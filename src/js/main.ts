@@ -20,4 +20,5 @@ import { FormattingHelper } from "./modules/FormattingHelper";
 HeaderCustomizer.getInstance();
 ThemeCustomizer.getInstance();
 BlacklistToggler.getInstance();
-FormattingHelper.getInstance();
+
+FormattingHelper.init();

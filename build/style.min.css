@@ -205,8 +205,6 @@ re-tab-group .re-tab-panel { display: none; width: 100%; padding-top: 0.5rem; }
 /* Vanilla Overrides */
 body { position: relative; }
 
-body form.simple_form { padding: 0; }
-
 @media (min-width: 800px) { header#top h1 { display: none !important; }
   header#top nav#nav { display: -ms-grid !important; display: grid !important; -ms-grid-columns: auto 1fr auto; grid-template-columns: auto 1fr auto; }
   header#top nav#nav menu.logo:not(.main) { background: unset; margin: 0 0 0 0.5rem; padding: 0.25rem 0; font-weight: 700; }
@@ -247,46 +245,66 @@ section#blacklist-box[data-blacklist-hidden=false] > h1 > a::before { content: "
 section#blacklist-box[data-blacklist-hidden=false] ul#blacklist-list { display: block; }
 
 /* Styles for the Formatting Helper module */
-div.dtext-previewable div.comment-header { display: -ms-inline-grid; display: inline-grid; -ms-grid-columns: max-content auto; grid-template-columns: -webkit-max-content auto; grid-template-columns: max-content auto; width: 100%; padding-top: 0.5rem; background: #2b538e; }
+body.resp form.simple_form { padding: 0; }
 
-[data-th-main=pony] div.dtext-previewable div.comment-header { background: #5c428c; }
+body.resp form.simple_form div.dtext-previewable { min-height: 12rem; }
 
-[data-th-main=bloodlust] div.dtext-previewable div.comment-header { background: #4d4d4d; }
+body.resp form.simple_form div.dtext-previewable div.comment-header { display: -ms-inline-grid; display: inline-grid; -ms-grid-columns: max-content auto; grid-template-columns: -webkit-max-content auto; grid-template-columns: max-content auto; width: 100%; padding-top: 0.5rem; background: #2b538e; }
 
-[data-th-main=serpent] div.dtext-previewable div.comment-header { background: #fff9be; }
+[data-th-main=pony] body.resp form.simple_form div.dtext-previewable div.comment-header { background: #5c428c; }
 
-[data-th-main=hotdog] div.dtext-previewable div.comment-header { background: #d1625f; }
+[data-th-main=bloodlust] body.resp form.simple_form div.dtext-previewable div.comment-header { background: #4d4d4d; }
 
-div.dtext-previewable div.comment-header div.comment-tabs { -ms-grid-column: 1; grid-column: 1; padding-left: 1rem; }
+[data-th-main=serpent] body.resp form.simple_form div.dtext-previewable div.comment-header { background: #fff9be; }
 
-div.dtext-previewable div.comment-header div.comment-tabs a { display: inline-block; padding: 0.5rem 0.75rem; margin-right: 0.5rem; border-radius: 4px 4px 0 0; color: #ffffff; }
+[data-th-main=hotdog] body.resp form.simple_form div.dtext-previewable div.comment-header { background: #d1625f; }
 
-[data-th-main=pony] div.dtext-previewable div.comment-header div.comment-tabs a { color: #ffffff; }
+body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs { -ms-grid-column: 1; grid-column: 1; padding-left: 1rem; }
 
-[data-th-main=bloodlust] div.dtext-previewable div.comment-header div.comment-tabs a { color: #ffffff; }
+body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a { display: inline-block; padding: 0.5rem 0.75rem; margin-right: 0.5rem; border-radius: 4px 4px 0 0; outline: 0; color: #ffffff; }
 
-[data-th-main=serpent] div.dtext-previewable div.comment-header div.comment-tabs a { color: #000000; }
+[data-th-main=pony] body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a { color: #ffffff; }
 
-[data-th-main=hotdog] div.dtext-previewable div.comment-header div.comment-tabs a { color: #000000; }
+[data-th-main=bloodlust] body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a { color: #ffffff; }
 
-div.dtext-previewable div.comment-header div.comment-tabs a.active { background: #1f3c67; }
+[data-th-main=serpent] body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a { color: #000000; }
 
-[data-th-main=pony] div.dtext-previewable div.comment-header div.comment-tabs a.active { background: #453269; }
+[data-th-main=hotdog] body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a { color: #000000; }
 
-[data-th-main=bloodlust] div.dtext-previewable div.comment-header div.comment-tabs a.active { background: #333333; }
+body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a:hover { color: #999999; }
 
-[data-th-main=serpent] div.dtext-previewable div.comment-header div.comment-tabs a.active { background: #fff48b; }
+[data-th-main=pony] body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a:hover { color: #999999; }
 
-[data-th-main=hotdog] div.dtext-previewable div.comment-header div.comment-tabs a.active { background: #c53c38; }
+[data-th-main=bloodlust] body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a:hover { color: #999999; }
 
-div.dtext-previewable div.comment-header div.comment-buttons { -ms-grid-column: 2; grid-column: 2; }
+[data-th-main=serpent] body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a:hover { color: #555555; }
 
-div.dtext-previewable textarea { width: -webkit-fill-available; width: -moz-available; width: stretch; background: #1f3c67; border: 1px solid #2b538e; border-top: 0; }
+[data-th-main=hotdog] body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a:hover { color: #999999; }
 
-[data-th-main=pony] div.dtext-previewable textarea { background: #453269; border: 1px solid #5c428c; border-top: 0; }
+body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a.active { pointer-events: none; background: #1f3c67; }
 
-[data-th-main=bloodlust] div.dtext-previewable textarea { background: #333333; border: 1px solid #4d4d4d; border-top: 0; }
+[data-th-main=pony] body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a.active { background: #453269; }
 
-[data-th-main=serpent] div.dtext-previewable textarea { background: #fff48b; border: 1px solid #fff9be; border-top: 0; }
+[data-th-main=bloodlust] body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a.active { background: #333333; }
 
-[data-th-main=hotdog] div.dtext-previewable textarea { background: #c53c38; border: 1px solid #d1625f; border-top: 0; }
+[data-th-main=serpent] body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a.active { background: #fff48b; }
+
+[data-th-main=hotdog] body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a.active { background: #c53c38; }
+
+body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-buttons { -ms-grid-column: 2; grid-column: 2; padding: 0 0.5rem; }
+
+body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-buttons a { display: inline-block; padding: 0.25rem 0.75rem 0.75rem; }
+
+body.resp form.simple_form div.dtext-previewable textarea, body.resp form.simple_form div.dtext-previewable div.dtext-preview { width: 100%; min-width: 100%; max-width: 100%; min-height: inherit; -webkit-box-sizing: border-box; box-sizing: border-box; -webkit-box-shadow: unset; box-shadow: unset; padding: 0.25rem; font-family: inherit; font-size: inherit; background: #1f3c67; border: 1px solid #2b538e; color: #ffffff; border-top: 0; }
+
+[data-th-main=pony] body.resp form.simple_form div.dtext-previewable textarea, [data-th-main=pony] body.resp form.simple_form div.dtext-previewable div.dtext-preview { background: #453269; border: 1px solid #5c428c; color: #ffffff; }
+
+[data-th-main=bloodlust] body.resp form.simple_form div.dtext-previewable textarea, [data-th-main=bloodlust] body.resp form.simple_form div.dtext-previewable div.dtext-preview { background: #333333; border: 1px solid #4d4d4d; color: #ffffff; }
+
+[data-th-main=serpent] body.resp form.simple_form div.dtext-previewable textarea, [data-th-main=serpent] body.resp form.simple_form div.dtext-previewable div.dtext-preview { background: #fff48b; border: 1px solid #fff9be; color: #000000; }
+
+[data-th-main=hotdog] body.resp form.simple_form div.dtext-previewable textarea, [data-th-main=hotdog] body.resp form.simple_form div.dtext-previewable div.dtext-preview { background: #c53c38; border: 1px solid #d1625f; color: #000000; }
+
+body.resp form.simple_form div.dtext-previewable[data-editing=false] div.comment-buttons, body.resp form.simple_form div.dtext-previewable[data-editing=false] textarea { display: none; }
+
+body.resp form.simple_form div.dtext-previewable[data-editing=false] div.dtext-preview { display: block; }

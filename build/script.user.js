@@ -262,7 +262,7 @@ const FormattingHelper_1 = require("./modules/FormattingHelper");
 HeaderCustomizer_1.HeaderCustomizer.getInstance();
 ThemeCustomizer_1.ThemeCustomizer.getInstance();
 BlacklistToggler_1.BlacklistToggler.getInstance();
-FormattingHelper_1.FormattingHelper.getInstance();
+FormattingHelper_1.FormattingHelper.init();
 
 },{"./modules/BlacklistToggler":5,"./modules/FormattingHelper":6,"./modules/HeaderCustomizer":7,"./modules/SettingsController":8,"./modules/StructureUtilities":9,"./modules/ThemeCustomizer":10}],5:[function(require,module,exports){
 "use strict";
@@ -323,42 +323,90 @@ exports.BlacklistToggler = BlacklistToggler;
 },{}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class FormattingHelper {
-    constructor() {
+const RE6Module_1 = require("../components/RE6Module");
+class FormattingHelper extends RE6Module_1.RE6Module {
+    constructor($targetContainer) {
+        super();
+        let _self = this;
+        this.$container = $targetContainer;
         this.createDOM();
+        this.$toggleTabs.find("a").click(function (e) {
+            e.preventDefault();
+            _self.toggleEditing();
+        });
     }
-    static getInstance() {
-        if (this.instance == undefined)
-            this.instance = new FormattingHelper();
-        return this.instance;
+    getDefaultSettings() {
+        return {
+            "buttons": [
+                { title: `<i class="fas fa-bold"></i>`, content: "[b]$selection[/b]" },
+                { title: `<i class="fas fa-italic"></i>`, content: "[i]$selection[/i]" },
+                { title: `<i class="fas fa-strikethrough"></i>`, content: "[s]$selection[/s]" },
+            ]
+        };
+    }
+    static init() {
+        $("div.dtext-previewable:has(textarea)").each(function (index, element) {
+            new FormattingHelper($(element));
+        });
+        $("input.dtext-preview-button").remove();
     }
     createDOM() {
-        let $container = $("div.dtext-previewable:has(textarea)");
-        let $bar = $("<div>").addClass("comment-header").prependTo($container);
-        let $toggleTabs = $("<div>").addClass("comment-tabs").appendTo($bar);
-        let $toggleEdit = $(`<a href="">`).html("Write").addClass("active").appendTo($toggleTabs);
-        let $togglePreview = $(`<a href="">`).html("Preview").appendTo($toggleTabs);
+        this.$container.attr("data-editing", "true");
+        this.$textarea = this.$container.find("textarea");
+        this.$preview = this.$container.find("div.dtext-preview");
+        let $bar = $("<div>").addClass("comment-header").prependTo(this.$container);
+        this.$toggleTabs = $("<div>")
+            .addClass("comment-tabs")
+            .appendTo($bar);
+        this.$toggleEditing = $(`<a href="">`)
+            .html("Write")
+            .addClass("toggle-editing")
+            .addClass("active")
+            .appendTo(this.$toggleTabs);
+        this.$togglePreview = $(`<a href="">`)
+            .html("Preview")
+            .addClass("toggle-preview")
+            .appendTo(this.$toggleTabs);
         let $buttonBox = $("<div>").addClass("comment-buttons").appendTo($bar);
-        let $buttonBold = $(`<a href="">`).html("B").appendTo($buttonBox);
+        this.fetchSettings("buttons").forEach(function (value) {
+            $(`<a href="">`).html(value.title).appendTo($buttonBox);
+        });
     }
-    format() {
+    toggleEditing() {
+        let _self = this;
+        if (this.$container.attr("data-editing") === "true") {
+            this.$container.attr("data-editing", "false");
+            this.$toggleEditing.removeClass("active");
+            this.$togglePreview.addClass("active");
+            this.$textarea.val();
+            this.format(this.$textarea.val(), function (data) {
+                console.log(data);
+                _self.$preview.html(data.html);
+            });
+        }
+        else {
+            this.$container.attr("data-editing", "true");
+            this.$toggleEditing.addClass("active");
+            this.$togglePreview.removeClass("active");
+        }
+    }
+    format(input, handleData) {
         $.ajax({
             type: "post",
             url: "/dtext_preview",
             dataType: "json",
             data: {
-                body: "test"
+                body: input
             },
             success: function (data) {
-                console.log(data);
+                handleData(data);
             }
         });
     }
 }
 exports.FormattingHelper = FormattingHelper;
-FormattingHelper.instance = new FormattingHelper();
 
-},{}],7:[function(require,module,exports){
+},{"../components/RE6Module":2}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Modal_1 = require("../components/Modal");
