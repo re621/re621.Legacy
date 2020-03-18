@@ -19,7 +19,15 @@ export class FormattingHelper {
     private createDOM() {
         let $container = $("div.dtext-previewable:has(textarea)");
 
-        let $bar = $("<div>").addClass("comment-header")
+        let $bar = $("<div>").addClass("comment-header").prependTo($container);
+        let $toggleTabs = $("<div>").addClass("comment-tabs").appendTo($bar);
+
+        let $toggleEdit = $(`<a href="">`).html("Write").addClass("active").appendTo($toggleTabs);
+        let $togglePreview = $(`<a href="">`).html("Preview").appendTo($toggleTabs);
+
+        let $buttonBox = $("<div>").addClass("comment-buttons").appendTo($bar);
+
+        let $buttonBold = $(`<a href="">`).html("B").appendTo($buttonBox);
     }
 
     private format() {

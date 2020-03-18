@@ -1,0 +1,51 @@
+/* Styles for the Formatting Helper module */
+
+div.dtext-previewable {
+    div.comment-header {
+        display: inline-grid;
+        grid-template-columns: max-content auto;
+        width: 100%;
+        
+        padding-top: 0.5rem;
+
+        @include themable() {
+            background: lighten( themed("color-section"), 10%);
+        }
+
+        div.comment-tabs {
+            grid-column: 1;
+            padding-left: 1rem;
+            
+            a {
+                display: inline-block;
+                padding: 0.5rem 0.75rem;
+                margin-right: 0.5rem;
+                
+                border-radius: 4px 4px 0 0;
+
+                @include themable() {
+                    color: themed("color-text");
+                }
+
+                &.active {
+                    @include themable() {
+                        background: themed("color-section");
+                    }
+                }
+            }
+        }
+
+        div.comment-buttons {
+            grid-column: 2;
+        }
+    }
+
+    textarea {
+        width: stretch;
+        @include themable() {
+            background: themed("color-section");
+            border: 1px solid lighten( themed("color-section"), 10%);
+            border-top: 0;
+        }
+    }
+}
