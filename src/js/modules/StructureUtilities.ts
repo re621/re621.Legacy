@@ -9,12 +9,12 @@ export class StructureUtilities {
 
     public static createDOM() {
         // Load in the external stylesheet
-        GM_addStyle( GM_getResourceText("re621_styles") );
-        
+        GM_addStyle(GM_getResourceText("re621_styles"));
+
         // Create a more sensible header structure
         let $menuContainer = $("nav#nav");
         let $menuMain = $("menu.main");
-        
+
         let $menuLogo = $("<menu>").addClass("logo desktop-only").html(`<a href="/" data-ytta-id="-">e621</a>`);
         $menuContainer.prepend($menuLogo);
 

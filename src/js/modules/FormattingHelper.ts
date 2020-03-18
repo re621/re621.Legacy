@@ -1,7 +1,7 @@
 
 export class FormattingHelper {
 
-    private static instance : FormattingHelper = new FormattingHelper();
+    private static instance: FormattingHelper = new FormattingHelper();
 
     private constructor() {
         this.createDOM();
@@ -12,7 +12,7 @@ export class FormattingHelper {
      * @returns FormattingHelper instance
      */
     public static getInstance() {
-        if(this.instance == undefined) this.instance = new FormattingHelper();
+        if (this.instance == undefined) this.instance = new FormattingHelper();
         return this.instance;
     }
 
@@ -36,9 +36,9 @@ export class FormattingHelper {
             url: "/dtext_preview",
             dataType: "json",
             data: {
-              body: "test"
+                body: "test"
             },
-            success: function(data) {
+            success: function (data) {
                 console.log(data);
             }
         });

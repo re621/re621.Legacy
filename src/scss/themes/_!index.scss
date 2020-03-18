@@ -5,14 +5,11 @@
 @import 'theme_hotdog';
 
 // Primary theming - colors, main backgrounds, etc
-$theme_main_index: (
-    "data-attr":    "main",
-    "default":      $theme_hexagon,
-    "themes": (
-//      "hexagon":      $theme_hexagon,
-        "pony":         $theme_pony,
-        "bloodlust":    $theme_bloodlust,
-        "serpent":      $theme_serpent,
-        "hotdog":       $theme_hotdog,
-    )
-);
+$theme_main_index: ("data-attr": "main",
+    "default": $theme_hexagon,
+    "themes": ( //      "hexagon":      $theme_hexagon,
+        "pony": $theme_pony,
+        "bloodlust": $theme_bloodlust,
+        "serpent": $theme_serpent,
+        "hotdog": $theme_hotdog,
+    ));

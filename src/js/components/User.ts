@@ -6,13 +6,13 @@ import { RE6Module } from "./RE6Module";
  */
 export class User extends RE6Module {
 
-    private static instance : User;
+    private static instance: User;
 
-    private loggedin    : boolean;
-    private username    : string;
-    private userid      : string;
-    
-    private level       : string;
+    private loggedin: boolean;
+    private username: string;
+    private userid: string;
+
+    private level: string;
 
     private constructor() {
         super();
@@ -20,17 +20,17 @@ export class User extends RE6Module {
 
         this.loggedin = $ref.attr("data-user-is-anonymous") == "false";
         this.username = $ref.attr("data-user-name") || "Anonymous";
-        this.userid   = $ref.attr("data-user-id") || "0";
+        this.userid = $ref.attr("data-user-id") || "0";
 
-        this.level    = $ref.attr("data-user-level-string") || "Guest";
+        this.level = $ref.attr("data-user-level-string") || "Guest";
     }
-    
+
     /**
      * Returns a singleton instance of the class
      * @returns User instance
      */
-    public static getInstance() : User {
-        if(this.instance === undefined) this.instance = new User();
+    public static getInstance(): User {
+        if (this.instance === undefined) this.instance = new User();
         return this.instance;
     }
 

@@ -6,8 +6,8 @@ declare var Cookies;
  */
 export abstract class RE6Module {
 
-    private settings : any;
-    private readonly prefix : string = this.constructor.name;
+    private settings: any;
+    private readonly prefix: string = this.constructor.name;
 
     protected constructor() {
         this.settings = this.loadSettingsCookies();
@@ -18,8 +18,8 @@ export abstract class RE6Module {
      * @param property Property name
      * @returns Property value
      */
-    protected fetchSettings(property? : string) {
-        if(property === undefined) return this.settings;
+    protected fetchSettings(property?: string) {
+        if (property === undefined) return this.settings;
         return this.settings[property];
     }
 
@@ -28,7 +28,7 @@ export abstract class RE6Module {
      * @param property Property name
      * @param value Property value
      */
-    protected pushSettings(property : string, value : any) {
+    protected pushSettings(property: string, value: any) {
         this.settings[property] = value;
         this.saveSettingsCookies();
     }
@@ -38,7 +38,7 @@ export abstract class RE6Module {
      * @returns Default settings
      */
     protected getDefaultSettings() {
-        return { };
+        return {};
     }
 
     /**
@@ -48,7 +48,7 @@ export abstract class RE6Module {
      */
     private loadSettingsCookies() {
         let cookies = Cookies.get("re621." + this.prefix);
-        if(cookies === undefined) { return this.getDefaultSettings(); }
+        if (cookies === undefined) { return this.getDefaultSettings(); }
         else return JSON.parse(cookies);
     }
 

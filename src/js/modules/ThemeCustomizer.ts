@@ -9,21 +9,21 @@ import { RE6Module } from "../components/RE6Module";
 declare var Cookies;
 
 const THEME_MAIN = [
-    { value: "hexagon",     name: "Hexagon" },
-    { value: "pony",        name: "Pony" },
-    { value: "bloodlust",   name: "Bloodlust" },
-    { value: "serpent",     name: "Serpent" },
-    { value: "hotdog",      name: "Hotdog" },
+    { value: "hexagon", name: "Hexagon" },
+    { value: "pony", name: "Pony" },
+    { value: "bloodlust", name: "Bloodlust" },
+    { value: "serpent", name: "Serpent" },
+    { value: "hotdog", name: "Hotdog" },
 ];
 const THEME_EXTRA = [
-    { value: "none",        name: "None" },
-    { value: "autumn",      name: "Autumn" },
-    { value: "winter",      name: "Winter" },
-    { value: "spring",      name: "Spring" },
-    { value: "aurora",      name: "Aurora" },
-    { value: "hexagons",    name: "Hexagons" },
-    { value: "space",       name: "Space" },
-    { value: "stars",       name: "Stars" },
+    { value: "none", name: "None" },
+    { value: "autumn", name: "Autumn" },
+    { value: "winter", name: "Winter" },
+    { value: "spring", name: "Spring" },
+    { value: "aurora", name: "Aurora" },
+    { value: "hexagons", name: "Hexagons" },
+    { value: "space", name: "Space" },
+    { value: "stars", name: "Stars" },
 ];
 
 /**
@@ -31,20 +31,20 @@ const THEME_EXTRA = [
  * Built upon e621 Redesign Fixes, this module adds the ability to change and adjust themes
  */
 export class ThemeCustomizer extends RE6Module {
-    
-    private static instance : ThemeCustomizer;
 
-    private modal : Modal;
+    private static instance: ThemeCustomizer;
+
+    private modal: Modal;
 
     private constructor() {
         super();
 
         this.createDOM();
-        
+
         this.handleThemeSwitcher("th-main", "hexagon");
         this.handleThemeSwitcher("th-extra", "hexagon");
         this.handleScalingToggle();
-        
+
     }
 
     /**
@@ -52,8 +52,8 @@ export class ThemeCustomizer extends RE6Module {
      * @returns ThemeCustomizer instance
      */
     public static getInstance() {
-       if(this.instance == undefined) this.instance = new ThemeCustomizer();
-       return this.instance;
+        if (this.instance == undefined) this.instance = new ThemeCustomizer();
+        return this.instance;
     }
 
     /**
@@ -62,9 +62,9 @@ export class ThemeCustomizer extends RE6Module {
      */
     protected getDefaultSettings() {
         return {
-            "th-main"   : "hexagon",
-            "th-extra"  : "hexagons",
-            "unscaling" : false,
+            "th-main": "hexagon",
+            "th-extra": "hexagons",
+            "unscaling": false,
         };
     }
 
@@ -74,8 +74,8 @@ export class ThemeCustomizer extends RE6Module {
     private createDOM() {
         // === Create a button in the header
         let addTabButton = HeaderCustomizer.createTab({
-            name   : `<i class="fas fa-paint-brush"></i>`,
-            parent : "menu.extra",
+            name: `<i class="fas fa-paint-brush"></i>`,
+            parent: "menu.extra",
         });
 
         // === Establish the settings window contents
@@ -92,7 +92,7 @@ export class ThemeCustomizer extends RE6Module {
         let $themeSelector = $("<select>")
             .attr("id", "th-main-selector")
             .appendTo($themeCustomizer);
-        THEME_MAIN.forEach(function(entry) {
+        THEME_MAIN.forEach(function (entry) {
             $("<option>").val(entry.value).text(entry.name).appendTo($themeSelector);
         });
 
@@ -104,7 +104,7 @@ export class ThemeCustomizer extends RE6Module {
         let $extraSelector = $("<select>")
             .attr("id", "th-extra-selector")
             .appendTo($themeCustomizer);
-        THEME_EXTRA.forEach(function(entry) {
+        THEME_EXTRA.forEach(function (entry) {
             $("<option>").val(entry.value).text(entry.name).appendTo($extraSelector);
         });
 
@@ -133,18 +133,18 @@ export class ThemeCustomizer extends RE6Module {
                 top: "4.5rem",
             },
             trigger: addTabButton.link,
-            content: [ { name: "re621", page: $themeCustomizerContainer } ],
+            content: [{ name: "re621", page: $themeCustomizerContainer }],
         });
     }
 
-    private handleThemeSwitcher(selector : string, default_option : string) {
+    private handleThemeSwitcher(selector: string, default_option: string) {
         let _self = this;
         let theme = this.fetchSettings(selector);
 
         $("body").attr("data-" + selector, theme);
         $("#" + selector + "-selector").val(theme);
 
-        $("#" + selector + "-selector").change(function(e) {
+        $("#" + selector + "-selector").change(function (e) {
             let theme = $(this).val() + "";
             _self.pushSettings(selector, theme);
             $("body").attr("data-" + selector, theme);
@@ -155,13 +155,13 @@ export class ThemeCustomizer extends RE6Module {
         let _self = this;
         let unscaling = this.fetchSettings("unscaling");
 
-        if(unscaling) { $("body").css("max-width", "unset"); }
+        if (unscaling) { $("body").css("max-width", "unset"); }
         $("#theme-scaling").prop("checked", unscaling);
 
-        $("re-modal-container").on("change", "#theme-scaling", function(e) {
+        $("re-modal-container").on("change", "#theme-scaling", function (e) {
             let disable_scaling = $(this).is(":checked");
             _self.pushSettings("unscaling", disable_scaling);
-            if(disable_scaling) { $("body").css("max-width", "unset"); }
+            if (disable_scaling) { $("body").css("max-width", "unset"); }
             else { $("body").css("max-width", ""); }
         });
     }

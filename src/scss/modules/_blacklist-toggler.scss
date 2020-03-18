@@ -1,17 +1,24 @@
 /* Styles for the Blacklist Toggler */
 section#blacklist-box {
-    
-    & > h1 > a::before {
+
+    &>h1>a::before {
         content: "\f105";
         font-family: 'Font Awesome 5 Free';
         font-weight: 900;
         padding-right: 0.25rem;
     }
 
-    ul#blacklist-list { display: none; }
+    ul#blacklist-list {
+        display: none;
+    }
 
     &[data-blacklist-hidden=false] {
-        & > h1 > a::before { content: "\f107"; }
-        ul#blacklist-list { display: block; }
+        &>h1>a::before {
+            content: "\f107";
+        }
+
+        ul#blacklist-list {
+            display: block;
+        }
     }
 }

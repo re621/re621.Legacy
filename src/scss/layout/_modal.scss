@@ -29,12 +29,16 @@ re-modal-container {
 
             border: 1px solid green;
             border-bottom: 0;
-            @include themable() { border-color: lighten( themed("color-section"), 10%); }
-            
+
+            @include themable() {
+                border-color: lighten(themed("color-section"), 10%);
+            }
+
             div.re-modal-title {
                 display: inline-block;
                 padding: 0.5rem 1rem;
             }
+
             a.re-modal-close {
                 float: right;
                 cursor: pointer;
@@ -42,50 +46,70 @@ re-modal-container {
                 font-size: 1.5em;
                 line-height: 0;
 
-                @include themable() { border-left: 1px solid lighten( themed("color-section"), 10%); }
+                @include themable() {
+                    border-left: 1px solid lighten(themed("color-section"), 10%);
+                }
 
-                &:hover { background: #ffffff10; }
+                &:hover {
+                    background: #ffffff10;
+                }
             }
         }
 
         &.ui-draggable-dragging re-modal-header {
             cursor: grabbing;
         }
-        
+
         // Modal Content
         .re-modal-tab-input {
             position: absolute;
             opacity: 0;
-    
-            &:focus   + .re-modal-tab-label { z-index: 1; }
-            &:checked + .re-modal-tab-label { @include themable() { background-color: lighten( themed("color-section"), 10%); } }
-            &:checked + .re-modal-tab-label + .re-modal-tab-content {
+
+            &:focus+.re-modal-tab-label {
+                z-index: 1;
+            }
+
+            &:checked+.re-modal-tab-label {
+                @include themable() {
+                    background-color: lighten(themed("color-section"), 10%);
+                }
+            }
+
+            &:checked+.re-modal-tab-label+.re-modal-tab-content {
                 display: block;
             }
         }
-    
+
         .re-modal-tab-label {
             cursor: pointer;
-            
+
             line-height: 0;
             padding: 0.75rem 0.25rem 0rem 0.5rem;
             margin-bottom: 0.5rem;
             box-shadow: -2px 0 10px -5px black;
             border-radius: 5px 0 0 5px;
-            
+
             text-align: right;
 
-            @include themable() { background-color: themed("color-section"); }
+            @include themable() {
+                background-color: themed("color-section");
+            }
 
             &:hover,
-            &:active { @include themable() { background-color: lighten( themed("color-section"), 10%); } }
-    
-            @media (min-width: 800px) { width: auto; }
+            &:active {
+                @include themable() {
+                    background-color: lighten(themed("color-section"), 10%);
+                }
+            }
+
+            @media (min-width: 800px) {
+                width: auto;
+            }
         }
-    
+
         .re-modal-tab-content {
             display: none;
-            
+
             grid-area: 2 / 2 / 10/ 3;
             padding: 0.5rem 1rem;
             box-shadow: 0 3px 10px -5px black;
@@ -94,8 +118,10 @@ re-modal-container {
             &.subtabbed {
                 padding-top: 0;
             }
-          
-            @media (min-width: 600px) { order: 99; }
+
+            @media (min-width: 600px) {
+                order: 99;
+            }
         }
     }
 }

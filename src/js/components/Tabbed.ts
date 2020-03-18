@@ -6,10 +6,10 @@ import { TabContent } from "./Modal";
  */
 export class Tabbed {
 
-    private config : TabbedConfig;
+    private config: TabbedConfig;
 
-    constructor(config : TabbedConfig) {
-        this.config  = config;
+    constructor(config: TabbedConfig) {
+        this.config = config;
     }
 
     public create() {
@@ -18,7 +18,7 @@ export class Tabbed {
 
         let $tabGroup = $("<re-tab-group>");
 
-        this.config.content.forEach(function(entry, index) {
+        this.config.content.forEach(function (entry, index) {
             $("<input>")
                 .attr("name", _self.config.name)
                 .attr("type", "radio")
@@ -45,6 +45,6 @@ export class Tabbed {
 }
 
 interface TabbedConfig {
-    name    : string,
-    content : TabContent[],
+    name: string,
+    content: TabContent[],
 }

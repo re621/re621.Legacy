@@ -8,17 +8,17 @@ import { Tabbed } from "../components/Tabbed";
  */
 export class SettingsController {
 
-    private static instance : SettingsController;
+    private static instance: SettingsController;
 
-    private modal : Modal;
+    private modal: Modal;
 
     private constructor() {
 
         // Create a button in the header
         let addSettingsButton = HeaderCustomizer.createTab({
-            name   : `<i class="fas fa-wrench"></i>`,
-            parent : "menu.extra",
-            class  : "float-right"
+            name: `<i class="fas fa-wrench"></i>`,
+            parent: "menu.extra",
+            class: "float-right"
         });
 
         // Establish the settings window contents
@@ -36,7 +36,7 @@ export class SettingsController {
             content: [
                 { name: "Common", page: $commonSettings },
                 { name: "Header", page: $headerSettings },
-                { name: "Posts",  page: $postSettings },
+                { name: "Posts", page: $postSettings },
             ]
         });
 
@@ -52,7 +52,7 @@ export class SettingsController {
             },
             subtabbed: true,
             trigger: addSettingsButton.link,
-            content: [ { name: "re621", page: $settings.create(), tabbable: true } ],
+            content: [{ name: "re621", page: $settings.create(), tabbable: true }],
         });
     }
 
@@ -61,7 +61,7 @@ export class SettingsController {
      * @returns SettingsController instance
      */
     public static getInstance() {
-        if(this.instance == undefined) this.instance = new SettingsController();
+        if (this.instance == undefined) this.instance = new SettingsController();
         return this.instance;
     }
 
@@ -69,8 +69,8 @@ export class SettingsController {
      * Registers a new settings page
      * @param page ModalContent with the page data
      */
-    public static addPage(page : TabContent) {
+    public static addPage(page: TabContent) {
         //this.getInstance().modal.addPage(page);
     }
 
- }
+}

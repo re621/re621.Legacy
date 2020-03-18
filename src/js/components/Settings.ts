@@ -6,12 +6,12 @@ declare var Cookies;
  */
 export class Settings {
 
-    private static instance : Settings;
+    private static instance: Settings;
 
     private data;
 
     private constructor() {
-        
+
     }
 
     /**
@@ -19,7 +19,7 @@ export class Settings {
      * @returns Settings instance
      */
     public static getInstance() {
-        if(this.instance === undefined) { this.instance = new Settings(); }
+        if (this.instance === undefined) { this.instance = new Settings(); }
         return this.instance;
     }
 

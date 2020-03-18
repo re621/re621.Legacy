@@ -4,11 +4,11 @@
  */
 export class BlacklistToggler {
 
-    private static instance : BlacklistToggler;
+    private static instance: BlacklistToggler;
 
-    private $box     : JQuery<HTMLElement>;
-    private $toggle  : JQuery<HTMLElement>;
-    private $list     : JQuery<HTMLElement>;
+    private $box: JQuery<HTMLElement>;
+    private $toggle: JQuery<HTMLElement>;
+    private $list: JQuery<HTMLElement>;
 
     private constructor() {
         let _self = this;
@@ -26,26 +26,26 @@ export class BlacklistToggler {
             .appendTo($toggleContainer);
 
         let $disableAllButton = $("#disable-all-blacklists").text("Disable all filters");
-        let $enableAllbutton  = $("#re-enable-all-blacklists").text("Enable all filters");
+        let $enableAllbutton = $("#re-enable-all-blacklists").text("Enable all filters");
 
         // Hide the filters by default, unless they are all disabled
-        if($enableAllbutton.css("display") === "none") { this.hide(); }
+        if ($enableAllbutton.css("display") === "none") { this.hide(); }
         else { this.show(); }
 
         // Toggle the filter list when clicking the header
-        $("a#blacklist-toggle").click(function(e) {
+        $("a#blacklist-toggle").click(function (e) {
             e.preventDefault();
             _self.toggleList();
         });
 
         //Show the filter list when clicking on "disable all filters"
-        $disableAllButton.click(function(e) {
+        $disableAllButton.click(function (e) {
             _self.show();
         });
     }
 
     private toggleList() {
-        if(this.isVisible()) { this.hide(); }
+        if (this.isVisible()) { this.hide(); }
         else { this.show(); }
     }
 
@@ -66,7 +66,7 @@ export class BlacklistToggler {
      * @returns BlacklistToggler instance
      */
     public static getInstance() {
-        if(this.instance === undefined) this.instance = new BlacklistToggler();
+        if (this.instance === undefined) this.instance = new BlacklistToggler();
         return this.instance;
     }
 

@@ -1,74 +1,72 @@
 // === Default / Hexagon Theme ===
 
-$theme_hexagon: (
-
-    // Theme-specific images
+$theme_hexagon: ( // Theme-specific images
     "image-background": url('data:image/png;base64,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'),
 
     // Layout Colors
-    "color-background":             #020F23,                // Main background (dark blue, large hexagons)
-    "color-foreground":             #152f56,                // Foreground (lighter blue, small hexagons)
-    "color-section":                #1f3c67,                // Foreground sections - boxes, sections, etc
+    "color-background": #020F23, // Main background (dark blue, large hexagons)
+    "color-foreground": #152f56, // Foreground (lighter blue, small hexagons)
+    "color-section": #1f3c67, // Foreground sections - boxes, sections, etc
 
     // Main Colors
-    "color-text":                   #ffffff,
-    "color-text-muted":             #999999,
-    "color-text-white":             #ffffff,
-    
-    "color-link":                   #b4c7d9,
-    "color-link-hover":             #e9f2fa,
-    "color-link-active":            #e8c446,
-    
-    "color-success":                darkgreen,
-    "color-danger":                 maroon,
-    "color-warning":                sienna,
-    
+    "color-text": #ffffff,
+    "color-text-muted": #999999,
+    "color-text-white": #ffffff,
+
+    "color-link": #b4c7d9,
+    "color-link-hover": #e9f2fa,
+    "color-link-active": #e8c446,
+
+    "color-success": darkgreen,
+    "color-danger": maroon,
+    "color-warning": sienna,
+
     // Detail Colors
-    "color-detail-quote":           #b4c7d9,
-    "color-detail-expandable":      #ffe380,
-    "color-detail-code":            #17a2b8,
+    "color-detail-quote": #b4c7d9,
+    "color-detail-expandable": #ffe380,
+    "color-detail-code": #17a2b8,
 
     // User Groups
-    "color-user-member":            #b4c7d9,
-    "color-user-member-alt":        #2e76b4,
-    "color-user-privileged":        #b4c7d9,
-    "color-user-privileged-alt":    #2e76b4,
-    "color-user-contributor":       #b4c7d9,
-    "color-user-contributor-alt":   #2e76b4,
+    "color-user-member": #b4c7d9,
+    "color-user-member-alt": #2e76b4,
+    "color-user-privileged": #b4c7d9,
+    "color-user-privileged-alt": #2e76b4,
+    "color-user-contributor": #b4c7d9,
+    "color-user-contributor-alt": #2e76b4,
 
-    "color-user-blocked":           #b4c7d9,
-    "color-user-blocked-alt":       #2e76b4,
+    "color-user-blocked": #b4c7d9,
+    "color-user-blocked-alt": #2e76b4,
 
-    "color-user-former-staff":      #78dca5,
-    "color-user-former-staff-alt":  #4da073,
-    "color-user-janitor":           #d82828,
-    "color-user-janitor-alt":       #cc5151,
-    "color-user-admin":             #e69500,
-    "color-user-admin-alt":         #9d6703,
+    "color-user-former-staff": #78dca5,
+    "color-user-former-staff-alt": #4da073,
+    "color-user-janitor": #d82828,
+    "color-user-janitor-alt": #cc5151,
+    "color-user-admin": #e69500,
+    "color-user-admin-alt": #9d6703,
 
     // Tag Categories
-    "color-tag-general":            #b4c7d9,
-    "color-tag-general-alt":        #2e76b4,
+    "color-tag-general": #b4c7d9,
+    "color-tag-general-alt": #2e76b4,
 
-    "color-tag-artist":             #f2ac08,
-    "color-tag-artist-alt":         #fbd67f,
+    "color-tag-artist": #f2ac08,
+    "color-tag-artist-alt": #fbd67f,
 
-    "color-tag-copyright":          #d0d,
-    "color-tag-copyright-alt":      #ff5eff,
+    "color-tag-copyright": #d0d,
+    "color-tag-copyright-alt": #ff5eff,
 
-    "color-tag-character":          #0a0,
-    "color-tag-character-alt":      #2bff2b,
+    "color-tag-character": #0a0,
+    "color-tag-character-alt": #2bff2b,
 
-    "color-tag-species":            #ed5d1f,
-    "color-tag-species-alt":        #f6b295,
+    "color-tag-species": #ed5d1f,
+    "color-tag-species-alt": #f6b295,
 
-    "color-tag-meta":               #eff89e,
-    "color-tag-meta-alt":           #e2e5c2,
+    "color-tag-meta": #eff89e,
+    "color-tag-meta-alt": #e2e5c2,
 
-    "color-tag-lore":               #282,
-    "color-tag-lore-alt":           #5fdb5f,
+    "color-tag-lore": #282,
+    "color-tag-lore-alt": #5fdb5f,
 
-    "color-tag-pool":               wheat,
-    "color-tag-pool-alt":           #d0b27a,
+    "color-tag-pool": wheat,
+    "color-tag-pool-alt": #d0b27a,
 
 );

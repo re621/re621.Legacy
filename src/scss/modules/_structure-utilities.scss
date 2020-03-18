@@ -2,7 +2,7 @@
 // Compatibility fix for modals
 body {
     position: relative;
-    
+
     form.simple_form {
         padding: 0;
     }
@@ -11,7 +11,9 @@ body {
 // Gridify the header
 @media (min-width: 800px) {
     header#top {
-        h1 { display: none !important; }
+        h1 {
+            display: none !important;
+        }
 
         nav#nav {
             display: grid !important;
@@ -23,6 +25,7 @@ body {
                 padding: 0.25rem 0;
                 font-weight: 700;
             }
+
             menu.logo a {
                 padding: 6px 10px;
             }
@@ -40,6 +43,7 @@ body {
                 padding: 0.25rem 0;
                 font-weight: 700;
             }
+
             menu.extra a {
                 padding: 6px 10px;
             }

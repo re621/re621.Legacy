@@ -1,9 +1,23 @@
 /* Helper Classes */
-@media (min-width: 800px) { .mobile-only  { display: none !important; } }
-@media (max-width: 800px) { .desktop-only { display: none !important; } }
+@media (min-width: 800px) {
+    .mobile-only {
+        display: none !important;
+    }
+}
 
-.float-left  { float: left;  }
-.float-right { float: right; }
+@media (max-width: 800px) {
+    .desktop-only {
+        display: none !important;
+    }
+}
+
+.float-left {
+    float: left;
+}
+
+.float-right {
+    float: right;
+}
 
 form.grid-form {
     display: grid;
@@ -11,6 +25,12 @@ form.grid-form {
     grid-row-gap: 1rem;
     grid-column-gap: 0.5rem;
 
-    .full-width { grid-column: 1 / 3; }
-    input, select { width: stretch; }
+    .full-width {
+        grid-column: 1 / 3;
+    }
+
+    input,
+    select {
+        width: stretch;
+    }
 }

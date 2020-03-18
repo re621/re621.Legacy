@@ -8,9 +8,15 @@ re-tab-group {
         position: absolute;
         opacity: 0;
 
-        &:focus   + .re-tab-label { z-index: 1; }
-        &:checked + .re-tab-label { background: #00000050; }
-        &:checked + .re-tab-label + .re-tab-panel {
+        &:focus+.re-tab-label {
+            z-index: 1;
+        }
+
+        &:checked+.re-tab-label {
+            background: #00000050;
+        }
+
+        &:checked+.re-tab-label+.re-tab-panel {
             display: block;
         }
     }
@@ -24,18 +30,24 @@ re-tab-group {
         border-radius: 0 0 6px 6px;
 
         background: #00000030;
-      
-        &:hover,
-        &:active { background: #00000050; }
 
-        @media (min-width: 800px) { width: auto; }
+        &:hover,
+        &:active {
+            background: #00000050;
+        }
+
+        @media (min-width: 800px) {
+            width: auto;
+        }
     }
 
     .re-tab-panel {
         display: none;
         width: 100%;
         padding-top: 0.5rem;
-      
-        @media (min-width: 600px) { order: 99; }
+
+        @media (min-width: 600px) {
+            order: 99;
+        }
     }
 }

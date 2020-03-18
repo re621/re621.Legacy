@@ -10,7 +10,9 @@ header#top nav#nav {
             margin-right: 0.5rem;
             height: auto !important;
 
-            & > a { padding: 0;  }
+            &>a {
+                padding: 0;
+            }
 
             &.configurable a::before {
                 content: "\f303";
@@ -24,7 +26,9 @@ header#top nav#nav {
     }
 
     menu.main[data-editing=true] li {
-        @include themable() { background-color: themed("color-section"); }
+        @include themable() {
+            background-color: themed("color-section");
+        }
 
         &.configurable a::before {
             visibility: visible;
