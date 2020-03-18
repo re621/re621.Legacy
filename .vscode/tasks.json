@@ -1,0 +1,52 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "process",
+            "command": "",
+            "problemMatcher": [ "$eslint-stylish" ],
+            "dependsOn": [ "userscript-format" ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": { "clear": false },
+        },
+        {
+            "label": "compile-typescript",
+            "type": "typescript",
+            "tsconfig": "tsconfig.json",
+            "problemMatcher": [],
+            "group": "build",
+            "options": {
+                "statusbar": { "hide": true }
+            },
+            "presentation": { "showReuseMessage": false },
+        },
+        {
+            "label": "browserify",
+            "type": "shell",
+            "command": "browserify ./build/temp/js/main.js -o ./build/script.user.js; rm ./build/temp/ -recurse;",
+            "problemMatcher": [],
+            "dependsOn": [ "compile-typescript" ],
+            "group": "build",
+            "options": {
+                "statusbar": { "hide": true }
+            },
+            "presentation": { "showReuseMessage": false },
+        },
+        {
+            "label": "userscript-format",
+            "type": "shell",
+            "command": "./.vscode/userscript-format.ps1",
+            "problemMatcher": [],
+            "dependsOn": [ "browserify" ],
+            "group": "build",
+            "options": {
+                "statusbar": { "label": "js-build" }
+            },
+            "presentation": { "showReuseMessage": false },
+        }
+    ]
+}

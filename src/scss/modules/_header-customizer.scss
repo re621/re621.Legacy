@@ -1,0 +1,33 @@
+/* Header Customizer Styles */
+header#top nav#nav {
+
+    menu.main {
+        padding: 0;
+
+        li {
+            display: inline-block;
+            padding: 0.25rem 0;
+            margin-right: 0.5rem;
+            height: auto !important;
+
+            & > a { padding: 0;  }
+
+            &.configurable a::before {
+                content: "\f303";
+                visibility: hidden;
+                padding-right: 0.25rem;
+                font-weight: 900;
+                font-family: 'Font Awesome 5 Free';
+                font-size: 75%;
+            }
+        }
+    }
+
+    menu.main[data-editing=true] li {
+        @include themable() { background-color: themed("color-section"); }
+
+        &.configurable a::before {
+            visibility: visible;
+        }
+    }
+}

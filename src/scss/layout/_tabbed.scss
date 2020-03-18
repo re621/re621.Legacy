@@ -1,0 +1,41 @@
+/* Tab Group Styles */
+re-tab-group {
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+
+    .re-tab-input {
+        position: absolute;
+        opacity: 0;
+
+        &:focus   + .re-tab-label { z-index: 1; }
+        &:checked + .re-tab-label { background: #00000050; }
+        &:checked + .re-tab-label + .re-tab-panel {
+            display: block;
+        }
+    }
+
+    .re-tab-label {
+        width: 100%;
+        cursor: pointer;
+
+        padding: 0.25rem 0.5rem;
+        margin-right: 0.5rem;
+        border-radius: 0 0 6px 6px;
+
+        background: #00000030;
+      
+        &:hover,
+        &:active { background: #00000050; }
+
+        @media (min-width: 800px) { width: auto; }
+    }
+
+    .re-tab-panel {
+        display: none;
+        width: 100%;
+        padding-top: 0.5rem;
+      
+        @media (min-width: 600px) { order: 99; }
+    }
+}
