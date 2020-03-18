@@ -16,9 +16,11 @@ import { HeaderCustomizer } from "./modules/HeaderCustomizer";
 import { ThemeCustomizer } from "./modules/ThemeCustomizer";
 import { BlacklistToggler } from "./modules/BlacklistToggler";
 import { FormattingHelper } from "./modules/FormattingHelper";
+import { TitleCustomizer } from "./modules/TitleCustomizer";
 
 HeaderCustomizer.getInstance();
 ThemeCustomizer.getInstance();
 BlacklistToggler.getInstance();
+TitleCustomizer.getInstance();
 
 FormattingHelper.init();
