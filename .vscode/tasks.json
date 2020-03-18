@@ -27,7 +27,7 @@
         {
             "label": "browserify",
             "type": "shell",
-            "command": "browserify ./build/temp/js/main.js -o ./build/script.user.js; rm ./build/temp/ -recurse;",
+            "command": "browserify ./build/temp/js/main.js -o ./build/script.user.js; rm ./build/temp/ -r;",
             "problemMatcher": [],
             "dependsOn": [ "compile-typescript" ],
             "group": "build",
@@ -39,7 +39,7 @@
         {
             "label": "userscript-format",
             "type": "shell",
-            "command": "./.vscode/userscript-format.ps1",
+            "command": "node ./.vscode/userscript-format.js",
             "problemMatcher": [],
             "dependsOn": [ "browserify" ],
             "group": "build",
