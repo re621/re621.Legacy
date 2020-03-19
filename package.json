@@ -1,28 +1,27 @@
 {
     "name": "re621",
     "displayName": "re621 - e621 Reimagined",
-    "namespace": "bitwolfy.com",
-    "version": "1.0.0",
+    "namespace": "re621.github.io",
+    "version": "0.1.0",
     "description": "Increases the amount of customization on e621",
     "author": "bitWolfy",
     "main": "./build/script.user.js",
     "scripts": {
-        "browserify": "browserify ./build/temp/js/main.js -o ./build/script.user.js && rm -r ./build/temp/",
-        "build": "npm run typescript && npm run browserify && npm run userscript && npm run sass",
         "test": "echo \"Error: no test specified\" && exit 1",
         "typescript": "tsc",
-        "userscript": "node ./src/userscript-format.js",
+        "browserify": "browserify ./build/temp/js/main.js -o ./build/script.user.js && rm -r ./build/temp/",
+        "userscript": "node ./bin/userscript-format.js",
         "sass": "sass src/scss/style.scss build/style.min.css --no-source-map --style compressed"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/bitWolfy/e621-Redesign-Fixes.git"
+        "url": "git+https://github.com/re621/re621.git"
     },
-    "license": "ISC",
+    "license": "GPLv3",
     "bugs": {
-        "url": "https://github.com/bitWolfy/e621-Redesign-Fixes/issues"
+        "url": "https://github.com/re621/re621/issues"
     },
-    "homepage": "https://github.com/bitWolfy/e621-Redesign-Fixes#readme",
+    "homepage": "https://re621.github.io/",
     "dependencies": {
         "jquery": "^3.4.1",
         "jquery-ui": "^1.12.1",

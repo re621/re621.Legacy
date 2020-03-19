@@ -1,17 +1,18 @@
 {
     "version": "2.0.0",
-    "tasks": [
-        {
+    "tasks": [{
             "label": "build",
             "type": "process",
             "command": "",
-            "problemMatcher": [ "$eslint-stylish" ],
-            "dependsOn": [ "userscript-format" ],
+            "problemMatcher": ["$eslint-stylish"],
+            "dependsOn": ["userscript-format"],
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            "presentation": { "clear": false },
+            "presentation": {
+                "clear": false
+            },
         },
         {
             "label": "compile-typescript",
@@ -20,33 +21,45 @@
             "problemMatcher": [],
             "group": "build",
             "options": {
-                "statusbar": { "hide": true }
+                "statusbar": {
+                    "hide": true
+                }
             },
-            "presentation": { "showReuseMessage": false },
+            "presentation": {
+                "showReuseMessage": false
+            },
         },
         {
             "label": "browserify",
             "type": "shell",
             "command": "browserify ./build/temp/js/main.js -o ./build/script.user.js; rm ./build/temp/ -r;",
             "problemMatcher": [],
-            "dependsOn": [ "compile-typescript" ],
+            "dependsOn": ["compile-typescript"],
             "group": "build",
             "options": {
-                "statusbar": { "hide": true }
+                "statusbar": {
+                    "hide": true
+                }
             },
-            "presentation": { "showReuseMessage": false },
+            "presentation": {
+                "showReuseMessage": false
+            },
         },
         {
             "label": "userscript-format",
             "type": "shell",
-            "command": "node ./.vscode/userscript-format.js",
+            "command": "node ./bin/userscript-format.js",
             "problemMatcher": [],
-            "dependsOn": [ "browserify" ],
+            "dependsOn": ["browserify"],
             "group": "build",
             "options": {
-                "statusbar": { "label": "js-build" }
+                "statusbar": {
+                    "label": "js-build"
+                }
             },
-            "presentation": { "showReuseMessage": false },
+            "presentation": {
+                "showReuseMessage": false
+            },
         }
     ]
 }
