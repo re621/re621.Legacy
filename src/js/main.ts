@@ -17,10 +17,12 @@ import { ThemeCustomizer } from "./modules/ThemeCustomizer";
 import { BlacklistToggler } from "./modules/BlacklistToggler";
 import { FormattingHelper } from "./modules/FormattingHelper";
 import { TitleCustomizer } from "./modules/TitleCustomizer";
+import { MiscFunctionality } from "./modules/Misc";
 
 HeaderCustomizer.getInstance();
 ThemeCustomizer.getInstance();
 BlacklistToggler.getInstance();
 TitleCustomizer.getInstance();
+MiscFunctionality.getInstance();
 
 FormattingHelper.init();
