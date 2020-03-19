@@ -419,10 +419,6 @@ class FormattingHelper extends RE6Module_1.RE6Module {
             e.preventDefault();
             _self.toggleEditing();
         });
-        this.$formatButtons.find("a").click(function (e) {
-            e.preventDefault();
-            _self.addFormatting($(e.currentTarget));
-        });
         this.$settingsButton.click(function (e) {
             e.preventDefault();
             _self.toggleButtonDrawer();
@@ -452,9 +448,7 @@ class FormattingHelper extends RE6Module_1.RE6Module {
             instances.push(new FormattingHelper($container));
             $container.on("formatting-helper:update", function (event, subject) {
                 instances.forEach(function (value) {
-                    if (!$container.is(value.$container)) {
-                        value.updateButtons();
-                    }
+                    value.updateButtons();
                 });
             });
         });
@@ -496,6 +490,7 @@ class FormattingHelper extends RE6Module_1.RE6Module {
             helper: "clone",
             forceHelperSize: true,
             cursor: "grabbing",
+            containment: this.$container,
             connectWith: this.$formatButtonsDrawer,
             disabled: true,
             update: function () { _self.handleToolbarUpdate(); },
@@ -504,12 +499,14 @@ class FormattingHelper extends RE6Module_1.RE6Module {
             helper: "clone",
             forceHelperSize: true,
             cursor: "grabbing",
+            containment: this.$container,
             connectWith: this.$formatButtons,
             disabled: true,
         });
     }
     updateButtons() {
         let _self = this;
+        let buttonList = [];
         this.$formatButtons.html("");
         this.fetchSettings("buttons", true).forEach(function (value) {
             let buttonData = _self.createButton(value);
@@ -518,6 +515,12 @@ class FormattingHelper extends RE6Module_1.RE6Module {
                 buttonData.button.addClass("disabled");
                 buttonData.button.removeAttr("title");
             }
+            buttonList.push(buttonData.button);
+        });
+        let allButtons = $.map(buttonList, function (el) { return el.get(); });
+        $(allButtons).click(function (e) {
+            e.preventDefault();
+            _self.addFormatting($(e.currentTarget));
         });
     }
     createButton(name) {
