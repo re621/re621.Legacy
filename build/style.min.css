@@ -247,9 +247,9 @@ section#blacklist-box[data-blacklist-hidden=false] ul#blacklist-list { display: 
 /* Styles for the Formatting Helper module */
 body.resp form.simple_form { padding: 0; }
 
-body.resp form.simple_form div.dtext-previewable { min-height: 12rem; }
+body.resp form.simple_form div.dtext-previewable { display: -ms-grid; display: grid; -ms-grid-columns: auto min-content; grid-template-columns: auto -webkit-min-content; grid-template-columns: auto min-content; -ms-grid-rows: 2.5rem auto; grid-template-rows: 2.5rem auto; min-height: 12rem; }
 
-body.resp form.simple_form div.dtext-previewable div.comment-header { display: -ms-inline-grid; display: inline-grid; -ms-grid-columns: max-content auto; grid-template-columns: -webkit-max-content auto; grid-template-columns: max-content auto; width: 100%; padding-top: 0.5rem; background: #2b538e; }
+body.resp form.simple_form div.dtext-previewable div.comment-header { -ms-grid-column: 1; grid-column: 1; display: -ms-inline-grid; display: inline-grid; -ms-grid-columns: max-content auto min-content; grid-template-columns: -webkit-max-content auto -webkit-min-content; grid-template-columns: max-content auto min-content; width: 100%; padding-top: 0.5rem; background: #2b538e; }
 
 [data-th-main=pony] body.resp form.simple_form div.dtext-previewable div.comment-header { background: #5c428c; }
 
@@ -259,9 +259,9 @@ body.resp form.simple_form div.dtext-previewable div.comment-header { display: -
 
 [data-th-main=hotdog] body.resp form.simple_form div.dtext-previewable div.comment-header { background: #d1625f; }
 
-body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs { -ms-grid-column: 1; grid-column: 1; padding-left: 1rem; }
+body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs { padding-left: 1rem; }
 
-body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a { display: inline-block; padding: 0.5rem 0.75rem; margin-right: 0.5rem; border-radius: 4px 4px 0 0; outline: 0; color: #ffffff; }
+body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a { display: inline-block; padding: 0.5rem 0.75rem; margin-right: 0.5rem; border-radius: 4px 4px 0 0; outline: 0; font-weight: 500; color: #ffffff; }
 
 [data-th-main=pony] body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a { color: #ffffff; }
 
@@ -291,11 +291,27 @@ body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-
 
 [data-th-main=hotdog] body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-tabs a.active { background: #c53c38; }
 
-body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-buttons { -ms-grid-column: 2; grid-column: 2; padding: 0 0.5rem; }
+body.resp form.simple_form div.dtext-previewable div.comment-buttons, body.resp form.simple_form div.dtext-previewable div.settings-buttons, body.resp form.simple_form div.dtext-previewable div.dtext-button-drawer { padding: 0 0.5rem; overflow: hidden; white-space: nowrap; }
 
-body.resp form.simple_form div.dtext-previewable div.comment-header div.comment-buttons a { display: inline-block; padding: 0.25rem 0.75rem 0.75rem; }
+body.resp form.simple_form div.dtext-previewable div.comment-buttons li, body.resp form.simple_form div.dtext-previewable div.settings-buttons li, body.resp form.simple_form div.dtext-previewable div.dtext-button-drawer li { list-style-type: none; display: inline-block; padding: 0.125rem 0.5rem; }
 
-body.resp form.simple_form div.dtext-previewable textarea, body.resp form.simple_form div.dtext-previewable div.dtext-preview { width: 100%; min-width: 100%; max-width: 100%; min-height: inherit; -webkit-box-sizing: border-box; box-sizing: border-box; -webkit-box-shadow: unset; box-shadow: unset; padding: 0.25rem; font-family: inherit; font-size: inherit; background: #1f3c67; border: 1px solid #2b538e; color: #ffffff; border-top: 0; }
+body.resp form.simple_form div.dtext-previewable div.comment-buttons li a, body.resp form.simple_form div.dtext-previewable div.settings-buttons li a, body.resp form.simple_form div.dtext-previewable div.dtext-button-drawer li a { display: inline-block; padding: 0.125rem 0.25rem; outline: 0; border: 1px dashed transparent; font-family: 'Font Awesome 5 Free'; font-weight: 900; }
+
+body.resp form.simple_form div.dtext-previewable div.comment-buttons li a.disabled, body.resp form.simple_form div.dtext-previewable div.settings-buttons li a.disabled, body.resp form.simple_form div.dtext-previewable div.dtext-button-drawer li a.disabled { pointer-events: none; }
+
+body.resp form.simple_form div.dtext-previewable div.comment-buttons li.ui-sortable-placeholder, body.resp form.simple_form div.dtext-previewable div.settings-buttons li.ui-sortable-placeholder, body.resp form.simple_form div.dtext-previewable div.dtext-button-drawer li.ui-sortable-placeholder { display: inline-block; height: 1px; }
+
+body.resp form.simple_form div.dtext-previewable[data-drawer=true] div.comment-buttons li a, body.resp form.simple_form div.dtext-previewable[data-drawer=true] div.dtext-button-drawer li a { border: 1px dashed #999999; }
+
+[data-th-main=pony] body.resp form.simple_form div.dtext-previewable[data-drawer=true] div.comment-buttons li a, [data-th-main=pony] body.resp form.simple_form div.dtext-previewable[data-drawer=true] div.dtext-button-drawer li a { border: 1px dashed #999999; }
+
+[data-th-main=bloodlust] body.resp form.simple_form div.dtext-previewable[data-drawer=true] div.comment-buttons li a, [data-th-main=bloodlust] body.resp form.simple_form div.dtext-previewable[data-drawer=true] div.dtext-button-drawer li a { border: 1px dashed #999999; }
+
+[data-th-main=serpent] body.resp form.simple_form div.dtext-previewable[data-drawer=true] div.comment-buttons li a, [data-th-main=serpent] body.resp form.simple_form div.dtext-previewable[data-drawer=true] div.dtext-button-drawer li a { border: 1px dashed #555555; }
+
+[data-th-main=hotdog] body.resp form.simple_form div.dtext-previewable[data-drawer=true] div.comment-buttons li a, [data-th-main=hotdog] body.resp form.simple_form div.dtext-previewable[data-drawer=true] div.dtext-button-drawer li a { border: 1px dashed #999999; }
+
+body.resp form.simple_form div.dtext-previewable textarea, body.resp form.simple_form div.dtext-previewable div.dtext-preview { -ms-grid-column: 1; grid-column: 1; width: 100%; min-width: -webkit-fill-available; min-width: -moz-available; min-width: stretch; max-width: 100%; min-height: inherit; -webkit-box-sizing: border-box; box-sizing: border-box; outline: 0; -webkit-box-shadow: unset; box-shadow: unset; padding: 0.25rem; font-family: inherit; font-size: inherit; background: #1f3c67; border: 1px solid #2b538e; color: #ffffff; border-top: 0; }
 
 [data-th-main=pony] body.resp form.simple_form div.dtext-previewable textarea, [data-th-main=pony] body.resp form.simple_form div.dtext-previewable div.dtext-preview { background: #453269; border: 1px solid #5c428c; color: #ffffff; }
 
@@ -305,6 +321,28 @@ body.resp form.simple_form div.dtext-previewable textarea, body.resp form.simple
 
 [data-th-main=hotdog] body.resp form.simple_form div.dtext-previewable textarea, [data-th-main=hotdog] body.resp form.simple_form div.dtext-previewable div.dtext-preview { background: #c53c38; border: 1px solid #d1625f; color: #000000; }
 
-body.resp form.simple_form div.dtext-previewable[data-editing=false] div.comment-buttons, body.resp form.simple_form div.dtext-previewable[data-editing=false] textarea { display: none; }
+body.resp form.simple_form div.dtext-previewable[data-editing=false] div.comment-buttons, body.resp form.simple_form div.dtext-previewable[data-editing=false] div.settings-buttons, body.resp form.simple_form div.dtext-previewable[data-editing=false] textarea { display: none; }
 
 body.resp form.simple_form div.dtext-previewable[data-editing=false] div.dtext-preview { display: block; }
+
+body.resp form.simple_form div.dtext-previewable div.dtext-button-drawer-title { -ms-grid-row: 1; grid-row: 1; -ms-grid-column: 2; grid-column: 2; margin-left: 1rem; text-align: center; padding: 0.75rem; background: #2b538e; color: #ffffff; }
+
+[data-th-main=pony] body.resp form.simple_form div.dtext-previewable div.dtext-button-drawer-title { background: #5c428c; color: #ffffff; }
+
+[data-th-main=bloodlust] body.resp form.simple_form div.dtext-previewable div.dtext-button-drawer-title { background: #4d4d4d; color: #ffffff; }
+
+[data-th-main=serpent] body.resp form.simple_form div.dtext-previewable div.dtext-button-drawer-title { background: #fff9be; color: #000000; }
+
+[data-th-main=hotdog] body.resp form.simple_form div.dtext-previewable div.dtext-button-drawer-title { background: #d1625f; color: #000000; }
+
+body.resp form.simple_form div.dtext-previewable div.dtext-button-drawer { -ms-grid-row: 2; grid-row: 2; -ms-grid-column: 2; grid-column: 2; display: -ms-inline-grid; display: inline-grid; -ms-grid-columns: (minmax(2.5rem, 1fr))[auto-fill]; grid-template-columns: repeat(auto-fill, minmax(2.5rem, 1fr)); -ms-grid-rows: (minmax(2.5rem, 1fr))[auto-fill]; grid-template-rows: repeat(auto-fill, minmax(2.5rem, 1fr)); -webkit-box-align: center; -ms-flex-align: center; align-items: center; min-width: 10rem; margin-left: 1rem; background: #1f3c67; border: 1px solid #2b538e; color: #ffffff; }
+
+[data-th-main=pony] body.resp form.simple_form div.dtext-previewable div.dtext-button-drawer { background: #453269; border: 1px solid #5c428c; color: #ffffff; }
+
+[data-th-main=bloodlust] body.resp form.simple_form div.dtext-previewable div.dtext-button-drawer { background: #333333; border: 1px solid #4d4d4d; color: #ffffff; }
+
+[data-th-main=serpent] body.resp form.simple_form div.dtext-previewable div.dtext-button-drawer { background: #fff48b; border: 1px solid #fff9be; color: #000000; }
+
+[data-th-main=hotdog] body.resp form.simple_form div.dtext-previewable div.dtext-button-drawer { background: #c53c38; border: 1px solid #d1625f; color: #000000; }
+
+body.resp form.simple_form div.dtext-previewable[data-drawer=false] div.dtext-button-drawer-title, body.resp form.simple_form div.dtext-previewable[data-editing=false] div.dtext-button-drawer-title, body.resp form.simple_form div.dtext-previewable[data-drawer=false] div.dtext-button-drawer, body.resp form.simple_form div.dtext-previewable[data-editing=false] div.dtext-button-drawer { display: none; }

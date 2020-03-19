@@ -5,12 +5,17 @@ body.resp form.simple_form {
     padding: 0;
 
     div.dtext-previewable {
-
+        display: grid;
+        grid-template-columns: auto min-content;
+        grid-template-rows: 2.5rem auto;
         min-height: 12rem;
 
         div.comment-header {
+            grid-column: 1;
+
             display: inline-grid;
-            grid-template-columns: max-content auto;
+            grid-template-columns: max-content auto min-content;
+
             width: 100%;
 
             padding-top: 0.5rem;
@@ -20,7 +25,6 @@ body.resp form.simple_form {
             }
 
             div.comment-tabs {
-                grid-column: 1;
                 padding-left: 1rem;
 
                 a {
@@ -30,6 +34,7 @@ body.resp form.simple_form {
 
                     border-radius: 4px 4px 0 0;
                     outline: 0;
+                    font-weight: 500;
 
                     @include themable() {
                         color: themed("color-text");
@@ -50,25 +55,62 @@ body.resp form.simple_form {
                     }
                 }
             }
+        }
 
-            div.comment-buttons {
-                grid-column: 2;
-                padding: 0 0.5rem;
+        div.comment-buttons,
+        div.settings-buttons,
+        div.dtext-button-drawer {
+            padding: 0 0.5rem;
+
+            overflow: hidden;
+            white-space: nowrap;
+
+            li {
+                list-style-type: none;
+                display: inline-block;
+                padding: 0.125rem 0.5rem;
 
                 a {
                     display: inline-block;
-                    padding: 0.25rem 0.75rem 0.75rem;
+                    padding: 0.125rem 0.25rem;
+                    outline: 0;
+
+                    border: 1px dashed transparent;
+
+                    font-family: 'Font Awesome 5 Free';
+                    font-weight: 900;
+
+                    &.disabled {
+                        pointer-events: none;
+                    }
+                }
+
+                &.ui-sortable-placeholder {
+                    display: inline-block;
+                    height: 1px;
+                }
+            }
+        }
+
+        &[data-drawer=true] div.comment-buttons,
+        &[data-drawer=true] div.dtext-button-drawer {
+            li a {
+                @include themable() {
+                    border: 1px dashed themed("color-text-muted");
                 }
             }
         }
 
         textarea,
         div.dtext-preview {
+            grid-column: 1;
+
             width: 100%;
-            min-width: 100%;
+            min-width: stretch;
             max-width: 100%;
             min-height: inherit;
             box-sizing: border-box;
+            outline: 0;
 
             box-shadow: unset;
             padding: 0.25rem;
@@ -86,12 +128,53 @@ body.resp form.simple_form {
         }
 
         &[data-editing=false] div.comment-buttons,
+        &[data-editing=false] div.settings-buttons,
         &[data-editing=false] textarea {
             display: none;
         }
 
         &[data-editing=false] div.dtext-preview {
             display: block;
+        }
+
+        div.dtext-button-drawer-title {
+            grid-row: 1;
+            grid-column: 2;
+
+            margin-left: 1rem;
+            text-align: center;
+            padding: 0.75rem;
+
+            @include themable() {
+                background: lighten(themed("color-section"), 10%);
+                color: themed("color-text");
+            }
+        }
+
+        div.dtext-button-drawer {
+            grid-row: 2;
+            grid-column: 2;
+
+            display: inline-grid;
+            grid-template-columns: repeat(auto-fill, minmax(2.5rem, 1fr));
+            grid-template-rows: repeat(auto-fill, minmax(2.5rem, 1fr));
+            align-items: center;
+
+            min-width: 10rem;
+            margin-left: 1rem;
+
+            @include themable() {
+                background: themed("color-section");
+                border: 1px solid lighten(themed("color-section"), 10%);
+                color: themed("color-text");
+            }
+        }
+
+        &[data-drawer=false] div.dtext-button-drawer-title,
+        &[data-editing=false] div.dtext-button-drawer-title,
+        &[data-drawer=false] div.dtext-button-drawer,
+        &[data-editing=false] div.dtext-button-drawer {
+            display: none;
         }
     }
 

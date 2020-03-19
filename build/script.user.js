@@ -182,6 +182,69 @@ exports.Modal = Modal;
 },{}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const RE6Module_1 = require("./RE6Module");
+class Post extends RE6Module_1.RE6Module {
+    constructor(id, tags, rating, favCount, scoreCount) {
+        super();
+        this.id = id;
+        this.tags = tags;
+        this.rating = rating;
+        this.favCount = favCount;
+        this.scoreCount = scoreCount;
+    }
+    static getVisiblePosts() {
+        let result = [];
+        $("#posts-container").children(".post-preview").each(function () {
+            result.push(new Post(parseInt(this.getAttribute("data-id")), this.getAttribute("data-tags"), this.getAttribute("data-rating"), parseInt(this.querySelector(".post-score-faves").innerHTML.substring(1)), parseInt(this.querySelector(".post-score-score").innerHTML.substring(1))));
+        });
+        return result;
+    }
+    static getViewingPost() {
+        const $post = $("#image-container");
+        if ($post.length === 0) {
+            return undefined;
+        }
+        return new ViewingPost(parseInt($post.attr("data-id")), $post.attr("data-tags"), $post.attr("data-rating"), parseInt($post.find("img").attr("data-fav-count")), parseInt($post.find("img").attr("data-score")));
+    }
+    getId() {
+        return this.id;
+    }
+    getTags() {
+        return this.tags;
+    }
+    getRating() {
+        return this.rating;
+    }
+    getFavCount() {
+        return this.favCount;
+    }
+    getScoreCount() {
+        return this.scoreCount;
+    }
+}
+exports.Post = Post;
+class ViewingPost extends Post {
+    constructor(id, tags, rating, favCount, voteCount) {
+        super(id, tags, rating, favCount, voteCount);
+        this.isFaved = $("#add-to-favorites").css("display") === "none";
+        this.isUpvoted = $("#post-vote-up-" + id).hasClass("score-positive");
+        this.isDownvoted = $("#post-vote-down-" + id).hasClass("score-negative");
+    }
+    getIsFaved() {
+        return this.isFaved;
+    }
+    getIsUpvoted() {
+        return this.isUpvoted;
+    }
+    getIsDownvoted() {
+        return this.isDownvoted;
+    }
+}
+exports.ViewingPost = ViewingPost;
+
+},{"./RE6Module":3}],3:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 class RE6Module {
     constructor() {
         this.prefix = this.constructor.name;
@@ -213,7 +276,7 @@ class RE6Module {
 }
 exports.RE6Module = RE6Module;
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class Tabbed {
@@ -248,7 +311,7 @@ class Tabbed {
 }
 exports.Tabbed = Tabbed;
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const StructureUtilities_1 = require("./modules/StructureUtilities");
@@ -259,12 +322,14 @@ const HeaderCustomizer_1 = require("./modules/HeaderCustomizer");
 const ThemeCustomizer_1 = require("./modules/ThemeCustomizer");
 const BlacklistToggler_1 = require("./modules/BlacklistToggler");
 const FormattingHelper_1 = require("./modules/FormattingHelper");
+const TitleCustomizer_1 = require("./modules/TitleCustomizer");
 HeaderCustomizer_1.HeaderCustomizer.getInstance();
 ThemeCustomizer_1.ThemeCustomizer.getInstance();
 BlacklistToggler_1.BlacklistToggler.getInstance();
+TitleCustomizer_1.TitleCustomizer.getInstance();
 FormattingHelper_1.FormattingHelper.init();
 
-},{"./modules/BlacklistToggler":5,"./modules/FormattingHelper":6,"./modules/HeaderCustomizer":7,"./modules/SettingsController":8,"./modules/StructureUtilities":9,"./modules/ThemeCustomizer":10}],5:[function(require,module,exports){
+},{"./modules/BlacklistToggler":6,"./modules/FormattingHelper":7,"./modules/HeaderCustomizer":8,"./modules/SettingsController":9,"./modules/StructureUtilities":10,"./modules/ThemeCustomizer":11,"./modules/TitleCustomizer":12}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class BlacklistToggler {
@@ -320,10 +385,28 @@ class BlacklistToggler {
 }
 exports.BlacklistToggler = BlacklistToggler;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const RE6Module_1 = require("../components/RE6Module");
+const button_definitions = {
+    bold: { icon: "&#xf032", title: "Bold", content: "[b]$selection[/b]" },
+    italic: { icon: "&#xf033", title: `Italic`, content: "[i]$selection[/i]" },
+    strikethrough: { icon: "&#xf0cc", title: `Strikethrough`, content: "[s]$selection[/s]" },
+    underscore: { icon: "&#x" + "f0cd", title: "Underscore", content: "[u]$selection[/u]" },
+    spacer: { icon: "&nbsp;", title: "Spacer", content: "%spacer%" },
+    superscript: { icon: "&#x" + "f12b", title: "Superscript", content: "[sup]$selection[/sup]" },
+    spoiler: { icon: "&#x" + "f20a", title: "Spoiler", content: "[spoiler]$selection[/spoiler]" },
+    color: { icon: "&#x" + "f53f", title: "Color", content: "[color=]$selection[/color]" },
+    code: { icon: "&#x" + "f121", title: "Code", content: "`$selection`" },
+    heading: { icon: "&#x" + "f1dc", title: "Heading", content: "h2.$selection" },
+    quote: { icon: "&#x" + "f10e", title: "Quote", content: "[quote]$selection[/quote]" },
+    section: { icon: "&#x" + "f103", title: "Section", content: "[section=Title]$selection[/section]" },
+    tag: { icon: "&#x" + "f02b", title: "Tag", content: "{{$selection}}" },
+    wiki: { icon: "&#x" + "f002", title: "Wiki", content: "[[$selection]]" },
+    link: { icon: "&#x" + "f0c1", title: "Link", content: "\"$selection\":" },
+    link_prompt: { icon: "&#x" + "f35d", title: "Link 2", content: "\"$selection\":$prompt" },
+};
 class FormattingHelper extends RE6Module_1.RE6Module {
     constructor($targetContainer) {
         super();
@@ -334,13 +417,29 @@ class FormattingHelper extends RE6Module_1.RE6Module {
             e.preventDefault();
             _self.toggleEditing();
         });
+        this.$formatButtons.find("a").click(function (e) {
+            e.preventDefault();
+            _self.addFormatting($(e.currentTarget));
+        });
+        this.$settingsButton.click(function (e) {
+            e.preventDefault();
+            _self.toggleButtonDrawer();
+        });
     }
     getDefaultSettings() {
         return {
             "buttons": [
-                { title: `<i class="fas fa-bold"></i>`, content: "[b]$selection[/b]" },
-                { title: `<i class="fas fa-italic"></i>`, content: "[i]$selection[/i]" },
-                { title: `<i class="fas fa-strikethrough"></i>`, content: "[s]$selection[/s]" },
+                "bold",
+                "italic",
+                "strikethrough",
+                "underscore",
+                "spacer",
+                "code",
+                "quote",
+                "heading",
+                "section",
+                "spoiler",
+                "link",
             ]
         };
     }
@@ -351,7 +450,9 @@ class FormattingHelper extends RE6Module_1.RE6Module {
         $("input.dtext-preview-button").remove();
     }
     createDOM() {
+        let _self = this;
         this.$container.attr("data-editing", "true");
+        this.$container.attr("data-drawer", "false");
         this.$textarea = this.$container.find("textarea");
         this.$preview = this.$container.find("div.dtext-preview");
         let $bar = $("<div>").addClass("comment-header").prependTo(this.$container);
@@ -367,10 +468,52 @@ class FormattingHelper extends RE6Module_1.RE6Module {
             .html("Preview")
             .addClass("toggle-preview")
             .appendTo(this.$toggleTabs);
-        let $buttonBox = $("<div>").addClass("comment-buttons").appendTo($bar);
+        this.$formatButtons = $("<div>").addClass("comment-buttons").appendTo($bar);
         this.fetchSettings("buttons").forEach(function (value) {
-            $(`<a href="">`).html(value.title).appendTo($buttonBox);
+            let buttonData = _self.createButton(value);
+            buttonData.box.appendTo(_self.$formatButtons);
+            if (buttonData.button.attr("data-content") === "%spacer%") {
+                buttonData.button.addClass("disabled");
+                buttonData.button.removeAttr("title");
+            }
         });
+        let $settingsButtonBox = $("<div>").addClass("settings-buttons").appendTo($bar);
+        let $settingsButtonLi = $("<li>").appendTo($settingsButtonBox);
+        this.$settingsButton = $(`<a href="">`)
+            .html("&#x" + "f1de")
+            .attr("title", "Settings")
+            .appendTo($settingsButtonLi);
+        $("<div>")
+            .html(`<i class="fas fa-angle-double-left"></i> Drag to the toolbar`)
+            .addClass("dtext-button-drawer-title")
+            .appendTo(this.$container);
+        this.$formatButtonsDrawer = $("<div>").addClass("dtext-button-drawer").appendTo(this.$container);
+        this.$formatButtons.sortable({
+            helper: "clone",
+            forceHelperSize: true,
+            cursor: "grabbing",
+            connectWith: this.$formatButtonsDrawer,
+            disabled: true,
+            update: function () { _self.handleToolbarUpdate(); },
+        });
+        this.$formatButtonsDrawer.sortable({
+            helper: "clone",
+            forceHelperSize: true,
+            cursor: "grabbing",
+            connectWith: this.$formatButtons,
+            disabled: true,
+        });
+    }
+    createButton(name) {
+        let button_data = button_definitions[name];
+        let box = $("<li>").appendTo(this.$formatButtons);
+        let button = $(`<a href="">`)
+            .html(button_data.icon)
+            .attr("title", button_data.title)
+            .attr("data-content", button_data.content)
+            .attr("data-name", name)
+            .appendTo(box);
+        return { button: button, box: box };
     }
     toggleEditing() {
         let _self = this;
@@ -379,8 +522,7 @@ class FormattingHelper extends RE6Module_1.RE6Module {
             this.$toggleEditing.removeClass("active");
             this.$togglePreview.addClass("active");
             this.$textarea.val();
-            this.format(this.$textarea.val(), function (data) {
-                console.log(data);
+            this.formatDText(this.$textarea.val(), function (data) {
                 _self.$preview.html(data.html);
             });
         }
@@ -390,7 +532,45 @@ class FormattingHelper extends RE6Module_1.RE6Module {
             this.$togglePreview.removeClass("active");
         }
     }
-    format(input, handleData) {
+    toggleButtonDrawer() {
+        let _self = this;
+        if (this.$container.attr("data-drawer") === "true") {
+            this.$container.attr("data-drawer", "false");
+            this.$formatButtons.sortable("disable");
+            this.$formatButtonsDrawer.sortable("disable");
+        }
+        else {
+            this.$container.attr("data-drawer", "true");
+            var missingButtons = $.grep(Object.keys(button_definitions), function (el) { return $.inArray(el, _self.fetchSettings("buttons")) == -1; });
+            missingButtons.forEach(function (value) {
+                let buttonData = _self.createButton(value);
+                buttonData.box.appendTo(_self.$formatButtonsDrawer);
+            });
+            this.$formatButtons.sortable("enable");
+            this.$formatButtonsDrawer.sortable("enable");
+        }
+    }
+    handleToolbarUpdate() {
+        let buttonData = [];
+        this.$formatButtons.find("li > a").each(function (index, element) {
+            buttonData.push($(element).attr("data-name"));
+        });
+        this.pushSettings("buttons", buttonData);
+    }
+    addFormatting(button) {
+        let content = button.attr("data-content");
+        let currentText = this.$textarea.val() + "";
+        let position = {
+            start: this.$textarea.prop('selectionStart'),
+            end: this.$textarea.prop('selectionEnd')
+        };
+        content = content.replace(/\$prompt/g, function () { return prompt(); });
+        content = content.replace(/\$selection/g, currentText.substring(position.start, position.end));
+        this.$textarea.val(currentText.substring(0, position.start)
+            + content
+            + currentText.substring(position.end, currentText.length));
+    }
+    formatDText(input, handleData) {
         $.ajax({
             type: "post",
             url: "/dtext_preview",
@@ -406,7 +586,7 @@ class FormattingHelper extends RE6Module_1.RE6Module {
 }
 exports.FormattingHelper = FormattingHelper;
 
-},{"../components/RE6Module":2}],7:[function(require,module,exports){
+},{"../components/RE6Module":3}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Modal_1 = require("../components/Modal");
@@ -612,7 +792,7 @@ class HeaderCustomizer extends RE6Module_1.RE6Module {
 exports.HeaderCustomizer = HeaderCustomizer;
 HeaderCustomizer.instance = new HeaderCustomizer();
 
-},{"../components/Modal":1,"../components/RE6Module":2}],8:[function(require,module,exports){
+},{"../components/Modal":1,"../components/RE6Module":3}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const HeaderCustomizer_1 = require("./HeaderCustomizer");
@@ -663,7 +843,7 @@ class SettingsController {
 }
 exports.SettingsController = SettingsController;
 
-},{"../components/Modal":1,"../components/Tabbed":3,"./HeaderCustomizer":7}],9:[function(require,module,exports){
+},{"../components/Modal":1,"../components/Tabbed":4,"./HeaderCustomizer":8}],10:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class StructureUtilities {
@@ -681,7 +861,7 @@ class StructureUtilities {
 }
 exports.StructureUtilities = StructureUtilities;
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const HeaderCustomizer_1 = require("./HeaderCustomizer");
@@ -808,4 +988,45 @@ class ThemeCustomizer extends RE6Module_1.RE6Module {
 }
 exports.ThemeCustomizer = ThemeCustomizer;
 
-},{"../components/Modal":1,"../components/RE6Module":2,"./HeaderCustomizer":7}]},{},[4]);
+},{"../components/Modal":1,"../components/RE6Module":3,"./HeaderCustomizer":8}],12:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const Post_1 = require("../components/Post");
+const RE6Module_1 = require("../components/RE6Module");
+class TitleCustomizer extends RE6Module_1.RE6Module {
+    constructor() {
+        super();
+        const post = Post_1.Post.getViewingPost();
+        if (post === undefined) {
+            return;
+        }
+        const oldTitle = document.title;
+        let prefix = "";
+        if (post.getIsFaved()) {
+            prefix += this.fetchSettings("favsymbol");
+        }
+        if (post.getIsUpvoted()) {
+            prefix += this.fetchSettings("voteupsymbol");
+        }
+        else if (post.getIsDownvoted()) {
+            prefix += this.fetchSettings("votedownsymbol");
+        }
+        document.title = prefix + oldTitle;
+    }
+    getDefaultSettings() {
+        return {
+            "favsymbol": "\u2665",
+            "voteupsymbol": "\u2191",
+            "votedownsymbol": "\u2193"
+        };
+    }
+    static getInstance() {
+        if (this.instance == undefined)
+            this.instance = new TitleCustomizer();
+        return this.instance;
+    }
+}
+exports.TitleCustomizer = TitleCustomizer;
+TitleCustomizer.instance = new TitleCustomizer();
+
+},{"../components/Post":2,"../components/RE6Module":3}]},{},[5]);
