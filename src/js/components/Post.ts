@@ -1,11 +1,10 @@
-import { RE6Module } from "./RE6Module";
 import { TagTypes } from "./Tag";
 
 /**
  * Collects basic info for a post.
  * Constructable via getVisiblePosts or getViewingPost
  */
-export class Post extends RE6Module {
+export class Post {
 
     private id: number;
     private tags: string;
@@ -15,7 +14,6 @@ export class Post extends RE6Module {
 
 
     constructor(id: number, tags: string, rating: string, favCount: number, scoreCount: number) {
-        super();
         this.id = id;
         this.tags = tags;
         this.rating = rating;
