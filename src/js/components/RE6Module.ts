@@ -16,9 +16,11 @@ export abstract class RE6Module {
     /**
      * Fetches the specified settings property
      * @param property Property name
+     * @param fresh Fetches some freshly baked cookies
      * @returns Property value
      */
-    protected fetchSettings(property?: string) {
+    protected fetchSettings(property?: string, fresh?: boolean) {
+        if (fresh) this.loadCookies();
         if (property === undefined) return this.settings;
         return this.settings[property];
     }
