@@ -17,7 +17,7 @@ import { ThemeCustomizer } from "./modules/ThemeCustomizer";
 import { BlacklistToggler } from "./modules/BlacklistToggler";
 import { FormattingHelper } from "./modules/FormattingHelper";
 import { TitleCustomizer } from "./modules/TitleCustomizer";
-import { MiscFunctionality } from "./modules/Misc";
+import { MiscFunctionality } from "./modules/MiscFunctionality";
 
 HeaderCustomizer.getInstance();
 ThemeCustomizer.getInstance();
