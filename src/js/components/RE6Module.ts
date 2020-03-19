@@ -10,7 +10,7 @@ export abstract class RE6Module {
     private readonly prefix: string = this.constructor.name;
 
     protected constructor() {
-        this.settings = this.loadSettingsCookies();
+        this.loadCookies();
     }
 
     /**
@@ -30,7 +30,7 @@ export abstract class RE6Module {
      */
     protected pushSettings(property: string, value: any) {
         this.settings[property] = value;
-        this.saveSettingsCookies();
+        this.saveCookies();
     }
 
     /**
@@ -43,19 +43,18 @@ export abstract class RE6Module {
 
     /**
      * Loads settings values from cookies if they exist.  
-     * Otherwise, returns the default values.
-     * @returns Settings set
+     * Otherwise, loads the default values
      */
-    private loadSettingsCookies() {
+    private loadCookies() {
         let cookies = Cookies.get("re621." + this.prefix);
-        if (cookies === undefined) { return this.getDefaultSettings(); }
-        else return JSON.parse(cookies);
+        if (cookies === undefined) { this.settings = this.getDefaultSettings(); }
+        else this.settings = JSON.parse(cookies);
     }
 
     /**
      * Saves the settings to cookies
      */
-    private saveSettingsCookies() {
+    private saveCookies() {
         Cookies.set("re621." + this.prefix, JSON.stringify(this.settings));
     }
 
