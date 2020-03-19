@@ -248,29 +248,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 class RE6Module {
     constructor() {
         this.prefix = this.constructor.name;
-        this.settings = this.loadSettingsCookies();
+        this.loadCookies();
     }
-    fetchSettings(property) {
+    fetchSettings(property, fresh) {
+        if (fresh)
+            this.loadCookies();
         if (property === undefined)
             return this.settings;
         return this.settings[property];
     }
     pushSettings(property, value) {
         this.settings[property] = value;
-        this.saveSettingsCookies();
+        this.saveCookies();
     }
     getDefaultSettings() {
         return {};
     }
-    loadSettingsCookies() {
+    loadCookies() {
         let cookies = Cookies.get("re621." + this.prefix);
         if (cookies === undefined) {
-            return this.getDefaultSettings();
+            this.settings = this.getDefaultSettings();
         }
         else
-            return JSON.parse(cookies);
+            this.settings = JSON.parse(cookies);
     }
-    saveSettingsCookies() {
+    saveCookies() {
         Cookies.set("re621." + this.prefix, JSON.stringify(this.settings));
     }
 }
@@ -405,7 +407,7 @@ const button_definitions = {
     tag: { icon: "&#x" + "f02b", title: "Tag", content: "{{$selection}}" },
     wiki: { icon: "&#x" + "f002", title: "Wiki", content: "[[$selection]]" },
     link: { icon: "&#x" + "f0c1", title: "Link", content: "\"$selection\":" },
-    link_prompt: { icon: "&#x" + "f35d", title: "Link 2", content: "\"$selection\":$prompt" },
+    link_prompt: { icon: "&#x" + "f35d", title: "Link (Prompted)", content: "\"$selection\":$prompt" },
 };
 class FormattingHelper extends RE6Module_1.RE6Module {
     constructor($targetContainer) {
@@ -444,8 +446,17 @@ class FormattingHelper extends RE6Module_1.RE6Module {
         };
     }
     static init() {
+        let instances = [];
         $("div.dtext-previewable:has(textarea)").each(function (index, element) {
-            new FormattingHelper($(element));
+            let $container = $(element);
+            instances.push(new FormattingHelper($container));
+            $container.on("formatting-helper:update", function (event, subject) {
+                instances.forEach(function (value) {
+                    if (!$container.is(value.$container)) {
+                        value.updateButtons();
+                    }
+                });
+            });
         });
         $("input.dtext-preview-button").remove();
     }
@@ -469,14 +480,7 @@ class FormattingHelper extends RE6Module_1.RE6Module {
             .addClass("toggle-preview")
             .appendTo(this.$toggleTabs);
         this.$formatButtons = $("<div>").addClass("comment-buttons").appendTo($bar);
-        this.fetchSettings("buttons").forEach(function (value) {
-            let buttonData = _self.createButton(value);
-            buttonData.box.appendTo(_self.$formatButtons);
-            if (buttonData.button.attr("data-content") === "%spacer%") {
-                buttonData.button.addClass("disabled");
-                buttonData.button.removeAttr("title");
-            }
-        });
+        this.updateButtons();
         let $settingsButtonBox = $("<div>").addClass("settings-buttons").appendTo($bar);
         let $settingsButtonLi = $("<li>").appendTo($settingsButtonBox);
         this.$settingsButton = $(`<a href="">`)
@@ -502,6 +506,18 @@ class FormattingHelper extends RE6Module_1.RE6Module {
             cursor: "grabbing",
             connectWith: this.$formatButtons,
             disabled: true,
+        });
+    }
+    updateButtons() {
+        let _self = this;
+        this.$formatButtons.html("");
+        this.fetchSettings("buttons", true).forEach(function (value) {
+            let buttonData = _self.createButton(value);
+            buttonData.box.appendTo(_self.$formatButtons);
+            if (buttonData.button.attr("data-content") === "%spacer%") {
+                buttonData.button.addClass("disabled");
+                buttonData.button.removeAttr("title");
+            }
         });
     }
     createButton(name) {
@@ -556,6 +572,7 @@ class FormattingHelper extends RE6Module_1.RE6Module {
             buttonData.push($(element).attr("data-name"));
         });
         this.pushSettings("buttons", buttonData);
+        this.$container.trigger("formatting-helper:update", [this]);
     }
     addFormatting(button) {
         let content = button.attr("data-content");

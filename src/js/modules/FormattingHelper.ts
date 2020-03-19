@@ -86,8 +86,16 @@ export class FormattingHelper extends RE6Module {
     }
 
     public static init() {
+        let instances = [];
         $("div.dtext-previewable:has(textarea)").each(function (index, element) {
-            new FormattingHelper($(element));
+            let $container = $(element);
+            instances.push(new FormattingHelper($container));
+
+            $container.on("formatting-helper:update", function (event, subject) {
+                instances.forEach(function (value) {
+                    if (!$container.is(value.$container)) { value.updateButtons(); }
+                })
+            });
         });
 
         $("input.dtext-preview-button").remove();   // TODO Remove only buttons corresponding to the elements
@@ -122,15 +130,7 @@ export class FormattingHelper extends RE6Module {
 
         this.$formatButtons = $("<div>").addClass("comment-buttons").appendTo($bar);
 
-        this.fetchSettings("buttons").forEach(function (value) {
-            let buttonData = _self.createButton(value);
-            buttonData.box.appendTo(_self.$formatButtons);
-
-            if (buttonData.button.attr("data-content") === "%spacer%") {
-                buttonData.button.addClass("disabled");
-                buttonData.button.removeAttr("title");
-            }
-        });
+        this.updateButtons();
 
         let $settingsButtonBox = $("<div>").addClass("settings-buttons").appendTo($bar);
 
@@ -167,6 +167,24 @@ export class FormattingHelper extends RE6Module {
             disabled: true,
         });
 
+    }
+
+    /**
+     * Updates the buttons toolbar based on saved settings
+     */
+    private updateButtons() {
+        let _self = this;
+        this.$formatButtons.html("");
+
+        this.fetchSettings("buttons", true).forEach(function (value) {
+            let buttonData = _self.createButton(value);
+            buttonData.box.appendTo(_self.$formatButtons);
+
+            if (buttonData.button.attr("data-content") === "%spacer%") {
+                buttonData.button.addClass("disabled");
+                buttonData.button.removeAttr("title");
+            }
+        });
     }
 
     /**
@@ -242,6 +260,7 @@ export class FormattingHelper extends RE6Module {
             buttonData.push($(element).attr("data-name"));
         });
         this.pushSettings("buttons", buttonData);
+        this.$container.trigger("formatting-helper:update", [this]);
     }
 
     /**
