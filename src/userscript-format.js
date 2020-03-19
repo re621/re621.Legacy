@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-const template = fs.readFileSync("./.vscode/userscript-template.txt").toString();
+const template = fs.readFileSync("./src/userscript-template.txt").toString();
 const json = JSON.parse(fs.readFileSync("./package.json"));
 
 const templateReplaced = template.replace(/%NAME%/g, json.displayName).
