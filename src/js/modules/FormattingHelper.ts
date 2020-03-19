@@ -151,6 +151,7 @@ export class FormattingHelper extends RE6Module {
             helper: "clone",
             forceHelperSize: true,
             cursor: "grabbing",
+            containment: this.$container,
             connectWith: this.$formatButtonsDrawer,
 
             disabled: true,
@@ -162,6 +163,7 @@ export class FormattingHelper extends RE6Module {
             helper: "clone",
             forceHelperSize: true,
             cursor: "grabbing",
+            containment: this.$container,
             connectWith: this.$formatButtons,
 
             disabled: true,
