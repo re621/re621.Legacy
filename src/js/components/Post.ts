@@ -1,4 +1,5 @@
 import { RE6Module } from "./RE6Module";
+import { TagTypes } from "./Tag";
 
 /**
  * Collects basic info for a post.
@@ -99,12 +100,35 @@ export class ViewingPost extends Post {
     private isFaved: boolean;
     private isUpvoted: boolean;
     private isDownvoted: boolean;
+    private artistTags: string[];
+    private characterTags: string[];
+    private copyrightTags: string[];
+    private speciesTags: string[];
+    private generalTags: string[];
+    private metaTags: string[];
+    private loreTags: string[];
 
     constructor(id: number, tags: string, rating: string, favCount: number, voteCount: number) {
         super(id, tags, rating, favCount, voteCount);
         this.isFaved = $("#add-to-favorites").css("display") === "none";
         this.isUpvoted = $("#post-vote-up-" + id).hasClass("score-positive");
         this.isDownvoted = $("#post-vote-down-" + id).hasClass("score-negative");
+
+        this.artistTags = this.getAllFromTaggroup("artist");
+        this.characterTags = this.getAllFromTaggroup("character");
+        this.copyrightTags = this.getAllFromTaggroup("copyright");
+        this.speciesTags = this.getAllFromTaggroup("species");
+        this.generalTags = this.getAllFromTaggroup("general");
+        this.metaTags = this.getAllFromTaggroup("meta");
+        this.loreTags = this.getAllFromTaggroup("lore");
+    }
+
+    private getAllFromTaggroup(taggroup: string) {
+        const result = [];
+        for (const element of $(`#tag-list .${taggroup}-tag-list`).children()) {
+            result.push($(element).find(".search-tag").text());
+        }
+        return result;
     }
     /**
      * Returns true if the post is favorited
@@ -125,5 +149,12 @@ export class ViewingPost extends Post {
      */
     public getIsDownvoted() {
         return this.isDownvoted;
+    }
+
+    /**
+     * Returns an array of all the tags of the specified type, or an empty array if there are none
+     */
+    public getTagsFromType(tagType: TagTypes) {
+        return this[tagType + "Tags"];
     }
 }
