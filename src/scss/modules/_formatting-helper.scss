@@ -68,7 +68,7 @@ body.resp form.simple_form {
             li {
                 list-style-type: none;
                 display: inline-block;
-                padding: 0.125rem 0.5rem;
+                padding: 0.25rem 0.5rem;
 
                 a {
                     display: inline-block;
@@ -114,6 +114,7 @@ body.resp form.simple_form {
 
             box-shadow: unset;
             padding: 0.25rem;
+            margin-bottom: 0 !important;
 
             font-family: inherit;
             font-size: inherit;

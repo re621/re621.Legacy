@@ -18,7 +18,7 @@ const button_definitions = {
     tag: { icon: "&#x" + "f02b", title: "Tag", content: "{{$selection}}" },
     wiki: { icon: "&#x" + "f002", title: "Wiki", content: "[[$selection]]" },
     link: { icon: "&#x" + "f0c1", title: "Link", content: "\"$selection\":" },
-    link_prompt: { icon: "&#x" + "f35d", title: "Link 2", content: "\"$selection\":$prompt" },
+    link_prompt: { icon: "&#x" + "f35d", title: "Link (Prompted)", content: "\"$selection\":$prompt" },
 }
 
 export class FormattingHelper extends RE6Module {

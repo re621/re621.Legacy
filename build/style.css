@@ -738,7 +738,7 @@ body.resp form.simple_form div.dtext-previewable div.settings-buttons li,
 body.resp form.simple_form div.dtext-previewable div.dtext-button-drawer li {
   list-style-type: none;
   display: inline-block;
-  padding: 0.125rem 0.5rem;
+  padding: 0.25rem 0.5rem;
 }
 
 body.resp form.simple_form div.dtext-previewable div.comment-buttons li a,
@@ -806,6 +806,7 @@ body.resp form.simple_form div.dtext-previewable div.dtext-preview {
   -webkit-box-shadow: unset;
           box-shadow: unset;
   padding: 0.25rem;
+  margin-bottom: 0 !important;
   font-family: inherit;
   font-size: inherit;
   background: #1f3c67;
