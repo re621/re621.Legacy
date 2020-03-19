@@ -132,7 +132,7 @@ export class ThemeCustomizer extends RE6Module {
                 right: "0",
                 top: "4.5rem",
             },
-            trigger: addTabButton.link,
+            triggers: [{ element: addTabButton.link }],
             content: [{ name: "re621", page: $themeCustomizerContainer }],
         });
     }

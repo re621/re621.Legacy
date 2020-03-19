@@ -51,7 +51,7 @@ export class SettingsController {
                 top: "4.5rem",
             },
             subtabbed: true,
-            trigger: addSettingsButton.link,
+            triggers: [{ element: addSettingsButton.link }],
             content: [{ name: "re621", page: $settings.create(), tabbable: true }],
         });
     }

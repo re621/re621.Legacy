@@ -130,7 +130,7 @@ export class HeaderCustomizer extends RE6Module {
                 right: "0",
                 top: "4.5rem",
             },
-            trigger: addTabButton.link,
+            triggers: [{ element: addTabButton.link, event: "click" }],
             content: [{ name: "re621", page: $addTabForm }],
         });
 
@@ -152,7 +152,7 @@ export class HeaderCustomizer extends RE6Module {
                 right: "18rem",
                 top: "4.5rem",
             },
-            trigger: $("menu.main li a"),
+            triggers: [{ element: $("menu.main li a") }],
             triggerMulti: true,
             disabled: true,
             content: [{ name: "re621", page: $updateTabForm }],
@@ -172,7 +172,7 @@ export class HeaderCustomizer extends RE6Module {
             controls: true,
         }, true);
 
-        this.updateModal.registerTrigger(newTab.link);
+        this.updateModal.registerTrigger({ element: newTab.link });
 
         tabNameInput.val("");
         tabHrefInput.val("");

@@ -6,6 +6,8 @@ export class Modal {
 
     private config: ModalConfig;
     private $modal: JQuery<HTMLElement>;
+
+    private triggers: ModalTrigger[];
     private $activeTrigger: JQuery<HTMLElement>;
 
     private index: number;
@@ -17,25 +19,28 @@ export class Modal {
     constructor(config: ModalConfig) {
         let _self = this;
 
-        if (config.title == undefined) config.title = "Modal";
-        if (config.width == undefined) config.title = "auto";
-        if (config.height == undefined) config.height = "auto";
-        if (config.position == undefined) config.position = {};
-        if (config.subtabbed == undefined) config.subtabbed = false;
+        if (config.uid === undefined) config.uid = $(this).uniqueId() + "";
+        if (config.title === undefined) config.title = "Modal";
+        if (config.width === undefined) config.width = "auto";
+        if (config.height === undefined) config.height = "auto";
+        if (config.position === undefined) config.position = {};
+        if (config.subtabbed === undefined) config.subtabbed = false;
 
-        if (config.triggerEvent == undefined) config.triggerEvent = "click";
-        if (config.triggerMulti == undefined) config.triggerMulti = false;
-        if (config.disabled == undefined) config.disabled = false;
+        if (config.triggers === undefined) config.triggers = [];
+        if (config.triggerMulti === undefined) config.triggerMulti = false;
+        if (config.disabled === undefined) config.disabled = false;
 
-        if (config.content == undefined) config.content = [];
+        if (config.content === undefined) config.content = [];
         this.config = config;
 
-        this.create();
-        this.$activeTrigger = this.config.trigger;
+        console.log(this.config.uid);
 
+        this.create();
         if (this.config.disabled) this.disable();
 
-        this.registerTrigger(this.config.trigger);
+        this.config.triggers.forEach(function (trigger) {
+            _self.registerTrigger(trigger);
+        });
     }
 
     /**
@@ -102,30 +107,27 @@ export class Modal {
     }
 
     /**
-     * Pre-toggle logic. Triggered by an event listener
-     * @param event Event
-     */
-    private handleTriggerEvent(context, event) {
-        if (context.isDisabled()) return;
-
-        let $target = $(event.currentTarget);
-        if (context.config.triggerMulti && !context.$activeTrigger.is($target) && context.isVisible()) {
-            context.toggle(); // Update the modal window instead of toggling
-        }
-        context.$activeTrigger = $target;
-
-        event.preventDefault();
-        context.toggle();
-    }
-
-    /**
      * Listens to the specified element in order to trigger the modal
-     * @param element Element to listen to
+     * @param trigger Element-event pair to listen to
      */
-    public registerTrigger(element: JQuery<HTMLElement>) {
-        let context = this;
-        element.on(this.config.triggerEvent, function (event) {
-            context.handleTriggerEvent(context, event);
+    public registerTrigger(trigger: ModalTrigger) {
+        let _self = this;
+
+        if (trigger.event === undefined) trigger.event = "click";
+        if (this.triggers.length == 0) this.$activeTrigger = trigger.element;
+        this.triggers.push(trigger);
+
+        trigger.element.on(trigger.event, function (event) {
+            if (_self.isDisabled()) return;
+
+            let $target = $(event.currentTarget);
+            if (_self.config.triggerMulti && !_self.$activeTrigger.is($target) && _self.isVisible()) {
+                _self.toggle(); // Update the modal window instead of toggling
+            }
+            _self.$activeTrigger = $target;
+
+            event.preventDefault();
+            _self.toggle();
         });
     }
 
@@ -172,7 +174,7 @@ export class Modal {
      */
     public enable() {
         this.config.disabled = false;
-        this.$activeTrigger = this.config.trigger;  // Reset to default state
+        this.$activeTrigger = this.triggers[0].element;  // Reset to default state
     }
 
     /**
@@ -233,8 +235,8 @@ export class Modal {
 }
 
 interface ModalConfig {
-    /** Unique modal ID */
-    uid: string,
+    /** Modal ID. Must be unique, or things will break. */
+    uid?: string,
     /** Title displayed in the modal header */
     title?: string,
     /** Modal width (pixels, em, percent). Defaults to 50% */
@@ -247,18 +249,16 @@ interface ModalConfig {
     /** If true, removes the top padding to make subtabs easier */
     subtabbed?: boolean,
 
-    /** Element - link or button - that triggers the element */
-    trigger: JQuery<HTMLElement>,
-    /** Event type that triggeres the modal */
-    triggerEvent?: string,
+    /** Element that triggers the modal to appear */
+    triggers?: ModalTrigger[],
     /** If true, updates the window when clicking on a trigger different from original */
     triggerMulti?: boolean,
 
     /** If true, prevents the modal from being triggered */
     disabled?: boolean,
 
-    /** List of elements with the modal content. Should have at least one. */
-    content?: TabContent[]
+    /** List of elements with the modal content. */
+    content?: TabContent[],
 }
 
 interface ModalPosition {
@@ -266,6 +266,13 @@ interface ModalPosition {
     right?: string,
     top?: string,
     bottom?: string
+}
+
+interface ModalTrigger {
+    /** Query selector containing a trigger - or a collection of triggers */
+    element: JQuery<HTMLElement>,
+    /** Event that the trigger should respond to */
+    event?: string,
 }
 
 export interface TabContent {
