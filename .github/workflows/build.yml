@@ -17,10 +17,12 @@ jobs:
     - name: Set up node
       uses: actions/setup-node@v1
   
+    - uses: olegtarasov/get-tag@v2
+  
     - run: npm ci
     - run: npm run typescript
     - run: npm run browserify
-    - run: npm run userscript
+    - run: npm run userscript -- $GIT_TAG_NAME
     - run: npm run sass
       
     - name: Create a Release
