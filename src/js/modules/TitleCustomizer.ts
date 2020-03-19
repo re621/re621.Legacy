@@ -17,13 +17,14 @@ export class TitleCustomizer extends RE6Module {
         }
         const oldTitle = document.title;
         let prefix = "";
+        const symbols = this.fetchSettings("symbols");
         if (post.getIsFaved()) {
-            prefix += this.fetchSettings("favsymbol");
+            prefix += symbols.fav;
         }
         if (post.getIsUpvoted()) {
-            prefix += this.fetchSettings("voteupsymbol")
+            prefix += symbols.voteup;
         } else if (post.getIsDownvoted()) {
-            prefix += this.fetchSettings("votedownsymbol")
+            prefix += symbols.votedown;
         }
         document.title = prefix + oldTitle;
     }
@@ -34,9 +35,11 @@ export class TitleCustomizer extends RE6Module {
      */
     protected getDefaultSettings() {
         return {
-            "favsymbol": "\u2665",      //heart symbol
-            "voteupsymbol": "\u2191",   //arrow up
-            "votedownsymbol": "\u2193"  //arrow down
+            "symbols": {
+                "fav": "\u2665",      //heart symbol
+                "voteup": "\u2191",   //arrow up
+                "votedown": "\u2193"  //arrow down
+            }
         };
     }
 
