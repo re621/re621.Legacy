@@ -560,6 +560,7 @@ class FormattingHelper extends RE6Module_1.RE6Module {
         }
         else {
             this.$container.attr("data-drawer", "true");
+            this.$formatButtonsDrawer.html("");
             var missingButtons = $.grep(Object.keys(button_definitions), function (el) { return $.inArray(el, _self.fetchSettings("buttons")) == -1; });
             missingButtons.forEach(function (value) {
                 let buttonData = _self.createButton(value);
