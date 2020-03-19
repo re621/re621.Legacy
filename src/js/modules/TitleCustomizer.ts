@@ -1,6 +1,6 @@
 import { Post } from "../components/Post";
 import { RE6Module } from "../components/RE6Module";
-import { TagTypes } from "../components/Tag";
+import { TagTypes, Tag } from "../components/Tag";
 
 
 /**
@@ -30,7 +30,8 @@ export class TitleCustomizer extends RE6Module {
 
         let tagsToAddToTitle = [];
         if (this.fetchSettings("addArtistToTitle") === true) {
-            tagsToAddToTitle = tagsToAddToTitle.concat(post.getTagsFromType(TagTypes.Artist));
+            const tags = post.getTagsFromType(TagTypes.Artist).filter(tag => Tag.isArist(tag));
+            tagsToAddToTitle = tagsToAddToTitle.concat(tags);
         }
         if (this.fetchSettings("addCopyrightToTitle") === true) {
             tagsToAddToTitle = tagsToAddToTitle.concat(post.getTagsFromType(TagTypes.Copyright));

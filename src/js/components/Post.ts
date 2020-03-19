@@ -126,7 +126,7 @@ export class ViewingPost extends Post {
     private getAllFromTaggroup(taggroup: string) {
         const result = [];
         for (const element of $(`#tag-list .${taggroup}-tag-list`).children()) {
-            result.push($(element).find(".search-tag").text());
+            result.push($(element).find(".search-tag").text().replace(/ /g, "_"));
         }
         return result;
     }
@@ -154,7 +154,7 @@ export class ViewingPost extends Post {
     /**
      * Returns an array of all the tags of the specified type, or an empty array if there are none
      */
-    public getTagsFromType(tagType: TagTypes) {
+    public getTagsFromType(tagType: TagTypes): string[] {
         return this[tagType + "Tags"];
     }
 }
