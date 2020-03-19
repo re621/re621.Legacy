@@ -6,6 +6,7 @@ import { TagTypes } from "./Tag";
  */
 export class Post {
 
+    private domElement: JQuery<HTMLElement>;
     private id: number;
     private tags: string;
     private rating: string;
@@ -27,13 +28,15 @@ export class Post {
     public static getVisiblePosts() {
         let result: Post[] = [];
         $("#posts-container").children(".post-preview").each(function () {
-            result.push(new Post(
+            const post = new Post(
                 parseInt(this.getAttribute("data-id")),
                 this.getAttribute("data-tags"),
                 this.getAttribute("data-rating"),
                 //substring to remove the prefix, like arrowdown, or heart
                 parseInt(this.querySelector(".post-score-faves").innerHTML.substring(1)),
-                parseInt(this.querySelector(".post-score-score").innerHTML.substring(1))));
+                parseInt(this.querySelector(".post-score-score").innerHTML.substring(1)));
+            post.setDomElement($(this));
+            result.push(post);
         });
         return result;
     }
@@ -43,17 +46,27 @@ export class Post {
      * @returns the current post if it exists, undefined otherwise
      */
     public static getViewingPost() {
-        const $post = $("#image-container");
-        if ($post.length === 0) {
+        const $postElememt = $("#image-container");
+        if ($postElememt.length === 0) {
             return undefined;
         }
-        return new ViewingPost(
-            parseInt($post.attr("data-id")),
-            $post.attr("data-tags"),
-            $post.attr("data-rating"),
-            parseInt($post.find("img").attr("data-fav-count")),
-            parseInt($post.find("img").attr("data-score"))
+        const post = new ViewingPost(
+            parseInt($postElememt.attr("data-id")),
+            $postElememt.attr("data-tags"),
+            $postElememt.attr("data-rating"),
+            parseInt($postElememt.find("img").attr("data-fav-count")),
+            parseInt($postElememt.find("img").attr("data-score"))
         );
+        post.setDomElement($postElememt);
+        return post;
+    }
+
+    public setDomElement(element: JQuery<HTMLElement>) {
+        this.domElement = element;
+    }
+
+    public getDomElement() {
+        return this.domElement;
     }
 
     /**
