@@ -27,6 +27,8 @@
         "@types/jquery": "^3.3.33",
         "@types/jqueryui": "^1.12.10",
         "@types/js-cookie": "^2.2.5",
-        "browserify": "^16.5.0"
+        "browserify": "^16.5.0",
+        "sass": "^1.26.3",
+        "typescript": "^3.8.3"
     }
 }
