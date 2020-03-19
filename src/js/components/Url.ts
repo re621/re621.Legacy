@@ -10,7 +10,6 @@ export class Url {
     public static matches(filter: string) {
         const domain = document.location.protocol + "//" + document.location.host;
         let result = false;
-        debugger;
         for (const constraint of filter.split("|")) {
             if (constraint.startsWith("=")) {
                 result = result || document.location.href === domain + constraint.substring(1);
