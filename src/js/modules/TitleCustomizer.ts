@@ -1,5 +1,6 @@
 import { Post } from "../components/Post";
 import { RE6Module } from "../components/RE6Module";
+import { TagTypes } from "../components/Tag";
 
 
 /**
@@ -26,7 +27,19 @@ export class TitleCustomizer extends RE6Module {
         } else if (post.getIsDownvoted()) {
             prefix += symbols.votedown;
         }
-        document.title = prefix + oldTitle;
+
+        let tagsToAddToTitle = [];
+        if (this.fetchSettings("addArtistToTitle") === true) {
+            tagsToAddToTitle = tagsToAddToTitle.concat(post.getTagsFromType(TagTypes.Artist));
+        }
+        if (this.fetchSettings("addCopyrightToTitle") === true) {
+            tagsToAddToTitle = tagsToAddToTitle.concat(post.getTagsFromType(TagTypes.Copyright));
+        }
+        const titleSplit = oldTitle.split(" ");
+        //add a extra space after the number only if there are any tags
+        titleSplit[0] += (tagsToAddToTitle.length === 0) ? "" : " " + tagsToAddToTitle.join(" ");
+
+        document.title = prefix + titleSplit.join(" ");
     }
 
     /**
@@ -39,7 +52,9 @@ export class TitleCustomizer extends RE6Module {
                 "fav": "\u2665",      //heart symbol
                 "voteup": "\u2191",   //arrow up
                 "votedown": "\u2193"  //arrow down
-            }
+            },
+            "addArtistToTitle": true,
+            "addCopyrightToTitle": false
         };
     }
 
