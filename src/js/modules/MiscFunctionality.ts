@@ -3,7 +3,7 @@ import { Url } from "../components/Url";
 
 
 /**
- * Add various symbols to the tilebar depending on the posts state
+ * Adds smaller stuff that wouldn't make sense to have a own module for
  */
 export class MiscFunctionality extends RE6Module {
 
