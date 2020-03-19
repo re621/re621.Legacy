@@ -1,32 +1,32 @@
 {
-  "name": "re621",
-  "displayName": "re621 - e621 Reimagined",
-  "namespace": "bitwolfy.com",
-  "version": "1.0.0",
-  "description": "Increases the amount of customization on e621",
-  "author": "bitWolfy",
-  "main": "./build/script.user.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/bitWolfy/e621-Redesign-Fixes.git"
-  },
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/bitWolfy/e621-Redesign-Fixes/issues"
-  },
-  "homepage": "https://github.com/bitWolfy/e621-Redesign-Fixes#readme",
-  "dependencies": {
-    "jquery": "^3.4.1",
-    "jquery-ui": "^1.12.1",
-    "js-cookie": "^2.2.1"
-  },
-  "devDependencies": {
-    "@types/jquery": "^3.3.33",
-    "@types/jqueryui": "^1.12.10",
-    "@types/js-cookie": "^2.2.5",
-    "browserify": "^16.5.0"
-  }
+    "name": "re621",
+    "displayName": "re621 - e621 Reimagined",
+    "namespace": "bitwolfy.com",
+    "version": "1.0.0",
+    "description": "Increases the amount of customization on e621",
+    "author": "bitWolfy",
+    "main": "./build/script.user.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/bitWolfy/e621-Redesign-Fixes.git"
+    },
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/bitWolfy/e621-Redesign-Fixes/issues"
+    },
+    "homepage": "https://github.com/bitWolfy/e621-Redesign-Fixes#readme",
+    "dependencies": {
+        "jquery": "^3.4.1",
+        "jquery-ui": "^1.12.1",
+        "js-cookie": "^2.2.1"
+    },
+    "devDependencies": {
+        "@types/jquery": "^3.3.33",
+        "@types/jqueryui": "^1.12.10",
+        "@types/js-cookie": "^2.2.5",
+        "browserify": "^16.5.0"
+    }
 }
