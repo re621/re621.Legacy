@@ -31,7 +31,7 @@ export class InstantSearch extends RE6Module {
             const posts = Post.getVisiblePosts();
             if (filter === "") {
                 for (const post of posts) {
-                    $(post.getDomElement).css("display", "");
+                    $(post.getDomElement()).css("display", "");
                 }
             } else {
                 for (const post of posts) {
