@@ -204,7 +204,6 @@ export class FormattingHelper extends RE6Module {
         let button = $(`<a href="">`)
             .html(button_data.icon)
             .attr("title", button_data.title)
-            .attr("data-content", button_data.content)
             .attr("data-name", name)
             .appendTo(box);
 
