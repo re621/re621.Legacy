@@ -17,12 +17,18 @@ import { Miscellaneous } from "./modules/Miscellaneous";
 
 import { SettingsController } from "./modules/SettingsController";
 
+// Modules with self-contained settings
+HeaderCustomizer.getInstance();
+ThemeCustomizer.getInstance();
+FormattingHelper.init();
+
+// Modules without settings
+BlacklistToggler.getInstance();
+TitleCustomizer.getInstance();
+
+// Modules configured by the SettingsController
 SettingsController.registerModule(
-    BlacklistToggler.getInstance(),
-    HeaderCustomizer.getInstance(),
     Miscellaneous.getInstance(),
-    ThemeCustomizer.getInstance(),
-    TitleCustomizer.getInstance(),
 );
 
-FormattingHelper.init();
+SettingsController.getInstance().init();

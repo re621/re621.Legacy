@@ -17,9 +17,7 @@ export class Miscellaneous extends RE6Module {
             this.removeSearchQueryString();
         }
 
-        if (this.fetchSettings("loadRedesignFixes")) {
-            this.loadRedesignFixes();
-        }
+        this.loadRedesignFixes(this.fetchSettings("loadRedesignFixes"));
     }
 
     /**
@@ -29,11 +27,12 @@ export class Miscellaneous extends RE6Module {
         history.replaceState({}, "", location.href.split("?")[0]);
     }
 
-    private loadRedesignFixes() {
-        $("<style>")
+    private loadRedesignFixes(enabled: boolean = true) {
+        let $stylesheet = $("<style>")
             .attr("id", "redesign-fixes-stylesheet")
             .append(GM_getResourceText("redesignFixes"))
             .appendTo("body");
+        if (!enabled) { $stylesheet.attr("media", "max-width: 1px"); }
     }
 
     /**
