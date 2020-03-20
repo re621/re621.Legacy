@@ -24,8 +24,10 @@ export class InstantSearch extends RE6Module {
 
         this.createDOM();
 
-        this.$searchbox.on("input", e => {
+        this.$searchbox.on("input", () => {
             const filter = this.$searchbox.val().toString();
+            //TODO: It's probably excessive to get these every time, but
+            //      let's keep it this way for now until something happens with the infinite scrolling mode
             const posts = Post.getVisiblePosts();
             if (filter === "") {
                 for (const post of posts) {
@@ -51,7 +53,7 @@ export class InstantSearch extends RE6Module {
         this.$searchbox.attr("type", "text");
         $section.append("<h1>Insant Search</h1>")
         $section.append(this.$searchbox)
-        $section.append($("<div>").addClass("fas fa-search"));
+        $section.append($("<button>").attr("type", "submit").append($("<i>").addClass("fas fa-search")));
         $section.insertAfter($("#search-box"));
     }
 
