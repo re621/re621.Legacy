@@ -19,7 +19,7 @@ export abstract class RE6Module {
      * @param fresh Fetches some freshly baked cookies
      * @returns Property value
      */
-    protected fetchSettings(property?: string, fresh?: boolean) {
+    public fetchSettings(property?: string, fresh?: boolean) {
         if (fresh) this.loadCookies();
         if (property === undefined) return this.settings;
         return this.settings[property];
@@ -30,7 +30,7 @@ export abstract class RE6Module {
      * @param property Property name
      * @param value Property value
      */
-    protected pushSettings(property: string, value: any) {
+    public pushSettings(property: string, value: any) {
         this.settings[property] = value;
         this.saveCookies();
     }

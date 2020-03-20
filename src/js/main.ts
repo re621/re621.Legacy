@@ -7,24 +7,30 @@
 import { StructureUtilities } from "./modules/StructureUtilities";
 StructureUtilities.createDOM();
 
-// Load Settings
-import { SettingsController } from "./modules/SettingsController";
-SettingsController.getInstance();
-
 // Load Modules
 import { HeaderCustomizer } from "./modules/HeaderCustomizer";
 import { ThemeCustomizer } from "./modules/ThemeCustomizer";
 import { BlacklistToggler } from "./modules/BlacklistToggler";
 import { FormattingHelper } from "./modules/FormattingHelper";
 import { TitleCustomizer } from "./modules/TitleCustomizer";
-import { MiscFunctionality } from "./modules/MiscFunctionality";
+import { Miscellaneous } from "./modules/Miscellaneous";
 import { InstantSearch } from "./modules/InstantSearch";
 
+import { SettingsController } from "./modules/SettingsController";
+
+// Modules with self-contained settings
 HeaderCustomizer.getInstance();
 ThemeCustomizer.getInstance();
+FormattingHelper.init();
+
+// Modules without settings
 BlacklistToggler.getInstance();
 TitleCustomizer.getInstance();
-MiscFunctionality.getInstance();
 InstantSearch.getInstance();
 
-FormattingHelper.init();
+// Modules configured by the SettingsController
+SettingsController.registerModule(
+    Miscellaneous.getInstance(),
+);
+
+SettingsController.getInstance().init();

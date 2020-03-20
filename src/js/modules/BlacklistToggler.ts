@@ -1,8 +1,10 @@
+import { RE6Module } from "../components/RE6Module";
+
 /**
  * Blacklist Toggler  
  * Makes the blacklist filters collapsable
  */
-export class BlacklistToggler {
+export class BlacklistToggler extends RE6Module {
 
     private static instance: BlacklistToggler;
 
@@ -11,6 +13,7 @@ export class BlacklistToggler {
     private $list: JQuery<HTMLElement>;
 
     private constructor() {
+        super();
         let _self = this;
 
         // Create the required DOM

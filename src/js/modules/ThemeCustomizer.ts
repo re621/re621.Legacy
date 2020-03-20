@@ -73,7 +73,7 @@ export class ThemeCustomizer extends RE6Module {
      */
     private createDOM() {
         // === Create a button in the header
-        let addTabButton = HeaderCustomizer.createTab({
+        let addTabButton = HeaderCustomizer.getInstance().createTab({
             name: `<i class="fas fa-paint-brush"></i>`,
             parent: "menu.extra",
         });
@@ -132,7 +132,7 @@ export class ThemeCustomizer extends RE6Module {
                 right: "0",
                 top: "4.5rem",
             },
-            trigger: addTabButton.link,
+            triggers: [{ element: addTabButton.link }],
             content: [{ name: "re621", page: $themeCustomizerContainer }],
         });
     }

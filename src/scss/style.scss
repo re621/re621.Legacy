@@ -8,9 +8,11 @@
 @import 'themes/!index';
 
 @import 'layout/modal';
+@import 'layout/prompt';
 @import 'layout/tabbed';
 
-@import 'modules/structure-utilities';
-@import 'modules/header-customizer';
 @import 'modules/blacklist-toggler';
 @import 'modules/formatting-helper';
+@import 'modules/header-customizer';
+@import 'modules/settings-controller';
+@import 'modules/structure-utilities';

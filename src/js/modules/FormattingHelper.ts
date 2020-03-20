@@ -1,24 +1,25 @@
 import { RE6Module } from "../components/RE6Module";
+import { Prompt } from "../components/Prompt";
 
 const button_definitions = {
-    bold: { icon: "&#xf032", title: "Bold", content: "[b]$selection[/b]" },
-    italic: { icon: "&#xf033", title: `Italic`, content: "[i]$selection[/i]" },
-    strikethrough: { icon: "&#xf0cc", title: `Strikethrough`, content: "[s]$selection[/s]" },
-    underscore: { icon: "&#x" + "f0cd", title: "Underscore", content: "[u]$selection[/u]" },
+    bold: { icon: "&#xf032", title: "Bold", content: "[b]%selection%[/b]" },
+    italic: { icon: "&#xf033", title: `Italic`, content: "[i]%selection%[/i]" },
+    strikethrough: { icon: "&#xf0cc", title: `Strikethrough`, content: "[s]%selection%[/s]" },
+    underscore: { icon: "&#x" + "f0cd", title: "Underscore", content: "[u]%selection%[/u]" },
 
     spacer: { icon: "&nbsp;", title: "Spacer", content: "%spacer%" },
 
-    superscript: { icon: "&#x" + "f12b", title: "Superscript", content: "[sup]$selection[/sup]" },
-    spoiler: { icon: "&#x" + "f20a", title: "Spoiler", content: "[spoiler]$selection[/spoiler]" },
-    color: { icon: "&#x" + "f53f", title: "Color", content: "[color=]$selection[/color]" },
-    code: { icon: "&#x" + "f121", title: "Code", content: "`$selection`" },
-    heading: { icon: "&#x" + "f1dc", title: "Heading", content: "h2.$selection" },
-    quote: { icon: "&#x" + "f10e", title: "Quote", content: "[quote]$selection[/quote]" },
-    section: { icon: "&#x" + "f103", title: "Section", content: "[section=Title]$selection[/section]" },
-    tag: { icon: "&#x" + "f02b", title: "Tag", content: "{{$selection}}" },
-    wiki: { icon: "&#x" + "f002", title: "Wiki", content: "[[$selection]]" },
-    link: { icon: "&#x" + "f0c1", title: "Link", content: "\"$selection\":" },
-    link_prompt: { icon: "&#x" + "f35d", title: "Link (Prompted)", content: "\"$selection\":$prompt" },
+    superscript: { icon: "&#x" + "f12b", title: "Superscript", content: "[sup]%selection%[/sup]" },
+    spoiler: { icon: "&#x" + "f20a", title: "Spoiler", content: "[spoiler]%selection%[/spoiler]" },
+    color: { icon: "&#x" + "f53f", title: "Color", content: "[color=]%selection%[/color]" },
+    code: { icon: "&#x" + "f121", title: "Code", content: "`%selection%`" },
+    heading: { icon: "&#x" + "f1dc", title: "Heading", content: "h2.%selection%" },
+    quote: { icon: "&#x" + "f10e", title: "Quote", content: "[quote]%selection%[/quote]" },
+    section: { icon: "&#x" + "f103", title: "Section", content: "[section=Title]%selection%[/section]" },
+    tag: { icon: "&#x" + "f02b", title: "Tag", content: "{{%selection%}}" },
+    wiki: { icon: "&#x" + "f002", title: "Wiki", content: "[[%selection%]]" },
+    link: { icon: "&#x" + "f0c1", title: "Link", content: "\"%selection%\":" },
+    link_prompt: { icon: "&#x" + "f35d", title: "Link (Prompted)", content: "\"%selection%\":%prompt:Address%" },
 }
 
 export class FormattingHelper extends RE6Module {
@@ -188,7 +189,7 @@ export class FormattingHelper extends RE6Module {
         let allButtons = $.map(buttonList, function (el) { return el.get(); });
         $(allButtons).click(function (e) {
             e.preventDefault();
-            _self.addFormatting($(e.currentTarget));
+            _self.processFormattingTag($(e.currentTarget).attr("data-name"));
         });
     }
 
@@ -203,7 +204,6 @@ export class FormattingHelper extends RE6Module {
         let button = $(`<a href="">`)
             .html(button_data.icon)
             .attr("title", button_data.title)
-            .attr("data-content", button_data.content)
             .attr("data-name", name)
             .appendTo(box);
 
@@ -270,27 +270,48 @@ export class FormattingHelper extends RE6Module {
     }
 
     /**
-     * Processes the button click of a formatting button
+     * Adds the specified tag to the textarea
+     * @param tag Tag to add
      */
-    private addFormatting(button: JQuery<HTMLElement>) {
-        let content = button.attr("data-content");
+    private processFormattingTag(tag: string) {
+        let _self = this;
 
-        let currentText = this.$textarea.val() + "";
-        let position = {
-            start: this.$textarea.prop('selectionStart'),
-            end: this.$textarea.prop('selectionEnd')
-        };
+        let tagData = button_definitions[tag];
+        let promises = [];
 
-        // Handle the %prompt% tag
-        content = content.replace(/\$prompt/g, function () { return prompt(); });
+        let lookup = tagData.content.match(/%prompt[:]?[^%]*?(%|$)/g);
+        let replacedTags = [];
 
-        // Handle the %selection% tag
-        content = content.replace(/\$selection/g, currentText.substring(position.start, position.end));
-        this.$textarea.val(
-            currentText.substring(0, position.start)
-            + content
-            + currentText.substring(position.end, currentText.length)
-        );
+        if (lookup !== null) {
+            lookup.forEach(function (element) {
+                let title = element.replace(/(%$)|(^%prompt[:]?)/g, "");
+                replacedTags.push(element);
+                promises.push(new Prompt(title).getPromise());
+            });
+        }
+
+        Promise.all(promises).then(function (data) {
+            let content = tagData.content;
+
+            // Handle the %prompt% tag
+            replacedTags.forEach(function (tag, index) {
+                content = content.replace(tag, data[index]);
+            });
+
+            // Handle the %selection% tag
+            let currentText = _self.$textarea.val() + "";
+            let position = {
+                start: _self.$textarea.prop('selectionStart'),
+                end: _self.$textarea.prop('selectionEnd')
+            };
+
+            content = content.replace(/%selection%/g, currentText.substring(position.start, position.end));
+            _self.$textarea.val(
+                currentText.substring(0, position.start)
+                + content
+                + currentText.substring(position.end, currentText.length)
+            );
+        });
     }
 
     /**
