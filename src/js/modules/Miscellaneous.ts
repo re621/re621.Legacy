@@ -1,6 +1,7 @@
 import { RE6Module } from "../components/RE6Module";
 import { Url } from "../components/Url";
 
+declare var GM_addStyle;
 declare var GM_getResourceText;
 
 /**
@@ -9,6 +10,8 @@ declare var GM_getResourceText;
 export class Miscellaneous extends RE6Module {
 
     private static instance: Miscellaneous = new Miscellaneous();
+
+    private redesignStylesheet: JQuery<HTMLElement>;
 
     private constructor() {
         super();
@@ -27,12 +30,23 @@ export class Miscellaneous extends RE6Module {
         history.replaceState({}, "", location.href.split("?")[0]);
     }
 
+    /**
+     * Loads the Redesign Fixes stylesheet
+     * @param enabled Should the stylesheet be enabled
+     */
     private loadRedesignFixes(enabled: boolean = true) {
-        let $stylesheet = $("<style>")
-            .attr("id", "redesign-fixes-stylesheet")
-            .append(GM_getResourceText("redesignFixes"))
-            .appendTo("body");
-        if (!enabled) { $stylesheet.attr("media", "max-width: 1px"); }
+        this.redesignStylesheet = $(GM_addStyle(GM_getResourceText("redesignFixes")));
+        if (!enabled) { this.disableRedesignFixes(); }
+    }
+
+    /** Enable the redesign stylesheet */
+    public enableRedesignFixes() {
+        this.redesignStylesheet.removeAttr("media");
+    }
+
+    /** Disable the redesign stylesheet */
+    public disableRedesignFixes() {
+        this.redesignStylesheet.attr("media", "max-width: 1px");
     }
 
     /**

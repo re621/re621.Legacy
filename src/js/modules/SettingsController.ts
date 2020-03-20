@@ -2,6 +2,7 @@ import { HeaderCustomizer } from "./HeaderCustomizer";
 import { Modal, TabContent } from "../components/Modal";
 import { Tabbed } from "../components/Tabbed";
 import { RE6Module } from "../components/RE6Module";
+import { Miscellaneous } from "./Miscellaneous";
 
 /**
  * SettingsController  
@@ -117,9 +118,11 @@ export class SettingsController extends RE6Module {
 
         $loadRedesignCheck.change(function (event) {
             let enabled = $(this).is(":checked");
-            _self.modules.get("Miscellaneous").pushSettings("loadRedesignFixes", enabled);
-            if (enabled) { $("style#redesign-fixes-stylesheet").removeAttr("media"); }
-            else { $("style#redesign-fixes-stylesheet").attr("media", "max-width: 1px"); }
+            let miscModule = <Miscellaneous>_self.modules.get("Miscellaneous");
+            miscModule.pushSettings("loadRedesignFixes", enabled);
+
+            if (enabled) { miscModule.enableRedesignFixes(); }
+            else { miscModule.disableRedesignFixes(); }
         });
 
         return $page;
