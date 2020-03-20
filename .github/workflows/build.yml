@@ -1,4 +1,4 @@
-name: re621 build
+name: build
 on:
   push:
     tags:
