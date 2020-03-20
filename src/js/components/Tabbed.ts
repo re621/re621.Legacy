@@ -32,7 +32,7 @@ export class Tabbed {
                 .appendTo($tabGroup);
             $("<div>")
                 .addClass("re-tab-panel")
-                .html(entry.page.html())
+                .append(entry.page)
                 .appendTo($tabGroup);
         });
 
