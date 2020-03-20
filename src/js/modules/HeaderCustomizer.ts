@@ -117,6 +117,8 @@ export class HeaderCustomizer extends RE6Module {
         let $addTabForm = $(`<form id="re621-addtab" class="grid-form">`);
         $(`<label for="re621-addtab-name">Name:</label>`).appendTo($addTabForm);
         $(`<input id="re621-addtab-name">`).appendTo($addTabForm);
+        $(`<label for="re621-addtab-title">Hover:</label>`).appendTo($addTabForm);
+        $(`<input id="re621-addtab-title">`).appendTo($addTabForm);
         $(`<label for="re621-addtab-link">Link:</label>`).appendTo($addTabForm);
         $(`<input id="re621-addtab-link">`).appendTo($addTabForm);
         $(`<button type="submit" class="full-width">Add Tab</button>`).appendTo($addTabForm);
@@ -138,6 +140,8 @@ export class HeaderCustomizer extends RE6Module {
         let $updateTabForm = $(`<form id="re621-updatetab" class="grid-form">`);
         $(`<label for="re621-updatetab-name">Name:</label>`).appendTo($updateTabForm);
         $(`<input id="re621-updatetab-name">`).appendTo($updateTabForm);
+        $(`<label for="re621-updatetab-title">Hover:</label>`).appendTo($updateTabForm);
+        $(`<input id="re621-updatetab-title">`).appendTo($updateTabForm);
         $(`<label for="re621-updatetab-link">Link:</label>`).appendTo($updateTabForm);
         $(`<input id="re621-updatetab-link">`).appendTo($updateTabForm);
         $(`<button id="re621-updatetab-delete" type="button">Delete</button>`).appendTo($updateTabForm);
@@ -164,10 +168,12 @@ export class HeaderCustomizer extends RE6Module {
      */
     private handleNewTabEvent() {
         let tabNameInput = $("#re621-addtab-name");
+        let tabTitleInput = $("#re621-addtab-title");
         let tabHrefInput = $("#re621-addtab-link");
 
         let newTab = HeaderCustomizer.createTab({
             name: tabNameInput.val() + "",
+            title: tabTitleInput.val() + "",
             href: tabHrefInput.val() + "",
             controls: true,
         }, true);
@@ -183,10 +189,12 @@ export class HeaderCustomizer extends RE6Module {
      */
     private handleUpdateEvent() {
         let tabName = $("#re621-updatetab-name").val() + "";
+        let tabTitle = $("#re621-updatetab-title").val() + "";
         let tabHref = $("#re621-updatetab-link").val() + "";
 
         this.updateModal.getActiveTrigger()
             .attr("href", tabHref)
+            .attr("title", tabTitle)
             .text(tabName);
 
         HeaderCustomizer.handleUpdate();
@@ -241,13 +249,14 @@ export class HeaderCustomizer extends RE6Module {
         if (config.name === undefined) config.name = "New Tab";
         if (config.href === undefined) config.href = "#";
         if (config.class === undefined) config.class = "";
+        if (config.title === undefined) config.title = "";
         if (config.parent === undefined) config.parent = "menu.main";
         if (config.controls === undefined) config.controls = false;
 
         if (triggerUpdate === undefined) triggerUpdate = false;
 
         let $tab = $(`<li>`).appendTo($(config.parent));
-        let $link = $(`<a href="` + config.href + `">` + config.name + "</a>").appendTo($tab);
+        let $link = $(`<a href="` + config.href + `" title="` + config.title + `">` + config.name + "</a>").appendTo($tab);
 
         if (config.controls) { $tab.addClass("configurable"); }
         if (config.class) { $tab.addClass(config.class); }
@@ -275,9 +284,17 @@ export class HeaderCustomizer extends RE6Module {
 }
 
 interface HeaderTab {
+    /** Text inside the link */
     name?: string,
+    /** Link address */
     href?: string,
+    /** Hover text */
+    title?: string,
+
+    /** Extra class to append to the tab */
     class?: string,
+    /** Element to append the tab to */
     parent?: string,
+    /** Should the tab have controls in editing mode */
     controls?: boolean
 }
