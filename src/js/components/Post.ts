@@ -1,4 +1,4 @@
-import { TagTypes } from "./Tag";
+import { TagTypes, Tag } from "./Tag";
 
 /**
  * Collects basic info for a post.
@@ -59,6 +59,43 @@ export class Post {
         );
         post.setDomElement($postElememt);
         return post;
+    }
+
+    /**
+    * Checks if the post would be returned if you searched on the site with filterString
+    * Most of the things that work on the site should also work here
+    * @todo Implement ~ modifier
+    */
+    public tagsMatchesFilter(queryString: string) {
+        const seperatedFilters = queryString.split(" ");
+        let result = true;
+        for (const filter of seperatedFilters) {
+            const inverse = filter.startsWith("-");
+            //Remove dash from filter, if it starts with one
+            const filterNoMinus = inverse ? filter.substring(1) : filter;
+            //If the result is already negative, bail. All filters must match
+            if (result === false) {
+                break;
+            }
+            if (filterNoMinus.includes("*")) {
+                const regex = Tag.escapeSearchToRegex(filterNoMinus);
+                result = regex.test(this.getTags());
+            } else {
+                //if there is no wildcard, the filter and tag must be an equal match
+                let matchFound = false;
+                for (const tag of this.getTags().split(" ")) {
+                    if (tag === filterNoMinus) {
+                        matchFound = true;
+                        break;
+                    }
+                }
+                result = matchFound;
+            }
+            //invert the result, depending on if the filter started with a -
+            result = result !== inverse;
+        }
+        return result;
+
     }
 
     public setDomElement(element: JQuery<HTMLElement>) {

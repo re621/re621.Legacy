@@ -23,4 +23,16 @@ export class Tag {
     public static isArist(tag: string) {
         return Tag.nonArtistTags.indexOf(tag) === -1;
     }
+
+    /**
+     * Converts a single search input (i.e test_input or *_fur) into a regex that can be used on a string of tags
+     * First it escapes all characters from the input which have special meaning in a regex, like + or ?, except for *
+     * '*' has a special meaning when searching and acts as a wildcard character
+     * To put this into the regex it gets replaced with [\S]* which matches zero or more non-whitespace characters
+     * This ways if you have a space seperated string of tags this function will tell you wether or not the filter matches
+     * @param string 
+     */
+    public static escapeSearchToRegex(string: string) {
+        return new RegExp(string.replace(/[-\/\\^$+?.()|[\]{}]/g, "\\$&").replace(/\*/g, "[\\S]\*\?"));
+    }
 }
