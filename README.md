@@ -9,7 +9,7 @@ RE621 is a comprehensive project created to improve the basic user experience wh
 
 The project is delivered via a userscript. This means that you need a script manager, such as [Tampermonkey](https://www.tampermonkey.net/).
 
-With a script manager installed, click on [this link](https://github.com/re621/re621/releases/latest) and follow the instructions on the new page.
+With a script manager installed, click on [this link](https://github.com/re621/re621/releases/latest/download/script.user.js) and follow the instructions on the new page.
 
 ## Contributing
 
