@@ -4,8 +4,10 @@
  */
 export class Modal {
 
+    private static uid_iterator = 0;
+
     private config: ModalConfig;
-    private $modal: JQuery<HTMLElement>;
+    private $element: JQuery<HTMLElement>;
 
     private triggers: ModalTrigger[] = [];
     private $activeTrigger: JQuery<HTMLElement>;
@@ -19,7 +21,7 @@ export class Modal {
     constructor(config: ModalConfig) {
         let _self = this;
 
-        if (config.uid === undefined) config.uid = $(this).uniqueId() + "";
+        if (config.uid === undefined) config.uid = Modal.getUID() + "";
         if (config.title === undefined) config.title = "Modal";
         if (config.width === undefined) config.width = "auto";
         if (config.height === undefined) config.height = "auto";
@@ -42,31 +44,40 @@ export class Modal {
     }
 
     /**
+     * Returns a "unique" ID for the modal
+     * Unless there are collisions. Then it won't be unique.
+     */
+    private static getUID() {
+        return this.uid_iterator++;
+    }
+
+    /**
      * Creates a modal based on the configuration
      */
-    private create() {
+    public create() {
         let _self = this;
 
         // Container
-        this.$modal = $("<re-modal>")
+        this.$element = $("<re-modal>")
             .addClass("ui-draggable")
             .attr("data-open", "false")
             .css("width", this.config.width)
             .css("height", this.config.height);
 
-        if (this.config.position.left != undefined) this.$modal.css("left", this.config.position.left);
-        if (this.config.position.right != undefined) this.$modal.css("right", this.config.position.right);
-        if (this.config.position.top != undefined) this.$modal.css("top", this.config.position.top);
-        if (this.config.position.bottom != undefined) this.$modal.css("bottom", this.config.position.bottom);
+        if (this.config.position.position != undefined) this.$element.css("position", this.config.position.position);
+        if (this.config.position.left != undefined) this.$element.css("left", this.config.position.left);
+        if (this.config.position.right != undefined) this.$element.css("right", this.config.position.right);
+        if (this.config.position.top != undefined) this.$element.css("top", this.config.position.top);
+        if (this.config.position.bottom != undefined) this.$element.css("bottom", this.config.position.bottom);
 
         // Side Tabs
         let $tabs = $("<re-modal-tabs>")
-            .appendTo(this.$modal);
+            .appendTo(this.$element);
 
         // Header
         let $header = $("<re-modal-header>")
             .addClass("bg-foreground")
-            .appendTo(this.$modal);
+            .appendTo(this.$element);
 
         let $title = $("<div>")
             .addClass("re-modal-title")
@@ -94,14 +105,22 @@ export class Modal {
 
         if ($tabList.length == 1) { $tabs.css("display", "none"); }
 
-        $("re-modal-container").append(this.$modal);
-        this.$modal.draggable({
+        $("re-modal-container").append(this.$element);
+        this.$element.draggable({
             handle: "re-modal-header",
             containment: "parent",
             stack: "re-modal",
         });
 
-        $(this.$modal).trigger("modal:create", [this]);
+        $(this.$element).trigger("modal:create", [this]);
+    }
+
+    /**
+     * Destroys modal's DOM structure and disables triggers
+     */
+    public destroy() {
+        this.$element.remove();
+        this.disable();
     }
 
     /**
@@ -135,7 +154,7 @@ export class Modal {
     public toggle() {
         if (this.isVisible()) this.setHidden();
         else this.setShown();
-        $(this.$modal).trigger("modal:toggle", [this]);
+        $(this.$element).trigger("modal:toggle", [this]);
     }
 
     /**
@@ -143,21 +162,21 @@ export class Modal {
      * @returns boolean True if the modal is visible, false otherwise
      */
     public isVisible() {
-        return this.$modal.attr("data-open") == "true";
+        return this.$element.attr("data-open") == "true";
     }
 
     /**
      * Set the modal to be visible
      */
     public setShown() {
-        this.$modal.attr("data-open", "true");
+        this.$element.attr("data-open", "true");
     }
 
     /**
      * Set the modal to be hidden
      */
     public setHidden() {
-        this.$modal.attr("data-open", "false");
+        this.$element.attr("data-open", "false");
     }
 
     /**
@@ -187,7 +206,7 @@ export class Modal {
      * @returns JQuery<HTMLElement> modal
      */
     public getModal() {
-        return this.$modal;
+        return this.$element;
     }
 
     /**
@@ -210,22 +229,22 @@ export class Modal {
             .attr("type", "radio")
             .attr("id", "tab-" + this.config.uid + "-" + this.index)
             .addClass("re-modal-tab-input")
-            .appendTo(this.$modal);
+            .appendTo(this.$element);
         if (this.index == 0) { modalTabInput.attr("checked", "checked"); }
         let modalTabLabel = $("<label>")
             .attr("for", "tab-" + this.config.uid + "-" + this.index)
             .addClass("re-modal-tab-label")
             .html(content.name)
-            .appendTo(this.$modal);
+            .appendTo(this.$element);
         let modalTabContent = $("<div>")
             .addClass("re-modal-tab-content")
             .addClass("bg-highlight")
             .append(content.page)
-            .appendTo(this.$modal);
+            .appendTo(this.$element);
         if (content.tabbable) { modalTabContent.addClass("subtabbed"); }
 
-        if (this.index == 0) { this.$modal.find("label.re-modal-tab-label").css("display", "none"); }
-        else { this.$modal.find("label.re-modal-tab-label").css("display", ""); }
+        if (this.index == 0) { this.$element.find("label.re-modal-tab-label").css("display", "none"); }
+        else { this.$element.find("label.re-modal-tab-label").css("display", ""); }
 
         this.index++;
     }
@@ -260,6 +279,7 @@ interface ModalConfig {
 }
 
 interface ModalPosition {
+    position?: "absolute" | "fixed",
     left?: string,
     right?: string,
     top?: string,

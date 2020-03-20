@@ -1,0 +1,17 @@
+/* Prompt Styles */
+
+form.prompt-input {
+    display: inline-flex;
+    justify-content: center;
+    width: 100%;
+
+    input {
+        width: 100%;
+        border-radius: 4px 0 0 4px;
+    }
+
+    button {
+        padding: 0.25rem;
+        border-radius: 0 4px 4px 0;
+    }
+}
