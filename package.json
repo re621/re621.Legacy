@@ -7,6 +7,7 @@
     "author": "bitWolfy",
     "main": "./build/script.user.js",
     "scripts": {
+        "build": "npm run typescript && npm run browserify && npm run userscript && npm run sass",
         "test": "echo \"Error: no test specified\" && exit 1",
         "typescript": "tsc",
         "browserify": "browserify ./build/temp/js/main.js -o ./build/script.user.js && rm -r ./build/temp/",
