@@ -1,0 +1,24 @@
+/* Auto-generated forms */
+form.grid-form {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-row-gap: 1rem;
+    grid-column-gap: 0.5rem;
+
+    &.columns-2 {
+        grid-template-columns: repeat(2, auto 1fr);
+    }
+
+    &.columns-3 {
+        grid-template-columns: repeat(3, auto 1fr);
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+
+    input,
+    select {
+        width: stretch;
+    }
+}

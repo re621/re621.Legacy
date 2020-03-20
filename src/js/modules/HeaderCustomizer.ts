@@ -1,6 +1,7 @@
 import { Modal } from "../components/Modal";
 import { RE6Module } from "../components/RE6Module";
 import { User } from "../components/User";
+import { Form } from "../utilities/Form";
 
 declare var Cookies;
 
@@ -15,7 +16,9 @@ export class HeaderCustomizer extends RE6Module {
     private $menu: JQuery<HTMLElement>;
 
     private updateModal: Modal;
+
     private addTabModal: Modal;
+    private addTabForm: Form;
 
     private constructor() {
         super();
@@ -25,21 +28,13 @@ export class HeaderCustomizer extends RE6Module {
         this.createDOM();
 
         // Configuration Form Listeners
-        $("#re621-addtab").submit(function (event) {
-            event.preventDefault();
-            let tabNameInput = $("#re621-addtab-name");
-            let tabTitleInput = $("#re621-addtab-title");
-            let tabHrefInput = $("#re621-addtab-link");
-
+        this.addTabForm.get().on("re-form:submit", function (event, data) {
             _self.addTab({
-                name: tabNameInput.val() + "",
-                title: tabTitleInput.val() + "",
-                href: tabHrefInput.val() + "",
+                name: data.get("name"),
+                title: data.get("title"),
+                href: data.get("href"),
             });
-
-            tabNameInput.val("");
-            tabTitleInput.val("");
-            tabHrefInput.val("");
+            _self.addTabForm.reset();
         });
 
         $("#re621-updatetab").submit(function (event) {
@@ -138,6 +133,7 @@ export class HeaderCustomizer extends RE6Module {
             controls: false,
         });
 
+        /*
         let $addTabForm = $(`<form id="re621-addtab" class="grid-form">`);
         $(`<label for="re621-addtab-name">Name:</label>`).appendTo($addTabForm);
         $(`<input id="re621-addtab-name">`).appendTo($addTabForm);
@@ -146,6 +142,19 @@ export class HeaderCustomizer extends RE6Module {
         $(`<label for="re621-addtab-link">Link:</label>`).appendTo($addTabForm);
         $(`<input id="re621-addtab-link">`).appendTo($addTabForm);
         $(`<button type="submit" class="full-width">Add Tab</button>`).appendTo($addTabForm);
+        */
+        this.addTabForm = new Form(
+            {
+                id: "header-addtab",
+                parent: "re-modal-container",
+            },
+            [
+                { id: "name", label: "Name", type: "input" },
+                { id: "title", label: "Hover", type: "input" },
+                { id: "href", label: "Link", type: "input" },
+                { id: "submit", value: "Submit", type: "submit" }
+            ]
+        );
 
         this.addTabModal = new Modal({
             uid: "header-addtab-modal",
@@ -157,7 +166,7 @@ export class HeaderCustomizer extends RE6Module {
                 top: "4.5rem",
             },
             triggers: [{ element: addTabButton.link, event: "click" }],
-            content: [{ name: "re621", page: $addTabForm }],
+            content: [{ name: "re621", page: this.addTabForm.get() }],
         });
 
         // Tab Update Interface
