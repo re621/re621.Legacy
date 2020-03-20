@@ -83,11 +83,12 @@ export class HeaderCustomizer extends RE6Module {
      * Builds basic structure for the module
      */
     private createDOM() {
+        let _self = this;
         this.$menu.html("");
 
         // Fetch stored data
         this.fetchSettings("tabs").forEach(function (value) {
-            HeaderCustomizer.createTab({
+            _self.createTab({
                 name: value.name,
                 href: value.href,
                 controls: true,
@@ -104,11 +105,11 @@ export class HeaderCustomizer extends RE6Module {
 
             disabled: true,
 
-            update: HeaderCustomizer.handleUpdate,
+            update: function () { _self.handleUpdate(); },
         });
 
         // === Tab Configuration Interface
-        let addTabButton = HeaderCustomizer.createTab({
+        let addTabButton = this.createTab({
             name: `<i class="fas fa-tasks"></i>`,
             parent: "menu.extra",
             class: "float-left",
@@ -171,7 +172,7 @@ export class HeaderCustomizer extends RE6Module {
         let tabTitleInput = $("#re621-addtab-title");
         let tabHrefInput = $("#re621-addtab-link");
 
-        let newTab = HeaderCustomizer.createTab({
+        let newTab = this.createTab({
             name: tabNameInput.val() + "",
             title: tabTitleInput.val() + "",
             href: tabHrefInput.val() + "",
@@ -197,7 +198,7 @@ export class HeaderCustomizer extends RE6Module {
             .attr("title", tabTitle)
             .text(tabName);
 
-        HeaderCustomizer.handleUpdate();
+        this.handleUpdate();
 
         this.updateModal.setHidden();
     }
@@ -208,7 +209,7 @@ export class HeaderCustomizer extends RE6Module {
     private handleDeleteEvent() {
         this.updateModal.getActiveTrigger().parent().remove();
 
-        HeaderCustomizer.handleUpdate();
+        this.handleUpdate();
 
         this.updateModal.setHidden();
     }
@@ -245,7 +246,7 @@ export class HeaderCustomizer extends RE6Module {
      * Creates a new styled tab
      * @param config Tab configuration
      */
-    public static createTab(config: HeaderTab, triggerUpdate?: boolean) {
+    public createTab(config: HeaderTab, triggerUpdate?: boolean) {
         if (config.name === undefined) config.name = "New Tab";
         if (config.href === undefined) config.href = "#";
         if (config.class === undefined) config.class = "";
@@ -260,7 +261,7 @@ export class HeaderCustomizer extends RE6Module {
 
         if (config.controls) { $tab.addClass("configurable"); }
         if (config.class) { $tab.addClass(config.class); }
-        if (triggerUpdate) { HeaderCustomizer.handleUpdate(); }
+        if (triggerUpdate) { this.handleUpdate(); }
 
         return { tab: $tab, link: $link };
     }
@@ -268,7 +269,7 @@ export class HeaderCustomizer extends RE6Module {
     /**
      * Iterates over the header menu and saves the data to cookies
      */
-    private static handleUpdate() {
+    private handleUpdate() {
         let tabs = $("menu.main").find("li > a");
         let tabData = [];
         tabs.each(function (index, element) {
@@ -278,7 +279,7 @@ export class HeaderCustomizer extends RE6Module {
                 href: $link.attr("href")
             })
         });
-        HeaderCustomizer.getInstance().pushSettings("tabs", tabData);
+        this.pushSettings("tabs", tabData);
     }
 
 }

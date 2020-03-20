@@ -1,6 +1,7 @@
 import { HeaderCustomizer } from "./HeaderCustomizer";
 import { Modal, TabContent } from "../components/Modal";
 import { Tabbed } from "../components/Tabbed";
+import { RE6Module } from "../components/RE6Module";
 
 /**
  * SettingsController  
@@ -10,12 +11,13 @@ export class SettingsController {
 
     private static instance: SettingsController;
 
+    private modules: Map<string, RE6Module> = new Map();
     private modal: Modal;
 
     private constructor() {
 
         // Create a button in the header
-        let addSettingsButton = HeaderCustomizer.createTab({
+        let addSettingsButton = HeaderCustomizer.getInstance().createTab({
             name: `<i class="fas fa-wrench"></i>`,
             parent: "menu.extra",
             class: "float-right"
@@ -63,6 +65,17 @@ export class SettingsController {
     public static getInstance() {
         if (this.instance == undefined) this.instance = new SettingsController();
         return this.instance;
+    }
+
+    /**
+     * Registers the module so that its settings could be changed
+     * @param module Module to register
+     */
+    public static registerModule(...moduleList: RE6Module[]) {
+        let _self = this;
+        moduleList.forEach(function (module) {
+            _self.getInstance().modules.set(module.constructor.name, module);
+        });
     }
 
     /**

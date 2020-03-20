@@ -6,9 +6,9 @@ declare var GM_getResourceText;
 /**
  * Miscellaneous functionality that does not require a separate module
  */
-export class MiscFunctionality extends RE6Module {
+export class Miscellaneous extends RE6Module {
 
-    private static instance: MiscFunctionality = new MiscFunctionality();
+    private static instance: Miscellaneous = new Miscellaneous();
 
     private constructor() {
         super();
@@ -52,7 +52,7 @@ export class MiscFunctionality extends RE6Module {
      * @returns FormattingHelper instance
      */
     public static getInstance() {
-        if (this.instance == undefined) this.instance = new MiscFunctionality();
+        if (this.instance == undefined) this.instance = new Miscellaneous();
         return this.instance;
     }
 }

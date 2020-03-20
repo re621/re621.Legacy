@@ -7,22 +7,22 @@
 import { StructureUtilities } from "./modules/StructureUtilities";
 StructureUtilities.createDOM();
 
-// Load Settings
-import { SettingsController } from "./modules/SettingsController";
-SettingsController.getInstance();
-
 // Load Modules
 import { HeaderCustomizer } from "./modules/HeaderCustomizer";
 import { ThemeCustomizer } from "./modules/ThemeCustomizer";
 import { BlacklistToggler } from "./modules/BlacklistToggler";
 import { FormattingHelper } from "./modules/FormattingHelper";
 import { TitleCustomizer } from "./modules/TitleCustomizer";
-import { MiscFunctionality } from "./modules/Miscellaneous";
+import { Miscellaneous } from "./modules/Miscellaneous";
 
-HeaderCustomizer.getInstance();
-ThemeCustomizer.getInstance();
-BlacklistToggler.getInstance();
-TitleCustomizer.getInstance();
-MiscFunctionality.getInstance();
+import { SettingsController } from "./modules/SettingsController";
+
+SettingsController.registerModule(
+    BlacklistToggler.getInstance(),
+    HeaderCustomizer.getInstance(),
+    Miscellaneous.getInstance(),
+    ThemeCustomizer.getInstance(),
+    TitleCustomizer.getInstance(),
+);
 
 FormattingHelper.init();
