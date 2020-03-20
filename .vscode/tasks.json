@@ -1,11 +1,16 @@
 {
     "version": "2.0.0",
-    "tasks": [{
+    "tasks": [
+        {
             "label": "build",
             "type": "process",
             "command": "",
-            "problemMatcher": ["$eslint-stylish"],
-            "dependsOn": ["userscript-format"],
+            "problemMatcher": [
+                "$eslint-stylish"
+            ],
+            "dependsOn": [
+                "userscript"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -15,10 +20,9 @@
             },
         },
         {
-            "label": "compile-typescript",
-            "type": "typescript",
-            "tsconfig": "tsconfig.json",
-            "problemMatcher": [],
+            "label": "typescript",
+            "type": "npm",
+            "script": "typescript",
             "group": "build",
             "options": {
                 "statusbar": {
@@ -31,10 +35,12 @@
         },
         {
             "label": "browserify",
-            "type": "shell",
-            "command": "browserify ./build/temp/js/main.js -o ./build/script.user.js; rm ./build/temp/ -r;",
+            "type": "npm",
+            "script": "browserify",
             "problemMatcher": [],
-            "dependsOn": ["compile-typescript"],
+            "dependsOn": [
+                "typescript"
+            ],
             "group": "build",
             "options": {
                 "statusbar": {
@@ -46,11 +52,13 @@
             },
         },
         {
-            "label": "userscript-format",
-            "type": "shell",
-            "command": "node ./bin/userscript-format.js",
+            "label": "userscript",
+            "type": "npm",
+            "script": "userscript",
             "problemMatcher": [],
-            "dependsOn": ["browserify"],
+            "dependsOn": [
+                "browserify"
+            ],
             "group": "build",
             "options": {
                 "statusbar": {
