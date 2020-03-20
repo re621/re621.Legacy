@@ -7,7 +7,7 @@ export class Modal {
     private config: ModalConfig;
     private $modal: JQuery<HTMLElement>;
 
-    private triggers: ModalTrigger[];
+    private triggers: ModalTrigger[] = [];
     private $activeTrigger: JQuery<HTMLElement>;
 
     private index: number;
@@ -32,8 +32,6 @@ export class Modal {
 
         if (config.content === undefined) config.content = [];
         this.config = config;
-
-        console.log(this.config.uid);
 
         this.create();
         if (this.config.disabled) this.disable();
