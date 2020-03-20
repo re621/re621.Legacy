@@ -1,9 +1,10 @@
 import { RE6Module } from "../components/RE6Module";
 import { Url } from "../components/Url";
 
+declare var GM_getResourceText;
 
 /**
- * Add various symbols to the tilebar depending on the posts state
+ * Miscellaneous functionality that does not require a separate module
  */
 export class MiscFunctionality extends RE6Module {
 
@@ -11,13 +12,28 @@ export class MiscFunctionality extends RE6Module {
 
     private constructor() {
         super();
+
         if (this.fetchSettings("removeSearchQueryString") === true && Url.matches("/posts/")) {
             this.removeSearchQueryString();
         }
+
+        if (this.fetchSettings("loadRedesignFixes")) {
+            this.loadRedesignFixes();
+        }
     }
 
+    /**
+     * Removes the search query from the address bar
+     */
     private removeSearchQueryString() {
         history.replaceState({}, "", location.href.split("?")[0]);
+    }
+
+    private loadRedesignFixes() {
+        $("<style>")
+            .attr("id", "redesign-fixes-stylesheet")
+            .append(GM_getResourceText("redesignFixes"))
+            .appendTo("body");
     }
 
     /**
@@ -26,7 +42,8 @@ export class MiscFunctionality extends RE6Module {
      */
     protected getDefaultSettings() {
         return {
-            "removeSearchQueryString": true
+            "removeSearchQueryString": true,
+            "loadRedesignFixes": true,
         };
     }
 

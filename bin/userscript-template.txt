@@ -12,6 +12,7 @@
 // @require      https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js#sha256-oE03O+I6Pzff4fiMqwEGHbdfcW7a3GRRxlL+U49L5sA=
 // @require      https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js#sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=
 // @resource     re621_styles style.min.css
+// @resource     redesignFixes https://re621.github.io/Redesign-Fixes/build/style.min.css
 // @grant        GM_getResourceText
 // @grant        GM_addStyle
 // ==/UserScript==
