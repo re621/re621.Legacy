@@ -21,10 +21,11 @@ export class SettingsController extends RE6Module {
     public init() {
 
         // Create a button in the header
-        let addSettingsButton = HeaderCustomizer.getInstance().createTab({
+        let addSettingsButton = HeaderCustomizer.getInstance().createTabElement({
             name: `<i class="fas fa-wrench"></i>`,
             parent: "menu.extra",
-            class: "float-right"
+            class: "float-right",
+            controls: false,
         });
 
         // Establish the settings window contents

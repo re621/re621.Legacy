@@ -1,5 +1,6 @@
 import { Modal } from "../components/Modal";
 import { RE6Module } from "../components/RE6Module";
+import { User } from "../components/User";
 
 declare var Cookies;
 
@@ -26,17 +27,39 @@ export class HeaderCustomizer extends RE6Module {
         // Configuration Form Listeners
         $("#re621-addtab").submit(function (event) {
             event.preventDefault();
-            _self.handleNewTabEvent();
+            let tabNameInput = $("#re621-addtab-name");
+            let tabTitleInput = $("#re621-addtab-title");
+            let tabHrefInput = $("#re621-addtab-link");
+
+            _self.addTab({
+                name: tabNameInput.val() + "",
+                title: tabTitleInput.val() + "",
+                href: tabHrefInput.val() + "",
+            });
+
+            tabNameInput.val("");
+            tabTitleInput.val("");
+            tabHrefInput.val("");
         });
 
         $("#re621-updatetab").submit(function (event) {
             event.preventDefault();
-            _self.handleUpdateEvent();
+
+            _self.updateTab(
+                _self.updateModal.getActiveTrigger().parent(),
+                {
+                    name: $("#re621-updatetab-name").val() + "",
+                    title: $("#re621-updatetab-title").val() + "",
+                    href: $("#re621-updatetab-link").val() + "",
+                }
+            );
+            _self.updateModal.setHidden();
         });
 
         $("#re621-updatetab-delete").click(function (event) {
             event.preventDefault();
-            _self.handleDeleteEvent();
+            _self.deleteTab(_self.updateModal.getActiveTrigger().parent())
+            _self.updateModal.setHidden();
         });
 
         this.addTabModal.getModal().on("modal:toggle", function (event, modal) {
@@ -88,10 +111,9 @@ export class HeaderCustomizer extends RE6Module {
 
         // Fetch stored data
         this.fetchSettings("tabs").forEach(function (value) {
-            _self.createTab({
+            _self.createTabElement({
                 name: value.name,
                 href: value.href,
-                controls: true,
             });
         });
 
@@ -105,14 +127,15 @@ export class HeaderCustomizer extends RE6Module {
 
             disabled: true,
 
-            update: function () { _self.handleUpdate(); },
+            update: function () { _self.saveNavbarSettings(); },
         });
 
         // === Tab Configuration Interface
-        let addTabButton = this.createTab({
+        let addTabButton = this.createTabElement({
             name: `<i class="fas fa-tasks"></i>`,
             parent: "menu.extra",
             class: "float-left",
+            controls: false,
         });
 
         let $addTabForm = $(`<form id="re621-addtab" class="grid-form">`);
@@ -165,56 +188,6 @@ export class HeaderCustomizer extends RE6Module {
     }
 
     /**
-     * Processes the new tab form
-     */
-    private handleNewTabEvent() {
-        let tabNameInput = $("#re621-addtab-name");
-        let tabTitleInput = $("#re621-addtab-title");
-        let tabHrefInput = $("#re621-addtab-link");
-
-        let newTab = this.createTab({
-            name: tabNameInput.val() + "",
-            title: tabTitleInput.val() + "",
-            href: tabHrefInput.val() + "",
-            controls: true,
-        }, true);
-
-        this.updateModal.registerTrigger({ element: newTab.link });
-
-        tabNameInput.val("");
-        tabHrefInput.val("");
-    }
-
-    /**
-     * Processes the tab update form
-     */
-    private handleUpdateEvent() {
-        let tabName = $("#re621-updatetab-name").val() + "";
-        let tabTitle = $("#re621-updatetab-title").val() + "";
-        let tabHref = $("#re621-updatetab-link").val() + "";
-
-        this.updateModal.getActiveTrigger()
-            .attr("href", tabHref)
-            .attr("title", tabTitle)
-            .text(tabName);
-
-        this.handleUpdate();
-
-        this.updateModal.setHidden();
-    }
-
-    /**
-     * Processes the tab deletion form
-     */
-    private handleDeleteEvent() {
-        this.updateModal.getActiveTrigger().parent().remove();
-
-        this.handleUpdate();
-
-        this.updateModal.setHidden();
-    }
-
-    /**
      * Turns on editing mode on the header
      */
     private enableEditingMode() {
@@ -225,9 +198,10 @@ export class HeaderCustomizer extends RE6Module {
 
         // Fill in update tab data
         this.updateModal.getModal().on("modal:toggle", function (event, modal) {
-            let $trigger = _self.updateModal.getActiveTrigger();
-            $("#re621-updatetab-name").val($trigger.text());
-            $("#re621-updatetab-link").val($trigger.attr("href"));
+            let $tab = _self.updateModal.getActiveTrigger().parent();
+            $("#re621-updatetab-name").val($tab.attr("data-name"));
+            $("#re621-updatetab-title").val($tab.attr("data-title"));
+            $("#re621-updatetab-link").val($tab.attr("data-href"));
         });
     }
 
@@ -246,37 +220,103 @@ export class HeaderCustomizer extends RE6Module {
      * Creates a new styled tab
      * @param config Tab configuration
      */
-    public createTab(config: HeaderTab, triggerUpdate?: boolean) {
-        if (config.name === undefined) config.name = "New Tab";
-        if (config.href === undefined) config.href = "#";
-        if (config.class === undefined) config.class = "";
-        if (config.title === undefined) config.title = "";
-        if (config.parent === undefined) config.parent = "menu.main";
-        if (config.controls === undefined) config.controls = false;
-
+    public createTabElement(config: HeaderTab, triggerUpdate?: boolean) {
+        config = this.parseHeaderTabConfig(config);
         if (triggerUpdate === undefined) triggerUpdate = false;
 
-        let $tab = $(`<li>`).appendTo($(config.parent));
-        let $link = $(`<a href="` + config.href + `" title="` + config.title + `">` + config.name + "</a>").appendTo($tab);
+        let $tab = $(`<li>`)
+            .attr("data-name", config.name)
+            .attr("data-title", config.title)
+            .attr("data-href", config.href)
+            .appendTo($(config.parent));
+        let $link = $("<a>")
+            .html(this.processTabVariables(config.name))
+            .attr("title", this.processTabVariables(config.title))
+            .attr("href", this.processTabVariables(config.href))
+            .appendTo($tab);
 
         if (config.controls) { $tab.addClass("configurable"); }
         if (config.class) { $tab.addClass(config.class); }
-        if (triggerUpdate) { this.handleUpdate(); }
+        if (triggerUpdate) { this.saveNavbarSettings(); }
 
         return { tab: $tab, link: $link };
     }
 
     /**
+     * Parses the provided configuration file for missing values
+     * @param config Configuration to process
+     */
+    private parseHeaderTabConfig(config: HeaderTab) {
+        if (config.name === undefined) config.name = "New Tab";
+        if (config.href === undefined) config.href = "#";
+        if (config.title === undefined) config.title = "";
+
+        if (config.class === undefined) config.class = "";
+        if (config.parent === undefined) config.parent = "menu.main";
+        if (config.controls === undefined) config.controls = true;
+
+        return config;
+    }
+
+    /**
+     * Creates a new tab based on specified configuration
+     * @param config Configuration
+     */
+    private addTab(config: HeaderTab) {
+        config = this.parseHeaderTabConfig(config);
+        let newTab = this.createTabElement(config, true);
+        this.updateModal.registerTrigger({ element: newTab.link });
+    }
+
+    /**
+     * Update the specified tab with the corresponding configuration
+     * @param $element Tab to update
+     * @param config New configuration
+     */
+    private updateTab($element: JQuery<HTMLElement>, config: HeaderTab) {
+        config = this.parseHeaderTabConfig(config);
+        $element
+            .attr("data-name", config.name)
+            .attr("data-title", config.title)
+            .attr("data-href", config.href);
+        $element.find("a").first()
+            .html(this.processTabVariables(config.name))
+            .attr("title", this.processTabVariables(config.title))
+            .attr("href", this.processTabVariables(config.href));
+        this.saveNavbarSettings();
+    }
+
+    /**
+     * Remove the specified tab
+     * @param $element LI element of the tab
+     */
+    private deleteTab($element: JQuery<HTMLElement>) {
+        $element.remove();
+        this.saveNavbarSettings();
+        this.updateModal.setHidden();
+    }
+
+    /**
+     * Replaces the variables in the text with corresponding values
+     * @param text Text to parse
+     */
+    private processTabVariables(text: string) {
+        return text
+            .replace(/%userid%/g, User.getUserID())
+            .replace(/%username%/g, User.getUsername());
+    }
+
+    /**
      * Iterates over the header menu and saves the data to cookies
      */
-    private handleUpdate() {
-        let tabs = $("menu.main").find("li > a");
+    private saveNavbarSettings() {
         let tabData = [];
-        tabs.each(function (index, element) {
-            let $link = $(element);
+        this.$menu.find("li").each(function (i, element) {
+            let $tab = $(element);
             tabData.push({
-                name: $link.text(),
-                href: $link.attr("href")
+                name: $tab.attr("data-name"),
+                title: $tab.attr("data-title"),
+                href: $tab.attr("data-href"),
             })
         });
         this.pushSettings("tabs", tabData);
