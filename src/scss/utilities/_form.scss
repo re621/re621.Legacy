@@ -20,10 +20,10 @@ form.grid-form {
         display: flex;
         justify-content: space-between;
         align-items: center;
-    }
 
-    div.full-column {
-        display: block;
+        &.text-block {
+            display: block
+        }
     }
 
     hr.full-column {

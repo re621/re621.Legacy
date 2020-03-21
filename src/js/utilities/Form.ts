@@ -350,6 +350,7 @@ export class Form {
     private buildDiv($form: JQuery<HTMLElement>, element: FormElement) {
         let $input = $("<div>")
             .addClass("full-column")
+            .addClass("text-block")
             .html(element.label)
             .appendTo($form);
         return $input;
