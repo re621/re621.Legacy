@@ -15,6 +15,7 @@ import { FormattingHelper } from "./modules/FormattingHelper";
 import { TitleCustomizer } from "./modules/TitleCustomizer";
 import { Miscellaneous } from "./modules/Miscellaneous";
 import { InstantSearch } from "./modules/InstantSearch";
+import { InfiniteScroll } from "./modules/InfiniteScroll";
 
 import { SettingsController } from "./modules/SettingsController";
 
@@ -26,6 +27,7 @@ FormattingHelper.init();
 // Modules without settings
 BlacklistToggler.getInstance();
 InstantSearch.getInstance();
+InfiniteScroll.getInstance();
 
 // Modules configured by the SettingsController
 SettingsController.registerModule(
