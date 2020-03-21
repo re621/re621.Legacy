@@ -200,12 +200,12 @@ export class Form {
 
         let $copybutton = $("<button>")
             .attr("type", "button")
-            .attr("id", this.config.id + "_" + element.id)
+            .attr("id", this.config.id + "_" + element.id + "_copy")
             .html(`<i class="far fa-copy"></i>`)
             .appendTo($inputbox);
 
 
-        $(this.config.parent).on("click", "form#" + this.config.id + " button#" + this.config.id + "_" + element.id, function (event) {
+        $(this.config.parent).on("click", "form#" + this.config.id + " button#" + this.config.id + "_" + element.id + "_copy", function (event) {
             $input.select();
             document.execCommand("copy");
         });
