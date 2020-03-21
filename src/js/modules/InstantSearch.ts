@@ -36,7 +36,7 @@ export class InstantSearch extends RE6Module {
         this.applyFilter();
     }
 
-    private applyFilter() {
+    public applyFilter() {
         const filter = this.$searchbox.val().toString();
         sessionStorage.setItem("instantsearch", filter);
 

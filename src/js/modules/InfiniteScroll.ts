@@ -3,6 +3,7 @@ import { Url } from "../components/Url";
 import { Api } from "../components/Api";
 import { ApiPost } from "../components/apiresponses/ApiPost";
 import { PostHtml } from "../components/PostHtml";
+import { InstantSearch } from "./InstantSearch";
 
 /**
  * Gets rid of the default pagination and instead appends new posts
@@ -53,6 +54,9 @@ export class InfiniteScroll extends RE6Module {
         }
         this.isInProgress = false;
         Url.setQueryParameter("page", this.nextPageToGet.toString());
+        //TODO check if the module is enabled
+        //Currently getInstance will create the module, if it wasn't there already
+        InstantSearch.getInstance().applyFilter();
         this.nextPageToGet++;
     }
 
