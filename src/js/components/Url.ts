@@ -11,11 +11,13 @@ export class Url {
     }
 
     private initQueryParams() {
-        const paramString = this.location.href.split("?")[1];
-        //Check if there are any query params
-        if (paramString === undefined) {
+        //Remove ? from search, because that is somehow present everytime
+        const paramString = this.location.search.substring(1);
+        //If there are no parameters, break out
+        if (paramString === "") {
             return;
         }
+        //Check if there are any query params
         //Add each paramter to the map
         for (const param of paramString.split("&")) {
             const split = param.split("=")
