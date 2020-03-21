@@ -9,6 +9,7 @@ export class Form {
 
     private index: number = 0;
     private $form: JQuery<HTMLElement>;
+    private $inputList: Map<string, JQuery<HTMLElement>> = new Map();
 
     public constructor(config: FormConfig, elements: FormElement[]) {
         let _self = this;
@@ -18,6 +19,11 @@ export class Form {
         elements.forEach(function (element) { _self.addElement(element); });
     }
 
+    /**
+     * Adds another element to the form.  
+     * Should be run before get() in order for changes to appear
+     * @param element FormElement to add
+     */
     public addElement(element: FormElement) {
         if (element.id === undefined) element.id = this.index + "";
         if (element.value === undefined) element.value = "";
@@ -27,6 +33,10 @@ export class Form {
         this.index++;
     }
 
+    /**
+     * Returns the DOM element for the form
+     * @param force Rebuilds the form from scratch if set to true.
+     */
     public get(force?: boolean) {
         if (this.$form !== undefined && !force) { return this.$form; }
 
@@ -36,7 +46,6 @@ export class Form {
             .addClass("grid-form");
 
         if (this.config.columns > 1) { this.$form.addClass("columns-" + this.config.columns); }
-        let $inputList = new Map<string, JQuery<HTMLElement>>();
 
         this.elements.forEach(function (element) {
             let $input;
@@ -59,20 +68,42 @@ export class Form {
                 }
                 default: { }
             }
-            $inputList.set(element.id, $input);
+            _self.$inputList.set(element.id, $input);
         });
 
         $(this.config.parent).on("submit", "form#" + this.config.id, function (event) {
             event.preventDefault();
-            let values = new Map<string, any>();
-            $inputList.forEach(function (input, key) { values.set(key, input.val()); })
-            _self.$form.trigger("re-form:submit", values);
+            _self.$form.trigger("re-form:submit", _self.getInputValues());
         });
 
         _self.$form.trigger("re-form:create");
         return _self.$form;
     }
 
+    /**
+     * Returns a list of inputs in the form.  
+     * This includes buttons and submit elements.
+     */
+    public getInputList() {
+        return this.$inputList;
+    }
+
+    /**
+     * Aggregates the values of all inputs in the form.  
+     * This includes buttons and submit elements.
+     */
+    public getInputValues() {
+        let values = new Map<string, any>();
+        this.$inputList.forEach(function (input, key) {
+            values.set(key, input.val());
+        });
+        return values;
+    }
+
+    /**
+     * Resets the elements to their default values.  
+     * Only works with inputs and checkboxes
+     */
     public reset() {
         if (this.$form === undefined) return;
         let _self = this;
@@ -93,6 +124,11 @@ export class Form {
         });
     }
 
+    /**
+     * Builds and appends an input element
+     * @param $form Form to append the element to
+     * @param element Element configuration data
+     */
     private buildInput($form: JQuery<HTMLElement>, element: FormElement) {
         let $input = $("<input>");
 
@@ -112,6 +148,11 @@ export class Form {
         return $input;
     }
 
+    /**
+     * Builds and appends a checkbox element
+     * @param $form Form to append the element to
+     * @param element Element configuration data
+     */
     private buildCheckbox($form: JQuery<HTMLElement>, element: FormElement) {
         let $check_box = $("<div>").addClass("full-width");
         let $input = $("<input>");
@@ -130,27 +171,39 @@ export class Form {
         return $input;
     }
 
+    /**
+     * Builds and appends a button element
+     * @param $form Form to append the element to
+     * @param element Element configuration data
+     */
     private buildButton($form: JQuery<HTMLElement>, element: FormElement) {
+        let $button_box = $("<div>").appendTo($form);
         let $input = $(`<button>`)
-        if (!element.label) { $input.addClass("full-width"); }
+        if (!element.label) { $button_box.addClass("full-width"); }
 
         $input
             .attr("type", "button")
             .attr("id", this.config.id + "_" + element.id)
             .html(element.value)
-            .appendTo($form);
+            .appendTo($button_box);
         return $input;
     }
 
+    /**
+     * Builds and appends a submit button
+     * @param $form Form to append the element to
+     * @param element Element configuration data
+     */
     private buildSubmit($form: JQuery<HTMLElement>, element: FormElement) {
+        let $button_box = $("<div>").appendTo($form);
         let $input = $(`<button>`)
-        if (!element.label) { $input.addClass("full-width"); }
+        if (!element.label) { $button_box.addClass("full-width"); }
 
         $input
             .attr("type", "submit")
             .attr("id", this.config.id + "_" + element.id)
             .html(element.value)
-            .appendTo($form);
+            .appendTo($button_box);
         return $input;
     }
 }
@@ -159,7 +212,7 @@ interface FormConfig {
     /** Unique ID for the form */
     id: string,
     /** Number of columns that the form should take up */
-    columns?: 1,
+    columns?: number,
     /** Nearest static parent, for improved performance */
     parent?: string,
 }

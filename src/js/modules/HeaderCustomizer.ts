@@ -15,7 +15,8 @@ export class HeaderCustomizer extends RE6Module {
 
     private $menu: JQuery<HTMLElement>;
 
-    private updateModal: Modal;
+    private updateTabModal: Modal;
+    private updateTabForm: Form;
 
     private addTabModal: Modal;
     private addTabForm: Form;
@@ -37,24 +38,22 @@ export class HeaderCustomizer extends RE6Module {
             _self.addTabForm.reset();
         });
 
-        $("#re621-updatetab").submit(function (event) {
-            event.preventDefault();
-
+        this.updateTabForm.get().on("re-form:submit", function (event, data) {
             _self.updateTab(
-                _self.updateModal.getActiveTrigger().parent(),
+                _self.updateTabModal.getActiveTrigger().parent(),
                 {
-                    name: $("#re621-updatetab-name").val() + "",
-                    title: $("#re621-updatetab-title").val() + "",
-                    href: $("#re621-updatetab-link").val() + "",
+                    name: data.get("name"),
+                    title: data.get("title"),
+                    href: data.get("href"),
                 }
             );
-            _self.updateModal.setHidden();
+            _self.updateTabModal.setHidden();
         });
 
-        $("#re621-updatetab-delete").click(function (event) {
+        this.updateTabForm.getInputList().get("delete").click(function (event) {
             event.preventDefault();
-            _self.deleteTab(_self.updateModal.getActiveTrigger().parent())
-            _self.updateModal.setHidden();
+            _self.deleteTab(_self.updateTabModal.getActiveTrigger().parent())
+            _self.updateTabModal.setHidden();
         });
 
         this.addTabModal.getModal().on("modal:toggle", function (event, modal) {
@@ -133,16 +132,6 @@ export class HeaderCustomizer extends RE6Module {
             controls: false,
         });
 
-        /*
-        let $addTabForm = $(`<form id="re621-addtab" class="grid-form">`);
-        $(`<label for="re621-addtab-name">Name:</label>`).appendTo($addTabForm);
-        $(`<input id="re621-addtab-name">`).appendTo($addTabForm);
-        $(`<label for="re621-addtab-title">Hover:</label>`).appendTo($addTabForm);
-        $(`<input id="re621-addtab-title">`).appendTo($addTabForm);
-        $(`<label for="re621-addtab-link">Link:</label>`).appendTo($addTabForm);
-        $(`<input id="re621-addtab-link">`).appendTo($addTabForm);
-        $(`<button type="submit" class="full-width">Add Tab</button>`).appendTo($addTabForm);
-        */
         this.addTabForm = new Form(
             {
                 id: "header-addtab",
@@ -152,7 +141,7 @@ export class HeaderCustomizer extends RE6Module {
                 { id: "name", label: "Name", type: "input" },
                 { id: "title", label: "Hover", type: "input" },
                 { id: "href", label: "Link", type: "input" },
-                { id: "submit", value: "Submit", type: "submit" }
+                { id: "submit", value: "Submit", type: "submit" },
             ]
         );
 
@@ -170,17 +159,21 @@ export class HeaderCustomizer extends RE6Module {
         });
 
         // Tab Update Interface
-        let $updateTabForm = $(`<form id="re621-updatetab" class="grid-form">`);
-        $(`<label for="re621-updatetab-name">Name:</label>`).appendTo($updateTabForm);
-        $(`<input id="re621-updatetab-name">`).appendTo($updateTabForm);
-        $(`<label for="re621-updatetab-title">Hover:</label>`).appendTo($updateTabForm);
-        $(`<input id="re621-updatetab-title">`).appendTo($updateTabForm);
-        $(`<label for="re621-updatetab-link">Link:</label>`).appendTo($updateTabForm);
-        $(`<input id="re621-updatetab-link">`).appendTo($updateTabForm);
-        $(`<button id="re621-updatetab-delete" type="button">Delete</button>`).appendTo($updateTabForm);
-        $(`<button id="re621-updatetab-submit" type="submit">Update</button>`).appendTo($updateTabForm);
+        this.updateTabForm = new Form(
+            {
+                id: "header-updatetab",
+                parent: "re-modal-container",
+            },
+            [
+                { id: "name", label: "Name", type: "input" },
+                { id: "title", label: "Hover", type: "input" },
+                { id: "href", label: "Link", type: "input" },
+                { id: "delete", label: "delete", value: "Delete", type: "button" },
+                { id: "submit", label: "update", value: "Update", type: "submit" },
+            ]
+        );
 
-        this.updateModal = new Modal({
+        this.updateTabModal = new Modal({
             uid: "header-updatetab-modal",
             title: "Update Tab",
             width: "17rem",
@@ -192,7 +185,7 @@ export class HeaderCustomizer extends RE6Module {
             triggers: [{ element: $("menu.main li a") }],
             triggerMulti: true,
             disabled: true,
-            content: [{ name: "re621", page: $updateTabForm }],
+            content: [{ name: "re621", page: this.updateTabForm.get() }],
         });
     }
 
@@ -203,14 +196,16 @@ export class HeaderCustomizer extends RE6Module {
         let _self = this;
         this.$menu.attr("data-editing", "true");
         this.$menu.sortable("enable");
-        this.updateModal.enable();
+        this.updateTabModal.enable();
 
         // Fill in update tab data
-        this.updateModal.getModal().on("modal:toggle", function (event, modal) {
-            let $tab = _self.updateModal.getActiveTrigger().parent();
-            $("#re621-updatetab-name").val($tab.attr("data-name"));
-            $("#re621-updatetab-title").val($tab.attr("data-title"));
-            $("#re621-updatetab-link").val($tab.attr("data-href"));
+        this.updateTabModal.getModal().on("modal:toggle", function (event, modal) {
+            let $tab = _self.updateTabModal.getActiveTrigger().parent();
+            let $updateTabInputs = _self.updateTabForm.getInputList();
+
+            $updateTabInputs.get("name").val($tab.attr("data-name"));
+            $updateTabInputs.get("title").val($tab.attr("data-title"));
+            $updateTabInputs.get("href").val($tab.attr("data-href"));
         });
     }
 
@@ -221,8 +216,8 @@ export class HeaderCustomizer extends RE6Module {
         this.$menu.attr("data-editing", "false");
         this.$menu.sortable("disable");
 
-        this.updateModal.setHidden();
-        this.updateModal.disable();
+        this.updateTabModal.setHidden();
+        this.updateTabModal.disable();
     }
 
     /**
@@ -274,7 +269,7 @@ export class HeaderCustomizer extends RE6Module {
     private addTab(config: HeaderTab) {
         config = this.parseHeaderTabConfig(config);
         let newTab = this.createTabElement(config, true);
-        this.updateModal.registerTrigger({ element: newTab.link });
+        this.updateTabModal.registerTrigger({ element: newTab.link });
     }
 
     /**
@@ -302,7 +297,7 @@ export class HeaderCustomizer extends RE6Module {
     private deleteTab($element: JQuery<HTMLElement>) {
         $element.remove();
         this.saveNavbarSettings();
-        this.updateModal.setHidden();
+        this.updateTabModal.setHidden();
     }
 
     /**

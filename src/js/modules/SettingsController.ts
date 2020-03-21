@@ -3,6 +3,7 @@ import { Modal, TabContent } from "../components/Modal";
 import { Tabbed } from "../components/Tabbed";
 import { RE6Module } from "../components/RE6Module";
 import { Miscellaneous } from "./Miscellaneous";
+import { Form } from "../utilities/Form";
 
 /**
  * SettingsController  
@@ -30,16 +31,12 @@ export class SettingsController extends RE6Module {
         });
 
         // Establish the settings window contents
-        // let $headerSettings = $("<div>");
-        // $headerSettings.append(`... Coming Soon`);
-
-        // let $postSettings = $("<div>");
-        // $postSettings.append(`... Coming Soon`);
+        let miscSettingsTab = this.createTabMiscellaneous();
 
         let $settings = new Tabbed({
             name: "settings-tabs",
             content: [
-                { name: "Miscellaneous", page: this.createTabMiscellaneous() },
+                { name: "Miscellaneous", page: miscSettingsTab.get() },
                 // { name: "Header", page: $headerSettings },
                 // { name: "Posts", page: $postSettings },
             ]
@@ -59,6 +56,9 @@ export class SettingsController extends RE6Module {
             triggers: [{ element: addSettingsButton.link }],
             content: [{ name: "re621", page: $settings.create(), tabbable: true }],
         });
+
+        // Establish handlers
+        this.handleTabMiscellaneous(miscSettingsTab);
 
     }
 
@@ -96,27 +96,37 @@ export class SettingsController extends RE6Module {
      */
     private createTabMiscellaneous() {
         let _self = this;
-        let $page = $("<div>").addClass("settings-page");
+        let module = <Miscellaneous>this.modules.get("Miscellaneous");
 
-        // Load the Redesign Fixes Stylesheet
-        let $loadRedesignFixes = $("<div>").addClass("full-width").appendTo($page);
-        let $loadRedesignCheck = $("<input>")
-            .attr("type", "checkbox")
-            .attr("id", "theme-scaling")
-            .attr("name", "theme-scaling")
-            .css("float", "right")
-            .appendTo($loadRedesignFixes);
-        $("<label>")
-            .attr("for", "theme-scaling")
-            .css("font-weight", "500")
-            .text("Load Redesign Fixes")
-            .appendTo($loadRedesignFixes);
+        // Create the settings form
+        let form = new Form(
+            {
+                id: "settings-misc",
+                columns: 2,
+                parent: "re-modal-container",
+            },
+            [
+                {
+                    id: "redesign-fixes",
+                    type: "checkbox",
+                    value: module.fetchSettings("loadRedesignFixes"),
+                    label: "Load Redesign Fixes",
+                }
+            ]
+        );
 
-        if (this.modules.get("Miscellaneous").fetchSettings("loadRedesignFixes")) {
-            $loadRedesignCheck.attr("checked", "checked");
-        }
+        return form;
+    }
 
-        $loadRedesignCheck.change(function (event) {
+    /**
+     * Event handlers for the miscellaneous settings page
+     * @param form Miscellaneous settings form
+     */
+    private handleTabMiscellaneous(form: Form) {
+        let _self = this;
+        let miscFormInput = form.getInputList();
+
+        miscFormInput.get("redesign-fixes").change(function (event) {
             let enabled = $(this).is(":checked");
             let miscModule = <Miscellaneous>_self.modules.get("Miscellaneous");
             miscModule.pushSettings("loadRedesignFixes", enabled);
@@ -124,8 +134,6 @@ export class SettingsController extends RE6Module {
             if (enabled) { miscModule.enableRedesignFixes(); }
             else { miscModule.disableRedesignFixes(); }
         });
-
-        return $page;
     }
 
 }
