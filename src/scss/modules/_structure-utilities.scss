@@ -2,6 +2,12 @@
 // Compatibility fix for modals
 body {
     position: relative;
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+        outline: 0;
+    }
 }
 
 // Gridify the header

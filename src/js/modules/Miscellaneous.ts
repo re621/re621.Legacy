@@ -16,11 +16,16 @@ export class Miscellaneous extends RE6Module {
     private constructor() {
         super();
 
+        // Remove the query string on posts
         if (this.fetchSettings("removeSearchQueryString") === true && Url.matches("/posts/")) {
             this.removeSearchQueryString();
         }
 
+        // Load the Redesign Fixes stylesheet
         this.loadRedesignFixes(this.fetchSettings("loadRedesignFixes"));
+
+        // Auto-focus on the searchbar
+        this.focusSearchBar();
     }
 
     /**
@@ -47,6 +52,13 @@ export class Miscellaneous extends RE6Module {
     /** Disable the redesign stylesheet */
     public disableRedesignFixes() {
         this.redesignStylesheet.attr("media", "max-width: 1px");
+    }
+
+    /**
+     * Set focus on the search bar
+     */
+    private focusSearchBar() {
+        $("section#search-box input").focus();
     }
 
     /**
