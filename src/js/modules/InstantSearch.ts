@@ -38,7 +38,6 @@ export class InstantSearch extends RE6Module {
 
     public applyFilter() {
         const filter = this.$searchbox.val().toString();
-        sessionStorage.setItem("instantsearch", filter);
         const posts = Post.getVisiblePosts();
         //when the user clears the input, show all posts
         if (filter === "") {
@@ -62,8 +61,7 @@ export class InstantSearch extends RE6Module {
     protected createDOM() {
         const $section = $("<section>").attr("id", "re-instantsearch");
         this.$searchbox = $("<input>").
-            attr("id", "re-instantsearch-input").
-            attr("value", sessionStorage.getItem("instantsearch"));
+            attr("id", "re-instantsearch-input");
         this.$searchbox.attr("type", "text");
         $section.append("<h1>Insant Search</h1>")
         $section.append(this.$searchbox)
