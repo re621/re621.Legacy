@@ -18,6 +18,7 @@ import { InstantSearch } from "./modules/InstantSearch";
 import { InfiniteScroll } from "./modules/InfiniteScroll";
 
 import { SettingsController } from "./modules/SettingsController";
+import { ImageScaler } from "./modules/ImageScaler";
 
 // Modules with self-contained settings
 HeaderCustomizer.getInstance();
@@ -26,6 +27,7 @@ FormattingHelper.init();
 
 // Modules without settings
 BlacklistToggler.getInstance();
+ImageScaler.getInstance();
 InstantSearch.getInstance();
 InfiniteScroll.getInstance();
 

@@ -13,8 +13,10 @@ export class Post {
     private favCount: number;
     private scoreCount: number
 
+    private imageURL: string;
+    private previewURL: string;
 
-    constructor(id: number, tags: string, rating: string, favCount: number, scoreCount: number) {
+    constructor(id: number, tags: string, rating: string, favCount: number, scoreCount: number, imageURL: string, previewURL: string) {
         this.id = id;
         this.tags = tags;
         this.rating = rating;
@@ -34,7 +36,10 @@ export class Post {
                 this.getAttribute("data-rating"),
                 //substring to remove the prefix, like arrowdown, or heart
                 parseInt(this.querySelector(".post-score-faves").innerHTML.substring(1)),
-                parseInt(this.querySelector(".post-score-score").innerHTML.substring(1)));
+                parseInt(this.querySelector(".post-score-score").innerHTML.substring(1)),
+                this.getAttribute("data-file-url"),
+                this.getAttribute("data-preview-file-url"),
+            );
             post.setDomElement($(this));
             result.push(post);
         });
@@ -55,7 +60,9 @@ export class Post {
             $postElememt.attr("data-tags"),
             $postElememt.attr("data-rating"),
             parseInt($postElememt.find("img").attr("data-fav-count")),
-            parseInt($postElememt.find("img").attr("data-score"))
+            parseInt($postElememt.find("img").attr("data-score")),
+            $postElememt.attr("data-file-url"),
+            $postElememt.attr("data-preview-file-url"),
         );
         post.setDomElement($postElememt);
         return post;
@@ -139,6 +146,22 @@ export class Post {
     public getScoreCount() {
         return this.scoreCount;
     }
+
+    /**
+     * Returns the full-sized image URL
+     * @returns string Image URL
+     */
+    public getImageURL() {
+        return this.imageURL;
+    }
+
+    /**
+     * Returns the preview image URL
+     * @returns string Preview URL
+     */
+    public getPreviewURL() {
+        return this.previewURL;
+    }
 }
 
 /**
@@ -156,8 +179,8 @@ export class ViewingPost extends Post {
     private metaTags: string[];
     private loreTags: string[];
 
-    constructor(id: number, tags: string, rating: string, favCount: number, voteCount: number) {
-        super(id, tags, rating, favCount, voteCount);
+    constructor(id: number, tags: string, rating: string, favCount: number, voteCount: number, imageURL: string, previewURL: string) {
+        super(id, tags, rating, favCount, voteCount, imageURL, previewURL);
         this.isFaved = $("#add-to-favorites").css("display") === "none";
         this.isUpvoted = $("#post-vote-up-" + id).hasClass("score-positive");
         this.isDownvoted = $("#post-vote-down-" + id).hasClass("score-negative");
