@@ -52,6 +52,28 @@ export class Url {
     }
 
     /**
+     * Removes a querystring from the url
+     */
+    public static removeQueryParameter(key: string) {
+        this.getInstance().queryParameter.delete(key);
+        this.refreshCurrentUrl();
+    }
+
+    /**
+     * Replaces the current url without reloading or pushing the old one to the history
+     */
+    private static refreshCurrentUrl() {
+        let newSearch = [];
+        this.getInstance().queryParameter.forEach((value, key) => {
+            value = value !== undefined ? value : "";
+            newSearch.push(key + "=" + value);
+        });
+        const location = this.getInstance().location;
+        const searchPrefix = newSearch.length === 0 ? "" : "?"
+        history.replaceState({}, "", location.protocol + "//" + location.host + location.pathname + searchPrefix + newSearch.join("&"));
+    }
+
+    /**
      * Returns a singleton instance of the class
      * @returns Url instance
      */

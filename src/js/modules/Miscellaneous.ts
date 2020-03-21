@@ -32,7 +32,7 @@ export class Miscellaneous extends RE6Module {
      * Removes the search query from the address bar
      */
     private removeSearchQueryString() {
-        history.replaceState({}, "", location.href.split("?")[0]);
+        Url.removeQueryParameter("q");
     }
 
     /**
