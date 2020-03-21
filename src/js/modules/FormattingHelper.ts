@@ -94,7 +94,7 @@ export class FormattingHelper extends RE6Module {
             });
         });
 
-        $("input.dtext-preview-button").remove();   // TODO Remove only buttons corresponding to the elements
+        $("input.dtext-preview-button").remove();
     }
 
     /**
@@ -103,12 +103,14 @@ export class FormattingHelper extends RE6Module {
     private createDOM() {
         let _self = this;
 
+        // Establish helper states
         this.$container.attr("data-editing", "true");
         this.$container.attr("data-drawer", "false");
 
         this.$textarea = this.$container.find("textarea");
         this.$preview = this.$container.find("div.dtext-preview");
 
+        // Create the toolbar
         let $bar = $("<div>").addClass("comment-header").prependTo(this.$container);
 
         this.$toggleTabs = $("<div>")
@@ -141,6 +143,7 @@ export class FormattingHelper extends RE6Module {
             .addClass("dtext-button-drawer-title")
             .appendTo(this.$container);
 
+        // Create the button drawer
         this.$formatButtonsDrawer = $("<div>").addClass("dtext-button-drawer").appendTo(this.$container);
 
         this.$formatButtons.sortable({
@@ -165,6 +168,18 @@ export class FormattingHelper extends RE6Module {
             disabled: true,
         });
 
+        // Create the character counter
+        let charCounter = $("<span>")
+            .addClass("char-counter")
+            .html((_self.$textarea.val() + "").length + " / 50000");
+        $("<div>")
+            .addClass("dtext-character-counter-box")
+            .append(charCounter)
+            .appendTo(this.$container);
+
+        this.$textarea.keyup(function (event) {
+            charCounter.html((_self.$textarea.val() + "").length + " / 50000");
+        });
     }
 
     /**

@@ -177,6 +177,21 @@ body.resp form.simple_form {
         &[data-editing=false] div.dtext-button-drawer {
             display: none;
         }
+
+        div.dtext-character-counter-box {
+            grid-row: 3;
+            grid-column: 1;
+            position: relative;
+            bottom: 1.25rem;
+            margin-bottom: -1rem;
+            text-align: right;
+
+            span.char-counter {
+                padding: 0.25rem 1rem;
+                font-size: 0.75rem;
+                opacity: 0.5;
+            }
+        }
     }
 
 }
