@@ -326,6 +326,7 @@ export class FormattingHelper extends RE6Module {
                 + content
                 + currentText.substring(position.end, currentText.length)
             );
+            _self.$textarea.keyup();
         });
     }
 
