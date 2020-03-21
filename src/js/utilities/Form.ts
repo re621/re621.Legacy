@@ -1,4 +1,3 @@
-
 /**
  * Removes the hassle of creating HTML elements for a form
  */
@@ -56,6 +55,10 @@ export class Form {
                     $input = _self.buildInput(_self.$form, element);
                     break;
                 }
+                case "copyinput": {
+                    $input = _self.buildCopyInput(_self.$form, element);
+                    break;
+                }
                 case "checkbox": {
                     $input = _self.buildCheckbox(_self.$form, element);
                     break;
@@ -78,6 +81,10 @@ export class Form {
                 }
                 case "div": {
                     $input = _self.buildDiv(_self.$form, element);
+                    break;
+                }
+                case "hr": {
+                    $input = _self.buildHr(_self.$form, element);
                     break;
                 }
                 default: { }
@@ -162,6 +169,48 @@ export class Form {
             .appendTo($form);
 
         if (element.class) $input.addClass(element.class);
+
+        return $input;
+    }
+
+    /**
+     * Builds and appends an input element with a copy button
+     * @param $form Form to append the element to
+     * @param element Element configuration data
+     */
+    private buildCopyInput($form: JQuery<HTMLElement>, element: FormElement) {
+        let $input = $("<input>");
+        let $inputbox = $("<div>").addClass("copybox");
+
+        if (element.label) {
+            $("<label>")
+                .attr("for", this.config.id + "_" + element.id)
+                .html(element.label)
+                .appendTo($form);
+        } else { $input.addClass("full-column"); }
+
+        $input
+            .attr("type", "text")
+            .attr("id", this.config.id + "_" + element.id)
+            .attr("readonly", "true")
+            .val(element.value)
+            .appendTo($inputbox);
+
+        if (element.class) $input.addClass(element.class);
+
+        let $copybutton = $("<button>")
+            .attr("type", "button")
+            .attr("id", this.config.id + "_" + element.id)
+            .html(`<i class="far fa-copy"></i>`)
+            .appendTo($inputbox);
+
+
+        $(this.config.parent).on("click", "form#" + this.config.id + " button#" + this.config.id + "_" + element.id, function (event) {
+            $input.select();
+            document.execCommand("copy");
+        });
+
+        $inputbox.appendTo($form);
 
         return $input;
     }
@@ -306,6 +355,18 @@ export class Form {
         return $input;
     }
 
+    /**
+     * Builds and appends an HR element
+     * @param $form Form to append the element to
+     * @param element Element configuration data
+     */
+    private buildHr($form: JQuery<HTMLElement>, element: FormElement) {
+        let $input = $("<hr>")
+            .addClass("full-column")
+            .appendTo($form);
+        return $input;
+    }
+
 }
 
 interface FormConfig {
@@ -321,7 +382,7 @@ interface FormElement {
     /** Unique ID for the element. Actual ID becomes formID_elementID */
     id?: string,
     /** Supported input type */
-    type: "input" | "checkbox" | "button" | "submit" | "textarea" | "select" | "div",
+    type: "input" | "copyinput" | "checkbox" | "button" | "submit" | "textarea" | "select" | "div" | "hr",
     /** Default value for the input */
     value?: string,
     /** Input label */

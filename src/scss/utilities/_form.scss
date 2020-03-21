@@ -13,6 +13,7 @@ form.grid-form {
         grid-template-columns: repeat(3, auto 1fr);
     }
 
+    // Fill 2 columns
     .full-column {
         grid-column: 1 / 3;
 
@@ -21,20 +22,56 @@ form.grid-form {
         align-items: center;
     }
 
+    div.full-column {
+        display: block;
+    }
+
+    hr.full-column {
+        margin: 0;
+    }
+
+    // Fill all columns
     .full-width {
         grid-column: 2 / -1;
     }
 
+    // Input styles
     input,
     select,
     button {
         width: stretch;
+        padding: 0.125rem;
+        border-radius: 4px;
     }
 
     label {
         font-weight: 500;
     }
 
+    .copybox {
+        display: inline-grid;
+        grid-template-columns: 80% 20%;
+        overflow: hidden;
+
+        input[type=text] {
+            width: unset;
+            border-radius: 4px 0 0 4px;
+        }
+
+        button[type=button] {
+            width: unset;
+            border-radius: 0 4px 4px 0;
+
+            &:hover {
+                @include themable {
+                    background: themed("color-section");
+                    color: themed("color-text");
+                }
+            }
+        }
+    }
+
+    // Checkbox Switch
     input[type=checkbox].switch {
         display: none;
 
