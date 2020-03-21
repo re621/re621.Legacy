@@ -78,7 +78,6 @@ export class SettingsController extends RE6Module {
     public static registerModule(...moduleList: RE6Module[]) {
         let _self = this;
         moduleList.forEach(function (module) {
-            console.log("loading " + module.constructor.name);
             _self.getInstance().modules.set(module.constructor.name, module);
         });
     }
