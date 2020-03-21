@@ -16,6 +16,7 @@ export class InfiniteScroll extends RE6Module {
     private currentQuery: string;
     private nextPageToGet: number;
     private isInProgress: boolean;
+    private pagesLeft: boolean;
 
     private static instance: InfiniteScroll = new InfiniteScroll();
 
@@ -29,6 +30,7 @@ export class InfiniteScroll extends RE6Module {
         const page = parseInt(Url.getQueryParameter("page"));
         this.nextPageToGet = isNaN(page) ? 2 : page + 1;
         this.isInProgress = false;
+        this.pagesLeft = true;
 
         //Wait until all images are loaded, to prevent fetching posts 
         //while the layout is still changing
@@ -44,7 +46,7 @@ export class InfiniteScroll extends RE6Module {
      * Adds more posts to the site, if the user has scrolled down enough
      */
     private async addMorePosts() {
-        if (this.isInProgress || !this.shouldAddMore()) {
+        if (this.isInProgress || !this.pagesLeft || !this.shouldAddMore()) {
             return;
         }
         this.isInProgress = true;
@@ -52,6 +54,7 @@ export class InfiniteScroll extends RE6Module {
         for (const json of posts) {
             this.$postContainer.append(PostHtml.create(json));
         }
+        this.pagesLeft = posts.length !== 0;
         this.isInProgress = false;
         Url.setQueryParameter("page", this.nextPageToGet.toString());
         //TODO check if the module is enabled
