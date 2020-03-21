@@ -39,7 +39,6 @@ export class InstantSearch extends RE6Module {
     public applyFilter() {
         const filter = this.$searchbox.val().toString();
         sessionStorage.setItem("instantsearch", filter);
-
         const posts = Post.getVisiblePosts();
         //when the user clears the input, show all posts
         if (filter === "") {
@@ -47,6 +46,8 @@ export class InstantSearch extends RE6Module {
                 $(post.getDomElement()).css("display", "");
             }
         } else {
+            const currentQuery = Url.getQueryParameter("tags") === undefined ? "" : Url.getQueryParameter("tags");
+            Url.setQueryParameter("tags", currentQuery + (currentQuery.length === 0 ? "" : "+") + filter);
             for (const post of posts) {
                 if (post.tagsMatchesFilter(filter)) {
                     post.getDomElement().css("display", "");
