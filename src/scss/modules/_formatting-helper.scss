@@ -1,13 +1,12 @@
 /* Styles for the Formatting Helper module */
 
-body form.simple_form {
+form.simple_form {
 
     padding: 0;
 
     div.dtext-previewable {
         display: grid;
         grid-template-columns: auto min-content;
-        grid-template-rows: 2.5rem auto;
         min-height: 12rem;
 
         div.comment-header {
@@ -122,6 +121,7 @@ body form.simple_form {
             @include themable() {
                 background: themed("color-section");
                 border: 1px solid lighten(themed("color-section"), 10%);
+                border-top: 0;
                 color: themed("color-text");
             }
 
@@ -144,7 +144,7 @@ body form.simple_form {
 
             margin-left: 1rem;
             text-align: center;
-            padding: 0.75rem;
+            padding-top: 0.75rem;
 
             @include themable() {
                 background: lighten(themed("color-section"), 10%);
@@ -167,6 +167,7 @@ body form.simple_form {
             @include themable() {
                 background: themed("color-section");
                 border: 1px solid lighten(themed("color-section"), 10%);
+                border-top: 0;
                 color: themed("color-text");
             }
         }
