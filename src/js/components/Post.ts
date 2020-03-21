@@ -22,6 +22,8 @@ export class Post {
         this.rating = rating;
         this.favCount = favCount;
         this.scoreCount = scoreCount;
+        this.imageURL = imageURL;
+        this.previewURL = previewURL;
     }
 
     /**
