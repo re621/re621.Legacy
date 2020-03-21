@@ -52,6 +52,7 @@ export class InfiniteScroll extends RE6Module {
             this.$postContainer.append(PostHtml.create(json));
         }
         this.isInProgress = false;
+        Url.setQueryParameter("page", this.nextPageToGet.toString());
         this.nextPageToGet++;
     }
 

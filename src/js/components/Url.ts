@@ -54,6 +54,15 @@ export class Url {
     }
 
     /**
+     * Sets a query parameter in the current url
+     * If there is already one with the same key it will get overridden
+     */
+    public static setQueryParameter(key: string, value: string) {
+        this.getInstance().queryParameter.set(key, value);
+        this.refreshCurrentUrl();
+    }
+
+    /**
      * Removes a querystring from the url
      */
     public static removeQueryParameter(key: string) {
