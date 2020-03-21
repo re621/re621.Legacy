@@ -49,7 +49,6 @@ export class SettingsController extends RE6Module {
             uid: "settings-modal",
             title: "Settings",
             width: "40rem",
-            height: "200px",
             position: {
                 right: "0",
                 top: "4.5rem",

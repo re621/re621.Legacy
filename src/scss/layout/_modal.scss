@@ -15,6 +15,7 @@ re-modal-container {
         display: grid;
         grid-template-columns: auto 1fr;
         grid-template-rows: max-content;
+        overflow-x: hidden;
 
         &[data-open=false] {
             display: none;
@@ -111,7 +112,7 @@ re-modal-container {
             display: none;
 
             grid-area: 2 / 2 / 10/ 3;
-            padding: 0.5rem 1rem;
+            padding: 0.5rem 1rem 1rem;
             box-shadow: 0 3px 10px -5px black;
             border-radius: 0 0 6px 6px;
 
