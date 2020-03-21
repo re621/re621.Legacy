@@ -12,35 +12,11 @@ export class TitleCustomizer extends RE6Module {
 
     private constructor() {
         super();
+
         const post = Post.getViewingPost();
-        if (post === undefined) {
-            return;
-        }
-        const oldTitle = document.title;
-        let prefix = "";
-        const symbols = this.fetchSettings("symbols");
-        if (post.getIsFaved()) {
-            prefix += symbols.fav;
-        }
-        if (post.getIsUpvoted()) {
-            prefix += symbols.voteup;
-        } else if (post.getIsDownvoted()) {
-            prefix += symbols.votedown;
-        }
+        if (post === undefined) { return; }
 
-        let tagsToAddToTitle = [];
-        if (this.fetchSettings("addArtistToTitle") === true) {
-            const tags = post.getTagsFromType(TagTypes.Artist).filter(tag => Tag.isArist(tag));
-            tagsToAddToTitle = tagsToAddToTitle.concat(tags);
-        }
-        if (this.fetchSettings("addCopyrightToTitle") === true) {
-            tagsToAddToTitle = tagsToAddToTitle.concat(post.getTagsFromType(TagTypes.Copyright));
-        }
-        const titleSplit = oldTitle.split(" ");
-        //add a extra space after the number only if there are any tags
-        titleSplit[0] += (tagsToAddToTitle.length === 0) ? "" : " " + tagsToAddToTitle.join(" ");
-
-        document.title = prefix + titleSplit.join(" ");
+        document.title = this.parseTemplate();
     }
 
     /**
@@ -49,14 +25,32 @@ export class TitleCustomizer extends RE6Module {
      */
     protected getDefaultSettings() {
         return {
-            "symbols": {
-                "fav": "\u2665",      //heart symbol
-                "voteup": "\u2191",   //arrow up
-                "votedown": "\u2193"  //arrow down
-            },
-            "addArtistToTitle": true,
-            "addCopyrightToTitle": false
+            "template": "%icons% #%postnum% by %author% (%copyright%) - %character%",
+            "symbolsEnabled": true,
+            "symbol-fav": "\u2665",      //heart symbol
+            "symbol-voteup": "\u2191",   //arrow up
+            "symbol-votedown": "\u2193",  //arrow down
+
         };
+    }
+
+    private parseTemplate() {
+        let post = Post.getViewingPost();
+
+        let prefix = "";
+        if (this.fetchSettings("symbolsEnabled")) {
+            if (post.getIsFaved()) { prefix += this.fetchSettings("symbol-fav"); }
+            if (post.getIsUpvoted()) { prefix += this.fetchSettings("symbol-voteup"); }
+            else if (post.getIsDownvoted()) { prefix += this.fetchSettings("symbol-votedown"); }
+            if (prefix) prefix += " ";
+        }
+
+        return this.fetchSettings("template")
+            .replace(/%icons%/g, prefix)
+            .replace(/%postnum%/g, post.getId().toString())
+            .replace(/%author%/g, post.getTagsFromType(TagTypes.Artist).filter(tag => Tag.isArist(tag)).join(", "))
+            .replace(/%copyright%/g, post.getTagsFromType(TagTypes.Copyright).join(", "))
+            .replace(/%character%/g, post.getTagsFromType(TagTypes.Character).join(", "));
     }
 
     /**

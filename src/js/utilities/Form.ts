@@ -29,6 +29,7 @@ export class Form {
         if (element.value === undefined) element.value = "";
         if (element.label === undefined) element.label = "";
         if (element.select === undefined) element.select = [];
+        if (element.class === undefined) element.class = "";
 
         this.elements.push(element);
         this.index++;
@@ -152,13 +153,15 @@ export class Form {
                 .attr("for", this.config.id + "_" + element.id)
                 .html(element.label)
                 .appendTo($form);
-        } else { $input.addClass("full-width"); }
+        } else { $input.addClass("full-column"); }
 
         $input
             .attr("type", "text")
             .attr("id", this.config.id + "_" + element.id)
             .val(element.value)
             .appendTo($form);
+
+        if (element.class) $input.addClass(element.class);
 
         return $input;
     }
@@ -169,7 +172,7 @@ export class Form {
      * @param element Element configuration data
      */
     private buildCheckbox($form: JQuery<HTMLElement>, element: FormElement) {
-        let $check_box = $("<div>").addClass("full-width");
+        let $check_box = $("<div>").addClass("full-column");
         let $input = $("<input>");
 
         $("<label>")
@@ -188,6 +191,8 @@ export class Form {
             .appendTo($check_box);
         $check_box.appendTo($form);
 
+        if (element.class) $check_box.addClass(element.class);
+
         return $input;
     }
 
@@ -199,13 +204,16 @@ export class Form {
     private buildButton($form: JQuery<HTMLElement>, element: FormElement) {
         let $button_box = $("<div>").appendTo($form);
         let $input = $(`<button>`)
-        if (!element.label) { $button_box.addClass("full-width"); }
+        if (!element.label) { $button_box.addClass("full-column"); }
 
         $input
             .attr("type", "button")
             .attr("id", this.config.id + "_" + element.id)
             .html(element.value)
             .appendTo($button_box);
+
+        if (element.class) $button_box.addClass(element.class);
+
         return $input;
     }
 
@@ -217,13 +225,16 @@ export class Form {
     private buildSubmit($form: JQuery<HTMLElement>, element: FormElement) {
         let $button_box = $("<div>").appendTo($form);
         let $input = $(`<button>`)
-        if (!element.label) { $button_box.addClass("full-width"); }
+        if (!element.label) { $button_box.addClass("full-column"); }
 
         $input
             .attr("type", "submit")
             .attr("id", this.config.id + "_" + element.id)
             .html(element.value)
             .appendTo($button_box);
+
+        if (element.class) $button_box.addClass(element.class);
+
         return $input;
     }
 
@@ -240,13 +251,15 @@ export class Form {
                 .attr("for", this.config.id + "_" + element.id)
                 .html(element.label)
                 .appendTo($form);
-        } else { $input.addClass("full-width"); }
+        } else { $input.addClass("full-column"); }
 
         $input
             .attr("type", "text")
             .attr("id", this.config.id + "_" + element.id)
             .val(element.value)
             .appendTo($form);
+
+        if (element.class) $input.addClass(element.class);
 
         return $input;
     }
@@ -264,7 +277,7 @@ export class Form {
                 .attr("for", this.config.id + "_" + element.id)
                 .html(element.label)
                 .appendTo($form);
-        } else { $input.addClass("full-width"); }
+        } else { $input.addClass("full-column"); }
 
         element.select.forEach(function (entry) {
             $("<option>").val(entry.value).text(entry.name).appendTo($input);
@@ -274,6 +287,8 @@ export class Form {
             .attr("id", this.config.id + "_" + element.id)
             .val(element.value)
             .appendTo($form);
+
+        if (element.class) $input.addClass(element.class);
 
         return $input;
     }
@@ -285,8 +300,9 @@ export class Form {
      */
     private buildDiv($form: JQuery<HTMLElement>, element: FormElement) {
         let $input = $("<div>")
-            .addClass("full-width")
-            .html(element.label);
+            .addClass("full-column")
+            .html(element.label)
+            .appendTo($form);
         return $input;
     }
 
@@ -312,4 +328,6 @@ interface FormElement {
     label?: string | HTMLElement,
     /** Value-name pairs for the select */
     select?: { value: string, name: string }[],
+    /** Custom class to apply to the element */
+    class?: string,
 }

@@ -13,12 +13,16 @@ form.grid-form {
         grid-template-columns: repeat(3, auto 1fr);
     }
 
-    .full-width {
+    .full-column {
         grid-column: 1 / 3;
 
         display: flex;
         justify-content: space-between;
         align-items: center;
+    }
+
+    .full-width {
+        grid-column: 2 / -1;
     }
 
     input,

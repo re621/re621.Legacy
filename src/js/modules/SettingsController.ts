@@ -4,6 +4,7 @@ import { Tabbed } from "../components/Tabbed";
 import { RE6Module } from "../components/RE6Module";
 import { Miscellaneous } from "./Miscellaneous";
 import { Form } from "../utilities/Form";
+import { TitleCustomizer } from "./TitleCustomizer";
 
 /**
  * SettingsController  
@@ -31,13 +32,14 @@ export class SettingsController extends RE6Module {
         });
 
         // Establish the settings window contents
+        let titleCustomizerTab = this.createTabTitleCustomizer();
         let miscSettingsTab = this.createTabMiscellaneous();
 
         let $settings = new Tabbed({
             name: "settings-tabs",
             content: [
+                { name: "TitleCustomizer", page: titleCustomizerTab.get() },
                 { name: "Miscellaneous", page: miscSettingsTab.get() },
-                // { name: "Header", page: $headerSettings },
                 // { name: "Posts", page: $postSettings },
             ]
         });
@@ -46,7 +48,7 @@ export class SettingsController extends RE6Module {
         this.modal = new Modal({
             uid: "settings-modal",
             title: "Settings",
-            width: "30rem",
+            width: "40rem",
             height: "200px",
             position: {
                 right: "0",
@@ -59,7 +61,7 @@ export class SettingsController extends RE6Module {
 
         // Establish handlers
         this.handleTabMiscellaneous(miscSettingsTab);
-
+        this.handleTabTitleCustomizer(titleCustomizerTab);
     }
 
     /**
@@ -90,9 +92,98 @@ export class SettingsController extends RE6Module {
         //this.getInstance().modal.addPage(page);
     }
 
+    /** Create the DOM for the Title Customizer page */
+    private createTabTitleCustomizer() {
+        let _self = this;
+        let module = <TitleCustomizer>this.modules.get("TitleCustomizer");
+
+        let form = new Form(
+            {
+                id: "title-customizer-misc",
+                columns: 2,
+                parent: "re-modal-container",
+            },
+            [
+                {
+                    id: "template",
+                    type: "input",
+                    value: module.fetchSettings("template"),
+                    label: "Template",
+                    class: "full-width",
+                },
+                {
+                    id: "symbols-enabled",
+                    type: "checkbox",
+                    value: module.fetchSettings("symbolsEnabled"),
+                    label: "Vote / Favorite Icons",
+                },
+                {
+                    id: "symbol-fav",
+                    type: "input",
+                    value: module.fetchSettings("symbol-fav"),
+                    label: "Favorite",
+                },
+                {
+                    id: "symbol-spacer-1",
+                    type: "div",
+                    value: "",
+                    label: "",
+                },
+                {
+                    id: "symbol-voteup",
+                    type: "input",
+                    value: module.fetchSettings("symbol-voteup"),
+                    label: "Upvote",
+                },
+                {
+                    id: "symbol-spacer-2",
+                    type: "div",
+                    value: "",
+                    label: "",
+                },
+                {
+                    id: "symbol-votedown",
+                    type: "input",
+                    value: module.fetchSettings("symbol-votedown"),
+                    label: "Downvote",
+                },
+            ]
+        );
+
+        return form;
+    }
+
     /**
-     * Creates the DOM for the miscellaneous settings page
+     * Event handlers for the title customizer settings page
+     * @param form Miscellaneous settings form
      */
+    private handleTabTitleCustomizer(form: Form) {
+        let _self = this;
+        let module = <TitleCustomizer>this.modules.get("TitleCustomizer");
+        let titleFormInput = form.getInputList();
+
+        titleFormInput.get("template").change(function (event) {
+            module.pushSettings("template", $(this).val());
+        });
+
+        titleFormInput.get("symbols-enabled").change(function (event) {
+            module.pushSettings("symbolsEnabled", $(this).is(":checked"));
+        });
+
+        titleFormInput.get("symbol-fav").change(function (event) {
+            module.pushSettings("symbol-fav", $(this).val());
+        });
+
+        titleFormInput.get("symbol-voteup").change(function (event) {
+            module.pushSettings("symbol-voteup", $(this).val());
+        });
+
+        titleFormInput.get("symbol-votedown").change(function (event) {
+            module.pushSettings("symbol-votedown", $(this).val());
+        });
+    }
+
+    /** Creates the DOM for the miscellaneous settings page */
     private createTabMiscellaneous() {
         let _self = this;
         let module = <Miscellaneous>this.modules.get("Miscellaneous");

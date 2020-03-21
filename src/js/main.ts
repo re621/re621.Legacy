@@ -25,11 +25,11 @@ FormattingHelper.init();
 
 // Modules without settings
 BlacklistToggler.getInstance();
-TitleCustomizer.getInstance();
 InstantSearch.getInstance();
 
 // Modules configured by the SettingsController
 SettingsController.registerModule(
+    TitleCustomizer.getInstance(),
     Miscellaneous.getInstance(),
 );
 
