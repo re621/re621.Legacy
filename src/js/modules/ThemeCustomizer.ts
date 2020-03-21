@@ -5,6 +5,7 @@
 import { HeaderCustomizer } from "./HeaderCustomizer";
 import { Modal } from "../components/Modal";
 import { RE6Module } from "../components/RE6Module";
+import { Form } from "../utilities/Form";
 
 declare var Cookies;
 
@@ -34,17 +35,17 @@ export class ThemeCustomizer extends RE6Module {
 
     private static instance: ThemeCustomizer;
 
-    private modal: Modal;
+    private themeCustomizerModal: Modal;
+    private themeCustomizerForm: Form;
 
     private constructor() {
         super();
 
         this.createDOM();
 
-        this.handleThemeSwitcher("th-main", "hexagon");
-        this.handleThemeSwitcher("th-extra", "hexagon");
+        this.handleThemeSwitcher("th-main");
+        this.handleThemeSwitcher("th-extra");
         this.handleScalingToggle();
-
     }
 
     /**
@@ -80,51 +81,37 @@ export class ThemeCustomizer extends RE6Module {
         });
 
         // === Establish the settings window contents
-        let $themeCustomizerContainer = $("<div>");
-        let $themeCustomizer = $("<form>")
-            .addClass("grid-form")
-            .appendTo($themeCustomizerContainer);
-
-        // Main Theme Selector
-        $("<div>")
-            .html("Theme:")
-            .appendTo($themeCustomizer);
-
-        let $themeSelector = $("<select>")
-            .attr("id", "th-main-selector")
-            .appendTo($themeCustomizer);
-        THEME_MAIN.forEach(function (entry) {
-            $("<option>").val(entry.value).text(entry.name).appendTo($themeSelector);
-        });
-
-        // Theme Extras
-        $("<div>")
-            .html("Extras:")
-            .appendTo($themeCustomizer);
-
-        let $extraSelector = $("<select>")
-            .attr("id", "th-extra-selector")
-            .appendTo($themeCustomizer);
-        THEME_EXTRA.forEach(function (entry) {
-            $("<option>").val(entry.value).text(entry.name).appendTo($extraSelector);
-        });
-
-        // Disable Scaling
-        let $scalingSelector = $("<div>").addClass("full-width").appendTo($themeCustomizer);
-        $("<input>")
-            .attr("type", "checkbox")
-            .attr("id", "theme-scaling")
-            .attr("name", "theme-scaling")
-            .css("float", "right")
-            .appendTo($scalingSelector);
-        $("<label>")
-            .attr("for", "theme-scaling")
-            .css("font-weight", "500")
-            .text("Disable Scaling")
-            .appendTo($scalingSelector);
+        this.themeCustomizerForm = new Form(
+            {
+                "id": "theme-customizer",
+                "parent": "re-modal-container"
+            },
+            [
+                {
+                    "id": "th-main",
+                    "type": "select",
+                    "label": "Theme",
+                    "select": THEME_MAIN,
+                    "value": this.fetchSettings("th-main"),
+                },
+                {
+                    "id": "th-extra",
+                    "type": "select",
+                    "label": "Extras",
+                    "select": THEME_EXTRA,
+                    "value": this.fetchSettings("th-extra"),
+                },
+                {
+                    "id": "unscaling",
+                    "type": "checkbox",
+                    "label": "Disable Scaling",
+                    "value": this.fetchSettings("unscaling")
+                }
+            ]
+        );
 
         // === Create the modal
-        this.modal = new Modal({
+        this.themeCustomizerModal = new Modal({
             uid: "theme-customizer-modal",
             title: "Themes",
             width: "15rem",
@@ -134,18 +121,18 @@ export class ThemeCustomizer extends RE6Module {
                 top: "4.5rem",
             },
             triggers: [{ element: addTabButton.link }],
-            content: [{ name: "re621", page: $themeCustomizerContainer }],
+            content: [{ name: "re621", page: this.themeCustomizerForm.get() }],
         });
     }
 
-    private handleThemeSwitcher(selector: string, default_option: string) {
+    private handleThemeSwitcher(selector: string) {
         let _self = this;
         let theme = this.fetchSettings(selector);
 
         $("body").attr("data-" + selector, theme);
         $("#" + selector + "-selector").val(theme);
 
-        $("#" + selector + "-selector").change(function (e) {
+        this.themeCustomizerForm.getInputList().get(selector).change(function (event) {
             let theme = $(this).val() + "";
             _self.pushSettings(selector, theme);
             $("body").attr("data-" + selector, theme);
@@ -159,7 +146,7 @@ export class ThemeCustomizer extends RE6Module {
         if (unscaling) { $("body").css("max-width", "unset"); }
         $("#theme-scaling").prop("checked", unscaling);
 
-        $("re-modal-container").on("change", "#theme-scaling", function (e) {
+        this.themeCustomizerForm.getInputList().get("unscaling").change(function (event) {
             let disable_scaling = $(this).is(":checked");
             _self.pushSettings("unscaling", disable_scaling);
             if (disable_scaling) { $("body").css("max-width", "unset"); }

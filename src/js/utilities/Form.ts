@@ -28,6 +28,7 @@ export class Form {
         if (element.id === undefined) element.id = this.index + "";
         if (element.value === undefined) element.value = "";
         if (element.label === undefined) element.label = "";
+        if (element.select === undefined) element.select = [];
 
         this.elements.push(element);
         this.index++;
@@ -66,6 +67,18 @@ export class Form {
                     $input = _self.buildSubmit(_self.$form, element);
                     break;
                 }
+                case "textarea": {
+                    $input = _self.buildTextarea(_self.$form, element);
+                    break;
+                }
+                case "select": {
+                    $input = _self.buildSelect(_self.$form, element);
+                    break;
+                }
+                case "div": {
+                    $input = _self.buildDiv(_self.$form, element);
+                    break;
+                }
                 default: { }
             }
             _self.$inputList.set(element.id, $input);
@@ -102,7 +115,7 @@ export class Form {
 
     /**
      * Resets the elements to their default values.  
-     * Only works with inputs and checkboxes
+     * Does not include buttons and submit elements
      */
     public reset() {
         if (this.$form === undefined) return;
@@ -111,7 +124,9 @@ export class Form {
         this.elements.forEach(function (element) {
             let $input = _self.$form.find("#" + _self.config.id + "_" + element.id);
             switch (element.type) {
-                case "input": {
+                case "input":
+                case "textarea":
+                case "select": {
                     $input.val(element.value);
                     break;
                 }
@@ -211,6 +226,70 @@ export class Form {
             .appendTo($button_box);
         return $input;
     }
+
+    /**
+     * Builds and appends a textarea
+     * @param $form Form to append the element to
+     * @param element Element configuration data
+     */
+    private buildTextarea($form: JQuery<HTMLElement>, element: FormElement) {
+        let $input = $("<textbox>");
+
+        if (element.label) {
+            $("<label>")
+                .attr("for", this.config.id + "_" + element.id)
+                .html(element.label)
+                .appendTo($form);
+        } else { $input.addClass("full-width"); }
+
+        $input
+            .attr("type", "text")
+            .attr("id", this.config.id + "_" + element.id)
+            .val(element.value)
+            .appendTo($form);
+
+        return $input;
+    }
+
+    /**
+     * Builds and appends a select
+     * @param $form Form to append the element to
+     * @param element Element configuration data
+     */
+    private buildSelect($form: JQuery<HTMLElement>, element: FormElement) {
+        let $input = $("<select>");
+
+        if (element.label) {
+            $("<label>")
+                .attr("for", this.config.id + "_" + element.id)
+                .html(element.label)
+                .appendTo($form);
+        } else { $input.addClass("full-width"); }
+
+        element.select.forEach(function (entry) {
+            $("<option>").val(entry.value).text(entry.name).appendTo($input);
+        });
+
+        $input
+            .attr("id", this.config.id + "_" + element.id)
+            .val(element.value)
+            .appendTo($form);
+
+        return $input;
+    }
+
+    /**
+     * Builds and appends a div
+     * @param $form Form to append the element to
+     * @param element Element configuration data
+     */
+    private buildDiv($form: JQuery<HTMLElement>, element: FormElement) {
+        let $input = $("<div>")
+            .addClass("full-width")
+            .html(element.label);
+        return $input;
+    }
+
 }
 
 interface FormConfig {
@@ -226,9 +305,11 @@ interface FormElement {
     /** Unique ID for the element. Actual ID becomes formID_elementID */
     id?: string,
     /** Supported input type */
-    type: "input" | "checkbox" | "button" | "submit",
+    type: "input" | "checkbox" | "button" | "submit" | "textarea" | "select" | "div",
     /** Default value for the input */
     value?: string,
     /** Input label */
-    label?: string,
+    label?: string | HTMLElement,
+    /** Value-name pairs for the select */
+    select?: { value: string, name: string }[],
 }
