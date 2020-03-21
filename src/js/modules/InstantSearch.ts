@@ -24,28 +24,33 @@ export class InstantSearch extends RE6Module {
 
         this.createDOM();
 
-        this.$searchbox.on("input", () => {
-            const filter = this.$searchbox.val().toString();
-            sessionStorage.setItem("instantsearch", filter);
-            //TODO: It's probably excessive to get these every time, but
-            //      let's keep it this way for now until something happens with the infinite scrolling mode
-            const posts = Post.getVisiblePosts();
-            //when the user clears the input, show all posts
-            if (filter === "") {
-                for (const post of posts) {
-                    $(post.getDomElement()).css("display", "");
-                }
-            } else {
-                for (const post of posts) {
-                    if (post.tagsMatchesFilter(filter)) {
-                        post.getDomElement().css("display", "");
-                    } else {
-                        post.getDomElement().css("display", "none");
-                    }
+        this.$searchbox.on("input", this.applyFilter);
+        //The user might have paginated, which means the input is not empty,
+        //but there was no input event yet.
+        this.applyFilter();
+    }
+
+    private applyFilter() {
+        const filter = this.$searchbox.val().toString();
+        sessionStorage.setItem("instantsearch", filter);
+        //TODO: It's probably excessive to get these every time, but
+        //      let's keep it this way for now until something happens with the infinite scrolling mode
+        const posts = Post.getVisiblePosts();
+        //when the user clears the input, show all posts
+        if (filter === "") {
+            for (const post of posts) {
+                $(post.getDomElement()).css("display", "");
+            }
+        } else {
+            for (const post of posts) {
+                if (post.tagsMatchesFilter(filter)) {
+                    post.getDomElement().css("display", "");
+                } else {
+                    post.getDomElement().css("display", "none");
                 }
             }
+        }
 
-        })
     }
 
     protected createDOM() {
