@@ -68,7 +68,7 @@ export class InfiniteScroll extends RE6Module {
      * posts should be appended
      */
     private shouldAddMore() {
-        return $(window).scrollTop() + $(window).height() === $(document).height();
+        return $(window).scrollTop() + $(window).height() > $(document).height() - 50;
     }
 
     /**
