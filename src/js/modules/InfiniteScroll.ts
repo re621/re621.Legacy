@@ -57,9 +57,6 @@ export class InfiniteScroll extends RE6Module {
         this.pagesLeft = posts.length !== 0;
         this.isInProgress = false;
         Url.setQueryParameter("page", this.nextPageToGet.toString());
-        //TODO check if the module is enabled
-        //Currently getInstance will create the module, if it wasn't there already
-        InstantSearch.getInstance().applyFilter();
         this.nextPageToGet++;
     }
 
