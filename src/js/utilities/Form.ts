@@ -164,7 +164,12 @@ export class Form {
         $input
             .attr("type", "checkbox")
             .attr("id", this.config.id + "_" + element.id)
+            .addClass("switch")
             .attr("checked", element.value)
+            .appendTo($check_box);
+        $("<label>")
+            .attr("for", this.config.id + "_" + element.id)
+            .addClass("switch")
             .appendTo($check_box);
         $check_box.appendTo($form);
 
