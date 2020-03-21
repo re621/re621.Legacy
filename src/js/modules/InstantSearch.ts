@@ -24,7 +24,13 @@ export class InstantSearch extends RE6Module {
 
         this.createDOM();
 
-        this.$searchbox.on("input", this.applyFilter);
+        let typingTimeout: number;
+        let doneTyping = 500;
+
+        this.$searchbox.on("input", () => {
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => { this.applyFilter() }, doneTyping);
+        });
         //The user might have paginated, which means the input is not empty,
         //but there was no input event yet.
         this.applyFilter();
@@ -33,8 +39,7 @@ export class InstantSearch extends RE6Module {
     private applyFilter() {
         const filter = this.$searchbox.val().toString();
         sessionStorage.setItem("instantsearch", filter);
-        //TODO: It's probably excessive to get these every time, but
-        //      let's keep it this way for now until something happens with the infinite scrolling mode
+
         const posts = Post.getVisiblePosts();
         //when the user clears the input, show all posts
         if (filter === "") {
