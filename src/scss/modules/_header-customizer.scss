@@ -15,7 +15,7 @@ header#top nav#nav {
             }
 
             &.configurable a::before {
-                content: "\f303";
+                content: unicode("f303");
                 visibility: hidden;
                 padding-right: 0.25rem;
                 font-weight: 900;
