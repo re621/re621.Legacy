@@ -15,6 +15,10 @@ export class StructureUtilities {
         let $menuContainer = $("nav#nav");
         let $menuMain = $("menu.main");
 
+        if ($("menu.submenu").length === 0) {
+            $menuContainer.append(`<menu class="submenu">`);
+        }
+
         let $menuLogo = $("<menu>").addClass("logo desktop-only").html(`<a href="/" data-ytta-id="-">e621</a>`);
         $menuContainer.prepend($menuLogo);
 
