@@ -6,72 +6,88 @@ import { TagTypes, Tag } from "./Tag";
  */
 export class Post {
 
-    private domElement: JQuery<HTMLElement>;
-    private id: number;
-    private tags: string;
-    private rating: string;
-    private favCount: number;
-    private scoreCount: number
+    private static posts: Post[];
 
-    private imageURL: string;
-    private sampleURL: string;
-    private previewURL: string;
+    protected element: JQuery<HTMLElement>;
 
-    constructor(id: number, tags: string, rating: string, favCount: number, scoreCount: number, imageURL: string, sampleURL: string, previewURL: string) {
-        this.id = id;
-        this.tags = tags;
-        this.rating = rating;
-        this.favCount = favCount;
-        this.scoreCount = scoreCount;
-        this.imageURL = imageURL;
-        this.sampleURL = sampleURL;
-        this.previewURL = previewURL;
+    protected id: number;
+    protected tags: string;
+    protected rating: string;
+    protected favorites: number;
+    protected score: number;
+
+    protected fileURL: string;
+    protected sampleURL: string;
+    protected previewURL: string;
+    protected fileExtension: string;
+
+    protected uploaderID: number;
+    protected uploaderName: string;
+
+    protected sound: boolean;
+    protected flags: string;
+
+    protected constructor($image: JQuery<HTMLElement>) {
+        this.id = parseInt($image.data("id"));
+        this.tags = $image.data("tags");
+        this.rating = PostRating[$image.data("rating")];
+
+        if ($image.data("fav-count")) { this.favorites = parseInt($image.data("fav-count")); }
+        else { parseInt($image.find(".post-score-faves").first().html().substring(1)); }
+
+        if ($image.data("score")) { this.score = parseInt($image.data("score")); }
+        else { parseInt($image.find(".post-score-score").first().html().substring(1)); }
+
+        this.fileURL = $image.data("file-url");
+        this.sampleURL = $image.data("large-file-url");
+        this.previewURL = $image.data("preview-file-url");
+        this.fileExtension = $image.data("file-ext");
+
+        this.uploaderID = $image.data("uploader-id");
+        this.uploaderName = $image.data("uploader-id");
+
+        this.sound = $image.data("has-sound");
+        this.flags = $image.data("flags");
+
+        this.element = $image;
+    }
+
+    /**
+     * Fetches the posts from the current page.
+     * @param cached If true, re-parses the page for data
+     */
+    public static fetchPosts(cached: boolean = true) {
+        if (this.posts !== undefined && cached) return this.posts;
+
+        let imageContainer = $("#image-container");
+        this.posts = [];
+        if (imageContainer.length === 0) {
+            $("#posts-container").children(".post-preview").each(function () {
+                Post.posts.push(new Post($(this)));
+            });
+        } else {
+            this.posts.push(new ViewingPost(imageContainer));
+        }
+        return this.posts;
     }
 
     /**
      * Fetches all posts if you are on https://e621.net/posts or similar
+     * @deprecated Use fetchPosts() instead
+     * @returns Post[] List of posts
      */
     public static getVisiblePosts() {
-        let result: Post[] = [];
-        $("#posts-container").children(".post-preview").each(function () {
-            const post = new Post(
-                parseInt(this.getAttribute("data-id")),
-                this.getAttribute("data-tags"),
-                this.getAttribute("data-rating"),
-                //substring to remove the prefix, like arrowdown, or heart
-                parseInt(this.querySelector(".post-score-faves").innerHTML.substring(1)),
-                parseInt(this.querySelector(".post-score-score").innerHTML.substring(1)),
-                this.getAttribute("data-file-url"),
-                this.getAttribute("data-large-file-url"),  // YES, the file marked as larger is a sample. Why the hell not.
-                this.getAttribute("data-preview-file-url"),
-            );
-            post.setDomElement($(this));
-            result.push(post);
-        });
-        return result;
+        return this.fetchPosts();
     }
 
     /**
      * Creates a ViewingPost if you are on a post page (https://e621.net/posts/:id)
-     * @returns the current post if it exists, undefined otherwise
+     * @deprecated Use fetchPosts() instead
+     * @returns Post the current post if it exists, undefined otherwise
      */
     public static getViewingPost() {
-        const $postElememt = $("#image-container");
-        if ($postElememt.length === 0) {
-            return undefined;
-        }
-        const post = new ViewingPost(
-            parseInt($postElememt.attr("data-id")),
-            $postElememt.attr("data-tags"),
-            $postElememt.attr("data-rating"),
-            parseInt($postElememt.find("img").attr("data-fav-count")),
-            parseInt($postElememt.find("img").attr("data-score")),
-            $postElememt.attr("data-file-url"),
-            $postElememt.attr("data-large-file-url"),
-            $postElememt.attr("data-preview-file-url"),
-        );
-        post.setDomElement($postElememt);
-        return post;
+        if ($("#image-container").length === 0) { return undefined; }
+        return <ViewingPost>this.fetchPosts()[0];
     }
 
     /**
@@ -111,72 +127,29 @@ export class Post {
 
     }
 
-    public setDomElement(element: JQuery<HTMLElement>) {
-        this.domElement = element;
-    }
-
     public getDomElement() {
-        return this.domElement;
+        return this.element;
     }
 
-    /**
-     * Returns the posts id
-     */
-    public getId() {
-        return this.id;
-    }
-    /**
-     * Returns the posts tags space seperated
-     */
-    public getTags() {
-        return this.tags;
-    }
+    public getId() { return this.id; }
+    public getTags() { return this.tags; }
+    public getRating() { return this.rating; }
+    public getFavCount() { return this.favorites; }
+    public getScoreCount() { return this.score; }
 
-    /**
-     * Returns the posts rating, as a char (e, q, s)
-     */
-    public getRating() {
-        return this.rating;
-    }
+    public getImageURL() { return this.fileURL; }
+    public getSampleURL() { return this.sampleURL; }
+    public getPreviewURL() { return this.previewURL; }
 
-    /**
-     * Returns the posts favorites
-     */
-    public getFavCount() {
-        return this.favCount;
-    }
+    public getFileExtension() { return this.fileExtension; }
 
-    /**
-     * Returns the posts score
-     */
-    public getScoreCount() {
-        return this.scoreCount;
-    }
+    public getUploaderID() { return this.uploaderID; }
+    public getUploaderName() { return this.uploaderName; }
 
-    /**
-     * Returns the full-sized image URL
-     * @returns string Image URL
-     */
-    public getImageURL() {
-        return this.imageURL;
-    }
-
-    /**
-     * Returns the sample image URL
-     * @returns string Sample URL
-     */
-    public getSampleURL() {
-        return this.sampleURL;
-    }
-
-    /**
-     * Returns the preview image URL
-     * @returns string Preview URL
-     */
-    public getPreviewURL() {
-        return this.previewURL;
-    }
+    public hasSound() { return this.sound; }
+    public getFlags() { return this.flags; }
 }
+
 
 /**
  * If you are viewing a post this element can be constructed
@@ -185,6 +158,7 @@ export class ViewingPost extends Post {
     private isFaved: boolean;
     private isUpvoted: boolean;
     private isDownvoted: boolean;
+
     private artistTags: string[];
     private characterTags: string[];
     private copyrightTags: string[];
@@ -193,11 +167,12 @@ export class ViewingPost extends Post {
     private metaTags: string[];
     private loreTags: string[];
 
-    constructor(id: number, tags: string, rating: string, favCount: number, voteCount: number, imageURL: string, sampleURL: string, previewURL: string) {
-        super(id, tags, rating, favCount, voteCount, imageURL, sampleURL, previewURL);
+    constructor($image: JQuery<HTMLElement>) {
+        super($image);
+
         this.isFaved = $("#add-to-favorites").css("display") === "none";
-        this.isUpvoted = $("#post-vote-up-" + id).hasClass("score-positive");
-        this.isDownvoted = $("#post-vote-down-" + id).hasClass("score-negative");
+        this.isUpvoted = $("#post-vote-up-" + this.id).hasClass("score-positive");
+        this.isDownvoted = $("#post-vote-down-" + this.id).hasClass("score-negative");
 
         this.artistTags = this.getAllFromTaggroup("artist");
         this.characterTags = this.getAllFromTaggroup("character");
@@ -242,4 +217,10 @@ export class ViewingPost extends Post {
     public getTagsFromType(tagType: TagTypes): string[] {
         return this[tagType + "Tags"];
     }
+}
+
+export enum PostRating {
+    Safe = "s",
+    Questionable = "q",
+    Explicit = "e",
 }
