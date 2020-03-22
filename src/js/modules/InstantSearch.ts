@@ -42,17 +42,13 @@ export class InstantSearch extends RE6Module {
         //when the user clears the input, show all posts
         if (filter === "") {
             for (const post of posts) {
-                $(post.getDomElement()).css("display", "");
+                post.setVisibility(true);
             }
         } else {
             const currentQuery = Url.getQueryParameter("tags") === undefined ? "" : Url.getQueryParameter("tags");
             Url.setQueryParameter("tags", currentQuery + (currentQuery.length === 0 ? "" : "+") + filter);
             for (const post of posts) {
-                if (post.tagsMatchesFilter(filter)) {
-                    post.getDomElement().css("display", "");
-                } else {
-                    post.getDomElement().css("display", "none");
-                }
+                post.setVisibility(post.tagsMatchesFilter(filter));
             }
         }
 

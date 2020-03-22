@@ -124,9 +124,27 @@ export class Post {
             result = result !== inverse;
         }
         return result;
-
     }
 
+    /**
+     * Returns true if the post has been hidden by InstantSearch
+     * @returns boolean True if the post has been hidden, false otherwise
+     */
+    public isVisible() { return !this.element.hasClass("filtered"); }
+
+    /**
+     * Sets the post's visibility status
+     * @param hidden If true, hides the post, if false shows it
+     */
+    public setVisibility(visible = true) {
+        if (visible) { this.element.removeClass("filtered"); }
+        else { this.element.addClass("filtered"); }
+    }
+
+    /**
+     * Returns the JQuery Object for the post
+     * @returns JQuery<HTMLElement> DOM Element
+     */
     public getDomElement() {
         return this.element;
     }
