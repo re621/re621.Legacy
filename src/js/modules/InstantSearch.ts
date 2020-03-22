@@ -40,11 +40,11 @@ export class InstantSearch extends RE6Module {
 
     public applyFilter() {
         const filter = this.$searchbox.val().toString().trim();
+        sessionStorage.setItem("re-instantsearch", filter);
         const posts = Post.fetchPosts();
         const filterTags = (this.startingQuery + (this.startingQuery.length === 0 ? "" : "+") + filter.replace(/ /g, "+")).split("+");
         //Remove duplicates
         const queryString = [...new Set(filterTags)].join("+");
-        Url.setQueryParameter("tags", queryString);
         //when the user clears the input, show all posts
         if (filter === "") {
             for (const post of posts) {
@@ -61,9 +61,10 @@ export class InstantSearch extends RE6Module {
     protected createDOM() {
         const $section = $("<section>").attr("id", "re-instantsearch");
         this.$searchbox = $("<input>").
-            attr("id", "re-instantsearch-input");
+            attr("id", "re-instantsearch-input").
+            val(sessionStorage.getItem("re-instantsearch"));
         this.$searchbox.attr("type", "text");
-        $section.append("<h1>Insant Search</h1>")
+        $section.append("<h1>Filter</h1>")
         $section.append(this.$searchbox)
         $section.append($("<button>").attr("type", "submit").append($("<i>").addClass("fas fa-search")));
         $section.insertAfter($("#search-box"));
