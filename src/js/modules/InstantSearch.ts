@@ -40,7 +40,7 @@ export class InstantSearch extends RE6Module {
 
     public applyFilter() {
         const filter = this.$searchbox.val().toString().trim();
-        const posts = Post.getVisiblePosts();
+        const posts = Post.fetchPosts();
         const filterTags = (this.startingQuery + (this.startingQuery.length === 0 ? "" : "+") + filter.replace(/ /g, "+")).split("+");
         //Remove duplicates
         const queryString = [...new Set(filterTags)].join("+");
