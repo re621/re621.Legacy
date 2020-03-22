@@ -136,7 +136,7 @@ export class HeaderCustomizer extends RE6Module {
                 parent: "re-modal-container",
             },
             [
-                { id: "name", label: "Name", type: "input" },
+                { id: "name", label: "Name", type: "input", required: true, pattern: "[\\S ]+", },
                 { id: "title", label: "Hover", type: "input" },
                 { id: "href", label: "Link", type: "input" },
                 { id: "submit", value: "Submit", type: "submit" },
@@ -161,7 +161,7 @@ export class HeaderCustomizer extends RE6Module {
                 parent: "re-modal-container",
             },
             [
-                { id: "name", label: "Name", type: "input" },
+                { id: "name", label: "Name", type: "input", required: true, pattern: "[\\S ]+", },
                 { id: "title", label: "Hover", type: "input" },
                 { id: "href", label: "Link", type: "input" },
                 { id: "delete", label: "delete", value: "Delete", type: "button" },
