@@ -13,6 +13,8 @@ export class InstantSearch extends RE6Module {
     // TODO: this can be of type HTMLInputElememnt, but I don't know how to do that
     private $searchbox: JQuery<HTMLElement>;
 
+    private startingQuery: string;
+
     private static instance: InstantSearch = new InstantSearch();
 
     private constructor() {
@@ -23,7 +25,7 @@ export class InstantSearch extends RE6Module {
         }
 
         this.createDOM();
-
+        this.startingQuery = Url.getQueryParameter("tags") === undefined ? "" : Url.getQueryParameter("tags");
         let typingTimeout: number;
         let doneTyping = 500;
 
@@ -39,14 +41,13 @@ export class InstantSearch extends RE6Module {
     public applyFilter() {
         const filter = this.$searchbox.val().toString();
         const posts = Post.getVisiblePosts();
+        Url.setQueryParameter("tags", this.startingQuery + (this.startingQuery.length === 0 ? "" : "+") + filter.replace(/ /g, "+"));
         //when the user clears the input, show all posts
         if (filter === "") {
             for (const post of posts) {
                 post.setVisibility(true);
             }
         } else {
-            const currentQuery = Url.getQueryParameter("tags") === undefined ? "" : Url.getQueryParameter("tags");
-            Url.setQueryParameter("tags", currentQuery + (currentQuery.length === 0 ? "" : "+") + filter);
             for (const post of posts) {
                 post.setVisibility(post.tagsMatchesFilter(filter));
             }
