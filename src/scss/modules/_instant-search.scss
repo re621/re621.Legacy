@@ -5,3 +5,8 @@ article.post-preview {
         display: none;
     }
 }
+
+#posts-container .instantsearch-seperator {
+    grid-column: 1/-1;
+    margin-top: 0.5em;
+}

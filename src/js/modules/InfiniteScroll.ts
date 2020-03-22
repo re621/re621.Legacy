@@ -52,16 +52,23 @@ export class InfiniteScroll extends RE6Module {
         }
         this.isInProgress = true;
         const posts: ApiPost[] = (await Api.getJson(`/posts.json?tags=${this.currentQuery}&page=${this.nextPageToGet}`)).posts;
+        Url.setQueryParameter("page", this.nextPageToGet.toString());
+        this.addPageIndicator();
+
         for (const json of posts) {
             this.$postContainer.append(PostHtml.create(json));
         }
         this.pagesLeft = posts.length !== 0;
         this.isInProgress = false;
-        Url.setQueryParameter("page", this.nextPageToGet.toString());
         //new posts habe been appended, force cache refresh
         Post.invalidatePostsCache();
         InstantSearch.getInstance().applyFilter();
         this.nextPageToGet++;
+    }
+
+    private addPageIndicator() {
+        const url = document.location.href;
+        this.$postContainer.append($("<a>").attr("href", url).addClass("instantsearch-seperator").html(`<h2>Page: ${this.nextPageToGet}</h2>`));
     }
 
     /**
