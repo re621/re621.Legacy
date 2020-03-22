@@ -12,31 +12,26 @@ export class Tabbed {
 
     public create() {
         let _self = this;
-        let $container = $("<re-tab-container>");
 
-        let $tabGroup = $("<re-tab-group>");
+        let $container = $("<div>");
+        let $tabList = $("<ul>").appendTo($container);
 
         this.config.content.forEach(function (entry, index) {
-            $("<input>")
-                .attr("name", _self.config.name)
-                .attr("type", "radio")
-                .attr("id", "tab-" + _self.config.name + "-" + index)
-                .addClass("re-tab-input")
-                .appendTo($tabGroup);
-            $("<label>")
-                .attr("for", "tab-" + _self.config.name + "-" + index)
-                .addClass("re-tab-label")
-                .html(entry.name)
-                .appendTo($tabGroup);
+            let $tab = $("<a>")
+                .attr("href", "#fragment-" + index)
+                .html(entry.name);
+            $("<li>").appendTo($tabList).append($tab);
+
             $("<div>")
-                .addClass("re-tab-panel")
+                .attr("id", "fragment-" + index)
                 .append(entry.page)
-                .appendTo($tabGroup);
+                .appendTo($container);
         });
 
-        $tabGroup.find("input").first().attr("checked", "checked");
+        $container.tabs({
+            //        heightStyle: "auto",
+        });
 
-        $container.append($tabGroup);
         return $container;
     }
 
