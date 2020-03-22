@@ -74,6 +74,27 @@ form.grid-form {
         }
     }
 
+    // Input Validation
+    input[type=text] {
+        border: 1px solid transparent;
+
+        &:required {
+            @include themable {
+                border-left: 1px solid themed("color-warning");
+            }
+        }
+
+        &:invalid {
+            @include themable {
+                border-left: 1px solid themed("color-danger");
+            }
+        }
+
+        &:valid {
+            border-left: 1px solid transparent;
+        }
+    }
+
     // Checkbox Switch
     input[type=checkbox].switch {
         display: none;

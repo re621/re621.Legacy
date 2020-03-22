@@ -26,6 +26,8 @@ export class Form {
     public addElement(element: FormElement) {
         if (element.id === undefined) element.id = this.index + "";
         if (element.value === undefined) element.value = "";
+        if (element.required === undefined) element.required = false;
+        if (element.pattern === undefined) element.pattern = "";
         if (element.label === undefined) element.label = "";
         if (element.select === undefined) element.select = [];
         if (element.class === undefined) element.class = "";
@@ -168,8 +170,10 @@ export class Form {
             .val(element.value)
             .appendTo($form);
 
-        if (element.class) $input.addClass(element.class);
+        if (element.pattern !== "") { $input.attr("pattern", element.pattern); }
+        if (element.required) { $input.attr("required", ''); }
 
+        if (element.class) $input.addClass(element.class);
         return $input;
     }
 
@@ -386,6 +390,10 @@ interface FormElement {
     type: "input" | "copyinput" | "checkbox" | "button" | "submit" | "textarea" | "select" | "div" | "hr",
     /** Default value for the input */
     value?: string,
+    /** If true, the field is required to submit the form */
+    required?: boolean,
+    /** Pattern that the input value must match */
+    pattern?: string,
     /** Input label */
     label?: string | HTMLElement,
     /** Value-name pairs for the select */
