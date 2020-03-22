@@ -35,6 +35,14 @@ export class Modal {
             .draggable({ containment: "parent", })
             .resizable({ containment: "parent", });
 
+        if (config.fixed) {
+            this.$modal.on("dialogopen", function (event, ui) {
+                $(event.target).dialog('widget')
+                    .css({ position: 'fixed' })
+                    .position({ my: config.position.my, at: config.position.at, of: window });
+            });
+        }
+
         config.triggers.forEach(function (trigger) {
             _self.registerTrigger(trigger);
         });
@@ -47,12 +55,13 @@ export class Modal {
      */
     private validateConfig(config: ModalConfig) {
         if (config.title === undefined) config.title = "Dialog";
-        if (config.content === undefined) config.content = $("<span>. . .</span>");
+        if (config.content === undefined) config.content = $("");
         if (config.triggers === undefined) config.triggers = [];
         if (config.triggerMulti === undefined) config.triggerMulti = false;
 
         if (config.minWidth === undefined) config.minWidth = 150;
         if (config.minHeight === undefined) config.minHeight = 150;
+        if (config.fixed === undefined) config.fixed = false;
 
         if (config.disabled === undefined) config.disabled = false;
         if (config.position === undefined) config.position = { my: "center", at: "center" };
@@ -108,7 +117,13 @@ export class Modal {
     public enable() { this.config.disabled = false; }
     public disable() { this.config.disabled = true; }
 
-    public destroy() { this.$modal.dialog("destroy"); }
+    /**
+     * Completely and irreversibly destorys the modal window
+     */
+    public destroy() {
+        this.$modal.dialog("destroy");
+        this.$modal.remove();
+    }
 
     /**
      * Returns the element that triggered the modal
@@ -128,6 +143,7 @@ interface ModalConfig {
 
     minWidth?: number,
     minHeight?: number,
+    fixed?: boolean,
 
     disabled?: boolean,
     position?: {
