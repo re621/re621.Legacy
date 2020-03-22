@@ -12,7 +12,7 @@ export class Post {
 
     protected id: number;
     protected tags: string;
-    protected rating: string;
+    protected rating: PostRating;
     protected favorites: number;
     protected score: number;
 
@@ -30,7 +30,7 @@ export class Post {
     protected constructor($image: JQuery<HTMLElement>) {
         this.id = parseInt($image.attr("data-id"));
         this.tags = $image.attr("data-tags");
-        this.rating = PostRating[$image.attr("data-rating")];
+        this.rating = PostRating.fromValue($image.attr("data-rating"));
 
         if ($image.attr("data-fav-count")) { this.favorites = parseInt($image.attr("data-fav-count")); }
         else { parseInt($image.find(".post-score-faves").first().html().substring(1)); }
@@ -44,8 +44,7 @@ export class Post {
         this.fileExtension = $image.attr("data-file-ext");
 
         this.uploaderID = parseInt($image.attr("data-uploader-id"));
-        this.uploaderName = $image.attr("data-uploader-id");
-
+        this.uploaderName = $image.attr("data-uploader");
         this.sound = $image.attr("data-has-sound") === "true";
         this.flags = $image.attr("data-flags");
 
@@ -242,5 +241,25 @@ export class ViewingPost extends Post {
 export enum PostRating {
     Safe = "s",
     Questionable = "q",
-    Explicit = "e",
+    Explicit = "e"
+}
+
+export namespace PostRating {
+    export function fromValue(value: string) {
+        for (const key of Object.keys(PostRating)) {
+            if (PostRating[key] === value) {
+                return PostRating[key];
+            }
+        }
+        return undefined;
+    }
+
+    export function toString(postRating: PostRating): string {
+        for (const key of Object.keys(PostRating)) {
+            if (PostRating[key] === postRating) {
+                return key;
+            }
+        }
+        return undefined;
+    }
 }

@@ -20,11 +20,13 @@ import { ImageScaler } from "./modules/ImageScaler";
 import { DownloadCustomizer } from "./modules/DownloadCustomizer";
 
 import { SettingsController } from "./modules/SettingsController";
+import { PostViewer } from "./modules/PostViewer";
 
 // Modules with self-contained settings
 HeaderCustomizer.getInstance();
 ThemeCustomizer.getInstance();
 FormattingHelper.init();
+PostViewer.getInstance();
 
 // Modules without settings
 BlacklistToggler.getInstance();
