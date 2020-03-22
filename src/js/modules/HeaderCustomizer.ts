@@ -101,7 +101,7 @@ export class HeaderCustomizer extends RE6Module {
      */
     private createDOM() {
         let _self = this;
-        this.$menu.html("");
+        this.$menu.empty();
 
         // Fetch stored data
         this.fetchSettings("tabs").forEach(function (value) {

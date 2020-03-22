@@ -188,7 +188,7 @@ export class FormattingHelper extends RE6Module {
     private updateButtons() {
         let _self = this;
         let buttonList = [];
-        this.$formatButtons.html("");
+        this.$formatButtons.empty();
 
         this.fetchSettings("buttons", true).forEach(function (value) {
             let buttonData = _self.createButton(value);
@@ -260,7 +260,7 @@ export class FormattingHelper extends RE6Module {
         } else {
             this.$container.attr("data-drawer", "true");
 
-            this.$formatButtonsDrawer.html("");
+            this.$formatButtonsDrawer.empty();
             var missingButtons = $.grep(Object.keys(button_definitions), function (el) { return $.inArray(el, _self.fetchSettings("buttons")) == -1 });
             missingButtons.forEach(function (value) {
                 let buttonData = _self.createButton(value);

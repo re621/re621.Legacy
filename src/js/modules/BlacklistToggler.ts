@@ -19,7 +19,7 @@ export class BlacklistToggler extends RE6Module {
         // Create the required DOM
         this.$box = $("section#blacklist-box");
 
-        let $toggleContainer = $("section#blacklist-box h1").html("");
+        let $toggleContainer = $("section#blacklist-box h1").empty();
         this.$toggle = $(`<a href="">Blacklisted</a>`)
             .attr("id", "blacklist-toggle")
             .appendTo($toggleContainer);

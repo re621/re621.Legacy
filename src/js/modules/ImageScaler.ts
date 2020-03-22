@@ -62,7 +62,7 @@ export class ImageScaler extends RE6Module {
      * Builds basic structure for the module
      */
     private createDOM() {
-        let resizeButtonContainer = $("#image-resize-cycle").html("");
+        let resizeButtonContainer = $("#image-resize-cycle").empty();
         this.setImageSize(this.fetchSettings("size"));
 
         this.resizeSelector = new Form(

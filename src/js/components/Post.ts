@@ -28,26 +28,26 @@ export class Post {
     protected flags: string;
 
     protected constructor($image: JQuery<HTMLElement>) {
-        this.id = parseInt($image.data("id"));
-        this.tags = $image.data("tags");
-        this.rating = PostRating[$image.data("rating")];
+        this.id = parseInt($image.attr("data-id"));
+        this.tags = $image.attr("data-tags");
+        this.rating = PostRating[$image.attr("data-rating")];
 
-        if ($image.data("fav-count")) { this.favorites = parseInt($image.data("fav-count")); }
+        if ($image.attr("data-fav-count")) { this.favorites = parseInt($image.attr("data-fav-count")); }
         else { parseInt($image.find(".post-score-faves").first().html().substring(1)); }
 
-        if ($image.data("score")) { this.score = parseInt($image.data("score")); }
+        if ($image.attr("data-score")) { this.score = parseInt($image.attr("data-score")); }
         else { parseInt($image.find(".post-score-score").first().html().substring(1)); }
 
-        this.fileURL = $image.data("file-url");
-        this.sampleURL = $image.data("large-file-url");
-        this.previewURL = $image.data("preview-file-url");
-        this.fileExtension = $image.data("file-ext");
+        this.fileURL = $image.attr("data-file-url");
+        this.sampleURL = $image.attr("data-large-file-url");
+        this.previewURL = $image.attr("data-preview-file-url");
+        this.fileExtension = $image.attr("data-file-ext");
 
-        this.uploaderID = $image.data("uploader-id");
-        this.uploaderName = $image.data("uploader-id");
+        this.uploaderID = parseInt($image.attr("data-uploader-id"));
+        this.uploaderName = $image.attr("data-uploader-id");
 
-        this.sound = $image.data("has-sound");
-        this.flags = $image.data("flags");
+        this.sound = $image.attr("data-has-sound") === "true";
+        this.flags = $image.attr("data-flags");
 
         this.element = $image;
     }
