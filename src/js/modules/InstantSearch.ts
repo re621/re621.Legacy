@@ -39,9 +39,12 @@ export class InstantSearch extends RE6Module {
     }
 
     public applyFilter() {
-        const filter = this.$searchbox.val().toString();
+        const filter = this.$searchbox.val().toString().trim();
         const posts = Post.getVisiblePosts();
-        Url.setQueryParameter("tags", this.startingQuery + (this.startingQuery.length === 0 ? "" : "+") + filter.replace(/ /g, "+"));
+        const filterTags = (this.startingQuery + (this.startingQuery.length === 0 ? "" : "+") + filter.replace(/ /g, "+")).split("+");
+        //Remove duplicates
+        const queryString = [...new Set(filterTags)].join("+");
+        Url.setQueryParameter("tags", queryString);
         //when the user clears the input, show all posts
         if (filter === "") {
             for (const post of posts) {
