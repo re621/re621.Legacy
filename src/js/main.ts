@@ -16,9 +16,10 @@ import { TitleCustomizer } from "./modules/TitleCustomizer";
 import { Miscellaneous } from "./modules/Miscellaneous";
 import { InstantSearch } from "./modules/InstantSearch";
 import { InfiniteScroll } from "./modules/InfiniteScroll";
+import { ImageScaler } from "./modules/ImageScaler";
+import { DownloadCustomizer } from "./modules/DownloadCustomizer";
 
 import { SettingsController } from "./modules/SettingsController";
-import { ImageScaler } from "./modules/ImageScaler";
 
 // Modules with self-contained settings
 HeaderCustomizer.getInstance();
@@ -33,6 +34,7 @@ InfiniteScroll.getInstance();
 
 // Modules configured by the SettingsController
 SettingsController.registerModule(
+    DownloadCustomizer.getInstance(),
     TitleCustomizer.getInstance(),
     Miscellaneous.getInstance(),
 );

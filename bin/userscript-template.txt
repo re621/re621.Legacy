@@ -15,4 +15,5 @@
 // @resource     redesignFixes https://re621.github.io/Redesign-Fixes/build/style.min.css
 // @grant        GM_getResourceText
 // @grant        GM_addStyle
+// @grant        GM_download
 // ==/UserScript==
