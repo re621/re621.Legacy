@@ -250,7 +250,16 @@ export namespace PostRating {
             if (PostRating[key] === value) {
                 return PostRating[key];
             }
-            return undefined;
         }
+        return undefined;
+    }
+
+    export function toString(postRating: PostRating): string {
+        for (const key of Object.keys(PostRating)) {
+            if (PostRating[key] === postRating) {
+                return key;
+            }
+        }
+        return undefined;
     }
 }
