@@ -2,6 +2,7 @@
 
 @import 'components/themable';
 
+@import 'utilities/functions';
 @import 'utilities/themed';
 @import 'utilities/common';
 @import 'utilities/form';
@@ -19,8 +20,3 @@
 @import 'modules/instant-search';
 @import 'modules/settings-controller';
 @import 'modules/structure-utilities';
-
-//UTF-8 fuckery: https://github.com/sass/sass/issues/1395
-@function unicode($str){
-    @return unquote("\"")+unquote(str-insert($str, "\\", 1))+unquote("\"");
-}
