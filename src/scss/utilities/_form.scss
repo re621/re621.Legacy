@@ -9,132 +9,154 @@ form.grid-form {
     &.columns-2 {
         grid-template-columns: repeat(2, 5rem 10rem);
         width: 31.5rem;
+
+        .input-container.stretch-full {
+            grid-column: span 4;
+
+            &.labeled {
+                grid-column: span 3;
+            }
+        }
     }
 
     &.columns-3 {
         grid-template-columns: repeat(3, 5rem 10rem);
         width: 48rem;
-    }
 
-    // Fill 2 columns
-    .full-column {
-        grid-column: 1 / 3;
+        .input-container.stretch-full {
+            grid-column: span 6;
 
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        &.text-block {
-            display: block
+            &.labeled {
+                grid-column: span 5;
+            }
         }
-    }
-
-    hr.full-column {
-        margin: 0;
-    }
-
-    // Fill all columns
-    .full-width {
-        grid-column: 2 / -1;
-    }
-
-    // Input styles
-    input,
-    select,
-    button {
-        width: stretch;
-        padding: 0.125rem;
-        border-radius: 4px;
     }
 
     label {
         font-weight: 500;
     }
 
-    .copybox {
-        display: inline-grid;
-        grid-template-columns: 80% 20%;
-        overflow: hidden;
+    .input-container {
 
-        input[type=text] {
-            width: unset;
-            border-radius: 4px 0 0 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        // Width Utilities
+        &.stretch-column {
+            grid-column: span 2;
+
+            &.labeled {
+                grid-column: span 1;
+            }
         }
 
-        button[type=button] {
-            width: unset;
-            border-radius: 0 4px 4px 0;
+        &.stretch-full {
+            grid-column: span 2;
+        }
 
-            &:hover {
+        // Input styles
+        input,
+        select,
+        button {
+            width: stretch;
+            padding: 0.125rem;
+            border-radius: 4px;
+            border: 1px solid transparent;
+
+            &:required {
                 @include themable {
-                    background: themed("color-section");
-                    color: themed("color-text");
+                    border-left: 1px solid themed("color-warning");
                 }
             }
-        }
-    }
 
-    // Input Validation
-    input[type=text] {
-        border: 1px solid transparent;
-
-        &:required {
-            @include themable {
-                border-left: 1px solid themed("color-warning");
-            }
-        }
-
-        &:invalid {
-            @include themable {
-                border-left: 1px solid themed("color-danger");
-            }
-        }
-
-        &:valid {
-            border-left: 1px solid transparent;
-        }
-    }
-
-    // Checkbox Switch
-    input[type=checkbox].switch {
-        display: none;
-
-        &+label.switch {
-            position: relative;
-            display: inline-block;
-            width: 2.5rem;
-            height: 1.25rem;
-            border-radius: 1.25rem;
-
-            @include themable {
-                background-color: desaturate(themed("color-section"), 10%);
-                border: 1px solid themed("color-section");
-            }
-
-            &::after {
-                content: "";
-                position: absolute;
-                width: 1.125rem;
-                height: 1.125rem;
-                border-radius: 50%;
-                top: 0.075rem;
-                left: 0.075rem;
-                transition: all 0.3s;
-
+            &:invalid {
                 @include themable {
-                    background-color: themed("color-text-muted");
+                    border-left: 1px solid themed("color-danger");
+                }
+            }
+
+            &:valid {
+                border-left: 1px solid transparent;
+            }
+        }
+
+        // Copybox
+        &.copybox {
+            display: inline-grid;
+            grid-template-columns: 80% 20%;
+            overflow: hidden;
+
+            input[type=text] {
+                width: unset;
+                border-radius: 4px 0 0 4px;
+            }
+
+            button[type=button] {
+                width: unset;
+                border-radius: 0 4px 4px 0;
+
+                &:hover {
+                    @include themable {
+                        background: themed("color-section");
+                        color: themed("color-text");
+                    }
                 }
             }
         }
 
-        &:checked+label.switch {
-            @include themable {
-                background-color: lighten(themed("color-section"), 20%);
-            }
+        // Checkbox Switch
+        &.checkbox-switch {
+            input[type=checkbox] {
+                display: none;
 
-            &::after {
-                left: 1.325rem;
+                &+label {
+                    position: relative;
+                    display: inline-block;
+                    width: 2.5rem;
+                    height: 1.25rem;
+                    border-radius: 1.25rem;
+
+                    @include themable {
+                        background-color: desaturate(themed("color-section"), 10%);
+                        border: 1px solid themed("color-section");
+                    }
+
+                    &::after {
+                        content: "";
+                        position: absolute;
+                        width: 1.125rem;
+                        height: 1.125rem;
+                        border-radius: 50%;
+                        top: 0.075rem;
+                        left: 0.075rem;
+                        transition: all 0.3s;
+
+                        @include themable {
+                            background-color: themed("color-text-muted");
+                        }
+                    }
+                }
+
+                &:checked+label {
+                    @include themable {
+                        background-color: lighten(themed("color-section"), 20%);
+                    }
+
+                    &::after {
+                        left: 1.325rem;
+                    }
+                }
             }
         }
+
+        // HR
+        hr {
+            margin: 0;
+            width: 100%;
+        }
+
+        // End of Input Container
     }
+
 }

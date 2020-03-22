@@ -5,6 +5,7 @@ import { RE6Module } from "../components/RE6Module";
 import { Miscellaneous } from "./Miscellaneous";
 import { Form } from "../utilities/Form";
 import { TitleCustomizer } from "./TitleCustomizer";
+import { DownloadCustomizer } from "./DownloadCustomizer";
 
 /**
  * SettingsController  
@@ -32,13 +33,13 @@ export class SettingsController extends RE6Module {
         });
 
         // Establish the settings window contents
-        let titleCustomizerTab = this.createTabTitleCustomizer();
+        let postsPageTab = this.createTabPostsPage();
         let miscSettingsTab = this.createTabMiscellaneous();
 
         let $settings = new Tabbed({
             name: "settings-tabs",
             content: [
-                { name: "TitleCustomizer", page: titleCustomizerTab.get() },
+                { name: "TitleCustomizer", page: postsPageTab.get() },
                 { name: "Miscellaneous", page: miscSettingsTab.get() },
                 // { name: "Posts", page: $postSettings },
             ]
@@ -54,7 +55,7 @@ export class SettingsController extends RE6Module {
 
         // Establish handlers
         this.handleTabMiscellaneous(miscSettingsTab);
-        this.handleTabTitleCustomizer(titleCustomizerTab);
+        this.handleTabPostsPage(postsPageTab);
     }
 
     /**
@@ -86,9 +87,10 @@ export class SettingsController extends RE6Module {
     }
 
     /** Create the DOM for the Title Customizer page */
-    private createTabTitleCustomizer() {
+    private createTabPostsPage() {
         let _self = this;
-        let module = <TitleCustomizer>this.modules.get("TitleCustomizer");
+        let titleCustomizer = <TitleCustomizer>this.modules.get("TitleCustomizer");
+        let downloadCustomizer = <TitleCustomizer>this.modules.get("DownloadCustomizer");
 
         let form = new Form(
             {
@@ -97,47 +99,53 @@ export class SettingsController extends RE6Module {
                 parent: "re-modal-container",
             },
             [
+                // Title Customizer
                 {
-                    id: "template",
-                    type: "input",
-                    value: module.fetchSettings("template"),
-                    label: "Template",
-                    class: "full-width",
+                    id: "title-cust-header",
+                    type: "div",
+                    value: "<h3>Title Customizer</h3>",
+                    stretch: "full",
                 },
                 {
-                    id: "symbols-enabled",
+                    id: "title-cust-template",
+                    type: "input",
+                    value: titleCustomizer.fetchSettings("template"),
+                    label: "Template",
+                    stretch: "full",
+                },
+                {
+                    id: "title-cust-symbols-enabled",
                     type: "checkbox",
-                    value: module.fetchSettings("symbolsEnabled"),
+                    value: titleCustomizer.fetchSettings("symbolsEnabled"),
                     label: "Vote / Favorite Icons",
                 },
                 {
-                    id: "symbol-fav",
+                    id: "title-cust-symbol-fav",
                     type: "input",
-                    value: module.fetchSettings("symbol-fav"),
+                    value: titleCustomizer.fetchSettings("symbol-fav"),
                     label: "Favorite",
                 },
                 {
-                    id: "symbol-spacer-1",
+                    id: "title-cust-symbol-spacer-1",
                     type: "div",
                     value: "",
-                    label: "",
                 },
                 {
-                    id: "symbol-voteup",
+                    id: "title-cust-symbol-voteup",
                     type: "input",
-                    value: module.fetchSettings("symbol-voteup"),
+                    value: titleCustomizer.fetchSettings("symbol-voteup"),
                     label: "Upvote",
                 },
                 {
-                    id: "symbol-spacer-2",
+                    id: "title-cust-symbol-spacer-2",
                     type: "div",
                     value: "",
                     label: "",
                 },
                 {
-                    id: "symbol-votedown",
+                    id: "title-cust-symbol-votedown",
                     type: "input",
-                    value: module.fetchSettings("symbol-votedown"),
+                    value: titleCustomizer.fetchSettings("symbol-votedown"),
                     label: "Downvote",
                 },
             ]
@@ -150,29 +158,30 @@ export class SettingsController extends RE6Module {
      * Event handlers for the title customizer settings page
      * @param form Miscellaneous settings form
      */
-    private handleTabTitleCustomizer(form: Form) {
+    private handleTabPostsPage(form: Form) {
         let _self = this;
-        let module = <TitleCustomizer>this.modules.get("TitleCustomizer");
-        let titleFormInput = form.getInputList();
+        let titleCustomizer = <TitleCustomizer>this.modules.get("TitleCustomizer");
+        let postsPageInput = form.getInputList();
 
-        titleFormInput.get("template").change(function (event) {
-            module.pushSettings("template", $(this).val());
+        // Title Customizer
+        postsPageInput.get("title-cust-template").change(function (event) {
+            titleCustomizer.pushSettings("template", $(this).val());
         });
 
-        titleFormInput.get("symbols-enabled").change(function (event) {
-            module.pushSettings("symbolsEnabled", $(this).is(":checked"));
+        postsPageInput.get("title-cust-symbols-enabled").change(function (event) {
+            titleCustomizer.pushSettings("symbolsEnabled", $(this).is(":checked"));
         });
 
-        titleFormInput.get("symbol-fav").change(function (event) {
-            module.pushSettings("symbol-fav", $(this).val());
+        postsPageInput.get("title-cust-symbol-fav").change(function (event) {
+            titleCustomizer.pushSettings("symbol-fav", $(this).val());
         });
 
-        titleFormInput.get("symbol-voteup").change(function (event) {
-            module.pushSettings("symbol-voteup", $(this).val());
+        postsPageInput.get("title-cust-symbol-voteup").change(function (event) {
+            titleCustomizer.pushSettings("symbol-voteup", $(this).val());
         });
 
-        titleFormInput.get("symbol-votedown").change(function (event) {
-            module.pushSettings("symbol-votedown", $(this).val());
+        postsPageInput.get("title-cust-symbol-votedown").change(function (event) {
+            titleCustomizer.pushSettings("symbol-votedown", $(this).val());
         });
     }
 

@@ -25,12 +25,16 @@ export class Form {
      */
     public addElement(element: FormElement) {
         if (element.id === undefined) element.id = this.index + "";
+
+        if (element.stretch === undefined) element.stretch = "default";
+
+        if (element.label === undefined) element.label = "";
         if (element.value === undefined) element.value = "";
+
         if (element.required === undefined) element.required = false;
         if (element.pattern === undefined) element.pattern = "";
-        if (element.label === undefined) element.label = "";
+
         if (element.select === undefined) element.select = [];
-        if (element.class === undefined) element.class = "";
 
         this.elements.push(element);
         this.index++;
@@ -155,25 +159,30 @@ export class Form {
      * @param element Element configuration data
      */
     private buildInput($form: JQuery<HTMLElement>, element: FormElement) {
-        let $input = $("<input>");
-
+        let labeled = false;
         if (element.label) {
             $("<label>")
-                .attr("for", this.config.id + "_" + element.id)
+                .attr("for", this.config.id + "-" + element.id)
                 .html(element.label)
                 .appendTo($form);
-        } else { $input.addClass("full-column"); }
+            labeled = true;
+        } else if (element.stretch === "default") { element.stretch = "column"; }
 
-        $input
-            .attr("type", "text")
-            .attr("id", this.config.id + "_" + element.id)
-            .val(element.value)
+        let $inputContainer = $("<div>")
+            .addClass("input-container")
+            .toggleClass("labeled", labeled)
+            .addClass("stretch-" + element.stretch)
             .appendTo($form);
 
-        if (element.pattern !== "") { $input.attr("pattern", element.pattern); }
+        let $input = $("<input>")
+            .attr("type", "text")
+            .attr("id", this.config.id + "-" + element.id)
+            .val(element.value)
+            .appendTo($inputContainer);
+
+        if (element.pattern) { $input.attr("pattern", element.pattern); }
         if (element.required) { $input.attr("required", ''); }
 
-        if (element.class) $input.addClass(element.class);
         return $input;
     }
 
@@ -183,38 +192,38 @@ export class Form {
      * @param element Element configuration data
      */
     private buildCopyInput($form: JQuery<HTMLElement>, element: FormElement) {
-        let $input = $("<input>");
-        let $inputbox = $("<div>").addClass("copybox");
-
+        let labeled = false;
         if (element.label) {
             $("<label>")
-                .attr("for", this.config.id + "_" + element.id)
+                .attr("for", this.config.id + "-" + element.id)
                 .html(element.label)
                 .appendTo($form);
-        } else { $input.addClass("full-column"); }
+            labeled = true;
+        } else if (element.stretch === "default") { element.stretch = "column"; }
 
-        $input
+        let $inputContainer = $("<div>")
+            .addClass("input-container")
+            .toggleClass("labeled", labeled)
+            .addClass("copybox")
+            .addClass("stretch-" + element.stretch)
+            .appendTo($form);
+
+        let $input = $("<input>")
             .attr("type", "text")
-            .attr("id", this.config.id + "_" + element.id)
-            .attr("readonly", "true")
+            .attr("id", this.config.id + "-" + element.id)
             .val(element.value)
-            .appendTo($inputbox);
-
-        if (element.class) $input.addClass(element.class);
+            .appendTo($inputContainer);
 
         let $copybutton = $("<button>")
             .attr("type", "button")
-            .attr("id", this.config.id + "_" + element.id + "_copy")
+            .attr("id", this.config.id + "-" + element.id + "-copy")
             .html(`<i class="far fa-copy"></i>`)
-            .appendTo($inputbox);
+            .appendTo($inputContainer);
 
-
-        $(this.config.parent).on("click", "form#" + this.config.id + " button#" + this.config.id + "_" + element.id + "_copy", function (event) {
+        $($copybutton).click(function (event) {
             $input.select();
             document.execCommand("copy");
         });
-
-        $inputbox.appendTo($form);
 
         return $input;
     }
@@ -225,26 +234,32 @@ export class Form {
      * @param element Element configuration data
      */
     private buildCheckbox($form: JQuery<HTMLElement>, element: FormElement) {
-        let $check_box = $("<div>").addClass("full-column");
-        let $input = $("<input>");
+        if (element.stretch === "default") { element.stretch = "column"; }
 
-        $("<label>")
-            .attr("for", this.config.id + "_" + element.id)
-            .html(element.label)
-            .appendTo($check_box);
-        $input
+        let $inputContainer = $("<div>")
+            .addClass("input-container")
+            .addClass("checkbox-switch")
+            .addClass("stretch-" + element.stretch)
+            .appendTo($form);
+
+        if (element.label) {
+            $("<label>")
+                .attr("for", this.config.id + "-" + element.id)
+                .html(element.label)
+                .appendTo($inputContainer);
+        }
+
+        let $input = $("<input>")
             .attr("type", "checkbox")
-            .attr("id", this.config.id + "_" + element.id)
+            .attr("id", this.config.id + "-" + element.id)
             .addClass("switch")
             .attr("checked", element.value)
-            .appendTo($check_box);
-        $("<label>")
-            .attr("for", this.config.id + "_" + element.id)
-            .addClass("switch")
-            .appendTo($check_box);
-        $check_box.appendTo($form);
+            .appendTo($inputContainer);
 
-        if (element.class) $check_box.addClass(element.class);
+        $("<label>")
+            .attr("for", this.config.id + "-" + element.id)
+            .addClass("switch")
+            .appendTo($inputContainer);
 
         return $input;
     }
@@ -255,17 +270,29 @@ export class Form {
      * @param element Element configuration data
      */
     private buildButton($form: JQuery<HTMLElement>, element: FormElement) {
-        let $button_box = $("<div>").appendTo($form);
-        let $input = $(`<button>`)
-        if (!element.label) { $button_box.addClass("full-column"); }
+        let labeled = false;
+        if (element.label) {
+            $("<label>")
+                .attr("for", this.config.id + "-" + element.id)
+                .html(element.label)
+                .appendTo($form);
+            labeled = true;
+        } else if (element.stretch === "default") { element.stretch = "column"; }
 
-        $input
+        let $inputContainer = $("<div>")
+            .addClass("input-container")
+            .toggleClass("labeled", labeled)
+            .addClass("stretch-" + element.stretch)
+            .appendTo($form);
+
+        let $input = $("<button>")
             .attr("type", "button")
-            .attr("id", this.config.id + "_" + element.id)
+            .attr("id", this.config.id + "-" + element.id)
             .html(element.value)
-            .appendTo($button_box);
+            .appendTo($inputContainer);
 
-        if (element.class) $button_box.addClass(element.class);
+        if (element.pattern) { $input.attr("pattern", element.pattern); }
+        if (element.required) { $input.attr("required", ''); }
 
         return $input;
     }
@@ -276,17 +303,29 @@ export class Form {
      * @param element Element configuration data
      */
     private buildSubmit($form: JQuery<HTMLElement>, element: FormElement) {
-        let $button_box = $("<div>").appendTo($form);
-        let $input = $(`<button>`)
-        if (!element.label) { $button_box.addClass("full-column"); }
+        let labeled = false;
+        if (element.label) {
+            $("<label>")
+                .attr("for", this.config.id + "-" + element.id)
+                .html(element.label)
+                .appendTo($form);
+            labeled = true;
+        } else if (element.stretch === "default") { element.stretch = "column"; }
 
-        $input
+        let $inputContainer = $("<div>")
+            .addClass("input-container")
+            .toggleClass("labeled", labeled)
+            .addClass("stretch-" + element.stretch)
+            .appendTo($form);
+
+        let $input = $("<button>")
             .attr("type", "submit")
-            .attr("id", this.config.id + "_" + element.id)
+            .attr("id", this.config.id + "-" + element.id)
             .html(element.value)
-            .appendTo($button_box);
+            .appendTo($inputContainer);
 
-        if (element.class) $button_box.addClass(element.class);
+        if (element.pattern) { $input.attr("pattern", element.pattern); }
+        if (element.required) { $input.attr("required", ''); }
 
         return $input;
     }
@@ -297,22 +336,28 @@ export class Form {
      * @param element Element configuration data
      */
     private buildTextarea($form: JQuery<HTMLElement>, element: FormElement) {
-        let $input = $("<textbox>");
-
+        let labeled = false;
         if (element.label) {
             $("<label>")
-                .attr("for", this.config.id + "_" + element.id)
+                .attr("for", this.config.id + "-" + element.id)
                 .html(element.label)
                 .appendTo($form);
-        } else { $input.addClass("full-column"); }
+            labeled = true;
+        } else if (element.stretch === "default") { element.stretch = "column"; }
 
-        $input
-            .attr("type", "text")
-            .attr("id", this.config.id + "_" + element.id)
-            .val(element.value)
+        let $inputContainer = $("<div>")
+            .addClass("input-container")
+            .toggleClass("labeled", labeled)
+            .addClass("stretch-" + element.stretch)
             .appendTo($form);
 
-        if (element.class) $input.addClass(element.class);
+        let $input = $("<textarea>")
+            .attr("id", this.config.id + "-" + element.id)
+            .val(element.value)
+            .appendTo($inputContainer);
+
+        if (element.pattern) { $input.attr("pattern", element.pattern); }
+        if (element.required) { $input.attr("required", ''); }
 
         return $input;
     }
@@ -323,25 +368,31 @@ export class Form {
      * @param element Element configuration data
      */
     private buildSelect($form: JQuery<HTMLElement>, element: FormElement) {
-        let $input = $("<select>");
-
+        let labeled = false;
         if (element.label) {
             $("<label>")
-                .attr("for", this.config.id + "_" + element.id)
+                .attr("for", this.config.id + "-" + element.id)
                 .html(element.label)
                 .appendTo($form);
-        } else { $input.addClass("full-column"); }
+            labeled = true;
+        } else if (element.stretch === "default") { element.stretch = "column"; }
+
+        let $inputContainer = $("<div>")
+            .addClass("input-container")
+            .toggleClass("labeled", labeled)
+            .addClass("stretch-" + element.stretch)
+            .appendTo($form);
+
+        let $input = $("<select>")
+            .attr("id", this.config.id + "-" + element.id)
+            .val(element.value)
+            .appendTo($inputContainer);
 
         element.select.forEach(function (entry) {
             $("<option>").val(entry.value).text(entry.name).appendTo($input);
         });
 
-        $input
-            .attr("id", this.config.id + "_" + element.id)
-            .val(element.value)
-            .appendTo($form);
-
-        if (element.class) $input.addClass(element.class);
+        if (element.required) { $input.attr("required", ''); }
 
         return $input;
     }
@@ -352,11 +403,26 @@ export class Form {
      * @param element Element configuration data
      */
     private buildDiv($form: JQuery<HTMLElement>, element: FormElement) {
-        let $input = $("<div>")
-            .addClass("full-column")
-            .addClass("text-block")
-            .html(element.label)
+        let labeled = false;
+        if (element.label) {
+            $("<label>")
+                .attr("for", this.config.id + "-" + element.id)
+                .html(element.label)
+                .appendTo($form);
+            labeled = true;
+        } else if (element.stretch === "default") { element.stretch = "column"; }
+
+        let $inputContainer = $("<div>")
+            .addClass("input-container")
+            .toggleClass("labeled", labeled)
+            .addClass("stretch-" + element.stretch)
             .appendTo($form);
+
+        let $input = $("<div>")
+            .attr("id", this.config.id + "-" + element.id)
+            .html(element.value)
+            .appendTo($inputContainer);
+
         return $input;
     }
 
@@ -366,9 +432,25 @@ export class Form {
      * @param element Element configuration data
      */
     private buildHr($form: JQuery<HTMLElement>, element: FormElement) {
-        let $input = $("<hr>")
-            .addClass("full-column")
+        let labeled = false;
+        if (element.label) {
+            $("<label>")
+                .attr("for", this.config.id + "-" + element.id)
+                .html(element.label)
+                .appendTo($form);
+            labeled = true;
+        } else if (element.stretch === "default") { element.stretch = "column"; }
+
+        let $inputContainer = $("<div>")
+            .addClass("input-container")
+            .toggleClass("labeled", labeled)
+            .addClass("stretch-" + element.stretch)
             .appendTo($form);
+
+        let $input = $("<hr>")
+            .attr("id", this.config.id + "-" + element.id)
+            .appendTo($inputContainer);
+
         return $input;
     }
 
@@ -388,16 +470,19 @@ interface FormElement {
     id?: string,
     /** Supported input type */
     type: "input" | "copyinput" | "checkbox" | "button" | "submit" | "textarea" | "select" | "div" | "hr",
+
+    stretch?: "default" | "column" | "full",
+
+    /** Input label */
+    label?: string,
     /** Default value for the input */
     value?: string,
+
     /** If true, the field is required to submit the form */
     required?: boolean,
     /** Pattern that the input value must match */
     pattern?: string,
-    /** Input label */
-    label?: string | HTMLElement,
+
     /** Value-name pairs for the select */
     select?: { value: string, name: string }[],
-    /** Custom class to apply to the element */
-    class?: string,
 }
