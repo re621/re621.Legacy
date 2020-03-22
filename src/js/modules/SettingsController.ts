@@ -194,7 +194,7 @@ export class SettingsController extends RE6Module {
                     type: "checkbox",
                     value: module.fetchSettings("loadRedesignFixes"),
                     label: "Load Redesign Fixes",
-                }
+                },
             ]
         );
 

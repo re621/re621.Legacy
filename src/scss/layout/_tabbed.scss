@@ -1,54 +1,48 @@
 /* Tab Group Styles */
-re-tab-group {
-    box-sizing: border-box;
-    display: flex;
-    flex-wrap: wrap;
-    width: fit-content;
+div.ui-widget-content.ui-tabs {
 
-    .re-tab-input {
-        position: absolute;
-        opacity: 0;
+    // Whoever desided to include JQuery-UI theming in e621.
+    // My hatred for you is ever increasing. Just why.
 
-        &:focus+.re-tab-label {
-            z-index: 1;
-        }
+    @include themable {
+        border: 1px solid lighten(themed("color-section"), 10%) !important;
+        background-color: lighten(themed("color-section"), 10%) !important;
+        color: themed("color-text") !important;
+    }
 
-        &:checked+.re-tab-label {
-            background: #00000050;
-        }
+    ul.ui-tabs-nav {
+        border: unset !important;
+        background-color: unset !important;
+        color: unset !important;
 
-        &:checked+.re-tab-label+.re-tab-panel {
-            display: block;
+        margin-left: 0;
+
+        li.ui-tabs-tab {
+            display: inline-block;
+
+            border: unset;
+            background: unset;
+
+            padding: 0.5rem 0.25rem;
+            margin-right: 1rem;
+
+            @include themable {
+                background-color: lighten(themed("color-section"), 10%) !important;
+                color: themed("color-text") !important;
+            }
+
+            &.ui-tabs-active {
+                @include themable {
+                    background-color: themed("color-section") !important;
+                    color: themed("color-text") !important;
+                }
+            }
         }
     }
 
-    .re-tab-label {
-        width: 100%;
-        cursor: pointer;
-
-        padding: 0.25rem 0.5rem;
-        margin-right: 0.5rem;
-        border-radius: 0 0 6px 6px;
-
-        background: #00000030;
-
-        &:hover,
-        &:active {
-            background: #00000050;
-        }
-
-        @media (min-width: 800px) {
-            width: auto;
-        }
-    }
-
-    .re-tab-panel {
-        display: none;
-        width: 100%;
-        padding-top: 0.5rem;
-
-        @media (min-width: 600px) {
-            order: 99;
-        }
+    div.ui-tabs-panel {
+        border: unset !important;
+        background-color: unset !important;
+        color: unset !important;
     }
 }

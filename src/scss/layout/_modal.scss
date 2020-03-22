@@ -17,6 +17,7 @@ re-modal-container {
 
         pointer-events: auto;
         border-radius: 6px;
+        min-width: fit-content;
 
         @include themable {
             border: 1px solid lighten(themed("color-section"), 10%) !important;
@@ -74,11 +75,16 @@ re-modal-container {
 
         div.ui-dialog-content {
             padding: 1em 1em;
+            min-width: fit-content;
 
             @include themable {
                 border: unset !important;
                 background-color: unset !important;
                 color: unset !important;
+            }
+
+            div.ui-tabs {
+                margin-top: -1em;
             }
         }
     }

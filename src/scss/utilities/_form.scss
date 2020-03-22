@@ -1,16 +1,19 @@
 /* Auto-generated forms */
 form.grid-form {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: 5rem 10rem;
     grid-row-gap: 1rem;
     grid-column-gap: 0.5rem;
+    width: 15rem;
 
     &.columns-2 {
-        grid-template-columns: repeat(2, auto 1fr);
+        grid-template-columns: repeat(2, 5rem 10rem);
+        width: 31.5rem;
     }
 
     &.columns-3 {
-        grid-template-columns: repeat(3, auto 1fr);
+        grid-template-columns: repeat(3, 5rem 10rem);
+        width: 48rem;
     }
 
     // Fill 2 columns

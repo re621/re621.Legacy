@@ -18,6 +18,11 @@ export class Modal {
             .dialog({
                 autoOpen: false,
                 appendTo: "re-modal-container",
+
+                width: "auto",
+                minWidth: config.minWidth,
+                minHeight: config.minHeight,
+
                 position: {
                     my: config.position.my,
                     at: config.position.at,
@@ -45,6 +50,9 @@ export class Modal {
         if (config.content === undefined) config.content = $("<span>. . .</span>");
         if (config.triggers === undefined) config.triggers = [];
         if (config.triggerMulti === undefined) config.triggerMulti = false;
+
+        if (config.minWidth === undefined) config.minWidth = 150;
+        if (config.minHeight === undefined) config.minHeight = 150;
 
         if (config.disabled === undefined) config.disabled = false;
         if (config.position === undefined) config.position = { my: "center", at: "center" };
@@ -117,6 +125,9 @@ interface ModalConfig {
     content?: JQuery<HTMLElement>,
     triggers?: ModalTrigger[],
     triggerMulti?: boolean,
+
+    minWidth?: number,
+    minHeight?: number,
 
     disabled?: boolean,
     position?: {
