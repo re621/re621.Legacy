@@ -72,6 +72,14 @@ export class Post {
     }
 
     /**
+     * Forces the function fetchPosts to reaquire it's info
+     * This is useful if posts have been appended
+     */
+    public static invalidatePostsCache() {
+        this.posts = undefined;
+    }
+
+    /**
      * Fetches all posts if you are on https://e621.net/posts or similar
      * @deprecated Use fetchPosts() instead
      * @returns Post[] List of posts
