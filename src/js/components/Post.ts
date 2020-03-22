@@ -14,15 +14,17 @@ export class Post {
     private scoreCount: number
 
     private imageURL: string;
+    private sampleURL: string;
     private previewURL: string;
 
-    constructor(id: number, tags: string, rating: string, favCount: number, scoreCount: number, imageURL: string, previewURL: string) {
+    constructor(id: number, tags: string, rating: string, favCount: number, scoreCount: number, imageURL: string, sampleURL: string, previewURL: string) {
         this.id = id;
         this.tags = tags;
         this.rating = rating;
         this.favCount = favCount;
         this.scoreCount = scoreCount;
         this.imageURL = imageURL;
+        this.sampleURL = sampleURL;
         this.previewURL = previewURL;
     }
 
@@ -40,6 +42,7 @@ export class Post {
                 parseInt(this.querySelector(".post-score-faves").innerHTML.substring(1)),
                 parseInt(this.querySelector(".post-score-score").innerHTML.substring(1)),
                 this.getAttribute("data-file-url"),
+                this.getAttribute("data-large-file-url"),  // YES, the file marked as larger is a sample. Why the hell not.
                 this.getAttribute("data-preview-file-url"),
             );
             post.setDomElement($(this));
@@ -64,6 +67,7 @@ export class Post {
             parseInt($postElememt.find("img").attr("data-fav-count")),
             parseInt($postElememt.find("img").attr("data-score")),
             $postElememt.attr("data-file-url"),
+            $postElememt.attr("data-large-file-url"),
             $postElememt.attr("data-preview-file-url"),
         );
         post.setDomElement($postElememt);
@@ -158,6 +162,14 @@ export class Post {
     }
 
     /**
+     * Returns the sample image URL
+     * @returns string Sample URL
+     */
+    public getSampleURL() {
+        return this.sampleURL;
+    }
+
+    /**
      * Returns the preview image URL
      * @returns string Preview URL
      */
@@ -181,8 +193,8 @@ export class ViewingPost extends Post {
     private metaTags: string[];
     private loreTags: string[];
 
-    constructor(id: number, tags: string, rating: string, favCount: number, voteCount: number, imageURL: string, previewURL: string) {
-        super(id, tags, rating, favCount, voteCount, imageURL, previewURL);
+    constructor(id: number, tags: string, rating: string, favCount: number, voteCount: number, imageURL: string, sampleURL: string, previewURL: string) {
+        super(id, tags, rating, favCount, voteCount, imageURL, sampleURL, previewURL);
         this.isFaved = $("#add-to-favorites").css("display") === "none";
         this.isUpvoted = $("#post-vote-up-" + id).hasClass("score-positive");
         this.isDownvoted = $("#post-vote-down-" + id).hasClass("score-negative");
