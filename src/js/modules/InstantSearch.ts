@@ -13,6 +13,8 @@ export class InstantSearch extends RE6Module {
     // TODO: this can be of type HTMLInputElememnt, but I don't know how to do that
     private $searchbox: JQuery<HTMLElement>;
 
+    private startingQuery: string;
+
     private static instance: InstantSearch = new InstantSearch();
 
     private constructor() {
@@ -23,7 +25,7 @@ export class InstantSearch extends RE6Module {
         }
 
         this.createDOM();
-
+        this.startingQuery = Url.getQueryParameter("tags") === undefined ? "" : Url.getQueryParameter("tags");
         let typingTimeout: number;
         let doneTyping = 500;
 
@@ -37,16 +39,18 @@ export class InstantSearch extends RE6Module {
     }
 
     public applyFilter() {
-        const filter = this.$searchbox.val().toString();
-        const posts = Post.getVisiblePosts();
+        const filter = this.$searchbox.val().toString().trim();
+        sessionStorage.setItem("re-instantsearch", filter);
+        const posts = Post.fetchPosts();
+        const filterTags = (this.startingQuery + (this.startingQuery.length === 0 ? "" : "+") + filter.replace(/ /g, "+")).split("+");
+        //Remove duplicates
+        const queryString = [...new Set(filterTags)].join("+");
         //when the user clears the input, show all posts
         if (filter === "") {
             for (const post of posts) {
                 post.setVisibility(true);
             }
         } else {
-            const currentQuery = Url.getQueryParameter("tags") === undefined ? "" : Url.getQueryParameter("tags");
-            Url.setQueryParameter("tags", currentQuery + (currentQuery.length === 0 ? "" : "+") + filter);
             for (const post of posts) {
                 post.setVisibility(post.tagsMatchesFilter(filter));
             }
@@ -57,9 +61,10 @@ export class InstantSearch extends RE6Module {
     protected createDOM() {
         const $section = $("<section>").attr("id", "re-instantsearch");
         this.$searchbox = $("<input>").
-            attr("id", "re-instantsearch-input");
+            attr("id", "re-instantsearch-input").
+            val(sessionStorage.getItem("re-instantsearch"));
         this.$searchbox.attr("type", "text");
-        $section.append("<h1>Insant Search</h1>")
+        $section.append("<h1>Filter</h1>")
         $section.append(this.$searchbox)
         $section.append($("<button>").attr("type", "submit").append($("<i>").addClass("fas fa-search")));
         $section.insertAfter($("#search-box"));

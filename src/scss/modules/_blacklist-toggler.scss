@@ -2,7 +2,7 @@
 section#blacklist-box {
 
     &>h1>a::before {
-        content: "\f105";
+        content: unicode("f105");
         font-family: 'Font Awesome 5 Free';
         font-weight: 900;
         padding-right: 0.25rem;
@@ -14,7 +14,7 @@ section#blacklist-box {
 
     &[data-blacklist-hidden=false] {
         &>h1>a::before {
-            content: "\f107";
+            content: unicode("f107");
         }
 
         ul#blacklist-list {

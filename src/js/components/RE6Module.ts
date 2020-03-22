@@ -49,8 +49,20 @@ export abstract class RE6Module {
      */
     private loadCookies() {
         let cookies = Cookies.get("re621." + this.prefix);
-        if (cookies === undefined) { this.settings = this.getDefaultSettings(); }
-        else this.settings = JSON.parse(cookies);
+        const defaultValues = this.getDefaultSettings();
+        if (cookies === undefined) {
+            this.settings = defaultValues;
+        }
+        else {
+            this.settings = JSON.parse(cookies);
+            //If defaultValues has a entry the defaultSettings do not have, add it
+            //this might happen if the user saved and a defaultSetting gets added afterwards
+            for (const key of Object.keys(defaultValues)) {
+                if (this.settings[key] === undefined) {
+                    this.settings[key] = defaultValues[key];
+                }
+            }
+        }
     }
 
     /**

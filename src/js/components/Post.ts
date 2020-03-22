@@ -2,7 +2,7 @@ import { TagTypes, Tag } from "./Tag";
 
 /**
  * Collects basic info for a post.
- * Constructable via getVisiblePosts or getViewingPost
+ * Use fetchPosts to construct
  */
 export class Post {
 
@@ -72,22 +72,24 @@ export class Post {
     }
 
     /**
-     * Fetches all posts if you are on https://e621.net/posts or similar
-     * @deprecated Use fetchPosts() instead
-     * @returns Post[] List of posts
+     * Forces the function fetchPosts to reaquire it's info
+     * This is useful if posts have been appended
      */
-    public static getVisiblePosts() {
-        return this.fetchPosts();
+    public static invalidatePostsCache() {
+        this.posts = undefined;
     }
 
     /**
      * Creates a ViewingPost if you are on a post page (https://e621.net/posts/:id)
-     * @deprecated Use fetchPosts() instead
-     * @returns Post the current post if it exists, undefined otherwise
+     * @returns the current ViewingPost if it exists, undefined otherwise
      */
     public static getViewingPost() {
-        if ($("#image-container").length === 0) { return undefined; }
-        return <ViewingPost>this.fetchPosts()[0];
+        const posts = this.fetchPosts();
+        if (posts[0] instanceof ViewingPost) {
+            return <ViewingPost>posts[0];
+        } else {
+            return undefined;
+        }
     }
 
     /**
