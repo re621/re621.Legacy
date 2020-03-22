@@ -1,7 +1,9 @@
 /* Image Scaler Styles */
+
+// Controls
 section#image-extra-controls div#image-resize-cycle {
 
-    select#resize-image_size {
+    select#resize-image_scale {
         padding: 0.25rem 0.25rem;
         font-size: 1rem;
         margin: 0;
@@ -16,4 +18,20 @@ section#image-extra-controls div#image-resize-cycle {
             color: themed("color-text");
         }
     }
+}
+
+// Image States
+section#image-container {
+
+    img#image {
+
+        &.re621-fit-horizontal {
+            max-width: 100%;
+        }
+
+        &.re621-fit-vertical {
+            max-height: 95vh;
+        }
+    }
+
 }
