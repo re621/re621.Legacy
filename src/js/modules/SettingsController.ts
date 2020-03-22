@@ -1,6 +1,6 @@
 import { HeaderCustomizer } from "./HeaderCustomizer";
-import { Modal, TabContent } from "../components/Modal";
-import { Tabbed } from "../components/Tabbed";
+import { Modal } from "../components/Modal";
+import { Tabbed, TabContent } from "../components/Tabbed";
 import { RE6Module } from "../components/RE6Module";
 import { Miscellaneous } from "./Miscellaneous";
 import { Form } from "../utilities/Form";
@@ -46,16 +46,10 @@ export class SettingsController extends RE6Module {
 
         // Create the modal
         this.modal = new Modal({
-            uid: "settings-modal",
             title: "Settings",
-            width: "40rem",
-            position: {
-                right: "0",
-                top: "4.5rem",
-            },
-            subtabbed: true,
             triggers: [{ element: addSettingsButton.link }],
-            content: [{ name: "re621", page: $settings.create(), tabbable: true }],
+            content: $settings.create(),
+            position: { my: "right top", at: "right top" }
         });
 
         // Establish handlers

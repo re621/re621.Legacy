@@ -3,6 +3,7 @@ re-tab-group {
     box-sizing: border-box;
     display: flex;
     flex-wrap: wrap;
+    width: fit-content;
 
     .re-tab-input {
         position: absolute;

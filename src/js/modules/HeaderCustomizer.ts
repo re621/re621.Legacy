@@ -47,19 +47,17 @@ export class HeaderCustomizer extends RE6Module {
                     href: data.get("href"),
                 }
             );
-            _self.updateTabModal.setHidden();
+            _self.updateTabModal.close();
         });
 
         this.updateTabForm.getInputList().get("delete").click(function (event) {
             event.preventDefault();
             _self.deleteTab(_self.updateTabModal.getActiveTrigger().parent())
-            _self.updateTabModal.setHidden();
+            _self.updateTabModal.close();
         });
 
-        this.addTabModal.getModal().on("modal:toggle", function (event, modal) {
-            if (_self.addTabModal.isVisible()) { _self.enableEditingMode(); }
-            else { _self.disableEditingMode(); }
-        });
+        this.addTabModal.getElement().on("dialogopen", function () { _self.enableEditingMode() });
+        this.addTabModal.getElement().on("dialogclose", function () { _self.disableEditingMode() });
     }
 
     /**
@@ -150,17 +148,11 @@ export class HeaderCustomizer extends RE6Module {
         );
 
         this.addTabModal = new Modal({
-            uid: "header-addtab-modal",
             title: "Add Tab",
-            width: "17rem",
-            height: "auto",
-            position: {
-                right: "0",
-                top: "4.5rem",
-            },
-            triggers: [{ element: addTabButton.link, event: "click" }],
-            content: [{ name: "re621", page: this.addTabForm.get() }],
-        });
+            triggers: [{ element: addTabButton.link }],
+            content: this.addTabForm.get(),
+            position: { my: "right top", at: "right top" }
+        })
 
         // Tab Update Interface
         this.updateTabForm = new Form(
@@ -178,19 +170,12 @@ export class HeaderCustomizer extends RE6Module {
         );
 
         this.updateTabModal = new Modal({
-            uid: "header-updatetab-modal",
             title: "Update Tab",
-            width: "17rem",
-            height: "auto",
-            position: {
-                right: "18rem",
-                top: "4.5rem",
-            },
             triggers: [{ element: $("menu.main li a") }],
+            content: this.updateTabForm.get(),
+            position: { my: "center top", at: "center top" },
             triggerMulti: true,
-            disabled: true,
-            content: [{ name: "re621", page: this.updateTabForm.get() }],
-        });
+        })
     }
 
     /**
@@ -203,7 +188,7 @@ export class HeaderCustomizer extends RE6Module {
         this.updateTabModal.enable();
 
         // Fill in update tab data
-        this.updateTabModal.getModal().on("modal:toggle", function (event, modal) {
+        this.updateTabModal.getElement().on("dialogopen", function (event, modal) {
             let $tab = _self.updateTabModal.getActiveTrigger().parent();
             let $updateTabInputs = _self.updateTabForm.getInputList();
 
@@ -220,7 +205,7 @@ export class HeaderCustomizer extends RE6Module {
         this.$menu.attr("data-editing", "false");
         this.$menu.sortable("disable");
 
-        this.updateTabModal.setHidden();
+        this.updateTabModal.close();
         this.updateTabModal.disable();
     }
 
@@ -301,7 +286,7 @@ export class HeaderCustomizer extends RE6Module {
     private deleteTab($element: JQuery<HTMLElement>) {
         $element.remove();
         this.saveNavbarSettings();
-        this.updateTabModal.setHidden();
+        this.updateTabModal.close();
     }
 
     /**

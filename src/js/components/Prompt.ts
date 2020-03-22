@@ -13,23 +13,13 @@ export class Prompt extends Modal {
     constructor(title: string = "Prompt") {
         super({
             title: title,
-            width: "40%",
-            height: "auto",
-            position: {
-                position: "fixed",
-                left: "25%",
-                top: "25%",
-            },
         });
 
         let _self = this;
 
         this.createForm();
-        this.addContent({
-            name: "prompt",
-            page: this.$form
-        });
-        this.setShown();
+        this.addContent(this.$form);
+        this.open();
         this.$input.focus();
 
         this.promise = new Promise(function (resolve, reject) {

@@ -112,16 +112,10 @@ export class ThemeCustomizer extends RE6Module {
 
         // === Create the modal
         this.themeCustomizerModal = new Modal({
-            uid: "theme-customizer-modal",
             title: "Themes",
-            width: "15rem",
-            height: "auto",
-            position: {
-                right: "0",
-                top: "4.5rem",
-            },
             triggers: [{ element: addTabButton.link }],
-            content: [{ name: "re621", page: this.themeCustomizerForm.get() }],
+            content: this.themeCustomizerForm.get(),
+            position: { my: "right top", at: "right top" }
         });
     }
 

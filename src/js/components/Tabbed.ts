@@ -1,5 +1,3 @@
-import { TabContent } from "./Modal";
-
 /**
  * Tabbed  
  * Relateively easy tabbed content, powered by CSS
@@ -47,4 +45,13 @@ export class Tabbed {
 interface TabbedConfig {
     name: string,
     content: TabContent[],
+}
+
+export interface TabContent {
+    /** Tab name. If there is only one tab, does nothing. */
+    name: string,
+    /** JQuery element with the modal contents */
+    page: JQuery<HTMLElement>,
+    /** If true, strips the top margins so that a Tabbed object could be fitted in it */
+    tabbable?: boolean,
 }
