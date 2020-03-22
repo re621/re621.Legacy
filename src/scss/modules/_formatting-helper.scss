@@ -193,6 +193,10 @@ form.simple_form {
                 opacity: 0.5;
             }
         }
+
+        &[data-editing=false] div.dtext-character-counter-box {
+            display: none;
+        }
     }
 
 }
