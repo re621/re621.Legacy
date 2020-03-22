@@ -148,6 +148,21 @@ export class SettingsController extends RE6Module {
                     value: titleCustomizer.fetchSettings("symbol-votedown"),
                     label: "Downvote",
                 },
+
+                // Download Customizer
+                {
+                    id: "download-cust-header",
+                    type: "div",
+                    value: "<h3>Downloads</h3>",
+                    stretch: "full",
+                },
+                {
+                    id: "download-cust-template",
+                    type: "input",
+                    value: downloadCustomizer.fetchSettings("template"),
+                    label: "Template",
+                    stretch: "full",
+                },
             ]
         );
 
@@ -161,6 +176,7 @@ export class SettingsController extends RE6Module {
     private handleTabPostsPage(form: Form) {
         let _self = this;
         let titleCustomizer = <TitleCustomizer>this.modules.get("TitleCustomizer");
+        let downloadCustomizer = <TitleCustomizer>this.modules.get("DownloadCustomizer");
         let postsPageInput = form.getInputList();
 
         // Title Customizer
@@ -182,6 +198,11 @@ export class SettingsController extends RE6Module {
 
         postsPageInput.get("title-cust-symbol-votedown").change(function (event) {
             titleCustomizer.pushSettings("symbol-votedown", $(this).val());
+        });
+
+        // Download Customizer
+        postsPageInput.get("download-cust-template").change(function (event) {
+            downloadCustomizer.pushSettings("template", $(this).val());
         });
     }
 
