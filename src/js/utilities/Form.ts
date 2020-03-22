@@ -277,7 +277,7 @@ export class Form {
                 .html(element.label)
                 .appendTo($form);
             labeled = true;
-        } else if (element.stretch === "default") { element.stretch = "column"; }
+        }
 
         let $inputContainer = $("<div>")
             .addClass("input-container")
@@ -310,7 +310,7 @@ export class Form {
                 .html(element.label)
                 .appendTo($form);
             labeled = true;
-        } else if (element.stretch === "default") { element.stretch = "column"; }
+        }
 
         let $inputContainer = $("<div>")
             .addClass("input-container")

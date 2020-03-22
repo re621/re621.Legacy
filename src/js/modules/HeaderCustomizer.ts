@@ -139,7 +139,7 @@ export class HeaderCustomizer extends RE6Module {
                 { id: "name", label: "Name", type: "input", required: true, pattern: "[\\S ]+", },
                 { id: "title", label: "Hover", type: "input" },
                 { id: "href", label: "Link", type: "input" },
-                { id: "submit", value: "Submit", type: "submit" },
+                { id: "submit", value: "Submit", type: "submit", stretch: "column" },
                 { id: "help-hr", type: "hr" },
                 { id: "help-var", label: `Available variables:`, type: "div" },
                 { id: "help-var-userid", label: "Unique ID", value: "%userid%", type: "copyinput" },
@@ -164,8 +164,8 @@ export class HeaderCustomizer extends RE6Module {
                 { id: "name", label: "Name", type: "input", required: true, pattern: "[\\S ]+", },
                 { id: "title", label: "Hover", type: "input" },
                 { id: "href", label: "Link", type: "input" },
-                { id: "delete", label: "delete", value: "Delete", type: "button" },
-                { id: "submit", label: "update", value: "Update", type: "submit" },
+                { id: "delete", value: "Delete", type: "button" },
+                { id: "submit", value: "Update", type: "submit" },
             ]
         );
 
