@@ -19,11 +19,13 @@ import { InfiniteScroll } from "./modules/InfiniteScroll";
 
 import { SettingsController } from "./modules/SettingsController";
 import { ImageScaler } from "./modules/ImageScaler";
+import { PostViewer } from "./modules/PostViewer";
 
 // Modules with self-contained settings
 HeaderCustomizer.getInstance();
 ThemeCustomizer.getInstance();
 FormattingHelper.init();
+PostViewer.getInstance();
 
 // Modules without settings
 BlacklistToggler.getInstance();
