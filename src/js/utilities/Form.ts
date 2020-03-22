@@ -385,12 +385,13 @@ export class Form {
 
         let $input = $("<select>")
             .attr("id", this.config.id + "-" + element.id)
-            .val(element.value)
             .appendTo($inputContainer);
 
         element.select.forEach(function (entry) {
             $("<option>").val(entry.value).text(entry.name).appendTo($input);
         });
+
+        $input.val(element.value);
 
         if (element.required) { $input.attr("required", ''); }
 
