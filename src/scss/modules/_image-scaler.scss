@@ -3,11 +3,12 @@
 // Controls
 section#image-extra-controls div#image-resize-cycle {
 
+    margin-left: 1rem;
+
     select#resize-image-scale {
         padding: 0.25rem 0.25rem;
         font-size: 1rem;
         margin: 0;
-        margin-left: 1rem;
         border-radius: 4px;
         border: 0;
         line-height: 1.25em;
@@ -16,6 +17,27 @@ section#image-extra-controls div#image-resize-cycle {
         @include themable {
             background: themed("color-section");
             color: themed("color-text");
+        }
+    }
+
+    a#fullsize-image {
+        padding: 0.25rem 0.25rem;
+        font-size: 1rem;
+        margin: 0;
+        border-radius: 4px;
+        border: 0;
+        line-height: 1.25em;
+        font-family: inherit;
+
+        @include themable {
+            background: themed("color-section");
+            color: themed("color-text");
+        }
+
+        &:hover {
+            @include themable {
+                background: lighten(themed("color-section"), 10%);
+            }
         }
     }
 }

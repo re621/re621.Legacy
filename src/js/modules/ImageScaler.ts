@@ -77,6 +77,11 @@ export class ImageScaler extends RE6Module {
                     type: "select",
                     select: IMAGE_SIZES,
                     value: this.fetchSettings("size"),
+                },
+                {
+                    id: "fullsize",
+                    type: "div",
+                    value: `<a href="` + this.post.getImageURL() + `" id="fullsize-image">Fullscreen</a>`,
                 }
             ]
         )
