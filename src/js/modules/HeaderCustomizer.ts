@@ -175,6 +175,7 @@ export class HeaderCustomizer extends RE6Module {
             content: this.updateTabForm.get(),
             position: { my: "center top", at: "center top" },
             triggerMulti: true,
+            disabled: true,
         })
     }
 
