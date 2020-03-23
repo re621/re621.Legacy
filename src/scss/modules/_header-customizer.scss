@@ -12,6 +12,7 @@ header#top nav#nav {
 
             &>a {
                 padding: 0;
+                outline: 0;
             }
 
             &.configurable a::before {

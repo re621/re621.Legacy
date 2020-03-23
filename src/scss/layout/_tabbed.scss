@@ -3,10 +3,10 @@ div.ui-widget-content.ui-tabs {
 
     // Whoever desided to include JQuery-UI theming in e621.
     // My hatred for you is ever increasing. Just why.
+    border: unset !important;
+    background-color: unset !important;
 
     @include themable {
-        border: 1px solid lighten(themed("color-section"), 10%) !important;
-        background-color: lighten(themed("color-section"), 10%) !important;
         color: themed("color-text") !important;
     }
 
@@ -25,6 +25,8 @@ div.ui-widget-content.ui-tabs {
 
             padding: 0.5rem 0.25rem;
             margin-right: 1rem;
+            outline: 0;
+            border-radius: 0 0 4px 4px;
 
             @include themable {
                 background-color: lighten(themed("color-section"), 10%) !important;
@@ -35,6 +37,22 @@ div.ui-widget-content.ui-tabs {
                 @include themable {
                     background-color: themed("color-section") !important;
                     color: themed("color-text") !important;
+                }
+            }
+
+            a,
+            a:link,
+            a:visited {
+                outline: 0;
+
+                @include themable {
+                    color: themed("color-text");
+                }
+            }
+
+            a:hover {
+                @include themable {
+                    color: themed("color-link-hover");
                 }
             }
         }

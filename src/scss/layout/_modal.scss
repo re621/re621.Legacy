@@ -51,6 +51,7 @@ re-modal-container {
 
                 border: unset;
                 background: unset;
+                box-shadow: unset;
 
                 @include themable {
                     border-left: 1px solid lighten(themed("color-section"), 10%) !important;
