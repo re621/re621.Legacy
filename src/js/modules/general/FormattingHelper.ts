@@ -1,5 +1,5 @@
-import { RE6Module } from "../components/RE6Module";
-import { Prompt } from "../components/Prompt";
+import { RE6Module } from "../../components/RE6Module";
+import { Prompt } from "../../components/structure/Prompt";
 
 const button_definitions = {
     bold: { icon: "&#xf032", title: "Bold", content: "[b]%selection%[/b]" },

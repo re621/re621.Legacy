@@ -1,6 +1,6 @@
-import { RE6Module } from "../components/RE6Module";
-import { Url } from "../components/Url";
-import { Post } from "../components/Post";
+import { RE6Module } from "../../components/RE6Module";
+import { Url } from "../../components/data/Url";
+import { Post } from "../../components/data/Post";
 
 /**
  * Adds a extra search input below the current one where 

@@ -1,4 +1,4 @@
-import { RE6Module } from "../components/RE6Module";
+import { RE6Module } from "../../components/RE6Module";
 
 /**
  * Blacklist Toggler  

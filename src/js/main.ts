@@ -4,23 +4,26 @@
  */
 
 // Create DOM required for the rest of the modules
-import { StructureUtilities } from "./modules/StructureUtilities";
+import { StructureUtilities } from "./modules/general/StructureUtilities";
 StructureUtilities.createDOM();
 
 // Load Modules
-import { HeaderCustomizer } from "./modules/HeaderCustomizer";
-import { ThemeCustomizer } from "./modules/ThemeCustomizer";
-import { BlacklistToggler } from "./modules/BlacklistToggler";
-import { FormattingHelper } from "./modules/FormattingHelper";
-import { TitleCustomizer } from "./modules/TitleCustomizer";
-import { Miscellaneous } from "./modules/Miscellaneous";
-import { InstantSearch } from "./modules/InstantSearch";
-import { InfiniteScroll } from "./modules/InfiniteScroll";
-import { ImageScaler } from "./modules/ImageScaler";
-import { DownloadCustomizer } from "./modules/DownloadCustomizer";
-
-import { SettingsController } from "./modules/SettingsController";
-import { PostViewer } from "./modules/PostViewer";
+// - general
+import { FormattingHelper } from "./modules/general/FormattingHelper";
+import { HeaderCustomizer } from "./modules/general/HeaderCustomizer";
+import { Miscellaneous } from "./modules/general/Miscellaneous";
+import { ThemeCustomizer } from "./modules/general/ThemeCustomizer";
+// - post
+import { DownloadCustomizer } from "./modules/post/DownloadCustomizer";
+import { ImageScaler } from "./modules/post/ImageScaler";
+import { PostViewer } from "./modules/post/PostViewer";
+import { TitleCustomizer } from "./modules/post/TitleCustomizer";
+// - search
+import { BlacklistToggler } from "./modules/search/BlacklistToggler";
+import { InstantSearch } from "./modules/search/InstantSearch";
+import { InfiniteScroll } from "./modules/search/InfiniteScroll";
+// - settings
+import { SettingsController } from "./modules/general/SettingsController";
 
 // Modules with self-contained settings
 HeaderCustomizer.getInstance();

@@ -1,7 +1,7 @@
-import { RE6Module } from "../components/RE6Module";
-import { Url } from "../components/Url";
-import { ApiTag } from "../components/apiresponses/ApiTag";
-import { Api } from "../components/Api";
+import { RE6Module } from "../../components/RE6Module";
+import { Url } from "../../components/data/Url";
+import { ApiTag } from "../../components/api/responses/ApiTag";
+import { Api } from "../../components/api/Api";
 
 declare var GM_addStyle;
 declare var GM_getResourceText;

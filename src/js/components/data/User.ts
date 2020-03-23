@@ -1,4 +1,4 @@
-import { RE6Module } from "./RE6Module";
+import { RE6Module } from "../RE6Module";
 
 /**
  * User  

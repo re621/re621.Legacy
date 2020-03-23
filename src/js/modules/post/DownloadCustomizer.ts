@@ -1,6 +1,6 @@
-import { RE6Module } from "../components/RE6Module";
-import { Post, ViewingPost } from "../components/Post";
-import { TagTypes } from "../components/Tag";
+import { RE6Module } from "../../components/RE6Module";
+import { Post, ViewingPost } from "../../components/data/Post";
+import { TagTypes } from "../../components/data/Tag";
 
 declare var GM_download;
 

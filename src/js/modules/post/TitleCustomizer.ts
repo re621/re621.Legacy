@@ -1,6 +1,6 @@
-import { Post } from "../components/Post";
-import { RE6Module } from "../components/RE6Module";
-import { TagTypes, Tag } from "../components/Tag";
+import { Post } from "../../components/data/Post";
+import { RE6Module } from "../../components/RE6Module";
+import { TagTypes, Tag } from "../../components/data/Tag";
 
 
 /**

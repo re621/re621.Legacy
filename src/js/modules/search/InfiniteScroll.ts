@@ -1,10 +1,10 @@
-import { RE6Module } from "../components/RE6Module";
-import { Url } from "../components/Url";
-import { Api } from "../components/Api";
-import { ApiPost } from "../components/apiresponses/ApiPost";
-import { PostHtml } from "../components/PostHtml";
+import { RE6Module } from "../../components/RE6Module";
+import { Url } from "../../components/data/Url";
+import { Api } from "../../components/api/Api";
+import { ApiPost } from "../../components/api/responses/ApiPost";
+import { PostHtml } from "../../components/api/PostHtml";
 import { InstantSearch } from "./InstantSearch";
-import { Post } from "../components/Post";
+import { Post } from "../../components/data/Post";
 
 /**
  * Gets rid of the default pagination and instead appends new posts

@@ -1,11 +1,11 @@
 import { HeaderCustomizer } from "./HeaderCustomizer";
-import { Modal } from "../components/Modal";
-import { Tabbed, TabContent } from "../components/Tabbed";
-import { RE6Module } from "../components/RE6Module";
+import { Modal } from "../../components/structure/Modal";
+import { Tabbed, TabContent } from "../../components/structure/Tabbed";
+import { RE6Module } from "../../components/RE6Module";
 import { Miscellaneous } from "./Miscellaneous";
-import { Form } from "../utilities/Form";
-import { TitleCustomizer } from "./TitleCustomizer";
-import { DownloadCustomizer } from "./DownloadCustomizer";
+import { Form } from "../../components/structure/Form";
+import { TitleCustomizer } from "../post/TitleCustomizer";
+import { DownloadCustomizer } from "../post/DownloadCustomizer";
 
 /**
  * SettingsController  

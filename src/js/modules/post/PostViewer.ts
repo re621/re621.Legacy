@@ -1,6 +1,6 @@
-import { Post, ViewingPost, PostRating } from "../components/Post";
-import { RE6Module } from "../components/RE6Module";
-import { Url } from "../components/Url";
+import { Post, ViewingPost, PostRating } from "../../components/data/Post";
+import { RE6Module } from "../../components/RE6Module";
+import { Url } from "../../components/data/Url";
 
 
 /**

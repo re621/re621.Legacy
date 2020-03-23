@@ -1,6 +1,6 @@
-import { RE6Module } from "../components/RE6Module";
-import { Post } from "../components/Post";
-import { Form } from "../utilities/Form";
+import { RE6Module } from "../../components/RE6Module";
+import { Post } from "../../components/data/Post";
+import { Form } from "../../components/structure/Form";
 
 const IMAGE_SIZES = [
     { value: "sample", name: "Sample" },

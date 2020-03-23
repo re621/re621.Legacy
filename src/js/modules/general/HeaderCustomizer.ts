@@ -1,7 +1,7 @@
-import { Modal } from "../components/Modal";
-import { RE6Module } from "../components/RE6Module";
-import { User } from "../components/User";
-import { Form } from "../utilities/Form";
+import { Modal } from "../../components/structure/Modal";
+import { RE6Module } from "../../components/RE6Module";
+import { User } from "../../components/data/User";
+import { Form } from "../../components/structure/Form";
 
 declare var Cookies;
 

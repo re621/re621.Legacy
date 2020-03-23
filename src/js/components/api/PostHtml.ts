@@ -1,4 +1,4 @@
-import { ApiPost } from "./apiresponses/ApiPost";
+import { ApiPost } from "./responses/ApiPost";
 
 export class PostHtml {
     public static create(json: ApiPost) {
