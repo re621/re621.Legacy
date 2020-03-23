@@ -34,14 +34,15 @@ export class SettingsController extends RE6Module {
 
         // Establish the settings window contents
         let postsPageTab = this.createTabPostsPage();
+        let hotkeyTab = this.createTabHotkeys();
         let miscSettingsTab = this.createTabMiscellaneous();
 
         let $settings = new Tabbed({
             name: "settings-tabs",
             content: [
-                { name: "TitleCustomizer", page: postsPageTab.get() },
-                { name: "Miscellaneous", page: miscSettingsTab.get() },
-                // { name: "Posts", page: $postSettings },
+                { name: "Posts", page: postsPageTab.get() },
+                { name: "Hotkeys", page: hotkeyTab.get() },
+                { name: "Misc", page: miscSettingsTab.get() },
             ]
         });
 
@@ -56,6 +57,7 @@ export class SettingsController extends RE6Module {
         // Establish handlers
         this.handleTabMiscellaneous(miscSettingsTab);
         this.handleTabPostsPage(postsPageTab);
+        this.handleTabHotkeys(postsPageTab);
     }
 
     /**
@@ -103,7 +105,7 @@ export class SettingsController extends RE6Module {
                 {
                     id: "title-cust-header",
                     type: "div",
-                    value: "<h3>Title Customizer</h3>",
+                    value: "<h3>Page Title</h3>",
                     stretch: "full",
                 },
                 {
@@ -204,6 +206,35 @@ export class SettingsController extends RE6Module {
         postsPageInput.get("download-cust-template").change(function (event) {
             downloadCustomizer.pushSettings("template", $(this).val());
         });
+    }
+
+    /** Creates the DOM for the hotkey settings page */
+    private createTabHotkeys() {
+        let form = new Form(
+            {
+                "id": "settings-hotkeys",
+                columns: 2,
+                parent: "re-modal-container"
+            },
+            [
+                {
+                    id: "hotkey-placeholder",
+                    type: "div",
+                    value: "Coming soon",
+                    stretch: "full"
+                }
+            ]
+        );
+
+        return form;
+    }
+
+    /**
+     * Event handlers for the hotkey settings page
+     * @param form Miscellaneous settings form
+     */
+    private handleTabHotkeys(form: Form) {
+
     }
 
     /** Creates the DOM for the miscellaneous settings page */
