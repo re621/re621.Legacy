@@ -5,10 +5,10 @@
 @import 'utilities/functions';
 @import 'utilities/themed';
 @import 'utilities/common';
-@import 'utilities/form';
 
 @import 'themes/!index';
 
+@import 'layout/form';
 @import 'layout/modal';
 @import 'layout/prompt';
 @import 'layout/tabbed';
