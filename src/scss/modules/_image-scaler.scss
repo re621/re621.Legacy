@@ -6,12 +6,8 @@ section#image-extra-controls div#image-resize-cycle {
     margin-left: 1rem;
 
     select#resize-image-scale {
-        padding: 0.19rem 0.25rem;
-        font-size: 1rem;
         margin: 0;
-        border-radius: 4px;
         border: 0;
-        line-height: 1.25em;
         font-family: inherit;
 
         @include themable {
@@ -21,12 +17,8 @@ section#image-extra-controls div#image-resize-cycle {
     }
 
     a#fullsize-image {
-        padding: 0.25rem 0.5rem;
-        font-size: 1rem;
         margin: 0;
-        border-radius: 4px;
         border: 0;
-        line-height: 1.25em;
         font-family: inherit;
 
         @include themable {

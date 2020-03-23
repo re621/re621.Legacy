@@ -1,7 +1,7 @@
 /* Post Viewer Styles */
 section#image-extra-controls {
     display: inline-grid !important;
-    grid-template-columns: max-content max-content auto max-content;
+    grid-template-columns: max-content max-content max-content auto;
     margin: 0.5rem 0;
     grid-column-gap: 0.5rem;
 
@@ -10,11 +10,30 @@ section#image-extra-controls {
     }
 
     div#image-score-links {
-        font-size: 1.25rem;
+
+        @include themable {
+            background: themed("color-section");
+            color: themed("color-text");
+        }
 
         span.image-score-num {
             margin: 0 1rem;
         }
+    }
+
+    div#image-score-links,
+    div.fav-buttons>button,
+    div#image-download-link a,
+    div#image-resize-cycle select,
+    div#image-resize-cycle a {
+        display: inline-flex;
+        align-items: center;
+        height: 2rem;
+
+        font-size: 1rem;
+        padding: 0rem 0.5rem;
+        border-radius: 4px;
+        line-height: 1.25em;
     }
 }
 

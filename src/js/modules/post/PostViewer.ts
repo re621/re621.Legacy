@@ -52,7 +52,7 @@ export class PostViewer extends RE6Module {
     }
 
     private moveScoringBlock() {
-        let $ratingContainer = $("<div>").attr("id", "image-score-links").appendTo("section#image-extra-controls");
+        let $ratingContainer = $("<div>").attr("id", "image-score-links").prependTo("section#image-extra-controls");
         let postID = this.post.getId();
         let original = $("#post-vote-up-" + postID).parent().parent();
 
