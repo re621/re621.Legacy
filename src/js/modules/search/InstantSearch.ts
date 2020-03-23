@@ -1,5 +1,5 @@
 import { RE6Module } from "../../components/RE6Module";
-import { Url } from "../../components/data/Url";
+import { Page } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
 
 /**
@@ -20,12 +20,12 @@ export class InstantSearch extends RE6Module {
     private constructor() {
         super();
         // TODO: Maybe somehow put this into RE6Module
-        if (!Url.matches(this.locationConstrain)) {
+        if (!Page.matches(this.locationConstrain)) {
             return;
         }
 
         this.createDOM();
-        this.startingQuery = Url.getQueryParameter("tags") === undefined ? "" : Url.getQueryParameter("tags");
+        this.startingQuery = Page.getQueryParameter("tags") === undefined ? "" : Page.getQueryParameter("tags");
         let typingTimeout: number;
         let doneTyping = 500;
 

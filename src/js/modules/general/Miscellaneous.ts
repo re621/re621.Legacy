@@ -1,5 +1,5 @@
 import { RE6Module } from "../../components/RE6Module";
-import { Url } from "../../components/data/Url";
+import { Page } from "../../components/data/Page";
 import { ApiTag } from "../../components/api/responses/ApiTag";
 import { Api } from "../../components/api/Api";
 
@@ -19,7 +19,7 @@ export class Miscellaneous extends RE6Module {
         super();
 
         // Remove the query string on posts
-        if (this.fetchSettings("removeSearchQueryString") === true && Url.matches("/posts/")) {
+        if (this.fetchSettings("removeSearchQueryString") === true && Page.matches("/posts/")) {
             this.removeSearchQueryString();
         }
 
@@ -27,7 +27,7 @@ export class Miscellaneous extends RE6Module {
         this.loadRedesignFixes(this.fetchSettings("loadRedesignFixes"));
 
         // Replaces the tag count estimate with the real number
-        if (this.fetchSettings("improveTagCount") === true && Url.matches("/posts")) {
+        if (this.fetchSettings("improveTagCount") === true && Page.matches("/posts")) {
             this.improveTagCount();
         }
 
@@ -39,7 +39,7 @@ export class Miscellaneous extends RE6Module {
      * Removes the search query from the address bar
      */
     private removeSearchQueryString() {
-        Url.removeQueryParameter("q");
+        Page.removeQueryParameter("q");
     }
 
     /**

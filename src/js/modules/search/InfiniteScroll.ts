@@ -1,5 +1,5 @@
 import { RE6Module } from "../../components/RE6Module";
-import { Url } from "../../components/data/Url";
+import { Page } from "../../components/data/Page";
 import { Api } from "../../components/api/Api";
 import { ApiPost } from "../../components/api/responses/ApiPost";
 import { PostHtml } from "../../components/api/PostHtml";
@@ -23,12 +23,12 @@ export class InfiniteScroll extends RE6Module {
 
     private constructor() {
         super();
-        if (!Url.matches(this.locationConstrain)) {
+        if (!Page.matches(this.locationConstrain)) {
             return;
         }
         this.$postContainer = $("#posts-container");
-        this.currentQuery = Url.getQueryParameter("tags") !== undefined ? Url.getQueryParameter("tags") : "";
-        const page = parseInt(Url.getQueryParameter("page"));
+        this.currentQuery = Page.getQueryParameter("tags") !== undefined ? Page.getQueryParameter("tags") : "";
+        const page = parseInt(Page.getQueryParameter("page"));
         this.nextPageToGet = isNaN(page) ? 2 : page + 1;
         this.isInProgress = false;
         this.pagesLeft = true;
@@ -52,7 +52,7 @@ export class InfiniteScroll extends RE6Module {
         }
         this.isInProgress = true;
         const posts: ApiPost[] = (await Api.getJson(`/posts.json?tags=${this.currentQuery}&page=${this.nextPageToGet}`)).posts;
-        Url.setQueryParameter("page", this.nextPageToGet.toString());
+        Page.setQueryParameter("page", this.nextPageToGet.toString());
         this.addPageIndicator();
 
         for (const json of posts) {

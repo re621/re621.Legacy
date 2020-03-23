@@ -1,6 +1,6 @@
 import { Post, ViewingPost, PostRating } from "../../components/data/Post";
 import { RE6Module } from "../../components/RE6Module";
-import { Url } from "../../components/data/Url";
+import { Page } from "../../components/data/Page";
 
 
 /**
@@ -14,7 +14,7 @@ export class PostViewer extends RE6Module {
 
     private constructor() {
         super();
-        if (!Url.matches(this.locationConstrain)) {
+        if (!Page.matches(this.locationConstrain)) {
             return;
         }
         this.post = Post.getViewingPost();
