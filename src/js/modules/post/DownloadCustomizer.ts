@@ -20,9 +20,7 @@ export class DownloadCustomizer extends RE6Module {
         if (!this.eval()) return;
 
         this.post = Post.getViewingPost();
-        if (this.post === undefined) { return; }
 
-        let _self = this;
         this.link = $("div#image-download-link a");
         this.updateLink();
     }

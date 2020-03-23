@@ -1,4 +1,4 @@
-import { Post } from "../../components/data/Post";
+import { Post, ViewingPost } from "../../components/data/Post";
 import { RE6Module } from "../../components/RE6Module";
 import { TagTypes, Tag } from "../../components/data/Tag";
 import { PageDefintion } from "../../components/data/Page";
@@ -11,12 +11,13 @@ export class TitleCustomizer extends RE6Module {
 
     private static instance: TitleCustomizer = new TitleCustomizer();
 
+    private post: ViewingPost;
+
     private constructor() {
         super(PageDefintion.post);
         if (!this.eval()) return;
 
-        const post = Post.getViewingPost();
-        if (post === undefined) { return; }
+        this.post = Post.getViewingPost();
 
         document.title = this.parseTemplate();
     }
@@ -37,22 +38,20 @@ export class TitleCustomizer extends RE6Module {
     }
 
     private parseTemplate() {
-        let post = Post.getViewingPost();
-
         let prefix = "";
         if (this.fetchSettings("symbolsEnabled")) {
-            if (post.getIsFaved()) { prefix += this.fetchSettings("symbol-fav"); }
-            if (post.getIsUpvoted()) { prefix += this.fetchSettings("symbol-voteup"); }
-            else if (post.getIsDownvoted()) { prefix += this.fetchSettings("symbol-votedown"); }
+            if (this.post.getIsFaved()) { prefix += this.fetchSettings("symbol-fav"); }
+            if (this.post.getIsUpvoted()) { prefix += this.fetchSettings("symbol-voteup"); }
+            else if (this.post.getIsDownvoted()) { prefix += this.fetchSettings("symbol-votedown"); }
             if (prefix) prefix += " ";
         }
 
         return this.fetchSettings("template")
             .replace(/%icons%/g, prefix)
-            .replace(/%postnum%/g, post.getId().toString())
-            .replace(/%author%/g, post.getTagsFromType(TagTypes.Artist).filter(tag => Tag.isArist(tag)).join(", "))
-            .replace(/%copyright%/g, post.getTagsFromType(TagTypes.Copyright).join(", "))
-            .replace(/%character%/g, post.getTagsFromType(TagTypes.Character).join(", "));
+            .replace(/%postnum%/g, this.post.getId().toString())
+            .replace(/%author%/g, this.post.getTagsFromType(TagTypes.Artist).filter(tag => Tag.isArist(tag)).join(", "))
+            .replace(/%copyright%/g, this.post.getTagsFromType(TagTypes.Copyright).join(", "))
+            .replace(/%character%/g, this.post.getTagsFromType(TagTypes.Character).join(", "));
     }
 
     /**

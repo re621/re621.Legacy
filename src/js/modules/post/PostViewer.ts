@@ -9,7 +9,6 @@ import { Page, PageDefintion } from "../../components/data/Page";
 export class PostViewer extends RE6Module {
 
     private static instance: PostViewer = new PostViewer();
-    private locationConstrain = "/posts/";
     private post: ViewingPost;
 
     private constructor() {
