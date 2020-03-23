@@ -39,15 +39,14 @@ export class PostViewer extends RE6Module {
     }
 
     private colorizeRating() {
-        const _self = this;
-        $("#post-information ul li").each(function () {
-            const $this = $(this);
-            if (!$this.text().startsWith("Rating:")) {
+        $("#post-information ul li").each((index, element) => {
+            const $element = $(element);
+            if (!$element.text().startsWith("Rating:")) {
                 return;
             }
-            const rating = _self.post.getRating();
+            const rating = this.post.getRating();
             const $li = $("<li>").append("Rating: ").append($("<b>").text(PostRating.toString(rating)).addClass("colorize-rating-" + rating));
-            $this.replaceWith($li);
+            $element.replaceWith($li);
         });
     }
 

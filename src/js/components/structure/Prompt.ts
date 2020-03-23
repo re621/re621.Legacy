@@ -17,18 +17,16 @@ export class Prompt extends Modal {
             minHeight: 50,
         });
 
-        let _self = this;
-
         this.createForm();
         this.addContent(this.$form);
         this.open();
         this.$input.focus();
 
-        this.promise = new Promise(function (resolve, reject) {
-            _self.$form.submit(function (event) {
+        this.promise = new Promise((resolve, reject) => {
+            this.$form.submit(event => {
                 event.preventDefault();
-                _self.destroy();
-                resolve(_self.$input.val());
+                this.destroy();
+                resolve(this.$input.val());
             });
         });
     }

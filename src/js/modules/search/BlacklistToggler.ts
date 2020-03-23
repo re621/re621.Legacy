@@ -17,8 +17,6 @@ export class BlacklistToggler extends RE6Module {
         super(PageDefintion.search);
         if (!this.eval()) return;
 
-        let _self = this;
-
         // Create the required DOM
         this.$box = $("section#blacklist-box");
 
@@ -39,14 +37,14 @@ export class BlacklistToggler extends RE6Module {
         else { this.show(); }
 
         // Toggle the filter list when clicking the header
-        $("a#blacklist-toggle").click(function (e) {
+        $("a#blacklist-toggle").click(e => {
             e.preventDefault();
-            _self.toggleList();
+            this.toggleList();
         });
 
         //Show the filter list when clicking on "disable all filters"
-        $disableAllButton.click(function (e) {
-            _self.show();
+        $disableAllButton.click(e => {
+            this.show();
         });
     }
 

@@ -24,40 +24,39 @@ export class HeaderCustomizer extends RE6Module {
     private constructor() {
         super();
 
-        let _self = this;
         this.$menu = $("menu.main");
         this.createDOM();
 
         // Configuration Form Listeners
-        this.addTabForm.get().on("re-form:submit", function (event, data) {
-            _self.addTab({
+        this.addTabForm.get().on("re-form:submit", (event, data) => {
+            this.addTab({
                 name: data.get("name"),
                 title: data.get("title"),
                 href: data.get("href"),
             });
-            _self.addTabForm.reset();
+            this.addTabForm.reset();
         });
 
-        this.updateTabForm.get().on("re-form:submit", function (event, data) {
-            _self.updateTab(
-                _self.updateTabModal.getActiveTrigger().parent(),
+        this.updateTabForm.get().on("re-form:submit", (event, data) => {
+            this.updateTab(
+                this.updateTabModal.getActiveTrigger().parent(),
                 {
                     name: data.get("name"),
                     title: data.get("title"),
                     href: data.get("href"),
                 }
             );
-            _self.updateTabModal.close();
+            this.updateTabModal.close();
         });
 
-        this.updateTabForm.getInputList().get("delete").click(function (event) {
+        this.updateTabForm.getInputList().get("delete").click(event => {
             event.preventDefault();
-            _self.deleteTab(_self.updateTabModal.getActiveTrigger().parent())
-            _self.updateTabModal.close();
+            this.deleteTab(this.updateTabModal.getActiveTrigger().parent())
+            this.updateTabModal.close();
         });
 
-        this.addTabModal.getElement().on("dialogopen", function () { _self.enableEditingMode() });
-        this.addTabModal.getElement().on("dialogclose", function () { _self.disableEditingMode() });
+        this.addTabModal.getElement().on("dialogopen", () => { this.enableEditingMode() });
+        this.addTabModal.getElement().on("dialogclose", () => { this.disableEditingMode() });
     }
 
     /**
@@ -98,12 +97,11 @@ export class HeaderCustomizer extends RE6Module {
      * Builds basic structure for the module
      */
     private createDOM() {
-        let _self = this;
         this.$menu.empty();
 
         // Fetch stored data
-        this.fetchSettings("tabs").forEach(function (value) {
-            _self.createTabElement({
+        this.fetchSettings("tabs").forEach(value => {
+            this.createTabElement({
                 name: value.name,
                 href: value.href,
             });
@@ -119,7 +117,7 @@ export class HeaderCustomizer extends RE6Module {
 
             disabled: true,
 
-            update: function () { _self.saveNavbarSettings(); },
+            update: () => { this.saveNavbarSettings(); },
         });
 
         // === Tab Configuration Interface
@@ -183,15 +181,14 @@ export class HeaderCustomizer extends RE6Module {
      * Turns on editing mode on the header
      */
     private enableEditingMode() {
-        let _self = this;
         this.$menu.attr("data-editing", "true");
         this.$menu.sortable("enable");
         this.updateTabModal.enable();
 
         // Fill in update tab data
-        this.updateTabModal.getElement().on("dialogopen", function (event, modal) {
-            let $tab = _self.updateTabModal.getActiveTrigger().parent();
-            let $updateTabInputs = _self.updateTabForm.getInputList();
+        this.updateTabModal.getElement().on("dialogopen", (event, modal) => {
+            let $tab = this.updateTabModal.getActiveTrigger().parent();
+            let $updateTabInputs = this.updateTabForm.getInputList();
 
             $updateTabInputs.get("name").val($tab.attr("data-name"));
             $updateTabInputs.get("title").val($tab.attr("data-title"));

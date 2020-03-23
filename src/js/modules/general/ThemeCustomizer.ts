@@ -120,29 +120,27 @@ export class ThemeCustomizer extends RE6Module {
     }
 
     private handleThemeSwitcher(selector: string) {
-        let _self = this;
         let theme = this.fetchSettings(selector);
 
         $("body").attr("data-" + selector, theme);
         $("#" + selector + "-selector").val(theme);
 
-        this.themeCustomizerForm.getInputList().get(selector).change(function (event) {
-            let theme = $(this).val() + "";
-            _self.pushSettings(selector, theme);
+        this.themeCustomizerForm.getInputList().get(selector).change(element => {
+            let theme = $(element.target).val() + "";
+            this.pushSettings(selector, theme);
             $("body").attr("data-" + selector, theme);
         });
     }
 
     private handleScalingToggle() {
-        let _self = this;
         let unscaling = this.fetchSettings("unscaling");
 
         if (unscaling) { $("body").css("max-width", "unset"); }
         $("#theme-scaling").prop("checked", unscaling);
 
-        this.themeCustomizerForm.getInputList().get("unscaling").change(function (event) {
-            let disable_scaling = $(this).is(":checked");
-            _self.pushSettings("unscaling", disable_scaling);
+        this.themeCustomizerForm.getInputList().get("unscaling").change(element => {
+            let disable_scaling = $(element.target).is(":checked");
+            this.pushSettings("unscaling", disable_scaling);
             if (disable_scaling) { $("body").css("max-width", "unset"); }
             else { $("body").css("max-width", ""); }
         });

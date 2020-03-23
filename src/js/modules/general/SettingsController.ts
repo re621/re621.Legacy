@@ -74,10 +74,9 @@ export class SettingsController extends RE6Module {
      * @param module Module to register
      */
     public static registerModule(...moduleList: RE6Module[]) {
-        let _self = this;
-        moduleList.forEach(function (module) {
-            _self.getInstance().modules.set(module.constructor.name, module);
-        });
+        for (const module of moduleList) {
+            this.getInstance().modules.set(module.constructor.name, module);
+        }
     }
 
     /**
@@ -90,7 +89,6 @@ export class SettingsController extends RE6Module {
 
     /** Create the DOM for the Title Customizer page */
     private createTabPostsPage() {
-        let _self = this;
         let titleCustomizer = <TitleCustomizer>this.modules.get("TitleCustomizer");
         let downloadCustomizer = <TitleCustomizer>this.modules.get("DownloadCustomizer");
 
@@ -176,7 +174,6 @@ export class SettingsController extends RE6Module {
      * @param form Miscellaneous settings form
      */
     private handleTabPostsPage(form: Form) {
-        let _self = this;
         let titleCustomizer = <TitleCustomizer>this.modules.get("TitleCustomizer");
         let downloadCustomizer = <TitleCustomizer>this.modules.get("DownloadCustomizer");
         let postsPageInput = form.getInputList();
@@ -239,7 +236,6 @@ export class SettingsController extends RE6Module {
 
     /** Creates the DOM for the miscellaneous settings page */
     private createTabMiscellaneous() {
-        let _self = this;
         let module = <Miscellaneous>this.modules.get("Miscellaneous");
 
         // Create the settings form
@@ -267,12 +263,11 @@ export class SettingsController extends RE6Module {
      * @param form Miscellaneous settings form
      */
     private handleTabMiscellaneous(form: Form) {
-        let _self = this;
         let miscFormInput = form.getInputList();
 
-        miscFormInput.get("redesign-fixes").change(function (event) {
-            let enabled = $(this).is(":checked");
-            let miscModule = <Miscellaneous>_self.modules.get("Miscellaneous");
+        miscFormInput.get("redesign-fixes").change(element => {
+            let enabled = $(element.target).is(":checked");
+            let miscModule = <Miscellaneous>this.modules.get("Miscellaneous");
             miscModule.pushSettings("loadRedesignFixes", enabled);
 
             if (enabled) { miscModule.enableRedesignFixes(); }
