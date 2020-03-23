@@ -72,9 +72,6 @@ export class Page {
 }
 
 export const PageDefintion = {
-    search: [
-        /^$/,
-        /^\/posts\/?$/
-    ],
+    search: /^$|^\/posts\/?$/,
     post: /^\/posts\/\d+\/?$/,
 }
