@@ -1,12 +1,32 @@
-#post-information > ul > li{
+/* Post Viewer Styles */
+section#image-extra-controls {
+    display: inline-grid !important;
+    grid-template-columns: max-content max-content auto max-content;
+    margin: 0.5rem 0;
+    grid-column-gap: 0.5rem;
+
+    div {
+        margin: 0;
+    }
+
+    div#image-score-links {
+        font-size: 1.25rem;
+
+        span.image-score-num {
+            margin: 0 1rem;
+        }
+    }
+}
+
+#post-information>ul>li {
     & .colorize-rating-s {
         color: #3e9e49;
     }
-    
+
     & .colorize-rating-q {
         color: #ffe666;
     }
-    
+
     & .colorize-rating-e {
         color: #e45f5f;
     }

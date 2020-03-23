@@ -16,16 +16,18 @@ export class PostViewer extends RE6Module {
         if (!this.eval()) return;
 
         this.post = Post.getViewingPost();
-        this.modifyDom();
+        this.createDOM();
     }
 
-    private modifyDom() {
+    private createDOM() {
         if (this.fetchSettings("showUploader") === true) {
             this.showUploader();
         }
         if (this.fetchSettings("colorizeRating") === true) {
             this.colorizeRating();
         }
+
+        this.moveScoringBlock();
     }
 
     private showUploader() {
@@ -47,6 +49,18 @@ export class PostViewer extends RE6Module {
             const $li = $("<li>").append("Rating: ").append($("<b>").text(PostRating.toString(rating)).addClass("colorize-rating-" + rating));
             $this.replaceWith($li);
         });
+    }
+
+    private moveScoringBlock() {
+        let $ratingContainer = $("<div>").attr("id", "image-score-links").appendTo("section#image-extra-controls");
+        let postID = this.post.getId();
+        let original = $("#post-vote-up-" + postID).parent().parent();
+
+        $("#post-vote-up-" + postID).addClass("image-score-up").appendTo($ratingContainer);
+        $("#post-score-" + postID).addClass("image-score-num").appendTo($ratingContainer);
+        $("#post-vote-down-" + postID).addClass("image-score-down").appendTo($ratingContainer);
+
+        original.remove();
     }
 
     /**
