@@ -19,7 +19,7 @@ export class Miscellaneous extends RE6Module {
         super();
 
         // Remove the query string on posts
-        if (this.fetchSettings("removeSearchQueryString") === true && Page.matches("/posts/")) {
+        if (this.fetchSettings("removeSearchQueryString") === true && Page.matches(/^\/posts\/\d+\/?$/)) {
             this.removeSearchQueryString();
         }
 
@@ -27,12 +27,14 @@ export class Miscellaneous extends RE6Module {
         this.loadRedesignFixes(this.fetchSettings("loadRedesignFixes"));
 
         // Replaces the tag count estimate with the real number
-        if (this.fetchSettings("improveTagCount") === true && Page.matches("/posts")) {
+        if (this.fetchSettings("improveTagCount") === true && Page.matches([/^$/, /^\/posts\/?$/])) {
             this.improveTagCount();
         }
 
         // Auto-focus on the searchbar
-        this.focusSearchBar();
+        if (Page.matches([/^$/, /^\/posts\/?$/])) {
+            this.focusSearchBar();
+        }
     }
 
     /**
@@ -95,7 +97,8 @@ export class Miscellaneous extends RE6Module {
      * Set focus on the search bar
      */
     private focusSearchBar() {
-        $("section#search-box input").focus();
+        let searchbox = $("section#search-box input");
+        if (searchbox.val() == "") searchbox.focus();
     }
 
     /**

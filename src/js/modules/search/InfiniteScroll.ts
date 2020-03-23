@@ -1,5 +1,5 @@
 import { RE6Module } from "../../components/RE6Module";
-import { Page } from "../../components/data/Page";
+import { Page, PageDefintion } from "../../components/data/Page";
 import { Api } from "../../components/api/Api";
 import { ApiPost } from "../../components/api/responses/ApiPost";
 import { PostHtml } from "../../components/api/PostHtml";
@@ -12,7 +12,6 @@ import { Post } from "../../components/data/Post";
  */
 export class InfiniteScroll extends RE6Module {
 
-    private locationConstrain = "=/posts|/posts?";
     private $postContainer: JQuery<HTMLElement>;
     private currentQuery: string;
     private nextPageToGet: number;
@@ -22,12 +21,11 @@ export class InfiniteScroll extends RE6Module {
     private static instance: InfiniteScroll = new InfiniteScroll();
 
     private constructor() {
-        super();
-        if (!Page.matches(this.locationConstrain)) {
-            return;
-        }
+        super(PageDefintion.search);
+        if (!this.eval()) return;
+
         this.$postContainer = $("#posts-container");
-        this.currentQuery = Page.getQueryParameter("tags") !== undefined ? Page.getQueryParameter("tags") : "";
+        this.currentQuery = Page.getQueryParameter("tags") !== null ? Page.getQueryParameter("tags") : "";
         const page = parseInt(Page.getQueryParameter("page"));
         this.nextPageToGet = isNaN(page) ? 2 : page + 1;
         this.isInProgress = false;

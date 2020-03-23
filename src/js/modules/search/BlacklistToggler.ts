@@ -1,4 +1,5 @@
 import { RE6Module } from "../../components/RE6Module";
+import { PageDefintion } from "../../components/data/Page";
 
 /**
  * Blacklist Toggler  
@@ -13,7 +14,9 @@ export class BlacklistToggler extends RE6Module {
     private $list: JQuery<HTMLElement>;
 
     private constructor() {
-        super();
+        super(PageDefintion.search);
+        if (!this.eval()) return;
+
         let _self = this;
 
         // Create the required DOM

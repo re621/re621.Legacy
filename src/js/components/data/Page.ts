@@ -15,16 +15,13 @@ export class Page {
      *               you can prepend =
      * @returns true if at least on filter is fullfilled
      */
-    public static matches(filter: string) {
-        const url = this.getInstance().url;
+    public static matches(filter: RegExp | RegExp[]) {
+        if (filter instanceof RegExp) filter = [filter];
+        const pathname = this.getInstance().url.pathname.replace(/[\/?]$/g, "");
         let result = false;
-        for (const constraint of filter.split("|")) {
-            if (constraint.startsWith("=")) {
-                result = result || url.pathname === constraint.substring(1);
-            } else {
-                result = result || url.pathname.startsWith(constraint);
-            }
-        }
+        filter.forEach(function (constraint) {
+            result = result || constraint.test(pathname);
+        });
         return result;
     }
 
@@ -72,4 +69,12 @@ export class Page {
         if (this.instance === undefined) this.instance = new Page();
         return this.instance;
     }
+}
+
+export const PageDefintion = {
+    search: [
+        /^$/,
+        /^\/posts\/?$/
+    ],
+    post: /^\/posts\/\d+\/?$/,
 }

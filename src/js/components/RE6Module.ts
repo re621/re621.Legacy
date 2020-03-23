@@ -1,16 +1,31 @@
+import { Page } from "./data/Page";
+
 declare var Cookies;
 
 /**
  * Abstract class that other modules extend.  
  * Provides methods to save and load settings from cookies.
  */
-export abstract class RE6Module {
+export class RE6Module {
 
     private settings: any;
     private readonly prefix: string = this.constructor.name;
+    private constraint: RegExp[] = [];
 
-    protected constructor() {
+    protected constructor(constraint?: RegExp | RegExp[]) {
+        if (constraint === undefined) this.constraint = [];
+        else if (constraint instanceof RegExp) this.constraint.push(constraint);
+        else this.constraint = constraint;
+
         this.loadCookies();
+    }
+
+    /**
+     * Evaluates whether the module should be executed.
+     * @returns true if the page matches the constraint, false otherwise.
+     */
+    public eval() {
+        return this.constraint.length == 0 || Page.matches(this.constraint);
     }
 
     /**

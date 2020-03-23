@@ -1,5 +1,5 @@
 import { RE6Module } from "../../components/RE6Module";
-import { Page } from "../../components/data/Page";
+import { Page, PageDefintion } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
 
 /**
@@ -7,8 +7,6 @@ import { Post } from "../../components/data/Post";
  * you can filter posts instantaneously
  */
 export class InstantSearch extends RE6Module {
-
-    private locationConstrain = "=/posts|/posts?";
 
     // TODO: this can be of type HTMLInputElememnt, but I don't know how to do that
     private $searchbox: JQuery<HTMLElement>;
@@ -18,14 +16,11 @@ export class InstantSearch extends RE6Module {
     private static instance: InstantSearch = new InstantSearch();
 
     private constructor() {
-        super();
-        // TODO: Maybe somehow put this into RE6Module
-        if (!Page.matches(this.locationConstrain)) {
-            return;
-        }
+        super(PageDefintion.search);
+        if (!this.eval()) return;
 
         this.createDOM();
-        this.startingQuery = Page.getQueryParameter("tags") === undefined ? "" : Page.getQueryParameter("tags");
+        this.startingQuery = Page.getQueryParameter("tags") === null ? "" : Page.getQueryParameter("tags");
         let typingTimeout: number;
         let doneTyping = 500;
 

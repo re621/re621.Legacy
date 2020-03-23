@@ -1,6 +1,7 @@
 import { RE6Module } from "../../components/RE6Module";
 import { Post, ViewingPost } from "../../components/data/Post";
 import { TagTypes } from "../../components/data/Tag";
+import { PageDefintion } from "../../components/data/Page";
 
 declare var GM_download;
 
@@ -15,7 +16,8 @@ export class DownloadCustomizer extends RE6Module {
     private link: JQuery<HTMLElement>;
 
     private constructor() {
-        super();
+        super(PageDefintion.post);
+        if (!this.eval()) return;
 
         this.post = Post.getViewingPost();
         if (this.post === undefined) { return; }

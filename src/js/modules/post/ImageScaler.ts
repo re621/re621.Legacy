@@ -1,6 +1,7 @@
 import { RE6Module } from "../../components/RE6Module";
 import { Post } from "../../components/data/Post";
 import { Form } from "../../components/structure/Form";
+import { PageDefintion } from "../../components/data/Page";
 
 const IMAGE_SIZES = [
     { value: "sample", name: "Sample" },
@@ -22,12 +23,11 @@ export class ImageScaler extends RE6Module {
     private resizeSelector: Form;
 
     constructor() {
-        super();
-
-        this.post = Post.getViewingPost();
-        if (this.post === undefined) { return; }
+        super(PageDefintion.post);
+        if (!this.eval()) return;
 
         let _self = this;
+        this.post = Post.getViewingPost();
         this.image = $("img#image");
         this.createDOM();
 

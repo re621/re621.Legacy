@@ -1,6 +1,7 @@
 import { Post } from "../../components/data/Post";
 import { RE6Module } from "../../components/RE6Module";
 import { TagTypes, Tag } from "../../components/data/Tag";
+import { PageDefintion } from "../../components/data/Page";
 
 
 /**
@@ -11,7 +12,8 @@ export class TitleCustomizer extends RE6Module {
     private static instance: TitleCustomizer = new TitleCustomizer();
 
     private constructor() {
-        super();
+        super(PageDefintion.post);
+        if (!this.eval()) return;
 
         const post = Post.getViewingPost();
         if (post === undefined) { return; }
