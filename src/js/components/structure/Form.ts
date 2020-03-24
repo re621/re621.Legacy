@@ -66,7 +66,7 @@ export class Form {
                     break;
                 }
                 case "keyinput": {
-                    $input = _self.buildKeyInput(_self.$form, element);
+                    $input = this.buildKeyInput(this.$form, element);
                     break;
                 }
                 case "checkbox": {

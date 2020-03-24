@@ -21,7 +21,7 @@ export class InstantSearch extends RE6Module {
 
         this.createDOM();
         this.startingQuery = Page.getQueryParameter("tags") === null ? "" : Page.getQueryParameter("tags");
-        let typingTimeout: NodeJS.Timeout;
+        let typingTimeout: number; // TODO NodeJS.Timeout;
         let doneTyping = 500;
 
         this.$searchbox.on("input", () => {
