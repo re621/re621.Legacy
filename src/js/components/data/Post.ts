@@ -1,4 +1,5 @@
 import { TagTypes, Tag } from "./Tag";
+import { User } from "./User";
 
 declare var Danbooru;
 
@@ -54,6 +55,9 @@ export class Post {
         this.flags = $image.attr("data-flags");
 
         this.element = $image;
+
+        //Remove blacklist class, this gets custom handling from the script
+        $image.removeClass("blacklisted-active");
 
         //Check if a post will be hidden if the blacklist is active
         //Cache this result, to prevent having to recalculate it everytime the blacklist toggles
@@ -150,13 +154,9 @@ export class Post {
      */
     private matchesSiteBlacklist() {
         let hits = 0;
-        for (const entry of Danbooru.Blacklist.entries) {
-            if (Danbooru.Blacklist.post_match(this.element, entry)) {
-                entry.hits++
-                if (!entry.disabled) {
-                    hits++;
-                }
-                Danbooru.Blacklist.post_count++;
+        for (const filter of User.getBlacklist()) {
+            if (this.tagsMatchesFilter(filter)) {
+                hits++;
             }
         }
         return hits !== 0;

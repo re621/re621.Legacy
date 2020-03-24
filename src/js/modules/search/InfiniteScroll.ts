@@ -27,6 +27,9 @@ export class InfiniteScroll extends RE6Module {
         super(PageDefintion.search);
         if (!this.eval()) return;
 
+        //Override default blacklist function
+        Danbooru.Blacklist.apply = () => { };
+
         this.$postContainer = $("#posts-container");
 
         this.$loadingIndicator = $("<div>").attr("id", "re-infinite-scroll-loading").addClass("lds-dual-ring");
@@ -40,13 +43,12 @@ export class InfiniteScroll extends RE6Module {
         this.pagesLeft = true;
 
         //catch when the user toggles the blacklist
-        $("#disable-all-blacklists").on("click", () => {
-            this.applyBlacklist(false);
+        $("#disable-all-blacklists").add("#re-enable-all-blacklists").on("click", () => {
+            this.applyBlacklist();
         });
 
-        $("#re-enable-all-blacklists").on("click", () => {
-            this.applyBlacklist(true);
-        });
+        //Apply blacklist without user interaction. Blacklist might be active
+        this.applyBlacklist();
 
         //Wait until all images are loaded, to prevent fetching posts 
         //while the layout is still changing
@@ -58,15 +60,20 @@ export class InfiniteScroll extends RE6Module {
         });
     }
 
+    private blacklistIsActive() {
+        return $("#disable-all-blacklists").is(":visible");
+    }
+
     /**
      * Hides posts, if they are blacklisted and blacklist is active, show otherwise
      * @param hide 
      */
-    private applyBlacklist(hide: boolean) {
+    private applyBlacklist() {
+        const blacklistIsActive = this.blacklistIsActive();
         for (const post of Post.fetchPosts()) {
             //Only hide/show blacklisted, no need to do it to all
             if (post.getIsBlacklisted()) {
-                if (hide) {
+                if (blacklistIsActive) {
                     post.getDomElement().hide();
                 } else {
                     post.getDomElement().show();
