@@ -64,7 +64,12 @@ export class ImageScaler extends RE6Module {
     /** Registers the module's hotkeys */
     public registerHotkeys() {
         HotkeyCustomizer.register(this.fetchSettings("hotkey_scale"), function () {
-            console.log("scaling");
+            let $next = $("#resize-image-scale option:selected").next();
+            if ($next.length > 0) {
+                $("#resize-image-scale").val($next.val()).change();
+            } else {
+                $("#resize-image-scale").val($("#resize-image-scale option").first().val()).change();
+            }
         });
     }
 

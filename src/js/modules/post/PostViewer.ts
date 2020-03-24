@@ -50,13 +50,14 @@ export class PostViewer extends RE6Module {
     /** Registers the module's hotkeys */
     public registerHotkeys() {
         HotkeyCustomizer.register(this.fetchSettings("hotkey_upvote"), function () {
-            console.log("upvoting");
+            $("a.post-vote-up-link").click();
         });
         HotkeyCustomizer.register(this.fetchSettings("hotkey_downvote"), function () {
-            console.log("downvoting");
+            $("a.post-vote-down-link").click();
         });
         HotkeyCustomizer.register(this.fetchSettings("hotkey_favorite"), function () {
-            console.log("favoriting");
+            if ($("div.fav-buttons").hasClass("fav-buttons-false")) { $("button#add-fav-button").click(); }
+            else { $("button#remove-fav-button").click(); }
         });
     }
 
