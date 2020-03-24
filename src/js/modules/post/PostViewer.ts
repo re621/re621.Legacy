@@ -17,41 +17,23 @@ export class PostViewer extends RE6Module {
 
         this.post = Post.getViewingPost();
         this.createDOM();
+
     }
 
+    /** Creates the document structure for the module */
     private createDOM() {
-        if (this.fetchSettings("showUploader") === true) {
-            this.showUploader();
-        }
-        if (this.fetchSettings("colorizeRating") === true) {
-            this.colorizeRating();
-        }
+        // Add the uploader name
+        $("<li>")
+            .append("Uploader: ")
+            .append($("<a>").attr("href", "/users/" + this.post.getUploaderID()).text(this.post.getUploaderName()))
+            .appendTo("#post-information ul");
 
-        this.moveScoringBlock();
-    }
+        // Colorize the rating
+        $("#post-information ul li:contains('Rating: ')")
+            .html("Rating: ")
+            .append($("<b>").text(PostRating.toString(this.post.getRating())).addClass("colorize-rating-" + this.post.getRating()));
 
-    private showUploader() {
-        const uploaderName = this.post.getUploaderName();
-        const uploaderId = this.post.getUploaderID();
-        const $ul = $("#post-information ul");
-        const $li = $("<li>").append("Uploader: ").append($("<a>").attr("href", "/users/" + uploaderId).text(uploaderName));
-        $ul.append($li);
-    }
-
-    private colorizeRating() {
-        const _self = this;
-        $("#post-information ul li").each(function () {
-            const $this = $(this);
-            if (!$this.text().startsWith("Rating:")) {
-                return;
-            }
-            const rating = _self.post.getRating();
-            const $li = $("<li>").append("Rating: ").append($("<b>").text(PostRating.toString(rating)).addClass("colorize-rating-" + rating));
-            $this.replaceWith($li);
-        });
-    }
-
-    private moveScoringBlock() {
+        // Move the scoring block
         let $ratingContainer = $("<div>").attr("id", "image-score-links").prependTo("section#image-extra-controls");
         let postID = this.post.getId();
         let original = $("#post-vote-up-" + postID).parent().parent();
