@@ -6,8 +6,8 @@ import { HotkeyCustomizer } from "../general/HotkeyCustomizer";
 
 const IMAGE_SIZES = [
     { value: "sample", name: "Sample" },
-    { value: "fit-horizontal", name: "Fit Horizontally" },
     { value: "fit-vertical", name: "Fit Vertically" },
+    { value: "fit-horizontal", name: "Fit Horizontally" },
     { value: "original", name: "Original" },
 ];
 
