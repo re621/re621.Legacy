@@ -14,7 +14,7 @@ export class BlacklistToggler extends RE6Module {
     private $list: JQuery<HTMLElement>;
 
     private constructor() {
-        super(PageDefintion.search);
+        super([PageDefintion.search, PageDefintion.post]);
         if (!this.eval()) return;
 
         // Create the required DOM
