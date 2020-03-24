@@ -1,73 +1,26 @@
 {
     "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "build",
-            "type": "process",
-            "command": "",
-            "problemMatcher": [
-                "$eslint-stylish"
-            ],
-            "dependsOn": [
-                "userscript"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "clear": false
-            },
+    "tasks": [{
+        "label": "build",
+        "type": "npm",
+        "script": "build",
+        "problemMatcher": [
+            "$eslint-stylish"
+        ],
+        "group": {
+            "kind": "build",
+            "isDefault": true
         },
-        {
-            "label": "typescript",
-            "type": "npm",
-            "script": "typescript",
-            "group": "build",
-            "options": {
-                "statusbar": {
-                    "hide": true
-                }
-            },
-            "presentation": {
-                "showReuseMessage": false
-            },
+        "presentation": {
+            "clear": true,
+            "reveal": "silent",
+            "panel": "shared"
+
         },
-        {
-            "label": "browserify",
-            "type": "npm",
-            "script": "browserify",
-            "problemMatcher": [],
-            "dependsOn": [
-                "typescript"
-            ],
-            "group": "build",
-            "options": {
-                "statusbar": {
-                    "hide": true
-                }
-            },
-            "presentation": {
-                "showReuseMessage": false
-            },
-        },
-        {
-            "label": "userscript",
-            "type": "npm",
-            "script": "userscript",
-            "problemMatcher": [],
-            "dependsOn": [
-                "browserify"
-            ],
-            "group": "build",
-            "options": {
-                "statusbar": {
-                    "label": "js-build"
-                }
-            },
-            "presentation": {
-                "showReuseMessage": false
-            },
+        "options": {
+            "statusbar": {
+                "hide": false
+            }
         }
-    ]
+    }]
 }
