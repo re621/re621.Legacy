@@ -3,16 +3,18 @@ import { RequestQueue } from "./RequestQueue";
 /**
  * Conventient class to make e6 api requests
  */
-export class Api extends RequestQueue {
+export class Api {
 
     private static instance: Api;
 
     //needed to authenticate some post requests, for example when you modify user settings
     private authenticityToken: string;
 
+    private queue: RequestQueue;
+
     private constructor() {
-        super();
         this.authenticityToken = $("body").attr("csrf-token");
+        this.queue = new RequestQueue(2000);
     }
 
     /**
@@ -55,9 +57,10 @@ export class Api extends RequestQueue {
      * @returns the response as a string
      */
     public static async getUrl(url: string) {
-        const id = this.getRequestId();
-        this.addToQueue(this.request, id, url, "GET");
-        return await this.getRequestResult(id);
+        const queue = this.getInstance().queue;
+        const id = queue.getRequestId();
+        queue.add(this.request, id, url, "GET");
+        return await queue.getRequestResult(id);
     }
 
     /**
@@ -76,9 +79,10 @@ export class Api extends RequestQueue {
      * @returns the response as a string
      */
     public static async postUrl(url: string, json: object) {
-        const id = this.getRequestId();
-        this.addToQueue(this.request, id, url, "POST", json);
-        return await this.getRequestResult(id);
+        const queue = this.getInstance().queue;
+        const id = queue.getRequestId();
+        queue.add(this.request, id, url, "POST", json);
+        return await queue.getRequestResult(id);
     }
 
     /**

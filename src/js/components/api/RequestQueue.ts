@@ -1,30 +1,34 @@
-export abstract class RequestQueue {
+export class RequestQueue {
     // how long should be waited between each api request, in ms
-    private static requestSleepTimer = 2000;
+    private requestSleepDuration = 2000;
 
     //used to notify the original request function of the requests completion
-    private static emitter = $({});
+    private emitter = $({});
 
     //Holds request data which has yet to be processed. Content will be filled, once the request is done
-    private static requestQueue = new Map<number, { url: string, method: string, data: {}, content: string }>();
+    private requestQueue = new Map<number, { url: string, method: string, data: {}, content: string }>();
 
     //True, if the queue is currently being emptied
-    private static workingQueue = false;
+    private workingQueue = false;
 
     //Incrementing id to uniquely identify each request, used to emit done event
-    private static requestCounter = 0;
+    private requestCounter = 0;
+
+    public constructor(requestSleepDuration: number) {
+        this.requestSleepDuration = requestSleepDuration;
+    }
 
     /**
      * @returns the next id to uniquely identify a request
      */
-    protected static getRequestId() {
+    public getRequestId() {
         return this.requestCounter++;
     }
 
     /**
      * Starts working through the queue and notify listeners on completion
      */
-    private static async workQueue(requestMethod: Function) {
+    private async workQueue(requestMethod: Function) {
         //If queue is already being worked on, don't start another round
         if (this.workingQueue === true) {
             return;
@@ -37,7 +41,7 @@ export abstract class RequestQueue {
             console.log("Finished " + entry[0]);
             this.emitter.trigger("request-" + entry[0]);
             //sleep
-            await new Promise(resolve => setTimeout(() => resolve(), 1000 / this.requestSleepTimer));
+            await new Promise(resolve => setTimeout(() => resolve(), 1000 / this.requestSleepDuration));
         }
         this.workingQueue = false;
     }
@@ -50,7 +54,7 @@ export abstract class RequestQueue {
      * @param method 2nd requestMethod parameter
      * @param data 3rd requestMethod paramter
      */
-    protected static async addToQueue(requestMethod: Function, id: number, url: string, method: string, data = {}) {
+    public async add(requestMethod: Function, id: number, url: string, method: string, data = {}) {
         this.requestQueue.set(id, {
             url: url,
             method: method,
@@ -62,7 +66,7 @@ export abstract class RequestQueue {
         console.log("Queue size: " + this.requestQueue.size);
     }
 
-    protected static async getRequestResult(id: number): Promise<string> {
+    public async getRequestResult(id: number): Promise<string> {
         return new Promise(resolve => {
             //Wait until the queue worker finishes the request
             this.emitter.on("request-" + id, () => {
