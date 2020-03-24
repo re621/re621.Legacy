@@ -2,6 +2,7 @@ import { RE6Module } from "../../components/RE6Module";
 import { Post } from "../../components/data/Post";
 import { Form } from "../../components/structure/Form";
 import { PageDefintion } from "../../components/data/Page";
+import { HotkeyCustomizer } from "../general/HotkeyCustomizer";
 
 const IMAGE_SIZES = [
     { value: "sample", name: "Sample" },
@@ -36,6 +37,8 @@ export class ImageScaler extends RE6Module {
             _self.setImageSize(size);
             _self.pushSettings("size", size)
         });
+
+        this.registerHotkeys();
     }
 
     /**
@@ -54,8 +57,16 @@ export class ImageScaler extends RE6Module {
     protected getDefaultSettings() {
         let def_settings = {
             size: "sample",
+            hotkey_scale: "v",
         };
         return def_settings;
+    }
+
+    /** Registers the module's hotkeys */
+    public registerHotkeys() {
+        HotkeyCustomizer.register(this.fetchSettings("hotkey_scale"), function () {
+            console.log("scaling");
+        });
     }
 
     /**

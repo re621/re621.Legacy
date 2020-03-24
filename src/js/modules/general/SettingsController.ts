@@ -6,6 +6,9 @@ import { Miscellaneous } from "./Miscellaneous";
 import { Form } from "../../components/structure/Form";
 import { TitleCustomizer } from "../post/TitleCustomizer";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
+import { PostViewer } from "../post/PostViewer";
+import { HotkeyCustomizer } from "./HotkeyCustomizer";
+import { ImageScaler } from "../post/ImageScaler";
 
 /**
  * SettingsController  
@@ -50,14 +53,15 @@ export class SettingsController extends RE6Module {
         this.modal = new Modal({
             title: "Settings",
             triggers: [{ element: addSettingsButton.link }],
+            escapable: false,
             content: $settings.create(),
             position: { my: "right top", at: "right top" }
         });
 
         // Establish handlers
         this.handleTabMiscellaneous(miscSettingsTab);
+        this.handleTabHotkeys(hotkeyTab);
         this.handleTabPostsPage(postsPageTab);
-        this.handleTabHotkeys(postsPageTab);
     }
 
     /**
@@ -210,6 +214,9 @@ export class SettingsController extends RE6Module {
 
     /** Creates the DOM for the hotkey settings page */
     private createTabHotkeys() {
+        let postViewer = <PostViewer>this.modules.get("PostViewer");
+        let imageScaler = <ImageScaler>this.modules.get("ImageScaler");
+
         let form = new Form(
             {
                 "id": "settings-hotkeys",
@@ -218,11 +225,35 @@ export class SettingsController extends RE6Module {
             },
             [
                 {
-                    id: "hotkey-placeholder",
+                    id: "hotkey-posts-title",
                     type: "div",
-                    value: "Coming soon",
+                    value: "Posts",
                     stretch: "full"
-                }
+                },
+                {
+                    id: "hotkey-upvote",
+                    type: "keyinput",
+                    label: "Upvote",
+                    value: postViewer.fetchSettings("hotkey_upvote"),
+                },
+                {
+                    id: "hotkey-downvote",
+                    type: "keyinput",
+                    label: "Downvote",
+                    value: postViewer.fetchSettings("hotkey_downvote"),
+                },
+                {
+                    id: "hotkey-favorite",
+                    type: "keyinput",
+                    label: "Favorite",
+                    value: postViewer.fetchSettings("hotkey_favorite"),
+                },
+                {
+                    id: "hotkey-scale",
+                    type: "keyinput",
+                    label: "Scale",
+                    value: imageScaler.fetchSettings("hotkey_scale"),
+                },
             ]
         );
 
@@ -234,7 +265,34 @@ export class SettingsController extends RE6Module {
      * @param form Miscellaneous settings form
      */
     private handleTabHotkeys(form: Form) {
+        let _self = this;
+        let hotkeyFormInput = form.getInputList();
+        let postViewer = <PostViewer>_self.modules.get("PostViewer");
+        let imageScaler = <ImageScaler>this.modules.get("ImageScaler");
 
+        hotkeyFormInput.get("hotkey-upvote").on("re621:keychange", function (event, newKey, oldKey) {
+            postViewer.pushSettings("hotkey_upvote", newKey);
+            HotkeyCustomizer.unregister(oldKey);
+            postViewer.registerHotkeys();
+        });
+
+        hotkeyFormInput.get("hotkey-downvote").on("re621:keychange", function (event, newKey, oldKey) {
+            postViewer.pushSettings("hotkey_downvote", newKey);
+            HotkeyCustomizer.unregister(oldKey);
+            postViewer.registerHotkeys();
+        });
+
+        hotkeyFormInput.get("hotkey-favorite").on("re621:keychange", function (event, newKey, oldKey) {
+            postViewer.pushSettings("hotkey_favorite", newKey);
+            HotkeyCustomizer.unregister(oldKey);
+            postViewer.registerHotkeys();
+        });
+
+        hotkeyFormInput.get("hotkey-scale").on("re621:keychange", function (event, newKey, oldKey) {
+            imageScaler.pushSettings("hotkey_scale", newKey);
+            HotkeyCustomizer.unregister(oldKey);
+            imageScaler.registerHotkeys();
+        });
     }
 
     /** Creates the DOM for the miscellaneous settings page */

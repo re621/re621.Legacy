@@ -29,19 +29,19 @@ import { SettingsController } from "./modules/general/SettingsController";
 HeaderCustomizer.getInstance();
 ThemeCustomizer.getInstance();
 FormattingHelper.init();
-PostViewer.getInstance();
 
 // Modules without settings
 BlacklistToggler.getInstance();
-ImageScaler.getInstance();
 InstantSearch.getInstance();
 InfiniteScroll.getInstance();
 
 // Modules configured by the SettingsController
 SettingsController.registerModule(
     DownloadCustomizer.getInstance(),
+    ImageScaler.getInstance(),
     TitleCustomizer.getInstance(),
     Miscellaneous.getInstance(),
+    PostViewer.getInstance(),
 );
 
 SettingsController.getInstance().init();

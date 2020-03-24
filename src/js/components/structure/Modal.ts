@@ -18,6 +18,7 @@ export class Modal {
             .dialog({
                 autoOpen: false,
                 appendTo: "re-modal-container",
+                closeOnEscape: config.escapable,
 
                 width: "auto",
                 minWidth: config.minWidth,
@@ -58,6 +59,7 @@ export class Modal {
         if (config.content === undefined) config.content = $("");
         if (config.triggers === undefined) config.triggers = [];
         if (config.triggerMulti === undefined) config.triggerMulti = false;
+        if (config.escapable === undefined) config.escapable = true;
 
         if (config.minWidth === undefined) config.minWidth = 150;
         if (config.minHeight === undefined) config.minHeight = 150;
@@ -140,6 +142,7 @@ interface ModalConfig {
     content?: JQuery<HTMLElement>,
     triggers?: ModalTrigger[],
     triggerMulti?: boolean,
+    escapable?: boolean,
 
     minWidth?: number,
     minHeight?: number,

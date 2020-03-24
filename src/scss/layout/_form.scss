@@ -82,7 +82,8 @@ form.grid-form {
         }
 
         // Copybox
-        &.copybox {
+        &.copybox,
+        &.keyinput {
             display: inline-grid;
             grid-template-columns: 80% 20%;
             overflow: hidden;
@@ -90,11 +91,18 @@ form.grid-form {
             input[type=text] {
                 width: unset;
                 border-radius: 4px 0 0 4px;
+                text-align: center;
+                outline: 0;
+
+                &.input-info {
+                    color: red;
+                }
             }
 
             button[type=button] {
                 width: unset;
                 border-radius: 0 4px 4px 0;
+                outline: 0;
 
                 &:hover {
                     @include themable {

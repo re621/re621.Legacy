@@ -1,3 +1,5 @@
+import { HotkeyCustomizer } from "../../modules/general/HotkeyCustomizer";
+
 /**
  * Removes the hassle of creating HTML elements for a form
  */
@@ -63,6 +65,10 @@ export class Form {
                 }
                 case "copyinput": {
                     $input = _self.buildCopyInput(_self.$form, element);
+                    break;
+                }
+                case "keyinput": {
+                    $input = _self.buildKeyInput(_self.$form, element);
                     break;
                 }
                 case "checkbox": {
@@ -224,6 +230,80 @@ export class Form {
         $($copybutton).click(function (event) {
             $input.select();
             document.execCommand("copy");
+        });
+
+        return $input;
+    }
+
+    /**
+     * Builds and appends an input element that records a key press
+     * @param $form Form to append the element to
+     * @param element Element configuration data
+     */
+    private buildKeyInput($form: JQuery<HTMLElement>, element: FormElement) {
+        let labeled = false;
+        if (element.label) {
+            $("<label>")
+                .attr("for", this.config.id + "-" + element.id)
+                .html(element.label)
+                .appendTo($form);
+            labeled = true;
+        } else if (element.stretch === "default") { element.stretch = "column"; }
+
+        let $inputContainer = $("<div>")
+            .addClass("input-container")
+            .toggleClass("labeled", labeled)
+            .addClass("keyinput")
+            .addClass("stretch-" + element.stretch)
+            .appendTo($form);
+
+        let $input = $("<input>")
+            .attr("type", "text")
+            .attr("id", this.config.id + "-" + element.id)
+            .attr("readonly", "")
+            .val(element.value)
+            .appendTo($inputContainer);
+
+        let $recordbutton = $("<button>")
+            .attr("type", "button")
+            .attr("id", this.config.id + "-" + element.id + "-copy")
+            .html(`<i class="far fa-keyboard"></i>`)
+            .appendTo($inputContainer);
+
+        let occupied = false;
+        $($recordbutton).click(function (event) {
+            if (occupied) return;
+            occupied = true;
+
+            let $oldKey = $input.val();
+            $input
+                .addClass("input-info")
+                .val("Recording");
+
+            HotkeyCustomizer.recordSingleKeypress(function (key: string) {
+                if (key.includes("escape")) {
+                    $input
+                        .removeClass("input-info")
+                        .val($oldKey);
+                    occupied = false;
+                }
+                else if (HotkeyCustomizer.isRegistered(key)) {
+                    $input.val("Already Taken");
+                    setTimeout(() => {
+                        $input
+                            .removeClass("input-info")
+                            .val($oldKey);
+                        occupied = false;
+                    }, 1000);
+                }
+                else {
+                    $input
+                        .removeClass("input-info")
+                        .val(key)
+                        .trigger("re621:keychange", [key, $oldKey]);
+                    occupied = false;
+                }
+            });
         });
 
         return $input;
@@ -471,7 +551,7 @@ interface FormElement {
     /** Unique ID for the element. Actual ID becomes formID_elementID */
     id?: string,
     /** Supported input type */
-    type: "input" | "copyinput" | "checkbox" | "button" | "submit" | "textarea" | "select" | "div" | "hr",
+    type: "input" | "copyinput" | "keyinput" | "checkbox" | "button" | "submit" | "textarea" | "select" | "div" | "hr",
 
     stretch?: "default" | "column" | "full",
 

@@ -1,6 +1,7 @@
 import { Post, ViewingPost, PostRating } from "../../components/data/Post";
 import { RE6Module } from "../../components/RE6Module";
 import { Page, PageDefintion } from "../../components/data/Page";
+import { HotkeyCustomizer } from "../general/HotkeyCustomizer";
 
 
 /**
@@ -18,6 +19,7 @@ export class PostViewer extends RE6Module {
         this.post = Post.getViewingPost();
         this.createDOM();
 
+        this.registerHotkeys();
     }
 
     /** Creates the document structure for the module */
@@ -45,14 +47,28 @@ export class PostViewer extends RE6Module {
         original.remove();
     }
 
+    /** Registers the module's hotkeys */
+    public registerHotkeys() {
+        HotkeyCustomizer.register(this.fetchSettings("hotkey_upvote"), function () {
+            console.log("upvoting");
+        });
+        HotkeyCustomizer.register(this.fetchSettings("hotkey_downvote"), function () {
+            console.log("downvoting");
+        });
+        HotkeyCustomizer.register(this.fetchSettings("hotkey_favorite"), function () {
+            console.log("favoriting");
+        });
+    }
+
     /**
      * Returns a set of default settings values
      * @returns Default settings
      */
     protected getDefaultSettings() {
         return {
-            "showUploader": true,
-            "colorizeRating": true
+            hotkey_upvote: "a",
+            hotkey_downvote: "z",
+            hotkey_favorite: "f",
         };
     }
 
