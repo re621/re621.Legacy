@@ -15,6 +15,7 @@ declare var Danbooru;
 export class InfiniteScroll extends RE6Module {
 
     private $postContainer: JQuery<HTMLElement>;
+    private $loadingIndicator: JQuery<HTMLElement>;
     private currentQuery: string;
     private nextPageToGet: number;
     private isInProgress: boolean;
@@ -27,6 +28,11 @@ export class InfiniteScroll extends RE6Module {
         if (!this.eval()) return;
 
         this.$postContainer = $("#posts-container");
+
+        this.$loadingIndicator = $("<div>").attr("id", "re-infinite-scroll-loading").addClass("lds-dual-ring");
+        this.$loadingIndicator.insertAfter(this.$postContainer);
+        this.$loadingIndicator.hide();
+
         this.currentQuery = Page.getQueryParameter("tags") !== null ? Page.getQueryParameter("tags") : "";
         const page = parseInt(Page.getQueryParameter("page"));
         this.nextPageToGet = isNaN(page) ? 2 : page + 1;
@@ -51,6 +57,7 @@ export class InfiniteScroll extends RE6Module {
             return;
         }
         this.isInProgress = true;
+        this.$loadingIndicator.show();
         const posts: ApiPost[] = (await Api.getJson(`/posts.json?tags=${this.currentQuery}&page=${this.nextPageToGet}`)).posts;
         Page.setQueryParameter("page", this.nextPageToGet.toString());
         this.addPageIndicator();
@@ -60,11 +67,12 @@ export class InfiniteScroll extends RE6Module {
         }
         this.pagesLeft = posts.length !== 0;
         this.isInProgress = false;
+        this.$loadingIndicator.hide();
+
         //new posts habe been appended, force cache refresh
         Post.invalidatePostsCache();
         InstantSearch.getInstance().applyFilter();
         this.nextPageToGet++;
-
         Danbooru.Blacklist.apply();
     }
 
