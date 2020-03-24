@@ -13,7 +13,7 @@ export class Api {
     private queue: RequestQueue;
 
     private constructor() {
-        this.authenticityToken = $("body").attr("csrf-token");
+        this.authenticityToken = $("head meta[name=csrf-token]").attr("content");
         this.queue = new RequestQueue(2000);
     }
 
