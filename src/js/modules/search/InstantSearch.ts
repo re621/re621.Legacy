@@ -21,12 +21,12 @@ export class InstantSearch extends RE6Module {
 
         this.createDOM();
         this.startingQuery = Page.getQueryParameter("tags") === null ? "" : Page.getQueryParameter("tags");
-        let typingTimeout: number; // TODO NodeJS.Timeout;
+        let typingTimeout: number;
         let doneTyping = 500;
 
         this.$searchbox.on("input", () => {
             clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => { this.applyFilter() }, doneTyping);
+            typingTimeout = window.setTimeout(() => { this.applyFilter() }, doneTyping);
         });
         //The user might have paginated, which means the input is not empty,
         //but there was no input event yet.
