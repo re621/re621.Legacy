@@ -211,6 +211,7 @@ export class Form {
         let $input = $("<input>")
             .attr("type", "text")
             .attr("id", this.config.id + "-" + element.id)
+            .attr("readonly", "")
             .val(element.value)
             .appendTo($inputContainer);
 
