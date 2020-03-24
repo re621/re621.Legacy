@@ -51,7 +51,9 @@ export class TitleCustomizer extends RE6Module {
             .replace(/%postnum%/g, this.post.getId().toString())
             .replace(/%author%/g, this.post.getTagsFromType(TagTypes.Artist).filter(tag => Tag.isArist(tag)).join(", "))
             .replace(/%copyright%/g, this.post.getTagsFromType(TagTypes.Copyright).join(", "))
-            .replace(/%character%/g, this.post.getTagsFromType(TagTypes.Character).join(", "));
+            .replace(/%character%/g, this.post.getTagsFromType(TagTypes.Character).join(", "))
+            .replace(/\(\)|( - )$/g, "")
+            .replace(/[ ]{2,}|^ | $/g, "");
     }
 
     /**

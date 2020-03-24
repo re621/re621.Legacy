@@ -1,6 +1,7 @@
 import { Post, ViewingPost, PostRating } from "../../components/data/Post";
 import { RE6Module } from "../../components/RE6Module";
 import { Page, PageDefintion } from "../../components/data/Page";
+import { HotkeyCustomizer } from "../general/HotkeyCustomizer";
 
 
 /**
@@ -17,49 +18,47 @@ export class PostViewer extends RE6Module {
 
         this.post = Post.getViewingPost();
         this.createDOM();
+
+        this.registerHotkeys();
     }
 
+    /** Creates the document structure for the module */
     private createDOM() {
-        if (this.fetchSettings("showUploader") === true) {
-            this.showUploader();
-        }
-        if (this.fetchSettings("colorizeRating") === true) {
-            this.colorizeRating();
-        }
+        // Add the uploader name
+        $("<li>")
+            .append("Uploader: ")
+            .append($("<a>").attr("href", "/users/" + this.post.getUploaderID()).text(this.post.getUploaderName()))
+            .appendTo("#post-information ul");
 
-        this.moveScoringBlock();
-    }
+        // Colorize the rating
+        $("#post-information ul li:contains('Rating: ')")
+            .html("Rating: ")
+            .append($("<b>").text(PostRating.toString(this.post.getRating())).addClass("colorize-rating-" + this.post.getRating()));
 
-    private showUploader() {
-        const uploaderName = this.post.getUploaderName();
-        const uploaderId = this.post.getUploaderID();
-        const $ul = $("#post-information ul");
-        const $li = $("<li>").append("Uploader: ").append($("<a>").attr("href", "/users/" + uploaderId).text(uploaderName));
-        $ul.append($li);
-    }
-
-    private colorizeRating() {
-        $("#post-information ul li").each((index, element) => {
-            const $element = $(element);
-            if (!$element.text().startsWith("Rating:")) {
-                return;
-            }
-            const rating = this.post.getRating();
-            const $li = $("<li>").append("Rating: ").append($("<b>").text(PostRating.toString(rating)).addClass("colorize-rating-" + rating));
-            $element.replaceWith($li);
-        });
-    }
-
-    private moveScoringBlock() {
+        // Move the scoring block
         let $ratingContainer = $("<div>").attr("id", "image-score-links").prependTo("section#image-extra-controls");
         let postID = this.post.getId();
         let original = $("#post-vote-up-" + postID).parent().parent();
 
-        $("#post-vote-up-" + postID).addClass("image-score-up").appendTo($ratingContainer);
-        $("#post-score-" + postID).addClass("image-score-num").appendTo($ratingContainer);
         $("#post-vote-down-" + postID).addClass("image-score-down").appendTo($ratingContainer);
+        $("#post-score-" + postID).addClass("image-score-num").appendTo($ratingContainer);
+        $("#post-vote-up-" + postID).addClass("image-score-up").appendTo($ratingContainer);
 
         original.remove();
+    }
+
+    /** Registers the module's hotkeys */
+    public registerHotkeys() {
+        HotkeyCustomizer.register(this.fetchSettings("hotkey_upvote"), function () {
+            $("a.post-vote-up-link")[0].click();
+        });
+        HotkeyCustomizer.register(this.fetchSettings("hotkey_downvote"), function () {
+            $("a.post-vote-down-link")[0].click();
+        });
+        HotkeyCustomizer.register(this.fetchSettings("hotkey_favorite"), function () {
+            if ($("div.fav-buttons").hasClass("fav-buttons-false")) { $("button#add-fav-button")[0].click(); }
+            else { $("button#remove-fav-button")[0].click(); }
+        });
     }
 
     /**
@@ -68,8 +67,9 @@ export class PostViewer extends RE6Module {
      */
     protected getDefaultSettings() {
         return {
-            "showUploader": true,
-            "colorizeRating": true
+            hotkey_upvote: "a",
+            hotkey_downvote: "z",
+            hotkey_favorite: "f",
         };
     }
 

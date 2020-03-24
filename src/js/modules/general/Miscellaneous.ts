@@ -1,5 +1,5 @@
 import { RE6Module } from "../../components/RE6Module";
-import { Page } from "../../components/data/Page";
+import { Page, PageDefintion } from "../../components/data/Page";
 import { ApiTag } from "../../components/api/responses/ApiTag";
 import { Api } from "../../components/api/Api";
 
@@ -19,7 +19,7 @@ export class Miscellaneous extends RE6Module {
         super();
 
         // Remove the query string on posts
-        if (this.fetchSettings("removeSearchQueryString") === true && Page.matches(/^\/posts\/\d+\/?$/)) {
+        if (this.fetchSettings("removeSearchQueryString") === true && Page.matches(PageDefintion.post)) {
             this.removeSearchQueryString();
         }
 
@@ -27,12 +27,12 @@ export class Miscellaneous extends RE6Module {
         this.loadRedesignFixes(this.fetchSettings("loadRedesignFixes"));
 
         // Replaces the tag count estimate with the real number
-        if (this.fetchSettings("improveTagCount") === true && Page.matches([/^$/, /^\/posts\/?[0-9]*$/])) {
+        if (this.fetchSettings("improveTagCount") === true && Page.matches([PageDefintion.search, PageDefintion.post])) {
             this.improveTagCount();
         }
 
         // Auto-focus on the searchbar
-        if (Page.matches([/^$/, /^\/posts\/?$/])) {
+        if (Page.matches(PageDefintion.search)) {
             this.focusSearchBar();
         }
     }

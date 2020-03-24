@@ -19,7 +19,8 @@ export class PostHtml {
             attr("data-file-ext", json.file.ext).
             attr("data-file-url", json.file.url).
             attr("data-large-file-url", json.sample.url).       //yes, even though the name has large in it, sample is correct here
-            attr("data-preview-file-url", json.preview.url);
+            attr("data-preview-file-url", json.preview.url).
+            attr("data-uploader", json.uploader_id);            // TODO temporary, replace with actual uploader name
 
         for (const className of this.getArticleClasses(json)) {
             $article.addClass(className);

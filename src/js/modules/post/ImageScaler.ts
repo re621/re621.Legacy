@@ -2,11 +2,12 @@ import { RE6Module } from "../../components/RE6Module";
 import { Post } from "../../components/data/Post";
 import { Form } from "../../components/structure/Form";
 import { PageDefintion } from "../../components/data/Page";
+import { HotkeyCustomizer } from "../general/HotkeyCustomizer";
 
 const IMAGE_SIZES = [
     { value: "sample", name: "Sample" },
-    { value: "fit-horizontal", name: "Fit Horizontally" },
     { value: "fit-vertical", name: "Fit Vertically" },
+    { value: "fit-horizontal", name: "Fit Horizontally" },
     { value: "original", name: "Original" },
 ];
 
@@ -35,6 +36,8 @@ export class ImageScaler extends RE6Module {
             this.setImageSize(size);
             this.pushSettings("size", size)
         });
+
+        this.registerHotkeys();
     }
 
     /**
@@ -53,8 +56,21 @@ export class ImageScaler extends RE6Module {
     protected getDefaultSettings() {
         let def_settings = {
             size: "sample",
+            hotkey_scale: "v",
         };
         return def_settings;
+    }
+
+    /** Registers the module's hotkeys */
+    public registerHotkeys() {
+        HotkeyCustomizer.register(this.fetchSettings("hotkey_scale"), function () {
+            let $next = $("#resize-image-scale option:selected").next();
+            if ($next.length > 0) {
+                $("#resize-image-scale").val($next.val()).change();
+            } else {
+                $("#resize-image-scale").val($("#resize-image-scale option").first().val()).change();
+            }
+        });
     }
 
     /**
@@ -123,6 +139,10 @@ export class ImageScaler extends RE6Module {
                 break;
             }
         }
+
+        this.image.on("load", () => {
+            this.image.resize();
+        });
     }
 
 }

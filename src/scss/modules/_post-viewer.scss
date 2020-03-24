@@ -23,6 +23,7 @@ section#image-extra-controls {
 
     div#image-score-links,
     div.fav-buttons>button,
+    div.fav-buttons>button::after,
     div#image-download-link a,
     div#image-resize-cycle select,
     div#image-resize-cycle a {
@@ -31,7 +32,7 @@ section#image-extra-controls {
         height: 2rem;
 
         font-size: 1rem;
-        padding: 0rem 0.5rem;
+        padding: 0rem 0.5rem !important;
         border-radius: 4px;
         line-height: 1.25em;
     }
