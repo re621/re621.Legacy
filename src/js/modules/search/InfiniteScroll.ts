@@ -6,6 +6,8 @@ import { PostHtml } from "../../components/api/PostHtml";
 import { InstantSearch } from "./InstantSearch";
 import { Post } from "../../components/data/Post";
 
+declare var Danbooru;
+
 /**
  * Gets rid of the default pagination and instead appends new posts
  * when you scrolled to the bottom
@@ -62,6 +64,8 @@ export class InfiniteScroll extends RE6Module {
         Post.invalidatePostsCache();
         InstantSearch.getInstance().applyFilter();
         this.nextPageToGet++;
+
+        Danbooru.Blacklist.apply();
     }
 
     private addPageIndicator() {
