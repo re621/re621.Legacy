@@ -262,9 +262,8 @@ export class SettingsController extends RE6Module {
      * @param form Miscellaneous settings form
      */
     private handleTabHotkeys(form: Form) {
-        let _self = this;
         let hotkeyFormInput = form.getInputList();
-        let postViewer = <PostViewer>_self.modules.get("PostViewer");
+        let postViewer = <PostViewer>this.modules.get("PostViewer");
         let imageScaler = <ImageScaler>this.modules.get("ImageScaler");
 
         hotkeyFormInput.get("hotkey-upvote").on("re621:keychange", function (event, newKey, oldKey) {
