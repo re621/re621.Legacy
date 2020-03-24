@@ -1,12 +1,15 @@
 import { TagTypes, Tag } from "./Tag";
 
+declare var Danbooru;
+
 /**
  * Collects basic info for a post.
  * Use fetchPosts to construct
  */
 export class Post {
 
-    private static posts: Post[];
+    private static initalPosts: Post[];
+    private static addedPosts: Post[] = [];
 
     protected element: JQuery<HTMLElement>;
 
@@ -27,7 +30,9 @@ export class Post {
     protected sound: boolean;
     protected flags: string;
 
-    protected constructor($image: JQuery<HTMLElement>) {
+    protected isBlacklisted: boolean;
+
+    public constructor($image: JQuery<HTMLElement>) {
         this.id = parseInt($image.attr("data-id"));
         this.tags = $image.attr("data-tags");
         this.rating = PostRating.fromValue($image.attr("data-rating"));
@@ -49,33 +54,37 @@ export class Post {
         this.flags = $image.attr("data-flags");
 
         this.element = $image;
+
+        //Check if a post will be hidden if the blacklist is active
+        //Cache this result, to prevent having to recalculate it everytime the blacklist toggles
+        this.isBlacklisted = this.matchesSiteBlacklist();
     }
 
     /**
      * Fetches the posts from the current page.
-     * @param cached If true, re-parses the page for data
      */
-    public static fetchPosts(cached: boolean = true) {
-        if (this.posts !== undefined && cached) return this.posts;
-
-        let imageContainer = $("#image-container");
-        this.posts = [];
-        if (imageContainer.length === 0) {
-            $("#posts-container").children(".post-preview").each(function () {
-                Post.posts.push(new Post($(this)));
-            });
-        } else {
-            this.posts.push(new ViewingPost(imageContainer));
+    public static fetchPosts() {
+        if (this.initalPosts === undefined) {
+            let imageContainer = $("#image-container");
+            this.initalPosts = [];
+            if (imageContainer.length === 0) {
+                $("#posts-container").children(".post-preview").each(function () {
+                    Post.initalPosts.push(new Post($(this)));
+                });
+            } else {
+                this.initalPosts.push(new ViewingPost(imageContainer));
+            }
         }
-        return this.posts;
+
+        return this.initalPosts.concat(this.addedPosts);
     }
 
     /**
-     * Forces the function fetchPosts to reaquire it's info
-     * This is useful if posts have been appended
+     * Adds a post which will now be returned with fetchPosts
+     * @param post the post to appened
      */
-    public static invalidatePostsCache() {
-        this.posts = undefined;
+    public static appendPost(post) {
+        this.initalPosts.push(post);
     }
 
     /**
@@ -128,6 +137,32 @@ export class Post {
     }
 
     /**
+     * Checks if posts should be hidden, because the blacklist is active
+     */
+    public static blacklistIsActive() {
+        return $("#disable-all-blacklists").is(":visible");
+    }
+
+    /**
+     * Checks if a post should be hidden by the users blacklist
+     * Also takes care to update blacklist match counter
+     * https://github.com/zwagoth/e621ng/blob/master/app/javascript/src/javascripts/blacklists.js
+     */
+    private matchesSiteBlacklist() {
+        let hits = 0;
+        for (const entry of Danbooru.Blacklist.entries) {
+            if (Danbooru.Blacklist.post_match(this.element, entry)) {
+                entry.hits++
+                if (!entry.disabled) {
+                    hits++;
+                }
+                Danbooru.Blacklist.post_count++;
+            }
+        }
+        return hits !== 0;
+    }
+
+    /**
      * Returns true if the post has been hidden by InstantSearch
      * @returns boolean True if the post has been hidden, false otherwise
      */
@@ -148,6 +183,14 @@ export class Post {
      */
     public getDomElement() {
         return this.element;
+    }
+
+    /**
+     * Returns true if post can be hidden by blacklist
+     * @returns true if the post can be hidden by the blacklist, false otherwise
+     */
+    public getIsBlacklisted() {
+        return this.isBlacklisted;
     }
 
     public getId() { return this.id; }

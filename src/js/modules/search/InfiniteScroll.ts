@@ -39,6 +39,15 @@ export class InfiniteScroll extends RE6Module {
         this.isInProgress = false;
         this.pagesLeft = true;
 
+        //catch when the user toggles the blacklist
+        $("#disable-all-blacklists").on("click", () => {
+            this.applyBlacklist(false);
+        });
+
+        $("#re-enable-all-blacklists").on("click", () => {
+            this.applyBlacklist(true);
+        });
+
         //Wait until all images are loaded, to prevent fetching posts 
         //while the layout is still changing
         $(() => {
@@ -47,6 +56,23 @@ export class InfiniteScroll extends RE6Module {
             //If the user has few posts per page, he might already be scrolled to the bottom
             this.addMorePosts();
         });
+    }
+
+    /**
+     * Hides posts, if they are blacklisted and blacklist is active, show otherwise
+     * @param hide 
+     */
+    private applyBlacklist(hide: boolean) {
+        for (const post of Post.fetchPosts()) {
+            //Only hide/show blacklisted, no need to do it to all
+            if (post.getIsBlacklisted()) {
+                if (hide) {
+                    post.getDomElement().hide();
+                } else {
+                    post.getDomElement().show();
+                }
+            }
+        }
     }
 
     /**
@@ -61,19 +87,27 @@ export class InfiniteScroll extends RE6Module {
         const posts: ApiPost[] = (await Api.getJson(`/posts.json?tags=${this.currentQuery}&page=${this.nextPageToGet}`)).posts;
         Page.setQueryParameter("page", this.nextPageToGet.toString());
         this.addPageIndicator();
-
+        const blacklistIsActive = Post.blacklistIsActive();
         for (const json of posts) {
-            this.$postContainer.append(PostHtml.create(json));
+            const element = PostHtml.create(json);
+            const post = new Post(element);
+            //Add post to the list of posts currently visible
+            //This is important because InstantSearch relies on it
+            Post.appendPost(post);
+            this.$postContainer.append(element);
+            //Hide if blacklist is active and post matches the blacklist
+            if (blacklistIsActive && post.getIsBlacklisted()) {
+                element.hide();
+            }
         }
         this.pagesLeft = posts.length !== 0;
         this.isInProgress = false;
         this.$loadingIndicator.hide();
 
-        //new posts habe been appended, force cache refresh
-        Post.invalidatePostsCache();
+        Danbooru.Blacklist.update_sidebar();
+
         InstantSearch.getInstance().applyFilter();
         this.nextPageToGet++;
-        Danbooru.Blacklist.apply();
     }
 
     private addPageIndicator() {
