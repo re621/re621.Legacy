@@ -27,15 +27,14 @@ export class ImageScaler extends RE6Module {
         super(PageDefintion.post);
         if (!this.eval()) return;
 
-        let _self = this;
         this.post = Post.getViewingPost();
         this.image = $("img#image");
         this.createDOM();
 
-        this.resizeSelector.getInputList().get("scale").change(function (event) {
+        this.resizeSelector.getInputList().get("scale").change(event => {
             let size = $(event.target).val() + "";
-            _self.setImageSize(size);
-            _self.pushSettings("size", size)
+            this.setImageSize(size);
+            this.pushSettings("size", size)
         });
 
         this.registerHotkeys();

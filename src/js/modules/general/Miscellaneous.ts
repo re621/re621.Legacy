@@ -27,7 +27,7 @@ export class Miscellaneous extends RE6Module {
         this.loadRedesignFixes(this.fetchSettings("loadRedesignFixes"));
 
         // Replaces the tag count estimate with the real number
-        if (this.fetchSettings("improveTagCount") === true && Page.matches([/^$/, /^\/posts\/?$/])) {
+        if (this.fetchSettings("improveTagCount") === true && Page.matches([/^$/, /^\/posts\/?[0-9]*$/])) {
             this.improveTagCount();
         }
 
@@ -74,6 +74,11 @@ export class Miscellaneous extends RE6Module {
                 });
             }
         });
+        //Don't make a request if there is nothing to do
+        if (tagElements.size === 0) {
+            return;
+        }
+
         const tagString = Array.from(tagElements.values()).map(e => e.tagEscaped).join(",");
         const tagJson: ApiTag[] = await Api.getJson("/tags.json?limit=320&search[name]=" + tagString);
 

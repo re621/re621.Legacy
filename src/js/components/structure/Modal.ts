@@ -8,7 +8,6 @@ export class Modal {
     private $activeTrigger: JQuery<HTMLElement>;
 
     public constructor(config: ModalConfig) {
-        let _self = this;
         this.config = this.validateConfig(config);
 
         this.$modal = $("<div>")
@@ -43,11 +42,9 @@ export class Modal {
                     .position({ my: config.position.my, at: config.position.at, of: window });
             });
         }
-
-        config.triggers.forEach(function (trigger) {
-            _self.registerTrigger(trigger);
-        });
-
+        for (const trigger of config.triggers) {
+            this.registerTrigger(trigger);
+        }
     }
 
     /**
@@ -84,23 +81,22 @@ export class Modal {
      * @param trigger Element-event pair to listen to
      */
     public registerTrigger(trigger: ModalTrigger) {
-        let _self = this;
 
         if (trigger.event === undefined) trigger.event = "click";
         if (this.triggers.length == 0) this.$activeTrigger = trigger.element;
         this.triggers.push(trigger);
 
-        trigger.element.on(trigger.event, function (event) {
-            if (_self.isDisabled()) return;
+        trigger.element.on(trigger.event, event => {
+            if (this.isDisabled()) return;
 
             let $target = $(event.currentTarget);
-            if (_self.config.triggerMulti && !_self.$activeTrigger.is($target) && _self.isOpen()) {
-                _self.toggle(); // Update the modal window instead of toggling
+            if (this.config.triggerMulti && !this.$activeTrigger.is($target) && this.isOpen()) {
+                this.toggle(); // Update the modal window instead of toggling
             }
-            _self.$activeTrigger = $target;
+            this.$activeTrigger = $target;
 
             event.preventDefault();
-            _self.toggle();
+            this.toggle();
         });
     }
 

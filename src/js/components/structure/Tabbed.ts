@@ -11,7 +11,6 @@ export class Tabbed {
     }
 
     public create() {
-        let _self = this;
 
         let $container = $("<div>");
         let $tabList = $("<ul>").appendTo($container);

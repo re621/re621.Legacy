@@ -49,7 +49,6 @@ export class DownloadCustomizer extends RE6Module {
      * Creates a download link with the saved template
      */
     public updateLink() {
-        let _self = this;
         let $template = this.fetchSettings("template")
             .replace(/%id%/g, this.post.getId())
             .replace(/%artist%/g, this.post.getTagsFromType(TagTypes.Artist).join("-"))
@@ -59,11 +58,11 @@ export class DownloadCustomizer extends RE6Module {
             + "." + this.post.getFileExtension();
         this.link.attr("download", $template);
 
-        this.link.click(function (event) {
+        this.link.click(event => {
             event.preventDefault();
             GM_download({
-                url: _self.link.attr("href"),
-                name: _self.link.attr("download"),
+                url: this.link.attr("href"),
+                name: this.link.attr("download"),
                 saveAs: true,
             });
         });

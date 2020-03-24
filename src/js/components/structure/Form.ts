@@ -13,11 +13,10 @@ export class Form {
     private $inputList: Map<string, JQuery<HTMLElement>> = new Map();
 
     public constructor(config: FormConfig, elements: FormElement[]) {
-        let _self = this;
         if (config.columns === undefined) config.columns = 1;
         if (config.parent === undefined) config.parent = "body";
         this.config = config;
-        elements.forEach(function (element) { _self.addElement(element); });
+        elements.forEach(element => { this.addElement(element); });
     }
 
     /**
@@ -49,22 +48,21 @@ export class Form {
     public get(force?: boolean) {
         if (this.$form !== undefined && !force) { return this.$form; }
 
-        let _self = this;
         this.$form = $("<form>")
             .attr("id", this.config.id)
             .addClass("grid-form");
 
         if (this.config.columns > 1) { this.$form.addClass("columns-" + this.config.columns); }
 
-        this.elements.forEach(function (element) {
+        for (const element of this.elements) {
             let $input;
             switch (element.type) {
                 case "input": {
-                    $input = _self.buildInput(_self.$form, element);
+                    $input = this.buildInput(this.$form, element);
                     break;
                 }
                 case "copyinput": {
-                    $input = _self.buildCopyInput(_self.$form, element);
+                    $input = this.buildCopyInput(this.$form, element);
                     break;
                 }
                 case "keyinput": {
@@ -72,45 +70,45 @@ export class Form {
                     break;
                 }
                 case "checkbox": {
-                    $input = _self.buildCheckbox(_self.$form, element);
+                    $input = this.buildCheckbox(this.$form, element);
                     break;
                 }
                 case "button": {
-                    $input = _self.buildButton(_self.$form, element);
+                    $input = this.buildButton(this.$form, element);
                     break;
                 }
                 case "submit": {
-                    $input = _self.buildSubmit(_self.$form, element);
+                    $input = this.buildSubmit(this.$form, element);
                     break;
                 }
                 case "textarea": {
-                    $input = _self.buildTextarea(_self.$form, element);
+                    $input = this.buildTextarea(this.$form, element);
                     break;
                 }
                 case "select": {
-                    $input = _self.buildSelect(_self.$form, element);
+                    $input = this.buildSelect(this.$form, element);
                     break;
                 }
                 case "div": {
-                    $input = _self.buildDiv(_self.$form, element);
+                    $input = this.buildDiv(this.$form, element);
                     break;
                 }
                 case "hr": {
-                    $input = _self.buildHr(_self.$form, element);
+                    $input = this.buildHr(this.$form, element);
                     break;
                 }
                 default: { }
             }
-            _self.$inputList.set(element.id, $input);
-        });
+            this.$inputList.set(element.id, $input);
+        }
 
-        $(this.config.parent).on("submit", "form#" + this.config.id, function (event) {
+        $(this.config.parent).on("submit", "form#" + this.config.id, event => {
             event.preventDefault();
-            _self.$form.trigger("re-form:submit", _self.getInputValues());
+            this.$form.trigger("re-form:submit", this.getInputValues());
         });
 
-        _self.$form.trigger("re-form:create");
-        return _self.$form;
+        this.$form.trigger("re-form:create");
+        return this.$form;
     }
 
     /**
@@ -139,10 +137,8 @@ export class Form {
      */
     public reset() {
         if (this.$form === undefined) return;
-        let _self = this;
-
-        this.elements.forEach(function (element) {
-            let $input = _self.$form.find("#" + _self.config.id + "_" + element.id);
+        for (const element of this.elements) {
+            let $input = this.$form.find("#" + this.config.id + "_" + element.id);
             switch (element.type) {
                 case "input":
                 case "textarea":
@@ -156,7 +152,7 @@ export class Form {
                 }
                 default: { }
             }
-        });
+        }
     }
 
     /**

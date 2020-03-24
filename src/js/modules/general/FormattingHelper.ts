@@ -40,20 +40,19 @@ export class FormattingHelper extends RE6Module {
 
     private constructor($targetContainer) {
         super();
-        let _self = this;
 
         this.$container = $targetContainer;
 
         this.createDOM();
 
-        this.$toggleTabs.find("a").click(function (e) {
+        this.$toggleTabs.find("a").click(e => {
             e.preventDefault();
-            _self.toggleEditing();
+            this.toggleEditing();
         });
 
-        this.$settingsButton.click(function (e) {
+        this.$settingsButton.click(e => {
             e.preventDefault();
-            _self.toggleButtonDrawer();
+            this.toggleButtonDrawer();
         });
     }
 
@@ -101,7 +100,6 @@ export class FormattingHelper extends RE6Module {
      * Builds basic structure for the module
      */
     private createDOM() {
-        let _self = this;
 
         // Establish helper states
         this.$container.attr("data-editing", "true");
@@ -155,7 +153,7 @@ export class FormattingHelper extends RE6Module {
 
             disabled: true,
 
-            update: function () { _self.handleToolbarUpdate(); },
+            update: () => { this.handleToolbarUpdate(); },
         });
 
         this.$formatButtonsDrawer.sortable({
@@ -171,14 +169,14 @@ export class FormattingHelper extends RE6Module {
         // Create the character counter
         let charCounter = $("<span>")
             .addClass("char-counter")
-            .html((_self.$textarea.val() + "").length + " / 50000");
+            .html((this.$textarea.val() + "").length + " / 50000");
         $("<div>")
             .addClass("dtext-character-counter-box")
             .append(charCounter)
             .appendTo(this.$container);
 
-        this.$textarea.keyup(function (event) {
-            charCounter.html((_self.$textarea.val() + "").length + " / 50000");
+        this.$textarea.keyup(() => {
+            charCounter.html((this.$textarea.val() + "").length + " / 50000");
         });
     }
 
@@ -186,13 +184,12 @@ export class FormattingHelper extends RE6Module {
      * Updates the buttons toolbar based on saved settings
      */
     private updateButtons() {
-        let _self = this;
         let buttonList = [];
         this.$formatButtons.empty();
 
-        this.fetchSettings("buttons", true).forEach(function (value) {
-            let buttonData = _self.createButton(value);
-            buttonData.box.appendTo(_self.$formatButtons);
+        this.fetchSettings("buttons", true).forEach(value => {
+            let buttonData = this.createButton(value);
+            buttonData.box.appendTo(this.$formatButtons);
 
             if (buttonData.button.attr("data-content") === "%spacer%") {
                 buttonData.button.addClass("disabled");
@@ -202,9 +199,9 @@ export class FormattingHelper extends RE6Module {
         });
 
         let allButtons = $.map(buttonList, function (el) { return el.get(); });
-        $(allButtons).click(function (e) {
+        $(allButtons).click(e => {
             e.preventDefault();
-            _self.processFormattingTag($(e.currentTarget).attr("data-name"));
+            this.processFormattingTag($(e.currentTarget).attr("data-name"));
         });
     }
 
@@ -229,7 +226,6 @@ export class FormattingHelper extends RE6Module {
      * Toggles the comment form from editing to preview
      */
     private toggleEditing() {
-        let _self = this;
         if (this.$container.attr("data-editing") === "true") {
             this.$container.attr("data-editing", "false");
             this.$toggleEditing.removeClass("active");
@@ -237,8 +233,8 @@ export class FormattingHelper extends RE6Module {
 
             // format the text
             this.$textarea.val();
-            this.formatDText(this.$textarea.val(), function (data) {
-                _self.$preview.html(data.html);
+            this.formatDText(this.$textarea.val(), data => {
+                this.$preview.html(data.html);
             });
         } else {
             this.$container.attr("data-editing", "true");
@@ -251,7 +247,6 @@ export class FormattingHelper extends RE6Module {
      * Toggles the settings box
      */
     private toggleButtonDrawer() {
-        let _self = this;
         if (this.$container.attr("data-drawer") === "true") {
             this.$container.attr("data-drawer", "false");
 
@@ -261,11 +256,11 @@ export class FormattingHelper extends RE6Module {
             this.$container.attr("data-drawer", "true");
 
             this.$formatButtonsDrawer.empty();
-            var missingButtons = $.grep(Object.keys(button_definitions), function (el) { return $.inArray(el, _self.fetchSettings("buttons")) == -1 });
-            missingButtons.forEach(function (value) {
-                let buttonData = _self.createButton(value);
-                buttonData.box.appendTo(_self.$formatButtonsDrawer);
-            });
+            var missingButtons = $.grep(Object.keys(button_definitions), el => { return $.inArray(el, this.fetchSettings("buttons")) == -1 });
+            for (const value of missingButtons) {
+                let buttonData = this.createButton(value);
+                buttonData.box.appendTo(this.$formatButtonsDrawer);
+            }
 
             this.$formatButtons.sortable("enable");
             this.$formatButtonsDrawer.sortable("enable");
@@ -289,7 +284,6 @@ export class FormattingHelper extends RE6Module {
      * @param tag Tag to add
      */
     private processFormattingTag(tag: string) {
-        let _self = this;
 
         let tagData = button_definitions[tag];
         let promises = [];
@@ -305,28 +299,27 @@ export class FormattingHelper extends RE6Module {
             });
         }
 
-        Promise.all(promises).then(function (data) {
+        Promise.all(promises).then(data => {
             let content = tagData.content;
-
             // Handle the %prompt% tag
             replacedTags.forEach(function (tag, index) {
                 content = content.replace(tag, data[index]);
             });
 
             // Handle the %selection% tag
-            let currentText = _self.$textarea.val() + "";
+            let currentText = this.$textarea.val() + "";
             let position = {
-                start: _self.$textarea.prop('selectionStart'),
-                end: _self.$textarea.prop('selectionEnd')
+                start: this.$textarea.prop('selectionStart'),
+                end: this.$textarea.prop('selectionEnd')
             };
 
             content = content.replace(/%selection%/g, currentText.substring(position.start, position.end));
-            _self.$textarea.val(
+            this.$textarea.val(
                 currentText.substring(0, position.start)
                 + content
                 + currentText.substring(position.end, currentText.length)
             );
-            _self.$textarea.keyup();
+            this.$textarea.keyup();
         });
     }
 
@@ -343,7 +336,7 @@ export class FormattingHelper extends RE6Module {
             data: {
                 body: input
             },
-            success: function (data) {
+            success: data => {
                 handleData(data);
             }
         });
