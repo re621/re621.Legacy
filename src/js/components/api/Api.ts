@@ -23,7 +23,7 @@ export class Api {
      * @param method either post or get
      * @param data Optional, only used when method is post
      */
-    protected static async request(url: string, method: string, data = {}): Promise<string> {
+    protected static async requestFunction(url: string, method: string, data = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
             let requestInfo: RequestInit = {
                 credentials: "include",
@@ -51,16 +51,20 @@ export class Api {
         });
     }
 
+    private static async request(url: string, method: string, data?: {}) {
+        const queue = this.getInstance().queue;
+        const id = queue.getRequestId();
+        queue.add(this.requestFunction, id, url, method, data);
+        return await queue.getRequestResult(id);
+    }
+
     /**
      * @todo better error handling
      * @param url e6 endpoint without the host, => /posts/123456.json
      * @returns the response as a string
      */
     public static async getUrl(url: string) {
-        const queue = this.getInstance().queue;
-        const id = queue.getRequestId();
-        queue.add(this.request, id, url, "GET");
-        return await queue.getRequestResult(id);
+        return await this.request(url, "GET");
     }
 
     /**
@@ -78,11 +82,8 @@ export class Api {
      * @param url e6 endpoint without the host, => /posts/123456.json
      * @returns the response as a string
      */
-    public static async postUrl(url: string, json: object) {
-        const queue = this.getInstance().queue;
-        const id = queue.getRequestId();
-        queue.add(this.request, id, url, "POST", json);
-        return await queue.getRequestResult(id);
+    public static async postUrl(url: string, json?: {}) {
+        return await this.request(url, "GET", json);
     }
 
     /**
