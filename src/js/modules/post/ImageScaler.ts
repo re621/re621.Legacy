@@ -139,6 +139,10 @@ export class ImageScaler extends RE6Module {
                 break;
             }
         }
+
+        this.image.on("load", () => {
+            this.image.resize();
+        });
     }
 
 }
