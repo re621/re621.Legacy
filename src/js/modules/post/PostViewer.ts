@@ -56,9 +56,9 @@ export class PostViewer extends RE6Module {
         let postID = this.post.getId();
         let original = $("#post-vote-up-" + postID).parent().parent();
 
-        $("#post-vote-up-" + postID).addClass("image-score-up").appendTo($ratingContainer);
-        $("#post-score-" + postID).addClass("image-score-num").appendTo($ratingContainer);
         $("#post-vote-down-" + postID).addClass("image-score-down").appendTo($ratingContainer);
+        $("#post-score-" + postID).addClass("image-score-num").appendTo($ratingContainer);
+        $("#post-vote-up-" + postID).addClass("image-score-up").appendTo($ratingContainer);
 
         original.remove();
     }
