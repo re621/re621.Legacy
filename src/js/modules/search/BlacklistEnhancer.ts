@@ -13,7 +13,7 @@ export class BlacklistEnhancer extends RE6Module {
     private static instance: BlacklistEnhancer;
 
     private constructor() {
-        super([PageDefintion.search, PageDefintion.post]);
+        super([PageDefintion.search]);
         if (!this.eval()) return;
 
         //Override default blacklist function
