@@ -51,3 +51,11 @@ section#image-extra-controls {
         color: #e45f5f;
     }
 }
+
+div#c-posts div.bottom-notices {
+    display: block;
+
+    & #has-children-relationship-preview {
+        display: grid;
+    }
+}

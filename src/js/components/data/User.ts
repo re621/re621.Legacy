@@ -11,6 +11,7 @@ export class User extends RE6Module {
     private loggedin: boolean;
     private username: string;
     private userid: string;
+    private blacklist: string[];
 
     private level: string;
 
@@ -21,6 +22,8 @@ export class User extends RE6Module {
         this.loggedin = $ref.attr("data-user-is-anonymous") == "false";
         this.username = $ref.attr("data-user-name") || "Anonymous";
         this.userid = $ref.attr("data-user-id") || "0";
+
+        this.blacklist = JSON.parse($("head meta[name=blacklisted-tags]").attr("content"));
 
         this.level = $ref.attr("data-user-level-string") || "Guest";
     }
@@ -64,5 +67,13 @@ export class User extends RE6Module {
      */
     public static getLevel() {
         return this.getInstance().level;
+    }
+
+    /**
+     * Returns user's blacklist
+     * @returns string[] A array of space seperated strings
+     */
+    public static getBlacklist() {
+        return this.getInstance().blacklist;
     }
 }

@@ -1,3 +1,5 @@
+import { RequestQueue } from "./RequestQueue";
+
 /**
  * Conventient class to make e6 api requests
  */
@@ -8,8 +10,11 @@ export class Api {
     //needed to authenticate some post requests, for example when you modify user settings
     private authenticityToken: string;
 
+    private queue: RequestQueue;
+
     private constructor() {
-        this.authenticityToken = $("body").attr("csrf-token");
+        this.authenticityToken = $("head meta[name=csrf-token]").attr("content");
+        this.queue = new RequestQueue(2000);
     }
 
     /**
@@ -18,7 +23,7 @@ export class Api {
      * @param method either post or get
      * @param data Optional, only used when method is post
      */
-    private static async request(url: string, method: string, data = {}): Promise<string> {
+    protected static async requestFunction(url: string, method: string, data = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
             let requestInfo: RequestInit = {
                 credentials: "include",
@@ -43,7 +48,14 @@ export class Api {
             } else {
                 reject();
             }
-        })
+        });
+    }
+
+    private static async request(url: string, method: string, data?: {}) {
+        const queue = this.getInstance().queue;
+        const id = queue.getRequestId();
+        queue.add(this.requestFunction, id, url, method, data);
+        return await queue.getRequestResult(id);
     }
 
     /**
@@ -61,7 +73,7 @@ export class Api {
      * @returns the response as a string
      */
     public static async getJson(url: string) {
-        const response = await this.request(url, "GET");
+        const response = await this.getUrl(url);
         return JSON.parse(response);
     }
 
@@ -70,7 +82,7 @@ export class Api {
      * @param url e6 endpoint without the host, => /posts/123456.json
      * @returns the response as a string
      */
-    public static async postUrl(url: string, json: object) {
+    public static async postUrl(url: string, json?: {}) {
         return await this.request(url, "GET", json);
     }
 

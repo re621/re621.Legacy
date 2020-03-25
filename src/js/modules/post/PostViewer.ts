@@ -45,6 +45,27 @@ export class PostViewer extends RE6Module {
         $("#post-vote-up-" + postID).addClass("image-score-up").appendTo($ratingContainer);
 
         original.remove();
+
+        // Move bottom notice, like child/parent indicator
+        let $bottomNotices = $(".bottom-notices");
+        $bottomNotices.insertAfter($("#search-box"));
+        //expand child/parent container
+        let $parentRel = $("#has-parent-relationship-preview-link");
+        let $childRel = $("#has-children-relationship-preview-link");
+
+        let autoOpen = this.fetchSettings("auto_open_parent_child")
+        //only click on one container, because both open with one click. Clicking both results in them open and the closing
+        if (!$parentRel.is(":visible") && autoOpen) {
+            $parentRel.click();
+        } else if (!$childRel.is(":visible") && autoOpen) {
+            $childRel.click();
+        }
+        //remeber toggle state
+        $parentRel.add($childRel).on("click", () => {
+            this.pushSettings("auto_open_parent_child", !autoOpen);
+        });
+
+
     }
 
     /** Registers the module's hotkeys */
@@ -70,6 +91,7 @@ export class PostViewer extends RE6Module {
             hotkey_upvote: "a",
             hotkey_downvote: "z",
             hotkey_favorite: "f",
+            auto_open_parent_child: true
         };
     }
 
