@@ -25,7 +25,7 @@ export class BlacklistEnhancer extends RE6Module {
         });
 
         //Apply blacklist without user interaction. Blacklist might be active
-        this.applyBlacklist();
+        this.applyBlacklist(true);
     }
 
 
@@ -37,9 +37,13 @@ export class BlacklistEnhancer extends RE6Module {
      * Hides posts, if they are blacklisted and blacklist is active, show otherwise
      * @param hide 
      */
-    private applyBlacklist() {
+    private applyBlacklist(firstRun = false) {
         const blacklistIsActive = this.blacklistIsActive();
         for (const post of Post.fetchPosts()) {
+            //Skip over posts who were already hidden by other means, like instantsearch
+            if (firstRun && !post.getDomElement().is(":visible")) {
+                continue;
+            }
             post.applyBlacklist(blacklistIsActive);
         }
     }
