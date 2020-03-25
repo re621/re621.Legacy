@@ -58,7 +58,8 @@ form.grid-form {
         // Input styles
         input,
         select,
-        button {
+        button,
+        textarea {
             width: 100%;
             padding: 0.125rem;
             border-radius: 4px;
@@ -126,7 +127,7 @@ form.grid-form {
         div.icon-picker {
             display: grid;
             grid-template-columns: repeat(auto-fit, 23px);
-            grid-column-gap: 0.30rem;
+            grid-column-gap: 0.35rem;
             grid-row-gap: 0.30rem;
             width: 100%;
 
