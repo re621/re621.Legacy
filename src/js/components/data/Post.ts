@@ -148,6 +148,22 @@ export class Post {
     }
 
     /**
+     * Hides or shows the post, depending on the state
+     * Show if blacklist is not active, hide if blacklist is active and post matches blacklist
+     * @param blacklistIsActive true if blacklist is active, false otherwise
+     */
+    public applyBlacklist(blacklistIsActive: boolean) {
+        //Only hide/show blacklisted, no need to do it to all
+        if (this.getIsBlacklisted()) {
+            if (blacklistIsActive) {
+                this.getDomElement().hide();
+            } else {
+                this.getDomElement().show();
+            }
+        }
+    }
+
+    /**
      * Checks if a post should be hidden by the users blacklist
      * Also takes care to update blacklist match counter
      * https://github.com/zwagoth/e621ng/blob/master/app/javascript/src/javascripts/blacklists.js
