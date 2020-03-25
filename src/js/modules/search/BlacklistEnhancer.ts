@@ -1,6 +1,6 @@
 import { RE6Module } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
-import { Post } from "../../components/data/Post";
+import { Post, ViewingPost } from "../../components/data/Post";
 
 declare var Danbooru;
 
@@ -13,7 +13,7 @@ export class BlacklistEnhancer extends RE6Module {
     private static instance: BlacklistEnhancer;
 
     private constructor() {
-        super([PageDefintion.search]);
+        super([PageDefintion.search, PageDefintion.post]);
         if (!this.eval()) return;
 
         //Override default blacklist function
@@ -42,6 +42,10 @@ export class BlacklistEnhancer extends RE6Module {
         for (const post of Post.fetchPosts()) {
             //Skip over posts who were already hidden by other means, like instantsearch
             if (firstRun && !post.getDomElement().is(":visible")) {
+                continue;
+            }
+            //do not apply the blacklist to the post you're viewing
+            if (post instanceof ViewingPost) {
                 continue;
             }
             post.applyBlacklist(blacklistIsActive);

@@ -15,11 +15,11 @@ export class Post {
     protected id: number;
     protected tags: string;
     protected rating: PostRating;
-    protected favorites: number;
-    protected score: number;
+    protected favorites?: number;
+    protected score?: number;
 
-    protected fileURL: string;
-    protected sampleURL: string;
+    protected fileURL?: string;
+    protected sampleURL?: string;
     protected previewURL: string;
     protected fileExtension: string;
 
@@ -36,15 +36,23 @@ export class Post {
         this.tags = $image.attr("data-tags");
         this.rating = PostRating.fromValue($image.attr("data-rating"));
 
-        if ($image.attr("data-fav-count")) { this.favorites = parseInt($image.attr("data-fav-count")); }
-        else { this.favorites = parseInt($image.find(".post-score-faves").first().html().substring(1)); }
+        if ($image.attr("data-fav-count")) {
+            this.favorites = parseInt($image.attr("data-fav-count"));
+        }
+        else if ($image.find(".post-score-faves").length !== 0) {
+            this.favorites = parseInt($image.find(".post-score-faves").first().html().substring(1));
+        }
 
-        if ($image.attr("data-score")) { this.score = parseInt($image.attr("data-score")); }
-        else { this.score = parseInt($image.find(".post-score-score").first().html().substring(1)); }
+        if ($image.attr("data-score")) {
+            this.score = parseInt($image.attr("data-score"));
+        }
+        else if ($image.find(".post-score-score").length !== 0) {
+            this.score = parseInt($image.find(".post-score-score").first().html().substring(1));
+        }
 
         this.fileURL = $image.attr("data-file-url");
         this.sampleURL = $image.attr("data-large-file-url");
-        this.previewURL = $image.attr("data-preview-file-url");
+        this.previewURL = $image.attr("data-preview-file-url") || $image.attr("data-preview-url");
         this.fileExtension = $image.attr("data-file-ext");
 
         this.uploaderID = parseInt($image.attr("data-uploader-id"));
@@ -70,11 +78,14 @@ export class Post {
             let imageContainer = $("#image-container");
             this.initalPosts = [];
             if (imageContainer.length === 0) {
-                $("#posts-container").children(".post-preview").each(function () {
-                    Post.initalPosts.push(new Post($(this)));
+                $("#posts-container").children(".post-preview").each((index, element) => {
+                    Post.initalPosts.push(new Post($(element)));
                 });
             } else {
                 this.initalPosts.push(new ViewingPost(imageContainer));
+                $(".post-thumbnail").each((index, element) => {
+                    Post.initalPosts.push(new Post($(element)));
+                });
             }
         }
 
