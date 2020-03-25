@@ -4,6 +4,21 @@ form.simple_form {
 
     padding: 0;
 
+    &.new_forum_post,
+    &.edit_forum_post,
+    &.edit_comment {
+
+        input[type=button],
+        input[type=submit] {
+            @include themable {
+                background: lighten(themed("color-section"), 10%);
+                color: themed("color-text");
+            }
+
+            padding: 0.25rem 0.5rem;
+        }
+    }
+
     div.dtext-previewable {
         display: grid;
         grid-template-columns: auto min-content;
