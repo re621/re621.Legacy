@@ -1,6 +1,7 @@
 import { RE6Module } from "../../components/RE6Module";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
+import { PostFilter } from "../../components/data/PostFilter";
 
 /**
  * Adds a extra search input below the current one where 
@@ -31,18 +32,19 @@ export class InstantSearch extends RE6Module {
     }
 
     public applyFilter() {
-        const filter = this.$searchbox.val().toString().trim();
-        sessionStorage.setItem("re-instantsearch", filter);
+        const filterText = this.$searchbox.val().toString().trim();
+        const filter = new PostFilter(filterText);
+        sessionStorage.setItem("re-instantsearch", filterText);
         const posts = Post.fetchPosts();
         const blacklistIsActive = Post.blacklistIsActive();
         //when the user clears the input, show all posts
-        if (filter === "") {
+        if (filterText === "") {
             for (const post of posts) {
                 post.show(blacklistIsActive);
             }
         } else {
             for (const post of posts) {
-                post.postMatchesFilter(filter) ? post.show(blacklistIsActive) : post.hide();
+                filter.matchesPost(post) ? post.show(blacklistIsActive) : post.hide();
             }
         }
     }

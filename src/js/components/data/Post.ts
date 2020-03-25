@@ -1,8 +1,6 @@
 import { TagTypes, Tag } from "./Tag";
 import { User } from "./User";
 
-declare var Danbooru;
-
 /**
  * Collects basic info for a post.
  * Use fetchPosts to construct
@@ -105,62 +103,6 @@ export class Post {
     }
 
     /**
-    * Checks if the post would be returned if you searched on the site with filterString
-    * Most of the things that work on the site should also work here
-    * @todo Implement ~ modifier
-    */
-    public postMatchesFilter(queryString: string) {
-        const seperatedFilters = queryString.split(" ");
-        let result = true;
-        for (const filter of seperatedFilters) {
-            const inverse = filter.startsWith("-");
-            //Remove dash from filter, if it starts with one
-            const filterNoMinus = inverse ? filter.substring(1) : filter;
-            //If the result is already negative, bail. All filters must match
-            if (result === false) {
-                break;
-            }
-            if (filterNoMinus.startsWith("id:")) {
-                const id = parseInt(filterNoMinus.substring(3));
-                result = this.id === id;
-            } else if (filterNoMinus.startsWith("score:")) {
-                const score = parseInt(filterNoMinus.substring(6));
-                result = this.score === score;
-            } else if (filterNoMinus.startsWith("rating:")) {
-                const rating = filterNoMinus.substring(7);
-                result = this.rating === rating;
-            } else if (filterNoMinus.startsWith("uploader:")) {
-                const uploader = filterNoMinus.substring(9);
-                result = this.uploaderID === parseInt(uploader) || this.uploaderName === uploader;
-            } else if (filterNoMinus.startsWith("flag:")) {
-                const flags = filterNoMinus.substring(5);
-                result = this.flags === flags;
-            } else {
-                result = this.tagsMatchesFilter(filterNoMinus);
-            }
-            //invert the result, depending on if the filter started with a -
-            result = result !== inverse;
-        }
-        return result;
-    }
-
-    public tagsMatchesFilter(filter: string) {
-        if (filter.includes("*")) {
-            const regex = Tag.escapeSearchToRegex(filter);
-            return regex.test(this.getTags());
-        } else {
-            //if there is no wildcard, the filter and tag must be an equal match
-            let matchFound = false;
-            for (const tag of this.getTags().split(" ")) {
-                if (tag === filter) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
      * Checks if posts should be hidden, because the blacklist is active
      */
     public static blacklistIsActive() {
@@ -193,7 +135,7 @@ export class Post {
      * Shows the post and restores the src attribute, if the blacklist allows it
      */
     public show(blacklistIsActive = false) {
-        if (blacklistIsActive === true) {
+        if (blacklistIsActive === true && this.isBlacklisted) {
             return;
         }
         const $img = this.element.find("img");
@@ -209,7 +151,7 @@ export class Post {
     private matchesSiteBlacklist() {
         let hits = 0;
         for (const filter of User.getBlacklist()) {
-            if (this.postMatchesFilter(filter)) {
+            if (filter.matchesPost(this)) {
                 hits++;
             }
         }
