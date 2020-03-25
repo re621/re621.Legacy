@@ -142,12 +142,18 @@ export class Form {
     public reset() {
         if (this.$form === undefined) return;
         for (const element of this.elements) {
-            let $input = this.$form.find("#" + this.config.id + "_" + element.id);
+            let $input = this.$form.find("#" + this.config.id + "-" + element.id);
             switch (element.type) {
                 case "input":
                 case "textarea":
                 case "select": {
                     $input.val(element.value);
+                    break;
+                }
+                case "icon": {
+                    $input
+                        .val(element.value)
+                        .trigger("re621:form:update");
                     break;
                 }
                 case "checkbox": {
@@ -358,18 +364,16 @@ export class Form {
             $target.addClass("active");
         });
 
-        if (element.value === "") {
-            $selectContainer.find("a").first().click();
-        } else {
-            $selectContainer.find("a[data-value='" + element.value + "']").first().click();
-        }
+        if (element.value === "") { $selectContainer.find("a").first().click(); }
+        else { $selectContainer.find("a[data-value='" + element.value + "']").first().click(); }
 
-        $input.on("re621.form.update", () => {
-            $selectContainer.find("a[data-value='" + $input.val() + "']").first().click();
+        $input.on("re621:form:update", () => {
+            if ($input.val() == "") { $selectContainer.find("a").first().click(); }
+            else { $selectContainer.find("a[data-value='" + $input.val() + "']").first().click(); }
         });
 
         if (element.pattern) { $input.attr("pattern", element.pattern); }
-        if (element.required) { $input.attr("required", ''); }
+        if (element.required) { $input.attr("required", ""); }
 
         return $input;
     }

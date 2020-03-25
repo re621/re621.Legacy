@@ -399,7 +399,7 @@ export class FormattingHelper extends RE6Module {
         button.click(event => {
             event.preventDefault();
             if (this.$container.attr("data-drawer") === "false") {
-                this.processFormattingTag(config.text);
+                this.processFormattingTag(box.attr("data-text"));
             }
         });
 
