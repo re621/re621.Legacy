@@ -14,7 +14,10 @@ export class PostViewer extends RE6Module {
 
     private constructor() {
         super(PageDefintion.post);
-        if (!this.eval()) return;
+        if (!this.eval()) {
+            this.reserveHotkeys();
+            return;
+        }
 
         this.post = Post.getViewingPost();
         this.createDOM();
@@ -64,12 +67,10 @@ export class PostViewer extends RE6Module {
         $parentRel.add($childRel).on("click", () => {
             this.pushSettings("auto_open_parent_child", !autoOpen);
         });
-
-
     }
 
-    /** Registers the module's hotkeys */
-    public registerHotkeys() {
+    /** Registers hotkeys for the module */
+    protected registerHotkeys() {
         HotkeyCustomizer.register(this.fetchSettings("hotkey_upvote"), function () {
             $("a.post-vote-up-link")[0].click();
         });
@@ -80,6 +81,13 @@ export class PostViewer extends RE6Module {
             if ($("div.fav-buttons").hasClass("fav-buttons-false")) { $("button#add-fav-button")[0].click(); }
             else { $("button#remove-fav-button")[0].click(); }
         });
+    }
+
+    /** Reserves hotkeys to prevent them from being re-assigned */
+    protected reserveHotkeys() {
+        HotkeyCustomizer.register(this.fetchSettings("hotkey_upvote"), function () { });
+        HotkeyCustomizer.register(this.fetchSettings("hotkey_downvote"), function () { });
+        HotkeyCustomizer.register(this.fetchSettings("hotkey_favorite"), function () { });
     }
 
     /**
