@@ -139,12 +139,15 @@ export namespace PostFilterType {
     }
 }
 
+//Its important that they are in this order
+//should the one character ones be in front they will match
+//before the other ones have a chance
 export enum Comparable {
+    EqualsSmaller = "<=",
+    EqualsLarger = ">=",
     Equals = "=",
     Smaller = "<",
-    EqualsSmaller = ">=",
-    Larger = ">",
-    EqualsLarger = ">="
+    Larger = ">"
 }
 
 export namespace Comparable {
