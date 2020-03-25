@@ -37,7 +37,15 @@ export class Modal {
 
         this.$modal.dialog("widget")
             .addClass("re621-ui-dialog")
-            .removeClass("ui-dialog");
+            .removeClass("ui-dialog")
+            .draggable({
+                disabled: !config.draggable,
+                containment: "parent"
+            })
+            .resizable({
+                disabled: !config.resizable,
+                containment: "parent"
+            });
 
         if (config.fixed) {
             this.$modal.on("dialogopen", function (event, ui) {
