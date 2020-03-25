@@ -57,7 +57,7 @@ export class PostFilter {
                     break;
                 case PostFilterType.Id:
                     const id = parseInt(content);
-                    result = post.getId() === id;
+                    result = this.compareNumbers(post.getId(), id, filter.comparable);
                     break;
                 case PostFilterType.Rating:
                     const rating = content;
@@ -65,7 +65,7 @@ export class PostFilter {
                     break;
                 case PostFilterType.Score:
                     const score = parseInt(content);
-                    result = post.getScoreCount() === score;
+                    result = this.compareNumbers(post.getScoreCount(), score, filter.comparable);
                     break;
                 case PostFilterType.Tags:
                     result = this.tagsMatchesFilter(post, content);
@@ -79,6 +79,21 @@ export class PostFilter {
             result = result !== filter.invert;
         }
         return result;
+    }
+
+    public compareNumbers(a: number, b: number, mode: Comparable) {
+        switch (mode) {
+            case Comparable.Equals:
+                return a === b;
+            case Comparable.Smaller:
+                return a < b;
+            case Comparable.EqualsSmaller:
+                return a <= b;
+            case Comparable.Larger:
+                return a > b;
+            case Comparable.EqualsLarger:
+                return a >= b;
+        }
     }
 
     public tagsMatchesFilter(post: Post, filter: string) {
