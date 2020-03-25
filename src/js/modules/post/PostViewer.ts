@@ -22,6 +22,13 @@ export class PostViewer extends RE6Module {
         this.post = Post.getViewingPost();
         this.createDOM();
 
+        let upvoteButton = $("a.post-vote-up-link");
+        $("button#add-fav-button").click(() => {
+            if (this.fetchSettings("upvote_on_favorite") && !upvoteButton.parent().hasClass("score-positive")) {
+                upvoteButton.click();
+            }
+        });
+
         this.registerHotkeys();
     }
 
@@ -99,7 +106,8 @@ export class PostViewer extends RE6Module {
             hotkey_upvote: "a",
             hotkey_downvote: "z",
             hotkey_favorite: "f",
-            auto_open_parent_child: true
+            auto_open_parent_child: true,
+            upvote_on_favorite: true,
         };
     }
 
