@@ -1,25 +1,27 @@
 import { RE6Module } from "../../components/RE6Module";
 import { Prompt } from "../../components/structure/Prompt";
+import { Modal } from "../../components/structure/Modal";
+import { Form } from "../../components/structure/Form";
 
-const button_definitions = {
-    bold: { icon: "&#xf032", title: "Bold", content: "[b]%selection%[/b]" },
-    italic: { icon: "&#xf033", title: `Italic`, content: "[i]%selection%[/i]" },
-    strikethrough: { icon: "&#xf0cc", title: `Strikethrough`, content: "[s]%selection%[/s]" },
-    underscore: { icon: "&#x" + "f0cd", title: "Underscore", content: "[u]%selection%[/u]" },
+const icon_definitions = {
+    bold: "&#x" + "f032",
+    italic: "&#x" + "f033",
+    strikethrough: "&#x" + "f0cc",
+    underscore: "&#x" + "f0cd",
 
-    spacer: { icon: "&nbsp;", title: "Spacer", content: "%spacer%" },
+    spacer: "&nbsp;",
 
-    superscript: { icon: "&#x" + "f12b", title: "Superscript", content: "[sup]%selection%[/sup]" },
-    spoiler: { icon: "&#x" + "f20a", title: "Spoiler", content: "[spoiler]%selection%[/spoiler]" },
-    color: { icon: "&#x" + "f53f", title: "Color", content: "[color=]%selection%[/color]" },
-    code: { icon: "&#x" + "f121", title: "Code", content: "`%selection%`" },
-    heading: { icon: "&#x" + "f1dc", title: "Heading", content: "h2.%selection%" },
-    quote: { icon: "&#x" + "f10e", title: "Quote", content: "[quote]%selection%[/quote]" },
-    section: { icon: "&#x" + "f103", title: "Section", content: "[section=Title]%selection%[/section]" },
-    tag: { icon: "&#x" + "f02b", title: "Tag", content: "{{%selection%}}" },
-    wiki: { icon: "&#x" + "f002", title: "Wiki", content: "[[%selection%]]" },
-    link: { icon: "&#x" + "f0c1", title: "Link", content: "\"%selection%\":" },
-    link_prompt: { icon: "&#x" + "f35d", title: "Link (Prompted)", content: "\"%selection%\":%prompt:Address%" },
+    superscript: "&#x" + "f12b",
+    spoiler: "&#x" + "f20a",
+    color: "&#x" + "f53f",
+    code: "&#x" + "f121",
+    heading: "&#x" + "f1dc",
+    quote: "&#x" + "f10e",
+    section: "&#x" + "f103",
+    tag: "&#x" + "f02b",
+    wiki: "&#x" + "f002",
+    link: "&#x" + "f0c1",
+    link_prompt: "&#x" + "f35d",
 }
 
 export class FormattingHelper extends RE6Module {
@@ -27,11 +29,8 @@ export class FormattingHelper extends RE6Module {
     private $container: JQuery<HTMLElement>;
 
     private $toggleTabs: JQuery<HTMLElement>;
-    private $toggleEditing: JQuery<HTMLElement>;
-    private $togglePreview: JQuery<HTMLElement>;
-
     private $formatButtons: JQuery<HTMLElement>;
-    private $settingsButton: JQuery<HTMLElement>;
+    private $editButtonsModal: Modal;
 
     private $textarea: JQuery<HTMLElement>;
     private $preview: JQuery<HTMLElement>;
@@ -44,16 +43,6 @@ export class FormattingHelper extends RE6Module {
         this.$container = $targetContainer;
 
         this.createDOM();
-
-        this.$toggleTabs.find("a").click(e => {
-            e.preventDefault();
-            this.toggleEditing();
-        });
-
-        this.$settingsButton.click(e => {
-            e.preventDefault();
-            this.toggleButtonDrawer();
-        });
     }
 
     /**
@@ -62,33 +51,43 @@ export class FormattingHelper extends RE6Module {
      */
     public getDefaultSettings() {
         return {
-            "buttons": [
-                "bold",
-                "italic",
-                "strikethrough",
-                "underscore",
+            "btn_active": [
+                { name: "Bold", icon: "bold", text: "[b]%selection%[/b]" },
+                { name: "Italic", icon: "italic", text: "[i]%selection%[/i]" },
+                { name: "Strikethrough", icon: "strikethrough", text: "[s]%selection%[/s]" },
+                { name: "Underscore", icon: "underscore", text: "[u]%selection%[/u]" },
 
-                "spacer",
+                { name: "Spacer", icon: "spacer", text: "%spacer%" },
 
-                "code",
-                "quote",
-                "heading",
-                "section",
-                "spoiler",
-                "link",
-            ]
+                { name: "Heading", icon: "heading", text: "h2.%selection%" },
+                { name: "Spoiler", icon: "spoiler", text: "[spoiler]%selection%[/spoiler]" },
+                { name: "Code", icon: "code", text: "`%selection%`" },
+                { name: "Quote", icon: "quote", text: "[quote]%selection%[/quote]" },
+                { name: "Section", icon: "section", text: "[section=Title]%selection%[/section]" },
+                { name: "Tag", icon: "tag", text: "{{%selection%}}" },
+                { name: "Link", icon: "link", text: "\"%selection%\":" },
+            ],
+            "btn_inactive": [
+                { name: "Superscript", icon: "superscript", text: "[sup]%selection%[/sup]" },
+                { name: "Color", icon: "color", text: "[color=]%selection%[/color]" },
+                { name: "Wiki", icon: "wiki", text: "[[%selection%]]" },
+                { name: "Link (Prompted)", icon: "link_prompt", text: "\"%selection%\":%prompt:Address%" },
+            ],
         };
     }
 
     public static init() {
-        let instances = [];
-        $("div.dtext-previewable:has(textarea)").each(function (index, element) {
+        let instances: FormattingHelper[] = [];
+        $("div.dtext-previewable:has(textarea)").each(function (i, element) {
             let $container = $(element);
-            instances.push(new FormattingHelper($container));
+            let thisInstance = new FormattingHelper($container);
+            instances.push(thisInstance);
 
-            $container.on("formatting-helper:update", function (event, subject) {
-                instances.forEach(function (value) {
-                    value.updateButtons();
+            $container.on("re621:formatter:update", () => {
+                instances.forEach(formatter => {
+                    if (!formatter.$container.is(thisInstance.$container)) {
+                        formatter.loadButtons();
+                    }
                 })
             });
         });
@@ -100,50 +99,18 @@ export class FormattingHelper extends RE6Module {
      * Builds basic structure for the module
      */
     private createDOM() {
-
-        // Establish helper states
+        /* === Basic Structure === */
         this.$container.attr("data-editing", "true");
         this.$container.attr("data-drawer", "false");
 
         this.$textarea = this.$container.find("textarea");
         this.$preview = this.$container.find("div.dtext-preview");
 
-        // Create the toolbar
-        let $bar = $("<div>").addClass("comment-header").prependTo(this.$container);
+        this.createToolbar();
+        this.createButtonDrawer();
+        this.createCharacterCounter();
 
-        this.$toggleTabs = $("<div>")
-            .addClass("comment-tabs")
-            .appendTo($bar);
-        this.$toggleEditing = $(`<a href="">`)
-            .html("Write")
-            .addClass("toggle-editing")
-            .addClass("active")
-            .appendTo(this.$toggleTabs);
-        this.$togglePreview = $(`<a href="">`)
-            .html("Preview")
-            .addClass("toggle-preview")
-            .appendTo(this.$toggleTabs);
-
-        this.$formatButtons = $("<div>").addClass("comment-buttons").appendTo($bar);
-
-        this.updateButtons();
-
-        let $settingsButtonBox = $("<div>").addClass("settings-buttons").appendTo($bar);
-
-        let $settingsButtonLi = $("<li>").appendTo($settingsButtonBox);
-        this.$settingsButton = $(`<a href="">`)
-            .html("&#x" + "f1de")
-            .attr("title", "Settings")
-            .appendTo($settingsButtonLi);
-
-        $("<div>")
-            .html(`<i class="fas fa-angle-double-left"></i> Drag to the toolbar`)
-            .addClass("dtext-button-drawer-title")
-            .appendTo(this.$container);
-
-        // Create the button drawer
-        this.$formatButtonsDrawer = $("<div>").addClass("dtext-button-drawer").appendTo(this.$container);
-
+        // Establish Sorting
         this.$formatButtons.sortable({
             helper: "clone",
             forceHelperSize: true,
@@ -153,7 +120,7 @@ export class FormattingHelper extends RE6Module {
 
             disabled: true,
 
-            update: () => { this.handleToolbarUpdate(); },
+            update: () => { this.saveButtons(); },
         });
 
         this.$formatButtonsDrawer.sortable({
@@ -166,7 +133,151 @@ export class FormattingHelper extends RE6Module {
             disabled: true,
         });
 
-        // Create the character counter
+        // Create the Button Editing Modal
+        let $editButtonsForm = new Form(
+            { id: "dtext-edit-button", parent: "re-modal-container", },
+            [
+                { id: "name", type: "input", label: "Name", },
+                { id: "icon", type: "input", label: "Icon", },
+                { id: "text", type: "input", label: "Content", },
+                { id: "delete", type: "button", value: "Delete", },
+                { id: "update", type: "submit", value: "Update", },
+            ]);
+
+        this.$editButtonsModal = new Modal({
+            title: "Edit Button",
+            content: $editButtonsForm.get(),
+            triggers: [],
+            triggerMulti: true,
+            fixed: true,
+            disabled: true,
+        });
+
+        this.$editButtonsModal.getElement().on("dialogopen", (event, modal) => {
+            let $button = this.$editButtonsModal.getActiveTrigger().parent();
+            let $updateTabInputs = $editButtonsForm.getInputList();
+
+            $updateTabInputs.get("name").val($button.attr("data-name"));
+            $updateTabInputs.get("icon").val($button.attr("data-icon"));
+            $updateTabInputs.get("text").val($button.attr("data-text"));
+        });
+
+        $editButtonsForm.get().on("re-form:submit", (event, data) => {
+            event.preventDefault();
+            this.updateButton(
+                this.$editButtonsModal.getActiveTrigger().parent(),
+                {
+                    name: data.get("name"),
+                    icon: data.get("icon"),
+                    text: data.get("text"),
+                }
+            );
+            this.$editButtonsModal.close();
+        });
+
+        $editButtonsForm.getInputList().get("delete").click(event => {
+            event.preventDefault();
+            this.deleteButton(this.$editButtonsModal.getActiveTrigger().parent())
+            this.$editButtonsModal.close();
+        });
+
+        // Fill the Toolbar Buttons
+        this.loadButtons();
+    }
+
+    /** Creates the toolbar DOM structure */
+    private createToolbar() {
+        let $bar = $("<div>").addClass("comment-header").prependTo(this.$container);
+
+        // - Editing State Tabs
+        this.$toggleTabs = $("<div>")
+            .addClass("comment-tabs")
+            .appendTo($bar);
+        $("<a>")
+            .html("Write")
+            .attr("href", "#")
+            .addClass("toggle-editing")
+            .addClass("active")
+            .appendTo(this.$toggleTabs);
+        $("<a>")
+            .html("Preview")
+            .attr("href", "#")
+            .addClass("toggle-preview")
+            .appendTo(this.$toggleTabs);
+
+        this.$toggleTabs.find("a").click(e => {
+            e.preventDefault();
+            this.toggleEditing();
+        });
+
+        // - Formatting Buttons Bar
+        this.$formatButtons = $("<div>").addClass("comment-buttons").appendTo($bar);
+
+        // - Drawer Toggle Button
+        let $drawerButtonBox = $("<li>")
+            .appendTo($("<div>").addClass("settings-buttons").appendTo($bar));
+        $("<a>")
+            .html("&#x" + "f1de")
+            .attr("href", "#")
+            .attr("title", "Settings")
+            .appendTo($drawerButtonBox)
+            .click(event => {
+                event.preventDefault();
+                this.toggleButtonDrawer();
+            });
+    }
+
+    /** Creates the button drawer structure */
+    private createButtonDrawer() {
+        // - Drawer Header
+        let $newFormatButton = $("<a>")
+            .attr("href", "#")
+            .html("Add Button");
+
+        $("<div>")
+            .addClass("dtext-button-drawer-title")
+            .append($newFormatButton)
+            .appendTo(this.$container);
+
+        // - New Button Process
+        let newFormatForm = new Form(
+            { id: "dtext-custom-button", parent: "re-modal-container", },
+            [
+                { id: "name", type: "input", label: "Name", },
+                { id: "icon", type: "input", label: "Icon", },
+                { id: "text", type: "input", label: "Content", },
+                { id: "create", type: "submit", value: "Create", stretch: "column", }
+            ]);
+
+        let newFormatModal = new Modal({
+            title: "New Custom Button",
+            content: newFormatForm.get(),
+            triggers: [{ element: $newFormatButton }],
+            fixed: true,
+        });
+
+        newFormatForm.get().on("re-form:submit", (event, data) => {
+            event.preventDefault();
+            let buttonData = this.createButton({
+                name: data.get("name"),
+                icon: data.get("icon"),
+                text: data.get("text"),
+            });
+            buttonData.box.appendTo(this.$formatButtonsDrawer);
+
+            newFormatForm.reset();
+            newFormatModal.close();
+            this.saveButtons();
+        });
+
+        // - Drawer Container Element
+        this.$formatButtonsDrawer = $("<div>").addClass("dtext-button-drawer").appendTo(this.$container);
+
+        // - Elements themselves are added when the user opens the drawer
+    }
+
+    /** Creates the character counter  */
+    private createCharacterCounter() {
         let charCounter = $("<span>")
             .addClass("char-counter")
             .html((this.$textarea.val() + "").length + " / 50000");
@@ -180,46 +291,119 @@ export class FormattingHelper extends RE6Module {
         });
     }
 
-    /**
-     * Updates the buttons toolbar based on saved settings
-     */
-    private updateButtons() {
-        let buttonList = [];
+    /** Updates the buttons toolbar based on saved settings */
+    private loadButtons() {
         this.$formatButtons.empty();
 
-        this.fetchSettings("buttons", true).forEach(value => {
-            let buttonData = this.createButton(value);
-            buttonData.box.appendTo(this.$formatButtons);
+        this.fetchSettings("btn_active", true).forEach((data: ButtonDefinition) => {
+            let buttonElement = this.createButton(data);
+            buttonElement.box.appendTo(this.$formatButtons);
 
-            if (buttonData.button.attr("data-content") === "%spacer%") {
-                buttonData.button.addClass("disabled");
-                buttonData.button.removeAttr("title");
+            if (buttonElement.button.attr("data-text") === "%spacer%") {
+                buttonElement.button.addClass("disabled");
+                buttonElement.button.removeAttr("title");
             }
-            buttonList.push(buttonData.button);
         });
 
-        let allButtons = $.map(buttonList, function (el) { return el.get(); });
-        $(allButtons).click(e => {
-            e.preventDefault();
-            this.processFormattingTag($(e.currentTarget).attr("data-name"));
+        this.$formatButtonsDrawer.empty();
+        this.fetchSettings("btn_inactive", true).forEach((data: ButtonDefinition) => {
+            let buttonData = this.createButton(data);
+            buttonData.box.appendTo(this.$formatButtonsDrawer);
         });
     }
 
-    /**
-     * Creates an element for the specified pre-built button
-     * @param name Button name
-     */
-    private createButton(name: string) {
-        let button_data = button_definitions[name];
+    /** Re-indexes and saves the toolbar configuration */
+    private saveButtons() {
+        let buttonData: ButtonDefinition[] = [];
+        this.$formatButtons.find("li").each(function (i, element) {
+            buttonData.push(fetchData(element));
+        });
+        this.pushSettings("btn_active", buttonData);
 
-        let box = $("<li>").appendTo(this.$formatButtons);
+        buttonData = [];
+        this.$formatButtonsDrawer.find("li").each(function (i, element) {
+            buttonData.push(fetchData(element));
+        })
+        this.pushSettings("btn_inactive", buttonData);
+
+        this.$container.trigger("re621:formatter:update", [this]);
+
+        function fetchData(element: HTMLElement): ButtonDefinition {
+            let $button = $(element);
+            return {
+                name: $button.attr("data-name"),
+                icon: $button.attr("data-icon"),
+                text: $button.attr("data-text"),
+            };
+        }
+    }
+
+    /**
+     * Parses the provided configuration file for missing values
+     * @param config Configuration to process
+     */
+    private parseButtonConfig(config: ButtonDefinition) {
+        if (config.name === undefined) config.name = "New Button";
+        if (config.icon === undefined) config.icon = "#";
+        if (config.text === undefined) config.text = "";
+
+        return config;
+    }
+
+    /**
+     * Creates a new element based on provided definition
+     * @param config Button definition
+     */
+    private createButton(config: ButtonDefinition) {
+        config = this.parseButtonConfig(config);
+        let box = $("<li>")
+            .attr({
+                "data-name": config.name,
+                "data-icon": config.icon,
+                "data-text": config.text,
+            })
+            .appendTo(this.$formatButtons);
         let button = $(`<a href="">`)
-            .html(button_data.icon)
-            .attr("title", button_data.title)
-            .attr("data-name", name)
+            .html(icon_definitions[config.icon])
+            .addClass("format-button")
+            .attr("title", config.name)
             .appendTo(box);
 
+        this.$editButtonsModal.registerTrigger({ element: button });
+        button.click(event => {
+            event.preventDefault();
+            if (this.$container.attr("data-drawer") === "false") {
+                this.processFormattingTag(config.text);
+            }
+        });
+
         return { button: button, box: box };
+    }
+
+    /**
+     * Update the specified button with the corresponding configuration
+     * @param $element LI element of the button to update
+     * @param config New configuration
+     */
+    private updateButton($element: JQuery<HTMLElement>, config: ButtonDefinition) {
+        config = this.parseButtonConfig(config);
+        $element
+            .attr("data-name", config.name)
+            .attr("data-icon", config.icon)
+            .attr("data-text", config.text);
+        $element.find("a").first()
+            .html(icon_definitions[config.icon])
+            .attr("title", config.name);
+        this.saveButtons();
+    }
+
+    /**
+     * Remove the specified button
+     * @param $element LI element of the tab
+     */
+    private deleteButton($element: JQuery<HTMLElement>) {
+        $element.remove();
+        this.saveButtons();
     }
 
     /**
@@ -228,18 +412,15 @@ export class FormattingHelper extends RE6Module {
     private toggleEditing() {
         if (this.$container.attr("data-editing") === "true") {
             this.$container.attr("data-editing", "false");
-            this.$toggleEditing.removeClass("active");
-            this.$togglePreview.addClass("active");
+            this.$toggleTabs.find("a").toggleClass("active");
 
             // format the text
-            this.$textarea.val();
             this.formatDText(this.$textarea.val(), data => {
                 this.$preview.html(data.html);
             });
         } else {
             this.$container.attr("data-editing", "true");
-            this.$toggleEditing.addClass("active");
-            this.$togglePreview.removeClass("active");
+            this.$toggleTabs.find("a").toggleClass("active");
         }
     }
 
@@ -252,43 +433,26 @@ export class FormattingHelper extends RE6Module {
 
             this.$formatButtons.sortable("disable");
             this.$formatButtonsDrawer.sortable("disable");
+
+            this.$editButtonsModal.disable();
         } else {
             this.$container.attr("data-drawer", "true");
 
-            this.$formatButtonsDrawer.empty();
-            var missingButtons = $.grep(Object.keys(button_definitions), el => { return $.inArray(el, this.fetchSettings("buttons")) == -1 });
-            for (const value of missingButtons) {
-                let buttonData = this.createButton(value);
-                buttonData.box.appendTo(this.$formatButtonsDrawer);
-            }
-
             this.$formatButtons.sortable("enable");
             this.$formatButtonsDrawer.sortable("enable");
+
+            this.$editButtonsModal.enable();
         }
     }
 
     /**
-     * Re-indexes and saves the toolbar configuration
+     * Adds the provided tag text to the textarea
+     * @param content Tag text (i.e. "[b]%selection%[/b]")
      */
-    private handleToolbarUpdate() {
-        let buttonData = [];
-        this.$formatButtons.find("li > a").each(function (index, element) {
-            buttonData.push($(element).attr("data-name"));
-        });
-        this.pushSettings("buttons", buttonData);
-        this.$container.trigger("formatting-helper:update", [this]);
-    }
-
-    /**
-     * Adds the specified tag to the textarea
-     * @param tag Tag to add
-     */
-    private processFormattingTag(tag: string) {
-
-        let tagData = button_definitions[tag];
+    private processFormattingTag(content: string) {
         let promises = [];
 
-        let lookup = tagData.content.match(/%prompt[:]?[^%]*?(%|$)/g);
+        let lookup = content.match(/%prompt[:]?[^%]*?(%|$)/g);
         let replacedTags = [];
 
         if (lookup !== null) {
@@ -300,7 +464,6 @@ export class FormattingHelper extends RE6Module {
         }
 
         Promise.all(promises).then(data => {
-            let content = tagData.content;
             // Handle the %prompt% tag
             replacedTags.forEach(function (tag, index) {
                 content = content.replace(tag, data[index]);
@@ -341,4 +504,10 @@ export class FormattingHelper extends RE6Module {
             }
         });
     }
+}
+
+interface ButtonDefinition {
+    name: string,
+    icon: string,
+    text: string,
 }

@@ -150,6 +150,16 @@ form.simple_form {
                 background: lighten(themed("color-section"), 10%);
                 color: themed("color-text");
             }
+
+            a {
+                display: inline-block;
+                padding: .125rem 1.3rem;
+                outline: 0;
+
+                @include themable() {
+                    border: 1px dashed themed("color-text-muted");
+                }
+            }
         }
 
         div.dtext-button-drawer {

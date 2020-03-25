@@ -29,6 +29,7 @@ export class HeaderCustomizer extends RE6Module {
 
         // Configuration Form Listeners
         this.addTabForm.get().on("re-form:submit", (event, data) => {
+            event.preventDefault();
             this.addTab({
                 name: data.get("name"),
                 title: data.get("title"),
@@ -38,6 +39,7 @@ export class HeaderCustomizer extends RE6Module {
         });
 
         this.updateTabForm.get().on("re-form:submit", (event, data) => {
+            event.preventDefault();
             this.updateTab(
                 this.updateTabModal.getActiveTrigger().parent(),
                 {
@@ -284,7 +286,6 @@ export class HeaderCustomizer extends RE6Module {
     private deleteTab($element: JQuery<HTMLElement>) {
         $element.remove();
         this.saveNavbarSettings();
-        this.updateTabModal.close();
     }
 
     /**
