@@ -12,30 +12,34 @@ const icon_definitions = [
     { value: "underscore", name: "&#x" + "f0cd" },
     { value: "superscript", name: "&#x" + "f12b" },
     { value: "subscript", name: "&#x" + "f12c" },
+    { value: "spoiler", name: "&#x" + "f29e" },
 
-    { value: "spoiler", name: "&#x" + "f20a" },
     { value: "color", name: "&#x" + "f53f" },
     { value: "code", name: "&#x" + "f121" },
     { value: "heading", name: "&#x" + "f1dc" },
     { value: "quote", name: "&#x" + "f10e" },
     { value: "section", name: "&#x" + "f103" },
     { value: "tag", name: "&#x" + "f02b" },
-
     { value: "wiki", name: "&#x" + "f002" },
+    { value: "keyboard", name: "&#x" + "f11c" },
+
     { value: "link", name: "&#x" + "f0c1" },
     { value: "unlink", name: "&#x" + "f127" },
     { value: "link_prompt", name: "&#x" + "f35d" },
     { value: "lemon", name: "&#x" + "f094" },
     { value: "pepper", name: "&#x" + "f816" },
     { value: "drumstick", name: "&#x" + "f6d7" },
-
     { value: "magic", name: "&#x" + "f0d0" },
-    { value: "address-book", name: "&#x" + "f2b9" },
     { value: "clipboard", name: "&#x" + "f328" },
+
     { value: "paperclip", name: "&#x" + "f0c6" },
     { value: "fountainpen", name: "&#x" + "f5ad" },
     { value: "comment", name: "&#x" + "f27a" },
-    { value: "keyboard", name: "&#x" + "f11c" },
+    { value: "bell", name: "&#x" + "f0f3" },
+    { value: "bullhorn", name: "&#x" + "f0a1" },
+    { value: "heart", name: "&#x" + "f004" },
+    { value: "plus-square", name: "&#x" + "f0fe" },
+    { value: "minus-square", name: "&#x" + "f146" },
 ];
 
 export class FormattingHelper extends RE6Module {
@@ -156,6 +160,10 @@ export class FormattingHelper extends RE6Module {
                 { id: "text", type: "input", label: "Content", },
                 { id: "delete", type: "button", value: "Delete", },
                 { id: "update", type: "submit", value: "Update", },
+                { id: "hr", type: "hr" },
+                { id: "vartext", type: "div", value: "Available variables:" },
+                { id: "var-select", label: "Selected text", value: "%selection%", type: "copyinput" },
+                { id: "var-prompt", label: "Prompt for input", value: "%prompt%", type: "copyinput" },
             ]);
 
         this.$editButtonsModal = new Modal({
@@ -260,7 +268,11 @@ export class FormattingHelper extends RE6Module {
                 { id: "name", type: "input", label: "Name", },
                 { id: "icon", type: "icon", label: "Icon", data: icon_definitions, },
                 { id: "text", type: "input", label: "Content", },
-                { id: "create", type: "submit", value: "Create", stretch: "column", }
+                { id: "create", type: "submit", value: "Create", stretch: "column", },
+                { id: "hr", type: "hr" },
+                { id: "vartext", type: "div", value: "Available variables:" },
+                { id: "var-select", label: "Selected text", value: "%selection%", type: "copyinput" },
+                { id: "var-prompt", label: "Prompt for input", value: "%prompt%", type: "copyinput" },
             ]);
 
         let newFormatModal = new Modal({
