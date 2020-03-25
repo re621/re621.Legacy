@@ -68,9 +68,12 @@ export class InfiniteScroll extends RE6Module {
             //Add post to the list of posts currently visible
             //This is important because InstantSearch relies on it
             Post.appendPost(post);
+
+            //Apply blacklist before appending, to prevent image loading
+            post.applyBlacklist(blacklistIsActive);
+
             this.$postContainer.append(element);
             //Hide if blacklist is active and post matches the blacklist
-            post.applyBlacklist(blacklistIsActive);
         }
         this.pagesLeft = posts.length !== 0;
         this.isInProgress = false;

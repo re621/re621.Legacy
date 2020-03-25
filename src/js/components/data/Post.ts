@@ -155,12 +155,30 @@ export class Post {
     public applyBlacklist(blacklistIsActive: boolean) {
         //Only hide/show blacklisted, no need to do it to all
         if (this.getIsBlacklisted()) {
-            if (blacklistIsActive) {
-                this.getDomElement().hide();
-            } else {
-                this.getDomElement().show();
-            }
+            blacklistIsActive ? this.hide() : this.show();
         }
+    }
+
+    /**
+     * Hides the post and removes its src attribute, to prevent
+     * loading of the image, if it's not already appended
+     */
+    public hide() {
+        const $img = this.element.find("img");
+        $img.attr("src", "/images/blacklisted-preview.png");
+        this.element.addClass("filtered");
+    }
+
+    /**
+     * Shows the post and restores the src attribute, if the blacklist allows it
+     */
+    public show(blacklistIsActive = false) {
+        if (blacklistIsActive === true) {
+            return;
+        }
+        const $img = this.element.find("img");
+        $img.attr("src", this.previewURL);
+        this.element.removeClass("filtered");
     }
 
     /**
@@ -176,21 +194,6 @@ export class Post {
             }
         }
         return hits !== 0;
-    }
-
-    /**
-     * Returns true if the post has been hidden by InstantSearch
-     * @returns boolean True if the post has been hidden, false otherwise
-     */
-    public isVisible() { return !this.element.hasClass("filtered"); }
-
-    /**
-     * Sets the post's visibility status
-     * @param hidden If true, hides the post, if false shows it
-     */
-    public setVisibility(visible = true) {
-        if (visible) { this.element.removeClass("filtered"); }
-        else { this.element.addClass("filtered"); }
     }
 
     /**

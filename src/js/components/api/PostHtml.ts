@@ -28,9 +28,6 @@ export class PostHtml {
         let $href = $("<a>").
             attr("href", "/posts/" + json.id);
         let $picture = $("<picture>");
-        $picture.append($("<source>").
-            attr("media", "(max-width: 800px)").
-            attr("srcset", json.preview.url));
         //TODO title status
         $picture.append($("<img>").
             attr("class", "has-cropped-false").
