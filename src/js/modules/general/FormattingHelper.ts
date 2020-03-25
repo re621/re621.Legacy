@@ -2,6 +2,7 @@ import { RE6Module } from "../../components/RE6Module";
 import { Prompt } from "../../components/structure/Prompt";
 import { Modal } from "../../components/structure/Modal";
 import { Form } from "../../components/structure/Form";
+import { HotkeyCustomizer } from "./HotkeyCustomizer";
 
 const icon_definitions = [
     { value: "spacer", name: "&nbsp;" },
@@ -61,6 +62,8 @@ export class FormattingHelper extends RE6Module {
         this.$container = $targetContainer;
 
         this.createDOM();
+
+        this.registerHotkeys();
     }
 
     /**
@@ -91,6 +94,7 @@ export class FormattingHelper extends RE6Module {
                 { name: "Wiki", icon: "wiki", text: "[[%selection%]]" },
                 { name: "Link (Prompted)", icon: "link_prompt", text: "\"%selection%\":%prompt:Address%" },
             ],
+            "hotkey_submit": "alt+return",
         };
     }
 
@@ -111,6 +115,13 @@ export class FormattingHelper extends RE6Module {
         });
 
         $("input.dtext-preview-button").remove();
+    }
+
+    /** Registers the module's hotkeys */
+    public registerHotkeys() {
+        HotkeyCustomizer.registerInput(this.fetchSettings("hotkey_submit"), this.$textarea, () => {
+            this.$container.parent().parent().submit();
+        });
     }
 
     /**
