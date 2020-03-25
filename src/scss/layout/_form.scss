@@ -1,13 +1,13 @@
 /* Auto-generated forms */
 form.grid-form {
     display: grid;
-    grid-template-columns: 5rem 10rem;
+    grid-template-columns: 1fr 2fr;
     grid-row-gap: 1rem;
     grid-column-gap: 0.5rem;
-    width: 15rem;
+    //    width: 15rem;
 
     &.columns-2 {
-        grid-template-columns: repeat(2, 5rem 10rem);
+        grid-template-columns: repeat(2, 1fr 2fr);
         width: 31.5rem;
 
         .input-container.stretch-full {
@@ -20,7 +20,7 @@ form.grid-form {
     }
 
     &.columns-3 {
-        grid-template-columns: repeat(3, 5rem 10rem);
+        grid-template-columns: repeat(3, 1fr 2fr);
         width: 48rem;
 
         .input-container.stretch-full {
