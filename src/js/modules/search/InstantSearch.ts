@@ -42,7 +42,7 @@ export class InstantSearch extends RE6Module {
             }
         } else {
             for (const post of posts) {
-                post.tagsMatchesFilter(filter) ? post.show(blacklistIsActive) : post.hide();
+                post.postMatchesFilter(filter) ? post.show(blacklistIsActive) : post.hide();
             }
         }
     }

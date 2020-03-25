@@ -39,10 +39,10 @@ export class Post {
         this.rating = PostRating.fromValue($image.attr("data-rating"));
 
         if ($image.attr("data-fav-count")) { this.favorites = parseInt($image.attr("data-fav-count")); }
-        else { parseInt($image.find(".post-score-faves").first().html().substring(1)); }
+        else { this.favorites = parseInt($image.find(".post-score-faves").first().html().substring(1)); }
 
         if ($image.attr("data-score")) { this.score = parseInt($image.attr("data-score")); }
-        else { parseInt($image.find(".post-score-score").first().html().substring(1)); }
+        else { this.score = parseInt($image.find(".post-score-score").first().html().substring(1)); }
 
         this.fileURL = $image.attr("data-file-url");
         this.sampleURL = $image.attr("data-large-file-url");
@@ -109,7 +109,7 @@ export class Post {
     * Most of the things that work on the site should also work here
     * @todo Implement ~ modifier
     */
-    public tagsMatchesFilter(queryString: string) {
+    public postMatchesFilter(queryString: string) {
         const seperatedFilters = queryString.split(" ");
         let result = true;
         for (const filter of seperatedFilters) {
@@ -120,24 +120,44 @@ export class Post {
             if (result === false) {
                 break;
             }
-            if (filterNoMinus.includes("*")) {
-                const regex = Tag.escapeSearchToRegex(filterNoMinus);
-                result = regex.test(this.getTags());
+            if (filterNoMinus.startsWith("id:")) {
+                const id = parseInt(filterNoMinus.substring(3));
+                result = this.id === id;
+            } else if (filterNoMinus.startsWith("score:")) {
+                const score = parseInt(filterNoMinus.substring(6));
+                result = this.score === score;
+            } else if (filterNoMinus.startsWith("rating:")) {
+                const rating = filterNoMinus.substring(7);
+                result = this.rating === rating;
+            } else if (filterNoMinus.startsWith("uploader:")) {
+                const uploader = filterNoMinus.substring(9);
+                result = this.uploaderID === parseInt(uploader) || this.uploaderName === uploader;
+            } else if (filterNoMinus.startsWith("flag:")) {
+                const flags = filterNoMinus.substring(5);
+                result = this.flags === flags;
             } else {
-                //if there is no wildcard, the filter and tag must be an equal match
-                let matchFound = false;
-                for (const tag of this.getTags().split(" ")) {
-                    if (tag === filterNoMinus) {
-                        matchFound = true;
-                        break;
-                    }
-                }
-                result = matchFound;
+                result = this.tagsMatchesFilter(filterNoMinus);
             }
             //invert the result, depending on if the filter started with a -
             result = result !== inverse;
         }
         return result;
+    }
+
+    public tagsMatchesFilter(filter: string) {
+        if (filter.includes("*")) {
+            const regex = Tag.escapeSearchToRegex(filter);
+            return regex.test(this.getTags());
+        } else {
+            //if there is no wildcard, the filter and tag must be an equal match
+            let matchFound = false;
+            for (const tag of this.getTags().split(" ")) {
+                if (tag === filter) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -189,7 +209,7 @@ export class Post {
     private matchesSiteBlacklist() {
         let hits = 0;
         for (const filter of User.getBlacklist()) {
-            if (this.tagsMatchesFilter(filter)) {
+            if (this.postMatchesFilter(filter)) {
                 hits++;
             }
         }
