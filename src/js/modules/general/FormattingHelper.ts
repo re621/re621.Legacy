@@ -180,11 +180,11 @@ export class FormattingHelper extends RE6Module {
             let $updateTabInputs = $editButtonsForm.getInputList();
 
             $updateTabInputs.get("name").val($button.attr("data-name"));
-            $updateTabInputs.get("icon").val($button.attr("data-icon")).trigger("re621.form.update");
+            $updateTabInputs.get("icon").val($button.attr("data-icon")).trigger("re621:form:update");
             $updateTabInputs.get("text").val($button.attr("data-text"));
         });
 
-        $editButtonsForm.get().on("re-form:submit", (event, data) => {
+        $editButtonsForm.get().on("re621:form:submit", (event, data) => {
             event.preventDefault();
             this.updateButton(
                 this.$editButtonsModal.getActiveTrigger().parent(),
@@ -282,7 +282,7 @@ export class FormattingHelper extends RE6Module {
             fixed: true,
         });
 
-        newFormatForm.get().on("re-form:submit", (event, data) => {
+        newFormatForm.get().on("re621:form:submit", (event, data) => {
             event.preventDefault();
             let buttonData = this.createButton({
                 name: data.get("name"),

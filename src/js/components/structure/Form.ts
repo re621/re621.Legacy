@@ -108,10 +108,10 @@ export class Form {
 
         $(this.config.parent).on("submit", "form#" + this.config.id, event => {
             event.preventDefault();
-            this.$form.trigger("re-form:submit", this.getInputValues());
+            this.$form.trigger("re621:form:submit", this.getInputValues());
         });
 
-        this.$form.trigger("re-form:create");
+        this.$form.trigger("re621:form:create");
         return this.$form;
     }
 
@@ -300,7 +300,7 @@ export class Form {
                     $input
                         .removeClass("input-info")
                         .val(key)
-                        .trigger("re621:keychange", [key, $oldKey]);
+                        .trigger("re621:form:keychange", [key, $oldKey]);
                     occupied = false;
                 }
             });

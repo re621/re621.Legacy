@@ -28,7 +28,7 @@ export class HeaderCustomizer extends RE6Module {
         this.createDOM();
 
         // Configuration Form Listeners
-        this.addTabForm.get().on("re-form:submit", (event, data) => {
+        this.addTabForm.get().on("re621:form:submit", (event, data) => {
             event.preventDefault();
             this.addTab({
                 name: data.get("name"),
@@ -38,7 +38,7 @@ export class HeaderCustomizer extends RE6Module {
             this.addTabForm.reset();
         });
 
-        this.updateTabForm.get().on("re-form:submit", (event, data) => {
+        this.updateTabForm.get().on("re621:form:submit", (event, data) => {
             event.preventDefault();
             this.updateTab(
                 this.updateTabModal.getActiveTrigger().parent(),
