@@ -1,0 +1,30 @@
+/* Pool Navigator Styles */
+
+div#nav-links {
+
+    li.post-nav {
+        position: relative;
+
+        div.post-nav-switch-box {
+            position: absolute;
+            left: 2rem;
+
+            input[type=radio] {
+                display: none;
+            }
+
+            /* to hide the checkbox itself */
+            input[type=radio]+label:before {
+                content: "\f0c8";
+                font-family: "Font Awesome 5 Free";
+                display: inline-block;
+                letter-spacing: 10px;
+                cursor: pointer;
+            }
+
+            input[type=radio]:checked+label:before {
+                content: "\f14a";
+            }
+        }
+    }
+}

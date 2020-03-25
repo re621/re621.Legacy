@@ -25,6 +25,7 @@ import { InstantSearch } from "./modules/search/InstantSearch";
 import { InfiniteScroll } from "./modules/search/InfiniteScroll";
 // - settings
 import { SettingsController } from "./modules/general/SettingsController";
+import { PoolNavigator } from "./modules/post/PoolNavigator";
 
 // Modules with self-contained settings
 HeaderCustomizer.getInstance();
@@ -43,6 +44,7 @@ SettingsController.registerModule(
     ImageScaler.getInstance(),
     TitleCustomizer.getInstance(),
     Miscellaneous.getInstance(),
+    PoolNavigator.getInstance(),
     PostViewer.getInstance(),
 );
 

@@ -4,6 +4,21 @@ form.simple_form {
 
     padding: 0;
 
+    &.new_forum_post,
+    &.edit_forum_post,
+    &.edit_comment {
+
+        input[type=button],
+        input[type=submit] {
+            @include themable {
+                background: lighten(themed("color-section"), 10%);
+                color: themed("color-text");
+            }
+
+            padding: 0.25rem 0.5rem;
+        }
+    }
+
     div.dtext-previewable {
         display: grid;
         grid-template-columns: auto min-content;
@@ -16,11 +31,13 @@ form.simple_form {
             grid-template-columns: max-content auto min-content;
 
             width: 100%;
-
             padding-top: 0.5rem;
+            box-sizing: border-box;
 
             @include themable() {
                 background: lighten(themed("color-section"), 10%);
+                border: 1px solid lighten(themed("color-section"), 10%);
+                border-bottom: 0;
             }
 
             div.comment-tabs {
@@ -124,8 +141,6 @@ form.simple_form {
                 border-top: 0;
                 color: themed("color-text");
             }
-
-            border-top: 0;
         }
 
         &[data-editing=false] div.comment-buttons,
@@ -206,6 +221,14 @@ form.simple_form {
 
         &[data-editing=false] div.dtext-character-counter-box {
             display: none;
+        }
+
+        &.invalid {
+
+            div.comment-header,
+            textarea {
+                border-color: orange
+            }
         }
     }
 

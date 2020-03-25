@@ -45,6 +45,7 @@ const icon_definitions = [
 
 export class FormattingHelper extends RE6Module {
 
+    private $form: JQuery<HTMLElement>;
     private $container: JQuery<HTMLElement>;
 
     private $toggleTabs: JQuery<HTMLElement>;
@@ -62,6 +63,13 @@ export class FormattingHelper extends RE6Module {
         this.$container = $targetContainer;
 
         this.createDOM();
+
+        this.$form.submit((event) => {
+            if (this.$textarea.val() === "") {
+                event.preventDefault();
+                this.$container.addClass("invalid");
+            }
+        });
 
         this.registerHotkeys();
     }
@@ -120,7 +128,7 @@ export class FormattingHelper extends RE6Module {
     /** Registers the module's hotkeys */
     public registerHotkeys() {
         HotkeyCustomizer.registerInput(this.fetchSettings("hotkey_submit"), this.$textarea, () => {
-            this.$container.parent().parent().submit();
+            this.$form.submit();
         });
     }
 
@@ -132,6 +140,7 @@ export class FormattingHelper extends RE6Module {
         this.$container.attr("data-editing", "true");
         this.$container.attr("data-drawer", "false");
 
+        this.$form = this.$container.parent().parent();
         this.$textarea = this.$container.find("textarea");
         this.$preview = this.$container.find("div.dtext-preview");
 

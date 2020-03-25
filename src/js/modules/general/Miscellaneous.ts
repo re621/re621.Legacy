@@ -2,6 +2,7 @@ import { RE6Module } from "../../components/RE6Module";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { ApiTag } from "../../components/api/responses/ApiTag";
 import { Api } from "../../components/api/Api";
+import { HotkeyCustomizer } from "./HotkeyCustomizer";
 
 declare var GM_addStyle;
 declare var GM_getResourceText;
@@ -18,13 +19,13 @@ export class Miscellaneous extends RE6Module {
     private constructor() {
         super();
 
+        // Load the Redesign Fixes stylesheet
+        this.loadRedesignFixes(this.fetchSettings("loadRedesignFixes"));
+
         // Remove the query string on posts
         if (this.fetchSettings("removeSearchQueryString") === true && Page.matches(PageDefintion.post)) {
             this.removeSearchQueryString();
         }
-
-        // Load the Redesign Fixes stylesheet
-        this.loadRedesignFixes(this.fetchSettings("loadRedesignFixes"));
 
         // Replaces the tag count estimate with the real number
         if (this.fetchSettings("improveTagCount") === true && Page.matches([PageDefintion.search, PageDefintion.post])) {
@@ -35,6 +36,43 @@ export class Miscellaneous extends RE6Module {
         if (Page.matches(PageDefintion.search)) {
             this.focusSearchBar();
         }
+
+        this.registerHotkeys();
+    }
+
+    /** Registers hotkeys for the module */
+    protected registerHotkeys() {
+        HotkeyCustomizer.register(this.fetchSettings("hotkey_newcomment"), function () {
+            if (Page.matches(PageDefintion.post)) $("a.expand-comment-response").click();
+            else if (Page.matches(PageDefintion.forum)) $("a#new-response-link").click();
+        });
+    }
+
+    /** Reserves hotkeys to prevent them from being re-assigned */
+    protected reserveHotkeys() {
+        HotkeyCustomizer.register(this.fetchSettings("hotkey_newcomment"), function () { });
+    }
+
+    /**
+     * Returns a singleton instance of the class
+     * @returns FormattingHelper instance
+     */
+    public static getInstance() {
+        if (this.instance == undefined) this.instance = new Miscellaneous();
+        return this.instance;
+    }
+
+    /**
+     * Returns a set of default settings values
+     * @returns Default settings
+     */
+    protected getDefaultSettings() {
+        return {
+            hotkey_newcomment: "n",
+            removeSearchQueryString: true,
+            loadRedesignFixes: true,
+            improveTagCount: true,
+        };
     }
 
     /**
@@ -104,26 +142,5 @@ export class Miscellaneous extends RE6Module {
     private focusSearchBar() {
         let searchbox = $("section#search-box input");
         if (searchbox.val() == "") searchbox.focus();
-    }
-
-    /**
-     * Returns a set of default settings values
-     * @returns Default settings
-     */
-    protected getDefaultSettings() {
-        return {
-            "removeSearchQueryString": true,
-            "loadRedesignFixes": true,
-            "improveTagCount": true
-        };
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns FormattingHelper instance
-     */
-    public static getInstance() {
-        if (this.instance == undefined) this.instance = new Miscellaneous();
-        return this.instance;
     }
 }
