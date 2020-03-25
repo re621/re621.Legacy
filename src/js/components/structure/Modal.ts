@@ -48,12 +48,9 @@ export class Modal {
             });
 
         if (config.fixed) {
-            this.$modal.on("dialogopen", function (event, ui) {
-                $(event.target).dialog('widget')
-                    .css({ position: 'fixed' })
-                    .position({ my: config.position.my, at: config.position.at, of: window });
-            });
+            $(this.$modal).dialog('widget').addClass("modal-fixed");
         }
+
         for (const trigger of config.triggers) {
             this.registerTrigger(trigger);
         }

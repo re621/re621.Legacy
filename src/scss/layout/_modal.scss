@@ -24,6 +24,10 @@ re-modal-container {
             color: themed("color-text") !important;
         }
 
+        &.modal-fixed {
+            position: fixed !important;
+        }
+
         div.ui-dialog-titlebar {
             position: relative;
             padding: 0;
