@@ -13,6 +13,7 @@ div.ui-widget-content.ui-tabs {
         color: unset !important;
 
         margin-left: 0;
+        margin-bottom: 0.5rem;
 
         li.ui-tabs-tab {
             display: inline-block;
@@ -20,7 +21,7 @@ div.ui-widget-content.ui-tabs {
             border: unset;
             background: unset;
 
-            padding: 0.5rem 0.25rem;
+            padding: 0.25rem 0.5rem;
             margin-right: 0.5rem;
             outline: 0;
             border-radius: 0 0 4px 4px;
