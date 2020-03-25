@@ -31,11 +31,13 @@ form.simple_form {
             grid-template-columns: max-content auto min-content;
 
             width: 100%;
-
             padding-top: 0.5rem;
+            box-sizing: border-box;
 
             @include themable() {
                 background: lighten(themed("color-section"), 10%);
+                border: 1px solid lighten(themed("color-section"), 10%);
+                border-bottom: 0;
             }
 
             div.comment-tabs {
@@ -139,8 +141,6 @@ form.simple_form {
                 border-top: 0;
                 color: themed("color-text");
             }
-
-            border-top: 0;
         }
 
         &[data-editing=false] div.comment-buttons,
@@ -221,6 +221,14 @@ form.simple_form {
 
         &[data-editing=false] div.dtext-character-counter-box {
             display: none;
+        }
+
+        &.invalid {
+
+            div.comment-header,
+            textarea {
+                border-color: orange
+            }
         }
     }
 
