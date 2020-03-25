@@ -63,22 +63,28 @@ form.grid-form {
             padding: 0.125rem;
             border-radius: 4px;
             border: 1px solid transparent;
+            border-left-width: 5px;
+
+            @include themable {
+                background: lighten(themed("color-section"), 10%);
+                color: themed("color-text");
+            }
 
             &:required {
-                @include themable {
-                    border-left: 1px solid themed("color-warning");
-                }
+                border-left: 5px solid grey;
             }
 
             &:invalid {
-                @include themable {
-                    border-left: 1px solid themed("color-danger");
-                }
+                border-left: 5px solid orange;
             }
 
             &:valid {
-                border-left: 1px solid transparent;
+                border-left: 5px solid transparent;
             }
+        }
+
+        button {
+            border-left-width: 1px;
         }
 
         // Copybox
@@ -95,7 +101,7 @@ form.grid-form {
                 outline: 0;
 
                 &.input-info {
-                    color: red;
+                    color: orange;
                 }
             }
 
@@ -104,9 +110,13 @@ form.grid-form {
                 border-radius: 0 4px 4px 0;
                 outline: 0;
 
+                @include themable {
+                    background: lighten(themed("color-section"), 15%);
+                }
+
                 &:hover {
                     @include themable {
-                        background: themed("color-section");
+                        background: themed("color-foreground");
                         color: themed("color-text");
                     }
                 }
@@ -126,7 +136,7 @@ form.grid-form {
                     border-radius: 1.25rem;
 
                     @include themable {
-                        background-color: desaturate(themed("color-section"), 10%);
+                        background-color: themed("color-foreground");
                         border: 1px solid themed("color-section");
                     }
 
@@ -148,7 +158,7 @@ form.grid-form {
 
                 &:checked+label {
                     @include themable {
-                        background-color: lighten(themed("color-section"), 20%);
+                        background-color: lighten(themed("color-section"), 10%);
                     }
 
                     &::after {

@@ -27,14 +27,15 @@ div.ui-widget-content.ui-tabs {
             border-radius: 0 0 4px 4px;
 
             @include themable {
-                background-color: lighten(themed("color-section"), 10%) !important;
-                color: themed("color-text") !important;
+                background-color: transparent;
+                color: themed("color-text");
             }
 
+            &:hover,
             &.ui-tabs-active {
                 @include themable {
-                    background-color: themed("color-section") !important;
-                    color: themed("color-text") !important;
+                    background-color: themed("color-foreground");
+                    color: themed("color-text");
                 }
             }
 
