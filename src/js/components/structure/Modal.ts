@@ -17,7 +17,10 @@ export class Modal {
             .dialog({
                 autoOpen: false,
                 appendTo: "re-modal-container",
+
                 closeOnEscape: config.escapable,
+                draggable: config.draggable,
+                resizable: config.resizable,
 
                 width: "auto",
                 minWidth: config.minWidth,
@@ -28,12 +31,21 @@ export class Modal {
                     at: config.position.at,
                     of: "re-modal-container",
                     within: "re-modal-container",
-                    collision: "fit",
-                },
+                    collision: "none",
+                }
             });
+
         this.$modal.dialog("widget")
-            .draggable({ containment: "parent", })
-            .resizable({ containment: "parent", });
+            .addClass("re621-ui-dialog")
+            .removeClass("ui-dialog")
+            .draggable({
+                disabled: !config.draggable,
+                containment: "parent"
+            })
+            .resizable({
+                disabled: !config.resizable,
+                containment: "parent"
+            });
 
         if (config.fixed) {
             this.$modal.on("dialogopen", function (event, ui) {
@@ -56,7 +68,10 @@ export class Modal {
         if (config.content === undefined) config.content = $("");
         if (config.triggers === undefined) config.triggers = [];
         if (config.triggerMulti === undefined) config.triggerMulti = false;
+
         if (config.escapable === undefined) config.escapable = true;
+        if (config.draggable === undefined) config.draggable = true;
+        if (config.resizable === undefined) config.resizable = false;
 
         if (config.minWidth === undefined) config.minWidth = 150;
         if (config.minHeight === undefined) config.minHeight = 150;
@@ -138,7 +153,10 @@ interface ModalConfig {
     content?: JQuery<HTMLElement>,
     triggers?: ModalTrigger[],
     triggerMulti?: boolean,
+
     escapable?: boolean,
+    resizable?: boolean,
+    draggable?: boolean,
 
     minWidth?: number,
     minHeight?: number,

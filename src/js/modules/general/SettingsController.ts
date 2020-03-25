@@ -266,28 +266,28 @@ export class SettingsController extends RE6Module {
         let postViewer = <PostViewer>this.modules.get("PostViewer");
         let imageScaler = <ImageScaler>this.modules.get("ImageScaler");
 
-        hotkeyFormInput.get("hotkey-upvote").on("re621:keychange", function (event, newKey, oldKey) {
+        hotkeyFormInput.get("hotkey-upvote").on("re621:form:keychange", function (event, newKey, oldKey) {
             postViewer.pushSettings("hotkey_upvote", newKey);
             HotkeyCustomizer.unregister(oldKey);
-            postViewer.registerHotkeys();
+            postViewer.handleHotkeys();
         });
 
-        hotkeyFormInput.get("hotkey-downvote").on("re621:keychange", function (event, newKey, oldKey) {
+        hotkeyFormInput.get("hotkey-downvote").on("re621:form:keychange", function (event, newKey, oldKey) {
             postViewer.pushSettings("hotkey_downvote", newKey);
             HotkeyCustomizer.unregister(oldKey);
-            postViewer.registerHotkeys();
+            postViewer.handleHotkeys();
         });
 
-        hotkeyFormInput.get("hotkey-favorite").on("re621:keychange", function (event, newKey, oldKey) {
+        hotkeyFormInput.get("hotkey-favorite").on("re621:form:keychange", function (event, newKey, oldKey) {
             postViewer.pushSettings("hotkey_favorite", newKey);
             HotkeyCustomizer.unregister(oldKey);
-            postViewer.registerHotkeys();
+            postViewer.handleHotkeys();
         });
 
-        hotkeyFormInput.get("hotkey-scale").on("re621:keychange", function (event, newKey, oldKey) {
+        hotkeyFormInput.get("hotkey-scale").on("re621:form:keychange", function (event, newKey, oldKey) {
             imageScaler.pushSettings("hotkey_scale", newKey);
             HotkeyCustomizer.unregister(oldKey);
-            imageScaler.registerHotkeys();
+            imageScaler.handleHotkeys();
         });
     }
 

@@ -8,24 +8,24 @@ re-modal-container {
     z-index: 50;
     pointer-events: none;
 
-
     /* Modal Styling Overrides */
-    div.ui-widget-content.ui-dialog {
-
-        // Whoever desided to include JQuery-UI theming in e621.
-        // You have no idea how much I fucking hate you.
-
+    div.ui-widget-content.re621-ui-dialog {
+        position: absolute !important;
         pointer-events: auto;
         border-radius: 6px;
-        min-width: fit-content;
+        min-width: max-content;
+        max-width: fit-content;
+        box-shadow: 0 5px 15px -5px black;
+        outline: 0;
 
         @include themable {
-            border: 1px solid lighten(themed("color-section"), 10%) !important;
-            background-color: lighten(themed("color-section"), 10%) !important;
+            border: 1px solid themed("color-section") !important;
+            background-color: themed("color-section") !important;
             color: themed("color-text") !important;
         }
 
         div.ui-dialog-titlebar {
+            position: relative;
             padding: 0;
             border-radius: 6px 6px 0 0;
             cursor: grab;
@@ -37,10 +37,16 @@ re-modal-container {
             }
 
             span.ui-dialog-title {
+                float: left;
                 padding: .4em 1em;
+                margin: .1em 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             button.ui-dialog-titlebar-close {
+                position: absolute;
                 height: 100%;
                 margin: 0;
                 right: 0;
@@ -54,15 +60,17 @@ re-modal-container {
                 box-shadow: unset;
 
                 @include themable {
-                    border-left: 1px solid lighten(themed("color-section"), 10%) !important;
+                    border-left: 1px solid themed("color-section") !important;
                     color: themed("color-link");
                 }
 
-                &:hover {
-                    background: #ffffff10;
+                &:hover,
+                &:active {
+                    background: #00000033;
 
-                    @include themable {
-                        color: themed("color-link-hover");
+                    span.ui-icon {
+                        background-image: url(/packs/media/images/ui-icons_ffffff_256x240-bf27228a.png);
+                        background-position: -96px -128px;
                     }
                 }
             }
@@ -75,6 +83,7 @@ re-modal-container {
         }
 
         div.ui-dialog-content {
+            position: relative;
             padding: 1em 1em;
             min-width: fit-content;
 

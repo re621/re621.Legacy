@@ -1,13 +1,13 @@
 /* Auto-generated forms */
 form.grid-form {
     display: grid;
-    grid-template-columns: 5rem 10rem;
+    grid-template-columns: 1fr 2fr;
     grid-row-gap: 1rem;
     grid-column-gap: 0.5rem;
-    width: 15rem;
+    //    width: 15rem;
 
     &.columns-2 {
-        grid-template-columns: repeat(2, 5rem 10rem);
+        grid-template-columns: repeat(2, 1fr 2fr);
         width: 31.5rem;
 
         .input-container.stretch-full {
@@ -20,7 +20,7 @@ form.grid-form {
     }
 
     &.columns-3 {
-        grid-template-columns: repeat(3, 5rem 10rem);
+        grid-template-columns: repeat(3, 1fr 2fr);
         width: 48rem;
 
         .input-container.stretch-full {
@@ -58,27 +58,34 @@ form.grid-form {
         // Input styles
         input,
         select,
-        button {
+        button,
+        textarea {
             width: 100%;
             padding: 0.125rem;
             border-radius: 4px;
             border: 1px solid transparent;
+            border-left-width: 5px;
+
+            @include themable {
+                background: lighten(themed("color-section"), 10%);
+                color: themed("color-text");
+            }
 
             &:required {
-                @include themable {
-                    border-left: 1px solid themed("color-warning");
-                }
+                border-left: 5px solid grey;
             }
 
             &:invalid {
-                @include themable {
-                    border-left: 1px solid themed("color-danger");
-                }
+                border-left: 5px solid orange;
             }
 
             &:valid {
-                border-left: 1px solid transparent;
+                border-left: 5px solid transparent;
             }
+        }
+
+        button {
+            border-left-width: 1px;
         }
 
         // Copybox
@@ -95,7 +102,7 @@ form.grid-form {
                 outline: 0;
 
                 &.input-info {
-                    color: red;
+                    color: orange;
                 }
             }
 
@@ -104,11 +111,41 @@ form.grid-form {
                 border-radius: 0 4px 4px 0;
                 outline: 0;
 
+                @include themable {
+                    background: lighten(themed("color-section"), 15%);
+                }
+
                 &:hover {
                     @include themable {
-                        background: themed("color-section");
+                        background: themed("color-foreground");
                         color: themed("color-text");
                     }
+                }
+            }
+        }
+
+        div.icon-picker {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, 23px);
+            grid-column-gap: 0.35rem;
+            grid-row-gap: 0.30rem;
+            width: 100%;
+
+            a {
+                display: inline-flex;
+                justify-content: space-around;
+                padding: 0.125rem 0.25rem;
+                outline: 0;
+
+                font-family: 'Font Awesome 5 Free';
+                font-weight: 900;
+
+                @include themable {
+                    border: 1px dashed themed("color-text-muted");
+                }
+
+                &.active {
+                    background: #ffffff30;
                 }
             }
         }
@@ -126,7 +163,7 @@ form.grid-form {
                     border-radius: 1.25rem;
 
                     @include themable {
-                        background-color: desaturate(themed("color-section"), 10%);
+                        background-color: themed("color-foreground");
                         border: 1px solid themed("color-section");
                     }
 
@@ -148,7 +185,7 @@ form.grid-form {
 
                 &:checked+label {
                     @include themable {
-                        background-color: lighten(themed("color-section"), 20%);
+                        background-color: lighten(themed("color-section"), 10%);
                     }
 
                     &::after {

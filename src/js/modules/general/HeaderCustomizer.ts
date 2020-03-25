@@ -28,7 +28,8 @@ export class HeaderCustomizer extends RE6Module {
         this.createDOM();
 
         // Configuration Form Listeners
-        this.addTabForm.get().on("re-form:submit", (event, data) => {
+        this.addTabForm.get().on("re621:form:submit", (event, data) => {
+            event.preventDefault();
             this.addTab({
                 name: data.get("name"),
                 title: data.get("title"),
@@ -37,7 +38,8 @@ export class HeaderCustomizer extends RE6Module {
             this.addTabForm.reset();
         });
 
-        this.updateTabForm.get().on("re-form:submit", (event, data) => {
+        this.updateTabForm.get().on("re621:form:submit", (event, data) => {
+            event.preventDefault();
             this.updateTab(
                 this.updateTabModal.getActiveTrigger().parent(),
                 {
@@ -139,7 +141,7 @@ export class HeaderCustomizer extends RE6Module {
                 { id: "href", label: "Link", type: "input" },
                 { id: "submit", value: "Submit", type: "submit", stretch: "column" },
                 { id: "help-hr", type: "hr" },
-                { id: "help-var", label: `Available variables:`, type: "div" },
+                { id: "help-var", value: "Available variables:", type: "div" },
                 { id: "help-var-userid", label: "Unique ID", value: "%userid%", type: "copyinput" },
                 { id: "help-var-username", label: "Username", value: "%username%", type: "copyinput" },
             ]
@@ -284,7 +286,6 @@ export class HeaderCustomizer extends RE6Module {
     private deleteTab($element: JQuery<HTMLElement>) {
         $element.remove();
         this.saveNavbarSettings();
-        this.updateTabModal.close();
     }
 
     /**

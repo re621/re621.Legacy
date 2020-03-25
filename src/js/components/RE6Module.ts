@@ -87,4 +87,16 @@ export class RE6Module {
         Cookies.set("re621." + this.prefix, JSON.stringify(this.settings));
     }
 
+    /** Establish the module's hotkeys */
+    public handleHotkeys() {
+        if (this.eval) this.registerHotkeys();
+        else this.reserveHotkeys();
+    }
+
+    /** Registers hotkeys for the module */
+    protected registerHotkeys() { }
+
+    /** Reserves hotkeys to prevent them from being re-assigned */
+    protected reserveHotkeys() { }
+
 }
