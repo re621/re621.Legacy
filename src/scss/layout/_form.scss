@@ -123,6 +123,32 @@ form.grid-form {
             }
         }
 
+        div.icon-picker {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, 23px);
+            grid-column-gap: 0.30rem;
+            grid-row-gap: 0.30rem;
+            width: 100%;
+
+            a {
+                display: inline-flex;
+                justify-content: space-around;
+                padding: 0.125rem 0.25rem;
+                outline: 0;
+
+                font-family: 'Font Awesome 5 Free';
+                font-weight: 900;
+
+                @include themable {
+                    border: 1px dashed themed("color-text-muted");
+                }
+
+                &.active {
+                    background: #ffffff30;
+                }
+            }
+        }
+
         // Checkbox Switch
         &.checkbox-switch {
             input[type=checkbox] {

@@ -35,7 +35,7 @@ export class Form {
         if (element.required === undefined) element.required = false;
         if (element.pattern === undefined) element.pattern = "";
 
-        if (element.select === undefined) element.select = [];
+        if (element.data === undefined) element.data = [];
 
         this.elements.push(element);
         this.index++;
@@ -67,6 +67,10 @@ export class Form {
                 }
                 case "keyinput": {
                     $input = this.buildKeyInput(this.$form, element);
+                    break;
+                }
+                case "icon": {
+                    $input = this.buildIconInput(this.$form, element);
                     break;
                 }
                 case "checkbox": {
@@ -306,6 +310,71 @@ export class Form {
     }
 
     /**
+     * Builds and appends an icon selector element
+     * @param $form Form to append the element to
+     * @param element Element configuration data
+     */
+    private buildIconInput($form: JQuery<HTMLElement>, element: FormElement) {
+        let labeled = false;
+        if (element.label) {
+            $("<label>")
+                .attr("for", this.config.id + "-" + element.id)
+                .html(element.label)
+                .appendTo($form);
+            labeled = true;
+        } else if (element.stretch === "default") { element.stretch = "column"; }
+
+        let $inputContainer = $("<div>")
+            .addClass("input-container")
+            .toggleClass("labeled", labeled)
+            .addClass("stretch-" + element.stretch)
+            .appendTo($form);
+
+        let $input = $("<input>")
+            .attr("type", "text")
+            .attr("id", this.config.id + "-" + element.id)
+            .css("display", "none")
+            .val(element.value)
+            .appendTo($inputContainer);
+
+        let $selectContainer = $("<div>")
+            .addClass("icon-picker")
+            .appendTo($inputContainer);
+
+
+        element.data.forEach((icon) => {
+            $("<a>")
+                .attr("href", "#")
+                .attr("data-value", icon.value)
+                .html(icon.name)
+                .appendTo($selectContainer);
+        });
+
+        $selectContainer.find("a").click((event) => {
+            event.preventDefault();
+            $selectContainer.find("a").removeClass("active");
+            let $target = $(event.target);
+            $input.val($target.attr("data-value"));
+            $target.addClass("active");
+        });
+
+        if (element.value === "") {
+            $selectContainer.find("a").first().click();
+        } else {
+            $selectContainer.find("a[data-value='" + element.value + "']").first().click();
+        }
+
+        $input.on("re621.form.update", () => {
+            $selectContainer.find("a[data-value='" + $input.val() + "']").first().click();
+        });
+
+        if (element.pattern) { $input.attr("pattern", element.pattern); }
+        if (element.required) { $input.attr("required", ''); }
+
+        return $input;
+    }
+
+    /**
      * Builds and appends a checkbox element
      * @param $form Form to append the element to
      * @param element Element configuration data
@@ -464,7 +533,7 @@ export class Form {
             .attr("id", this.config.id + "-" + element.id)
             .appendTo($inputContainer);
 
-        element.select.forEach(function (entry) {
+        element.data.forEach(function (entry) {
             $("<option>").val(entry.value).text(entry.name).appendTo($input);
         });
 
@@ -547,7 +616,7 @@ interface FormElement {
     /** Unique ID for the element. Actual ID becomes formID_elementID */
     id?: string,
     /** Supported input type */
-    type: "input" | "copyinput" | "keyinput" | "checkbox" | "button" | "submit" | "textarea" | "select" | "div" | "hr",
+    type: "input" | "copyinput" | "keyinput" | "icon" | "checkbox" | "button" | "submit" | "textarea" | "select" | "div" | "hr",
 
     stretch?: "default" | "column" | "full",
 
@@ -562,5 +631,5 @@ interface FormElement {
     pattern?: string,
 
     /** Value-name pairs for the select */
-    select?: { value: string, name: string }[],
+    data?: { value: string, name: string }[],
 }

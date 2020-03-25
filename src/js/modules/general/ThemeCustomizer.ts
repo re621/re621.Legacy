@@ -88,24 +88,24 @@ export class ThemeCustomizer extends RE6Module {
             },
             [
                 {
-                    "id": "th-main",
-                    "type": "select",
-                    "label": "Theme",
-                    "select": THEME_MAIN,
-                    "value": this.fetchSettings("th-main"),
+                    id: "th-main",
+                    type: "select",
+                    label: "Theme",
+                    data: THEME_MAIN,
+                    value: this.fetchSettings("th-main"),
                 },
                 {
-                    "id": "th-extra",
-                    "type": "select",
-                    "label": "Extras",
-                    "select": THEME_EXTRA,
-                    "value": this.fetchSettings("th-extra"),
+                    id: "th-extra",
+                    type: "select",
+                    label: "Extras",
+                    data: THEME_EXTRA,
+                    value: this.fetchSettings("th-extra"),
                 },
                 {
-                    "id": "unscaling",
-                    "type": "checkbox",
-                    "label": "Disable Scaling",
-                    "value": this.fetchSettings("unscaling")
+                    id: "unscaling",
+                    type: "checkbox",
+                    label: "Disable Scaling",
+                    value: this.fetchSettings("unscaling")
                 }
             ]
         );

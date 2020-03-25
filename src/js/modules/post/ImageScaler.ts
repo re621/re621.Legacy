@@ -90,7 +90,7 @@ export class ImageScaler extends RE6Module {
                 {
                     id: "scale",
                     type: "select",
-                    select: IMAGE_SIZES,
+                    data: IMAGE_SIZES,
                     value: this.fetchSettings("size"),
                 },
                 {

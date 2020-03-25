@@ -3,26 +3,40 @@ import { Prompt } from "../../components/structure/Prompt";
 import { Modal } from "../../components/structure/Modal";
 import { Form } from "../../components/structure/Form";
 
-const icon_definitions = {
-    bold: "&#x" + "f032",
-    italic: "&#x" + "f033",
-    strikethrough: "&#x" + "f0cc",
-    underscore: "&#x" + "f0cd",
+const icon_definitions = [
+    { value: "spacer", name: "&nbsp;" },
 
-    spacer: "&nbsp;",
+    { value: "bold", name: "&#x" + "f032" },
+    { value: "italic", name: "&#x" + "f033" },
+    { value: "strikethrough", name: "&#x" + "f0cc" },
+    { value: "underscore", name: "&#x" + "f0cd" },
+    { value: "superscript", name: "&#x" + "f12b" },
+    { value: "subscript", name: "&#x" + "f12c" },
 
-    superscript: "&#x" + "f12b",
-    spoiler: "&#x" + "f20a",
-    color: "&#x" + "f53f",
-    code: "&#x" + "f121",
-    heading: "&#x" + "f1dc",
-    quote: "&#x" + "f10e",
-    section: "&#x" + "f103",
-    tag: "&#x" + "f02b",
-    wiki: "&#x" + "f002",
-    link: "&#x" + "f0c1",
-    link_prompt: "&#x" + "f35d",
-}
+    { value: "spoiler", name: "&#x" + "f20a" },
+    { value: "color", name: "&#x" + "f53f" },
+    { value: "code", name: "&#x" + "f121" },
+    { value: "heading", name: "&#x" + "f1dc" },
+    { value: "quote", name: "&#x" + "f10e" },
+    { value: "section", name: "&#x" + "f103" },
+    { value: "tag", name: "&#x" + "f02b" },
+
+    { value: "wiki", name: "&#x" + "f002" },
+    { value: "link", name: "&#x" + "f0c1" },
+    { value: "unlink", name: "&#x" + "f127" },
+    { value: "link_prompt", name: "&#x" + "f35d" },
+    { value: "lemon", name: "&#x" + "f094" },
+    { value: "pepper", name: "&#x" + "f816" },
+    { value: "drumstick", name: "&#x" + "f6d7" },
+
+    { value: "magic", name: "&#x" + "f0d0" },
+    { value: "address-book", name: "&#x" + "f2b9" },
+    { value: "clipboard", name: "&#x" + "f328" },
+    { value: "paperclip", name: "&#x" + "f0c6" },
+    { value: "fountainpen", name: "&#x" + "f5ad" },
+    { value: "comment", name: "&#x" + "f27a" },
+    { value: "keyboard", name: "&#x" + "f11c" },
+];
 
 export class FormattingHelper extends RE6Module {
 
@@ -138,7 +152,7 @@ export class FormattingHelper extends RE6Module {
             { id: "dtext-edit-button", parent: "re-modal-container", },
             [
                 { id: "name", type: "input", label: "Name", },
-                { id: "icon", type: "input", label: "Icon", },
+                { id: "icon", type: "icon", label: "Icon", data: icon_definitions, },
                 { id: "text", type: "input", label: "Content", },
                 { id: "delete", type: "button", value: "Delete", },
                 { id: "update", type: "submit", value: "Update", },
@@ -158,7 +172,7 @@ export class FormattingHelper extends RE6Module {
             let $updateTabInputs = $editButtonsForm.getInputList();
 
             $updateTabInputs.get("name").val($button.attr("data-name"));
-            $updateTabInputs.get("icon").val($button.attr("data-icon"));
+            $updateTabInputs.get("icon").val($button.attr("data-icon")).trigger("re621.form.update");
             $updateTabInputs.get("text").val($button.attr("data-text"));
         });
 
@@ -244,7 +258,7 @@ export class FormattingHelper extends RE6Module {
             { id: "dtext-custom-button", parent: "re-modal-container", },
             [
                 { id: "name", type: "input", label: "Name", },
-                { id: "icon", type: "input", label: "Icon", },
+                { id: "icon", type: "icon", label: "Icon", data: icon_definitions, },
                 { id: "text", type: "input", label: "Content", },
                 { id: "create", type: "submit", value: "Create", stretch: "column", }
             ]);
@@ -364,7 +378,7 @@ export class FormattingHelper extends RE6Module {
             })
             .appendTo(this.$formatButtons);
         let button = $(`<a href="">`)
-            .html(icon_definitions[config.icon])
+            .html(this.getIcon(config.icon))
             .addClass("format-button")
             .attr("title", config.name)
             .appendTo(box);
@@ -392,7 +406,7 @@ export class FormattingHelper extends RE6Module {
             .attr("data-icon", config.icon)
             .attr("data-text", config.text);
         $element.find("a").first()
-            .html(icon_definitions[config.icon])
+            .html(this.getIcon(config.icon))
             .attr("title", config.name);
         this.saveButtons();
     }
@@ -443,6 +457,17 @@ export class FormattingHelper extends RE6Module {
 
             this.$editButtonsModal.enable();
         }
+    }
+
+    /**
+     * Provided with a valid icon name, returns its character value
+     * @param name Icon name
+     */
+    private getIcon(name: string) {
+        for (let icon of icon_definitions) {
+            if (icon.value === name) { return icon.name; }
+        }
+        return "";
     }
 
     /**
