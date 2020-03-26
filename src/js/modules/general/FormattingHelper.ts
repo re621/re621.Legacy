@@ -182,8 +182,8 @@ export class FormattingHelper extends RE6Module {
                 { id: "update", type: "submit", value: "Update", },
                 { id: "hr", type: "hr" },
                 { id: "vartext", type: "div", value: "Available variables:" },
-                { id: "var-select", label: "Selected text", value: "%selection%", type: "copyinput" },
-                { id: "var-prompt", label: "Prompt for input", value: "%prompt%", type: "copyinput" },
+                { id: "var-select", label: "Selected text", value: "%selection%", type: "copy" },
+                { id: "var-prompt", label: "Prompt for input", value: "%prompt%", type: "copy" },
             ]);
 
         this.$editButtonsModal = new Modal({
@@ -291,8 +291,8 @@ export class FormattingHelper extends RE6Module {
                 { id: "create", type: "submit", value: "Create", stretch: "column", },
                 { id: "hr", type: "hr" },
                 { id: "vartext", type: "div", value: "Available variables:" },
-                { id: "var-select", label: "Selected text", value: "%selection%", type: "copyinput" },
-                { id: "var-prompt", label: "Prompt for input", value: "%prompt%", type: "copyinput" },
+                { id: "var-select", label: "Selected text", value: "%selection%", type: "copy" },
+                { id: "var-prompt", label: "Prompt for input", value: "%prompt%", type: "copy" },
             ]);
 
         let newFormatModal = new Modal({

@@ -55,54 +55,7 @@ export class Form {
         if (this.config.columns > 1) { this.$form.addClass("columns-" + this.config.columns); }
 
         for (const element of this.elements) {
-            let $input;
-            switch (element.type) {
-                case "input": {
-                    $input = this.buildInput(this.$form, element);
-                    break;
-                }
-                case "copyinput": {
-                    $input = this.buildCopyInput(this.$form, element);
-                    break;
-                }
-                case "keyinput": {
-                    $input = this.buildKeyInput(this.$form, element);
-                    break;
-                }
-                case "icon": {
-                    $input = this.buildIconInput(this.$form, element);
-                    break;
-                }
-                case "checkbox": {
-                    $input = this.buildCheckbox(this.$form, element);
-                    break;
-                }
-                case "button": {
-                    $input = this.buildButton(this.$form, element);
-                    break;
-                }
-                case "submit": {
-                    $input = this.buildSubmit(this.$form, element);
-                    break;
-                }
-                case "textarea": {
-                    $input = this.buildTextarea(this.$form, element);
-                    break;
-                }
-                case "select": {
-                    $input = this.buildSelect(this.$form, element);
-                    break;
-                }
-                case "div": {
-                    $input = this.buildDiv(this.$form, element);
-                    break;
-                }
-                case "hr": {
-                    $input = this.buildHr(this.$form, element);
-                    break;
-                }
-                default: { }
-            }
+            let $input = this.build(this.$form, element);
             this.$inputList.set(element.id, $input);
         }
 
@@ -166,6 +119,16 @@ export class Form {
     }
 
     /**
+     * Builds and appends a form element
+     * @param $form Form to append the element to
+     * @param element Element configuration data
+     */
+    private build($form: JQuery<HTMLElement>, element: FormElement) {
+        let fn = "build" + element.type.charAt(0).toUpperCase() + element.type.slice(1);
+        return this[fn](this.$form, element);
+    }
+
+    /**
      * Builds and appends an input element
      * @param $form Form to append the element to
      * @param element Element configuration data
@@ -211,7 +174,7 @@ export class Form {
      * @param $form Form to append the element to
      * @param element Element configuration data
      */
-    private buildCopyInput($form: JQuery<HTMLElement>, element: FormElement) {
+    private buildCopy($form: JQuery<HTMLElement>, element: FormElement) {
         let labeled = false;
         if (element.label) {
             $("<label>")
@@ -262,7 +225,7 @@ export class Form {
      * @param $form Form to append the element to
      * @param element Element configuration data
      */
-    private buildKeyInput($form: JQuery<HTMLElement>, element: FormElement) {
+    private buildKey($form: JQuery<HTMLElement>, element: FormElement) {
         let labeled = false;
         if (element.label) {
             $("<label>")
@@ -336,7 +299,7 @@ export class Form {
      * @param $form Form to append the element to
      * @param element Element configuration data
      */
-    private buildIconInput($form: JQuery<HTMLElement>, element: FormElement) {
+    private buildIcon($form: JQuery<HTMLElement>, element: FormElement) {
         let labeled = false;
         if (element.label) {
             $("<label>")
@@ -653,7 +616,7 @@ interface FormElement {
     /** Unique ID for the element. Actual ID becomes formID_elementID */
     id?: string,
     /** Supported input type */
-    type: "input" | "copyinput" | "keyinput" | "icon" | "checkbox" | "button" | "submit" | "textarea" | "select" | "div" | "hr",
+    type: "input" | "copy" | "key" | "icon" | "checkbox" | "button" | "submit" | "textarea" | "select" | "div" | "hr",
 
     stretch?: "default" | "column" | "mid" | "full",
 

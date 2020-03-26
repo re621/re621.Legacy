@@ -142,8 +142,8 @@ export class HeaderCustomizer extends RE6Module {
                 { id: "submit", value: "Submit", type: "submit", stretch: "column" },
                 { id: "help-hr", type: "hr" },
                 { id: "help-var", value: "Available variables:", type: "div" },
-                { id: "help-var-userid", label: "Unique ID", value: "%userid%", type: "copyinput" },
-                { id: "help-var-username", label: "Username", value: "%username%", type: "copyinput" },
+                { id: "help-var-userid", label: "Unique ID", value: "%userid%", type: "copy" },
+                { id: "help-var-username", label: "Username", value: "%username%", type: "copy" },
             ]
         );
 

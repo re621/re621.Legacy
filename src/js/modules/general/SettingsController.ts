@@ -104,10 +104,10 @@ export class SettingsController extends RE6Module {
             { id: "title-template-icons", columns: 2, },
             [
                 { id: "explain", type: "div", stretch: "mid", value: `<div class="notice unmargin">The following variables can be used:</div>` },
-                { id: "postnum", type: "copyinput", label: "Post ID", value: "%postid%", },
-                { id: "author", type: "copyinput", label: "Artist", value: "%artist%", },
-                { id: "copyright", type: "copyinput", label: "Copyright", value: "%copyright%", },
-                { id: "characters", type: "copyinput", label: "Characters", value: "%character%", },
+                { id: "postnum", type: "copy", label: "Post ID", value: "%postid%", },
+                { id: "author", type: "copy", label: "Artist", value: "%artist%", },
+                { id: "copyright", type: "copy", label: "Copyright", value: "%copyright%", },
+                { id: "characters", type: "copy", label: "Characters", value: "%character%", },
             ]
         );
 
@@ -298,19 +298,19 @@ export class SettingsController extends RE6Module {
                 // - Voting
                 {
                     id: "hotkey-post-upvote",
-                    type: "keyinput",
+                    type: "key",
                     label: "Upvote",
                     value: postViewer.fetchSettings("hotkey_upvote"),
                 },
                 {
                     id: "hotkey-post-downvote",
-                    type: "keyinput",
+                    type: "key",
                     label: "Downvote",
                     value: postViewer.fetchSettings("hotkey_downvote"),
                 },
                 {
                     id: "hotkey-post-favorite",
-                    type: "keyinput",
+                    type: "key",
                     label: "Favorite",
                     value: postViewer.fetchSettings("hotkey_favorite"),
                 },
@@ -318,19 +318,19 @@ export class SettingsController extends RE6Module {
                 // - Navigation
                 {
                     id: "hotkey-post-next",
-                    type: "keyinput",
+                    type: "key",
                     label: "Next Post",
                     value: poolNavigator.fetchSettings("hotkey_prev"),
                 },
                 {
                     id: "hotkey-post-prev",
-                    type: "keyinput",
+                    type: "key",
                     label: "Previous Post",
                     value: poolNavigator.fetchSettings("hotkey_next"),
                 },
                 {
                     id: "hotkey-post-cycle",
-                    type: "keyinput",
+                    type: "key",
                     label: "Cycle Navigation",
                     value: poolNavigator.fetchSettings("hotkey_cycle"),
                 },
@@ -338,7 +338,7 @@ export class SettingsController extends RE6Module {
                 // - Scaling
                 {
                     id: "hotkey-post-scale",
-                    type: "keyinput",
+                    type: "key",
                     label: "Scale",
                     value: imageScaler.fetchSettings("hotkey_scale"),
                 },
@@ -352,7 +352,7 @@ export class SettingsController extends RE6Module {
                 },
                 {
                     id: "hotkey-comments-new",
-                    type: "keyinput",
+                    type: "key",
                     label: "New Comment",
                     value: miscellaneous.fetchSettings("hotkey_newcomment"),
                 },
