@@ -32,3 +32,10 @@ section#blacklist-box {
         }
     }
 }
+
+//tag-box when searching, tag-list when viewing a post
+#tag-list .blacklist-tag-toggle, #tag-box .blacklist-tag-toggle {
+    &::after {
+        content: " ";
+    }
+}

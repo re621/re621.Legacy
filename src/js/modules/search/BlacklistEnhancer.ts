@@ -1,6 +1,7 @@
 import { RE6Module } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
+import { User } from "../../components/data/User";
 
 declare var Danbooru;
 
@@ -67,8 +68,36 @@ export class BlacklistEnhancer extends RE6Module {
             //Togle display state
             this.toggleBlacklistedTags();
         });
+
+        //Add x next to tag names to toggle them from the blacklist
+        if (this.fetchSettings("quickaddTags") === true && User.isLoggedIn()) {
+            $("#tag-list .search-tag, #tag-box .search-tag").each((index, element) => {
+                const $element = $(element);
+                $("<a>").addClass("blacklist-tag-toggle").attr("href", "#").text("x").on("click", () => {
+                    this.toggleBlacklistTag($element.text().replace(/ /g, "_"));
+                }).prependTo($element.parent());
+            });
+        }
+
     }
 
+    /**
+     * Removes or adds a tag to the users blacklist
+     */
+    private async toggleBlacklistTag(tag) {
+        Danbooru.notice("Getting current blacklist");
+        let currentBlacklist = (await User.getCurrentSettings()).blacklisted_tags.split("\n");
+
+        if (currentBlacklist.indexOf(tag) === -1) {
+            currentBlacklist.push(tag);
+            Danbooru.notice("Adding " + tag + " to blacklist");
+        } else {
+            currentBlacklist = currentBlacklist.filter(e => e !== tag);
+            Danbooru.notice("Removing " + tag + " from blacklist");
+        }
+        User.setSettings({ blacklisted_tags: currentBlacklist.join("\n") });
+        Danbooru.notice("Finished blacklist");
+    }
 
     private toggleBlacklistedTags() {
         if (this.blacklistedTagsAreVisible()) { this.hideBlacklistedTags(); }
@@ -145,6 +174,17 @@ export class BlacklistEnhancer extends RE6Module {
         $entry.append($count);
 
         this.$list.append($entry);
+    }
+
+
+    /**
+     * Returns a set of default settings values
+     * @returns Default settings
+     */
+    protected getDefaultSettings() {
+        return {
+            quickaddTags: true,
+        };
     }
 
     /**

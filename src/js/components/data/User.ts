@@ -1,5 +1,6 @@
 import { RE6Module } from "../RE6Module";
 import { PostFilter } from "./PostFilter";
+import { Api } from "../api/Api";
 
 /**
  * User  
@@ -81,5 +82,27 @@ export class User extends RE6Module {
      */
     public static getBlacklist() {
         return this.getInstance().blacklist;
+    }
+
+    /**
+     * @returns the users e6 site settings
+     */
+    public static async getCurrentSettings() {
+        return Api.getJson("/users/" + this.getUserID() + ".json");
+    }
+
+    /**
+     * Saves the settings for the user
+     * There is no need to put the keys into array form, this happens automatically
+     */
+    public static async setSettings(data: {}) {
+        const url = "/users/" + this.getUserID() + ".json";
+        const json = {
+            "_method": "patch"
+        }
+        for (const key of Object.keys(data)) {
+            json["user[" + key + "]"] = data[key];
+        }
+        await Api.postUrl(url, json);
     }
 }

@@ -10,6 +10,7 @@ import { PostViewer } from "../post/PostViewer";
 import { HotkeyCustomizer } from "./HotkeyCustomizer";
 import { ImageScaler } from "../post/ImageScaler";
 import { PoolNavigator } from "../post/PoolNavigator";
+import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
 
 /**
  * SettingsController  
@@ -40,6 +41,7 @@ export class SettingsController extends RE6Module {
         let postsPageTab = this.createTabPostsPage();
         let hotkeyTab = this.createTabHotkeys();
         let miscSettingsTab = this.createTabMiscellaneous();
+        let blacklistSettingsTab = this.createTabBlacklist();
 
         let $settings = new Tabbed({
             name: "settings-tabs",
@@ -47,6 +49,7 @@ export class SettingsController extends RE6Module {
                 { name: "Posts", page: postsPageTab.get() },
                 { name: "Hotkeys", page: hotkeyTab.get() },
                 { name: "Misc", page: miscSettingsTab.get() },
+                { name: "Blacklist", page: blacklistSettingsTab.get() }
             ]
         });
 
@@ -64,6 +67,7 @@ export class SettingsController extends RE6Module {
         this.handleTabMiscellaneous(miscSettingsTab);
         this.handleTabHotkeys(hotkeyTab);
         this.handleTabPostsPage(postsPageTab);
+        this.handleTabBlacklist(blacklistSettingsTab);
     }
 
     /**
@@ -472,4 +476,40 @@ export class SettingsController extends RE6Module {
         });
     }
 
+    private createTabBlacklist() {
+        let module = <BlacklistEnhancer>this.modules.get("BlacklistEnhancer");
+
+        // Create the settings form
+        let form = new Form(
+            {
+                id: "settings-blacklist",
+                columns: 3,
+                parent: "re-modal-container",
+            },
+            [
+                {
+                    id: "blacklist-title",
+                    type: "div",
+                    value: "<h3>Blacklist</h3>",
+                    stretch: "full"
+                },
+                {
+                    id: "blacklist-quickadd",
+                    type: "checkbox",
+                    value: module.fetchSettings("quickaddTags"),
+                    label: "Click x before tag to toggle",
+                },
+            ]
+        );
+
+        return form;
+    }
+
+    private handleTabBlacklist(form: Form) {
+        let module = <BlacklistEnhancer>this.modules.get("BlacklistEnhancer");
+        let inputs = form.getInputList();
+        inputs.get("blacklist-quickadd").on("re621:form:input", (event, data) => {
+            module.pushSettings("quickaddTags", data);
+        });
+    }
 }

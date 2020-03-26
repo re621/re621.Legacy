@@ -36,7 +36,7 @@ export class Api {
             };
             if (method !== "GET" && method !== "get") {
                 let postData = []
-                data["authenticity_token"] = this.getInstance().authenticityToken;
+                data["authenticity_token"] = Api.getInstance().authenticityToken;
                 for (const key of Object.keys(data)) {
                     postData.push(encodeURIComponent(key) + "=" + encodeURIComponent(data[key]));
                 }
@@ -83,7 +83,7 @@ export class Api {
      * @returns the response as a string
      */
     public static async postUrl(url: string, json?: {}) {
-        return await this.request(url, "GET", json);
+        return await this.request(url, "POST", json);
     }
 
     /**
