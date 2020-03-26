@@ -33,10 +33,26 @@ div.alias-list {
 
         input[type=text] {
             grid-column: span 2;
+            border-left: 3px solid transparent;
+
+            &:disabled {
+                background: transparent;
+                color: white;
+                font-weight: bold;
+            }
+
+            &.invalid {
+                border-left: 3px solid orange;
+            }
         }
 
         textarea {
             grid-row: span 2;
+            border-left: 3px solid transparent;
+
+            &.invalid {
+                border-left: 3px solid orange;
+            }
         }
     }
 }
