@@ -20,7 +20,6 @@ import { PostViewer } from "./modules/post/PostViewer";
 import { TitleCustomizer } from "./modules/post/TitleCustomizer";
 // - search
 import { BlacklistEnhancer } from "./modules/search/BlacklistEnhancer"
-import { BlacklistToggler } from "./modules/search/BlacklistToggler";
 import { InstantSearch } from "./modules/search/InstantSearch";
 import { InfiniteScroll } from "./modules/search/InfiniteScroll";
 // - settings
@@ -35,7 +34,6 @@ FormattingHelper.init();
 
 // Modules without settings
 BlacklistEnhancer.getInstance();
-BlacklistToggler.getInstance();
 InstantSearch.getInstance();
 InfiniteScroll.getInstance();
 TinyAlias.getInstance();

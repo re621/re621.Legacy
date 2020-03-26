@@ -1,6 +1,28 @@
-.post-thumbnail.filtered{
+//make image container square, instead of what it was before
+.post-thumbnail.filtered {
     & img {
         width: 100%;
         height: 100%;
+    }
+}
+
+/* Styles for the Blacklist Toggler */
+section#blacklist-box {
+
+    &>h1>a::before {
+        content: unicode("f105");
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        padding-right: 0.25rem;
+    }
+
+    &[data-blacklist-hidden=false] {
+        &>h1>a::before {
+            content: unicode("f107");
+        }
+
+        ul#blacklist-list {
+            display: block;
+        }
     }
 }
