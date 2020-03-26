@@ -41,7 +41,7 @@ export class RequestQueue {
             console.log("Finished " + entry[0]);
             this.emitter.trigger("request-" + entry[0]);
             //sleep
-            await new Promise(resolve => setTimeout(() => resolve(), 1000 / this.requestSleepDuration));
+            await new Promise(resolve => setTimeout(() => resolve(), this.requestSleepDuration));
         }
         this.workingQueue = false;
     }
