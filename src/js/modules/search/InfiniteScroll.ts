@@ -5,6 +5,7 @@ import { ApiPost } from "../../components/api/responses/ApiPost";
 import { PostHtml } from "../../components/api/PostHtml";
 import { InstantSearch } from "./InstantSearch";
 import { Post } from "../../components/data/Post";
+import { BlacklistEnhancer } from "./BlacklistEnhancer";
 
 declare var Danbooru;
 
@@ -79,7 +80,7 @@ export class InfiniteScroll extends RE6Module {
         this.isInProgress = false;
         this.$loadingIndicator.hide();
 
-        Danbooru.Blacklist.update_sidebar();
+        BlacklistEnhancer.getInstance().updateSidebar(blacklistIsActive);
 
         InstantSearch.getInstance().applyFilter();
         this.nextPageToGet++;

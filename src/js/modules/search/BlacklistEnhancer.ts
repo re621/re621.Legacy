@@ -67,11 +67,6 @@ export class BlacklistEnhancer extends RE6Module {
             //Togle display state
             this.toggleBlacklistedTags();
         });
-
-        //Show the filter list when clicking on "disable all filters"
-        $disableAllButton.click(e => {
-            this.showBlacklistedTags();
-        });
     }
 
 
@@ -81,15 +76,15 @@ export class BlacklistEnhancer extends RE6Module {
     }
 
     private blacklistedTagsAreVisible() {
-        return this.$box.attr("data-blacklist-hidden") == "false";
+        return this.$box.attr("data-filters-hidden") == "false";
     }
 
     private hideBlacklistedTags() {
-        this.$box.attr("data-blacklist-hidden", "true");
+        this.$box.attr("data-filters-hidden", "true");
     }
 
     private showBlacklistedTags() {
-        this.$box.attr("data-blacklist-hidden", "false");
+        this.$box.attr("data-filters-hidden", "false");
     }
 
     private blacklistIsActive() {
@@ -113,6 +108,43 @@ export class BlacklistEnhancer extends RE6Module {
             }
             post.applyBlacklist(blacklistIsActive);
         }
+
+        this.$box.attr("data-blacklist-active", blacklistIsActive.toString());
+        this.updateSidebar(blacklistIsActive);
+    }
+
+    public updateSidebar(blacklistIsActive: boolean) {
+        //remove already added entries
+        this.$list.empty();
+
+        for (const entry of Post.getBlacklistMatches().entries()) {
+            this.addSidebarEntry(entry[0], entry[1], blacklistIsActive);
+        }
+    }
+
+    private addSidebarEntry(filterName: string, filterCount: number, blacklistIsActive: boolean) {
+        //https://github.com/zwagoth/e621ng/blob/master/app/javascript/src/javascripts/blacklists.js
+        const $entry = $("<li>");
+        const $link = $("<a>");
+        const $count = $("<span>");
+
+        $link.text(filterName);
+        $link.addClass("blacklist-toggle-link");
+        $link.attr("href", `/posts?tags=${encodeURIComponent(filterName)}`);
+        $link.attr("title", filterName);
+        $link.attr("rel", "nofollow");
+
+        if (!blacklistIsActive) {
+            $link.addClass("blacklisted-active");
+        }
+
+        $count.html(filterCount.toString());
+        $count.addClass("post-count");
+        $entry.append($link);
+        $entry.append(" ");
+        $entry.append($count);
+
+        this.$list.append($entry);
     }
 
     /**

@@ -32,7 +32,7 @@ export class Post {
 
     protected isBlacklisted: boolean;
 
-    protected blacklistMatches = new Map<string, number>();
+    protected static blacklistMatches = new Map<string, number>();
 
     public constructor($image: JQuery<HTMLElement>) {
         this.id = parseInt($image.attr("data-id"));
@@ -163,13 +163,15 @@ export class Post {
      * https://github.com/zwagoth/e621ng/blob/master/app/javascript/src/javascripts/blacklists.js
      */
     private matchesSiteBlacklist() {
+        let hits = 0;
         for (const filter of User.getBlacklist()) {
             if (filter.matchesPost(this)) {
-                const currentMatches = this.blacklistMatches.get(filter.getStringRepresentation());
-                this.blacklistMatches.set(filter.getStringRepresentation(), currentMatches === undefined ? 1 : currentMatches + 1);
+                const currentMatches = Post.blacklistMatches.get(filter.getStringRepresentation());
+                Post.blacklistMatches.set(filter.getStringRepresentation(), currentMatches === undefined ? 1 : currentMatches + 1);
+                hits++;
             }
         }
-        return this.blacklistMatches.size !== 0;
+        return hits !== 0;
     }
 
     /**
@@ -186,6 +188,10 @@ export class Post {
      */
     public getIsBlacklisted() {
         return this.isBlacklisted;
+    }
+
+    public static getBlacklistMatches() {
+        return this.blacklistMatches;
     }
 
     public getId() { return this.id; }

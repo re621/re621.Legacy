@@ -16,7 +16,13 @@ section#blacklist-box {
         padding-right: 0.25rem;
     }
 
-    &[data-blacklist-hidden=false] {
+    &[data-filters-hidden=true] {
+        ul#blacklist-list {
+            display: none;
+        }
+    }
+
+    &[data-filters-hidden=false] {
         &>h1>a::before {
             content: unicode("f107");
         }
