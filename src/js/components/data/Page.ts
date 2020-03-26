@@ -74,5 +74,6 @@ export class Page {
 export const PageDefintion = {
     search: /^$|^\/posts\/?$/,
     post: /^\/posts\/\d+\/?$/,
+    upload: /\/uploads\/new\/?/,
     forum: /^\/forum_topics\/?.*/,
 }

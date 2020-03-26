@@ -1,0 +1,22 @@
+/* Tiny Alias Styles */
+
+div.tiny-alias-container {
+
+    display: grid;
+    grid-template-columns: auto 4rem 4rem;
+    grid-column-gap: 0.25rem;
+    grid-row-gap: 0.25rem;
+    margin-bottom: 0.5rem;
+
+    input[type=text] {
+        border-radius: 3px;
+        grid-area: 1 / 1 / 2 / 3;
+        padding: 0.25rem;
+    }
+
+    button {
+        border-radius: 3px;
+        padding: 0.25rem;
+    }
+
+}

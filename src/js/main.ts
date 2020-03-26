@@ -26,6 +26,7 @@ import { InfiniteScroll } from "./modules/search/InfiniteScroll";
 // - settings
 import { SettingsController } from "./modules/general/SettingsController";
 import { PoolNavigator } from "./modules/post/PoolNavigator";
+import { TinyAlias } from "./modules/upload/TinyAlias";
 
 // Modules with self-contained settings
 HeaderCustomizer.getInstance();
@@ -37,6 +38,7 @@ BlacklistEnhancer.getInstance();
 BlacklistToggler.getInstance();
 InstantSearch.getInstance();
 InfiniteScroll.getInstance();
+TinyAlias.getInstance();
 
 // Modules configured by the SettingsController
 SettingsController.registerModule(
