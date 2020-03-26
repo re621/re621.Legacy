@@ -3,10 +3,12 @@ import { Tag } from "./Tag";
 
 export class PostFilter {
 
+    private stringRepresentation;
     private entries: SinglePostFilter[];
 
     constructor(input: string) {
         this.entries = [];
+        this.stringRepresentation = input;
         this.createPostFilter(input);
     }
 
@@ -109,6 +111,13 @@ export class PostFilter {
             }
         }
         return false;
+    }
+
+    /**
+     * @returns the string which was used to construct this filter
+     */
+    public getStringRepresentation() {
+        return this.stringRepresentation;
     }
 }
 
