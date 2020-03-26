@@ -28,7 +28,7 @@ export class TitleCustomizer extends RE6Module {
      */
     protected getDefaultSettings() {
         return {
-            "template": "%icons% #%postnum% by %author% (%copyright%) - %character%",
+            "template": "#%postid% by %artist% (%copyright%) - %character%",
             "symbolsEnabled": true,
             "symbol-fav": "\u2665",      //heart symbol
             "symbol-voteup": "\u2191",   //arrow up
@@ -46,14 +46,14 @@ export class TitleCustomizer extends RE6Module {
             if (prefix) prefix += " ";
         }
 
-        return this.fetchSettings("template")
-            .replace(/%icons%/g, prefix)
-            .replace(/%postnum%/g, this.post.getId().toString())
-            .replace(/%author%/g, this.post.getTagsFromType(TagTypes.Artist).filter(tag => Tag.isArist(tag)).join(", "))
+        return prefix + this.fetchSettings("template")
+            .replace(/%postid%/g, this.post.getId().toString())
+            .replace(/%artist%/g, this.post.getTagsFromType(TagTypes.Artist).filter(tag => Tag.isArist(tag)).join(", "))
             .replace(/%copyright%/g, this.post.getTagsFromType(TagTypes.Copyright).join(", "))
             .replace(/%character%/g, this.post.getTagsFromType(TagTypes.Character).join(", "))
             .replace(/\(\)|( - )$/g, "")
-            .replace(/[ ]{2,}|^ | $/g, "");
+            .replace(/[ ]{2,}|^ | $/g, "")
+            + " - e621";
     }
 
     /**

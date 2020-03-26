@@ -40,7 +40,7 @@ export class DownloadCustomizer extends RE6Module {
      */
     protected getDefaultSettings() {
         let def_settings = {
-            template: "%id%-%artist%-%copyright%-%character%",
+            template: "%postid%-%artist%-%copyright%-%character%",
         };
         return def_settings;
     }
@@ -50,7 +50,7 @@ export class DownloadCustomizer extends RE6Module {
      */
     public updateLink() {
         let $template = this.fetchSettings("template")
-            .replace(/%id%/g, this.post.getId())
+            .replace(/%postid%/g, this.post.getId())
             .replace(/%artist%/g, this.post.getTagsFromType(TagTypes.Artist).join("-"))
             .replace(/%copyright%/g, this.post.getTagsFromType(TagTypes.Copyright).join("-"))
             .replace(/%character%/g, this.post.getTagsFromType(TagTypes.Character).join("-"))
