@@ -1,6 +1,7 @@
 import { RE6Module } from "../RE6Module";
 import { PostFilter } from "./PostFilter";
 import { Api } from "../api/Api";
+import { Post } from "./Post";
 
 /**
  * User  
@@ -25,12 +26,7 @@ export class User extends RE6Module {
         this.username = $ref.attr("data-user-name") || "Anonymous";
         this.userid = $ref.attr("data-user-id") || "0";
 
-        this.blacklist = [];
-        const filterArray: string[] = JSON.parse($("head meta[name=blacklisted-tags]").attr("content"));
-        for (const filter of filterArray) {
-            this.blacklist.push(new PostFilter(filter));
-        }
-
+        this.refreshBlacklist();
 
         this.level = $ref.attr("data-user-level-string") || "Guest";
     }
@@ -82,6 +78,23 @@ export class User extends RE6Module {
      */
     public static getBlacklist() {
         return this.getInstance().blacklist;
+    }
+
+    /**
+     * Saves the passed blacklist to the users e6 account
+     */
+    public static setBlacklist(blacklistArray: string[]) {
+        $("head meta[name=blacklisted-tags]").attr("content", JSON.stringify(blacklistArray))
+        this.getInstance().refreshBlacklist();
+    }
+
+    private refreshBlacklist() {
+        this.blacklist = [];
+        const filterArray: string[] = JSON.parse($("head meta[name=blacklisted-tags]").attr("content"));
+        for (const filter of filterArray) {
+            this.blacklist.push(new PostFilter(filter));
+        }
+        Post.refreshBlacklistStatus();
     }
 
     /**

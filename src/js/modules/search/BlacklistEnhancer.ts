@@ -95,8 +95,10 @@ export class BlacklistEnhancer extends RE6Module {
             currentBlacklist = currentBlacklist.filter(e => e !== tag);
             Danbooru.notice("Removing " + tag + " from blacklist");
         }
-        User.setSettings({ blacklisted_tags: currentBlacklist.join("\n") });
-        Danbooru.notice("Finished blacklist");
+        await User.setSettings({ blacklisted_tags: currentBlacklist.join("\n") });
+        Danbooru.notice("Done!");
+        User.setBlacklist(currentBlacklist);
+        this.applyBlacklist();
     }
 
     private toggleBlacklistedTags() {
@@ -117,7 +119,7 @@ export class BlacklistEnhancer extends RE6Module {
     }
 
     private blacklistIsActive() {
-        return $("#disable-all-blacklists").is(":visible");
+        return $("#disable-all-blacklists").css("display") !== "none";
     }
 
     /**
@@ -148,6 +150,13 @@ export class BlacklistEnhancer extends RE6Module {
 
         for (const entry of Post.getBlacklistMatches().entries()) {
             this.addSidebarEntry(entry[0], entry[1], blacklistIsActive);
+        }
+
+        //When there are no entries there's no need to display the blacklist box
+        if (Post.getBlacklistMatches().size === 0) {
+            this.$box.hide();
+        } else {
+            this.$box.show();
         }
     }
 

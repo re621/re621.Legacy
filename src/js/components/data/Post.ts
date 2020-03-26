@@ -129,9 +129,10 @@ export class Post {
      * @param blacklistIsActive true if blacklist is active, false otherwise
      */
     public applyBlacklist(blacklistIsActive: boolean) {
-        //Only hide/show blacklisted, no need to do it to all
         if (this.getIsBlacklisted()) {
             blacklistIsActive ? this.hide() : this.show();
+        } else {    //It's not blacklisted, show it instead
+            this.show();
         }
     }
 
@@ -172,6 +173,17 @@ export class Post {
             }
         }
         return hits !== 0;
+    }
+
+    /**
+     * Reparsed the the blacklist status of all posts, in case the blacklist got modified
+     */
+    public static refreshBlacklistStatus() {
+        //empty current status and itterate over every post and check again
+        this.blacklistMatches = new Map<string, number>();
+        for (const post of this.fetchPosts()) {
+            post.isBlacklisted = post.matchesSiteBlacklist();
+        }
     }
 
     /**
