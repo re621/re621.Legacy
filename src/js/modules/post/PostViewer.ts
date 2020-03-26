@@ -65,9 +65,9 @@ export class PostViewer extends RE6Module {
 
         let autoOpen = this.fetchSettings("auto_open_parent_child")
         //only click on one container, because both open with one click. Clicking both results in them open and the closing
-        if (!$parentRel.is(":visible") && autoOpen) {
+        if ($parentRel.length !== 0 && !$parentRel.is(":visible") && autoOpen) {
             $parentRel.click();
-        } else if (!$childRel.is(":visible") && autoOpen) {
+        } else if ($childRel.length !== 0 && !$childRel.is(":visible") && autoOpen) {
             $childRel.click();
         }
         //remeber toggle state

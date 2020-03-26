@@ -1,6 +1,7 @@
 import { RE6Module } from "../../components/RE6Module";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
+import { PostFilter } from "../../components/data/PostFilter";
 
 /**
  * Adds a extra search input below the current one where 
@@ -11,8 +12,6 @@ export class InstantSearch extends RE6Module {
     // TODO: this can be of type HTMLInputElememnt, but I don't know how to do that
     private $searchbox: JQuery<HTMLElement>;
 
-    private startingQuery: string;
-
     private static instance: InstantSearch = new InstantSearch();
 
     private constructor() {
@@ -20,7 +19,6 @@ export class InstantSearch extends RE6Module {
         if (!this.eval()) return;
 
         this.createDOM();
-        this.startingQuery = Page.getQueryParameter("tags") === null ? "" : Page.getQueryParameter("tags");
         let typingTimeout: number;
         let doneTyping = 500;
 
@@ -34,23 +32,21 @@ export class InstantSearch extends RE6Module {
     }
 
     public applyFilter() {
-        const filter = this.$searchbox.val().toString().trim();
-        sessionStorage.setItem("re-instantsearch", filter);
+        const filterText = this.$searchbox.val().toString().trim();
+        const filter = new PostFilter(filterText);
+        sessionStorage.setItem("re-instantsearch", filterText);
         const posts = Post.fetchPosts();
-        const filterTags = (this.startingQuery + (this.startingQuery.length === 0 ? "" : "+") + filter.replace(/ /g, "+")).split("+");
-        //Remove duplicates
-        const queryString = [...new Set(filterTags)].join("+");
+        const blacklistIsActive = Post.blacklistIsActive();
         //when the user clears the input, show all posts
-        if (filter === "") {
+        if (filterText === "") {
             for (const post of posts) {
-                post.setVisibility(true);
+                post.show(blacklistIsActive);
             }
         } else {
             for (const post of posts) {
-                post.setVisibility(post.tagsMatchesFilter(filter));
+                filter.matchesPost(post) ? post.show(blacklistIsActive) : post.hide();
             }
         }
-
     }
 
     protected createDOM() {

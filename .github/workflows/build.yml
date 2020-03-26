@@ -20,10 +20,7 @@ jobs:
     - uses: olegtarasov/get-tag@v2
   
     - run: npm ci
-    - run: npm run typescript
-    - run: npm run browserify
-    - run: npm run userscript -- $GIT_TAG_NAME
-    - run: npm run sass
+    - run: npm run build
       
     - name: Create a Release
       uses: ncipollo/release-action@v1

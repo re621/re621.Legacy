@@ -1,4 +1,5 @@
 import { RE6Module } from "../RE6Module";
+import { PostFilter } from "./PostFilter";
 
 /**
  * User  
@@ -11,7 +12,7 @@ export class User extends RE6Module {
     private loggedin: boolean;
     private username: string;
     private userid: string;
-    private blacklist: string[];
+    private blacklist: PostFilter[];
 
     private level: string;
 
@@ -23,7 +24,12 @@ export class User extends RE6Module {
         this.username = $ref.attr("data-user-name") || "Anonymous";
         this.userid = $ref.attr("data-user-id") || "0";
 
-        this.blacklist = JSON.parse($("head meta[name=blacklisted-tags]").attr("content"));
+        this.blacklist = [];
+        const filterArray: string[] = JSON.parse($("head meta[name=blacklisted-tags]").attr("content"));
+        for (const filter of filterArray) {
+            this.blacklist.push(new PostFilter(filter));
+        }
+
 
         this.level = $ref.attr("data-user-level-string") || "Guest";
     }

@@ -1,8 +1,6 @@
 import { TagTypes, Tag } from "./Tag";
 import { User } from "./User";
 
-declare var Danbooru;
-
 /**
  * Collects basic info for a post.
  * Use fetchPosts to construct
@@ -17,11 +15,11 @@ export class Post {
     protected id: number;
     protected tags: string;
     protected rating: PostRating;
-    protected favorites: number;
-    protected score: number;
+    protected favorites?: number;
+    protected score?: number;
 
-    protected fileURL: string;
-    protected sampleURL: string;
+    protected fileURL?: string;
+    protected sampleURL?: string;
     protected previewURL: string;
     protected fileExtension: string;
 
@@ -38,15 +36,23 @@ export class Post {
         this.tags = $image.attr("data-tags");
         this.rating = PostRating.fromValue($image.attr("data-rating"));
 
-        if ($image.attr("data-fav-count")) { this.favorites = parseInt($image.attr("data-fav-count")); }
-        else { parseInt($image.find(".post-score-faves").first().html().substring(1)); }
+        if ($image.attr("data-fav-count")) {
+            this.favorites = parseInt($image.attr("data-fav-count"));
+        }
+        else if ($image.find(".post-score-faves").length !== 0) {
+            this.favorites = parseInt($image.find(".post-score-faves").first().html().substring(1));
+        }
 
-        if ($image.attr("data-score")) { this.score = parseInt($image.attr("data-score")); }
-        else { parseInt($image.find(".post-score-score").first().html().substring(1)); }
+        if ($image.attr("data-score")) {
+            this.score = parseInt($image.attr("data-score"));
+        }
+        else if ($image.find(".post-score-score").length !== 0) {
+            this.score = parseInt($image.find(".post-score-score").first().html().substring(1));
+        }
 
         this.fileURL = $image.attr("data-file-url");
         this.sampleURL = $image.attr("data-large-file-url");
-        this.previewURL = $image.attr("data-preview-file-url");
+        this.previewURL = $image.attr("data-preview-file-url") || $image.attr("data-preview-url");
         this.fileExtension = $image.attr("data-file-ext");
 
         this.uploaderID = parseInt($image.attr("data-uploader-id"));
@@ -72,11 +78,14 @@ export class Post {
             let imageContainer = $("#image-container");
             this.initalPosts = [];
             if (imageContainer.length === 0) {
-                $("#posts-container").children(".post-preview").each(function () {
-                    Post.initalPosts.push(new Post($(this)));
+                $("#posts-container").children(".post-preview").each((index, element) => {
+                    Post.initalPosts.push(new Post($(element)));
                 });
             } else {
                 this.initalPosts.push(new ViewingPost(imageContainer));
+                $(".post-thumbnail").each((index, element) => {
+                    Post.initalPosts.push(new Post($(element)));
+                });
             }
         }
 
@@ -105,46 +114,44 @@ export class Post {
     }
 
     /**
-    * Checks if the post would be returned if you searched on the site with filterString
-    * Most of the things that work on the site should also work here
-    * @todo Implement ~ modifier
-    */
-    public tagsMatchesFilter(queryString: string) {
-        const seperatedFilters = queryString.split(" ");
-        let result = true;
-        for (const filter of seperatedFilters) {
-            const inverse = filter.startsWith("-");
-            //Remove dash from filter, if it starts with one
-            const filterNoMinus = inverse ? filter.substring(1) : filter;
-            //If the result is already negative, bail. All filters must match
-            if (result === false) {
-                break;
-            }
-            if (filterNoMinus.includes("*")) {
-                const regex = Tag.escapeSearchToRegex(filterNoMinus);
-                result = regex.test(this.getTags());
-            } else {
-                //if there is no wildcard, the filter and tag must be an equal match
-                let matchFound = false;
-                for (const tag of this.getTags().split(" ")) {
-                    if (tag === filterNoMinus) {
-                        matchFound = true;
-                        break;
-                    }
-                }
-                result = matchFound;
-            }
-            //invert the result, depending on if the filter started with a -
-            result = result !== inverse;
-        }
-        return result;
-    }
-
-    /**
      * Checks if posts should be hidden, because the blacklist is active
      */
     public static blacklistIsActive() {
         return $("#disable-all-blacklists").is(":visible");
+    }
+
+    /**
+     * Hides or shows the post, depending on the state
+     * Show if blacklist is not active, hide if blacklist is active and post matches blacklist
+     * @param blacklistIsActive true if blacklist is active, false otherwise
+     */
+    public applyBlacklist(blacklistIsActive: boolean) {
+        //Only hide/show blacklisted, no need to do it to all
+        if (this.getIsBlacklisted()) {
+            blacklistIsActive ? this.hide() : this.show();
+        }
+    }
+
+    /**
+     * Hides the post and removes its src attribute, to prevent
+     * loading of the image, if it's not already appended
+     */
+    public hide() {
+        const $img = this.element.find("img");
+        $img.attr("src", "/images/blacklisted-preview.png");
+        this.element.addClass("filtered");
+    }
+
+    /**
+     * Shows the post and restores the src attribute, if the blacklist allows it
+     */
+    public show(blacklistIsActive = false) {
+        if (blacklistIsActive === true && this.isBlacklisted) {
+            return;
+        }
+        const $img = this.element.find("img");
+        $img.attr("src", this.previewURL);
+        this.element.removeClass("filtered");
     }
 
     /**
@@ -155,26 +162,11 @@ export class Post {
     private matchesSiteBlacklist() {
         let hits = 0;
         for (const filter of User.getBlacklist()) {
-            if (this.tagsMatchesFilter(filter)) {
+            if (filter.matchesPost(this)) {
                 hits++;
             }
         }
         return hits !== 0;
-    }
-
-    /**
-     * Returns true if the post has been hidden by InstantSearch
-     * @returns boolean True if the post has been hidden, false otherwise
-     */
-    public isVisible() { return !this.element.hasClass("filtered"); }
-
-    /**
-     * Sets the post's visibility status
-     * @param hidden If true, hides the post, if false shows it
-     */
-    public setVisibility(visible = true) {
-        if (visible) { this.element.removeClass("filtered"); }
-        else { this.element.addClass("filtered"); }
     }
 
     /**
