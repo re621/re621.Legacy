@@ -233,7 +233,7 @@ export class SettingsController extends RE6Module {
      */
     private handleTabPostsPage(form: Form) {
         let titleCustomizer = <TitleCustomizer>this.modules.get("TitleCustomizer");
-        let downloadCustomizer = <TitleCustomizer>this.modules.get("DownloadCustomizer");
+        let downloadCustomizer = <DownloadCustomizer>this.modules.get("DownloadCustomizer");
         let miscellaneous = <Miscellaneous>this.modules.get("Miscellaneous");
         let postViewer = <PostViewer>this.modules.get("PostViewer");
         let postsPageInput = form.getInputList();
@@ -241,22 +241,27 @@ export class SettingsController extends RE6Module {
         // General
         postsPageInput.get("general-title-template").on("re621:form:input", (event, data) => {
             titleCustomizer.pushSettings("template", data);
+            titleCustomizer.refreshPageTitle();
         });
 
         postsPageInput.get("general-title-symbol-enabled").on("re621:form:input", (event, data) => {
             titleCustomizer.pushSettings("symbolsEnabled", data);
+            titleCustomizer.refreshPageTitle();
         });
 
         postsPageInput.get("general-title-symbol-fav").on("re621:form:input", (event, data) => {
             titleCustomizer.pushSettings("symbol-fav", data);
+            titleCustomizer.refreshPageTitle();
         });
 
         postsPageInput.get("general-title-symbol-voteup").on("re621:form:input", (event, data) => {
             titleCustomizer.pushSettings("symbol-voteup", data);
+            titleCustomizer.refreshPageTitle();
         });
 
         postsPageInput.get("general-title-symbol-votedown").on("re621:form:input", (event, data) => {
             titleCustomizer.pushSettings("symbol-votedown", data);
+            titleCustomizer.refreshPageTitle();
         });
 
         postsPageInput.get("general-improved-tagcount").on("re621:form:input", (event, data) => {
@@ -266,6 +271,7 @@ export class SettingsController extends RE6Module {
         // Actions
         postsPageInput.get("action-download-template").on("re621:form:input", (event, data) => {
             downloadCustomizer.pushSettings("template", data);
+            downloadCustomizer.refreshDownloadLink();
         });
 
         postsPageInput.get("actions-votefavorite").on("re621:form:input", (event, data) => {

@@ -22,7 +22,16 @@ export class DownloadCustomizer extends RE6Module {
         this.post = Post.getViewingPost();
 
         this.link = $("div#image-download-link a");
-        this.updateLink();
+        this.refreshDownloadLink();
+
+        this.link.click(event => {
+            event.preventDefault();
+            GM_download({
+                url: this.link.attr("href"),
+                name: this.link.attr("download"),
+                saveAs: true,
+            });
+        });
     }
 
     /**
@@ -48,24 +57,22 @@ export class DownloadCustomizer extends RE6Module {
     /**
      * Creates a download link with the saved template
      */
-    public updateLink() {
-        let $template = this.fetchSettings("template")
+    public refreshDownloadLink() {
+        this.link.attr("download", this.parseTemplate());
+    }
+
+    /**
+     * Parses the download link template, replacing variables with their corresponding values
+     * @returns string Download link
+     */
+    private parseTemplate() {
+        return this.fetchSettings("template")
             .replace(/%postid%/g, this.post.getId())
             .replace(/%artist%/g, this.post.getTagsFromType(TagTypes.Artist).join("-"))
             .replace(/%copyright%/g, this.post.getTagsFromType(TagTypes.Copyright).join("-"))
             .replace(/%character%/g, this.post.getTagsFromType(TagTypes.Character).join("-"))
             .replace(/-{2,}|-$/g, "")
             + "." + this.post.getFileExtension();
-        this.link.attr("download", $template);
-
-        this.link.click(event => {
-            event.preventDefault();
-            GM_download({
-                url: this.link.attr("href"),
-                name: this.link.attr("download"),
-                saveAs: true,
-            });
-        });
     }
 
 }

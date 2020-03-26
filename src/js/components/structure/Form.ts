@@ -5,6 +5,8 @@ import { HotkeyCustomizer } from "../../modules/general/HotkeyCustomizer";
  */
 export class Form {
 
+    private static timeout: number = 500;
+
     private config: FormConfig;
     private elements: FormElement[] = [];
 
@@ -163,7 +165,7 @@ export class Form {
             if (timer) clearTimeout(timer);
             timer = window.setTimeout(() => {
                 $input.trigger("re621:form:input", $input.val());
-            }, 500);
+            }, Form.timeout);
         });
 
         return $input;
@@ -214,7 +216,7 @@ export class Form {
             if (timer) clearTimeout(timer);
             timer = window.setTimeout(() => {
                 $input.trigger("re621:form:input", $input.val());
-            }, 500);
+            }, Form.timeout);
         });
 
         return $input;
@@ -498,7 +500,7 @@ export class Form {
             if (timer) clearTimeout(timer);
             timer = window.setTimeout(() => {
                 $input.trigger("re621:form:input", $input.val());
-            }, 500);
+            }, Form.timeout);
         });
 
         return $input;

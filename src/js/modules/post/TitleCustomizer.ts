@@ -19,7 +19,7 @@ export class TitleCustomizer extends RE6Module {
 
         this.post = Post.getViewingPost();
 
-        document.title = this.parseTemplate();
+        this.refreshPageTitle();
     }
 
     /**
@@ -37,6 +37,17 @@ export class TitleCustomizer extends RE6Module {
         };
     }
 
+    /**
+     * Refreshes the page's title according to the template in the settings
+     */
+    public refreshPageTitle() {
+        document.title = this.parseTemplate();
+    }
+
+    /**
+     * Parses the page title template, replacing variables with their corresponding values
+     * @returns string Page title
+     */
     private parseTemplate() {
         let prefix = "";
         if (this.fetchSettings("symbolsEnabled")) {

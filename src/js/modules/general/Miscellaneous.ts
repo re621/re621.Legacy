@@ -89,6 +89,16 @@ export class Miscellaneous extends RE6Module {
         if (!enabled) { this.disableRedesignFixes(); }
     }
 
+    /** Enable the redesign stylesheet */
+    public enableRedesignFixes() {
+        this.redesignStylesheet.removeAttr("media");
+    }
+
+    /** Disable the redesign stylesheet */
+    public disableRedesignFixes() {
+        this.redesignStylesheet.attr("media", "max-width: 1px");
+    }
+
     /**
      * Replaces the tag estimates with the real count
      */
@@ -104,16 +114,6 @@ export class Miscellaneous extends RE6Module {
                 }
             });
         });
-    }
-
-    /** Enable the redesign stylesheet */
-    public enableRedesignFixes() {
-        this.redesignStylesheet.removeAttr("media");
-    }
-
-    /** Disable the redesign stylesheet */
-    public disableRedesignFixes() {
-        this.redesignStylesheet.attr("media", "max-width: 1px");
     }
 
     /**
