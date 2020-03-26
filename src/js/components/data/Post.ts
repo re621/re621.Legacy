@@ -9,6 +9,7 @@ export class Post {
 
     private static initalPosts: Post[];
     private static addedPosts: Post[] = [];
+    private static postThumbnails: Post[] = [];
 
     protected element: JQuery<HTMLElement>;
 
@@ -83,13 +84,13 @@ export class Post {
                 });
             } else {
                 this.initalPosts.push(new ViewingPost(imageContainer));
-                $(".post-thumbnail").each((index, element) => {
-                    Post.initalPosts.push(new Post($(element)));
-                });
             }
+            $(".post-thumbnail").each((index, element) => {
+                this.postThumbnails.push(new Post($(element)));
+            });
         }
 
-        return this.initalPosts.concat(this.addedPosts);
+        return this.initalPosts.concat(this.addedPosts).concat(this.postThumbnails);
     }
 
     /**
@@ -97,7 +98,7 @@ export class Post {
      * @param post the post to appened
      */
     public static appendPost(post) {
-        this.initalPosts.push(post);
+        this.addedPosts.push(post);
     }
 
     /**
