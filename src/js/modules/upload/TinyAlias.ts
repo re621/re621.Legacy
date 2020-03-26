@@ -43,10 +43,7 @@ export class TinyAlias extends RE6Module {
      */
     protected getDefaultSettings() {
         return {
-            data: {
-                "test": "test_tag other_tag",
-                "yess": "other_tag what why",
-            },
+            data: {}
         };
     }
 
@@ -114,6 +111,7 @@ export class TinyAlias extends RE6Module {
         let $newAliasForm = this.buildAliasForm($aliasList, "", "", "alias-form-new");
         $newAliasForm.css("margin-bottom", "1.5rem");
         $newAliasForm.find("button[type='button']").css("visibility", "hidden");
+        $newAliasForm.find("button[type='submit']").html("Create");
         $newAliasForm.find("input[type='text']").removeAttr("disabled");
 
         this.aliasData = this.fetchSettings("data");
@@ -131,7 +129,19 @@ export class TinyAlias extends RE6Module {
             let $name = $newAliasForm.find("input[type='text']");
             let $data = $newAliasForm.find("textarea");
 
-            if (this.aliasData[$name.val() + ""]) return; // TODO Actual form validation please
+            $name.removeClass("invalid");
+            $data.removeClass("invalid");
+
+            if ($name.val() === "" || this.aliasData[$name.val() + ""]) {
+                $name.addClass("invalid");
+
+                if ($data.val() === "") { $data.addClass("invalid"); }
+                return;
+            }
+            if ($data.val() === "") {
+                $data.addClass("invalid");
+                return;
+            }
 
             this.aliasData[$name.val() + ""] = $data.val() + "";
             this.pushSettings("data", this.aliasData);
@@ -310,11 +320,29 @@ export class TinyAlias extends RE6Module {
     }
 
     private buildAliasForm($aliasList: JQuery<HTMLElement>, name: string, data: string, id: string) {
-        let $aliasForm = $("<form>").attr("id", id).appendTo($aliasList);
-        $("<input>").attr({ type: "text", name: "name", disabled: "" }).val(name).appendTo($aliasForm);
-        $("<textarea>").attr({ name: "data" }).val(data).appendTo($aliasForm);
+        let $aliasForm = $("<form>")
+            .attr("id", id)
+            .appendTo($aliasList);
+
+        $("<input>")
+            .attr({
+                type: "text",
+                name: "name",
+                placeholder: "name",
+                disabled: "",
+            })
+            .val(name)
+            .appendTo($aliasForm);
+        $("<textarea>")
+            .attr({
+                name: "data",
+                placeholder: "tags",
+            })
+            .val(data)
+            .appendTo($aliasForm);
+
         $("<button>").attr({ type: "button" }).html("Delete").appendTo($aliasForm);
-        $("<button>").attr({ type: "submit" }).html("Submit").appendTo($aliasForm);
+        $("<button>").attr({ type: "submit" }).html("Update").appendTo($aliasForm);
         return $aliasForm;
     }
 

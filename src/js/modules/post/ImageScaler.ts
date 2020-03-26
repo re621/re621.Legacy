@@ -117,39 +117,39 @@ export class ImageScaler extends RE6Module {
      * @param size sample, fit-gorizontal, fit-vertical, or original
      */
     private setImageSize(size: string) {
-        this.image.removeClass().attr("src", this.post.getImageURL());
+        this.image.removeClass();
+        this.image.parent().addClass("loading");
 
         switch (size) {
             case ("sample"): {
-                this.image
-                    .removeClass()
-                    .attr("src", this.post.getSampleURL());
-                break;
-            }
-            case ("fit-horizontal"): {
-                this.image
-                    .removeClass()
-                    .addClass("re621-fit-horizontal")
-                    .attr("src", this.post.getImageURL());
+                this.image.attr("src", this.post.getSampleURL());
                 break;
             }
             case ("fit-vertical"): {
-                this.image
-                    .removeClass()
-                    .addClass("re621-fit-vertical")
-                    .attr("src", this.post.getImageURL());
+                this.image.addClass("re621-fit-vertical")
+                if (this.image.attr("src") !== this.post.getImageURL()) {
+                    this.image.attr("src", this.post.getImageURL());
+                } else { this.image.parent().removeClass("loading"); }
+                break;
+            }
+            case ("fit-horizontal"): {
+                this.image.addClass("re621-fit-horizontal");
+                if (this.image.attr("src") !== this.post.getImageURL()) {
+                    this.image.attr("src", this.post.getImageURL());
+                } else { this.image.parent().removeClass("loading"); }
                 break;
             }
             case ("original"): {
-                this.image
-                    .removeClass()
-                    .attr("src", this.post.getImageURL());
+                if (this.image.attr("src") !== this.post.getImageURL()) {
+                    this.image.attr("src", this.post.getImageURL());
+                } else { this.image.parent().removeClass("loading"); }
                 break;
             }
         }
 
         this.image.on("load", () => {
             this.image.resize();
+            this.image.parent().removeClass("loading");
         });
     }
 
