@@ -37,6 +37,23 @@ section#image-extra-controls div#image-resize-cycle {
 // Image States
 section#image-container {
 
+    &.loading {
+        position: relative;
+
+        &::after {
+            content: unicode("f1ce");
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            font-size: 3rem;
+
+            position: absolute;
+            left: 50%;
+            top: 50%;
+
+            animation: loading-rotation 2s infinite linear;
+        }
+    }
+
     img#image {
         height: unset;
         width: unset;
@@ -47,7 +64,18 @@ section#image-container {
 
         &.re621-fit-vertical {
             max-height: 95vh;
+            max-width: 100%;
         }
     }
 
+}
+
+@keyframes loading-rotation {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(359deg);
+    }
 }
