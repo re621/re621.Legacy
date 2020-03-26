@@ -570,8 +570,9 @@ export class Form {
             .appendTo($form);
 
         let $input = $("<div>")
+            .addClass("input-div")
             .attr("id", this.config.id + "-" + element.id)
-            .html(element.value)
+            .append(element.value)
             .appendTo($inputContainer);
 
         return $input;
@@ -622,12 +623,12 @@ interface FormElement {
     /** Supported input type */
     type: "input" | "copyinput" | "keyinput" | "icon" | "checkbox" | "button" | "submit" | "textarea" | "select" | "div" | "hr",
 
-    stretch?: "default" | "column" | "full",
+    stretch?: "default" | "column" | "mid" | "full",
 
     /** Input label */
     label?: string,
     /** Default value for the input */
-    value?: string,
+    value?: string | any,
 
     /** If true, the field is required to submit the form */
     required?: boolean,

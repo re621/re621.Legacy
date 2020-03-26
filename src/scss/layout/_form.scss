@@ -10,6 +10,7 @@ form.grid-form {
         grid-template-columns: repeat(2, 1fr 2fr);
         width: 31.5rem;
 
+        .input-container.stretch-mid,
         .input-container.stretch-full {
             grid-column: span 4;
 
@@ -22,6 +23,14 @@ form.grid-form {
     &.columns-3 {
         grid-template-columns: repeat(3, 1fr 2fr);
         width: 48rem;
+
+        .input-container.stretch-mid {
+            grid-column: span 4;
+
+            &.labeled {
+                grid-column: span 3;
+            }
+        }
 
         .input-container.stretch-full {
             grid-column: span 6;
@@ -43,16 +52,14 @@ form.grid-form {
         align-items: center;
 
         // Width Utilities
+        &.stretch-mid,
+        &.stretch-full,
         &.stretch-column {
             grid-column: span 2;
 
             &.labeled {
                 grid-column: span 1;
             }
-        }
-
-        &.stretch-full {
-            grid-column: span 2;
         }
 
         // Input styles
@@ -192,6 +199,19 @@ form.grid-form {
                         left: 1.325rem;
                     }
                 }
+            }
+        }
+
+        // DIV
+        div.input-div {
+            width: 100%;
+
+            div.notice {
+                font-size: smaller;
+            }
+
+            div.unmargin {
+                margin: -0.5rem 0;
             }
         }
 

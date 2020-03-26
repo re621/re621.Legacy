@@ -9,6 +9,7 @@ import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { PostViewer } from "../post/PostViewer";
 import { HotkeyCustomizer } from "./HotkeyCustomizer";
 import { ImageScaler } from "../post/ImageScaler";
+import { PoolNavigator } from "../post/PoolNavigator";
 
 /**
  * SettingsController  
@@ -54,8 +55,9 @@ export class SettingsController extends RE6Module {
             title: "Settings",
             triggers: [{ element: addSettingsButton.link }],
             escapable: false,
+            fixed: true,
             content: $settings.create(),
-            position: { my: "right top", at: "right top" }
+            position: { my: "center top", at: "center top" }
         });
 
         // Establish handlers
@@ -95,76 +97,128 @@ export class SettingsController extends RE6Module {
     private createTabPostsPage() {
         let titleCustomizer = <TitleCustomizer>this.modules.get("TitleCustomizer");
         let downloadCustomizer = <TitleCustomizer>this.modules.get("DownloadCustomizer");
+        let miscellaneous = <Miscellaneous>this.modules.get("Miscellaneous");
+        let postViewer = <PostViewer>this.modules.get("PostViewer");
+
+        let template_icons = new Form(
+            { id: "title-template-icons", columns: 2, },
+            [
+                { id: "explain", type: "div", stretch: "mid", value: `<div class="notice unmargin">The following variables can be used:</div>` },
+                { id: "postnum", type: "copyinput", label: "Post ID", value: "%postid%", },
+                { id: "author", type: "copyinput", label: "Artist", value: "%artist%", },
+                { id: "copyright", type: "copyinput", label: "Copyright", value: "%copyright%", },
+                { id: "characters", type: "copyinput", label: "Characters", value: "%character%", },
+            ]
+        );
 
         let form = new Form(
             {
                 id: "title-customizer-misc",
-                columns: 2,
+                columns: 3,
                 parent: "re-modal-container",
             },
             [
-                // Title Customizer
+                // General
                 {
-                    id: "title-cust-header",
+                    id: "general-header",
                     type: "div",
-                    value: "<h3>Page Title</h3>",
-                    stretch: "full",
+                    value: "<h3>General</h3>",
+                    stretch: "column",
                 },
                 {
-                    id: "title-cust-template",
+                    id: "general-help",
+                    type: "div",
+                    value: `<div class="notice text-right">Settings are saved and applied automatically.</div>`,
+                    stretch: "mid"
+                },
+                {
+                    id: "general-title-template",
                     type: "input",
                     value: titleCustomizer.fetchSettings("template"),
-                    label: "Template",
+                    label: "Page Title",
                     stretch: "full",
                 },
                 {
-                    id: "title-cust-symbols-enabled",
+                    id: "general-title-template-variables",
+                    type: "div",
+                    label: " ",
+                    value: template_icons.get(),
+                    stretch: "full",
+                },
+                {
+                    id: "general-title-symbol-enabled",
                     type: "checkbox",
                     value: titleCustomizer.fetchSettings("symbolsEnabled"),
                     label: "Vote / Favorite Icons",
                 },
                 {
-                    id: "title-cust-symbol-fav",
+                    id: "general-title-spacer-1",
+                    type: "div",
+                    value: "",
+                    stretch: "mid"
+                },
+                {
+                    id: "general-title-symbol-fav",
                     type: "input",
                     value: titleCustomizer.fetchSettings("symbol-fav"),
                     label: "Favorite",
                 },
                 {
-                    id: "title-cust-symbol-spacer-1",
-                    type: "div",
-                    value: "",
-                },
-                {
-                    id: "title-cust-symbol-voteup",
+                    id: "general-title-symbol-voteup",
                     type: "input",
                     value: titleCustomizer.fetchSettings("symbol-voteup"),
                     label: "Upvote",
                 },
                 {
-                    id: "title-cust-symbol-spacer-2",
-                    type: "div",
-                    value: "",
-                    label: "",
-                },
-                {
-                    id: "title-cust-symbol-votedown",
+                    id: "general-title-symbol-votedown",
                     type: "input",
                     value: titleCustomizer.fetchSettings("symbol-votedown"),
                     label: "Downvote",
                 },
-
-                // Download Customizer
                 {
-                    id: "download-cust-header",
+                    id: "general-improved-tagcount",
+                    type: "checkbox",
+                    value: miscellaneous.fetchSettings("improveTagCount"),
+                    label: "Expanded Tag Count",
+                },
+                {
+                    id: "inter-spacer-1",
                     type: "div",
-                    value: "<h3>Downloads</h3>",
+                    value: " ",
+                    stretch: "full",
+                },
+
+                // Actions
+                {
+                    id: "action-header",
+                    type: "div",
+                    value: "<h3>Actions</h3>",
                     stretch: "full",
                 },
                 {
-                    id: "download-cust-template",
+                    id: "action-download-template",
                     type: "input",
                     value: downloadCustomizer.fetchSettings("template"),
-                    label: "Template",
+                    label: "Download File Name",
+                    stretch: "full",
+                },
+                {
+                    id: "action-download-explain",
+                    type: "div",
+                    stretch: "full",
+                    label: " ",
+                    value: `<div class="notice unmargin">Same variables as above can be used. A file extension is appended automatically.</div>`
+                },
+                {
+                    id: "actions-votefavorite",
+                    type: "checkbox",
+                    value: postViewer.fetchSettings("upvote_on_favorite"),
+                    label: "Upvote Favorites",
+                },
+                {
+                    id: "inter-spacer-2",
+                    type: "div",
+                    value: " ",
                     stretch: "full",
                 },
             ]
@@ -180,76 +234,127 @@ export class SettingsController extends RE6Module {
     private handleTabPostsPage(form: Form) {
         let titleCustomizer = <TitleCustomizer>this.modules.get("TitleCustomizer");
         let downloadCustomizer = <TitleCustomizer>this.modules.get("DownloadCustomizer");
+        let miscellaneous = <Miscellaneous>this.modules.get("Miscellaneous");
+        let postViewer = <PostViewer>this.modules.get("PostViewer");
         let postsPageInput = form.getInputList();
 
-        // Title Customizer
-        postsPageInput.get("title-cust-template").change(function (event) {
+        // General
+        postsPageInput.get("general-title-template").change(function (event) {
             titleCustomizer.pushSettings("template", $(this).val());
         });
 
-        postsPageInput.get("title-cust-symbols-enabled").change(function (event) {
+        postsPageInput.get("general-title-symbol-enabled").change(function (event) {
             titleCustomizer.pushSettings("symbolsEnabled", $(this).is(":checked"));
         });
 
-        postsPageInput.get("title-cust-symbol-fav").change(function (event) {
+        postsPageInput.get("general-title-symbol-fav").change(function (event) {
             titleCustomizer.pushSettings("symbol-fav", $(this).val());
         });
 
-        postsPageInput.get("title-cust-symbol-voteup").change(function (event) {
+        postsPageInput.get("general-title-symbol-voteup").change(function (event) {
             titleCustomizer.pushSettings("symbol-voteup", $(this).val());
         });
 
-        postsPageInput.get("title-cust-symbol-votedown").change(function (event) {
+        postsPageInput.get("general-title-symbol-votedown").change(function (event) {
             titleCustomizer.pushSettings("symbol-votedown", $(this).val());
         });
 
-        // Download Customizer
-        postsPageInput.get("download-cust-template").change(function (event) {
+        postsPageInput.get("general-improved-tagcount").change(function (event) {
+            miscellaneous.pushSettings("improveTagCount", $(this).is(":checked"));
+        });
+
+        // Actions
+        postsPageInput.get("action-download-template").change(function (event) {
             downloadCustomizer.pushSettings("template", $(this).val());
+        });
+
+        postsPageInput.get("actions-votefavorite").change(function (event) {
+            postViewer.pushSettings("upvote_on_favorite", $(this).is(":checked"));
         });
     }
 
     /** Creates the DOM for the hotkey settings page */
     private createTabHotkeys() {
         let postViewer = <PostViewer>this.modules.get("PostViewer");
+        let poolNavigator = <PoolNavigator>this.modules.get("PoolNavigator");
         let imageScaler = <ImageScaler>this.modules.get("ImageScaler");
+        let miscellaneous = <Miscellaneous>this.modules.get("Miscellaneous");
 
         let form = new Form(
             {
                 "id": "settings-hotkeys",
-                columns: 2,
+                columns: 3,
                 parent: "re-modal-container"
             },
             [
+                // Posts
                 {
                     id: "hotkey-posts-title",
                     type: "div",
-                    value: "Posts",
+                    value: "<h3>Posts</h3>",
                     stretch: "full"
                 },
+
+                // - Voting
                 {
-                    id: "hotkey-upvote",
+                    id: "hotkey-post-upvote",
                     type: "keyinput",
                     label: "Upvote",
                     value: postViewer.fetchSettings("hotkey_upvote"),
                 },
                 {
-                    id: "hotkey-downvote",
+                    id: "hotkey-post-downvote",
                     type: "keyinput",
                     label: "Downvote",
                     value: postViewer.fetchSettings("hotkey_downvote"),
                 },
                 {
-                    id: "hotkey-favorite",
+                    id: "hotkey-post-favorite",
                     type: "keyinput",
                     label: "Favorite",
                     value: postViewer.fetchSettings("hotkey_favorite"),
                 },
+
+                // - Navigation
                 {
-                    id: "hotkey-scale",
+                    id: "hotkey-post-next",
+                    type: "keyinput",
+                    label: "Next Post",
+                    value: poolNavigator.fetchSettings("hotkey_prev"),
+                },
+                {
+                    id: "hotkey-post-prev",
+                    type: "keyinput",
+                    label: "Previous Post",
+                    value: poolNavigator.fetchSettings("hotkey_next"),
+                },
+                {
+                    id: "hotkey-post-cycle",
+                    type: "keyinput",
+                    label: "Cycle Navigation",
+                    value: poolNavigator.fetchSettings("hotkey_cycle"),
+                },
+
+                // - Scaling
+                {
+                    id: "hotkey-post-scale",
                     type: "keyinput",
                     label: "Scale",
                     value: imageScaler.fetchSettings("hotkey_scale"),
+                },
+
+                // Comments
+                {
+                    id: "hotkey-comments-title",
+                    type: "div",
+                    value: "<h3>Comments</h3>",
+                    stretch: "full"
+                },
+                {
+                    id: "hotkey-comments-new",
+                    type: "keyinput",
+                    label: "New Comment",
+                    value: miscellaneous.fetchSettings("hotkey_newcomment"),
                 },
             ]
         );
@@ -264,30 +369,61 @@ export class SettingsController extends RE6Module {
     private handleTabHotkeys(form: Form) {
         let hotkeyFormInput = form.getInputList();
         let postViewer = <PostViewer>this.modules.get("PostViewer");
+        let poolNavigator = <PoolNavigator>this.modules.get("PoolNavigator");
         let imageScaler = <ImageScaler>this.modules.get("ImageScaler");
+        let miscellaneous = <Miscellaneous>this.modules.get("Miscellaneous");
 
-        hotkeyFormInput.get("hotkey-upvote").on("re621:form:keychange", function (event, newKey, oldKey) {
+        // Posts
+        // - Voting
+        hotkeyFormInput.get("hotkey-post-upvote").on("re621:form:keychange", function (event, newKey, oldKey) {
             postViewer.pushSettings("hotkey_upvote", newKey);
             HotkeyCustomizer.unregister(oldKey);
             postViewer.handleHotkeys();
         });
 
-        hotkeyFormInput.get("hotkey-downvote").on("re621:form:keychange", function (event, newKey, oldKey) {
+        hotkeyFormInput.get("hotkey-post-downvote").on("re621:form:keychange", function (event, newKey, oldKey) {
             postViewer.pushSettings("hotkey_downvote", newKey);
             HotkeyCustomizer.unregister(oldKey);
             postViewer.handleHotkeys();
         });
 
-        hotkeyFormInput.get("hotkey-favorite").on("re621:form:keychange", function (event, newKey, oldKey) {
+        hotkeyFormInput.get("hotkey-post-favorite").on("re621:form:keychange", function (event, newKey, oldKey) {
             postViewer.pushSettings("hotkey_favorite", newKey);
             HotkeyCustomizer.unregister(oldKey);
             postViewer.handleHotkeys();
         });
 
-        hotkeyFormInput.get("hotkey-scale").on("re621:form:keychange", function (event, newKey, oldKey) {
+        // - Navigation
+        hotkeyFormInput.get("hotkey-post-next").on("re621:form:keychange", function (event, newKey, oldKey) {
+            poolNavigator.pushSettings("hotkey_next", newKey);
+            HotkeyCustomizer.unregister(oldKey);
+            poolNavigator.handleHotkeys();
+        });
+
+        hotkeyFormInput.get("hotkey-post-prev").on("re621:form:keychange", function (event, newKey, oldKey) {
+            poolNavigator.pushSettings("hotkey_prev", newKey);
+            HotkeyCustomizer.unregister(oldKey);
+            poolNavigator.handleHotkeys();
+        });
+
+        hotkeyFormInput.get("hotkey-post-cycle").on("re621:form:keychange", function (event, newKey, oldKey) {
+            poolNavigator.pushSettings("hotkey_cycle", newKey);
+            HotkeyCustomizer.unregister(oldKey);
+            poolNavigator.handleHotkeys();
+        });
+
+        // - Scaling
+        hotkeyFormInput.get("hotkey-post-scale").on("re621:form:keychange", function (event, newKey, oldKey) {
             imageScaler.pushSettings("hotkey_scale", newKey);
             HotkeyCustomizer.unregister(oldKey);
             imageScaler.handleHotkeys();
+        });
+
+        // Comments
+        hotkeyFormInput.get("hotkey-comments-new").on("re621:form:keychange", function (event, newKey, oldKey) {
+            miscellaneous.pushSettings("hotkey_newcomment", newKey);
+            HotkeyCustomizer.unregister(oldKey);
+            miscellaneous.handleHotkeys();
         });
     }
 
@@ -299,12 +435,18 @@ export class SettingsController extends RE6Module {
         let form = new Form(
             {
                 id: "settings-misc",
-                columns: 2,
+                columns: 3,
                 parent: "re-modal-container",
             },
             [
                 {
-                    id: "redesign-fixes",
+                    id: "misc-title",
+                    type: "div",
+                    value: "<h3>Miscellaneous</h3>",
+                    stretch: "full"
+                },
+                {
+                    id: "misc-redesign-fixes",
                     type: "checkbox",
                     value: module.fetchSettings("loadRedesignFixes"),
                     label: "Load Redesign Fixes",
@@ -322,7 +464,7 @@ export class SettingsController extends RE6Module {
     private handleTabMiscellaneous(form: Form) {
         let miscFormInput = form.getInputList();
 
-        miscFormInput.get("redesign-fixes").change(element => {
+        miscFormInput.get("misc-redesign-fixes").change(element => {
             let enabled = $(element.target).is(":checked");
             let miscModule = <Miscellaneous>this.modules.get("Miscellaneous");
             miscModule.pushSettings("loadRedesignFixes", enabled);

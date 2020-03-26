@@ -19,6 +19,17 @@
     float: right;
 }
 
+.text-left {
+    text-align: left;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
 
 /* Animated loading spinner, from https://loading.io/css/ */
 .lds-dual-ring {
@@ -41,9 +52,10 @@
 
 @keyframes lds-dual-ring {
     0% {
-      transform: rotate(0deg);
+        transform: rotate(0deg);
     }
+
     100% {
-      transform: rotate(360deg);
+        transform: rotate(360deg);
     }
 }

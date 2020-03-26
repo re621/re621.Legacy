@@ -18,6 +18,10 @@ re-modal-container {
         box-shadow: 0 5px 15px -5px black;
         outline: 0;
 
+        background: url(https://bitwolfy.com/e621/extras/hexagons/hex.png), url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeEAAADICAYAAADfnllEAAAAGXRFW…AIGmGCIAiCoBEmCIIgCIJGmCAIgiBohAmCIAiCGDf+K8AArFxEbsIQENIAAAAASUVORK5CYII=);
+        background-position: left top;
+        background-repeat: repeat-x;
+
         @include themable {
             border: 1px solid themed("color-section") !important;
             background-color: themed("color-section") !important;
