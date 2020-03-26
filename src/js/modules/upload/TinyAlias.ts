@@ -2,6 +2,7 @@ import { RE6Module } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 import { Api } from "../../components/api/Api";
 import { ApiTag } from "../../components/api/responses/ApiTag";
+import { Modal } from "../../components/structure/Modal";
 
 declare var Danbooru;
 
@@ -15,6 +16,7 @@ export class TinyAlias extends RE6Module {
     private $infoText: JQuery<HTMLElement>;
 
     private tagAlreadyChecked: boolean;
+    private aliasData;
 
     private constructor() {
         super(PageDefintion.upload);
@@ -41,7 +43,10 @@ export class TinyAlias extends RE6Module {
      */
     protected getDefaultSettings() {
         return {
-            data: [],
+            data: {
+                "test": "test_tag other_tag",
+                "yess": "other_tag what why",
+            },
         };
     }
 
@@ -71,6 +76,11 @@ export class TinyAlias extends RE6Module {
         let timer: number;
         $input.on("input", () => {
             this.tagAlreadyChecked = false;
+            if ($input.val() === "") {
+                this.$infoText.html("");
+                return;
+            }
+
             if (timer) clearTimeout(timer);
             timer = window.setTimeout(() => {
                 this.handleCheckButton($input);
@@ -88,16 +98,55 @@ export class TinyAlias extends RE6Module {
             this.handleInsertButton($input);
         });
 
-        $settingsButton.on("click", () => {
-            // openSettingsTab("enhancePostUploader")
-        });
-
+        // Sort textarea
         $sortButton.click(() => {
             const currentText = this.prepareInput(this.$textarea.val());
             let tags = currentText.split(" ");
             tags = [...new Set(tags)];
             tags.sort();
             this.$textarea.val(tags.join(" "));
+        });
+
+        // Settings Page
+        let $aliasList = $("<div>").addClass("alias-list");
+
+        $("<div>").html("<h3>New Alias</h3>").appendTo($aliasList);
+        let $newAliasForm = this.buildAliasForm($aliasList, "", "", "alias-form-new");
+        $newAliasForm.css("margin-bottom", "1.5rem");
+        $newAliasForm.find("button[type='button']").css("visibility", "hidden");
+        $newAliasForm.find("input[type='text']").removeAttr("disabled");
+
+        this.aliasData = this.fetchSettings("data");
+        if (this.aliasData.length > 0) {
+            $("<div>").html("<h3>Existing Aliases</h3>").appendTo($aliasList);
+        }
+
+        for (const [index, name] of Object.keys(this.aliasData).entries()) {
+            console.log(index, name);
+            this.makeAliasEntry($aliasList, name, this.aliasData[name], index + "");
+        }
+
+        $newAliasForm.submit((event) => {
+            event.preventDefault();
+            let $name = $newAliasForm.find("input[type='text']");
+            let $data = $newAliasForm.find("textarea");
+
+            if (this.aliasData[$name.val() + ""]) return; // TODO Actual form validation please
+
+            this.aliasData[$name.val() + ""] = $data.val() + "";
+            this.pushSettings("data", this.aliasData);
+            this.makeAliasEntry($aliasList, $name.val() + "", $data.val() + "", this.aliasData.length + "");
+
+            $name.val("");
+            $data.val("");
+        });
+
+        new Modal({
+            title: "Tiny Alias",
+            triggers: [{ element: $settingsButton }],
+            fixed: true,
+            position: { at: "center", my: "center" },
+            content: $aliasList,
         });
     }
 
@@ -115,6 +164,13 @@ export class TinyAlias extends RE6Module {
         let tag = this.prepareTag($input.val().toString());
         if (this.tagAlreadyAdded(tag)) {
             this.$infoText.html("Tag has already been added");
+            return;
+        }
+
+        this.aliasData = this.fetchSettings("data");
+        if (this.aliasData[tag]) {
+            this.tagAlreadyChecked = true;
+            this.$infoText.html("Found alias: " + tag);
             return;
         }
 
@@ -168,12 +224,15 @@ export class TinyAlias extends RE6Module {
      * @returns True if the input had aliases, false otherwise
      */
     private insertAlias(input: string) {
-        const tinyAliases = this.fetchSettings("data");
+        console.log("looking up <" + input + ">");
+        const aliasList = this.fetchSettings("data");
         input = this.prepareTag(input);
-        if (tinyAliases[input]) {
-            this.$textarea.val((i, text) => {
-                if (text.endsWith(" ") || text.length === 0) return text + tinyAliases[input];
-                else return text + " " + tinyAliases[input];
+
+        if (aliasList[input]) {
+            console.log("found " + aliasList[input]);
+            this.$textarea.val(function (i, text) {
+                if (text.endsWith(" ") || text.length === 0) return text + aliasList[input];
+                else return text + " " + aliasList[input];
             });
             return true;
         }
@@ -223,6 +282,40 @@ export class TinyAlias extends RE6Module {
         result.count = jsonData.post_count;
         result.true_name = trueTagName;
         return result;
+    }
+
+    private makeAliasEntry($aliasList: JQuery<HTMLElement>, name: string, data: string, id: string) {
+        let $aliasForm = this.buildAliasForm($aliasList, name, data, "alias-form-" + id);
+        $aliasForm.appendTo($aliasList);
+        $aliasForm.submit((event) => {
+            event.preventDefault();
+            let $name = $aliasForm.find("input[type='text']");
+            let $data = $aliasForm.find("textarea");
+
+            console.log("pushing " + $name.val() + " with " + $data.val());
+            console.log(this.aliasData[$name.val() + ""])
+
+            console.log("updating");
+
+            this.aliasData[$name.val() + ""] = $data.val() + "";
+            this.pushSettings("data", this.aliasData);
+        });
+        $aliasForm.find("button[type='button']").click((event) => {
+            event.preventDefault();
+            let $name = $aliasForm.find("input[type='text']");
+            this.aliasData[$name.val() + ""] = undefined;
+            this.pushSettings("data", this.aliasData);
+            $aliasForm.remove();
+        });
+    }
+
+    private buildAliasForm($aliasList: JQuery<HTMLElement>, name: string, data: string, id: string) {
+        let $aliasForm = $("<form>").attr("id", id).appendTo($aliasList);
+        $("<input>").attr({ type: "text", name: "name", disabled: "" }).val(name).appendTo($aliasForm);
+        $("<textarea>").attr({ name: "data" }).val(data).appendTo($aliasForm);
+        $("<button>").attr({ type: "button" }).html("Delete").appendTo($aliasForm);
+        $("<button>").attr({ type: "submit" }).html("Submit").appendTo($aliasForm);
+        return $aliasForm;
     }
 
 }
