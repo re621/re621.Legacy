@@ -239,37 +239,37 @@ export class SettingsController extends RE6Module {
         let postsPageInput = form.getInputList();
 
         // General
-        postsPageInput.get("general-title-template").change(function (event) {
-            titleCustomizer.pushSettings("template", $(this).val());
+        postsPageInput.get("general-title-template").on("re621:form:input", (event, data) => {
+            titleCustomizer.pushSettings("template", data);
         });
 
-        postsPageInput.get("general-title-symbol-enabled").change(function (event) {
-            titleCustomizer.pushSettings("symbolsEnabled", $(this).is(":checked"));
+        postsPageInput.get("general-title-symbol-enabled").on("re621:form:input", (event, data) => {
+            titleCustomizer.pushSettings("symbolsEnabled", data);
         });
 
-        postsPageInput.get("general-title-symbol-fav").change(function (event) {
-            titleCustomizer.pushSettings("symbol-fav", $(this).val());
+        postsPageInput.get("general-title-symbol-fav").on("re621:form:input", (event, data) => {
+            titleCustomizer.pushSettings("symbol-fav", data);
         });
 
-        postsPageInput.get("general-title-symbol-voteup").change(function (event) {
-            titleCustomizer.pushSettings("symbol-voteup", $(this).val());
+        postsPageInput.get("general-title-symbol-voteup").on("re621:form:input", (event, data) => {
+            titleCustomizer.pushSettings("symbol-voteup", data);
         });
 
-        postsPageInput.get("general-title-symbol-votedown").change(function (event) {
-            titleCustomizer.pushSettings("symbol-votedown", $(this).val());
+        postsPageInput.get("general-title-symbol-votedown").on("re621:form:input", (event, data) => {
+            titleCustomizer.pushSettings("symbol-votedown", data);
         });
 
-        postsPageInput.get("general-improved-tagcount").change(function (event) {
-            miscellaneous.pushSettings("improveTagCount", $(this).is(":checked"));
+        postsPageInput.get("general-improved-tagcount").on("re621:form:input", (event, data) => {
+            miscellaneous.pushSettings("improveTagCount", data);
         });
 
         // Actions
-        postsPageInput.get("action-download-template").change(function (event) {
-            downloadCustomizer.pushSettings("template", $(this).val());
+        postsPageInput.get("action-download-template").on("re621:form:input", (event, data) => {
+            downloadCustomizer.pushSettings("template", data);
         });
 
-        postsPageInput.get("actions-votefavorite").change(function (event) {
-            postViewer.pushSettings("upvote_on_favorite", $(this).is(":checked"));
+        postsPageInput.get("actions-votefavorite").on("re621:form:input", (event, data) => {
+            postViewer.pushSettings("upvote_on_favorite", data);
         });
     }
 
@@ -375,52 +375,52 @@ export class SettingsController extends RE6Module {
 
         // Posts
         // - Voting
-        hotkeyFormInput.get("hotkey-post-upvote").on("re621:form:keychange", function (event, newKey, oldKey) {
+        hotkeyFormInput.get("hotkey-post-upvote").on("re621:form:input", (event, newKey, oldKey) => {
             postViewer.pushSettings("hotkey_upvote", newKey);
             HotkeyCustomizer.unregister(oldKey);
             postViewer.handleHotkeys();
         });
 
-        hotkeyFormInput.get("hotkey-post-downvote").on("re621:form:keychange", function (event, newKey, oldKey) {
+        hotkeyFormInput.get("hotkey-post-downvote").on("re621:form:input", (event, newKey, oldKey) => {
             postViewer.pushSettings("hotkey_downvote", newKey);
             HotkeyCustomizer.unregister(oldKey);
             postViewer.handleHotkeys();
         });
 
-        hotkeyFormInput.get("hotkey-post-favorite").on("re621:form:keychange", function (event, newKey, oldKey) {
+        hotkeyFormInput.get("hotkey-post-favorite").on("re621:form:input", (event, newKey, oldKey) => {
             postViewer.pushSettings("hotkey_favorite", newKey);
             HotkeyCustomizer.unregister(oldKey);
             postViewer.handleHotkeys();
         });
 
         // - Navigation
-        hotkeyFormInput.get("hotkey-post-next").on("re621:form:keychange", function (event, newKey, oldKey) {
+        hotkeyFormInput.get("hotkey-post-next").on("re621:form:input", (event, newKey, oldKey) => {
             poolNavigator.pushSettings("hotkey_next", newKey);
             HotkeyCustomizer.unregister(oldKey);
             poolNavigator.handleHotkeys();
         });
 
-        hotkeyFormInput.get("hotkey-post-prev").on("re621:form:keychange", function (event, newKey, oldKey) {
+        hotkeyFormInput.get("hotkey-post-prev").on("re621:form:input", (event, newKey, oldKey) => {
             poolNavigator.pushSettings("hotkey_prev", newKey);
             HotkeyCustomizer.unregister(oldKey);
             poolNavigator.handleHotkeys();
         });
 
-        hotkeyFormInput.get("hotkey-post-cycle").on("re621:form:keychange", function (event, newKey, oldKey) {
+        hotkeyFormInput.get("hotkey-post-cycle").on("re621:form:input", (event, newKey, oldKey) => {
             poolNavigator.pushSettings("hotkey_cycle", newKey);
             HotkeyCustomizer.unregister(oldKey);
             poolNavigator.handleHotkeys();
         });
 
         // - Scaling
-        hotkeyFormInput.get("hotkey-post-scale").on("re621:form:keychange", function (event, newKey, oldKey) {
+        hotkeyFormInput.get("hotkey-post-scale").on("re621:form:input", (event, newKey, oldKey) => {
             imageScaler.pushSettings("hotkey_scale", newKey);
             HotkeyCustomizer.unregister(oldKey);
             imageScaler.handleHotkeys();
         });
 
         // Comments
-        hotkeyFormInput.get("hotkey-comments-new").on("re621:form:keychange", function (event, newKey, oldKey) {
+        hotkeyFormInput.get("hotkey-comments-new").on("re621:form:input", (event, newKey, oldKey) => {
             miscellaneous.pushSettings("hotkey_newcomment", newKey);
             HotkeyCustomizer.unregister(oldKey);
             miscellaneous.handleHotkeys();
@@ -462,14 +462,12 @@ export class SettingsController extends RE6Module {
      * @param form Miscellaneous settings form
      */
     private handleTabMiscellaneous(form: Form) {
+        let miscModule = <Miscellaneous>this.modules.get("Miscellaneous");
         let miscFormInput = form.getInputList();
 
-        miscFormInput.get("misc-redesign-fixes").change(element => {
-            let enabled = $(element.target).is(":checked");
-            let miscModule = <Miscellaneous>this.modules.get("Miscellaneous");
-            miscModule.pushSettings("loadRedesignFixes", enabled);
-
-            if (enabled) { miscModule.enableRedesignFixes(); }
+        miscFormInput.get("misc-redesign-fixes").on("re621:form:input", (event, data) => {
+            miscModule.pushSettings("loadRedesignFixes", data);
+            if (data) { miscModule.enableRedesignFixes(); }
             else { miscModule.disableRedesignFixes(); }
         });
     }

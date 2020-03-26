@@ -195,6 +195,14 @@ export class Form {
         if (element.pattern) { $input.attr("pattern", element.pattern); }
         if (element.required) { $input.attr("required", ''); }
 
+        let timer: number;
+        $input.on("input", () => {
+            if (timer) clearTimeout(timer);
+            timer = window.setTimeout(() => {
+                $input.trigger("re621:form:input", $input.val());
+            }, 500);
+        });
+
         return $input;
     }
 
@@ -236,6 +244,14 @@ export class Form {
         $($copybutton).click(function (event) {
             $input.select();
             document.execCommand("copy");
+        });
+
+        let timer: number;
+        $input.on("input", () => {
+            if (timer) clearTimeout(timer);
+            timer = window.setTimeout(() => {
+                $input.trigger("re621:form:input", $input.val());
+            }, 500);
         });
 
         return $input;
@@ -306,7 +322,7 @@ export class Form {
                     $input
                         .removeClass("input-info")
                         .val(key)
-                        .trigger("re621:form:keychange", [key, $oldKey]);
+                        .trigger("re621:form:input", [key, $oldKey]);
                     occupied = false;
                 }
             });
@@ -362,6 +378,7 @@ export class Form {
             let $target = $(event.target);
             $input.val($target.attr("data-value"));
             $target.addClass("active");
+            $input.trigger("re621:form:input", $input.val());
         });
 
         if (element.value === "") { $selectContainer.find("a").first().click(); }
@@ -410,6 +427,10 @@ export class Form {
             .attr("for", this.config.id + "-" + element.id)
             .addClass("switch")
             .appendTo($inputContainer);
+
+        $input.on("change", () => {
+            $input.trigger("re621:form:input", $input.is(":checked"));
+        });
 
         return $input;
     }
@@ -509,6 +530,14 @@ export class Form {
         if (element.pattern) { $input.attr("pattern", element.pattern); }
         if (element.required) { $input.attr("required", ''); }
 
+        let timer: number;
+        $input.on("input", () => {
+            if (timer) clearTimeout(timer);
+            timer = window.setTimeout(() => {
+                $input.trigger("re621:form:input", $input.val());
+            }, 500);
+        });
+
         return $input;
     }
 
@@ -540,10 +569,13 @@ export class Form {
         element.data.forEach(function (entry) {
             $("<option>").val(entry.value).text(entry.name).appendTo($input);
         });
-
         $input.val(element.value);
 
         if (element.required) { $input.attr("required", ''); }
+
+        $input.on("change", () => {
+            $input.trigger("re621:form:input", $input.val());
+        });
 
         return $input;
     }
