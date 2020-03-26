@@ -1,7 +1,5 @@
 import { RE6Module } from "../../components/RE6Module";
 import { Page, PageDefintion } from "../../components/data/Page";
-import { ApiTag } from "../../components/api/responses/ApiTag";
-import { Api } from "../../components/api/Api";
 import { HotkeyCustomizer } from "./HotkeyCustomizer";
 
 declare var GM_addStyle;
@@ -95,35 +93,17 @@ export class Miscellaneous extends RE6Module {
      * Replaces the tag estimates with the real count
      */
     private async improveTagCount() {
-        const tagElements: Map<string, { tagEscaped: string, element: JQuery<HTMLElement> }> = new Map<string, { tagEscaped: string, element: JQuery<HTMLElement> }>();
         const $tags = $("#tag-box > ul > li, #tag-list > ul > li");
-        $tags.each(function () {
-            const $this = $(this);
-            //only use the first 320 tags. This should't happen to many posts anyways
-            //only add tags which end in k, meaning they have a ~ count
-            if (tagElements.size !== 320 && $this.find(".post-count").text().endsWith("k")) {
-                //grab the child with the tagname in it, replace spaces with _ and make it url save
-                const tag = $this.find(".search-tag").text();
-                const tagNormal = tag.replace(/ /g, "_");
-                const tagEscaped = encodeURIComponent(tagNormal);
-                tagElements.set(tagNormal, {
-                    tagEscaped: tagEscaped,
-                    element: $this
-                });
-            }
+        $tags.each(function (index, element) {
+            const $element = $(element);
+            $element.find(".post-count").each(function (index, tagElement) {
+                const $tagElement = $(tagElement);
+                const tagCount = $tagElement.attr("data-count");
+                if (tagCount) {
+                    $tagElement.text(tagCount);
+                }
+            });
         });
-        //Don't make a request if there is nothing to do
-        if (tagElements.size === 0) {
-            return;
-        }
-
-        const tagString = Array.from(tagElements.values()).map(e => e.tagEscaped).join(",");
-        const tagJson: ApiTag[] = await Api.getJson("/tags.json?limit=320&search[name]=" + tagString);
-
-        for (const tag of tagJson) {
-            const entry = tagElements.get(tag.name);
-            entry.element.find(".post-count").text(tag.post_count);
-        }
     }
 
     /** Enable the redesign stylesheet */
