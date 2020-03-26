@@ -57,7 +57,7 @@ export class SettingsController extends RE6Module {
             escapable: false,
             fixed: true,
             content: $settings.create(),
-            position: { my: "center top", at: "center top" }
+            position: { my: "center", at: "center" }
         });
 
         // Establish handlers

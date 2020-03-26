@@ -48,7 +48,18 @@ export class Modal {
             });
 
         if (config.fixed) {
-            $(this.$modal).dialog('widget').addClass("modal-fixed");
+            this.$modal.dialog('widget').addClass("modal-fixed");
+            this.$modal.dialog(
+                "option",
+                "position",
+                {
+                    my: config.position.my,
+                    at: config.position.at,
+                    of: window,
+                    within: "re-modal-container",
+                    collision: "none",
+                }
+            );
         }
 
         for (const trigger of config.triggers) {
