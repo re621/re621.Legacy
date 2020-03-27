@@ -62,6 +62,13 @@ export class Page {
     }
 
     /**
+     * Returns the ID from the second part of the pathname
+     */
+    public static getPageID() {
+        return this.getInstance().url.pathname.split("/")[2];
+    }
+
+    /**
      * Returns a singleton instance of the class
      * @returns Url instance
      */
@@ -76,4 +83,5 @@ export const PageDefintion = {
     post: /^\/posts\/\d+\/?$/,
     upload: /\/uploads\/new\/?/,
     forum: /^\/forum_topics\/?.*/,
+    pool: /^\/pools\/.+/,
 }

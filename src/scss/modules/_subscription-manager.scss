@@ -1,0 +1,82 @@
+/* Subscription Manager Styles */
+
+div#c-pools>div#a-show>h1 {
+    button.subscribe-button {
+        float: right;
+        padding: 0.25rem 0.5rem;
+        outline: 0;
+        box-shadow: 0 0 10px -5px black;
+        border-radius: 4px;
+
+        @include themable {
+            border: 1px solid themed("color-foreground");
+            color: themed("color-text");
+        }
+
+        &.subscribe {
+            @include themable {
+                background: themed("color-success");
+            }
+        }
+
+        &.unsubscribe {
+            @include themable {
+                background: themed("color-danger");
+            }
+        }
+
+        &.hidden {
+            display: none;
+        }
+    }
+}
+
+div.subscriptions-list {
+    position: relative;
+    width: 20rem;
+
+    div.subscriptions-empty {
+        background: #ffffff33;
+        text-align: center;
+        padding: 0.25rem 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    div.subscription-update {
+        display: grid;
+        grid-template-columns: 5rem 1fr 1fr;
+        margin-bottom: 1rem;
+        background: #ffffff33;
+
+        div.subscription-update-preview {
+            grid-row: span 2;
+
+            img {
+                max-width: 100%;
+            }
+        }
+
+        div.subscription-update-title {
+            grid-column: span 2;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin: 0.5rem 0.5rem 0
+        }
+
+        div.subscription-update-full {
+            display: flex;
+            align-self: end;
+            margin: 0rem 0.5rem 0.5rem;
+            font-size: 0.9em;
+        }
+
+        div.subscription-update-date {
+            display: flex;
+            align-self: end;
+            font-size: 0.9em;
+            margin: 0rem 0.5rem 0.5rem;
+            justify-content: flex-end;
+        }
+    }
+
+}
