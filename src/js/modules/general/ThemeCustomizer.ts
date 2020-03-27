@@ -7,8 +7,6 @@ import { Modal } from "../../components/structure/Modal";
 import { RE6Module } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
 
-declare var Cookies;
-
 const THEME_MAIN = [
     { value: "hexagon", name: "Hexagon" },
     { value: "pony", name: "Pony" },
@@ -40,6 +38,13 @@ export class ThemeCustomizer extends RE6Module {
 
     private constructor() {
         super();
+    }
+
+    public init() {
+        if (!this.shouldCallInitFunction()) {
+            return;
+        }
+        super.init();
 
         this.createDOM();
 
@@ -53,7 +58,10 @@ export class ThemeCustomizer extends RE6Module {
      * @returns ThemeCustomizer instance
      */
     public static getInstance() {
-        if (this.instance == undefined) this.instance = new ThemeCustomizer();
+        if (this.instance == undefined) {
+            this.instance = new ThemeCustomizer();
+            this.instance.init();
+        }
         return this.instance;
     }
 

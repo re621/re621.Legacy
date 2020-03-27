@@ -22,7 +22,13 @@ export class BlacklistEnhancer extends RE6Module {
 
     private constructor() {
         super([PageDefintion.search, PageDefintion.post]);
-        if (!this.eval()) return;
+    }
+
+    public init() {
+        if (!this.shouldCallInitFunction()) {
+            return;
+        }
+        super.init();
 
         //Override default blacklist function
         Danbooru.Blacklist.apply = () => { };
@@ -231,7 +237,10 @@ export class BlacklistEnhancer extends RE6Module {
      * @returns BlacklistEnhancer instance
      */
     public static getInstance() {
-        if (this.instance === undefined) this.instance = new BlacklistEnhancer();
+        if (this.instance === undefined) {
+            this.instance = new BlacklistEnhancer()
+            this.instance.init();
+        }
         return this.instance;
     }
 

@@ -17,7 +17,13 @@ export class DownloadCustomizer extends RE6Module {
 
     private constructor() {
         super(PageDefintion.post);
-        if (!this.eval()) return;
+    }
+
+    public init() {
+        if (!this.shouldCallInitFunction()) {
+            return;
+        }
+        super.init();
 
         this.post = Post.getViewingPost();
 
@@ -39,7 +45,10 @@ export class DownloadCustomizer extends RE6Module {
      * @returns DownloadCustomizer instance
      */
     public static getInstance() {
-        if (this.instance === undefined) this.instance = new DownloadCustomizer();
+        if (this.instance === undefined) {
+            this.instance = new DownloadCustomizer();
+            this.instance.init();
+        }
         return this.instance;
     }
 

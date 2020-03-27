@@ -1,6 +1,5 @@
 import { RE6Module } from "../../components/RE6Module";
 import { Page, PageDefintion } from "../../components/data/Page";
-import { HotkeyCustomizer } from "./HotkeyCustomizer";
 
 declare var GM_addStyle;
 declare var GM_getResourceText;
@@ -10,7 +9,7 @@ declare var GM_getResourceText;
  */
 export class Miscellaneous extends RE6Module {
 
-    private static instance: Miscellaneous = new Miscellaneous();
+    private static instance: Miscellaneous;
 
     private redesignStylesheet: JQuery<HTMLElement>;
 
@@ -19,7 +18,13 @@ export class Miscellaneous extends RE6Module {
         this.registerHotkeys(
             { keys: "hotkey_newcomment", fnct: this.openNewComment }
         );
+    }
 
+    public init() {
+        if (!this.shouldCallInitFunction()) {
+            return;
+        }
+        super.init();
         // Load the Redesign Fixes stylesheet
         this.loadRedesignFixes(this.fetchSettings("loadRedesignFixes"));
 
@@ -52,7 +57,10 @@ export class Miscellaneous extends RE6Module {
      * @returns FormattingHelper instance
      */
     public static getInstance() {
-        if (this.instance == undefined) this.instance = new Miscellaneous();
+        if (this.instance == undefined) {
+            this.instance = new Miscellaneous();
+            this.instance.init();
+        }
         return this.instance;
     }
 

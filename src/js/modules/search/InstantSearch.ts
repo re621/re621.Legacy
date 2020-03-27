@@ -1,5 +1,5 @@
 import { RE6Module } from "../../components/RE6Module";
-import { Page, PageDefintion } from "../../components/data/Page";
+import { PageDefintion } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
 import { PostFilter } from "../../components/data/PostFilter";
 
@@ -12,11 +12,17 @@ export class InstantSearch extends RE6Module {
     // TODO: this can be of type HTMLInputElememnt, but I don't know how to do that
     private $searchbox: JQuery<HTMLElement>;
 
-    private static instance: InstantSearch = new InstantSearch();
+    private static instance: InstantSearch;
 
     private constructor() {
         super(PageDefintion.search);
-        if (!this.eval()) return;
+    }
+
+    public init() {
+        if (!this.shouldCallInitFunction()) {
+            return;
+        }
+        super.init();
 
         this.createDOM();
         let typingTimeout: number;
@@ -28,7 +34,7 @@ export class InstantSearch extends RE6Module {
         });
         //The user might have paginated, which means the input is not empty,
         //but there was no input event yet.
-        this.applyFilter();
+        this.$searchbox.trigger("input");
     }
 
     public applyFilter() {
@@ -66,7 +72,10 @@ export class InstantSearch extends RE6Module {
      * @returns FormattingHelper instance
      */
     public static getInstance() {
-        if (this.instance == undefined) this.instance = new InstantSearch();
+        if (this.instance == undefined) {
+            this.instance = new InstantSearch();
+            this.instance.init();
+        }
         return this.instance;
     }
 }

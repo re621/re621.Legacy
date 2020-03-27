@@ -9,13 +9,19 @@ import { PageDefintion } from "../../components/data/Page";
  */
 export class TitleCustomizer extends RE6Module {
 
-    private static instance: TitleCustomizer = new TitleCustomizer();
+    private static instance: TitleCustomizer;
 
     private post: ViewingPost;
 
     private constructor() {
         super(PageDefintion.post);
-        if (!this.eval()) return;
+    }
+
+    public init() {
+        if (!this.shouldCallInitFunction()) {
+            return;
+        }
+        super.init();
 
         this.post = Post.getViewingPost();
 
@@ -72,7 +78,10 @@ export class TitleCustomizer extends RE6Module {
      * @returns FormattingHelper instance
      */
     public static getInstance() {
-        if (this.instance == undefined) this.instance = new TitleCustomizer();
+        if (this.instance == undefined) {
+            this.instance = new TitleCustomizer();
+            this.instance.init();
+        }
         return this.instance;
     }
 }

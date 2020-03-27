@@ -1,5 +1,3 @@
-import { RE6Module } from "../../components/RE6Module";
-
 declare var Danbooru;
 
 const validKeys = [

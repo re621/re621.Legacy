@@ -34,7 +34,7 @@ export class RE6Module {
      * Evaluates whether the module should be executed.
      * @returns true if the page matches the constraint, false otherwise.
      */
-    public eval() {
+    private matchesPageFilter() {
         return this.constraint.length == 0 || Page.matches(this.constraint);
     }
 
@@ -110,15 +110,24 @@ export class RE6Module {
         this.isEnabled = isEnabled;
     }
 
-    public init() { }
+    /**
+     * Should be called imidiatly after constructor finished
+     */
+    public init() {
+        this.alreadyInit = true;
+    }
 
-    public getAlreadyInit() {
-        return this.alreadyInit;
+    /**
+     * Checks if the module should call the init function
+     */
+    public shouldCallInitFunction() {
+        const result = !this.alreadyInit && this.matchesPageFilter() && this.fetchSettings("enabled") !== false;
+        return result;
     }
 
     /** Establish the module's hotkeys */
     public resetHotkeys() {
-        let enabled = this.eval();
+        let enabled = this.matchesPageFilter();
         this.hotkeys.forEach((value) => {
 
             let keys = this.fetchSettings(value.keys, true).split("|");

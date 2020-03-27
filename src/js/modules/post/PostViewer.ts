@@ -8,7 +8,7 @@ import { PageDefintion } from "../../components/data/Page";
  */
 export class PostViewer extends RE6Module {
 
-    private static instance: PostViewer = new PostViewer();
+    private static instance: PostViewer;
     private post: ViewingPost;
 
     private constructor() {
@@ -18,7 +18,13 @@ export class PostViewer extends RE6Module {
             { keys: "hotkey_downvote", fnct: this.triggerDownvote },
             { keys: "hotkey_favorite", fnct: this.toggleFavorite }
         );
-        if (!this.eval()) { return; }
+    }
+
+    public init() {
+        if (!this.shouldCallInitFunction()) {
+            return;
+        }
+        super.init();
 
         this.post = Post.getViewingPost();
         this.createDOM();
@@ -113,7 +119,10 @@ export class PostViewer extends RE6Module {
      * @returns FormattingHelper instance
      */
     public static getInstance() {
-        if (this.instance == undefined) this.instance = new PostViewer();
+        if (this.instance == undefined) {
+            this.instance = new PostViewer();
+            this.instance.init();
+        }
         return this.instance;
     }
 }

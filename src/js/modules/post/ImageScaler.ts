@@ -2,7 +2,6 @@ import { RE6Module } from "../../components/RE6Module";
 import { Post } from "../../components/data/Post";
 import { Form } from "../../components/structure/Form";
 import { PageDefintion } from "../../components/data/Page";
-import { HotkeyCustomizer } from "../general/HotkeyCustomizer";
 
 const IMAGE_SIZES = [
     { value: "sample", name: "Sample" },
@@ -16,7 +15,7 @@ const IMAGE_SIZES = [
  */
 export class ImageScaler extends RE6Module {
 
-    private static instance: ImageScaler = new ImageScaler();
+    private static instance: ImageScaler;
 
     private post: Post;
     private image: JQuery<HTMLElement>;
@@ -28,7 +27,13 @@ export class ImageScaler extends RE6Module {
         this.registerHotkeys(
             { keys: "hotkey_scale", fnct: this.cycleScaling }
         );
-        if (!this.eval()) { return; }
+    }
+
+    public init() {
+        if (!this.shouldCallInitFunction()) {
+            return;
+        }
+        super.init();
 
         this.post = Post.getViewingPost();
         this.image = $("img#image");
@@ -48,7 +53,10 @@ export class ImageScaler extends RE6Module {
      * @returns BlacklistToggler instance
      */
     public static getInstance() {
-        if (this.instance === undefined) this.instance = new ImageScaler();
+        if (this.instance === undefined) {
+            this.instance = new ImageScaler();
+            this.instance.init();
+        }
         return this.instance;
     }
 

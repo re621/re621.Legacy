@@ -15,7 +15,13 @@ export class PoolNavigator extends RE6Module {
             { keys: "hotkey_next", fnct: this.triggerNextPost },
             { keys: "hotkey_prev", fnct: this.triggerPrevPost },
         );
-        if (!this.eval()) { return; }
+    }
+
+    public init() {
+        if (!this.shouldCallInitFunction()) {
+            return;
+        }
+        super.init();
 
         this.buildDOM();
 
@@ -31,7 +37,10 @@ export class PoolNavigator extends RE6Module {
      * @returns FormattingHelper instance
      */
     public static getInstance() {
-        if (this.instance === undefined) this.instance = new PoolNavigator();
+        if (this.instance === undefined) {
+            this.instance = new PoolNavigator();
+            this.instance.init();
+        }
         return this.instance;
     }
 

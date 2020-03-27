@@ -11,7 +11,7 @@ declare var Cookies;
  */
 export class HeaderCustomizer extends RE6Module {
 
-    private static instance: HeaderCustomizer = new HeaderCustomizer();
+    private static instance: HeaderCustomizer;
 
     private $menu: JQuery<HTMLElement>;
 
@@ -23,6 +23,13 @@ export class HeaderCustomizer extends RE6Module {
 
     private constructor() {
         super();
+    }
+
+    public init() {
+        if (!this.shouldCallInitFunction()) {
+            return;
+        }
+        super.init();
 
         this.$menu = $("menu.main");
         this.createDOM();
@@ -66,7 +73,10 @@ export class HeaderCustomizer extends RE6Module {
      * @returns HeaderCustomizer instance
      */
     public static getInstance() {
-        if (this.instance == undefined) this.instance = new HeaderCustomizer();
+        if (this.instance == undefined) {
+            this.instance = new HeaderCustomizer();
+            this.instance.init();
+        }
         return this.instance;
     }
 

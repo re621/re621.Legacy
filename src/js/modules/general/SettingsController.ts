@@ -8,9 +8,6 @@ import { TitleCustomizer } from "../post/TitleCustomizer";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { PostViewer } from "../post/PostViewer";
 import { HotkeyCustomizer } from "./HotkeyCustomizer";
-import { ImageScaler } from "../post/ImageScaler";
-import { PoolNavigator } from "../post/PoolNavigator";
-import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
 
 /**
  * SettingsController  
@@ -28,6 +25,10 @@ export class SettingsController extends RE6Module {
     }
 
     public init() {
+        if (!this.shouldCallInitFunction()) {
+            return;
+        }
+        super.init();
 
         // Create a button in the header
         let addSettingsButton = HeaderCustomizer.getInstance().createTabElement({
@@ -78,7 +79,12 @@ export class SettingsController extends RE6Module {
      * @returns SettingsController instance
      */
     public static getInstance() {
-        if (this.instance == undefined) this.instance = new SettingsController();
+        //This is the only instance (for now) where the init function does not get called
+        //right after construction. registerModule also calls getInstance,
+        //but to call the init function only makes sense after all modules have been registered
+        if (this.instance == undefined) {
+            this.instance = new SettingsController();
+        }
         return this.instance;
     }
 
@@ -102,10 +108,10 @@ export class SettingsController extends RE6Module {
 
     /** Create the DOM for the Title Customizer page */
     private createTabPostsPage() {
-        let titleCustomizer = <TitleCustomizer>this.modules.get("TitleCustomizer");
-        let downloadCustomizer = <TitleCustomizer>this.modules.get("DownloadCustomizer");
-        let miscellaneous = <Miscellaneous>this.modules.get("Miscellaneous");
-        let postViewer = <PostViewer>this.modules.get("PostViewer");
+        let titleCustomizer = this.modules.get("TitleCustomizer");
+        let downloadCustomizer = this.modules.get("DownloadCustomizer");
+        let miscellaneous = this.modules.get("Miscellaneous");
+        let postViewer = this.modules.get("PostViewer");
 
         let template_icons = new Form(
             { id: "title-template-icons", columns: 2, },
@@ -288,10 +294,10 @@ export class SettingsController extends RE6Module {
 
     /** Creates the DOM for the hotkey settings page */
     private createTabHotkeys() {
-        let postViewer = <PostViewer>this.modules.get("PostViewer");
-        let poolNavigator = <PoolNavigator>this.modules.get("PoolNavigator");
-        let imageScaler = <ImageScaler>this.modules.get("ImageScaler");
-        let miscellaneous = <Miscellaneous>this.modules.get("Miscellaneous");
+        let postViewer = this.modules.get("PostViewer");
+        let poolNavigator = this.modules.get("PoolNavigator");
+        let imageScaler = this.modules.get("ImageScaler");
+        let miscellaneous = this.modules.get("Miscellaneous");
 
         let form = new Form(
             {
@@ -386,10 +392,10 @@ export class SettingsController extends RE6Module {
      */
     private handleTabHotkeys(form: Form) {
         let hotkeyFormInput = form.getInputList();
-        let postViewer = <PostViewer>this.modules.get("PostViewer");
-        let poolNavigator = <PoolNavigator>this.modules.get("PoolNavigator");
-        let imageScaler = <ImageScaler>this.modules.get("ImageScaler");
-        let miscellaneous = <Miscellaneous>this.modules.get("Miscellaneous");
+        let postViewer = this.modules.get("PostViewer");
+        let poolNavigator = this.modules.get("PoolNavigator");
+        let imageScaler = this.modules.get("ImageScaler");
+        let miscellaneous = this.modules.get("Miscellaneous");
 
         // Posts
         // - Voting
@@ -478,7 +484,7 @@ export class SettingsController extends RE6Module {
     }
 
     private createTabBlacklist() {
-        let module = <BlacklistEnhancer>this.modules.get("BlacklistEnhancer");
+        let module = this.modules.get("BlacklistEnhancer");
 
         // Create the settings form
         let form = new Form(
@@ -507,7 +513,7 @@ export class SettingsController extends RE6Module {
     }
 
     private handleTabBlacklist(form: Form) {
-        let module = <BlacklistEnhancer>this.modules.get("BlacklistEnhancer");
+        let module = this.modules.get("BlacklistEnhancer");
         let inputs = form.getInputList();
         inputs.get("blacklist-quickadd").on("re621:form:input", (event, data) => {
             module.pushSettings("quickaddTags", data);
@@ -560,7 +566,7 @@ export class SettingsController extends RE6Module {
             inputs.get(formName).on("re621:form:input", (event, data) => {
                 module.pushSettings("enabled", data);
                 module.setEnabled(data);
-                if (data === true && module.getAlreadyInit() === false) {
+                if (data === true && module.shouldCallInitFunction() === true) {
                     module.init();
                 }
             });

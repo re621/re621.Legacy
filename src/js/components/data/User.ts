@@ -1,5 +1,4 @@
 import { RE6Module } from "../RE6Module";
-import { PostFilter } from "./PostFilter";
 import { Api } from "../api/Api";
 
 /**
@@ -13,7 +12,6 @@ export class User extends RE6Module {
     private loggedin: boolean;
     private username: string;
     private userid: string;
-    private blacklist: PostFilter[];
 
     private level: string;
 
