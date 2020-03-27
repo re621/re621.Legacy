@@ -3,9 +3,10 @@ import { RE6Module } from "../../components/RE6Module";
 declare var Danbooru;
 
 const validKeys = [
-    "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=",
+    "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", ".", ",",
     "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
     "escape", "ctrl", "alt", "shift", "return",
+    "up", "down", "left", "right",
 ];
 
 /**
@@ -31,7 +32,10 @@ export class HotkeyCustomizer {
         let keys = [];
 
         $(document).on("keydown.re621.record", function (event) {
-            let key = event.key.toLowerCase().replace("enter", "return");
+            let key = event.key
+                .toLowerCase()
+                .replace(/enter/g, "return")
+                .replace(/arrow/g, "");
             if (validKeys.indexOf(key) == -1) return;
             keys.push(key)
         });

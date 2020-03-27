@@ -271,7 +271,8 @@ export class Form {
                 if (key.includes("escape")) {
                     $input
                         .removeClass("input-info")
-                        .val($oldKey);
+                        .val("")
+                        .trigger("re621:form:input", [key, $oldKey]);
                     occupied = false;
                 }
                 else if (HotkeyCustomizer.isRegistered(key)) {

@@ -121,8 +121,10 @@ export class RE6Module {
         let enabled = this.eval();
         this.hotkeys.forEach((value) => {
 
-            value.keys.forEach((key) => {
-                if (enabled) HotkeyCustomizer.register(this.fetchSettings(key, true), value.fnct);
+            let keys = this.fetchSettings(value.keys, true).split("|");
+            keys.forEach((key) => {
+                console.log("registering " + key);
+                if (enabled) HotkeyCustomizer.register(key, value.fnct);
                 else HotkeyCustomizer.register(key, function () { });
             });
         });
@@ -140,6 +142,6 @@ export class RE6Module {
 }
 
 interface Hotkey {
-    keys: string[],
+    keys: string,
     fnct: Function,
 }

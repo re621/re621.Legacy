@@ -17,7 +17,7 @@ export class Miscellaneous extends RE6Module {
     private constructor() {
         super();
         this.registerHotkeys(
-            { keys: ["hotkey_newcomment"], fnct: this.openNewComment }
+            { keys: "hotkey_newcomment", fnct: this.openNewComment }
         );
 
         // Load the Redesign Fixes stylesheet

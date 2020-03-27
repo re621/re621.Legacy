@@ -1,7 +1,6 @@
 import { Post, ViewingPost, PostRating } from "../../components/data/Post";
 import { RE6Module } from "../../components/RE6Module";
-import { Page, PageDefintion } from "../../components/data/Page";
-import { HotkeyCustomizer } from "../general/HotkeyCustomizer";
+import { PageDefintion } from "../../components/data/Page";
 
 
 /**
@@ -15,9 +14,9 @@ export class PostViewer extends RE6Module {
     private constructor() {
         super(PageDefintion.post);
         this.registerHotkeys(
-            { keys: ["hotkey_upvote"], fnct: this.triggerUpvote },
-            { keys: ["hotkey_downvote"], fnct: this.triggerDownvote },
-            { keys: ["hotkey_favorite"], fnct: this.toggleFavorite }
+            { keys: "hotkey_upvote", fnct: this.triggerUpvote },
+            { keys: "hotkey_downvote", fnct: this.triggerDownvote },
+            { keys: "hotkey_favorite", fnct: this.toggleFavorite }
         );
         if (!this.eval()) { return; }
 
@@ -103,6 +102,7 @@ export class PostViewer extends RE6Module {
             hotkey_upvote: "a",
             hotkey_downvote: "z",
             hotkey_favorite: "f",
+
             auto_open_parent_child: true,
             upvote_on_favorite: true,
         };

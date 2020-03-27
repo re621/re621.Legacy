@@ -26,7 +26,7 @@ export class ImageScaler extends RE6Module {
     constructor() {
         super(PageDefintion.post);
         this.registerHotkeys(
-            { keys: ["hotkey_scale"], fnct: this.cycleScaling }
+            { keys: "hotkey_scale", fnct: this.cycleScaling }
         );
         if (!this.eval()) { return; }
 
@@ -59,7 +59,7 @@ export class ImageScaler extends RE6Module {
     protected getDefaultSettings() {
         let def_settings = {
             size: "sample",
-            hotkey_scale: "v",
+            hotkey_scale: "v|0",
         };
         return def_settings;
     }

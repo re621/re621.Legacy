@@ -309,52 +309,37 @@ export class SettingsController extends RE6Module {
                 },
 
                 // - Voting
-                {
-                    id: "hotkey-post-upvote",
-                    type: "key",
-                    label: "Upvote",
-                    value: postViewer.fetchSettings("hotkey_upvote"),
-                },
-                {
-                    id: "hotkey-post-downvote",
-                    type: "key",
-                    label: "Downvote",
-                    value: postViewer.fetchSettings("hotkey_downvote"),
-                },
-                {
-                    id: "hotkey-post-favorite",
-                    type: "key",
-                    label: "Favorite",
-                    value: postViewer.fetchSettings("hotkey_favorite"),
-                },
+                createLabel("hotkey_upvote", "Upvote"),
+                createInput(postViewer, "hotkey_upvote", "", 0),
+                createInput(postViewer, "hotkey_upvote", "", 1),
+
+                createLabel("hotkey_downvote", "Downvote"),
+                createInput(postViewer, "hotkey_downvote", "", 0),
+                createInput(postViewer, "hotkey_downvote", "", 1),
+
+                createLabel("hotkey_favorite", "Favorite"),
+                createInput(postViewer, "hotkey_favorite", "", 0),
+                createInput(postViewer, "hotkey_favorite", "", 1),
 
                 // - Navigation
-                {
-                    id: "hotkey-post-next",
-                    type: "key",
-                    label: "Next Post",
-                    value: poolNavigator.fetchSettings("hotkey_prev"),
-                },
-                {
-                    id: "hotkey-post-prev",
-                    type: "key",
-                    label: "Previous Post",
-                    value: poolNavigator.fetchSettings("hotkey_next"),
-                },
-                {
-                    id: "hotkey-post-cycle",
-                    type: "key",
-                    label: "Cycle Navigation",
-                    value: poolNavigator.fetchSettings("hotkey_cycle"),
-                },
+                createLabel("hotkey_prev", "Previous Post"),
+                createInput(poolNavigator, "hotkey_prev", "", 0),
+                createInput(poolNavigator, "hotkey_prev", "", 1),
+
+
+                createLabel("hotkey_next", "Next Post"),
+                createInput(poolNavigator, "hotkey_next", "", 0),
+                createInput(poolNavigator, "hotkey_next", "", 1),
+
+
+                createLabel("hotkey_cycle", "Cycle Navigation"),
+                createInput(poolNavigator, "hotkey_cycle", "", 0),
+                createInput(poolNavigator, "hotkey_cycle", "", 1),
 
                 // - Scaling
-                {
-                    id: "hotkey-post-scale",
-                    type: "key",
-                    label: "Scale",
-                    value: imageScaler.fetchSettings("hotkey_scale"),
-                },
+                createLabel("hotkey_scale", "Change Scale"),
+                createInput(imageScaler, "hotkey_scale", "", 0),
+                createInput(imageScaler, "hotkey_scale", "", 1),
 
                 // Comments
                 {
@@ -363,14 +348,34 @@ export class SettingsController extends RE6Module {
                     value: "<h3>Comments</h3>",
                     stretch: "full"
                 },
-                {
-                    id: "hotkey-comments-new",
-                    type: "key",
-                    label: "New Comment",
-                    value: miscellaneous.fetchSettings("hotkey_newcomment"),
-                },
+
+                createLabel("hotkey_newcomment", "New Comment"),
+                createInput(miscellaneous, "hotkey_newcomment", "", 0),
+                createInput(miscellaneous, "hotkey_newcomment", "", 1),
             ]
         );
+
+        function createLabel(settingsKey: string, label: string): FormElement {
+            return {
+                id: settingsKey + "-label",
+                type: "div",
+                value: label,
+                stretch: "column"
+            };
+        }
+
+        function createInput(module: RE6Module, settingsKey: string, label: string, suffix: number = 0): FormElement {
+            let values = module.fetchSettings(settingsKey).split("|"),
+                binding = "";
+            if (values[suffix] !== undefined) binding = values[suffix];
+
+            return {
+                id: settingsKey + "-input-" + suffix,
+                type: "key",
+                label: label,
+                value: binding
+            };
+        }
 
         return form;
     }
@@ -388,56 +393,43 @@ export class SettingsController extends RE6Module {
 
         // Posts
         // - Voting
-        hotkeyFormInput.get("hotkey-post-upvote").on("re621:form:input", (event, newKey, oldKey) => {
-            postViewer.pushSettings("hotkey_upvote", newKey);
-            HotkeyCustomizer.unregister(oldKey);
-            postViewer.resetHotkeys();
-        });
+        createListener(postViewer, "hotkey_upvote", 2);
 
-        hotkeyFormInput.get("hotkey-post-downvote").on("re621:form:input", (event, newKey, oldKey) => {
-            postViewer.pushSettings("hotkey_downvote", newKey);
-            HotkeyCustomizer.unregister(oldKey);
-            postViewer.resetHotkeys();
-        });
-
-        hotkeyFormInput.get("hotkey-post-favorite").on("re621:form:input", (event, newKey, oldKey) => {
-            postViewer.pushSettings("hotkey_favorite", newKey);
-            HotkeyCustomizer.unregister(oldKey);
-            postViewer.resetHotkeys();
-        });
+        createListener(postViewer, "hotkey_downvote", 2);
+        createListener(postViewer, "hotkey_favorite", 2);
 
         // - Navigation
-        hotkeyFormInput.get("hotkey-post-next").on("re621:form:input", (event, newKey, oldKey) => {
-            poolNavigator.pushSettings("hotkey_next", newKey);
-            HotkeyCustomizer.unregister(oldKey);
-            poolNavigator.resetHotkeys();
-        });
-
-        hotkeyFormInput.get("hotkey-post-prev").on("re621:form:input", (event, newKey, oldKey) => {
-            poolNavigator.pushSettings("hotkey_prev", newKey);
-            HotkeyCustomizer.unregister(oldKey);
-            poolNavigator.resetHotkeys();
-        });
-
-        hotkeyFormInput.get("hotkey-post-cycle").on("re621:form:input", (event, newKey, oldKey) => {
-            poolNavigator.pushSettings("hotkey_cycle", newKey);
-            HotkeyCustomizer.unregister(oldKey);
-            poolNavigator.resetHotkeys();
-        });
+        createListener(poolNavigator, "hotkey_prev", 2);
+        createListener(poolNavigator, "hotkey_next", 2);
+        createListener(poolNavigator, "hotkey_cycle", 2);
 
         // - Scaling
-        hotkeyFormInput.get("hotkey-post-scale").on("re621:form:input", (event, newKey, oldKey) => {
-            imageScaler.pushSettings("hotkey_scale", newKey);
-            HotkeyCustomizer.unregister(oldKey);
-            imageScaler.resetHotkeys();
-        });
+        createListener(imageScaler, "hotkey_scale", 2);
 
         // Comments
-        hotkeyFormInput.get("hotkey-comments-new").on("re621:form:input", (event, newKey, oldKey) => {
-            miscellaneous.pushSettings("hotkey_newcomment", newKey);
-            HotkeyCustomizer.unregister(oldKey);
-            miscellaneous.resetHotkeys();
-        });
+        createListener(miscellaneous, "hotkey_newcomment", 2);
+
+        /** Creates a listener for the hotkey input */
+        function createListener(module: RE6Module, settingsKey: string, bindings: number = 1) {
+            for (let i = 0; i < bindings; i++) {
+                hotkeyFormInput.get(settingsKey + "-input-" + i).on("re621:form:input", (event, newKey, oldKey) => {
+                    if (i === 0) {
+                        let bindingData = [];
+                        for (let j = 0; j < bindings; j++) {
+                            bindingData.push(hotkeyFormInput.get(settingsKey + "-input-" + j).val());
+                        }
+                        console.log(bindingData);
+                        console.log(bindingData.filter(n => n).join("|"));
+                        module.pushSettings(settingsKey, bindingData.filter(n => n).join("|"));
+
+                        module.resetHotkeys();
+                    } else {
+                        HotkeyCustomizer.unregister(oldKey);
+                        hotkeyFormInput.get(settingsKey + "-input-0").trigger("re621:form:input");
+                    }
+                });
+            }
+        }
     }
 
     /** Creates the DOM for the miscellaneous settings page */

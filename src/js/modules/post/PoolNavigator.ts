@@ -1,5 +1,4 @@
 import { RE6Module } from "../../components/RE6Module";
-import { HotkeyCustomizer } from "../general/HotkeyCustomizer";
 import { PageDefintion } from "../../components/data/Page";
 
 export class PoolNavigator extends RE6Module {
@@ -12,9 +11,9 @@ export class PoolNavigator extends RE6Module {
     private constructor() {
         super(PageDefintion.post);
         this.registerHotkeys(
-            { keys: ["hotkey_cycle"], fnct: this.cycleNavbars },
-            { keys: ["hotkey_next"], fnct: this.triggerNextPost },
-            { keys: ["hotkey_prev"], fnct: this.triggerPrevPost },
+            { keys: "hotkey_cycle", fnct: this.cycleNavbars },
+            { keys: "hotkey_next", fnct: this.triggerNextPost },
+            { keys: "hotkey_prev", fnct: this.triggerPrevPost },
         );
         if (!this.eval()) { return; }
 
@@ -42,9 +41,9 @@ export class PoolNavigator extends RE6Module {
      */
     public getDefaultSettings() {
         return {
-            hotkey_cycle: "r",
-            hotkey_prev: "q",
-            hotkey_next: "e",
+            hotkey_cycle: "r|.",
+            hotkey_prev: "q|left",
+            hotkey_next: "e|right",
         };
     }
 
