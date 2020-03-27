@@ -5,18 +5,22 @@ import { HeaderCustomizer } from "./HeaderCustomizer";
 import { Tabbed } from "../../components/structure/Tabbed";
 import { Modal } from "../../components/structure/Modal";
 import { Util } from "../../components/structure/Util";
-import { ApiPost } from "../../components/api/responses/ApiPost";
 import { Page, PageDefintion } from "../../components/data/Page";
 
 export class SubscriptionManager extends RE6Module {
 
     private static instance: SubscriptionManager;
 
+    private static updateLimit: number = 20;
+    private static dismissOnUpdate: boolean = true;
+
     private lastUpdate: Date;
 
     private poolsTab: JQuery<HTMLElement>;
     private forumTab: JQuery<HTMLElement>;
     private tagsTab: JQuery<HTMLElement>;
+
+    private openSubsButton;
 
     private constructor() {
         super();
@@ -32,15 +36,17 @@ export class SubscriptionManager extends RE6Module {
                     .addClass("subscriptions-notice")
                     .html("All caught up!")
                     .appendTo(this.poolsTab);
-            }
-            data.forEach((entry) => {
-                this.poolsTab.append(this.createUpdateEntry(entry, images[entry.last]));
-            });
-            if (trimmed > 0) {
-                $("<div>")
-                    .addClass("subscriptions-notice")
-                    .html("... plus " + trimmed + " more")
-                    .appendTo(this.poolsTab);
+            } else {
+                data.forEach((entry) => {
+                    this.poolsTab.append(this.createUpdateEntry(entry, images[entry.last]));
+                });
+                if (trimmed > 0) {
+                    $("<div>")
+                        .addClass("subscriptions-notice")
+                        .html("... plus " + trimmed + " more")
+                        .appendTo(this.poolsTab);
+                }
+                this.openSubsButton.link.attr("data-has-notifications", "true");
             }
         });
     }
@@ -63,8 +69,6 @@ export class SubscriptionManager extends RE6Module {
             pools: [],
             pools_overflow: [],
             lastUpdate: "",
-            dismissOnUpdate: false,
-            maxUpdates: 20,
         };
     }
 
@@ -72,7 +76,7 @@ export class SubscriptionManager extends RE6Module {
     private buildDOM() {
 
         // Create a button in the header
-        let openSubsButton = HeaderCustomizer.getInstance().createTabElement({
+        this.openSubsButton = HeaderCustomizer.getInstance().createTabElement({
             name: `<i class="fas fa-bell"></i>`,
             parent: "menu.extra",
             controls: false,
@@ -95,7 +99,7 @@ export class SubscriptionManager extends RE6Module {
         // Create the modal
         let modal = new Modal({
             title: "Subscriptions",
-            triggers: [{ element: openSubsButton.link }],
+            triggers: [{ element: this.openSubsButton.link }],
             escapable: false,
             content: $subsTabs.create(),
             position: { my: "right top", at: "right top" }
@@ -209,13 +213,13 @@ export class SubscriptionManager extends RE6Module {
 
         let poolsJson: ApiPool[] = await Api.getJson("/pools.json?search[id]=" + poolData.join(","));
         let index = 0,
-            limit = this.fetchSettings("maxUpdates"),
+            limit = SubscriptionManager.updateLimit,
 
             overflow = this.fetchSettings("pools_overflow"),
             newOverflow = [],
             trimmed = 0;
         poolsJson.forEach((value) => {
-            if (new Date(value.updated_at).getTime() > this.lastUpdate.getTime() || this.fetchSettings("dismissOnUpdate") == false || overflow.indexOf(value.id) !== -1) {
+            if (new Date(value.updated_at).getTime() > this.lastUpdate.getTime() || !SubscriptionManager.dismissOnUpdate || overflow.indexOf(value.id) !== -1) {
                 console.log("processing");
                 if (index >= limit) {
                     newOverflow.push(value.id);

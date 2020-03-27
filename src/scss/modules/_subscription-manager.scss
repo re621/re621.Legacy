@@ -1,5 +1,21 @@
 /* Subscription Manager Styles */
 
+a[data-has-notifications=true] {
+    position: relative;
+
+    &::after {
+        content: unicode('f111');
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        font-size: 0.5em;
+        color: red;
+
+        position: absolute;
+        right: 15%;
+        top: 0;
+    }
+}
+
 div#c-pools>div#a-show>h1 {
     button.subscribe-button {
         float: right;
@@ -50,6 +66,10 @@ div.subscriptions-list {
         margin-bottom: 1rem;
         background: #ffffff33;
 
+        &:last-child {
+            margin-bottom: 0;
+        }
+
         div.subscription-update-preview {
             grid-row: span 2;
 
@@ -79,6 +99,30 @@ div.subscriptions-list {
             margin: 0rem 0.5rem 0.5rem;
             justify-content: flex-end;
         }
+    }
+
+    &::-webkit-scrollbar {
+        width: 14px;
+        height: 18px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        height: 6px;
+        border: 4px solid rgba(0, 0, 0, 0);
+        background-clip: padding-box;
+        border-radius: 7px;
+        background-color: rgba(0, 0, 0, 0.35);
+        box-shadow: inset -1px -1px 0px rgba(0, 0, 0, 0.05), inset 1px 1px 0px rgba(0, 0, 0, 0.05);
+    }
+
+    &::-webkit-scrollbar-button {
+        width: 0;
+        height: 0;
+        display: none;
+    }
+
+    &::-webkit-scrollbar-corner {
+        background-color: transparent;
     }
 
 }
