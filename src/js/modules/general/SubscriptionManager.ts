@@ -55,7 +55,8 @@ export class SubscriptionManager extends RE6Module {
     protected getDefaultSettings() {
         return {
             pools: [],
-            lastUpdate: ""
+            lastUpdate: "",
+            dismissOnUpdate: false,
         };
     }
 
@@ -94,10 +95,11 @@ export class SubscriptionManager extends RE6Module {
 
         modal.getElement().on("dialogopen", (event) => {
             this.lastUpdate = new Date();
-            this.pushSettings("lastUpdate", this.lastUpdate);
+            this.pushSettings("lastUpdate", this.lastUpdate, true);
         });
     }
 
+    /** Create the "Subscribe" / "Unsubscribe" buttons */
     private buildButtons() {
         if (Page.matches(PageDefintion.pool)) {
             let $header = $("div#c-pools > div#a-show > h1").first();
@@ -110,12 +112,7 @@ export class SubscriptionManager extends RE6Module {
                 .html("Unsubscribe")
                 .appendTo($header);
 
-            let poolData = this.fetchSettings("pools");
-
-            console.log(poolData);
-            console.log(Page.getPageID());
-            console.log(parseInt(Page.getPageID()));
-            console.log(poolData.indexOf(parseInt(Page.getPageID())));
+            let poolData = this.fetchSettings("pools", true);
 
             if (poolData.indexOf(parseInt(Page.getPageID())) === -1) {
                 unsubscribeButton.addClass("hidden");
@@ -124,6 +121,7 @@ export class SubscriptionManager extends RE6Module {
             subscribeButton.click((event) => {
                 subscribeButton.toggleClass("hidden");
                 unsubscribeButton.toggleClass("hidden");
+                poolData = this.fetchSettings("pools", true);
 
                 poolData.push(parseInt(Page.getPageID()));
                 this.pushSettings("pools", poolData);
@@ -131,6 +129,7 @@ export class SubscriptionManager extends RE6Module {
             unsubscribeButton.click((event) => {
                 subscribeButton.toggleClass("hidden");
                 unsubscribeButton.toggleClass("hidden");
+                poolData = this.fetchSettings("pools", true);
 
                 poolData = poolData.splice(poolData.indexOf(parseInt(Page.getPageID()), 1));
                 this.pushSettings("pools", poolData);
@@ -194,7 +193,7 @@ export class SubscriptionManager extends RE6Module {
         let results: Update[] = [];
         let lastImg: string[] = [];
 
-        let poolData = this.fetchSettings("pools");
+        let poolData = this.fetchSettings("pools", true);
         if (poolData.length == 0) {
             fn([], {});
             return;
@@ -203,7 +202,7 @@ export class SubscriptionManager extends RE6Module {
         let poolsJson: ApiPool[] = await Api.getJson("/pools.json?search[id]=" + poolData.join(","));
         poolsJson.forEach((value) => {
             let date = new Date(value.updated_at);
-            if (date.getTime() > this.lastUpdate.getTime()) {
+            if (date.getTime() > this.lastUpdate.getTime() || this.fetchSettings("dismissOnUpdate") == false) {
 
                 let image = value.post_ids[value.post_ids.length - 1];
                 let update: Update = {

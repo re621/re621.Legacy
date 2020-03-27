@@ -44,8 +44,10 @@ export class RE6Module {
      * Saves the specified settings property-value pair
      * @param property Property name
      * @param value Property value
+     * @param preserve Ensures that all other values are preserved
      */
-    public pushSettings(property: string, value: any) {
+    public pushSettings(property: string, value: any, preserve?: boolean) {
+        if (preserve) { this.loadCookies() }
         this.settings[property] = value;
         this.saveCookies();
     }
