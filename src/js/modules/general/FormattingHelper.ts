@@ -3,6 +3,7 @@ import { Prompt } from "../../components/structure/Prompt";
 import { Modal } from "../../components/structure/Modal";
 import { Form } from "../../components/structure/Form";
 import { HotkeyCustomizer } from "./HotkeyCustomizer";
+import { Api } from "../../components/api/Api";
 
 const icon_definitions = [
     { value: "spacer", name: "&nbsp;" },
@@ -461,7 +462,7 @@ export class FormattingHelper extends RE6Module {
             this.$toggleTabs.find("a").toggleClass("active");
 
             // format the text
-            this.formatDText(this.$textarea.val(), data => {
+            this.formatDText(this.$textarea.val(), async (data) => {
                 this.$preview.html(data.html);
             });
         } else {
@@ -548,18 +549,12 @@ export class FormattingHelper extends RE6Module {
      * @param input string
      * @param handleData Callback function
      */
-    private formatDText(input: string | string[] | number, handleData: any) {
-        $.ajax({
-            type: "post",
-            url: "/dtext_preview",
-            dataType: "json",
-            data: {
-                body: input
-            },
-            success: data => {
-                handleData(data);
-            }
-        });
+    private async formatDText(input: string | string[] | number, handleData: any) {
+        const response = await Api.postUrl(
+            "/dtext_preview",
+            { body: input }
+        );
+        handleData(JSON.parse(response));
     }
 }
 
