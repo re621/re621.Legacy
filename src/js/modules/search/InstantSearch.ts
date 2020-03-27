@@ -28,7 +28,7 @@ export class InstantSearch extends RE6Module {
         });
         //The user might have paginated, which means the input is not empty,
         //but there was no input event yet.
-        this.applyFilter();
+        this.$searchbox.trigger("input");
     }
 
     public applyFilter() {
