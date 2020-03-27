@@ -180,8 +180,9 @@ export class Post {
      */
     public static refreshBlacklistStatus() {
         //empty current status and itterate over every post and check again
+        const posts = this.fetchPosts();
         this.blacklistMatches = new Map<string, number>();
-        for (const post of this.fetchPosts()) {
+        for (const post of posts) {
             post.isBlacklisted = post.matchesSiteBlacklist();
         }
     }
