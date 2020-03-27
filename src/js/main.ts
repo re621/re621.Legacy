@@ -33,13 +33,13 @@ ThemeCustomizer.getInstance();
 FormattingHelper.init();
 
 // Modules without settings
-BlacklistEnhancer.getInstance();
 InstantSearch.getInstance();
 InfiniteScroll.getInstance();
 TinyAlias.getInstance();
 
 // Modules configured by the SettingsController
 SettingsController.registerModule(
+    BlacklistEnhancer.getInstance(),
     DownloadCustomizer.getInstance(),
     ImageScaler.getInstance(),
     TitleCustomizer.getInstance(),

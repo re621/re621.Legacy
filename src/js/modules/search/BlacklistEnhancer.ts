@@ -1,6 +1,8 @@
 import { RE6Module } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
+import { User } from "../../components/data/User";
+import { PostFilter } from "../../components/data/PostFilter";
 
 declare var Danbooru;
 
@@ -11,6 +13,8 @@ declare var Danbooru;
 export class BlacklistEnhancer extends RE6Module {
 
     private static instance: BlacklistEnhancer;
+
+    private blacklist: PostFilter[];
 
     private $box: JQuery<HTMLElement>;
     private $toggle: JQuery<HTMLElement>;
@@ -26,6 +30,8 @@ export class BlacklistEnhancer extends RE6Module {
         Danbooru.Blacklist.initialize_all = () => { };
 
         this.modifyDOM();
+
+        this.refresh();
 
         //Apply blacklist without user interaction. Blacklist might be active
         this.applyBlacklist(true);
@@ -67,8 +73,37 @@ export class BlacklistEnhancer extends RE6Module {
             //Togle display state
             this.toggleBlacklistedTags();
         });
+
+        //Add x next to tag names to toggle them from the blacklist
+        if (this.fetchSettings("quickaddTags") === true && User.isLoggedIn()) {
+            $("#tag-list .search-tag, #tag-box .search-tag").each((index, element) => {
+                const $element = $(element);
+                $("<a>").addClass("blacklist-tag-toggle").attr("href", "#").text("x").on("click", () => {
+                    this.toggleBlacklistTag($element.text().replace(/ /g, "_"));
+                }).prependTo($element.parent());
+            });
+        }
     }
 
+    /**
+     * Removes or adds a tag to the users blacklist
+     */
+    private async toggleBlacklistTag(tag) {
+        Danbooru.notice("Getting current blacklist");
+        let currentBlacklist = (await User.getCurrentSettings()).blacklisted_tags.split("\n");
+
+        if (currentBlacklist.indexOf(tag) === -1) {
+            currentBlacklist.push(tag);
+            Danbooru.notice("Adding " + tag + " to blacklist");
+        } else {
+            currentBlacklist = currentBlacklist.filter(e => e !== tag);
+            Danbooru.notice("Removing " + tag + " from blacklist");
+        }
+        await User.setSettings({ blacklisted_tags: currentBlacklist.join("\n") });
+        Danbooru.notice("Done!");
+        this.setBlacklist(currentBlacklist);
+        this.applyBlacklist();
+    }
 
     private toggleBlacklistedTags() {
         if (this.blacklistedTagsAreVisible()) { this.hideBlacklistedTags(); }
@@ -88,7 +123,7 @@ export class BlacklistEnhancer extends RE6Module {
     }
 
     private blacklistIsActive() {
-        return $("#disable-all-blacklists").is(":visible");
+        return $("#disable-all-blacklists").css("display") !== "none";
     }
 
     /**
@@ -113,12 +148,46 @@ export class BlacklistEnhancer extends RE6Module {
         this.updateSidebar(blacklistIsActive);
     }
 
+
+    public refresh() {
+        this.blacklist = [];
+        const filterArray: string[] = JSON.parse($("head meta[name=blacklisted-tags]").attr("content"));
+        for (const filter of filterArray) {
+            this.blacklist.push(new PostFilter(filter));
+        }
+        Post.refreshBlacklistStatus();
+    }
+
+    /**
+     * Returns the parsed blacklist filters
+     * @returns PostFilter[] A array of the users current filters
+     */
+    public getFilters() {
+        return this.blacklist;
+    }
+
+    /**
+     * Saves the passed blacklist to the users e6 account
+     * and refreshes the currently visible posts
+     */
+    public setBlacklist(blacklistArray: string[]) {
+        $("head meta[name=blacklisted-tags]").attr("content", JSON.stringify(blacklistArray))
+        this.refresh();
+    }
+
     public updateSidebar(blacklistIsActive: boolean) {
         //remove already added entries
         this.$list.empty();
 
         for (const entry of Post.getBlacklistMatches().entries()) {
             this.addSidebarEntry(entry[0], entry[1], blacklistIsActive);
+        }
+
+        //When there are no entries there's no need to display the blacklist box
+        if (Post.getBlacklistMatches().size === 0) {
+            this.$box.hide();
+        } else {
+            this.$box.show();
         }
     }
 
@@ -145,6 +214,17 @@ export class BlacklistEnhancer extends RE6Module {
         $entry.append($count);
 
         this.$list.append($entry);
+    }
+
+
+    /**
+     * Returns a set of default settings values
+     * @returns Default settings
+     */
+    protected getDefaultSettings() {
+        return {
+            quickaddTags: true,
+        };
     }
 
     /**

@@ -1,5 +1,5 @@
-import { TagTypes, Tag } from "./Tag";
-import { User } from "./User";
+import { TagTypes } from "./Tag";
+import { BlacklistEnhancer } from "../../modules/search/BlacklistEnhancer";
 
 /**
  * Collects basic info for a post.
@@ -129,9 +129,10 @@ export class Post {
      * @param blacklistIsActive true if blacklist is active, false otherwise
      */
     public applyBlacklist(blacklistIsActive: boolean) {
-        //Only hide/show blacklisted, no need to do it to all
         if (this.getIsBlacklisted()) {
             blacklistIsActive ? this.hide() : this.show();
+        } else {    //It's not blacklisted, show it instead
+            this.show();
         }
     }
 
@@ -164,7 +165,7 @@ export class Post {
      */
     private matchesSiteBlacklist() {
         let hits = 0;
-        for (const filter of User.getBlacklist()) {
+        for (const filter of BlacklistEnhancer.getInstance().getFilters()) {
             if (filter.matchesPost(this)) {
                 const currentMatches = Post.blacklistMatches.get(filter.getStringRepresentation());
                 Post.blacklistMatches.set(filter.getStringRepresentation(), currentMatches === undefined ? 1 : currentMatches + 1);
@@ -172,6 +173,17 @@ export class Post {
             }
         }
         return hits !== 0;
+    }
+
+    /**
+     * Reparsed the the blacklist status of all posts, in case the blacklist got modified
+     */
+    public static refreshBlacklistStatus() {
+        //empty current status and itterate over every post and check again
+        this.blacklistMatches = new Map<string, number>();
+        for (const post of this.fetchPosts()) {
+            post.isBlacklisted = post.matchesSiteBlacklist();
+        }
     }
 
     /**

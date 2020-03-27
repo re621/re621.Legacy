@@ -1,5 +1,6 @@
 import { RE6Module } from "../RE6Module";
 import { PostFilter } from "./PostFilter";
+import { Api } from "../api/Api";
 
 /**
  * User  
@@ -23,14 +24,6 @@ export class User extends RE6Module {
         this.loggedin = $ref.attr("data-user-is-anonymous") == "false";
         this.username = $ref.attr("data-user-name") || "Anonymous";
         this.userid = $ref.attr("data-user-id") || "0";
-
-        this.blacklist = [];
-        const filterArray: string[] = JSON.parse($("head meta[name=blacklisted-tags]").attr("content"));
-        for (const filter of filterArray) {
-            this.blacklist.push(new PostFilter(filter));
-        }
-
-
         this.level = $ref.attr("data-user-level-string") || "Guest";
     }
 
@@ -76,10 +69,24 @@ export class User extends RE6Module {
     }
 
     /**
-     * Returns user's blacklist
-     * @returns string[] A array of space seperated strings
+     * @returns the users e6 site settings
      */
-    public static getBlacklist() {
-        return this.getInstance().blacklist;
+    public static async getCurrentSettings() {
+        return Api.getJson("/users/" + this.getUserID() + ".json");
+    }
+
+    /**
+     * Saves the settings for the user
+     * There is no need to put the keys into array form, this happens automatically
+     */
+    public static async setSettings(data: {}) {
+        const url = "/users/" + this.getUserID() + ".json";
+        const json = {
+            "_method": "patch"
+        }
+        for (const key of Object.keys(data)) {
+            json["user[" + key + "]"] = data[key];
+        }
+        await Api.postUrl(url, json);
     }
 }
