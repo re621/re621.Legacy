@@ -20,10 +20,7 @@ export class TinyAlias extends RE6Module {
 
     private constructor() {
         super(PageDefintion.upload);
-        if (!this.eval()) {
-            this.reserveHotkeys();
-            return;
-        }
+        if (!this.eval()) { return; }
 
         this.buildDOM();
     }

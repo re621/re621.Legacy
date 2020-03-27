@@ -25,10 +25,10 @@ export class ImageScaler extends RE6Module {
 
     constructor() {
         super(PageDefintion.post);
-        if (!this.eval()) {
-            this.reserveHotkeys();
-            return;
-        }
+        this.registerHotkeys(
+            { keys: ["hotkey_scale"], fnct: this.cycleScaling }
+        );
+        if (!this.eval()) { return; }
 
         this.post = Post.getViewingPost();
         this.image = $("img#image");
@@ -64,21 +64,14 @@ export class ImageScaler extends RE6Module {
         return def_settings;
     }
 
-    /** Registers the module's hotkeys */
-    protected registerHotkeys() {
-        HotkeyCustomizer.register(this.fetchSettings("hotkey_scale"), function () {
-            let $next = $("#resize-image-scale option:selected").next();
-            if ($next.length > 0) {
-                $("#resize-image-scale").val($next.val()).change();
-            } else {
-                $("#resize-image-scale").val($("#resize-image-scale option").first().val()).change();
-            }
-        });
-    }
-
-    /** Reserves hotkeys to prevent them from being re-assigned */
-    protected reserveHotkeys() {
-        HotkeyCustomizer.register(this.fetchSettings("hotkey_scale"), function () { });
+    /** Loops through scaling options */
+    private cycleScaling() {
+        let $next = $("#resize-image-scale option:selected").next();
+        if ($next.length > 0) {
+            $("#resize-image-scale").val($next.val()).change();
+        } else {
+            $("#resize-image-scale").val($("#resize-image-scale option").first().val()).change();
+        }
     }
 
     /**

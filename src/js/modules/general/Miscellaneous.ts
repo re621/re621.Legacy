@@ -16,6 +16,9 @@ export class Miscellaneous extends RE6Module {
 
     private constructor() {
         super();
+        this.registerHotkeys(
+            { keys: ["hotkey_newcomment"], fnct: this.openNewComment }
+        );
 
         // Load the Redesign Fixes stylesheet
         this.loadRedesignFixes(this.fetchSettings("loadRedesignFixes"));
@@ -38,17 +41,10 @@ export class Miscellaneous extends RE6Module {
         this.registerHotkeys();
     }
 
-    /** Registers hotkeys for the module */
-    protected registerHotkeys() {
-        HotkeyCustomizer.register(this.fetchSettings("hotkey_newcomment"), function () {
-            if (Page.matches(PageDefintion.post)) $("a.expand-comment-response").click();
-            else if (Page.matches(PageDefintion.forum)) $("a#new-response-link").click();
-        });
-    }
-
-    /** Reserves hotkeys to prevent them from being re-assigned */
-    protected reserveHotkeys() {
-        HotkeyCustomizer.register(this.fetchSettings("hotkey_newcomment"), function () { });
+    /** Emulates the clicking on "New Comment" link */
+    private openNewComment() {
+        if (Page.matches(PageDefintion.post)) $("a.expand-comment-response").click();
+        else if (Page.matches(PageDefintion.forum)) $("a#new-response-link").click();
     }
 
     /**

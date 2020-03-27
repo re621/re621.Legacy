@@ -12,25 +12,18 @@ const validKeys = [
  * Manages the keyboard shortcuts for the entire project.  
  * Any module that uses hotkeys needs to call this instead.
  */
-export class HotkeyCustomizer extends RE6Module {
+export class HotkeyCustomizer {
 
     private static instance: HotkeyCustomizer;
     private listeners: string[] = [];
 
     private constructor() {
-        super();
         Danbooru.Utility.disableShortcuts = true;
     }
 
     public static getInstance() {
         if (this.instance === undefined) this.instance = new HotkeyCustomizer();
         return this.instance;
-    }
-
-    protected getDefaultSettings() {
-        return {
-
-        };
     }
 
     public static recordSingleKeypress(callback: Function) {

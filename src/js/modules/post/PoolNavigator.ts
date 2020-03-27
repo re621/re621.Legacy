@@ -11,10 +11,12 @@ export class PoolNavigator extends RE6Module {
 
     private constructor() {
         super(PageDefintion.post);
-        if (!this.eval()) {
-            this.reserveHotkeys();
-            return;
-        }
+        this.registerHotkeys(
+            { keys: ["hotkey_cycle"], fnct: this.cycleNavbars },
+            { keys: ["hotkey_next"], fnct: this.triggerNextPost },
+            { keys: ["hotkey_prev"], fnct: this.triggerPrevPost },
+        );
+        if (!this.eval()) { return; }
 
         this.buildDOM();
 
@@ -46,34 +48,31 @@ export class PoolNavigator extends RE6Module {
         };
     }
 
-    /** Registers hotkeys for the module */
-    protected registerHotkeys() {
-        HotkeyCustomizer.register(this.fetchSettings("hotkey_cycle"), () => {
-            if (this.navbars.length == 0) return;
-            if ((this.activeNav + 1) > this.navbars.length) {
-                this.navbars[0].checkbox.click();
-                this.activeNav = 0;
-            } else {
-                this.navbars[this.activeNav + 1].checkbox.click();
-                this.activeNav += 1;
-            }
-        });
-        HotkeyCustomizer.register(this.fetchSettings("hotkey_prev"), () => {
-            if (this.navbars.length == 0) return;
-            this.navbars[this.activeNav].element.find("a.prev").first()[0].click();
-        });
-        HotkeyCustomizer.register(this.fetchSettings("hotkey_next"), () => {
-            if (this.navbars.length == 0) return;
-            this.navbars[this.activeNav].element.find("a.next").first()[0].click();
-        });
+    /** Loops through available navbars */
+    private cycleNavbars() {
+        if (this.navbars.length == 0) return;
+        if ((this.activeNav + 1) > this.navbars.length) {
+            this.navbars[0].checkbox.click();
+            this.activeNav = 0;
+        } else {
+            this.navbars[this.activeNav + 1].checkbox.click();
+            this.activeNav += 1;
+        }
     }
 
-    /** Reserves hotkeys to prevent them from being re-assigned */
-    protected reserveHotkeys() {
-        HotkeyCustomizer.register(this.fetchSettings("hotkey_prev"), function () { });
-        HotkeyCustomizer.register(this.fetchSettings("hotkey_next"), function () { });
+    /** Emulates a click on the "next" button */
+    private triggerNextPost() {
+        if (this.navbars.length == 0) return;
+        this.navbars[this.activeNav].element.find("a.prev").first()[0].click();
     }
 
+    /** Emulates a click on the "prev" button */
+    private triggerPrevPost() {
+        if (this.navbars.length == 0) return;
+        this.navbars[this.activeNav].element.find("a.next").first()[0].click();
+    }
+
+    /** Creates the module structure */
     private buildDOM() {
         // Search-nav
         if ($("div#search-seq-nav").length) {

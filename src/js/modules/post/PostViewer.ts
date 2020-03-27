@@ -14,10 +14,12 @@ export class PostViewer extends RE6Module {
 
     private constructor() {
         super(PageDefintion.post);
-        if (!this.eval()) {
-            this.reserveHotkeys();
-            return;
-        }
+        this.registerHotkeys(
+            { keys: ["hotkey_upvote"], fnct: this.triggerUpvote },
+            { keys: ["hotkey_downvote"], fnct: this.triggerDownvote },
+            { keys: ["hotkey_favorite"], fnct: this.toggleFavorite }
+        );
+        if (!this.eval()) { return; }
 
         this.post = Post.getViewingPost();
         this.createDOM();
@@ -76,25 +78,20 @@ export class PostViewer extends RE6Module {
         });
     }
 
-    /** Registers hotkeys for the module */
-    protected registerHotkeys() {
-        HotkeyCustomizer.register(this.fetchSettings("hotkey_upvote"), function () {
-            $("a.post-vote-up-link")[0].click();
-        });
-        HotkeyCustomizer.register(this.fetchSettings("hotkey_downvote"), function () {
-            $("a.post-vote-down-link")[0].click();
-        });
-        HotkeyCustomizer.register(this.fetchSettings("hotkey_favorite"), function () {
-            if ($("div.fav-buttons").hasClass("fav-buttons-false")) { $("button#add-fav-button")[0].click(); }
-            else { $("button#remove-fav-button")[0].click(); }
-        });
+    /** Emulates a click on the upvote button */
+    private triggerUpvote() {
+        $("a.post-vote-up-link")[0].click();
     }
 
-    /** Reserves hotkeys to prevent them from being re-assigned */
-    protected reserveHotkeys() {
-        HotkeyCustomizer.register(this.fetchSettings("hotkey_upvote"), function () { });
-        HotkeyCustomizer.register(this.fetchSettings("hotkey_downvote"), function () { });
-        HotkeyCustomizer.register(this.fetchSettings("hotkey_favorite"), function () { });
+    /** Emulates a click on the downvote button */
+    private triggerDownvote() {
+        $("a.post-vote-down-link")[0].click();
+    }
+
+    /** Toggles the favorite state */
+    private toggleFavorite() {
+        if ($("div.fav-buttons").hasClass("fav-buttons-false")) { $("button#add-fav-button")[0].click(); }
+        else { $("button#remove-fav-button")[0].click(); }
     }
 
     /**

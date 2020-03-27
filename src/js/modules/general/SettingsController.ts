@@ -388,52 +388,52 @@ export class SettingsController extends RE6Module {
         hotkeyFormInput.get("hotkey-post-upvote").on("re621:form:input", (event, newKey, oldKey) => {
             postViewer.pushSettings("hotkey_upvote", newKey);
             HotkeyCustomizer.unregister(oldKey);
-            postViewer.handleHotkeys();
+            postViewer.resetHotkeys();
         });
 
         hotkeyFormInput.get("hotkey-post-downvote").on("re621:form:input", (event, newKey, oldKey) => {
             postViewer.pushSettings("hotkey_downvote", newKey);
             HotkeyCustomizer.unregister(oldKey);
-            postViewer.handleHotkeys();
+            postViewer.resetHotkeys();
         });
 
         hotkeyFormInput.get("hotkey-post-favorite").on("re621:form:input", (event, newKey, oldKey) => {
             postViewer.pushSettings("hotkey_favorite", newKey);
             HotkeyCustomizer.unregister(oldKey);
-            postViewer.handleHotkeys();
+            postViewer.resetHotkeys();
         });
 
         // - Navigation
         hotkeyFormInput.get("hotkey-post-next").on("re621:form:input", (event, newKey, oldKey) => {
             poolNavigator.pushSettings("hotkey_next", newKey);
             HotkeyCustomizer.unregister(oldKey);
-            poolNavigator.handleHotkeys();
+            poolNavigator.resetHotkeys();
         });
 
         hotkeyFormInput.get("hotkey-post-prev").on("re621:form:input", (event, newKey, oldKey) => {
             poolNavigator.pushSettings("hotkey_prev", newKey);
             HotkeyCustomizer.unregister(oldKey);
-            poolNavigator.handleHotkeys();
+            poolNavigator.resetHotkeys();
         });
 
         hotkeyFormInput.get("hotkey-post-cycle").on("re621:form:input", (event, newKey, oldKey) => {
             poolNavigator.pushSettings("hotkey_cycle", newKey);
             HotkeyCustomizer.unregister(oldKey);
-            poolNavigator.handleHotkeys();
+            poolNavigator.resetHotkeys();
         });
 
         // - Scaling
         hotkeyFormInput.get("hotkey-post-scale").on("re621:form:input", (event, newKey, oldKey) => {
             imageScaler.pushSettings("hotkey_scale", newKey);
             HotkeyCustomizer.unregister(oldKey);
-            imageScaler.handleHotkeys();
+            imageScaler.resetHotkeys();
         });
 
         // Comments
         hotkeyFormInput.get("hotkey-comments-new").on("re621:form:input", (event, newKey, oldKey) => {
             miscellaneous.pushSettings("hotkey_newcomment", newKey);
             HotkeyCustomizer.unregister(oldKey);
-            miscellaneous.handleHotkeys();
+            miscellaneous.resetHotkeys();
         });
     }
 

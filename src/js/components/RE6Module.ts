@@ -1,4 +1,5 @@
 import { Page } from "./data/Page";
+import { HotkeyCustomizer } from "../modules/general/HotkeyCustomizer";
 
 declare var Cookies;
 
@@ -10,7 +11,9 @@ export class RE6Module {
 
     private settings: any;
     private readonly prefix: string = this.constructor.name;
+
     private constraint: RegExp[] = [];
+    private hotkeys: Hotkey[] = [];
 
     protected constructor(constraint?: RegExp | RegExp[]) {
         if (constraint === undefined) this.constraint = [];
@@ -90,15 +93,29 @@ export class RE6Module {
     }
 
     /** Establish the module's hotkeys */
-    public handleHotkeys() {
-        if (this.eval) this.registerHotkeys();
-        else this.reserveHotkeys();
+    public resetHotkeys() {
+        let enabled = this.eval();
+        this.hotkeys.forEach((value) => {
+
+            value.keys.forEach((key) => {
+                if (enabled) HotkeyCustomizer.register(this.fetchSettings(key, true), value.fnct);
+                else HotkeyCustomizer.register(key, function () { });
+            });
+        });
     }
 
-    /** Registers hotkeys for the module */
-    protected registerHotkeys() { }
+    /**
+     * Registers the provided hotkeys with the module
+     * @param hotkeys Hotkey to register
+     */
+    protected registerHotkeys(...hotkeys: Hotkey[]) {
+        this.hotkeys = this.hotkeys.concat(hotkeys);
+        this.resetHotkeys();
+    }
 
-    /** Reserves hotkeys to prevent them from being re-assigned */
-    protected reserveHotkeys() { }
+}
 
+interface Hotkey {
+    keys: string[],
+    fnct: Function,
 }
