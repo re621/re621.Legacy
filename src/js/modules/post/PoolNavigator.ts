@@ -50,26 +50,32 @@ export class PoolNavigator extends RE6Module {
 
     /** Loops through available navbars */
     private cycleNavbars() {
-        if (this.navbars.length == 0) return;
-        if ((this.activeNav + 1) > this.navbars.length) {
-            this.navbars[0].checkbox.click();
-            this.activeNav = 0;
+        let navbars = PoolNavigator.getInstance().navbars,
+            active = PoolNavigator.getInstance().activeNav;
+
+        if ((active + 1) >= navbars.length) {
+            navbars[0].checkbox.click();
+            PoolNavigator.getInstance().activeNav = 0;
         } else {
-            this.navbars[this.activeNav + 1].checkbox.click();
-            this.activeNav += 1;
+            navbars[active + 1].checkbox.click();
+            PoolNavigator.getInstance().activeNav += 1;
         }
     }
 
     /** Emulates a click on the "next" button */
     private triggerNextPost() {
-        if (this.navbars.length == 0) return;
-        this.navbars[this.activeNav].element.find("a.prev").first()[0].click();
+        let navbars = PoolNavigator.getInstance().navbars,
+            active = PoolNavigator.getInstance().activeNav;
+        if (navbars.length == 0) return;
+        navbars[active].element.find("a.next").first()[0].click();
     }
 
     /** Emulates a click on the "prev" button */
     private triggerPrevPost() {
-        if (this.navbars.length == 0) return;
-        this.navbars[this.activeNav].element.find("a.next").first()[0].click();
+        let navbars = PoolNavigator.getInstance().navbars,
+            active = PoolNavigator.getInstance().activeNav;
+        if (navbars.length == 0) return;
+        navbars[active].element.find("a.prev").first()[0].click();
     }
 
     /** Creates the module structure */
