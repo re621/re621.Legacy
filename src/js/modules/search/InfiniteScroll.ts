@@ -22,16 +22,17 @@ export class InfiniteScroll extends RE6Module {
     private isInProgress: boolean;
     private pagesLeft: boolean;
 
-    private static instance: InfiniteScroll = new InfiniteScroll();
+    private static instance: InfiniteScroll;
 
     private constructor() {
         super(PageDefintion.search);
-        if (!this.eval() || this.fetchSettings("enabled") !== true) return;
-        this.init();
     }
 
     public init() {
-        this.alreadyInit = true;
+        if (!this.shouldCallInitFunction()) {
+            return;
+        }
+        super.init();
 
         this.$postContainer = $("#posts-container");
 
@@ -115,7 +116,10 @@ export class InfiniteScroll extends RE6Module {
      * @returns InfiniteScroll instance
      */
     public static getInstance() {
-        if (this.instance == undefined) this.instance = new InfiniteScroll();
+        if (this.instance == undefined) {
+            this.instance = new InfiniteScroll();
+            this.instance.init();
+        }
         return this.instance;
     }
 }

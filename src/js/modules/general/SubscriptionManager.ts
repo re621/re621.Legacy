@@ -20,10 +20,18 @@ export class SubscriptionManager extends RE6Module {
     private forumTab: JQuery<HTMLElement>;
     private tagsTab: JQuery<HTMLElement>;
 
-    private openSubsButton;
+    private openSubsButton: { link: any; tab?: JQuery<HTMLElement>; };
 
     private constructor() {
         super();
+    }
+
+    public init() {
+        if (!this.shouldCallInitFunction()) {
+            return;
+        }
+        super.init();
+
         if (this.fetchSettings("lastUpdate") == "") this.lastUpdate = new Date();
         else this.lastUpdate = new Date(this.fetchSettings("lastUpdate"));
 
@@ -56,7 +64,10 @@ export class SubscriptionManager extends RE6Module {
      * @returns FormattingHelper instance
      */
     public static getInstance() {
-        if (this.instance === undefined) this.instance = new SubscriptionManager();
+        if (this.instance === undefined) {
+            this.instance = new SubscriptionManager();
+            this.instance.init();
+        }
         return this.instance;
     }
 

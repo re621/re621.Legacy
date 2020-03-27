@@ -20,8 +20,13 @@ export class TinyAlias extends RE6Module {
 
     private constructor() {
         super(PageDefintion.upload);
-        if (!this.eval()) { return; }
+    }
 
+    public init() {
+        if (!this.shouldCallInitFunction()) {
+            return;
+        }
+        super.init();
         this.buildDOM();
     }
 
@@ -30,7 +35,10 @@ export class TinyAlias extends RE6Module {
      * @returns ThemeCustomizer instance
      */
     public static getInstance() {
-        if (this.instance === undefined) this.instance = new TinyAlias();
+        if (this.instance === undefined) {
+            this.instance = new TinyAlias();
+            this.instance.init();
+        }
         return this.instance;
     }
 

@@ -12,11 +12,17 @@ export class InstantSearch extends RE6Module {
     // TODO: this can be of type HTMLInputElememnt, but I don't know how to do that
     private $searchbox: JQuery<HTMLElement>;
 
-    private static instance: InstantSearch = new InstantSearch();
+    private static instance: InstantSearch;
 
     private constructor() {
         super(PageDefintion.search);
-        if (!this.eval()) return;
+    }
+
+    public init() {
+        if (!this.shouldCallInitFunction()) {
+            return;
+        }
+        super.init();
 
         this.createDOM();
         let typingTimeout: number;
@@ -66,7 +72,10 @@ export class InstantSearch extends RE6Module {
      * @returns FormattingHelper instance
      */
     public static getInstance() {
-        if (this.instance == undefined) this.instance = new InstantSearch();
+        if (this.instance == undefined) {
+            this.instance = new InstantSearch();
+            this.instance.init();
+        }
         return this.instance;
     }
 }

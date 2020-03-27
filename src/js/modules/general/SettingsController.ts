@@ -25,6 +25,10 @@ export class SettingsController extends RE6Module {
     }
 
     public init() {
+        if (!this.shouldCallInitFunction()) {
+            return;
+        }
+        super.init();
 
         // Create a button in the header
         let addSettingsButton = HeaderCustomizer.getInstance().createTabElement({
@@ -75,7 +79,12 @@ export class SettingsController extends RE6Module {
      * @returns SettingsController instance
      */
     public static getInstance() {
-        if (this.instance == undefined) this.instance = new SettingsController();
+        //This is the only instance (for now) where the init function does not get called
+        //right after construction. registerModule also calls getInstance,
+        //but to call the init function only makes sense after all modules have been registered
+        if (this.instance == undefined) {
+            this.instance = new SettingsController();
+        }
         return this.instance;
     }
 
@@ -565,7 +574,7 @@ export class SettingsController extends RE6Module {
             inputs.get(formName).on("re621:form:input", (event, data) => {
                 module.pushSettings("enabled", data);
                 module.setEnabled(data);
-                if (data === true && module.getAlreadyInit() === false) {
+                if (data === true && module.shouldCallInitFunction() === false) {
                     module.init();
                 }
             });
