@@ -2,7 +2,6 @@ import { RE6Module } from "../../components/RE6Module";
 import { Post } from "../../components/data/Post";
 import { Form } from "../../components/structure/Form";
 import { PageDefintion } from "../../components/data/Page";
-import { HotkeyCustomizer } from "../general/HotkeyCustomizer";
 
 const IMAGE_SIZES = [
     { value: "sample", name: "Sample" },

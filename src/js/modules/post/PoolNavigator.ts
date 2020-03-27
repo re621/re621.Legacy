@@ -1,5 +1,4 @@
 import { RE6Module } from "../../components/RE6Module";
-import { HotkeyCustomizer } from "../general/HotkeyCustomizer";
 import { PageDefintion } from "../../components/data/Page";
 
 export class PoolNavigator extends RE6Module {

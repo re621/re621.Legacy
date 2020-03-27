@@ -1,5 +1,5 @@
 import { RE6Module } from "../../components/RE6Module";
-import { Page, PageDefintion } from "../../components/data/Page";
+import { PageDefintion } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
 import { PostFilter } from "../../components/data/PostFilter";
 

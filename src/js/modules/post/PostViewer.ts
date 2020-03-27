@@ -1,7 +1,6 @@
 import { Post, ViewingPost, PostRating } from "../../components/data/Post";
 import { RE6Module } from "../../components/RE6Module";
-import { Page, PageDefintion } from "../../components/data/Page";
-import { HotkeyCustomizer } from "../general/HotkeyCustomizer";
+import { PageDefintion } from "../../components/data/Page";
 
 
 /**

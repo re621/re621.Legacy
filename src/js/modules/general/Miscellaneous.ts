@@ -1,6 +1,5 @@
 import { RE6Module } from "../../components/RE6Module";
 import { Page, PageDefintion } from "../../components/data/Page";
-import { HotkeyCustomizer } from "./HotkeyCustomizer";
 
 declare var GM_addStyle;
 declare var GM_getResourceText;

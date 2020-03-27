@@ -7,8 +7,6 @@ import { Modal } from "../../components/structure/Modal";
 import { RE6Module } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
 
-declare var Cookies;
-
 const THEME_MAIN = [
     { value: "hexagon", name: "Hexagon" },
     { value: "pony", name: "Pony" },
