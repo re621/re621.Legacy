@@ -11,6 +11,8 @@ export class RE6Module {
 
     private settings: any;
     private readonly prefix: string = this.constructor.name;
+    protected isEnabled: boolean;
+    protected alreadyInit = false;
 
     private constraint: RegExp[] = [];
     private hotkeys: Hotkey[] = [];
@@ -21,6 +23,11 @@ export class RE6Module {
         else this.constraint = constraint;
 
         this.loadCookies();
+
+        //Save if the module is active or not
+        //If no enabled settings is found assume the module is active
+        const status = this.fetchSettings("enabled");
+        this.isEnabled = status === undefined ? true : status;
     }
 
     /**
@@ -97,6 +104,16 @@ export class RE6Module {
      */
     public getPrefix() {
         return this.prefix;
+    }
+
+    public setEnabled(isEnabled: boolean) {
+        this.isEnabled = isEnabled;
+    }
+
+    public init() { }
+
+    public getAlreadyInit() {
+        return this.alreadyInit;
     }
 
     /** Establish the module's hotkeys */

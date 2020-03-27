@@ -567,6 +567,10 @@ export class SettingsController extends RE6Module {
             }
             inputs.get(formName).on("re621:form:input", (event, data) => {
                 module.pushSettings("enabled", data);
+                module.setEnabled(data);
+                if (data === true && module.getAlreadyInit() === false) {
+                    module.init();
+                }
             });
         }
     }

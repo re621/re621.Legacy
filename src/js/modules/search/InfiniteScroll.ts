@@ -27,6 +27,11 @@ export class InfiniteScroll extends RE6Module {
     private constructor() {
         super(PageDefintion.search);
         if (!this.eval() || this.fetchSettings("enabled") !== true) return;
+        this.init();
+    }
+
+    public init() {
+        this.alreadyInit = true;
 
         this.$postContainer = $("#posts-container");
 
@@ -54,7 +59,7 @@ export class InfiniteScroll extends RE6Module {
      * Adds more posts to the site, if the user has scrolled down enough
      */
     private async addMorePosts() {
-        if (this.isInProgress || !this.pagesLeft || !this.shouldAddMore()) {
+        if (!this.isEnabled || this.isInProgress || !this.pagesLeft || !this.shouldAddMore()) {
             return;
         }
         this.isInProgress = true;
