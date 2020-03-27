@@ -26,16 +26,22 @@ export class SubscriptionManager extends RE6Module {
         this.buildDOM();
         this.buildButtons();
 
-        this.loadPools(async (data: Update[], images) => {
+        this.loadPools(async (data: Update[], images, trimmed) => {
             if (data.length == 0) {
                 $("<div>")
-                    .addClass("subscriptions-empty")
+                    .addClass("subscriptions-notice")
                     .html("All caught up!")
                     .appendTo(this.poolsTab);
             }
             data.forEach((entry) => {
                 this.poolsTab.append(this.createUpdateEntry(entry, images[entry.last]));
             });
+            if (trimmed > 0) {
+                $("<div>")
+                    .addClass("subscriptions-notice")
+                    .html("... plus " + trimmed + " more")
+                    .appendTo(this.poolsTab);
+            }
         });
     }
 
@@ -55,8 +61,10 @@ export class SubscriptionManager extends RE6Module {
     protected getDefaultSettings() {
         return {
             pools: [],
+            pools_overflow: [],
             lastUpdate: "",
             dismissOnUpdate: false,
+            maxUpdates: 20,
         };
     }
 
@@ -191,7 +199,7 @@ export class SubscriptionManager extends RE6Module {
 
     private async loadPools(fn: Function) {
         let results: Update[] = [];
-        let lastImg: string[] = [];
+        let preview: string[] = [];
 
         let poolData = this.fetchSettings("pools", true);
         if (poolData.length == 0) {
@@ -200,23 +208,26 @@ export class SubscriptionManager extends RE6Module {
         }
 
         let poolsJson: ApiPool[] = await Api.getJson("/pools.json?search[id]=" + poolData.join(","));
+        let index = 0,
+            limit = this.fetchSettings("maxUpdates"),
+
+            overflow = this.fetchSettings("pools_overflow"),
+            newOverflow = [],
+            trimmed = 0;
         poolsJson.forEach((value) => {
-            let date = new Date(value.updated_at);
-            if (date.getTime() > this.lastUpdate.getTime() || this.fetchSettings("dismissOnUpdate") == false) {
-
-                let image = value.post_ids[value.post_ids.length - 1];
-                let update: Update = {
-                    type: "pool",
-                    id: value.id,
-                    name: value.name.replace(/_/g, " "),
-                    date: new Date(value.updated_at),
-                    last: image,
-                };
-
-                lastImg.push("id:" + image);
-                results.push(update);
+            if (new Date(value.updated_at).getTime() > this.lastUpdate.getTime() || this.fetchSettings("dismissOnUpdate") == false || overflow.indexOf(value.id) !== -1) {
+                console.log("processing");
+                if (index >= limit) {
+                    newOverflow.push(value.id);
+                    trimmed++;
+                } else {
+                    preview.push("id:" + value.post_ids[value.post_ids.length - 1]);
+                    results.push(this.formatPoolUpdate(value));
+                    index++;
+                }
             }
         });
+        this.pushSettings("pools_overflow", newOverflow, true);
 
         let images = {};
         /*
@@ -225,11 +236,21 @@ export class SubscriptionManager extends RE6Module {
             images[value.id] = value.preview;
         });
         */
-        lastImg.forEach((entry) => {
+        preview.forEach((entry) => {
             images[entry.substr(3)] = "https://static1.e621.net/data/preview/1f/fc/1ffc0e7f96c7e541181b40bfb52e130b.jpg";
         });
 
-        fn(results, images);
+        fn(results, images, trimmed);
+    }
+
+    private formatPoolUpdate(value: ApiPool): Update {
+        return {
+            type: "pool",
+            id: value.id,
+            name: value.name.replace(/_/g, " "),
+            date: new Date(value.updated_at),
+            last: value.post_ids[value.post_ids.length - 1],
+        };
     }
 
 }

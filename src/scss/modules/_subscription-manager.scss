@@ -34,8 +34,10 @@ div#c-pools>div#a-show>h1 {
 div.subscriptions-list {
     position: relative;
     width: 20rem;
+    max-height: 80vh;
+    overflow: hidden auto;
 
-    div.subscriptions-empty {
+    div.subscriptions-notice {
         background: #ffffff33;
         text-align: center;
         padding: 0.25rem 0.5rem;
@@ -44,7 +46,7 @@ div.subscriptions-list {
 
     div.subscription-update {
         display: grid;
-        grid-template-columns: 5rem 1fr 1fr;
+        grid-template-columns: 5rem auto 1fr;
         margin-bottom: 1rem;
         background: #ffffff33;
 
