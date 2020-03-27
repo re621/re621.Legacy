@@ -48,8 +48,8 @@ export class Miscellaneous extends RE6Module {
 
     /** Emulates the clicking on "New Comment" link */
     private openNewComment() {
-        if (Page.matches(PageDefintion.post)) $("a.expand-comment-response").click();
-        else if (Page.matches(PageDefintion.forum)) $("a#new-response-link").click();
+        if (Page.matches(PageDefintion.post)) { $("a.expand-comment-response")[0].click(); }
+        else if (Page.matches(PageDefintion.forum)) { $("a#new-response-link")[0].click(); }
     }
 
     /**
