@@ -5,6 +5,7 @@ import { Form } from "../../components/structure/Form";
 import { HotkeyCustomizer } from "./HotkeyCustomizer";
 import { Api } from "../../components/api/Api";
 
+// Avaliable icons for formatting buttons
 const icon_definitions = [
     { value: "spacer", name: "&nbsp;" },
 
@@ -44,43 +45,66 @@ const icon_definitions = [
     { value: "minus-square", name: "&#x" + "f146" },
 ];
 
-export class FormattingHelper extends RE6Module {
+export class FormattingManager extends RE6Module {
 
-    private $form: JQuery<HTMLElement>;
-    private $container: JQuery<HTMLElement>;
+    private static instance: FormattingManager;
 
-    private $toggleTabs: JQuery<HTMLElement>;
-    private $formatButtons: JQuery<HTMLElement>;
-    private $editButtonsModal: Modal;
+    private formatters: FormattingHelper[] = [];
 
-    private $textarea: JQuery<HTMLElement>;
-    private $preview: JQuery<HTMLElement>;
-
-    private $formatButtonsDrawer: JQuery<HTMLElement>;
-
-    private constructor($targetContainer) {
+    private constructor() {
         super();
+    }
 
-        this.$container = $targetContainer;
+    /**
+     * Initializes the module.
+     * Causes an infinite loop if done in the constructor
+     */
+    public init() {
+        if (this.fetchSettings("enabled")) this.create();
+        else this.destroy();
+    }
 
-        this.createDOM();
+    /** Creates the Formatting Helpers for appropriate textareas */
+    private create() {
+        $("div.dtext-previewable:has(textarea)").each((i, element) => {
+            let $container = $(element);
+            let newFormatter = new FormattingHelper($container);
+            this.formatters.push(newFormatter);
 
-        this.$form.submit((event) => {
-            if (this.$textarea.val() === "") {
-                event.preventDefault();
-                this.$container.addClass("invalid");
-            }
+            $container.on("re621:formatter:update", () => {
+                this.formatters.forEach((element) => {
+                    if (!element.getContainer().is(newFormatter.getContainer())) {
+                        element.loadButtons();
+                    }
+                });
+            });
         });
+    }
 
-        this.registerHotkeys();
+    /** Destroys all instances of the Formatting Helpers */
+    private destroy() {
+        this.formatters.forEach((entry) => {
+            entry.destroy();
+        });
+        this.formatters = [];
+    }
+
+    /**
+     * Returns a singleton instance of the class
+     * @returns FormattingHelper instance
+     */
+    public static getInstance() {
+        if (this.instance === undefined) this.instance = new FormattingManager();
+        return this.instance;
     }
 
     /**
      * Returns a set of default settings values
      * @returns Default settings
      */
-    public getDefaultSettings() {
+    protected getDefaultSettings() {
         return {
+            "enabled": true,
             "btn_active": [
                 { name: "Bold", icon: "bold", text: "[b]%selection%[/b]" },
                 { name: "Italic", icon: "italic", text: "[i]%selection%[/i]" },
@@ -107,30 +131,49 @@ export class FormattingHelper extends RE6Module {
         };
     }
 
-    public static init() {
-        let instances: FormattingHelper[] = [];
-        $("div.dtext-previewable:has(textarea)").each(function (i, element) {
-            let $container = $(element);
-            let thisInstance = new FormattingHelper($container);
-            instances.push(thisInstance);
+}
 
-            $container.on("re621:formatter:update", () => {
-                instances.forEach(formatter => {
-                    if (!formatter.$container.is(thisInstance.$container)) {
-                        formatter.loadButtons();
-                    }
-                })
-            });
+
+class FormattingHelper {
+
+    private $form: JQuery<HTMLElement>;
+    private $container: JQuery<HTMLElement>;
+
+    private $toggleTabs: JQuery<HTMLElement>;
+    private $formatButtons: JQuery<HTMLElement>;
+    private $editButtonsModal: Modal;
+
+    private $textarea: JQuery<HTMLElement>;
+    private $preview: JQuery<HTMLElement>;
+
+    private $formatButtonsDrawer: JQuery<HTMLElement>;
+
+    public constructor($targetContainer) {
+
+        this.$container = $targetContainer;
+
+        this.createDOM();
+
+        this.$form.submit((event) => {
+            if (this.$textarea.val() === "") {
+                event.preventDefault();
+                this.$container.addClass("invalid");
+            }
         });
 
-        $("input.dtext-preview-button").remove();
+        this.registerHotkeys();
     }
 
     /** Registers the module's hotkeys */
     public registerHotkeys() {
-        HotkeyCustomizer.registerInput(this.fetchSettings("hotkey_submit"), this.$textarea, () => {
+        HotkeyCustomizer.registerInput(FormattingManager.getInstance().fetchSettings("hotkey_submit"), this.$textarea, () => {
             this.$form.submit();
         });
+    }
+
+    /** Returns the formatter's container element */
+    public getContainer() {
+        return this.$container;
     }
 
     /**
@@ -148,6 +191,8 @@ export class FormattingHelper extends RE6Module {
         this.createToolbar();
         this.createButtonDrawer();
         this.createCharacterCounter();
+
+        this.$form.find("input.dtext-preview-button").css("display", "none");
 
         // Establish Sorting
         this.$formatButtons.sortable({
@@ -226,6 +271,14 @@ export class FormattingHelper extends RE6Module {
 
         // Fill the Toolbar Buttons
         this.loadButtons();
+    }
+
+    /** Makes an effort to reset the interface to default */
+    public destroy() {
+        this.$container
+            .find(".comment-header, .dtext-button-drawer-title, .dtext-button-drawer, .dtext-character-counter-box")
+            .remove();
+        this.$form.find("input.dtext-preview-button").css("display", "");
     }
 
     /** Creates the toolbar DOM structure */
@@ -339,10 +392,10 @@ export class FormattingHelper extends RE6Module {
     }
 
     /** Updates the buttons toolbar based on saved settings */
-    private loadButtons() {
+    public loadButtons() {
         this.$formatButtons.empty();
 
-        this.fetchSettings("btn_active", true).forEach((data: ButtonDefinition) => {
+        FormattingManager.getInstance().fetchSettings("btn_active", true).forEach((data: ButtonDefinition) => {
             let buttonElement = this.createButton(data);
             buttonElement.box.appendTo(this.$formatButtons);
 
@@ -353,7 +406,7 @@ export class FormattingHelper extends RE6Module {
         });
 
         this.$formatButtonsDrawer.empty();
-        this.fetchSettings("btn_inactive", true).forEach((data: ButtonDefinition) => {
+        FormattingManager.getInstance().fetchSettings("btn_inactive", true).forEach((data: ButtonDefinition) => {
             let buttonData = this.createButton(data);
             buttonData.box.appendTo(this.$formatButtonsDrawer);
         });
@@ -365,13 +418,13 @@ export class FormattingHelper extends RE6Module {
         this.$formatButtons.find("li").each(function (i, element) {
             buttonData.push(fetchData(element));
         });
-        this.pushSettings("btn_active", buttonData);
+        FormattingManager.getInstance().pushSettings("btn_active", buttonData);
 
         buttonData = [];
         this.$formatButtonsDrawer.find("li").each(function (i, element) {
             buttonData.push(fetchData(element));
         })
-        this.pushSettings("btn_inactive", buttonData);
+        FormattingManager.getInstance().pushSettings("btn_inactive", buttonData);
 
         this.$container.trigger("re621:formatter:update", [this]);
 

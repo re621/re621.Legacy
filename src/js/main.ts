@@ -9,7 +9,7 @@ StructureUtilities.createDOM();
 
 // Load Modules
 // - general
-import { FormattingHelper } from "./modules/general/FormattingHelper";
+import { FormattingManager } from "./modules/general/FormattingHelper";
 import { HeaderCustomizer } from "./modules/general/HeaderCustomizer";
 import { Miscellaneous } from "./modules/general/Miscellaneous";
 import { ThemeCustomizer } from "./modules/general/ThemeCustomizer";
@@ -31,7 +31,7 @@ import { SubscriptionManager } from "./modules/general/SubscriptionManager";
 // Modules with self-contained settings
 HeaderCustomizer.getInstance();
 ThemeCustomizer.getInstance();
-FormattingHelper.init();
+FormattingManager.getInstance().init();
 
 // Modules without settings
 InstantSearch.getInstance();
