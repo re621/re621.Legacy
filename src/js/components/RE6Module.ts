@@ -92,6 +92,13 @@ export class RE6Module {
         Cookies.set("re621." + this.prefix, JSON.stringify(this.settings));
     }
 
+    /**
+     * @returns the class name of the module
+     */
+    public getPrefix() {
+        return this.prefix;
+    }
+
     /** Establish the module's hotkeys */
     public resetHotkeys() {
         let enabled = this.eval();

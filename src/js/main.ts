@@ -35,7 +35,6 @@ FormattingHelper.init();
 
 // Modules without settings
 InstantSearch.getInstance();
-InfiniteScroll.getInstance();
 TinyAlias.getInstance();
 SubscriptionManager.getInstance();
 
@@ -43,6 +42,7 @@ SubscriptionManager.getInstance();
 SettingsController.registerModule(
     BlacklistEnhancer.getInstance(),
     DownloadCustomizer.getInstance(),
+    InfiniteScroll.getInstance(),
     ImageScaler.getInstance(),
     TitleCustomizer.getInstance(),
     Miscellaneous.getInstance(),

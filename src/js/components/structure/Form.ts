@@ -614,7 +614,7 @@ interface FormConfig {
     parent?: string,
 }
 
-interface FormElement {
+export interface FormElement {
     /** Unique ID for the element. Actual ID becomes formID_elementID */
     id?: string,
     /** Supported input type */

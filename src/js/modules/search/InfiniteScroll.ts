@@ -26,7 +26,7 @@ export class InfiniteScroll extends RE6Module {
 
     private constructor() {
         super(PageDefintion.search);
-        if (!this.eval()) return;
+        if (!this.eval() || this.fetchSettings("enabled") !== true) return;
 
         this.$postContainer = $("#posts-container");
 
@@ -97,6 +97,12 @@ export class InfiniteScroll extends RE6Module {
      */
     private shouldAddMore() {
         return $(window).scrollTop() + $(window).height() > $(document).height() - 50;
+    }
+
+    protected getDefaultSettings() {
+        return {
+            enabled: true
+        }
     }
 
     /**

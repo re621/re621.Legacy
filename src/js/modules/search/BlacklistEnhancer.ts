@@ -216,7 +216,6 @@ export class BlacklistEnhancer extends RE6Module {
         this.$list.append($entry);
     }
 
-
     /**
      * Returns a set of default settings values
      * @returns Default settings

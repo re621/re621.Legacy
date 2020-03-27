@@ -3,7 +3,7 @@ import { Modal } from "../../components/structure/Modal";
 import { Tabbed, TabContent } from "../../components/structure/Tabbed";
 import { RE6Module } from "../../components/RE6Module";
 import { Miscellaneous } from "./Miscellaneous";
-import { Form } from "../../components/structure/Form";
+import { Form, FormElement } from "../../components/structure/Form";
 import { TitleCustomizer } from "../post/TitleCustomizer";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { PostViewer } from "../post/PostViewer";
@@ -42,6 +42,7 @@ export class SettingsController extends RE6Module {
         let hotkeyTab = this.createTabHotkeys();
         let miscSettingsTab = this.createTabMiscellaneous();
         let blacklistSettingsTab = this.createTabBlacklist();
+        let moduleStatusTab = this.createModuleStatus();
 
         let $settings = new Tabbed({
             name: "settings-tabs",
@@ -49,7 +50,8 @@ export class SettingsController extends RE6Module {
                 { name: "Posts", page: postsPageTab.get() },
                 { name: "Hotkeys", page: hotkeyTab.get() },
                 { name: "Misc", page: miscSettingsTab.get() },
-                { name: "Blacklist", page: blacklistSettingsTab.get() }
+                { name: "Blacklist", page: blacklistSettingsTab.get() },
+                { name: "Features", page: moduleStatusTab.get() }
             ]
         });
 
@@ -68,6 +70,7 @@ export class SettingsController extends RE6Module {
         this.handleTabHotkeys(hotkeyTab);
         this.handleTabPostsPage(postsPageTab);
         this.handleTabBlacklist(blacklistSettingsTab);
+        this.handleModuleStatus(moduleStatusTab);
     }
 
     /**
@@ -517,5 +520,54 @@ export class SettingsController extends RE6Module {
         inputs.get("blacklist-quickadd").on("re621:form:input", (event, data) => {
             module.pushSettings("quickaddTags", data);
         });
+    }
+
+    private createModuleStatus() {
+        let infniniteScroll = this.modules.get("InfiniteScroll");
+
+        // Create the settings form
+        let form = new Form(
+            {
+                id: "settings-module-status",
+                columns: 3,
+                parent: "re-modal-container",
+            },
+            [
+                {
+                    id: "features-title",
+                    type: "div",
+                    value: "<h3>Features you can toggle</h3>",
+                    stretch: "full"
+                },
+                this.getModuleToggle(infniniteScroll)
+            ]
+        );
+        return form;
+    }
+
+    private getModuleToggle(module: RE6Module): FormElement {
+        const moduleName = module.getPrefix();
+        return {
+            id: moduleName + "-enabled",
+            type: "checkbox",
+            value: module.fetchSettings("enabled"),
+            label: "Enable " + moduleName
+        }
+    }
+
+    private handleModuleStatus(form: Form) {
+        let inputs = form.getInputList();
+        for (const formName of inputs.keys()) {
+            console.log(formName);
+            //remove -enabled from the id
+            const module = this.modules.get(formName.split("-")[0]);
+            //features-title is no input, and also has no module
+            if (module === undefined) {
+                continue;
+            }
+            inputs.get(formName).on("re621:form:input", (event, data) => {
+                module.pushSettings("enabled", data);
+            });
+        }
     }
 }
