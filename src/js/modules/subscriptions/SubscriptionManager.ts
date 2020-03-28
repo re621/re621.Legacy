@@ -3,7 +3,7 @@ import { HeaderCustomizer } from "../general/HeaderCustomizer";
 import { Tabbed } from "../../components/structure/Tabbed";
 import { Modal } from "../../components/structure/Modal";
 import { Util } from "../../components/structure/Util";
-import { Subscriber } from "./Subscriber";
+import { Subscription } from "./Subscription";
 
 export class SubscriptionManager extends RE6Module {
 
@@ -23,12 +23,6 @@ export class SubscriptionManager extends RE6Module {
     public create() {
         if (!this.canInitialize()) return;
         super.create();
-        this.init();
-    }
-
-    /** Builds the module structure */
-    private init() {
-
         // Create a button in the header
         this.openSubsButton = HeaderCustomizer.getInstance().createTabElement({
             name: `<i class="fas fa-bell"></i>`,
@@ -60,7 +54,7 @@ export class SubscriptionManager extends RE6Module {
      * Adds a subscriber to the list of them and creates a tab for it.
      * @param instance subscriber to be queued for update check
      */
-    public static registerSubscriber(instance: Subscriber) {
+    public static registerSubscriber(instance: Subscription) {
         this.getInstance().tabs.set(instance.getName(), instance.tab);
         instance.addSubscribeButtons();
     }
@@ -75,7 +69,7 @@ export class SubscriptionManager extends RE6Module {
     /**
      * Starts checking for updates for the passed subscriber
      */
-    public static async initSubscriber(instance: Subscriber) {
+    public static async initSubscriber(instance: Subscription) {
         let lastUpdate: number = instance.fetchSettings("lastUpdate");
         if (lastUpdate === undefined) {
             lastUpdate = new Date().getTime();
@@ -96,7 +90,7 @@ export class SubscriptionManager extends RE6Module {
     /**
      * Adds the passed updates to the tab of the subscriber
      */
-    public static addUpdateEntries(instance: Subscriber, updates: Update[]) {
+    public static addUpdateEntries(instance: Subscription, updates: Update[]) {
         if (updates.length == 0) {
             $("<div>")
                 .addClass("subscriptions-notice")

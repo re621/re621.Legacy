@@ -1,7 +1,7 @@
 import { Update } from "./SubscriptionManager";
 import { RE6Module } from "../../components/RE6Module";
 
-export interface Subscriber extends RE6Module {
+export interface Subscription extends RE6Module {
     /**
      * Returns the name of the tab
      */

@@ -3,10 +3,10 @@ import { ApiPool } from "../../components/api/responses/ApiPool";
 import { Api } from "../../components/api/Api";
 import { PageDefintion, Page } from "../../components/data/Page";
 import { RE6Module } from "../../components/RE6Module";
-import { Subscriber, UpdateCallback } from "./Subscriber";
+import { Subscription, UpdateCallback } from "./Subscription";
 import { Util } from "../../components/structure/Util";
 
-export class PoolSubscriptions extends RE6Module implements Subscriber {
+export class PoolSubscriptions extends RE6Module implements Subscription {
 
     limit: number;
     lastUpdate: number;
