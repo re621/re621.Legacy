@@ -8,6 +8,7 @@ import { TitleCustomizer } from "../post/TitleCustomizer";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { PostViewer } from "../post/PostViewer";
 import { Hotkeys } from "../../components/data/Hotkeys";
+import { PoolSettings, PoolSubscriptions } from "../subscriptions/PoolSubscriptions";
 
 /**
  * SettingsController  
@@ -32,11 +33,11 @@ export class SettingsController {
         });
 
         // Establish the settings window contents
+        let moduleStatusTab = this.createModuleStatus();
         let postsPageTab = this.createTabPostsPage();
+        let blacklistSettingsTab = this.createTabBlacklist();
         let hotkeyTab = this.createTabHotkeys();
         let miscSettingsTab = this.createTabMiscellaneous();
-        let blacklistSettingsTab = this.createTabBlacklist();
-        let moduleStatusTab = this.createModuleStatus();
 
         let $settings = new Tabbed({
             name: "settings-tabs",
@@ -61,11 +62,11 @@ export class SettingsController {
         });
 
         // Establish handlers
-        this.handleTabMiscellaneous(miscSettingsTab);
-        this.handleTabHotkeys(hotkeyTab);
+        this.handleModuleStatus(moduleStatusTab);
         this.handleTabPostsPage(postsPageTab);
         this.handleTabBlacklist(blacklistSettingsTab);
-        this.handleModuleStatus(moduleStatusTab);
+        this.handleTabHotkeys(hotkeyTab);
+        this.handleTabMiscellaneous(miscSettingsTab);
     }
 
     /**
@@ -447,13 +448,46 @@ export class SettingsController {
                     id: "misc-title",
                     type: "div",
                     value: "<h3>Miscellaneous</h3>",
-                    stretch: "full"
+                    stretch: "full",
                 },
                 {
                     id: "misc-redesign-fixes",
                     type: "checkbox",
                     value: module.fetchSettings("loadRedesignFixes"),
                     label: "Load Redesign Fixes",
+                },
+                {
+                    id: "misc-spacer-1",
+                    type: "div",
+                    value: "<br />",
+                    stretch: "mid",
+                },
+
+                {
+                    id: "misc-import",
+                    type: "div",
+                    value: "<h3>Import from File</h3>",
+                    stretch: "full",
+                },
+                {
+                    id: "misc-import-info",
+                    type: "div",
+                    value: `<div class="notice unmargin">Import the settings from eSix Extended (Legacy)</div>`,
+                    stretch: "full",
+                },
+                {
+                    id: "misc-import-button",
+                    type: "file",
+                    label: "Select file",
+                    value: "json",
+                    stretch: "full",
+                },
+                {
+                    id: "misc-import-status",
+                    type: "div",
+                    label: " ",
+                    value: `<div id="file-import-status"></div>`,
+                    stretch: "full",
                 },
             ]
         );
@@ -473,6 +507,44 @@ export class SettingsController {
             miscModule.pushSettings("loadRedesignFixes", data);
             if (data) { miscModule.enableRedesignFixes(); }
             else { miscModule.disableRedesignFixes(); }
+        });
+
+        miscFormInput.get("misc-import-button").on("re621:form:input", (e, data) => {
+            if (!data) return;
+            let $info = $("div#file-import-status")
+                .html("Loading . . .");
+
+            var reader = new FileReader();
+            reader.readAsText(data, "UTF-8");
+            reader.onload = function (event) {
+                let parsedData = event.target.result.toString().split("\n");
+                if (parsedData[0] !== "eSixExtend User Prefs") { $info.html("Invalid file format"); return; }
+
+                parsedData.forEach((value, index) => {
+                    if (index !== 0) parsedData[index] = JSON.parse(atob(value).replace(/^\d+\|/, ""));
+                });
+
+                // parsedData[2] : pools
+                $info.html("Processing pools . . .");
+                let poolSubs = PoolSubscriptions.getInstance(),
+                    poolData: PoolSettings = poolSubs.fetchSettings("pools", true);
+                for (let entry of parsedData[2]) {
+                    let thumb = entry["thumb"]["url"].replace(/\..+$/g, "");
+                    poolData[entry["id"]] = { thumbnail: thumb };
+                }
+                poolSubs.pushSettings("pools", poolData);
+
+                // parsedData[3] : forums
+                $info.html("Processing forums . . .");
+
+                // parsedData[3] : tags (???)
+                $info.html("Processing tags . . .");
+
+                //console.log(parsedData);
+                $info.html("Settings imported!");
+            };
+            reader.onerror = function (evt) { $info.html("Error loading file"); };
+
         });
     }
 
