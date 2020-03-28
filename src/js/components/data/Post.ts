@@ -1,5 +1,5 @@
 import { TagTypes } from "./Tag";
-import { BlacklistEnhancer } from "../../modules/search/BlacklistEnhancer";
+import { User } from "./User";
 
 /**
  * Collects basic info for a post.
@@ -165,7 +165,7 @@ export class Post {
      */
     private matchesSiteBlacklist() {
         let hits = 0;
-        for (const filter of BlacklistEnhancer.getInstance().getFilters()) {
+        for (const filter of User.getBlacklist()) {
             if (filter.matchesPost(this)) {
                 const currentMatches = Post.blacklistMatches.get(filter.getStringRepresentation());
                 Post.blacklistMatches.set(filter.getStringRepresentation(), currentMatches === undefined ? 1 : currentMatches + 1);

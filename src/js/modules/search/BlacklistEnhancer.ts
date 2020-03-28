@@ -14,8 +14,6 @@ export class BlacklistEnhancer extends RE6Module {
 
     private static instance: BlacklistEnhancer;
 
-    private blacklist: PostFilter[];
-
     private $box: JQuery<HTMLElement>;
     private $toggle: JQuery<HTMLElement>;
     private $list: JQuery<HTMLElement>;
@@ -59,7 +57,7 @@ export class BlacklistEnhancer extends RE6Module {
 
         this.modifyDOM();
 
-        this.refresh();
+        User.refreshBlacklist();
 
         //Apply blacklist without user interaction. Blacklist might be active
         this.applyBlacklist(true);
@@ -129,7 +127,7 @@ export class BlacklistEnhancer extends RE6Module {
         }
         await User.setSettings({ blacklisted_tags: currentBlacklist.join("\n") });
         Danbooru.notice("Done!");
-        this.setBlacklist(currentBlacklist);
+        User.setBlacklist(currentBlacklist);
         this.applyBlacklist();
     }
 
@@ -174,33 +172,6 @@ export class BlacklistEnhancer extends RE6Module {
 
         this.$box.attr("data-blacklist-active", blacklistIsActive.toString());
         this.updateSidebar(blacklistIsActive);
-    }
-
-
-    public refresh() {
-        this.blacklist = [];
-        const filterArray: string[] = JSON.parse($("head meta[name=blacklisted-tags]").attr("content"));
-        for (const filter of filterArray) {
-            this.blacklist.push(new PostFilter(filter));
-        }
-        Post.refreshBlacklistStatus();
-    }
-
-    /**
-     * Returns the parsed blacklist filters
-     * @returns PostFilter[] A array of the users current filters
-     */
-    public getFilters() {
-        return this.blacklist;
-    }
-
-    /**
-     * Saves the passed blacklist to the users e6 account
-     * and refreshes the currently visible posts
-     */
-    public setBlacklist(blacklistArray: string[]) {
-        $("head meta[name=blacklisted-tags]").attr("content", JSON.stringify(blacklistArray))
-        this.refresh();
     }
 
     public updateSidebar(blacklistIsActive: boolean) {
