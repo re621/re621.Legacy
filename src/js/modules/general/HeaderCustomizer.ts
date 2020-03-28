@@ -13,11 +13,13 @@ export class HeaderCustomizer extends RE6Module {
 
     private static instance: HeaderCustomizer;
 
+    private $oldMenu: JQuery<HTMLElement>;
     private $menu: JQuery<HTMLElement>;
 
     private updateTabModal: Modal;
     private updateTabForm: Form;
 
+    private addTabButton: any;
     private addTabModal: Modal;
     private addTabForm: Form;
 
@@ -97,19 +99,33 @@ export class HeaderCustomizer extends RE6Module {
 
         this.updateTabForm.getInputList().get("delete").click(event => {
             event.preventDefault();
-            this.deleteTab(this.updateTabModal.getActiveTrigger().parent())
+            this.deleteTab(this.updateTabModal.getActiveTrigger().parent());
             this.updateTabModal.close();
         });
 
-        this.addTabModal.getElement().on("dialogopen", () => { this.enableEditingMode() });
-        this.addTabModal.getElement().on("dialogclose", () => { this.disableEditingMode() });
+        this.addTabModal.getElement().on("dialogopen", () => { this.enableEditingMode(); });
+        this.addTabModal.getElement().on("dialogclose", () => { this.disableEditingMode(); });
+    }
+
+    public destroy() {
+        super.destroy();
+        this.$menu.removeClass("custom").empty();
+
+        this.$menu.sortable("destroy");
+        this.addTabButton.tab.remove();
+        this.addTabModal.destroy();
+        this.updateTabModal.destroy();
+
+        this.$oldMenu.children().appendTo(this.$menu);
     }
 
     /**
      * Builds basic structure for the module
      */
     private createDOM() {
-        this.$menu.empty();
+        this.$oldMenu = $("<div>").css("display", "none").appendTo("body");
+        this.$menu.children().appendTo(this.$oldMenu);
+        this.$menu.addClass("custom");
 
         // Fetch stored data
         this.fetchSettings("tabs").forEach(value => {
@@ -133,7 +149,7 @@ export class HeaderCustomizer extends RE6Module {
         });
 
         // === Tab Configuration Interface
-        let addTabButton = this.createTabElement({
+        this.addTabButton = this.createTabElement({
             name: `<i class="fas fa-tasks"></i>`,
             parent: "menu.extra",
             class: "float-left",
@@ -159,10 +175,10 @@ export class HeaderCustomizer extends RE6Module {
 
         this.addTabModal = new Modal({
             title: "Add Tab",
-            triggers: [{ element: addTabButton.link }],
+            triggers: [{ element: this.addTabButton.link }],
             content: this.addTabForm.get(),
             position: { my: "right top", at: "right top" }
-        })
+        });
 
         // Tab Update Interface
         this.updateTabForm = new Form(
@@ -186,7 +202,7 @@ export class HeaderCustomizer extends RE6Module {
             position: { my: "center top", at: "center top" },
             triggerMulti: true,
             disabled: true,
-        })
+        });
     }
 
     /**
@@ -319,7 +335,7 @@ export class HeaderCustomizer extends RE6Module {
                 name: $tab.attr("data-name"),
                 title: $tab.attr("data-title"),
                 href: $tab.attr("data-href"),
-            })
+            });
         });
         this.pushSettings("tabs", tabData);
     }
@@ -339,5 +355,5 @@ interface HeaderTab {
     /** Element to append the tab to */
     parent?: string,
     /** Should the tab have controls in editing mode */
-    controls?: boolean
+    controls?: boolean;
 }

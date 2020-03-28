@@ -1,7 +1,7 @@
 /* Header Customizer Styles */
 header#top nav#nav {
 
-    menu.main {
+    menu.main.custom {
         padding: 0;
 
         li {
@@ -26,7 +26,7 @@ header#top nav#nav {
         }
     }
 
-    menu.main[data-editing=true] li {
+    menu.main.custom[data-editing=true] li {
         @include themable() {
             background-color: themed("color-section");
         }

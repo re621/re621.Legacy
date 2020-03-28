@@ -38,7 +38,7 @@ export class RE6Module {
 
     /** Checks if the module should call the init function */
     public canInitialize() {
-        return !this.initialized && this.pageMatchesFilter() && this.enabled
+        return !this.initialized && this.pageMatchesFilter() && this.enabled;
     }
 
     /**
@@ -62,7 +62,7 @@ export class RE6Module {
      * Must clean up everything that create() has added.
      */
     public destroy() {
-        this.initialized = true;
+        this.initialized = false;
     }
 
     /**
@@ -100,7 +100,7 @@ export class RE6Module {
      * @param preserve Ensures that all other values are preserved
      */
     public pushSettings(property: string, value: any, preserve?: boolean) {
-        if (preserve) { this.loadCookies() }
+        if (preserve) { this.loadCookies(); }
         this.settings[property] = value;
         this.saveCookies();
     }
