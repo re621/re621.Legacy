@@ -1,6 +1,8 @@
 
 export class Modal {
 
+    private uid: number;
+
     private config: ModalConfig;
     private $modal: JQuery<HTMLElement>;
 
@@ -8,6 +10,7 @@ export class Modal {
     private $activeTrigger: JQuery<HTMLElement>;
 
     public constructor(config: ModalConfig) {
+        this.uid = Math.round(new Date().getTime() + (Math.random() * 100));
         this.config = this.validateConfig(config);
 
         this.$modal = $("<div>")
@@ -48,7 +51,9 @@ export class Modal {
             });
 
         if (config.fixed) {
-            this.$modal.dialog("widget").addClass("modal-fixed");
+            let widget = this.$modal.dialog("widget");
+            widget.addClass("modal-fixed");
+
             this.$modal.dialog(
                 "option",
                 "position",
@@ -60,6 +65,45 @@ export class Modal {
                     collision: "none",
                 }
             );
+
+            widget.draggable("option", "containment", "window");
+            widget.resizable("option", "containment", "window");
+
+            let timer: number = 0,
+                left = widget.css("left"),
+                top = widget.css("top");
+
+            let style = $("<style>")
+                .attr("id", "style-" + this.uid)
+                .attr("type", "text/css")
+                .html(`
+                    .modal-fixed-` + this.uid + ` {
+                        left: ` + left + ` !important;
+                        top: ` + top + ` !important;
+                    }`
+                )
+                .appendTo("head");
+
+            $(window).scroll((event) => {
+                if (timer) clearTimeout(timer);
+                else {
+                    left = widget.css("left");
+                    top = widget.css("top");
+                    style.html(`
+                        .modal-fixed-` + this.uid + ` {
+                            left: ` + left + ` !important;
+                            top: ` + top + ` !important;
+                        }`
+                    );
+                    widget.addClass("modal-fixed-" + this.uid);
+                }
+                timer = window.setTimeout(() => {
+                    timer = 0;
+                    widget.removeClass("modal-fixed-" + this.uid);
+                    widget.css("left", left);
+                    widget.css("top", top);
+                }, 500);
+            });
         }
 
         if (config.reserveHeight) {
@@ -69,6 +113,11 @@ export class Modal {
         for (const trigger of config.triggers) {
             this.registerTrigger(trigger);
         }
+    }
+
+    /** Returns this modal's unique ID */
+    public getUID() {
+        return this.uid;
     }
 
     /**

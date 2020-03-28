@@ -30,10 +30,13 @@ re-modal-container {
 
         &.modal-fixed {
             position: fixed !important;
+            //    top: 10vh !important;
+            //    left: 50% !important;
+            //    transform: translateX(-50%);
         }
 
         &.modal-reserve-height {
-            height: 75% !important;
+            height: 75vh !important;
         }
 
         div.ui-dialog-titlebar {
