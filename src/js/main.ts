@@ -10,7 +10,6 @@ import { StructureUtilities } from "./modules/general/StructureUtilities";
 import { FormattingManager } from "./modules/general/FormattingHelper";
 import { HeaderCustomizer } from "./modules/general/HeaderCustomizer";
 import { Miscellaneous } from "./modules/general/Miscellaneous";
-import { SubscriptionManager } from "./modules/general/SubscriptionManager";
 import { ThemeCustomizer } from "./modules/general/ThemeCustomizer";
 // - post
 import { DownloadCustomizer } from "./modules/post/DownloadCustomizer";
@@ -24,6 +23,10 @@ import { InstantSearch } from "./modules/search/InstantSearch";
 import { InfiniteScroll } from "./modules/search/InfiniteScroll";
 // - upload
 import { TinyAlias } from "./modules/upload/TinyAlias";
+
+// - subscribers
+import { SubscriptionManager } from "./modules/subscriptions/SubscriptionManager";
+import { PoolSubscriptions } from "./modules/subscriptions/PoolSubscriptions";
 // - settings
 import { SettingsController } from "./modules/general/SettingsController";
 
@@ -47,6 +50,17 @@ const load_order = [
 
     { class: TinyAlias },
 ];
+
+const subscribers = [
+    { class: PoolSubscriptions }
+]
+
+subscribers.forEach((module) => {
+    let instance = module.class.getInstance();
+    if (instance.canInitialize()) instance.create();
+    SubscriptionManager.registerSubscriber(instance);
+});
+
 
 StructureUtilities.createDOM();
 
