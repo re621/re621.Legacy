@@ -109,6 +109,7 @@ export class HeaderCustomizer extends RE6Module {
     }
 
     public destroy() {
+        if (!this.initialized) return;
         super.destroy();
         this.$menu.removeClass("custom").empty();
 
