@@ -28,11 +28,30 @@ export class InfiniteScroll extends RE6Module {
         super(PageDefintion.search);
     }
 
-    public init() {
-        if (!this.shouldCallInitFunction()) {
-            return;
-        }
-        super.init();
+    /**
+     * Returns a singleton instance of the class
+     * @returns InfiniteScroll instance
+     */
+    public static getInstance() {
+        if (this.instance == undefined) this.instance = new InfiniteScroll();
+        return this.instance;
+    }
+
+    /**
+     * Returns a set of default settings values
+     * @returns Default settings
+     */
+    protected getDefaultSettings() {
+        return { enabled: true };
+    }
+
+    /**
+     * Creates the module's structure.  
+     * Should be run immediately after the constructor finishes.
+     */
+    public create() {
+        if (!this.canInitialize()) return;
+        super.create();
 
         this.$postContainer = $("#posts-container");
 
@@ -60,7 +79,7 @@ export class InfiniteScroll extends RE6Module {
      * Adds more posts to the site, if the user has scrolled down enough
      */
     private async addMorePosts() {
-        if (!this.isEnabled || this.isInProgress || !this.pagesLeft || !this.shouldAddMore()) {
+        if (!this.isEnabled() || this.isInProgress || !this.pagesLeft || !this.shouldAddMore()) {
             return;
         }
         this.isInProgress = true;
@@ -103,23 +122,5 @@ export class InfiniteScroll extends RE6Module {
      */
     private shouldAddMore() {
         return $(window).scrollTop() + $(window).height() > $(document).height() - 50;
-    }
-
-    protected getDefaultSettings() {
-        return {
-            enabled: true
-        }
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns InfiniteScroll instance
-     */
-    public static getInstance() {
-        if (this.instance == undefined) {
-            this.instance = new InfiniteScroll();
-            this.instance.init();
-        }
-        return this.instance;
     }
 }

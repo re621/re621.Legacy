@@ -3,51 +3,57 @@
  * Script root. Better keep this place tidy.
  */
 
-// Create DOM required for the rest of the modules
-import { StructureUtilities } from "./modules/general/StructureUtilities";
-StructureUtilities.createDOM();
-
 // Load Modules
+// - requied
+import { StructureUtilities } from "./modules/general/StructureUtilities";
 // - general
 import { FormattingManager } from "./modules/general/FormattingHelper";
 import { HeaderCustomizer } from "./modules/general/HeaderCustomizer";
 import { Miscellaneous } from "./modules/general/Miscellaneous";
+import { SubscriptionManager } from "./modules/general/SubscriptionManager";
 import { ThemeCustomizer } from "./modules/general/ThemeCustomizer";
 // - post
 import { DownloadCustomizer } from "./modules/post/DownloadCustomizer";
 import { ImageScaler } from "./modules/post/ImageScaler";
+import { PoolNavigator } from "./modules/post/PoolNavigator";
 import { PostViewer } from "./modules/post/PostViewer";
 import { TitleCustomizer } from "./modules/post/TitleCustomizer";
 // - search
 import { BlacklistEnhancer } from "./modules/search/BlacklistEnhancer"
 import { InstantSearch } from "./modules/search/InstantSearch";
 import { InfiniteScroll } from "./modules/search/InfiniteScroll";
+// - upload
+import { TinyAlias } from "./modules/upload/TinyAlias";
 // - settings
 import { SettingsController } from "./modules/general/SettingsController";
-import { PoolNavigator } from "./modules/post/PoolNavigator";
-import { TinyAlias } from "./modules/upload/TinyAlias";
-import { SubscriptionManager } from "./modules/general/SubscriptionManager";
 
-// Modules with self-contained settings
-HeaderCustomizer.getInstance();
-ThemeCustomizer.getInstance();
-FormattingManager.getInstance().init();
+const load_order = [
+    { class: FormattingManager },
+    { class: ThemeCustomizer },
+    { class: HeaderCustomizer },
+    { class: Miscellaneous },
+    { class: SubscriptionManager },
+    { class: ThemeCustomizer },
 
-// Modules without settings
-InstantSearch.getInstance();
-TinyAlias.getInstance();
-SubscriptionManager.getInstance();
+    { class: DownloadCustomizer },
+    { class: ImageScaler },
+    { class: PoolNavigator },
+    { class: PostViewer },
+    { class: TitleCustomizer },
 
-// Modules configured by the SettingsController
-SettingsController.registerModule(
-    BlacklistEnhancer.getInstance(),
-    DownloadCustomizer.getInstance(),
-    InfiniteScroll.getInstance(),
-    ImageScaler.getInstance(),
-    TitleCustomizer.getInstance(),
-    Miscellaneous.getInstance(),
-    PoolNavigator.getInstance(),
-    PostViewer.getInstance(),
-);
+    { class: BlacklistEnhancer },
+    { class: InfiniteScroll },
+    { class: InstantSearch },
+
+    { class: TinyAlias },
+];
+
+StructureUtilities.createDOM();
+
+load_order.forEach((module) => {
+    let instance = module.class.getInstance();
+    if (instance.canInitialize()) instance.create();
+    SettingsController.registerModule(instance);
+})
 
 SettingsController.getInstance().init();

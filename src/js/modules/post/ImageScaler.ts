@@ -29,11 +29,34 @@ export class ImageScaler extends RE6Module {
         );
     }
 
-    public init() {
-        if (!this.shouldCallInitFunction()) {
-            return;
-        }
-        super.init();
+    /**
+     * Returns a singleton instance of the class
+     * @returns BlacklistToggler instance
+     */
+    public static getInstance() {
+        if (this.instance == undefined) this.instance = new ImageScaler();
+        return this.instance;
+    }
+
+    /**
+     * Returns a set of default settings values
+     * @returns Default settings
+     */
+    protected getDefaultSettings() {
+        return {
+            enabled: true,
+            size: "sample",
+            hotkey_scale: "v|0",
+        };
+    }
+
+    /**
+     * Creates the module's structure.  
+     * Should be run immediately after the constructor finishes.
+     */
+    public create() {
+        if (!this.canInitialize()) return;
+        super.create();
 
         this.post = Post.getViewingPost();
         this.image = $("img#image");
@@ -46,30 +69,6 @@ export class ImageScaler extends RE6Module {
         });
 
         this.registerHotkeys();
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns BlacklistToggler instance
-     */
-    public static getInstance() {
-        if (this.instance === undefined) {
-            this.instance = new ImageScaler();
-            this.instance.init();
-        }
-        return this.instance;
-    }
-
-    /**
-     * Returns a set of default settings values
-     * @returns Default settings
-     */
-    protected getDefaultSettings() {
-        let def_settings = {
-            size: "sample",
-            hotkey_scale: "v|0",
-        };
-        return def_settings;
     }
 
     /** Loops through scaling options */

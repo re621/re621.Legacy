@@ -17,11 +17,35 @@ export class PoolNavigator extends RE6Module {
         );
     }
 
-    public init() {
-        if (!this.shouldCallInitFunction()) {
-            return;
-        }
-        super.init();
+    /**
+     * Returns a singleton instance of the class
+     * @returns FormattingHelper instance
+     */
+    public static getInstance() {
+        if (this.instance == undefined) this.instance = new PoolNavigator();
+        return this.instance;
+    }
+
+    /**
+     * Returns a set of default settings values
+     * @returns Default settings
+     */
+    protected getDefaultSettings() {
+        return {
+            enabled: true,
+            hotkey_cycle: "r|.",
+            hotkey_prev: "q|left",
+            hotkey_next: "e|right",
+        };
+    }
+
+    /**
+     * Creates the module's structure.  
+     * Should be run immediately after the constructor finishes.
+     */
+    public create() {
+        if (!this.canInitialize()) return;
+        super.create();
 
         this.buildDOM();
 
@@ -30,30 +54,6 @@ export class PoolNavigator extends RE6Module {
         });
 
         this.registerHotkeys();
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns FormattingHelper instance
-     */
-    public static getInstance() {
-        if (this.instance === undefined) {
-            this.instance = new PoolNavigator();
-            this.instance.init();
-        }
-        return this.instance;
-    }
-
-    /**
-     * Returns a set of default settings values
-     * @returns Default settings
-     */
-    public getDefaultSettings() {
-        return {
-            hotkey_cycle: "r|.",
-            hotkey_prev: "q|left",
-            hotkey_next: "e|right",
-        };
     }
 
     /** Loops through available navbars */

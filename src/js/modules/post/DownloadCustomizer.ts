@@ -19,11 +19,33 @@ export class DownloadCustomizer extends RE6Module {
         super(PageDefintion.post);
     }
 
-    public init() {
-        if (!this.shouldCallInitFunction()) {
-            return;
-        }
-        super.init();
+    /**
+     * Returns a singleton instance of the class
+     * @returns DownloadCustomizer instance
+     */
+    public static getInstance() {
+        if (this.instance == undefined) this.instance = new DownloadCustomizer();
+        return this.instance;
+    }
+
+    /**
+     * Returns a set of default settings values
+     * @returns Default settings
+     */
+    protected getDefaultSettings() {
+        return {
+            enabled: true,
+            template: "%postid%-%artist%-%copyright%-%character%",
+        };
+    }
+
+    /**
+     * Creates the module's structure.  
+     * Should be run immediately after the constructor finishes.
+     */
+    public create() {
+        if (!this.canInitialize()) return;
+        super.create();
 
         this.post = Post.getViewingPost();
 
@@ -38,29 +60,6 @@ export class DownloadCustomizer extends RE6Module {
                 saveAs: true,
             });
         });
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns DownloadCustomizer instance
-     */
-    public static getInstance() {
-        if (this.instance === undefined) {
-            this.instance = new DownloadCustomizer();
-            this.instance.init();
-        }
-        return this.instance;
-    }
-
-    /**
-     * Returns a set of default settings values
-     * @returns Default settings
-     */
-    protected getDefaultSettings() {
-        let def_settings = {
-            template: "%postid%-%artist%-%copyright%-%character%",
-        };
-        return def_settings;
     }
 
     /**

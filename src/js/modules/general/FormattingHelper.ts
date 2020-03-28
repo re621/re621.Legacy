@@ -2,7 +2,7 @@ import { RE6Module } from "../../components/RE6Module";
 import { Prompt } from "../../components/structure/Prompt";
 import { Modal } from "../../components/structure/Modal";
 import { Form } from "../../components/structure/Form";
-import { HotkeyCustomizer } from "./HotkeyCustomizer";
+import { Hotkeys } from "../../components/data/Hotkeys";
 import { Api } from "../../components/api/Api";
 
 // Avaliable icons for formatting buttons
@@ -56,45 +56,11 @@ export class FormattingManager extends RE6Module {
     }
 
     /**
-     * Initializes the module.
-     * Causes an infinite loop if done in the constructor
-     */
-    public init() {
-        if (this.fetchSettings("enabled")) this.create();
-        else this.destroy();
-    }
-
-    /** Creates the Formatting Helpers for appropriate textareas */
-    private create() {
-        $("div.dtext-previewable:has(textarea)").each((i, element) => {
-            let $container = $(element);
-            let newFormatter = new FormattingHelper($container);
-            this.formatters.push(newFormatter);
-
-            $container.on("re621:formatter:update", () => {
-                this.formatters.forEach((element) => {
-                    if (!element.getContainer().is(newFormatter.getContainer())) {
-                        element.loadButtons();
-                    }
-                });
-            });
-        });
-    }
-
-    /** Destroys all instances of the Formatting Helpers */
-    private destroy() {
-        this.formatters.forEach((entry) => {
-            entry.destroy();
-        });
-        this.formatters = [];
-    }
-
-    /**
      * Returns a singleton instance of the class
      * @returns FormattingHelper instance
      */
     public static getInstance() {
-        if (this.instance === undefined) this.instance = new FormattingManager();
+        if (this.instance == undefined) this.instance = new FormattingManager();
         return this.instance;
     }
 
@@ -129,6 +95,40 @@ export class FormattingManager extends RE6Module {
             ],
             "hotkey_submit": "alt+return",
         };
+    }
+
+    /**
+     * Initializes the module.
+     * Causes an infinite loop if done in the constructor
+     */
+    public init() {
+        if (this.fetchSettings("enabled")) this.create();
+        else this.destroy();
+    }
+
+    /** Creates the Formatting Helpers for appropriate textareas */
+    public create() {
+        $("div.dtext-previewable:has(textarea)").each((i, element) => {
+            let $container = $(element);
+            let newFormatter = new FormattingHelper($container);
+            this.formatters.push(newFormatter);
+
+            $container.on("re621:formatter:update", () => {
+                this.formatters.forEach((element) => {
+                    if (!element.getContainer().is(newFormatter.getContainer())) {
+                        element.loadButtons();
+                    }
+                });
+            });
+        });
+    }
+
+    /** Destroys all instances of the Formatting Helpers */
+    public destroy() {
+        this.formatters.forEach((entry) => {
+            entry.destroy();
+        });
+        this.formatters = [];
     }
 
 }
@@ -166,7 +166,7 @@ class FormattingHelper {
 
     /** Registers the module's hotkeys */
     public registerHotkeys() {
-        HotkeyCustomizer.registerInput(FormattingManager.getInstance().fetchSettings("hotkey_submit"), this.$textarea, () => {
+        Hotkeys.registerInput(FormattingManager.getInstance().fetchSettings("hotkey_submit"), this.$textarea, () => {
             this.$form.submit();
         });
     }

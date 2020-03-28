@@ -20,11 +20,37 @@ export class Miscellaneous extends RE6Module {
         );
     }
 
-    public init() {
-        if (!this.shouldCallInitFunction()) {
-            return;
-        }
-        super.init();
+    /**
+     * Returns a singleton instance of the class
+     * @returns FormattingHelper instance
+     */
+    public static getInstance() {
+        if (this.instance == undefined) this.instance = new Miscellaneous();
+        return this.instance;
+    }
+
+    /**
+     * Returns a set of default settings values
+     * @returns Default settings
+     */
+    protected getDefaultSettings() {
+        return {
+            enabled: true,
+            hotkey_newcomment: "n",
+            removeSearchQueryString: true,
+            loadRedesignFixes: true,
+            improveTagCount: true,
+        };
+    }
+
+    /**
+     * Creates the module's structure.  
+     * Should be run immediately after the constructor finishes.
+     */
+    public create() {
+        if (!this.canInitialize()) return;
+        super.create();
+
         // Load the Redesign Fixes stylesheet
         this.loadRedesignFixes(this.fetchSettings("loadRedesignFixes"));
 
@@ -50,31 +76,6 @@ export class Miscellaneous extends RE6Module {
     private openNewComment() {
         if (Page.matches(PageDefintion.post)) { $("a.expand-comment-response")[0].click(); }
         else if (Page.matches(PageDefintion.forum)) { $("a#new-response-link")[0].click(); }
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns FormattingHelper instance
-     */
-    public static getInstance() {
-        if (this.instance == undefined) {
-            this.instance = new Miscellaneous();
-            this.instance.init();
-        }
-        return this.instance;
-    }
-
-    /**
-     * Returns a set of default settings values
-     * @returns Default settings
-     */
-    protected getDefaultSettings() {
-        return {
-            hotkey_newcomment: "n",
-            removeSearchQueryString: true,
-            loadRedesignFixes: true,
-            improveTagCount: true,
-        };
     }
 
     /**

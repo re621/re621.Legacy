@@ -22,14 +22,6 @@ export class TinyAlias extends RE6Module {
         super(PageDefintion.upload);
     }
 
-    public init() {
-        if (!this.shouldCallInitFunction()) {
-            return;
-        }
-        super.init();
-        this.buildDOM();
-    }
-
     /**
      * Returns a singleton instance of the SettingsController
      * @returns ThemeCustomizer instance
@@ -37,7 +29,7 @@ export class TinyAlias extends RE6Module {
     public static getInstance() {
         if (this.instance === undefined) {
             this.instance = new TinyAlias();
-            this.instance.init();
+            this.instance.create();
         }
         return this.instance;
     }
@@ -48,8 +40,20 @@ export class TinyAlias extends RE6Module {
      */
     protected getDefaultSettings() {
         return {
+            enabled: true,
             data: {}
         };
+    }
+
+    /**
+     * Creates the module's structure.  
+     * Should be run immediately after the constructor finishes.
+     */
+    public create() {
+        if (!this.canInitialize()) return;
+        super.create();
+
+        this.buildDOM();
     }
 
     /** Creates the document structure for the module */

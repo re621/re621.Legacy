@@ -11,9 +11,9 @@ const validKeys = [
  * Manages the keyboard shortcuts for the entire project.  
  * Any module that uses hotkeys needs to call this instead.
  */
-export class HotkeyCustomizer {
+export class Hotkeys {
 
-    private static instance: HotkeyCustomizer;
+    private static instance: Hotkeys;
     private listeners: string[] = [];
 
     private constructor() {
@@ -21,7 +21,7 @@ export class HotkeyCustomizer {
     }
 
     public static getInstance() {
-        if (this.instance === undefined) this.instance = new HotkeyCustomizer();
+        if (this.instance === undefined) this.instance = new Hotkeys();
         return this.instance;
     }
 

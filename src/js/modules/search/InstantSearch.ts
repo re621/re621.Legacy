@@ -12,17 +12,36 @@ export class InstantSearch extends RE6Module {
     // TODO: this can be of type HTMLInputElememnt, but I don't know how to do that
     private $searchbox: JQuery<HTMLElement>;
 
-    private static instance: InstantSearch;
+    private static instance: InstantSearch = new InstantSearch();
 
     private constructor() {
         super(PageDefintion.search);
     }
 
-    public init() {
-        if (!this.shouldCallInitFunction()) {
-            return;
-        }
-        super.init();
+    /**
+     * Returns a singleton instance of the class
+     * @returns InstantSearch instance
+     */
+    public static getInstance() {
+        if (this.instance == undefined) this.instance = new InstantSearch();
+        return this.instance;
+    }
+
+    /**
+     * Returns a set of default settings values
+     * @returns Default settings
+     */
+    protected getDefaultSettings() {
+        return { enabled: true };
+    }
+
+    /**
+     * Creates the module's structure.  
+     * Should be run immediately after the constructor finishes.
+     */
+    public create() {
+        if (!this.canInitialize()) return;
+        super.create();
 
         this.createDOM();
         let typingTimeout: number;
@@ -65,17 +84,5 @@ export class InstantSearch extends RE6Module {
         $section.append(this.$searchbox)
         $section.append($("<button>").attr("type", "submit").append($("<i>").addClass("fas fa-search")));
         $section.insertAfter($("#search-box"));
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns FormattingHelper instance
-     */
-    public static getInstance() {
-        if (this.instance == undefined) {
-            this.instance = new InstantSearch();
-            this.instance.init();
-        }
-        return this.instance;
     }
 }

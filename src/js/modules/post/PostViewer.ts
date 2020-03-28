@@ -20,11 +20,38 @@ export class PostViewer extends RE6Module {
         );
     }
 
-    public init() {
-        if (!this.shouldCallInitFunction()) {
-            return;
-        }
-        super.init();
+    /**
+     * Returns a singleton instance of the class
+     * @returns FormattingHelper instance
+     */
+    public static getInstance() {
+        if (this.instance == undefined) this.instance = new PostViewer();
+        return this.instance;
+    }
+
+    /**
+     * Returns a set of default settings values
+     * @returns Default settings
+     */
+    protected getDefaultSettings() {
+        return {
+            enabled: true,
+            hotkey_upvote: "a",
+            hotkey_downvote: "z",
+            hotkey_favorite: "f",
+
+            auto_open_parent_child: true,
+            upvote_on_favorite: true,
+        };
+    }
+
+    /**
+     * Creates the module's structure.  
+     * Should be run immediately after the constructor finishes.
+     */
+    public create() {
+        if (!this.canInitialize()) return;
+        super.create();
 
         this.post = Post.getViewingPost();
         this.createDOM();
@@ -97,32 +124,5 @@ export class PostViewer extends RE6Module {
     private toggleFavorite() {
         if ($("div.fav-buttons").hasClass("fav-buttons-false")) { $("button#add-fav-button")[0].click(); }
         else { $("button#remove-fav-button")[0].click(); }
-    }
-
-    /**
-     * Returns a set of default settings values
-     * @returns Default settings
-     */
-    protected getDefaultSettings() {
-        return {
-            hotkey_upvote: "a",
-            hotkey_downvote: "z",
-            hotkey_favorite: "f",
-
-            auto_open_parent_child: true,
-            upvote_on_favorite: true,
-        };
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns FormattingHelper instance
-     */
-    public static getInstance() {
-        if (this.instance == undefined) {
-            this.instance = new PostViewer();
-            this.instance.init();
-        }
-        return this.instance;
     }
 }

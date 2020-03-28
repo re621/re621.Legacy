@@ -7,28 +7,22 @@ import { Form, FormElement } from "../../components/structure/Form";
 import { TitleCustomizer } from "../post/TitleCustomizer";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { PostViewer } from "../post/PostViewer";
-import { HotkeyCustomizer } from "./HotkeyCustomizer";
+import { Hotkeys } from "../../components/data/Hotkeys";
 
 /**
  * SettingsController  
  * Interface for accessing and changing project settings
  */
-export class SettingsController extends RE6Module {
+export class SettingsController {
 
     private static instance: SettingsController;
 
     private modules: Map<string, RE6Module> = new Map();
     private modal: Modal;
 
-    private constructor() {
-        super();
-    }
+    private constructor() { }
 
     public init() {
-        if (!this.shouldCallInitFunction()) {
-            return;
-        }
-        super.init();
 
         // Create a button in the header
         let addSettingsButton = HeaderCustomizer.getInstance().createTabElement({
@@ -79,12 +73,7 @@ export class SettingsController extends RE6Module {
      * @returns SettingsController instance
      */
     public static getInstance() {
-        //This is the only instance (for now) where the init function does not get called
-        //right after construction. registerModule also calls getInstance,
-        //but to call the init function only makes sense after all modules have been registered
-        if (this.instance == undefined) {
-            this.instance = new SettingsController();
-        }
+        if (this.instance == undefined) { this.instance = new SettingsController(); }
         return this.instance;
     }
 
@@ -430,7 +419,7 @@ export class SettingsController extends RE6Module {
 
                         module.resetHotkeys();
                     } else {
-                        HotkeyCustomizer.unregister(oldKey);
+                        Hotkeys.unregister(oldKey);
                         hotkeyFormInput.get(settingsKey + "-input-0").trigger("re621:form:input");
                     }
                 });
@@ -566,8 +555,8 @@ export class SettingsController extends RE6Module {
             inputs.get(formName).on("re621:form:input", (event, data) => {
                 module.pushSettings("enabled", data);
                 module.setEnabled(data);
-                if (data === true && module.shouldCallInitFunction() === true) {
-                    module.init();
+                if (data === true && module.canInitialize() === true) {
+                    module.create();
                 }
             });
         }

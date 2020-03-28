@@ -25,11 +25,48 @@ export class HeaderCustomizer extends RE6Module {
         super();
     }
 
-    public init() {
-        if (!this.shouldCallInitFunction()) {
-            return;
-        }
-        super.init();
+    /**
+     * Returns a singleton instance of the class
+     * @returns HeaderCustomizer instance
+     */
+    public static getInstance() {
+        if (this.instance == undefined) this.instance = new HeaderCustomizer();
+        return this.instance;
+    }
+
+    /**
+     * Returns a set of default settings values
+     * @returns Default settings
+     */
+    protected getDefaultSettings() {
+        let def_settings = {
+            enabled: true,
+            tabs: [
+                { name: "Account", href: "/users/home" },
+                { name: "Posts", href: "/posts" },
+                { name: "Comments", href: "/comments?group_by=post" },
+                { name: "Artists", href: "/artists" },
+                { name: "Tags", href: "/tags" },
+                { name: "Blips", href: "/blips" },
+                { name: "Pools", href: "/pools" },
+                { name: "Sets", href: "/post_sets" },
+                { name: "Wiki", href: "/wiki_pages?title=help%3Ahome" },
+                { name: "Forum", href: "/forum_topics" },
+                { name: "Discord", href: "/static/discord" },
+                { name: "Help", href: "/help" },
+                { name: "More »", href: "/static/site_map" },
+            ]
+        };
+        return def_settings;
+    }
+
+    /**
+     * Creates the module's structure.  
+     * Should be run immediately after the constructor finishes.
+     */
+    public create() {
+        if (!this.canInitialize()) return;
+        super.create();
 
         this.$menu = $("menu.main");
         this.createDOM();
@@ -66,43 +103,6 @@ export class HeaderCustomizer extends RE6Module {
 
         this.addTabModal.getElement().on("dialogopen", () => { this.enableEditingMode() });
         this.addTabModal.getElement().on("dialogclose", () => { this.disableEditingMode() });
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns HeaderCustomizer instance
-     */
-    public static getInstance() {
-        if (this.instance == undefined) {
-            this.instance = new HeaderCustomizer();
-            this.instance.init();
-        }
-        return this.instance;
-    }
-
-    /**
-     * Returns a set of default settings values
-     * @returns Default settings
-     */
-    protected getDefaultSettings() {
-        let def_settings = {
-            tabs: [
-                { name: "Account", href: "/users/home" },
-                { name: "Posts", href: "/posts" },
-                { name: "Comments", href: "/comments?group_by=post" },
-                { name: "Artists", href: "/artists" },
-                { name: "Tags", href: "/tags" },
-                { name: "Blips", href: "/blips" },
-                { name: "Pools", href: "/pools" },
-                { name: "Sets", href: "/post_sets" },
-                { name: "Wiki", href: "/wiki_pages?title=help%3Ahome" },
-                { name: "Forum", href: "/forum_topics" },
-                { name: "Discord", href: "/static/discord" },
-                { name: "Help", href: "/help" },
-                { name: "More »", href: "/static/site_map" },
-            ]
-        };
-        return def_settings;
     }
 
     /**

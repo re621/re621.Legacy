@@ -17,15 +17,13 @@ export class TitleCustomizer extends RE6Module {
         super(PageDefintion.post);
     }
 
-    public init() {
-        if (!this.shouldCallInitFunction()) {
-            return;
-        }
-        super.init();
-
-        this.post = Post.getViewingPost();
-
-        this.refreshPageTitle();
+    /**
+     * Returns a singleton instance of the class
+     * @returns FormattingHelper instance
+     */
+    public static getInstance() {
+        if (this.instance == undefined) this.instance = new TitleCustomizer();
+        return this.instance;
     }
 
     /**
@@ -34,13 +32,25 @@ export class TitleCustomizer extends RE6Module {
      */
     protected getDefaultSettings() {
         return {
-            "template": "#%postid% by %artist% (%copyright%) - %character%",
-            "symbolsEnabled": true,
-            "symbol-fav": "\u2665",      //heart symbol
-            "symbol-voteup": "\u2191",   //arrow up
-            "symbol-votedown": "\u2193",  //arrow down
-
+            enabled: true,
+            template: "#%postid% by %artist% (%copyright%) - %character%",
+            symbolsEnabled: true,
+            symbol_fav: "\u2665",      //heart symbol
+            symbol_voteup: "\u2191",   //arrow up
+            symbol_votedown: "\u2193",  //arrow down
         };
+    }
+
+    /**
+     * Creates the module's structure.  
+     * Should be run immediately after the constructor finishes.
+     */
+    public create() {
+        if (!this.canInitialize()) return;
+        super.create();
+
+        this.post = Post.getViewingPost();
+        this.refreshPageTitle();
     }
 
     /**
@@ -57,9 +67,9 @@ export class TitleCustomizer extends RE6Module {
     private parseTemplate() {
         let prefix = "";
         if (this.fetchSettings("symbolsEnabled")) {
-            if (this.post.getIsFaved()) { prefix += this.fetchSettings("symbol-fav"); }
-            if (this.post.getIsUpvoted()) { prefix += this.fetchSettings("symbol-voteup"); }
-            else if (this.post.getIsDownvoted()) { prefix += this.fetchSettings("symbol-votedown"); }
+            if (this.post.getIsFaved()) { prefix += this.fetchSettings("symbol_fav"); }
+            if (this.post.getIsUpvoted()) { prefix += this.fetchSettings("symbol_voteup"); }
+            else if (this.post.getIsDownvoted()) { prefix += this.fetchSettings("symbol_votedown"); }
             if (prefix) prefix += " ";
         }
 
@@ -71,17 +81,5 @@ export class TitleCustomizer extends RE6Module {
             .replace(/\(\)|( - )$/g, "")
             .replace(/[ ]{2,}|^ | $/g, "")
             + " - e621";
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns FormattingHelper instance
-     */
-    public static getInstance() {
-        if (this.instance == undefined) {
-            this.instance = new TitleCustomizer();
-            this.instance.init();
-        }
-        return this.instance;
     }
 }

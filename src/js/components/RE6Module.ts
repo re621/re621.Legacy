@@ -1,5 +1,5 @@
 import { Page } from "./data/Page";
-import { HotkeyCustomizer } from "../modules/general/HotkeyCustomizer";
+import { Hotkeys } from "./data/Hotkeys";
 
 declare var Cookies;
 
@@ -11,8 +11,9 @@ export class RE6Module {
 
     private settings: any;
     private readonly prefix: string = this.constructor.name;
-    protected isEnabled: boolean;
-    protected alreadyInit = false;
+
+    protected enabled: boolean;
+    protected initialized = false;
 
     private constraint: RegExp[] = [];
     private hotkeys: Hotkey[] = [];
@@ -24,18 +25,64 @@ export class RE6Module {
 
         this.loadCookies();
 
-        //Save if the module is active or not
-        //If no enabled settings is found assume the module is active
+        // Save if the module is active or not
+        // If no enabled settings is found, assume the module is active
         const status = this.fetchSettings("enabled");
-        this.isEnabled = status === undefined ? true : status;
+        this.enabled = status === undefined ? true : status;
+    }
+
+    /**
+     * Returns true if the module has already been initialized
+     */
+    public isInitialized() {
+        return this.initialized;
+    }
+
+    /**
+     * Checks if the module should call the init function
+     */
+    public canInitialize() {
+        return !this.initialized && this.pageMatchesFilter() && this.enabled
     }
 
     /**
      * Evaluates whether the module should be executed.
      * @returns true if the page matches the constraint, false otherwise.
      */
-    private matchesPageFilter() {
+    private pageMatchesFilter() {
         return this.constraint.length == 0 || Page.matches(this.constraint);
+    }
+
+    /**
+     * Creates the module's structure.  
+     * Should be run immediately after the constructor finishes.
+     */
+    public create() {
+        this.initialized = true;
+    }
+
+    /**
+     * Removes the module's structure.  
+     * Must clean up everything that create() has added.
+     */
+    public destroy() {
+        this.initialized = true;
+    }
+
+    /**
+     * Returns the module's current state
+     * @returns True if the module is enabled, false otherwise
+     */
+    public isEnabled() {
+        return this.enabled;
+    }
+
+    /**
+     * Sets the module's enabled / disabled state
+     * @param enabled True to enable, False to disable
+     */
+    public setEnabled(enabled: boolean) {
+        this.enabled = enabled;
     }
 
     /**
@@ -67,7 +114,7 @@ export class RE6Module {
      * @returns Default settings
      */
     protected getDefaultSettings() {
-        return {};
+        return { enabled: true };
     }
 
     /**
@@ -106,35 +153,15 @@ export class RE6Module {
         return this.prefix;
     }
 
-    public setEnabled(isEnabled: boolean) {
-        this.isEnabled = isEnabled;
-    }
-
-    /**
-     * Should be called imidiatly after constructor finished
-     */
-    public init() {
-        this.alreadyInit = true;
-    }
-
-    /**
-     * Checks if the module should call the init function
-     */
-    public shouldCallInitFunction() {
-        const result = !this.alreadyInit && this.matchesPageFilter() && this.fetchSettings("enabled") !== false;
-        return result;
-    }
-
     /** Establish the module's hotkeys */
     public resetHotkeys() {
-        let enabled = this.matchesPageFilter();
+        let enabled = this.pageMatchesFilter();
         this.hotkeys.forEach((value) => {
 
             let keys = this.fetchSettings(value.keys, true).split("|");
             keys.forEach((key) => {
-                console.log("registering " + key);
-                if (enabled) HotkeyCustomizer.register(key, value.fnct);
-                else HotkeyCustomizer.register(key, function () { });
+                if (enabled) Hotkeys.register(key, value.fnct);
+                else Hotkeys.register(key, function () { });
             });
         });
     }

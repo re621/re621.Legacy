@@ -33,24 +33,10 @@ export class ThemeCustomizer extends RE6Module {
 
     private static instance: ThemeCustomizer;
 
-    private themeCustomizerModal: Modal;
     private themeCustomizerForm: Form;
 
     private constructor() {
         super();
-    }
-
-    public init() {
-        if (!this.shouldCallInitFunction()) {
-            return;
-        }
-        super.init();
-
-        this.createDOM();
-
-        this.handleThemeSwitcher("th-main");
-        this.handleThemeSwitcher("th-extra");
-        this.handleScalingToggle();
     }
 
     /**
@@ -58,10 +44,7 @@ export class ThemeCustomizer extends RE6Module {
      * @returns ThemeCustomizer instance
      */
     public static getInstance() {
-        if (this.instance == undefined) {
-            this.instance = new ThemeCustomizer();
-            this.instance.init();
-        }
+        if (this.instance == undefined) this.instance = new ThemeCustomizer();
         return this.instance;
     }
 
@@ -71,10 +54,26 @@ export class ThemeCustomizer extends RE6Module {
      */
     protected getDefaultSettings() {
         return {
-            "th-main": "hexagon",
-            "th-extra": "hexagons",
-            "unscaling": false,
+            enabled: true,
+            main: "hexagon",
+            extra: "hexagons",
+            unscaling: false,
         };
+    }
+
+    /**
+     * Creates the module's structure.  
+     * Should be run immediately after the constructor finishes.
+     */
+    public create() {
+        if (!this.canInitialize()) return;
+        super.create();
+
+        this.createDOM();
+
+        this.handleThemeSwitcher("main");
+        this.handleThemeSwitcher("extra");
+        this.handleScalingToggle();
     }
 
     /**
@@ -96,18 +95,18 @@ export class ThemeCustomizer extends RE6Module {
             },
             [
                 {
-                    id: "th-main",
+                    id: "main",
                     type: "select",
                     label: "Theme",
                     data: THEME_MAIN,
-                    value: this.fetchSettings("th-main"),
+                    value: this.fetchSettings("main"),
                 },
                 {
-                    id: "th-extra",
+                    id: "extra",
                     type: "select",
                     label: "Extras",
                     data: THEME_EXTRA,
-                    value: this.fetchSettings("th-extra"),
+                    value: this.fetchSettings("extra"),
                 },
                 {
                     id: "unscaling",
@@ -119,7 +118,7 @@ export class ThemeCustomizer extends RE6Module {
         );
 
         // === Create the modal
-        this.themeCustomizerModal = new Modal({
+        new Modal({
             title: "Themes",
             triggers: [{ element: addTabButton.link }],
             content: this.themeCustomizerForm.get(),
@@ -127,19 +126,22 @@ export class ThemeCustomizer extends RE6Module {
         });
     }
 
+    /** Listens to the theme selectors and sets the appropriate theming */
     private handleThemeSwitcher(selector: string) {
-        let theme = this.fetchSettings(selector);
+        let theme = this.fetchSettings(selector),
+            input = this.themeCustomizerForm.getInputList().get(selector);
 
-        $("body").attr("data-" + selector, theme);
-        $("#" + selector + "-selector").val(theme);
+        $("body").attr("data-th-" + selector, theme);
+        input.val(theme);
 
-        this.themeCustomizerForm.getInputList().get(selector).change(element => {
+        input.change(element => {
             let theme = $(element.target).val() + "";
             this.pushSettings(selector, theme);
-            $("body").attr("data-" + selector, theme);
+            $("body").attr("data-th-" + selector, theme);
         });
     }
 
+    /** Disables page's min-width scaling */
     private handleScalingToggle() {
         let unscaling = this.fetchSettings("unscaling");
 

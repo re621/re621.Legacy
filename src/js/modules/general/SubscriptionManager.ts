@@ -26,11 +26,35 @@ export class SubscriptionManager extends RE6Module {
         super();
     }
 
-    public init() {
-        if (!this.shouldCallInitFunction()) {
-            return;
-        }
-        super.init();
+    /**
+     * Returns a singleton instance of the class
+     * @returns FormattingHelper instance
+     */
+    public static getInstance() {
+        if (this.instance == undefined) this.instance = new SubscriptionManager();
+        return this.instance;
+    }
+
+    /**
+     * Returns a set of default settings values
+     * @returns Default settings
+     */
+    protected getDefaultSettings() {
+        return {
+            enabled: true,
+            pools: [],
+            pools_overflow: [],
+            lastUpdate: "",
+        };
+    }
+
+    /**
+     * Creates the module's structure.  
+     * Should be run immediately after the constructor finishes.
+     */
+    public create() {
+        if (!this.canInitialize()) return;
+        super.create();
 
         if (this.fetchSettings("lastUpdate") == "") this.lastUpdate = new Date();
         else this.lastUpdate = new Date(this.fetchSettings("lastUpdate"));
@@ -57,30 +81,6 @@ export class SubscriptionManager extends RE6Module {
                 this.openSubsButton.link.attr("data-has-notifications", "true");
             }
         });
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns FormattingHelper instance
-     */
-    public static getInstance() {
-        if (this.instance === undefined) {
-            this.instance = new SubscriptionManager();
-            this.instance.init();
-        }
-        return this.instance;
-    }
-
-    /**
-     * Returns a set of default settings values
-     * @returns Default settings
-     */
-    protected getDefaultSettings() {
-        return {
-            pools: [],
-            pools_overflow: [],
-            lastUpdate: "",
-        };
     }
 
     /** Builds the module structure */

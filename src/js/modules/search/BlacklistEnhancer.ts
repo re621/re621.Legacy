@@ -24,11 +24,33 @@ export class BlacklistEnhancer extends RE6Module {
         super([PageDefintion.search, PageDefintion.post]);
     }
 
-    public init() {
-        if (!this.shouldCallInitFunction()) {
-            return;
-        }
-        super.init();
+    /**
+     * Returns a singleton instance of the class
+     * @returns BlacklistEnhancer instance
+     */
+    public static getInstance() {
+        if (this.instance == undefined) this.instance = new BlacklistEnhancer();
+        return this.instance;
+    }
+
+    /**
+     * Returns a set of default settings values
+     * @returns Default settings
+     */
+    protected getDefaultSettings() {
+        return {
+            enabled: true,
+            quickaddTags: true,
+        };
+    }
+
+    /**
+     * Creates the module's structure.  
+     * Should be run immediately after the constructor finishes.
+     */
+    public create() {
+        if (!this.canInitialize()) return;
+        super.create();
 
         //Override default blacklist function
         Danbooru.Blacklist.apply = () => { };
@@ -220,28 +242,6 @@ export class BlacklistEnhancer extends RE6Module {
         $entry.append($count);
 
         this.$list.append($entry);
-    }
-
-    /**
-     * Returns a set of default settings values
-     * @returns Default settings
-     */
-    protected getDefaultSettings() {
-        return {
-            quickaddTags: true,
-        };
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns BlacklistEnhancer instance
-     */
-    public static getInstance() {
-        if (this.instance === undefined) {
-            this.instance = new BlacklistEnhancer()
-            this.instance.init();
-        }
-        return this.instance;
     }
 
 }

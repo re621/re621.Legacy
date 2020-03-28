@@ -1,4 +1,4 @@
-import { HotkeyCustomizer } from "../../modules/general/HotkeyCustomizer";
+import { Hotkeys } from "../data/Hotkeys";
 
 /**
  * Removes the hassle of creating HTML elements for a form
@@ -267,7 +267,7 @@ export class Form {
                 .addClass("input-info")
                 .val("Recording");
 
-            HotkeyCustomizer.recordSingleKeypress(function (key: string) {
+            Hotkeys.recordSingleKeypress(function (key: string) {
                 if (key.includes("escape")) {
                     $input
                         .removeClass("input-info")
@@ -275,7 +275,7 @@ export class Form {
                         .trigger("re621:form:input", [key, $oldKey]);
                     occupied = false;
                 }
-                else if (HotkeyCustomizer.isRegistered(key)) {
+                else if (Hotkeys.isRegistered(key)) {
                     $input.val("Already Taken");
                     setTimeout(() => {
                         $input
