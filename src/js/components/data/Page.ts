@@ -25,6 +25,11 @@ export class Page {
         return result;
     }
 
+    /** Returns a URL object */
+    public static getURL() {
+        return this.getInstance().url;
+    }
+
     /**
      * Returns the query parameter, or null if the key does not exist
      * @return string Query parameter
@@ -57,7 +62,7 @@ export class Page {
      */
     private static refreshCurrentUrl() {
         let url = this.getInstance().url;
-        const searchPrefix = url.searchParams.toString().length === 0 ? "" : "?"
+        const searchPrefix = url.searchParams.toString().length === 0 ? "" : "?";
         history.replaceState({}, "", url.origin + url.pathname + searchPrefix + url.searchParams.toString());
     }
 
@@ -84,4 +89,4 @@ export const PageDefintion = {
     upload: /\/uploads\/new\/?/,
     forum: /^\/forum_topics\/?.*/,
     pool: /^\/pools\/.+/,
-}
+};

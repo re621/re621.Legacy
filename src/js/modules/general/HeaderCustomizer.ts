@@ -2,6 +2,7 @@ import { Modal } from "../../components/structure/Modal";
 import { RE6Module } from "../../components/RE6Module";
 import { User } from "../../components/data/User";
 import { Form } from "../../components/structure/Form";
+import { Page } from "../../components/data/Page";
 
 declare var Cookies;
 
@@ -170,6 +171,8 @@ export class HeaderCustomizer extends RE6Module {
                 { id: "help-var", value: "Available variables:", type: "div" },
                 { id: "help-var-userid", label: "Unique ID", value: "%userid%", type: "copy" },
                 { id: "help-var-username", label: "Username", value: "%username%", type: "copy" },
+                { id: "info-hr", type: "hr" },
+                { id: "info-div", value: "Drag-and-drop tabs to re-arrange.<br />Click on a tab to edit it.", type: "div" },
             ]
         );
 
@@ -257,6 +260,10 @@ export class HeaderCustomizer extends RE6Module {
         if (config.controls) { $tab.addClass("configurable"); }
         if (config.class) { $tab.addClass(config.class); }
         if (triggerUpdate) { this.saveNavbarSettings(); }
+
+        if (Page.getURL().pathname.includes(this.processTabVariables(config.href))) {
+            $tab.addClass("active");
+        }
 
         return { tab: $tab, link: $link };
     }

@@ -3,25 +3,24 @@ header#top nav#nav {
 
     menu.main.custom {
         padding: 0;
+        align-self: center;
 
         li {
+            position: relative;
             display: inline-block;
-            padding: 0.25rem 0;
-            margin-right: 0.5rem;
+            padding: 0.125rem 0;
+            margin: 0 0.25rem;
             height: auto !important;
 
             &>a {
-                padding: 0;
+                padding: 0 0.5rem;
                 outline: 0;
             }
 
-            &.configurable a::before {
-                content: unicode("f303");
-                visibility: hidden;
-                padding-right: 0.25rem;
-                font-weight: 900;
-                font-family: 'Font Awesome 5 Free';
-                font-size: 75%;
+            &.active {
+                @include themable {
+                    background: themed("color-foreground");
+                }
             }
         }
     }
@@ -29,10 +28,6 @@ header#top nav#nav {
     menu.main.custom[data-editing=true] li {
         @include themable() {
             background-color: themed("color-section");
-        }
-
-        &.configurable a::before {
-            visibility: visible;
         }
     }
 }
