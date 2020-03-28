@@ -162,19 +162,19 @@ export class SettingsController {
                 {
                     id: "general-title-symbol-fav",
                     type: "input",
-                    value: titleCustomizer.fetchSettings("symbol-fav"),
+                    value: titleCustomizer.fetchSettings("symbol_fav"),
                     label: "Favorite",
                 },
                 {
                     id: "general-title-symbol-voteup",
                     type: "input",
-                    value: titleCustomizer.fetchSettings("symbol-voteup"),
+                    value: titleCustomizer.fetchSettings("symbol_voteup"),
                     label: "Upvote",
                 },
                 {
                     id: "general-title-symbol-votedown",
                     type: "input",
-                    value: titleCustomizer.fetchSettings("symbol-votedown"),
+                    value: titleCustomizer.fetchSettings("symbol_votedown"),
                     label: "Downvote",
                 },
                 {
