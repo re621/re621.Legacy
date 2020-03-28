@@ -56,6 +56,12 @@ export class TinyAlias extends RE6Module {
         this.buildDOM();
     }
 
+    public destroy() {
+        super.destroy();
+        this.$container.find("input").unbind();
+        this.$container.find("div.tiny-alias-container").remove();
+    }
+
     /** Creates the document structure for the module */
     private buildDOM() {
         this.$textarea = $("textarea#post_tags");
@@ -255,7 +261,7 @@ export class TinyAlias extends RE6Module {
             });
             return true;
         }
-        return false
+        return false;
     }
 
     /**
@@ -279,7 +285,7 @@ export class TinyAlias extends RE6Module {
             invalid: false,
             is_alias: false,
             true_name: undefined
-        }
+        };
 
         let jsonData: ApiTag = await Api.getJson("/tags/" + tag + ".json");
         if (jsonData === null) {
@@ -312,7 +318,7 @@ export class TinyAlias extends RE6Module {
             let $data = $aliasForm.find("textarea");
 
             console.log("pushing " + $name.val() + " with " + $data.val());
-            console.log(this.aliasData[$name.val() + ""])
+            console.log(this.aliasData[$name.val() + ""]);
 
             console.log("updating");
 
