@@ -73,6 +73,7 @@ export class SubscriptionManager extends RE6Module {
         let lastUpdate: number = instance.fetchSettings("lastUpdate");
         if (lastUpdate === undefined) {
             lastUpdate = new Date().getTime();
+            instance.pushSettings("lastUpdate", lastUpdate);
         }
         instance.lastUpdate = lastUpdate;
         const currentDate = new Date().getTime();
