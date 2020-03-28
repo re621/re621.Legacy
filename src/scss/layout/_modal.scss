@@ -32,6 +32,10 @@ re-modal-container {
             position: fixed !important;
         }
 
+        &.modal-reserve-height {
+            height: 75% !important;
+        }
+
         div.ui-dialog-titlebar {
             position: relative;
             padding: 0;

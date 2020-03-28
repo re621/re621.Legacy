@@ -48,7 +48,7 @@ export class Modal {
             });
 
         if (config.fixed) {
-            this.$modal.dialog('widget').addClass("modal-fixed");
+            this.$modal.dialog("widget").addClass("modal-fixed");
             this.$modal.dialog(
                 "option",
                 "position",
@@ -60,6 +60,10 @@ export class Modal {
                     collision: "none",
                 }
             );
+        }
+
+        if (config.reserveHeight) {
+            this.$modal.dialog("widget").addClass("modal-reserve-height");
         }
 
         for (const trigger of config.triggers) {
@@ -84,6 +88,7 @@ export class Modal {
         if (config.minWidth === undefined) config.minWidth = 150;
         if (config.minHeight === undefined) config.minHeight = 150;
         if (config.fixed === undefined) config.fixed = false;
+        if (config.reserveHeight === undefined) config.reserveHeight = false;
 
         if (config.disabled === undefined) config.disabled = false;
         if (config.position === undefined) config.position = { my: "center", at: "center" };
@@ -169,12 +174,13 @@ interface ModalConfig {
     minWidth?: number,
     minHeight?: number,
     fixed?: boolean,
+    reserveHeight?: boolean,
 
     disabled?: boolean,
     position?: {
         at: string,
         my: string,
-    }
+    };
 }
 
 interface ModalTrigger {

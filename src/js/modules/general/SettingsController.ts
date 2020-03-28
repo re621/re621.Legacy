@@ -55,6 +55,7 @@ export class SettingsController {
             triggers: [{ element: addSettingsButton.link }],
             escapable: false,
             fixed: true,
+            reserveHeight: true,
             content: $settings.create(),
             position: { my: "center", at: "center" }
         });
@@ -547,7 +548,7 @@ export class SettingsController {
                 type: "checkbox",
                 value: module.fetchSettings("enabled"),
                 label: label,
-            }
+            };
         }
 
         function createLabel(moduleName: string, label: string): FormElement {
@@ -556,7 +557,7 @@ export class SettingsController {
                 type: "div",
                 value: label,
                 stretch: "mid",
-            }
+            };
         }
 
         return form;
