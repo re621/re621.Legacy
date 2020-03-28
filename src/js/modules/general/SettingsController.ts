@@ -347,6 +347,10 @@ export class SettingsController {
                 createLabel("hotkey_newcomment", "New Comment"),
                 createInput(miscellaneous, "hotkey_newcomment", "", 0),
                 createInput(miscellaneous, "hotkey_newcomment", "", 1),
+
+                createLabel("hotkey_editpost", "Edit Post"),
+                createInput(miscellaneous, "hotkey_editpost", "", 0),
+                createInput(miscellaneous, "hotkey_editpost", "", 1),
             ]
         );
 
@@ -403,6 +407,7 @@ export class SettingsController {
 
         // Comments
         createListener(miscellaneous, "hotkey_newcomment", 2);
+        createListener(miscellaneous, "hotkey_editpost", 2);
 
         /** Creates a listener for the hotkey input */
         function createListener(module: RE6Module, settingsKey: string, bindings: number = 1) {

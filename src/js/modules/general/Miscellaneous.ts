@@ -16,7 +16,8 @@ export class Miscellaneous extends RE6Module {
     private constructor() {
         super();
         this.registerHotkeys(
-            { keys: "hotkey_newcomment", fnct: this.openNewComment }
+            { keys: "hotkey_newcomment", fnct: this.openNewComment },
+            { keys: "hotkey_editpost", fnct: this.openEditTab },
         );
     }
 
@@ -37,6 +38,7 @@ export class Miscellaneous extends RE6Module {
         return {
             enabled: true,
             hotkey_newcomment: "n",
+            hotkey_editpost: "m",
             removeSearchQueryString: true,
             loadRedesignFixes: true,
             improveTagCount: true,
@@ -74,8 +76,17 @@ export class Miscellaneous extends RE6Module {
 
     /** Emulates the clicking on "New Comment" link */
     private openNewComment() {
-        if (Page.matches(PageDefintion.post)) { $("a.expand-comment-response")[0].click(); }
-        else if (Page.matches(PageDefintion.forum)) { $("a#new-response-link")[0].click(); }
+        if (Page.matches(PageDefintion.post)) {
+            $("menu#post-sections > li > a[href$=comments]")[0].click();
+            $("a.expand-comment-response")[0].click();
+        } else if (Page.matches(PageDefintion.forum)) { $("a#new-response-link")[0].click(); }
+    }
+
+    /** Emulated clicking on "Edit" tab */
+    private openEditTab() {
+        if (Page.matches(PageDefintion.post)) {
+            $("menu#post-sections > li > a[href$=edit]")[0].click();
+        }
     }
 
     /**
