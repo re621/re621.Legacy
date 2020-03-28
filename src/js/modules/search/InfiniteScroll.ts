@@ -87,7 +87,6 @@ export class InfiniteScroll extends RE6Module {
         const posts: ApiPost[] = (await Api.getJson(`/posts.json?tags=${this.currentQuery}&page=${this.nextPageToGet}`)).posts;
         Page.setQueryParameter("page", this.nextPageToGet.toString());
         this.addPageIndicator();
-        const blacklistIsActive = Post.blacklistIsActive();
         for (const json of posts) {
             const element = PostHtml.create(json);
             const post = new Post(element);
@@ -96,7 +95,7 @@ export class InfiniteScroll extends RE6Module {
             Post.appendPost(post);
 
             //Apply blacklist before appending, to prevent image loading
-            post.applyBlacklist(blacklistIsActive);
+            post.applyBlacklist();
 
             this.$postContainer.append(element);
             //Hide if blacklist is active and post matches the blacklist
@@ -105,7 +104,7 @@ export class InfiniteScroll extends RE6Module {
         this.isInProgress = false;
         this.$loadingIndicator.hide();
 
-        BlacklistEnhancer.getInstance().updateSidebar(blacklistIsActive);
+        BlacklistEnhancer.getInstance().updateSidebar();
 
         InstantSearch.getInstance().applyFilter();
         this.nextPageToGet++;

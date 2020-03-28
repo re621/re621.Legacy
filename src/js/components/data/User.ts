@@ -30,7 +30,8 @@ export class User extends RE6Module {
         this.level = $ref.attr("data-user-level-string") || "Guest";
 
         const filters = JSON.parse($("head meta[name=blacklisted-tags]").attr("content"));
-        const blacklistEnabled = BlacklistEnhancer.blacklistIsActive();
+        const blacklistEnabled = $("#disable-all-blacklists").is(":visible");
+
         for (const filter of filters) {
             this.addBlacklistFilter(filter, blacklistEnabled);
         }

@@ -154,16 +154,11 @@ export class BlacklistEnhancer extends RE6Module {
         this.$box.attr("data-filters-hidden", "false");
     }
 
-    public static blacklistIsActive() {
-        return $("#disable-all-blacklists").css("display") !== "none";
-    }
-
     /**
      * Hides posts, if they are blacklisted and blacklist is active, show otherwise
      * @param hide 
      */
     private applyBlacklist(firstRun = false) {
-        const blacklistIsActive = BlacklistEnhancer.blacklistIsActive();
         for (const post of Post.fetchPosts()) {
             //Skip over posts who were already hidden by other means, like instantsearch
             if (firstRun && !post.getDomElement().is(":visible")) {
@@ -173,14 +168,13 @@ export class BlacklistEnhancer extends RE6Module {
             if (post instanceof ViewingPost) {
                 continue;
             }
-            post.applyBlacklist(blacklistIsActive);
+            post.applyBlacklist();
         }
 
-        this.$box.attr("data-blacklist-active", blacklistIsActive.toString());
-        this.updateSidebar(blacklistIsActive);
+        this.updateSidebar();
     }
 
-    public updateSidebar(blacklistIsActive: boolean) {
+    public updateSidebar() {
         //remove already added entries
         this.$list.empty();
 
@@ -223,7 +217,7 @@ export class BlacklistEnhancer extends RE6Module {
         $link.on("click", e => {
             e.preventDefault();
             filter.toggleEnabled();
-            BlacklistEnhancer.getInstance().applyBlacklist();
+            this.applyBlacklist();
             $link.toggleClass("blacklisted-active");
         })
 

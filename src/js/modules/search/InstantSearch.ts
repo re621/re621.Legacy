@@ -68,15 +68,14 @@ export class InstantSearch extends RE6Module {
         const filter = new PostFilter(filterText);
         sessionStorage.setItem("re-instantsearch", filterText);
         const posts = Post.fetchPosts();
-        const blacklistIsActive = Post.blacklistIsActive();
         //when the user clears the input, show all posts
         if (filterText === "") {
             for (const post of posts) {
-                post.show(blacklistIsActive);
+                post.show();
             }
         } else {
             for (const post of posts) {
-                filter.addPost(post, true) ? post.show(blacklistIsActive) : post.hide();
+                filter.addPost(post, true) ? post.show() : post.hide();
             }
         }
     }

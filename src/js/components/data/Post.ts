@@ -113,24 +113,11 @@ export class Post {
     }
 
     /**
-     * Checks if posts should be hidden, because the blacklist is active
-     */
-    public static blacklistIsActive() {
-        return $("#disable-all-blacklists").is(":visible");
-    }
-
-    /**
      * Hides or shows the post, depending on the state
      * Show if blacklist is not active, hide if blacklist is active and post matches blacklist
-     * @param blacklistIsActive true if blacklist is active, false otherwise
      */
-    public applyBlacklist(blacklistIsActive: boolean) {
-
-        if (this.matchesBlacklist()) {
-            blacklistIsActive ? this.hide() : this.show();
-        } else {    //It's not blacklisted, show it instead
-            this.show();
-        }
+    public applyBlacklist() {
+        this.matchesBlacklist() ? this.hide() : this.show();
     }
 
     /**
@@ -158,8 +145,8 @@ export class Post {
     /**
      * Shows the post and restores the src attribute, if the blacklist allows it
      */
-    public show(blacklistIsActive = false) {
-        if (blacklistIsActive === true && this.matchesBlacklist()) {
+    public show() {
+        if (this.matchesBlacklist()) {
             return;
         }
         const $img = this.element.find("img");
