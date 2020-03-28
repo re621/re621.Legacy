@@ -420,6 +420,7 @@ export class SettingsController {
                         }
                         module.pushSettings(settingsKey, bindingData.filter(n => n).join("|"));
 
+                        Hotkeys.unregister(oldKey);
                         module.resetHotkeys();
                     } else {
                         Hotkeys.unregister(oldKey);
