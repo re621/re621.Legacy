@@ -530,7 +530,7 @@ export class SettingsController {
                 createInput("InfiniteScroll", "Infinite Scroll"),
                 createLabel("InfiniteScroll", "New posts are automatically loaded. No need to turn pages"),
 
-                createInput("InstantSearch", "Intstant Filters"),
+                createInput("InstantSearch", "Instant Filters"),
                 createLabel("InstantSearch", "Quickly add filters to your current search, with no need for a page reload"),
 
                 createInput("FormattingManager", "Formatting Helper"),

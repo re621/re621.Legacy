@@ -49,11 +49,18 @@ export class InstantSearch extends RE6Module {
 
         this.$searchbox.on("input", () => {
             clearTimeout(typingTimeout);
-            typingTimeout = window.setTimeout(() => { this.applyFilter() }, doneTyping);
+            typingTimeout = window.setTimeout(() => { this.applyFilter(); }, doneTyping);
         });
         //The user might have paginated, which means the input is not empty,
         //but there was no input event yet.
         this.$searchbox.trigger("input");
+    }
+
+    public destroy() {
+        super.destroy();
+        this.$searchbox.val("");
+        this.applyFilter();
+        $("section#re-instantsearch").remove();
     }
 
     public applyFilter() {
@@ -80,8 +87,8 @@ export class InstantSearch extends RE6Module {
             attr("id", "re-instantsearch-input").
             val(sessionStorage.getItem("re-instantsearch"));
         this.$searchbox.attr("type", "text");
-        $section.append("<h1>Filter</h1>")
-        $section.append(this.$searchbox)
+        $section.append("<h1>Filter</h1>");
+        $section.append(this.$searchbox);
         $section.append($("<button>").attr("type", "submit").append($("<i>").addClass("fas fa-search")));
         $section.insertAfter($("#search-box"));
     }
