@@ -2,6 +2,7 @@ import { RE6Module } from "../RE6Module";
 import { Api } from "../api/Api";
 import { PostFilter } from "./PostFilter";
 import { Post } from "./Post";
+import { BlacklistEnhancer } from "../../modules/search/BlacklistEnhancer";
 
 /**
  * User  
@@ -29,8 +30,9 @@ export class User extends RE6Module {
         this.level = $ref.attr("data-user-level-string") || "Guest";
 
         const filters = JSON.parse($("head meta[name=blacklisted-tags]").attr("content"));
+        const blacklistEnabled = BlacklistEnhancer.blacklistIsActive();
         for (const filter of filters) {
-            this.addBlacklistFilter(filter);
+            this.addBlacklistFilter(filter, blacklistEnabled);
         }
     }
 
@@ -86,11 +88,13 @@ export class User extends RE6Module {
     /**
      * Saves the passed blacklist to the users e6 account
      * and refreshes the currently visible posts
+     * @param filter the string which should be turned into a PostFilter
+     * @param enabled wether or not the filter should be enabled after creation
      */
-    public addBlacklistFilter(filter: string) {
+    public addBlacklistFilter(filter: string, enabled = true) {
         let postFilter = this.blacklist.get(filter);
         if (postFilter === undefined) {
-            postFilter = new PostFilter(filter);
+            postFilter = new PostFilter(filter, enabled);
             this.blacklist.set(filter, postFilter);
         }
         const posts = Post.fetchPosts();

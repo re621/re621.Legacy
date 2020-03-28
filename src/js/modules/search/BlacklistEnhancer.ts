@@ -71,9 +71,19 @@ export class BlacklistEnhancer extends RE6Module {
         let $enableAllbutton = $("#re-enable-all-blacklists").text("Enable all filters");
 
         //catch when the user toggles the blacklist
-        $($disableAllButton).add($enableAllbutton).on("click", () => {
+        $disableAllButton.on("click", () => {
+            for (const filter of User.getBlacklist().values()) {
+                filter.setEnabled(false);
+            }
             this.applyBlacklist();
         });
+        $enableAllbutton.on("click", () => {
+            for (const filter of User.getBlacklist().values()) {
+                filter.setEnabled(true);
+            }
+            this.applyBlacklist();
+        })
+
 
 
         // Create blacklis toggle dom
@@ -87,9 +97,7 @@ export class BlacklistEnhancer extends RE6Module {
             .html(`<a href="/help/blacklist" data-ytta-id="-">(filter help)</a>`)
             .appendTo($toggleContainer);
 
-        // Hide the filters by default, unless they are all disabled
-        if ($enableAllbutton.css("display") === "none") { this.hideBlacklistedTags(); }
-        else { this.showBlacklistedTags(); }
+        this.showBlacklistedTags();
 
         // Toggle the filter list when clicking the header
         $("a#blacklist-toggle").click(e => {
@@ -146,7 +154,7 @@ export class BlacklistEnhancer extends RE6Module {
         this.$box.attr("data-filters-hidden", "false");
     }
 
-    private blacklistIsActive() {
+    public static blacklistIsActive() {
         return $("#disable-all-blacklists").css("display") !== "none";
     }
 
@@ -155,7 +163,7 @@ export class BlacklistEnhancer extends RE6Module {
      * @param hide 
      */
     private applyBlacklist(firstRun = false) {
-        const blacklistIsActive = this.blacklistIsActive();
+        const blacklistIsActive = BlacklistEnhancer.blacklistIsActive();
         for (const post of Post.fetchPosts()) {
             //Skip over posts who were already hidden by other means, like instantsearch
             if (firstRun && !post.getDomElement().is(":visible")) {
@@ -177,7 +185,7 @@ export class BlacklistEnhancer extends RE6Module {
         this.$list.empty();
 
         for (const entry of User.getBlacklist().entries()) {
-            this.addSidebarEntry(entry[0], entry[1], blacklistIsActive);
+            this.addSidebarEntry(entry[0], entry[1]);
         }
 
         //When there are no entries there's no need to display the blacklist box
@@ -194,7 +202,7 @@ export class BlacklistEnhancer extends RE6Module {
         }
     }
 
-    private addSidebarEntry(filterString, filter: PostFilter, blacklistIsActive: boolean) {
+    private addSidebarEntry(filterString, filter: PostFilter) {
         //https://github.com/zwagoth/e621ng/blob/master/app/javascript/src/javascripts/blacklists.js
 
         //don't display filters with zero matches
@@ -212,7 +220,14 @@ export class BlacklistEnhancer extends RE6Module {
         $link.attr("title", filterString);
         $link.attr("rel", "nofollow");
 
-        if (!filter.isEnabled() || !blacklistIsActive) {
+        $link.on("click", e => {
+            e.preventDefault();
+            filter.toggleEnabled();
+            BlacklistEnhancer.getInstance().applyBlacklist();
+            $link.toggleClass("blacklisted-active");
+        })
+
+        if (!filter.isEnabled()) {
             $link.addClass("blacklisted-active");
         }
 

@@ -8,9 +8,9 @@ export class PostFilter {
     private matchesCount;
     private matchesIds: Set<number>;
 
-    constructor(input: string) {
+    constructor(input: string, enabled = true) {
         this.entries = [];
-        this.enabled = true;
+        this.enabled = enabled;
         this.matchesCount = 0;
         this.matchesIds = new Set();
         this.createPostFilter(input);
@@ -53,10 +53,6 @@ export class PostFilter {
      * @returns wether or not the filter matches the post
      */
     public addPost(post: Post, shouldDecrement: boolean) {
-        if (!this.enabled) {
-            return true;
-        }
-
         let result = true;
         for (const filter of this.entries) {
             //If the result is already negative, bail. All filters must match
@@ -103,7 +99,7 @@ export class PostFilter {
     }
 
     public matchesPost(post: Post) {
-        return this.matchesIds.has(post.getId());
+        return this.enabled && this.matchesIds.has(post.getId());
     }
 
     public compareNumbers(a: number, b: number, mode: Comparable) {
@@ -148,6 +144,10 @@ export class PostFilter {
      */
     public toggleEnabled() {
         this.enabled = !this.enabled;
+    }
+
+    public setEnabled(enabled: boolean) {
+        this.enabled = enabled;
     }
 
     public isEnabled() {
