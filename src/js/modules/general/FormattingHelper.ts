@@ -97,15 +97,6 @@ export class FormattingManager extends RE6Module {
         };
     }
 
-    /**
-     * Initializes the module.
-     * Causes an infinite loop if done in the constructor
-     */
-    public init() {
-        if (this.fetchSettings("enabled")) this.create();
-        else this.destroy();
-    }
-
     /** Creates the Formatting Helpers for appropriate textareas */
     public create() {
         $("div.dtext-previewable:has(textarea)").each((i, element) => {
@@ -123,7 +114,7 @@ export class FormattingManager extends RE6Module {
         });
     }
 
-    /** Destroys all instances of the Formatting Helpers */
+    /** Removes the module's structure */
     public destroy() {
         this.formatters.forEach((entry) => {
             entry.destroy();

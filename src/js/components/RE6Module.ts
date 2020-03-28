@@ -31,16 +31,12 @@ export class RE6Module {
         this.enabled = status === undefined ? true : status;
     }
 
-    /**
-     * Returns true if the module has already been initialized
-     */
+    /** Returns true if the module has already been initialized */
     public isInitialized() {
         return this.initialized;
     }
 
-    /**
-     * Checks if the module should call the init function
-     */
+    /** Checks if the module should call the init function */
     public canInitialize() {
         return !this.initialized && this.pageMatchesFilter() && this.enabled
     }

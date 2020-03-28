@@ -71,11 +71,21 @@ export class Form {
     }
 
     /**
-     * Returns a list of inputs in the form.  
-     * This includes buttons and submit elements.
+     * Returns a list of elements in the form.  
+     * If no parameter is specified, returns all inputs
+     * @param types Types of input to return
      */
-    public getInputList() {
-        return this.$inputList;
+    public getInputList(...types: FormElement["type"][]) {
+        if (types.length == 0) { return this.$inputList; }
+        let results: Map<String, JQuery<HTMLElement>> = new Map();
+
+        this.$inputList.forEach((element, key) => {
+            if ($.inArray(element.attr("data-type"), types) !== -1) {
+                results.set(key, element);
+            }
+        });
+
+        return results;
     }
 
     /**
@@ -152,8 +162,11 @@ export class Form {
             .appendTo($form);
 
         let $input = $("<input>")
-            .attr("type", "text")
-            .attr("id", this.config.id + "-" + element.id)
+            .attr({
+                "type": "text",
+                "data-type": element.type,
+                "id": this.config.id + "-" + element.id,
+            })
             .val(element.value)
             .appendTo($inputContainer);
 
@@ -194,9 +207,12 @@ export class Form {
             .appendTo($form);
 
         let $input = $("<input>")
-            .attr("type", "text")
-            .attr("id", this.config.id + "-" + element.id)
-            .attr("readonly", "")
+            .attr({
+                "type": "text",
+                "data-type": element.type,
+                "id": this.config.id + "-" + element.id,
+                "readonly": "",
+            })
             .val(element.value)
             .appendTo($inputContainer);
 
@@ -245,9 +261,12 @@ export class Form {
             .appendTo($form);
 
         let $input = $("<input>")
-            .attr("type", "text")
-            .attr("id", this.config.id + "-" + element.id)
-            .attr("readonly", "")
+            .attr({
+                "type": "text",
+                "data-type": element.type,
+                "id": this.config.id + "-" + element.id,
+                "readonly": "",
+            })
             .val(element.value)
             .appendTo($inputContainer);
 
@@ -319,8 +338,11 @@ export class Form {
             .appendTo($form);
 
         let $input = $("<input>")
-            .attr("type", "text")
-            .attr("id", this.config.id + "-" + element.id)
+            .attr({
+                "type": "text",
+                "data-type": element.type,
+                "id": this.config.id + "-" + element.id,
+            })
             .css("display", "none")
             .val(element.value)
             .appendTo($inputContainer);
@@ -383,8 +405,11 @@ export class Form {
         }
 
         let $input = $("<input>")
-            .attr("type", "checkbox")
-            .attr("id", this.config.id + "-" + element.id)
+            .attr({
+                "type": "checkbox",
+                "data-type": element.type,
+                "id": this.config.id + "-" + element.id,
+            })
             .addClass("switch")
             .attr("checked", element.value)
             .appendTo($inputContainer);
@@ -423,8 +448,11 @@ export class Form {
             .appendTo($form);
 
         let $input = $("<button>")
-            .attr("type", "button")
-            .attr("id", this.config.id + "-" + element.id)
+            .attr({
+                "type": "button",
+                "data-type": element.type,
+                "id": this.config.id + "-" + element.id,
+            })
             .html(element.value)
             .appendTo($inputContainer);
 
@@ -456,8 +484,11 @@ export class Form {
             .appendTo($form);
 
         let $input = $("<button>")
-            .attr("type", "submit")
-            .attr("id", this.config.id + "-" + element.id)
+            .attr({
+                "type": "submit",
+                "data-type": element.type,
+                "id": this.config.id + "-" + element.id,
+            })
             .html(element.value)
             .appendTo($inputContainer);
 
@@ -489,7 +520,10 @@ export class Form {
             .appendTo($form);
 
         let $input = $("<textarea>")
-            .attr("id", this.config.id + "-" + element.id)
+            .attr({
+                "data-type": element.type,
+                "id": this.config.id + "-" + element.id
+            })
             .val(element.value)
             .appendTo($inputContainer);
 
@@ -529,7 +563,10 @@ export class Form {
             .appendTo($form);
 
         let $input = $("<select>")
-            .attr("id", this.config.id + "-" + element.id)
+            .attr({
+                "data-type": element.type,
+                "id": this.config.id + "-" + element.id
+            })
             .appendTo($inputContainer);
 
         element.data.forEach(function (entry) {
@@ -569,7 +606,10 @@ export class Form {
 
         let $input = $("<div>")
             .addClass("input-div")
-            .attr("id", this.config.id + "-" + element.id)
+            .attr({
+                "data-type": element.type,
+                "id": this.config.id + "-" + element.id,
+            })
             .append(element.value)
             .appendTo($inputContainer);
 
@@ -598,7 +638,10 @@ export class Form {
             .appendTo($form);
 
         let $input = $("<hr>")
-            .attr("id", this.config.id + "-" + element.id)
+            .attr({
+                "data-type": element.type,
+                "id": this.config.id + "-" + element.id
+            })
             .appendTo($inputContainer);
 
         return $input;

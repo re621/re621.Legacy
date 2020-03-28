@@ -18,7 +18,6 @@ export class SettingsController {
     private static instance: SettingsController;
 
     private modules: Map<string, RE6Module> = new Map();
-    private modal: Modal;
 
     private constructor() { }
 
@@ -42,16 +41,16 @@ export class SettingsController {
         let $settings = new Tabbed({
             name: "settings-tabs",
             content: [
+                { name: "Features", page: moduleStatusTab.get() },
                 { name: "Posts", page: postsPageTab.get() },
+                { name: "Blacklist", page: blacklistSettingsTab.get() },
                 { name: "Hotkeys", page: hotkeyTab.get() },
                 { name: "Misc", page: miscSettingsTab.get() },
-                { name: "Blacklist", page: blacklistSettingsTab.get() },
-                { name: "Features", page: moduleStatusTab.get() }
             ]
         });
 
         // Create the modal
-        this.modal = new Modal({
+        new Modal({
             title: "Settings",
             triggers: [{ element: addSettingsButton.link }],
             escapable: false,
@@ -83,7 +82,7 @@ export class SettingsController {
      */
     public static registerModule(...moduleList: RE6Module[]) {
         for (const module of moduleList) {
-            this.getInstance().modules.set(module.constructor.name, module);
+            this.getInstance().modules.set(module.getPrefix(), module);
         }
     }
 
@@ -413,8 +412,6 @@ export class SettingsController {
                         for (let j = 0; j < bindings; j++) {
                             bindingData.push(hotkeyFormInput.get(settingsKey + "-input-" + j).val());
                         }
-                        console.log(bindingData);
-                        console.log(bindingData.filter(n => n).join("|"));
                         module.pushSettings(settingsKey, bindingData.filter(n => n).join("|"));
 
                         module.resetHotkeys();
@@ -510,9 +507,8 @@ export class SettingsController {
     }
 
     private createModuleStatus() {
-        let infniniteScroll = this.modules.get("InfiniteScroll");
+        let modules = this.modules;
 
-        // Create the settings form
         let form = new Form(
             {
                 id: "settings-module-status",
@@ -523,41 +519,61 @@ export class SettingsController {
                 {
                     id: "features-title",
                     type: "div",
-                    value: "<h3>Features you can toggle</h3>",
+                    value: "<h3>Features</h3>",
                     stretch: "full"
                 },
-                this.getModuleToggle(infniniteScroll)
+
+                createInput("HeaderCustomizer", "Header Customizer"),
+                createLabel("HeaderCustomizer", "Add, delete, and customize header links to your heart's content"),
+
+                createInput("InfiniteScroll", "Infinite Scroll"),
+                createLabel("InfiniteScroll", "New posts are automatically loaded. No need to turn pages"),
+
+                createInput("InstantSearch", "Intstant Filters"),
+                createLabel("InstantSearch", "Quickly add filters to your current search, with no need for a page reload"),
+
+                createInput("FormattingManager", "Formatting Helper"),
+                createLabel("FormattingManager", "Fully customizable toolbar for easy DText formatting and post templates"),
+
+                createInput("TinyAlias", "Tiny Alias"),
+                createLabel("TinyAlias", "A more intelligent way to quickly fill out post tags"),
             ]
         );
+
+        function createInput(moduleName: string, label: string): FormElement {
+            const module = modules.get(moduleName);
+            return {
+                id: moduleName + "-enabled",
+                type: "checkbox",
+                value: module.fetchSettings("enabled"),
+                label: label,
+            }
+        }
+
+        function createLabel(moduleName: string, label: string): FormElement {
+            return {
+                id: moduleName + "-label",
+                type: "div",
+                value: label,
+                stretch: "mid",
+            }
+        }
+
         return form;
     }
 
-    private getModuleToggle(module: RE6Module): FormElement {
-        const moduleName = module.getPrefix();
-        return {
-            id: moduleName + "-enabled",
-            type: "checkbox",
-            value: module.fetchSettings("enabled"),
-            label: "Enable " + moduleName
-        }
-    }
-
     private handleModuleStatus(form: Form) {
-        let inputs = form.getInputList();
+        let inputs = form.getInputList("checkbox");
+
         for (const formName of inputs.keys()) {
-            console.log(formName);
-            //remove -enabled from the id
             const module = this.modules.get(formName.split("-")[0]);
-            //features-title is no input, and also has no module
-            if (module === undefined) {
-                continue;
-            }
+
             inputs.get(formName).on("re621:form:input", (event, data) => {
                 module.pushSettings("enabled", data);
                 module.setEnabled(data);
-                if (data === true && module.canInitialize() === true) {
-                    module.create();
-                }
+                if (data === true) {
+                    if (module.canInitialize()) module.create();
+                } else module.destroy();
             });
         }
     }
