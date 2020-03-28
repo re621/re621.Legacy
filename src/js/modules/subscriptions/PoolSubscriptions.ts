@@ -5,6 +5,7 @@ import { PageDefintion, Page } from "../../components/data/Page";
 import { RE6Module } from "../../components/RE6Module";
 import { Subscription, UpdateCallback } from "./Subscription";
 import { Util } from "../../components/structure/Util";
+import { ApiPost } from "../../components/api/responses/ApiPost";
 
 export class PoolSubscriptions extends RE6Module implements Subscription {
 
@@ -35,9 +36,9 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
                 .html("Unsubscribe")
                 .appendTo($header);
 
-            let poolData = this.fetchSettings("pools", true);
+            let poolData: PoolSettings = this.fetchSettings("pools", true);
 
-            if (poolData.indexOf(parseInt(Page.getPageID())) === -1) {
+            if (poolData[parseInt(Page.getPageID())] === undefined) {
                 unsubscribeButton.addClass("hidden");
             } else { subscribeButton.addClass("hidden"); }
 
@@ -45,8 +46,8 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
                 subscribeButton.toggleClass("hidden");
                 unsubscribeButton.toggleClass("hidden");
                 poolData = this.fetchSettings("pools", true);
-
-                poolData.push(parseInt(Page.getPageID()));
+                const pageId = parseInt(Page.getPageID())
+                poolData[pageId] = {};
                 this.pushSettings("pools", poolData);
             });
             unsubscribeButton.click((event) => {
@@ -54,7 +55,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
                 unsubscribeButton.toggleClass("hidden");
                 poolData = this.fetchSettings("pools", true);
 
-                poolData = poolData.splice(poolData.indexOf(parseInt(Page.getPageID()), 1));
+                delete poolData[parseInt(Page.getPageID())];
                 this.pushSettings("pools", poolData);
             });
         }
@@ -108,27 +109,32 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
     public async getUpdatedEntries() {
         let results: Update[] = [];
 
-        let poolData = this.fetchSettings("pools", true);
-        if (poolData.length == 0) {
-            results;
+        let poolData: PoolSettings = this.fetchSettings("pools", true);
+        if (Object.keys(poolData).length === 0) {
+            return results;
         }
 
-        let poolsJson: ApiPool[] = await Api.getJson("/pools.json?search[id]=" + poolData.join(","));
-        poolsJson.forEach((value) => {
-            if (new Date(value.updated_at).getTime() > this.lastUpdate || !SubscriptionManager.dismissOnUpdate) {
-                results.push(this.formatPoolUpdate(value));
+        let poolsJson: ApiPool[] = await Api.getJson("/pools.json?search[id]=" + Object.keys(poolData).join(","));
+        for (const poolJson of poolsJson) {
+            if (new Date(poolJson.updated_at).getTime() > this.lastUpdate || !SubscriptionManager.dismissOnUpdate) {
+                results.push(await this.formatPoolUpdate(poolJson, poolData));
             }
-        });
+        }
+        this.pushSettings("pools", poolData);
         return results;
     }
 
-    private formatPoolUpdate(value: ApiPool): Update {
+    private async formatPoolUpdate(value: ApiPool, poolInfo: PoolSettings): Promise<Update> {
+        if (poolInfo[value.id].thumbnail === undefined) {
+            const post: ApiPost = (await Api.getJson(`/posts/${value.post_ids[0]}.json`)).post;
+            poolInfo[value.id].thumbnail = post.preview.url;
+        }
         return {
             id: value.id,
             name: value.name.replace(/_/g, " "),
             date: new Date(value.updated_at),
             last: value.post_ids[value.post_ids.length - 1],
-            extra: "https://static1.e621.net/data/preview/1f/fc/1ffc0e7f96c7e541181b40bfb52e130b.jpg"
+            extra: poolInfo[value.id].thumbnail
         };
     }
 
@@ -139,7 +145,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
     protected getDefaultSettings() {
         return {
             enabled: true,
-            pools: []
+            pools: {}
         };
     }
 
@@ -147,4 +153,14 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
         if (this.instance == undefined) this.instance = new PoolSubscriptions();
         return this.instance;
     }
+}
+
+
+
+interface PoolSettings {
+    [poolId: number]: PoolInfo
+}
+
+interface PoolInfo {
+    thumbnail?: string;
 }
