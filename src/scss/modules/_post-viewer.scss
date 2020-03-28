@@ -21,6 +21,12 @@ section#image-extra-controls {
         }
     }
 
+    div#image-resize-cycle {
+        form.grid-form {
+            width: unset;
+        }
+    }
+
     div#image-score-links,
     div.fav-buttons>button,
     div.fav-buttons>button::after,
