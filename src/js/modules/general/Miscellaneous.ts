@@ -1,5 +1,7 @@
 import { RE6Module } from "../../components/RE6Module";
 import { Page, PageDefintion } from "../../components/data/Page";
+import { Api } from "../../components/api/Api";
+import { ApiForumPost } from "../../components/api/responses/ApiForum";
 
 declare var GM_addStyle;
 declare var GM_getResourceText;
@@ -71,6 +73,10 @@ export class Miscellaneous extends RE6Module {
             this.focusSearchBar();
         }
 
+        if (Page.matches([PageDefintion.post, PageDefintion.forum])) {
+            this.handleQuoteButton();
+        }
+
         this.registerHotkeys();
     }
 
@@ -139,4 +145,62 @@ export class Miscellaneous extends RE6Module {
         let searchbox = $("section#search-box input");
         if (searchbox.val() == "") searchbox.focus();
     }
+
+    /**
+     * Handles the "Reply" button functionality
+     */
+    private handleQuoteButton() {
+        if (Page.matches(PageDefintion.forum)) {
+            $(".forum-post-reply-link").each(function (index, element) {
+                let $newLink = $("<a>")
+                    .attr("href", "#")
+                    .addClass("re621-forum-post-reply")
+                    .html("Respond");
+                $(element).after($newLink).remove();
+            });
+
+            $(".re621-forum-post-reply").on('click', (event) => {
+                event.preventDefault();
+                let $parent = $(event.target).parents("article.forum-post");
+                this.quote($parent, "/forum_posts/" + $parent.data("forum-post-id") + ".json", $("#forum_post_body"), $("a#new-response-link"));
+            });
+        } else if (Page.matches(PageDefintion.post)) {
+            $(".comment-reply-link").each(function (index, element) {
+                let $newLink = $("<a>")
+                    .attr("href", "#")
+                    .addClass("re621-comment-reply")
+                    .html("Respond");
+                $(element).after($newLink).remove();
+            });
+
+            $(".re621-comment-reply").on('click', (event) => {
+                event.preventDefault();
+                let $parent = $(event.target).parents("article.comment");
+                this.quote($parent, "/comments/" + $parent.data("comment-id") + ".json", $("#comment_body_for_"), $("a.expand-comment-response"));
+            });
+        }
+    }
+
+    private async quote($parent: JQuery<HTMLElement>, request_url: string, $textarea: JQuery<HTMLElement>, $responseButton: JQuery<HTMLElement>) {
+        let stripped_body = "",
+            selection = window.getSelection().toString();
+        console.log(request_url);
+
+        if (selection === "") {
+            let jsonData: ApiForumPost = await Api.getJson(request_url);
+            stripped_body = jsonData.body.replace(/\[quote\](?:.|\n|\r)+?\[\/quote\][\n\r]*/gm, "");
+            stripped_body = `[quote]"` + $parent.data('creator') + `":/user/show/` + $parent.data('creator-id') + `said:\n` + stripped_body + `\n[/quote]`;
+        } else {
+            stripped_body = `[quote]"` + $parent.data('creator') + `":/user/show/` + $parent.data('creator-id') + `said:\n` + selection + `\n[/quote]`;
+        }
+
+        if (($textarea.val() + "").length > 0) { stripped_body = "\n\n" + stripped_body; }
+
+        $textarea.val($textarea.val() + stripped_body);
+        $responseButton[0].click();
+        setTimeout(function () {
+            $responseButton[0].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+        }, 15);
+    }
+
 }
