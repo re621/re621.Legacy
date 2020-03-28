@@ -17,7 +17,7 @@ export class User extends RE6Module {
 
     private level: string;
 
-    private blacklist: PostFilter[];
+    private blacklist = new Map<string, PostFilter>();
 
     private constructor() {
         super();
@@ -27,6 +27,11 @@ export class User extends RE6Module {
         this.username = $ref.attr("data-user-name") || "Anonymous";
         this.userid = $ref.attr("data-user-id") || "0";
         this.level = $ref.attr("data-user-level-string") || "Guest";
+
+        const filters = JSON.parse($("head meta[name=blacklisted-tags]").attr("content"));
+        for (const filter of filters) {
+            this.addBlacklistFilter(filter);
+        }
     }
 
     /**
@@ -75,7 +80,6 @@ export class User extends RE6Module {
      * @returns PostFilter[] A array of the users current filters
      */
     public static getBlacklist() {
-        if (this.getInstance().blacklist === undefined) this.refreshBlacklist();
         return this.getInstance().blacklist;
     }
 
@@ -83,22 +87,16 @@ export class User extends RE6Module {
      * Saves the passed blacklist to the users e6 account
      * and refreshes the currently visible posts
      */
-    public static setBlacklist(blacklistArray: string[]) {
-        $("head meta[name=blacklisted-tags]").attr("content", JSON.stringify(blacklistArray))
-        this.refreshBlacklist();
-    }
-
-    /**
-     * Refreshes the currently visible posts
-     */
-    public static refreshBlacklist() {
-        let newBlacklist = [];
-        const filterArray: string[] = JSON.parse($("head meta[name=blacklisted-tags]").attr("content"));
-        for (const filter of filterArray) {
-            newBlacklist.push(new PostFilter(filter));
+    public addBlacklistFilter(filter: string) {
+        let postFilter = this.blacklist.get(filter);
+        if (postFilter === undefined) {
+            postFilter = new PostFilter(filter);
+            this.blacklist.set(filter, postFilter);
         }
-        this.getInstance().blacklist = newBlacklist;
-        Post.refreshBlacklistStatus();
+        const posts = Post.fetchPosts();
+        for (const post of posts) {
+            postFilter.addPost(post, false);
+        }
     }
 
     /**

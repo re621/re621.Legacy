@@ -57,8 +57,6 @@ export class BlacklistEnhancer extends RE6Module {
 
         this.modifyDOM();
 
-        User.refreshBlacklist();
-
         //Apply blacklist without user interaction. Blacklist might be active
         this.applyBlacklist(true);
     }
@@ -127,7 +125,7 @@ export class BlacklistEnhancer extends RE6Module {
         }
         await User.setSettings({ blacklisted_tags: currentBlacklist.join("\n") });
         Danbooru.notice("Done!");
-        User.setBlacklist(currentBlacklist);
+        User.getInstance().addBlacklistFilter(tag);
         this.applyBlacklist();
     }
 
@@ -178,35 +176,47 @@ export class BlacklistEnhancer extends RE6Module {
         //remove already added entries
         this.$list.empty();
 
-        for (const entry of Post.getBlacklistMatches().entries()) {
+        for (const entry of User.getBlacklist().entries()) {
             this.addSidebarEntry(entry[0], entry[1], blacklistIsActive);
         }
 
         //When there are no entries there's no need to display the blacklist box
-        if (Post.getBlacklistMatches().size === 0) {
+        let nonZeorFilterCount = 0;
+        for (const filter of User.getBlacklist().values()) {
+            if (filter.getMatches() !== 0) {
+                nonZeorFilterCount++;
+            }
+        }
+        if (nonZeorFilterCount === 0) {
             this.$box.hide();
         } else {
             this.$box.show();
         }
     }
 
-    private addSidebarEntry(filterName: string, filterCount: number, blacklistIsActive: boolean) {
+    private addSidebarEntry(filterString, filter: PostFilter, blacklistIsActive: boolean) {
         //https://github.com/zwagoth/e621ng/blob/master/app/javascript/src/javascripts/blacklists.js
+
+        //don't display filters with zero matches
+        if (filter.getMatches() === 0) {
+            return;
+        }
+
         const $entry = $("<li>");
         const $link = $("<a>");
         const $count = $("<span>");
 
-        $link.text(filterName);
+        $link.text(filterString);
         $link.addClass("blacklist-toggle-link");
-        $link.attr("href", `/posts?tags=${encodeURIComponent(filterName)}`);
-        $link.attr("title", filterName);
+        $link.attr("href", `/posts?tags=${encodeURIComponent(filterString)}`);
+        $link.attr("title", filterString);
         $link.attr("rel", "nofollow");
 
-        if (!blacklistIsActive) {
+        if (!filter.isEnabled() || !blacklistIsActive) {
             $link.addClass("blacklisted-active");
         }
 
-        $count.html(filterCount.toString());
+        $count.html(filter.getMatches());
         $count.addClass("post-count");
         $entry.append($link);
         $entry.append(" ");

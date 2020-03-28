@@ -76,7 +76,7 @@ export class InstantSearch extends RE6Module {
             }
         } else {
             for (const post of posts) {
-                filter.matchesPost(post) ? post.show(blacklistIsActive) : post.hide();
+                filter.addPost(post, true) ? post.show(blacklistIsActive) : post.hide();
             }
         }
     }

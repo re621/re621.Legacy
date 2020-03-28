@@ -3,12 +3,16 @@ import { Tag } from "./Tag";
 
 export class PostFilter {
 
-    private stringRepresentation;
     private entries: SinglePostFilter[];
+    private enabled;
+    private matchesCount;
+    private matchesIds: Set<number>;
 
     constructor(input: string) {
         this.entries = [];
-        this.stringRepresentation = input;
+        this.enabled = true;
+        this.matchesCount = 0;
+        this.matchesIds = new Set();
         this.createPostFilter(input);
     }
 
@@ -40,11 +44,19 @@ export class PostFilter {
     }
 
     /**
-    * Checks if the post would be returned if you searched on the site with filterString
-    * Most of the things that work on the site should also work here
-    * @todo Implement ~ modifier
-    */
-    public matchesPost(post: Post) {
+     * Adds a post to this filter.
+     * Most of the things that work on the site should also work here
+     * @todo Implement ~ modifier
+     * @param post the post to check agains
+     * @param shouldDecrement if the matched counter should decrement if the post doesn't match
+     * should be false for newly added posts, and true otherwise
+     * @returns wether or not the filter matches the post
+     */
+    public addPost(post: Post, shouldDecrement: boolean) {
+        if (!this.enabled) {
+            return true;
+        }
+
         let result = true;
         for (const filter of this.entries) {
             //If the result is already negative, bail. All filters must match
@@ -80,7 +92,18 @@ export class PostFilter {
             //invert the result, depending on if the filter started with a -
             result = result !== filter.invert;
         }
+        if (result === true) {
+            this.matchesCount++;
+            this.matchesIds.add(post.getId())
+        } else if (result === false && shouldDecrement) {
+            this.matchesCount--;
+            this.matchesIds.delete(post.getId());
+        }
         return result;
+    }
+
+    public matchesPost(post: Post) {
+        return this.matchesIds.has(post.getId());
     }
 
     public compareNumbers(a: number, b: number, mode: Comparable) {
@@ -114,10 +137,21 @@ export class PostFilter {
     }
 
     /**
-     * @returns the string which was used to construct this filter
+     * Returns how many posts are affected by this filter
      */
-    public getStringRepresentation() {
-        return this.stringRepresentation;
+    public getMatches() {
+        return this.matchesCount;
+    }
+
+    /**
+     * Enables/Disables the filter
+     */
+    public toggleEnabled() {
+        this.enabled = !this.enabled;
+    }
+
+    public isEnabled() {
+        return this.enabled;
     }
 }
 

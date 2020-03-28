@@ -30,10 +30,6 @@ export class Post {
     protected sound: boolean;
     protected flags: string;
 
-    protected isBlacklisted: boolean;
-
-    protected static blacklistMatches = new Map<string, number>();
-
     public constructor($image: JQuery<HTMLElement>) {
         this.id = parseInt($image.attr("data-id"));
         this.tags = $image.attr("data-tags");
@@ -65,12 +61,12 @@ export class Post {
 
         this.element = $image;
 
+        for (const filter of User.getBlacklist().values()) {
+            filter.addPost(this, false);
+        }
+
         //Remove blacklist class, this gets custom handling from the script
         $image.removeClass("blacklisted-active");
-
-        //Check if a post will be hidden if the blacklist is active
-        //Cache this result, to prevent having to recalculate it everytime the blacklist toggles
-        this.isBlacklisted = this.matchesSiteBlacklist();
     }
 
     /**
@@ -129,11 +125,24 @@ export class Post {
      * @param blacklistIsActive true if blacklist is active, false otherwise
      */
     public applyBlacklist(blacklistIsActive: boolean) {
-        if (this.getIsBlacklisted()) {
+
+        if (this.matchesBlacklist()) {
             blacklistIsActive ? this.hide() : this.show();
         } else {    //It's not blacklisted, show it instead
             this.show();
         }
+    }
+
+    /**
+     * Checks if the post is found in an activated blacklist filter
+     */
+    private matchesBlacklist() {
+        for (const filter of User.getBlacklist().values()) {
+            if (filter.matchesPost(this)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -150,7 +159,7 @@ export class Post {
      * Shows the post and restores the src attribute, if the blacklist allows it
      */
     public show(blacklistIsActive = false) {
-        if (blacklistIsActive === true && this.isBlacklisted) {
+        if (blacklistIsActive === true && this.matchesBlacklist()) {
             return;
         }
         const $img = this.element.find("img");
@@ -159,52 +168,11 @@ export class Post {
     }
 
     /**
-     * Checks if a post should be hidden by the users blacklist
-     * Also takes care to update blacklist match counter
-     * https://github.com/zwagoth/e621ng/blob/master/app/javascript/src/javascripts/blacklists.js
-     */
-    private matchesSiteBlacklist() {
-        let hits = 0;
-        for (const filter of User.getBlacklist()) {
-            if (filter.matchesPost(this)) {
-                const currentMatches = Post.blacklistMatches.get(filter.getStringRepresentation());
-                Post.blacklistMatches.set(filter.getStringRepresentation(), currentMatches === undefined ? 1 : currentMatches + 1);
-                hits++;
-            }
-        }
-        return hits !== 0;
-    }
-
-    /**
-     * Reparsed the the blacklist status of all posts, in case the blacklist got modified
-     */
-    public static refreshBlacklistStatus() {
-        //empty current status and itterate over every post and check again
-        const posts = this.fetchPosts();
-        this.blacklistMatches = new Map<string, number>();
-        for (const post of posts) {
-            post.isBlacklisted = post.matchesSiteBlacklist();
-        }
-    }
-
-    /**
      * Returns the JQuery Object for the post
      * @returns JQuery<HTMLElement> DOM Element
      */
     public getDomElement() {
         return this.element;
-    }
-
-    /**
-     * Returns true if post can be hidden by blacklist
-     * @returns true if the post can be hidden by the blacklist, false otherwise
-     */
-    public getIsBlacklisted() {
-        return this.isBlacklisted;
-    }
-
-    public static getBlacklistMatches() {
-        return this.blacklistMatches;
     }
 
     public getId() { return this.id; }
