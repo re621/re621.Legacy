@@ -65,7 +65,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         }
 
         for (const tagName of Object.keys(tagData)) {
-            let postsJson: ApiPost[] = (await Api.getJson("/posts.json?tags=" + tagName)).posts;
+            let postsJson: ApiPost[] = (await Api.getJson("/posts.json?tags=" + encodeURIComponent(tagName.replace(/ /g, "_")))).posts;
             for (const post of postsJson) {
                 if (new Date(post.created_at).getTime() > this.lastUpdate) {
                     results.push(await this.formatPostUpdate(post, tagName));
@@ -80,7 +80,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         return {
             id: value.id,
             name: tagName.replace(/ /g, " "),
-            date: new Date(value.updated_at),
+            date: new Date(value.created_at),
             last: -1,
             thumbnailMd5: value.file.md5
         };
