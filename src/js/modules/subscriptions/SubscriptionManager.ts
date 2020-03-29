@@ -171,16 +171,11 @@ export class SubscriptionManager extends RE6Module {
 
     public addSubscribeButtons(instance: Subscription) {
         let subscriptionData: SubscriptionSettings = instance.fetchSettings("data", true);
-
-        instance.getElementsToAppendTo().each((index, element) => {
+        instance.getElementsToInsertAfter().each((index, element) => {
             const $element = $(element);
 
-            let $subscribeButton = $("<button>")
-                .addClass("subscribe-button subscribe")
-                .html("Subscribe");
-            let $unsubscribeButton = $("<button>")
-                .addClass("subscribe-button unsubscribe")
-                .html("Unsubscribe");
+            let $subscribeButton = instance.createSubscribeButton();
+            let $unsubscribeButton = instance.createUnsubscribeButton();
 
             const id = instance.getSubscriberId($element);
 
@@ -188,14 +183,16 @@ export class SubscriptionManager extends RE6Module {
                 $unsubscribeButton.addClass("hidden");
             } else { $subscribeButton.addClass("hidden"); }
 
-            $subscribeButton.click(() => {
+            $subscribeButton.click((e) => {
+                e.preventDefault();
                 $subscribeButton.toggleClass("hidden");
                 $unsubscribeButton.toggleClass("hidden");
                 subscriptionData = instance.fetchSettings("data", true);
                 subscriptionData[id] = {};
                 instance.pushSettings("data", subscriptionData);
             });
-            $unsubscribeButton.click(() => {
+            $unsubscribeButton.click((e) => {
+                e.preventDefault();
                 $subscribeButton.toggleClass("hidden");
                 $unsubscribeButton.toggleClass("hidden");
                 subscriptionData = instance.fetchSettings("data", true);
@@ -203,8 +200,8 @@ export class SubscriptionManager extends RE6Module {
                 delete subscriptionData[id];
                 instance.pushSettings("data", subscriptionData);
             });
-            $subscribeButton.appendTo($element);
-            $unsubscribeButton.appendTo($element);
+            $subscribeButton.insertAfter($element);
+            $unsubscribeButton.insertAfter($element);
         });
 
     }

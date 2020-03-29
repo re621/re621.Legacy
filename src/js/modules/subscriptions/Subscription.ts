@@ -10,7 +10,9 @@ export interface Subscription extends RE6Module {
      * Elements where a subscribe/unsubscribe button should be appended to
      * The elements will be passedt to getSubscriberId
      */
-    getElementsToAppendTo(): JQuery<HTMLElement>
+    getElementsToInsertAfter(): JQuery<HTMLElement>
+    createSubscribeButton(): JQuery<HTMLElement>
+    createUnsubscribeButton(): JQuery<HTMLElement>
     /**
      * Returns all entries which are considered to be updated,
      * i.e the api update date is larger than the last updated date

@@ -42,8 +42,20 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         return Page.getPageID();
     }
 
-    getElementsToAppendTo() {
+    getElementsToInsertAfter() {
         return $("div#c-forum-topics > div#a-show > h1").first();
+    }
+
+    public createSubscribeButton() {
+        return $("<button>")
+            .addClass(`large-subscribe-button subscribe`)
+            .html("Subscribe");
+    }
+
+    public createUnsubscribeButton() {
+        return $("<button>")
+            .addClass(`large-subscribe-button unsubscribe`)
+            .html("Unsubscribe");
     }
 
     public async getUpdatedEntries() {

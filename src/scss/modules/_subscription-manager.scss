@@ -16,7 +16,7 @@ a[data-has-notifications=true] {
     }
 }
 
-button.subscribe-button {
+button.large-subscribe-button {
     float: right;
     padding: 0.25rem 0.5rem;
     outline: 0;
@@ -39,9 +39,11 @@ button.subscribe-button {
             background: themed("color-danger");
         }
     }
+}
 
-    &.hidden {
-        display: none;
+.tag-subscribtion-button {
+    &::after {
+        content: " "
     }
 }
 

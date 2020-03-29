@@ -43,8 +43,20 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
         return Page.getPageID();
     }
 
-    public getElementsToAppendTo() {
+    public getElementsToInsertAfter() {
         return $("div#c-pools > div#a-show > h1:first").first();
+    }
+
+    public createSubscribeButton() {
+        return $("<button>")
+            .addClass(`large-subscribe-button subscribe`)
+            .html("Subscribe");
+    }
+
+    public createUnsubscribeButton() {
+        return $("<button>")
+            .addClass(`large-subscribe-button unsubscribe`)
+            .html("Unsubscribe");
     }
 
     public async getUpdatedEntries() {
