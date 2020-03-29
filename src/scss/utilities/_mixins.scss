@@ -1,0 +1,33 @@
+/* Common Mixins */
+
+// Scrollbar Styling
+@mixin scrollbars() {
+
+    // For Chrome
+    &::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        height: 6px;
+        background-color: #ffffff55;
+    }
+
+    &::-webkit-scrollbar-button {
+        width: 0;
+        height: 0;
+        display: none;
+    }
+
+    &::-webkit-scrollbar-track,
+    &::-webkit-scrollbar-corner {
+        background-color: transparent;
+    }
+
+    // For Firefox
+    & {
+        scrollbar-width: thin;
+        scrollbar-color: #ffffff55 transparent;
+    }
+}

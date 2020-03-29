@@ -40,7 +40,7 @@ export class Util {
             token = 'ago',
             list_choice = 1;
 
-        if (seconds == 0) { return 'Just now' }
+        if (seconds == 0) { return 'Just now'; }
         if (seconds < 0) {
             seconds = Math.abs(seconds);
             token = 'from now';
@@ -56,6 +56,21 @@ export class Util {
                     return Math.floor(seconds / format[2]) + ' ' + format[1] + ' ' + token;
             }
         return time + "";
+    }
+
+    /**
+     * Downloads the provided object as a JSON file
+     * @param exportObj Object to download
+     * @param exportName File name
+     */
+    public static downloadJSON(exportObj, exportName) {
+        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 4));
+        var downloadAnchorNode = document.createElement("a");
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", exportName + ".json");
+        document.body.appendChild(downloadAnchorNode); // required for firefox
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
     }
 
 }
