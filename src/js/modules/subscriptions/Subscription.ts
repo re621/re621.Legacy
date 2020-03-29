@@ -1,4 +1,4 @@
-import { Update } from "./SubscriptionManager";
+import { UpdateData, UpdateDefinition } from "./SubscriptionManager";
 import { RE6Module } from "../../components/RE6Module";
 
 export interface Subscription extends RE6Module {
@@ -11,17 +11,10 @@ export interface Subscription extends RE6Module {
      */
     addSubscribeButtons();
     /**
-     * Creates an element which will be added to the tab when there are updates
-     * @param data Data Object created with getUpdateEntries
-     * @param extra Optional extra info you want to pass to the function
-     * @returns the element to append
-     */
-    createUpdateEntry(data: Update, extra?: any): JQuery<HTMLElement>;
-    /**
      * Returns all entries which are considered to be updated,
      * i.e the api update date is larger than the last updated date
      */
-    getUpdatedEntries(): Promise<Update[]>;
+    getUpdatedEntries(): Promise<UpdateData[]>;
     /**
      * Holds the last time checked for updates in ms since epoch
      */
@@ -30,8 +23,5 @@ export interface Subscription extends RE6Module {
      * Tab which will hold the updates. Updates are automatically added by the SubscriptionManager
      */
     tab: JQuery<HTMLElement>;
-}
-
-export interface UpdateCallback {
-    (updates: Update[]): void;
+    updateDefinition: UpdateDefinition;
 }

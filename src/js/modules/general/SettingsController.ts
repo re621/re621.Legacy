@@ -629,8 +629,8 @@ export class SettingsController {
                 let poolSubs = PoolSubscriptions.getInstance(),
                     poolData: PoolSettings = poolSubs.fetchSettings("pools", true);
                 for (let entry of parsedData[2]) {
-                    let thumb = entry["thumb"]["url"].replace(/\..+$/g, "");
-                    poolData[entry["id"]] = { thumbnail: thumb };
+                    let thumb = entry["thumb"]["url"].substr(6, 32);
+                    poolData[entry["id"]] = { thumbnailMd5: thumb };
                 }
                 poolSubs.pushSettings("pools", poolData);
 

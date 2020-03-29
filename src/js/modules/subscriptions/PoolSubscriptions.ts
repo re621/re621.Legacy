@@ -1,14 +1,33 @@
-import { SubscriptionManager, Update } from "./SubscriptionManager";
+import { UpdateData, UpdateDefinition } from "./SubscriptionManager";
 import { ApiPool } from "../../components/api/responses/ApiPool";
 import { Api } from "../../components/api/Api";
 import { PageDefintion, Page } from "../../components/data/Page";
 import { RE6Module } from "../../components/RE6Module";
 import { Subscription } from "./Subscription";
-import { Util } from "../../components/structure/Util";
 import { ApiPost } from "../../components/api/responses/ApiPost";
 import { Post } from "../../components/data/Post";
 
 export class PoolSubscriptions extends RE6Module implements Subscription {
+    updateDefinition: UpdateDefinition = {
+        imageSrc: data => {
+            return Post.createPreviewUrlFromMd5(data.thumbnailMd5);
+        },
+        imageHref: data => {
+            return `https://e621.net/pools/${data.id}`;
+        },
+        updateHref: data => {
+            return `https://e621.net/posts/${data.last}?pool_id=${data.id}`;
+        },
+        updateText: data => {
+            return data.name;
+        },
+        sourceHref: data => {
+            return `https://e621.net/pools/${data.id}`;
+        },
+        sourceText: data => {
+            return "All Posts";
+        }
+    }
 
     limit: number;
     lastUpdate: number;
@@ -57,53 +76,8 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
         }
     }
 
-    public createUpdateEntry(data: Update) {
-        let $content = $("<div>")
-            .addClass("subscription-update");
-
-        // Image
-        let $image = $("<div>")
-            .addClass("subscription-update-preview")
-            .appendTo($content);
-        $("<img>")
-            .attr("src", Post.createPreviewUrlFromMd5(data.thumbnailMd5))
-            .appendTo($image);
-
-        // Entry Title
-        let $title = $("<div>")
-            .addClass("subscription-update-title")
-            .appendTo($content);
-        $("<a>")
-            .html(data.name)
-            .attr({
-                "href": "/posts/" + data.last + "?pool_id=" + data.id,
-                "data-id": data.id,
-            })
-            .appendTo($title);
-
-        // Link to all posts page
-        let $full = $("<div>")
-            .addClass("subscription-update-full")
-            .appendTo($content);
-        $("<a>")
-            .attr("href", "/pool/" + data.id)
-            .html("All Posts")
-            .appendTo($full);
-
-        // Last Updated
-        let $date = $("<div>")
-            .addClass("subscription-update-date")
-            .appendTo($content);
-        $("<span>")
-            .html(Util.timeAgo(data.date))
-            .attr("title", data.date.toLocaleString())
-            .appendTo($date);
-
-        return $content;
-    }
-
     public async getUpdatedEntries() {
-        let results: Update[] = [];
+        let results: UpdateData[] = [];
 
         let poolData: PoolSettings = this.fetchSettings("pools", true);
         if (Object.keys(poolData).length === 0) {
@@ -120,17 +94,17 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
         return results;
     }
 
-    private async formatPoolUpdate(value: ApiPool, poolInfo: PoolSettings): Promise<Update> {
-        if (poolInfo[value.id].thumbnail === undefined) {
+    private async formatPoolUpdate(value: ApiPool, poolInfo: PoolSettings): Promise<UpdateData> {
+        if (poolInfo[value.id].thumbnailMd5 === undefined) {
             const post: ApiPost = (await Api.getJson(`/posts/${value.post_ids[0]}.json`)).post;
-            poolInfo[value.id].thumbnail = post.preview.url;
+            poolInfo[value.id].thumbnailMd5 = post.file.md5;
         }
         return {
             id: value.id,
             name: value.name.replace(/_/g, " "),
             date: new Date(value.updated_at),
             last: value.post_ids[value.post_ids.length - 1],
-            thumbnailMd5: poolInfo[value.id].thumbnail
+            thumbnailMd5: poolInfo[value.id].thumbnailMd5
         };
     }
 
@@ -158,5 +132,5 @@ export interface PoolSettings {
 }
 
 interface PoolInfo {
-    thumbnail?: string;
+    thumbnailMd5?: string;
 }
