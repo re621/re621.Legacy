@@ -16,7 +16,7 @@ a[data-has-notifications=true] {
     }
 }
 
-div#c-pools>div#a-show>h1 {
+div#c-pools>div#a-show>h1, div#c-forum-topics>div#a-show>h1 {
     button.subscribe-button {
         float: right;
         padding: 0.25rem 0.5rem;

@@ -2,7 +2,6 @@ import { RE6Module } from "../../components/RE6Module";
 import { HeaderCustomizer } from "../general/HeaderCustomizer";
 import { Tabbed } from "../../components/structure/Tabbed";
 import { Modal } from "../../components/structure/Modal";
-import { Util } from "../../components/structure/Util";
 import { Subscription } from "./Subscription";
 
 export class SubscriptionManager extends RE6Module {
@@ -157,5 +156,6 @@ export interface Update {
     name: string,
     date: Date,
     last: number,
-    extra: any
+    thumbnail: string
+    extra?: any
 }

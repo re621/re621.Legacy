@@ -1,27 +1,27 @@
 import { SubscriptionManager, Update } from "./SubscriptionManager";
-import { ApiPool } from "../../components/api/responses/ApiPool";
 import { Api } from "../../components/api/Api";
 import { PageDefintion, Page } from "../../components/data/Page";
 import { RE6Module } from "../../components/RE6Module";
 import { Subscription } from "./Subscription";
 import { Util } from "../../components/structure/Util";
 import { ApiPost } from "../../components/api/responses/ApiPost";
+import { ApiForumTopic } from "../../components/api/responses/ApiForum";
 
-export class PoolSubscriptions extends RE6Module implements Subscription {
+export class ForumSubscriptions extends RE6Module implements Subscription {
 
     limit: number;
     lastUpdate: number;
     tab: JQuery<HTMLElement>;
 
-    private static instance: PoolSubscriptions;
+    private static instance: ForumSubscriptions;
 
     public getName(): string {
-        return "Pools";
+        return "Forums";
     }
 
     public addSubscribeButtons() {
-        if (Page.matches(PageDefintion.pool)) {
-            let $header = $("div#c-pools > div#a-show > h1").first();
+        if (Page.matches(PageDefintion.forum)) {
+            let $header = $("div#c-forum-topics > div#a-show > h1").first();
             let subscribeButton = $("<button>")
                 .addClass("subscribe-button subscribe")
                 .html("Subscribe")
@@ -31,27 +31,27 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
                 .html("Unsubscribe")
                 .appendTo($header);
 
-            let poolData: PoolSettings = this.fetchSettings("pools", true);
+            let forumData: ForumSettings = this.fetchSettings("forums", true);
 
-            if (poolData[parseInt(Page.getPageID())] === undefined) {
+            if (forumData[parseInt(Page.getPageID())] === undefined) {
                 unsubscribeButton.addClass("hidden");
             } else { subscribeButton.addClass("hidden"); }
 
             subscribeButton.click((event) => {
                 subscribeButton.toggleClass("hidden");
                 unsubscribeButton.toggleClass("hidden");
-                poolData = this.fetchSettings("pools", true);
+                forumData = this.fetchSettings("forums", true);
                 const pageId = parseInt(Page.getPageID())
-                poolData[pageId] = {};
-                this.pushSettings("pools", poolData);
+                forumData[pageId] = {};
+                this.pushSettings("forums", forumData);
             });
             unsubscribeButton.click((event) => {
                 subscribeButton.toggleClass("hidden");
                 unsubscribeButton.toggleClass("hidden");
-                poolData = this.fetchSettings("pools", true);
+                forumData = this.fetchSettings("forums", true);
 
-                delete poolData[parseInt(Page.getPageID())];
-                this.pushSettings("pools", poolData);
+                delete forumData[parseInt(Page.getPageID())];
+                this.pushSettings("forums", forumData);
             });
         }
     }
@@ -65,7 +65,6 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             .addClass("subscription-update-preview")
             .appendTo($content);
         $("<img>")
-            .attr("src", data.extra)
             .appendTo($image);
 
         // Entry Title
@@ -75,7 +74,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
         $("<a>")
             .html(data.name)
             .attr({
-                "href": "/posts/" + data.last + "?pool_id=" + data.id,
+                "href": "/forum_topics/" + data.id + "?page=" + Math.ceil(data.last / 75),   //75 replies per page
                 "data-id": data.id,
             })
             .appendTo($title);
@@ -85,8 +84,8 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             .addClass("subscription-update-full")
             .appendTo($content);
         $("<a>")
-            .attr("href", "/pool/" + data.id)
-            .html("All Posts")
+            .attr("href", "/forum_topics/" + data.id)
+            .html("First Page")
             .appendTo($full);
 
         // Last Updated
@@ -104,32 +103,28 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
     public async getUpdatedEntries() {
         let results: Update[] = [];
 
-        let poolData: PoolSettings = this.fetchSettings("pools", true);
-        if (Object.keys(poolData).length === 0) {
+        let forumData: ForumSettings = this.fetchSettings("forums", true);
+        if (Object.keys(forumData).length === 0) {
             return results;
         }
 
-        let poolsJson: ApiPool[] = await Api.getJson("/pools.json?search[id]=" + Object.keys(poolData).join(","));
-        for (const poolJson of poolsJson) {
-            if (new Date(poolJson.updated_at).getTime() > this.lastUpdate || !SubscriptionManager.dismissOnUpdate) {
-                results.push(await this.formatPoolUpdate(poolJson, poolData));
+        let forumsJson: ApiForumTopic[] = await Api.getJson("/forum_topics.json?search[id]=" + Object.keys(forumData).join(","));
+        for (const forumJson of forumsJson) {
+            if (new Date(forumJson.updated_at).getTime() > this.lastUpdate || !SubscriptionManager.dismissOnUpdate) {
+                results.push(await this.formatForumUpdate(forumJson, forumData));
             }
         }
-        this.pushSettings("pools", poolData);
+        this.pushSettings("forums", forumData);
         return results;
     }
 
-    private async formatPoolUpdate(value: ApiPool, poolInfo: PoolSettings): Promise<Update> {
-        if (poolInfo[value.id].thumbnail === undefined) {
-            const post: ApiPost = (await Api.getJson(`/posts/${value.post_ids[0]}.json`)).post;
-            poolInfo[value.id].thumbnail = post.preview.url;
-        }
+    private async formatForumUpdate(value: ApiForumTopic, forumInfo: ForumSettings): Promise<Update> {
         return {
             id: value.id,
-            name: value.name.replace(/_/g, " "),
+            name: value.title,
             date: new Date(value.updated_at),
-            last: value.post_ids[value.post_ids.length - 1],
-            thumbnail: poolInfo[value.id].thumbnail
+            last: value.response_count,
+            thumbnail: ""
         };
     }
 
@@ -140,22 +135,22 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
     protected getDefaultSettings() {
         return {
             enabled: true,
-            pools: {}
+            forums: {}
         };
     }
 
     public static getInstance() {
-        if (this.instance == undefined) this.instance = new PoolSubscriptions();
+        if (this.instance == undefined) this.instance = new ForumSubscriptions();
         return this.instance;
     }
 }
 
 
 
-export interface PoolSettings {
-    [poolId: number]: PoolInfo
+export interface ForumSettings {
+    [forumId: number]: ForumInfo
 }
 
-interface PoolInfo {
+interface ForumInfo {
     thumbnail?: string;
 }

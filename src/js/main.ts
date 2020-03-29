@@ -27,6 +27,7 @@ import { TinyAlias } from "./modules/upload/TinyAlias";
 // - subscribers
 import { SubscriptionManager } from "./modules/subscriptions/SubscriptionManager";
 import { PoolSubscriptions } from "./modules/subscriptions/PoolSubscriptions";
+import { ForumSubscriptions } from "./modules/subscriptions/ForumSubscriptions";
 // - settings
 import { SettingsController } from "./modules/general/SettingsController";
 
@@ -52,7 +53,8 @@ const load_order = [
 ];
 
 const subscribers = [
-    { class: PoolSubscriptions }
+    { class: PoolSubscriptions },
+    { class: ForumSubscriptions }
 ]
 
 subscribers.forEach((module) => {
