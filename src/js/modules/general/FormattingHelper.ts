@@ -285,13 +285,11 @@ class FormattingHelper {
             .appendTo($bar);
         $("<a>")
             .html("Write")
-            .attr("href", "#")
             .addClass("toggle-editing")
             .addClass("active")
             .appendTo(this.$toggleTabs);
         $("<a>")
             .html("Preview")
-            .attr("href", "#")
             .addClass("toggle-preview")
             .appendTo(this.$toggleTabs);
 
@@ -308,7 +306,6 @@ class FormattingHelper {
             .appendTo($("<div>").addClass("settings-buttons").appendTo($bar));
         $("<a>")
             .html("&#x" + "f1de")
-            .attr("href", "#")
             .attr("title", "Settings")
             .appendTo($drawerButtonBox)
             .click(event => {
@@ -321,7 +318,6 @@ class FormattingHelper {
     private createButtonDrawer() {
         // - Drawer Header
         let $newFormatButton = $("<a>")
-            .attr("href", "#")
             .html("Add Button");
 
         $("<div>")
@@ -457,7 +453,7 @@ class FormattingHelper {
                 "data-text": config.text,
             })
             .appendTo(this.$formatButtons);
-        let button = $(`<a href="">`)
+        let button = $("<a>")
             .html(this.getIcon(config.icon))
             .addClass("format-button")
             .attr("title", config.name)
