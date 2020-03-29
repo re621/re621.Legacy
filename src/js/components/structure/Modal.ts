@@ -163,7 +163,7 @@ export class Modal {
         if (this.triggers.length == 0) this.$activeTrigger = trigger.element;
         this.triggers.push(trigger);
 
-        trigger.element.on(trigger.event, event => {
+        trigger.element.on(trigger.event, (event) => {
             if (this.isDisabled()) return;
 
             let $target = $(event.currentTarget);
@@ -174,6 +174,7 @@ export class Modal {
 
             event.preventDefault();
             this.toggle();
+            return false;
         });
     }
 

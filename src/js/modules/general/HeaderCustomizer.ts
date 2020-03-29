@@ -273,8 +273,11 @@ export class HeaderCustomizer extends RE6Module {
         let $link = $("<a>")
             .html(this.processTabVariables(config.name))
             .attr("title", this.processTabVariables(config.title))
-            .attr("href", this.processTabVariables(config.href))
+
             .appendTo($tab);
+
+        if (config.href != "")
+            $link.attr("href", this.processTabVariables(config.href));
 
         if (config.controls) { $tab.addClass("configurable"); }
         if (config.class) { $tab.addClass(config.class); }
@@ -293,7 +296,7 @@ export class HeaderCustomizer extends RE6Module {
      */
     private parseHeaderTabConfig(config: HeaderTab) {
         if (config.name === undefined) config.name = "New Tab";
-        if (config.href === undefined) config.href = "#";
+        if (config.href === undefined) config.href = "";
         if (config.title === undefined) config.title = "";
 
         if (config.class === undefined) config.class = "";
