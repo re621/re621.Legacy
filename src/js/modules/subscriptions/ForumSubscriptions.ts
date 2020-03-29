@@ -11,9 +11,6 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         imageSrc: data => {
             return "";
         },
-        imageHref: data => {
-            return "";
-        },
         updateHref: data => {
             return `/forum_topics/${data.id}?page=${Math.ceil(data.last / 75)}`;   //75 replies per page
         },

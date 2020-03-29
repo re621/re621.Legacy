@@ -129,33 +129,58 @@ export class SubscriptionManager extends RE6Module {
             .addClass("subscription-update");
 
         // Image
-        let $image = $("<div>")
+        let $imageDiv = $("<div>")
             .addClass("subscription-update-preview")
             .appendTo($content);
-        $("<img>")
-            .attr("src", definition.imageSrc(data))
-            .appendTo($image);
+
+        if (definition.imageHref !== undefined) {
+            let $a = $("<a>")
+                .attr("href", definition.imageHref(data));
+            $("<img>")
+                .attr("src", definition.imageSrc(data))
+                .appendTo($a);
+            $a.appendTo($imageDiv);
+        } else {
+            $("<img>")
+                .attr("src", definition.imageSrc(data))
+                .appendTo($imageDiv);
+        }
 
         // Entry Title
         let $title = $("<div>")
             .addClass("subscription-update-title")
             .appendTo($content);
-        $("<a>")
-            .html(definition.updateText(data))
-            .attr({
-                "href": definition.updateHref(data),
-                "data-id": data.id,
-            })
-            .appendTo($title);
+        if (definition.updateHref !== undefined) {
+            $("<a>")
+                .html(definition.updateText(data))
+                .attr({
+                    "href": definition.updateHref(data),
+                    "data-id": data.id,
+                })
+                .appendTo($title);
+        } else {
+            $("<div>")
+                .html(definition.updateText(data))
+                .attr("data-id", data.id)
+                .appendTo($title);
+        }
+
 
         // Link to all posts page
         let $full = $("<div>")
             .addClass("subscription-update-full")
             .appendTo($content);
-        $("<a>")
-            .attr("href", definition.sourceHref(data))
-            .html(definition.sourceText(data))
-            .appendTo($full);
+        if (definition.sourceHref !== undefined) {
+            $("<a>")
+                .attr("href", definition.sourceHref(data))
+                .html(definition.sourceText(data))
+                .appendTo($full);
+        } else {
+            $("<div>")
+                .html(definition.sourceText(data))
+                .appendTo($full);
+        }
+
 
         // Last Updated
         let $date = $("<div>")
@@ -261,15 +286,15 @@ export interface UpdateData {
 
 export interface UpdateDefinition {
     //what link should be opened when you click on the image? Leave empty for no action
-    imageHref: (data: UpdateData) => string,
+    imageHref?: (data: UpdateData) => string,
     //image link which should be displayed on the left side of the entry
     imageSrc: (data: UpdateData) => string,
     //Link to get to the update
-    updateHref: (data: UpdateData) => string,
+    updateHref?: (data: UpdateData) => string,
     //Text for the updatelink
     updateText: (data: UpdateData) => string,
     //Text to display when clicking on sourceLink
-    sourceText: (data: UpdateData) => string,
+    sourceHref?: (data: UpdateData) => string,
     //Link to where the "first page" of the subscription
-    sourceHref: (data: UpdateData) => string,
+    sourceText: (data: UpdateData) => string,
 }
