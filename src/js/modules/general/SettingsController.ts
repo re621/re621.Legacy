@@ -9,6 +9,9 @@ import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { PostViewer } from "../post/PostViewer";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { PoolInfo, PoolSubscriptions } from "../subscriptions/PoolSubscriptions";
+import { Util } from "../../components/structure/Util";
+import { User } from "../../components/data/User";
+import { ForumSubscriptions, ForumInfo } from "../subscriptions/ForumSubscriptions";
 
 /**
  * SettingsController  
@@ -35,7 +38,6 @@ export class SettingsController {
         // Establish the settings window contents
         let moduleStatusTab = this.createModuleStatus();
         let postsPageTab = this.createTabPostsPage();
-        let blacklistSettingsTab = this.createTabBlacklist();
         let hotkeyTab = this.createTabHotkeys();
         let miscSettingsTab = this.createTabMiscellaneous();
 
@@ -43,10 +45,9 @@ export class SettingsController {
             name: "settings-tabs",
             content: [
                 { name: "Features", page: moduleStatusTab.get() },
-                { name: "Posts", page: postsPageTab.get() },
-                { name: "Blacklist", page: blacklistSettingsTab.get() },
+                { name: "General", page: postsPageTab.get() },
                 { name: "Hotkeys", page: hotkeyTab.get() },
-                { name: "Misc", page: miscSettingsTab.get() },
+                { name: "Other", page: miscSettingsTab.get() },
             ]
         });
 
@@ -64,7 +65,6 @@ export class SettingsController {
         // Establish handlers
         this.handleModuleStatus(moduleStatusTab);
         this.handleTabPostsPage(postsPageTab);
-        this.handleTabBlacklist(blacklistSettingsTab);
         this.handleTabHotkeys(hotkeyTab);
         this.handleTabMiscellaneous(miscSettingsTab);
     }
@@ -103,6 +103,7 @@ export class SettingsController {
         let miscellaneous = this.modules.get("Miscellaneous");
         let postViewer = this.modules.get("PostViewer");
         let formattingManager = this.modules.get("FormattingManager");
+        let blacklistEnhancer = this.modules.get("BlacklistEnhancer");
 
         let template_icons = new Form(
             { id: "title-template-icons", columns: 2, },
@@ -237,6 +238,26 @@ export class SettingsController {
                     value: " ",
                     stretch: "mid",
                 },
+                {
+                    id: "inter-spacer-1",
+                    type: "div",
+                    value: " ",
+                    stretch: "full",
+                },
+
+                // Blacklist
+                {
+                    id: "blacklist-title",
+                    type: "div",
+                    value: "<h3>Blacklist</h3>",
+                    stretch: "full"
+                },
+                {
+                    id: "blacklist-quickadd",
+                    type: "checkbox",
+                    value: blacklistEnhancer.fetchSettings("quickaddTags"),
+                    label: "Click X to add tag to blacklist",
+                },
             ]
         );
 
@@ -253,6 +274,7 @@ export class SettingsController {
         let miscellaneous = <Miscellaneous>this.modules.get("Miscellaneous");
         let postViewer = <PostViewer>this.modules.get("PostViewer");
         let formattingManager = this.modules.get("FormattingManager");
+        let blacklistEnhancer = this.modules.get("BlacklistEnhancer");
         let postsPageInput = form.getInputList();
 
         // General
@@ -303,6 +325,11 @@ export class SettingsController {
 
         postsPageInput.get("actions-submit-hotkey").on("re621:form:input", (event, data) => {
             formattingManager.pushSettings("hotkey_submit_active", data);
+        });
+
+        // Blacklist
+        postsPageInput.get("blacklist-quickadd").on("re621:form:input", (event, data) => {
+            blacklistEnhancer.pushSettings("quickaddTags", data);
         });
     }
 
@@ -563,31 +590,97 @@ export class SettingsController {
                     stretch: "mid",
                 },
 
+                // Import from File
                 {
-                    id: "misc-import",
+                    id: "misc-import-title",
                     type: "div",
-                    value: "<h3>Import from File</h3>",
+                    value: "<h3>Import / Export from file</h3>",
                     stretch: "full",
                 },
                 {
                     id: "misc-import-info",
                     type: "div",
-                    value: `<div class="notice unmargin">Import the settings from eSix Extended (Legacy)</div>`,
+                    value: `<div class="notice unmargin">Import subscription data from file</div>`,
                     stretch: "full",
+                },
+                {
+                    id: "misc-export-button",
+                    type: "button",
+                    label: "Export to file",
+                    value: "Export",
+                    stretch: "mid",
+                },
+                {
+                    id: "misc-export-spacer-1",
+                    type: "div",
+                    value: "",
+                    stretch: "column",
                 },
                 {
                     id: "misc-import-button",
                     type: "file",
-                    label: "Select file",
+                    label: "Import from file",
                     value: "json",
-                    stretch: "full",
+                    stretch: "mid",
+                },
+                {
+                    id: "misc-export-spacer-2",
+                    type: "div",
+                    value: "",
+                    stretch: "column",
                 },
                 {
                     id: "misc-import-status",
                     type: "div",
                     label: " ",
-                    value: `<div id="file-import-status"></div>`,
+                    value: `<div id="file-import-status" class="unmargin"></div>`,
+                    stretch: "mid",
+                },
+                {
+                    id: "misc-export-spacer-3",
+                    type: "div",
+                    value: "",
+                    stretch: "column",
+                },
+
+                // eSix Extended
+                {
+                    id: "misc-esix-title",
+                    type: "div",
+                    value: "<h3>eSix Extended</h3>",
                     stretch: "full",
+                },
+                {
+                    id: "misc-esix-info",
+                    type: "div",
+                    value: `<div class="notice unmargin">Import the settings from eSix Extended (Legacy)</div>`,
+                    stretch: "full",
+                },
+                {
+                    id: "misc-esix-button",
+                    type: "file",
+                    label: "Select file",
+                    value: "json",
+                    stretch: "mid",
+                },
+                {
+                    id: "misc-esix-spacer",
+                    type: "div",
+                    value: "",
+                    stretch: "column",
+                },
+                {
+                    id: "misc-esix-status",
+                    type: "div",
+                    label: " ",
+                    value: `<div id="file-esix-status" class="unmargin"></div>`,
+                    stretch: "mid",
+                },
+                {
+                    id: "misc-esix-spacer",
+                    type: "div",
+                    value: "",
+                    stretch: "column",
                 },
             ]
         );
@@ -609,10 +702,68 @@ export class SettingsController {
             else { miscModule.disableRedesignFixes(); }
         });
 
-        miscFormInput.get("misc-import-button").on("re621:form:input", (e, data) => {
+        // Import / Export to file
+        miscFormInput.get("misc-export-button").on("click", (event, data) => {
+            let exportData = {
+                "meta": "re621/1.0",
+                "pools": PoolSubscriptions.getInstance().fetchSettings("data"),
+                "forums": ForumSubscriptions.getInstance().fetchSettings("data"),
+            };
+
+            Util.downloadJSON(exportData, "re621-" + User.getUsername());
+        });
+
+        miscFormInput.get("misc-import-button").on("re621:form:input", (event, data) => {
             if (!data) return;
-            let $info = $("div#file-import-status")
-                .html("Loading . . .");
+            let $info = $("div#file-import-status").html("Loading . . .");
+
+            var reader = new FileReader();
+            reader.readAsText(data, "UTF-8");
+            reader.onload = function (event) {
+                let parsedData = JSON.parse(event.target.result.toString());
+                console.log(parsedData);
+
+                if (!parsedData["meta"] || parsedData["meta"] !== "re621/1.0") {
+                    $info.html("Invalid file format");
+                    return;
+                }
+
+                // parsedData["pools"] : pools
+                if (parsedData["pools"]) {
+                    $info.html("Processing pools . . .");
+                    let poolSubs = PoolSubscriptions.getInstance(),
+                        poolData: PoolInfo = poolSubs.fetchSettings("data", true);
+                    for (const [key, value] of Object.entries(parsedData["pools"])) {
+                        poolData[key] = value;
+                    }
+                    poolSubs.pushSettings("data", poolData);
+                }
+
+                // parsedData["forums"] : forums
+                if (parsedData["forums"]) {
+                    $info.html("Processing forums . . .");
+                    let forumSubs = ForumSubscriptions.getInstance(),
+                        forumData: ForumInfo = forumSubs.fetchSettings("data", true);
+                    for (const [key, value] of Object.entries(parsedData["forums"])) {
+                        forumData[key] = value;
+                    }
+                    forumSubs.pushSettings("data", forumData);
+                }
+
+                // parsedData[3] : tags (???)
+                $info.html("Processing tags . . .");
+
+                //console.log(parsedData);
+                $info.html("Settings imported!");
+            };
+            reader.onerror = function (evt) { $info.html("Error loading file"); };
+
+        });
+
+        // eSix Legacy
+        miscFormInput.get("misc-esix-button").on("re621:form:input", (event, data) => {
+            if (!data) return;
+            let $info = $("div#file-esix-status").html("Loading . . .");
 
             var reader = new FileReader();
             reader.readAsText(data, "UTF-8");
@@ -636,6 +787,12 @@ export class SettingsController {
 
                 // parsedData[3] : forums
                 $info.html("Processing forums . . .");
+                let forumSubs = ForumSubscriptions.getInstance(),
+                    forumData: ForumInfo = forumSubs.fetchSettings("data", true);
+                for (let entry of parsedData[3]) {
+                    forumData[entry["id"]] = {};
+                }
+                forumSubs.pushSettings("data", forumData);
 
                 // parsedData[3] : tags (???)
                 $info.html("Processing tags . . .");
@@ -645,43 +802,6 @@ export class SettingsController {
             };
             reader.onerror = function (evt) { $info.html("Error loading file"); };
 
-        });
-    }
-
-    private createTabBlacklist() {
-        let module = this.modules.get("BlacklistEnhancer");
-
-        // Create the settings form
-        let form = new Form(
-            {
-                id: "settings-blacklist",
-                columns: 3,
-                parent: "re-modal-container",
-            },
-            [
-                {
-                    id: "blacklist-title",
-                    type: "div",
-                    value: "<h3>Blacklist</h3>",
-                    stretch: "full"
-                },
-                {
-                    id: "blacklist-quickadd",
-                    type: "checkbox",
-                    value: module.fetchSettings("quickaddTags"),
-                    label: "Click x before tag to toggle",
-                },
-            ]
-        );
-
-        return form;
-    }
-
-    private handleTabBlacklist(form: Form) {
-        let module = this.modules.get("BlacklistEnhancer");
-        let inputs = form.getInputList();
-        inputs.get("blacklist-quickadd").on("re621:form:input", (event, data) => {
-            module.pushSettings("quickaddTags", data);
         });
     }
 
