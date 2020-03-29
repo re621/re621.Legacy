@@ -262,7 +262,7 @@ export class HeaderCustomizer extends RE6Module {
         if (config.class) { $tab.addClass(config.class); }
         if (triggerUpdate) { this.saveNavbarSettings(); }
 
-        if (Page.getURL().pathname.includes(this.processTabVariables(config.href))) {
+        if (Page.getURL().pathname.includes(this.processTabVariables(config.href).split("?")[0])) {
             $tab.addClass("active");
         }
 
