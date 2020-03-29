@@ -110,7 +110,7 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
 
         let forumsJson: ApiForumTopic[] = await Api.getJson("/forum_topics.json?search[id]=" + Object.keys(forumData).join(","));
         for (const forumJson of forumsJson) {
-            if (new Date(forumJson.updated_at).getTime() > this.lastUpdate || !SubscriptionManager.dismissOnUpdate) {
+            if (new Date(forumJson.updated_at).getTime() > this.lastUpdate) {
                 results.push(await this.formatForumUpdate(forumJson, forumData));
             }
         }

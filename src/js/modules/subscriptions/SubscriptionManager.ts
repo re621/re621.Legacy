@@ -7,7 +7,8 @@ import { Subscription } from "./Subscription";
 export class SubscriptionManager extends RE6Module {
 
     private static instance: SubscriptionManager;
-    public static dismissOnUpdate: boolean = true;
+    //should notifications be cleared once seen?
+    public dismissOnUpdate: boolean = true;
     private updateInterval = 60 * 60; //1 hour, in seconds
 
     private tabNotificationsCount = 0;
@@ -137,7 +138,7 @@ export class SubscriptionManager extends RE6Module {
     }
 
     protected removeUnopened($element: JQuery<HTMLElement>) {
-        if ($element.attr("data-remove-notification-count") === "true") {
+        if ($element.attr("data-remove-notification-count") === "true" && this.dismissOnUpdate === true) {
             this.updateNotificationSymbol(-1);
             this.pushSettings("cache-" + $element.attr("data-subscription-class"), []);
         }

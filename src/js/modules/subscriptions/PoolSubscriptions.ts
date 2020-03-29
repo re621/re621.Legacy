@@ -111,7 +111,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
 
         let poolsJson: ApiPool[] = await Api.getJson("/pools.json?search[id]=" + Object.keys(poolData).join(","));
         for (const poolJson of poolsJson) {
-            if (new Date(poolJson.updated_at).getTime() > this.lastUpdate || !SubscriptionManager.dismissOnUpdate) {
+            if (new Date(poolJson.updated_at).getTime() > this.lastUpdate) {
                 results.push(await this.formatPoolUpdate(poolJson, poolData));
             }
         }
