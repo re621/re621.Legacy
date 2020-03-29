@@ -4,8 +4,6 @@ import { User } from "../../components/data/User";
 import { Form } from "../../components/structure/Form";
 import { Page } from "../../components/data/Page";
 
-declare var Cookies;
-
 /**
  * HeaderCustomizer  
  * Add, remove, and re-arrange the tabs in the customizable navbar

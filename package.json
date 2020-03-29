@@ -29,13 +29,11 @@
     "homepage": "https://re621.github.io/",
     "dependencies": {
         "jquery": "^3.4.1",
-        "jquery-ui": "^1.12.1",
-        "js-cookie": "^2.2.1"
+        "jquery-ui": "^1.12.1"
     },
     "devDependencies": {
         "@types/jquery": "^3.3.33",
         "@types/jqueryui": "^1.12.10",
-        "@types/js-cookie": "^2.2.5",
         "@typescript-eslint/eslint-plugin": "^2.25.0",
         "@typescript-eslint/parser": "^2.25.0",
         "autoprefixer": "^9.7.5",

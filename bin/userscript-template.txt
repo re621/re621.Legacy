@@ -9,11 +9,12 @@
 // @updateURL    https://github.com/re621/re621/releases/latest/download/script.user.js
 // @downloadURL  https://github.com/re621/re621/releases/latest/download/script.user.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js#sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=
-// @require      https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js#sha256-oE03O+I6Pzff4fiMqwEGHbdfcW7a3GRRxlL+U49L5sA=
 // @require      https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js#sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=
 // @require      https://cdn.jsdelivr.net/npm/jquery.hotkeys@0.1.0/jquery.hotkeys.min.js
 // @resource     re621_styles style.min.css
 // @resource     redesignFixes https://re621.github.io/Redesign-Fixes/build/style.min.css
+// @grant        GM_setValue
+// @grant        GM_getValue
 // @grant        GM_getResourceText
 // @grant        GM_addStyle
 // @grant        GM_download

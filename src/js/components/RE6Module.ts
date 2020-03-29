@@ -1,7 +1,8 @@
 import { Page } from "./data/Page";
 import { Hotkeys } from "./data/Hotkeys";
 
-declare var Cookies;
+declare var GM_getValue;
+declare var GM_setValue;
 
 /**
  * Abstract class that other modules extend.  
@@ -23,7 +24,7 @@ export class RE6Module {
         else if (constraint instanceof RegExp) this.constraint.push(constraint);
         else this.constraint = constraint;
 
-        this.loadCookies();
+        this.loadSettingsData();
 
         // Save if the module is active or not
         // If no enabled settings is found, assume the module is active
@@ -88,7 +89,7 @@ export class RE6Module {
      * @returns Property value
      */
     public fetchSettings(property?: string, fresh?: boolean) {
-        if (fresh) this.loadCookies();
+        if (fresh) this.loadSettingsData();
         if (property === undefined) return this.settings;
         return this.settings[property];
     }
@@ -100,9 +101,9 @@ export class RE6Module {
      * @param preserve Ensures that all other values are preserved
      */
     public pushSettings(property: string, value: any, preserve?: boolean) {
-        if (preserve) { this.loadCookies(); }
+        if (preserve) { this.loadSettingsData(); }
         this.settings[property] = value;
-        this.saveCookies();
+        this.saveSettingsData();
     }
 
     /**
@@ -117,20 +118,15 @@ export class RE6Module {
      * Loads settings values from cookies if they exist.  
      * Otherwise, loads the default values
      */
-    private loadCookies() {
-        let cookies = Cookies.get("re621." + this.prefix);
+    private loadSettingsData() {
         const defaultValues = this.getDefaultSettings();
-        if (cookies === undefined) {
-            this.settings = defaultValues;
-        }
-        else {
-            this.settings = JSON.parse(cookies);
-            //If defaultValues has a entry the defaultSettings do not have, add it
-            //this might happen if the user saved and a defaultSetting gets added afterwards
-            for (const key of Object.keys(defaultValues)) {
-                if (this.settings[key] === undefined) {
-                    this.settings[key] = defaultValues[key];
-                }
+        this.settings = GM_getValue("re621." + this.prefix, defaultValues);
+
+        // If defaultValues has a entry the defaultSettings do not have, add it
+        // this might happen if the user saved and a defaultSetting gets added afterwards
+        for (const key of Object.keys(defaultValues)) {
+            if (this.settings[key] === undefined) {
+                this.settings[key] = defaultValues[key];
             }
         }
     }
@@ -138,8 +134,8 @@ export class RE6Module {
     /**
      * Saves the settings to cookies
      */
-    private saveCookies() {
-        Cookies.set("re621." + this.prefix, JSON.stringify(this.settings));
+    private saveSettingsData() {
+        GM_setValue("re621." + this.prefix, this.settings);
     }
 
     /**
