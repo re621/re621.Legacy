@@ -1,7 +1,5 @@
 import { UpdateData, UpdateDefinition, SubscriptionSettings } from "./SubscriptionManager";
-import { ApiPool } from "../../components/api/responses/ApiPool";
 import { Api } from "../../components/api/Api";
-import { PageDefintion, Page } from "../../components/data/Page";
 import { RE6Module } from "../../components/RE6Module";
 import { Subscription } from "./Subscription";
 import { ApiPost } from "../../components/api/responses/ApiPost";
@@ -19,7 +17,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
             return "";
         },
         updateText: data => {
-            return "";
+            return data.name;
         },
         sourceHref: data => {
             return `https://e621.net/posts?tags=${data.name}`;
@@ -63,7 +61,32 @@ export class TagSubscriptions extends RE6Module implements Subscription {
 
     public async getUpdatedEntries() {
         let results: UpdateData[] = [];
-        return [];
+
+        let tagData: SubscriptionSettings = this.fetchSettings("data", true);
+        if (Object.keys(tagData).length === 0) {
+            return results;
+        }
+
+        for (const tagName of Object.keys(tagData)) {
+            let postsJson: ApiPost[] = (await Api.getJson("/posts.json?tags=" + tagName)).posts;
+            for (const post of postsJson) {
+                if (new Date(post.created_at).getTime() > this.lastUpdate) {
+                    results.push(await this.formatPostUpdate(post, tagName));
+                }
+            }
+        }
+        this.pushSettings("data", tagData);
+        return results;
+    }
+
+    private async formatPostUpdate(value: ApiPost, tagName: string): Promise<UpdateData> {
+        return {
+            id: value.id,
+            name: tagName.replace(/ /g, " "),
+            date: new Date(value.updated_at),
+            last: -1,
+            thumbnailMd5: value.file.md5
+        };
     }
 
     /**
