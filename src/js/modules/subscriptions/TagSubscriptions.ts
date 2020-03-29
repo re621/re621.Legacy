@@ -17,7 +17,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
             return data.name;
         },
         sourceHref: data => {
-            return `https://e621.net/posts?tags=${data.name}`;
+            return `https://e621.net/posts?tags=${encodeURIComponent(data.name.replace(/ /g, "_"))}`;
         },
         sourceText: data => {
             return "View Tag";
