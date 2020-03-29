@@ -317,6 +317,47 @@ export class Form {
     }
 
     /**
+     * Builds and appends a file input
+     * @param $form Form to append the element to
+     * @param element Element configuration data
+     */
+    private buildFile($form: JQuery<HTMLElement>, element: FormElement) {
+        let labeled = false;
+        if (element.label) {
+            $("<label>")
+                .attr("for", this.config.id + "-" + element.id)
+                .html(element.label)
+                .appendTo($form);
+            labeled = true;
+        } else if (element.stretch === "default") { element.stretch = "column"; }
+
+        let $inputContainer = $("<div>")
+            .addClass("input-container")
+            .toggleClass("labeled", labeled)
+            .addClass("stretch-" + element.stretch)
+            .appendTo($form);
+
+        let $input = $("<input>")
+            .attr({
+                "type": "file",
+                "accept": element.value,
+                "data-type": element.type,
+                "id": this.config.id + "-" + element.id,
+            })
+            .appendTo($inputContainer);
+
+        if (element.pattern) { $input.attr("pattern", element.pattern); }
+        if (element.required) { $input.attr("required", ''); }
+
+        let timer: number;
+        $input.on("change", () => {
+            $input.trigger("re621:form:input", $input.prop("files"));
+        });
+
+        return $input;
+    }
+
+    /**
      * Builds and appends an icon selector element
      * @param $form Form to append the element to
      * @param element Element configuration data
@@ -662,7 +703,7 @@ export interface FormElement {
     /** Unique ID for the element. Actual ID becomes formID_elementID */
     id?: string,
     /** Supported input type */
-    type: "input" | "copy" | "key" | "icon" | "checkbox" | "button" | "submit" | "textarea" | "select" | "div" | "hr",
+    type: "input" | "copy" | "key" | "file" | "icon" | "checkbox" | "button" | "submit" | "textarea" | "select" | "div" | "hr",
 
     stretch?: "default" | "column" | "mid" | "full",
 
@@ -677,5 +718,5 @@ export interface FormElement {
     pattern?: string,
 
     /** Value-name pairs for the select */
-    data?: { value: string, name: string }[],
+    data?: { value: string, name: string; }[],
 }

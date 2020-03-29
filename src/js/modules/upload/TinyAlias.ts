@@ -57,7 +57,7 @@ export class TinyAlias extends RE6Module {
     }
 
     public destroy() {
-        if (!this.initialized) return;
+        if (!this.isInitialized()) return;
         super.destroy();
         this.$container.find("input").unbind();
         this.$container.find("div.tiny-alias-container").remove();

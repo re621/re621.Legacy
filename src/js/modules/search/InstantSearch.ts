@@ -57,7 +57,7 @@ export class InstantSearch extends RE6Module {
     }
 
     public destroy() {
-        if (!this.initialized) return;
+        if (!this.isInitialized()) return;
         super.destroy();
         this.$searchbox.val("");
         this.applyFilter();

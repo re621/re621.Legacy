@@ -12,8 +12,8 @@ export class RE6Module {
     private settings: any;
     private readonly prefix: string = this.constructor.name;
 
-    protected enabled: boolean;
-    protected initialized = false;
+    private enabled: boolean;
+    private initialized = false;
 
     private constraint: RegExp[] = [];
     private hotkeys: Hotkey[] = [];
