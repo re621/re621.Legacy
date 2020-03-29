@@ -170,36 +170,43 @@ export class SubscriptionManager extends RE6Module {
     }
 
     public addSubscribeButtons(instance: Subscription) {
-        let $subscribeButton = $("<button>")
-            .addClass("subscribe-button subscribe")
-            .html("Subscribe");
-        let $unsubscribeButton = $("<button>")
-            .addClass("subscribe-button unsubscribe")
-            .html("Unsubscribe");
-
         let subscriptionData: SubscriptionSettings = instance.fetchSettings("data", true);
 
-        if (subscriptionData[instance.getSubscriberId()] === undefined) {
-            $unsubscribeButton.addClass("hidden");
-        } else { $subscribeButton.addClass("hidden"); }
+        instance.getElementsToAppendTo().each((index, element) => {
+            const $element = $(element);
 
-        $subscribeButton.click(() => {
-            $subscribeButton.toggleClass("hidden");
-            $unsubscribeButton.toggleClass("hidden");
-            subscriptionData = instance.fetchSettings("data", true);
-            subscriptionData[instance.getSubscriberId()] = {};
-            instance.pushSettings("data", subscriptionData);
+            let $subscribeButton = $("<button>")
+                .addClass("subscribe-button subscribe")
+                .html("Subscribe");
+            let $unsubscribeButton = $("<button>")
+                .addClass("subscribe-button unsubscribe")
+                .html("Unsubscribe");
+
+            const id = instance.getSubscriberId($element);
+
+            if (subscriptionData[id] === undefined) {
+                $unsubscribeButton.addClass("hidden");
+            } else { $subscribeButton.addClass("hidden"); }
+
+            $subscribeButton.click(() => {
+                $subscribeButton.toggleClass("hidden");
+                $unsubscribeButton.toggleClass("hidden");
+                subscriptionData = instance.fetchSettings("data", true);
+                subscriptionData[id] = {};
+                instance.pushSettings("data", subscriptionData);
+            });
+            $unsubscribeButton.click(() => {
+                $subscribeButton.toggleClass("hidden");
+                $unsubscribeButton.toggleClass("hidden");
+                subscriptionData = instance.fetchSettings("data", true);
+
+                delete subscriptionData[id];
+                instance.pushSettings("data", subscriptionData);
+            });
+            $subscribeButton.appendTo($element);
+            $unsubscribeButton.appendTo($element);
         });
-        $unsubscribeButton.click(() => {
-            $subscribeButton.toggleClass("hidden");
-            $unsubscribeButton.toggleClass("hidden");
-            subscriptionData = instance.fetchSettings("data", true);
 
-            delete subscriptionData[instance.getSubscriberId()];
-            instance.pushSettings("data", subscriptionData);
-        });
-
-        instance.appendSubscribeButtons($subscribeButton, $unsubscribeButton)
     }
 
     /**

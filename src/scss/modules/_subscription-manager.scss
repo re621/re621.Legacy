@@ -16,36 +16,35 @@ a[data-has-notifications=true] {
     }
 }
 
-div#c-pools>div#a-show>h1, div#c-forum-topics>div#a-show>h1 {
-    button.subscribe-button {
-        float: right;
-        padding: 0.25rem 0.5rem;
-        outline: 0;
-        box-shadow: 0 0 10px -5px black;
-        border-radius: 4px;
+button.subscribe-button {
+    float: right;
+    padding: 0.25rem 0.5rem;
+    outline: 0;
+    box-shadow: 0 0 10px -5px black;
+    border-radius: 4px;
 
+    @include themable {
+        border: 1px solid themed("color-foreground");
+        color: themed("color-text");
+    }
+
+    &.subscribe {
         @include themable {
-            border: 1px solid themed("color-foreground");
-            color: themed("color-text");
-        }
-
-        &.subscribe {
-            @include themable {
-                background: themed("color-success");
-            }
-        }
-
-        &.unsubscribe {
-            @include themable {
-                background: themed("color-danger");
-            }
-        }
-
-        &.hidden {
-            display: none;
+            background: themed("color-success");
         }
     }
+
+    &.unsubscribe {
+        @include themable {
+            background: themed("color-danger");
+        }
+    }
+
+    &.hidden {
+        display: none;
+    }
 }
+
 
 div.subscriptions-list {
     position: relative;

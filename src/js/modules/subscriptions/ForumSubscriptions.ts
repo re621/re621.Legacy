@@ -38,14 +38,12 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         return "Forums";
     }
 
-    getSubscriberId(): string {
+    getSubscriberId($element: JQuery<HTMLElement>): string {
         return Page.getPageID();
     }
 
-    appendSubscribeButtons($subscribeButton: JQuery<HTMLElement>, $unsubscribeButton: JQuery<HTMLElement>) {
-        let $header = $("div#c-forum-topics > div#a-show > h1").first();
-        $header.append($subscribeButton);
-        $header.append($unsubscribeButton);
+    getElementsToAppendTo() {
+        return $("div#c-forum-topics > div#a-show > h1").first();
     }
 
     public async getUpdatedEntries() {
