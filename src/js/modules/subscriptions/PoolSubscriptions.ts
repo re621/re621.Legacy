@@ -1,4 +1,4 @@
-import { UpdateData, UpdateDefinition } from "./SubscriptionManager";
+import { UpdateData, UpdateDefinition, SubscriptionSettings } from "./SubscriptionManager";
 import { ApiPool } from "../../components/api/responses/ApiPool";
 import { Api } from "../../components/api/Api";
 import { PageDefintion, Page } from "../../components/data/Page";
@@ -39,47 +39,22 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
         return "Pools";
     }
 
-    public addSubscribeButtons() {
+    public getSubscriberId(): string {
+        return Page.getPageID();
+    }
+
+    public appendSubscribeButtons($subscribeButton: JQuery<HTMLElement>, $unsubscribeButton: JQuery<HTMLElement>) {
         if (Page.matches(PageDefintion.pool)) {
             let $header = $("div#c-pools > div#a-show > h1").first();
-            let subscribeButton = $("<button>")
-                .addClass("subscribe-button subscribe")
-                .html("Subscribe")
-                .appendTo($header);
-            let unsubscribeButton = $("<button>")
-                .addClass("subscribe-button unsubscribe")
-                .html("Unsubscribe")
-                .appendTo($header);
-
-            let poolData: PoolSettings = this.fetchSettings("pools", true);
-
-            if (poolData[parseInt(Page.getPageID())] === undefined) {
-                unsubscribeButton.addClass("hidden");
-            } else { subscribeButton.addClass("hidden"); }
-
-            subscribeButton.click((event) => {
-                subscribeButton.toggleClass("hidden");
-                unsubscribeButton.toggleClass("hidden");
-                poolData = this.fetchSettings("pools", true);
-                const pageId = parseInt(Page.getPageID())
-                poolData[pageId] = {};
-                this.pushSettings("pools", poolData);
-            });
-            unsubscribeButton.click((event) => {
-                subscribeButton.toggleClass("hidden");
-                unsubscribeButton.toggleClass("hidden");
-                poolData = this.fetchSettings("pools", true);
-
-                delete poolData[parseInt(Page.getPageID())];
-                this.pushSettings("pools", poolData);
-            });
+            $subscribeButton.appendTo($header);
+            $unsubscribeButton.appendTo($header);
         }
     }
 
     public async getUpdatedEntries() {
         let results: UpdateData[] = [];
 
-        let poolData: PoolSettings = this.fetchSettings("pools", true);
+        let poolData: SubscriptionSettings = this.fetchSettings("data", true);
         if (Object.keys(poolData).length === 0) {
             return results;
         }
@@ -90,21 +65,22 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
                 results.push(await this.formatPoolUpdate(poolJson, poolData));
             }
         }
-        this.pushSettings("pools", poolData);
+        this.pushSettings("data", poolData);
         return results;
     }
 
-    private async formatPoolUpdate(value: ApiPool, poolInfo: PoolSettings): Promise<UpdateData> {
-        if (poolInfo[value.id].thumbnailMd5 === undefined) {
+    private async formatPoolUpdate(value: ApiPool, subSettings: SubscriptionSettings): Promise<UpdateData> {
+        const poolInfo = subSettings[value.id] as PoolInfo;
+        if (poolInfo.thumbnailMd5 === undefined) {
             const post: ApiPost = (await Api.getJson(`/posts/${value.post_ids[0]}.json`)).post;
-            poolInfo[value.id].thumbnailMd5 = post.file.md5;
+            poolInfo.thumbnailMd5 = post.file.md5;
         }
         return {
             id: value.id,
             name: value.name.replace(/_/g, " "),
             date: new Date(value.updated_at),
             last: value.post_ids[value.post_ids.length - 1],
-            thumbnailMd5: poolInfo[value.id].thumbnailMd5
+            thumbnailMd5: poolInfo.thumbnailMd5
         };
     }
 
@@ -115,7 +91,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
     protected getDefaultSettings() {
         return {
             enabled: true,
-            pools: {}
+            data: {}
         };
     }
 
@@ -125,12 +101,6 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
     }
 }
 
-
-
-export interface PoolSettings {
-    [poolId: number]: PoolInfo
-}
-
-interface PoolInfo {
+export interface PoolInfo {
     thumbnailMd5?: string;
 }

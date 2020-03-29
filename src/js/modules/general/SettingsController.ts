@@ -8,7 +8,7 @@ import { TitleCustomizer } from "../post/TitleCustomizer";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { PostViewer } from "../post/PostViewer";
 import { Hotkeys } from "../../components/data/Hotkeys";
-import { PoolSettings, PoolSubscriptions } from "../subscriptions/PoolSubscriptions";
+import { PoolInfo, PoolSubscriptions } from "../subscriptions/PoolSubscriptions";
 
 /**
  * SettingsController  
@@ -627,12 +627,12 @@ export class SettingsController {
                 // parsedData[2] : pools
                 $info.html("Processing pools . . .");
                 let poolSubs = PoolSubscriptions.getInstance(),
-                    poolData: PoolSettings = poolSubs.fetchSettings("pools", true);
+                    poolData: PoolInfo = poolSubs.fetchSettings("data", true);
                 for (let entry of parsedData[2]) {
                     let thumb = entry["thumb"]["url"].substr(6, 32);
                     poolData[entry["id"]] = { thumbnailMd5: thumb };
                 }
-                poolSubs.pushSettings("pools", poolData);
+                poolSubs.pushSettings("data", poolData);
 
                 // parsedData[3] : forums
                 $info.html("Processing forums . . .");

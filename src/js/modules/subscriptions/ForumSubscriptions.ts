@@ -1,4 +1,4 @@
-import { UpdateData, UpdateDefinition } from "./SubscriptionManager";
+import { UpdateData, UpdateDefinition, SubscriptionSettings } from "./SubscriptionManager";
 import { Api } from "../../components/api/Api";
 import { PageDefintion, Page } from "../../components/data/Page";
 import { RE6Module } from "../../components/RE6Module";
@@ -38,47 +38,20 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         return "Forums";
     }
 
-    public addSubscribeButtons() {
-        if (Page.matches(PageDefintion.forum)) {
-            let $header = $("div#c-forum-topics > div#a-show > h1").first();
-            let subscribeButton = $("<button>")
-                .addClass("subscribe-button subscribe")
-                .html("Subscribe")
-                .appendTo($header);
-            let unsubscribeButton = $("<button>")
-                .addClass("subscribe-button unsubscribe")
-                .html("Unsubscribe")
-                .appendTo($header);
+    getSubscriberId(): string {
+        return Page.getPageID();
+    }
 
-            let forumData: ForumSettings = this.fetchSettings("forums", true);
-
-            if (forumData[parseInt(Page.getPageID())] === undefined) {
-                unsubscribeButton.addClass("hidden");
-            } else { subscribeButton.addClass("hidden"); }
-
-            subscribeButton.click((event) => {
-                subscribeButton.toggleClass("hidden");
-                unsubscribeButton.toggleClass("hidden");
-                forumData = this.fetchSettings("forums", true);
-                const pageId = parseInt(Page.getPageID())
-                forumData[pageId] = {};
-                this.pushSettings("forums", forumData);
-            });
-            unsubscribeButton.click((event) => {
-                subscribeButton.toggleClass("hidden");
-                unsubscribeButton.toggleClass("hidden");
-                forumData = this.fetchSettings("forums", true);
-
-                delete forumData[parseInt(Page.getPageID())];
-                this.pushSettings("forums", forumData);
-            });
-        }
+    appendSubscribeButtons($subscribeButton: JQuery<HTMLElement>, $unsubscribeButton: JQuery<HTMLElement>) {
+        let $header = $("div#c-forum-topics > div#a-show > h1").first();
+        $header.append($subscribeButton);
+        $header.append($unsubscribeButton);
     }
 
     public async getUpdatedEntries() {
         let results: UpdateData[] = [];
 
-        let forumData: ForumSettings = this.fetchSettings("forums", true);
+        let forumData: SubscriptionSettings = this.fetchSettings("data", true);
         if (Object.keys(forumData).length === 0) {
             return results;
         }
@@ -89,11 +62,11 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
                 results.push(await this.formatForumUpdate(forumJson, forumData));
             }
         }
-        this.pushSettings("forums", forumData);
+        this.pushSettings("data", forumData);
         return results;
     }
 
-    private async formatForumUpdate(value: ApiForumTopic, forumInfo: ForumSettings): Promise<UpdateData> {
+    private async formatForumUpdate(value: ApiForumTopic, forumInfo: SubscriptionSettings): Promise<UpdateData> {
         return {
             id: value.id,
             name: value.title,
@@ -110,7 +83,7 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
     protected getDefaultSettings() {
         return {
             enabled: true,
-            forums: {}
+            data: {}
         };
     }
 
@@ -120,12 +93,5 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
     }
 }
 
-
-
-export interface ForumSettings {
-    [forumId: number]: ForumInfo
-}
-
-interface ForumInfo {
-    thumbnail?: string;
+export interface ForumInfo {
 }

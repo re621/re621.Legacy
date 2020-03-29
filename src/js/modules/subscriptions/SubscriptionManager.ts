@@ -77,7 +77,6 @@ export class SubscriptionManager extends RE6Module {
      */
     public static registerSubscriber(instance: Subscription) {
         this.getInstance().subscribers.push(instance);
-        instance.addSubscribeButtons();
     }
 
     public static createTabContent() {
@@ -103,8 +102,9 @@ export class SubscriptionManager extends RE6Module {
             cachedUpdates = [];
         }
 
+        this.addSubscribeButtons(instance);
         instance.tab = SubscriptionManager.createTabContent();
-        instance.tab.attr("data-subscribption-class", moduleName);
+        instance.tab.attr("data-subscription-class", moduleName);
         instance.lastUpdate = lastUpdate;
         const currentDate = new Date().getTime();
 
@@ -169,6 +169,39 @@ export class SubscriptionManager extends RE6Module {
         return $content;
     }
 
+    public addSubscribeButtons(instance: Subscription) {
+        let $subscribeButton = $("<button>")
+            .addClass("subscribe-button subscribe")
+            .html("Subscribe");
+        let $unsubscribeButton = $("<button>")
+            .addClass("subscribe-button unsubscribe")
+            .html("Unsubscribe");
+
+        let subscriptionData: SubscriptionSettings = instance.fetchSettings("data", true);
+
+        if (subscriptionData[instance.getSubscriberId()] === undefined) {
+            $unsubscribeButton.addClass("hidden");
+        } else { $subscribeButton.addClass("hidden"); }
+
+        $subscribeButton.click(() => {
+            $subscribeButton.toggleClass("hidden");
+            $unsubscribeButton.toggleClass("hidden");
+            subscriptionData = instance.fetchSettings("data", true);
+            subscriptionData[instance.getSubscriberId()] = {};
+            instance.pushSettings("data", subscriptionData);
+        });
+        $unsubscribeButton.click(() => {
+            $subscribeButton.toggleClass("hidden");
+            $unsubscribeButton.toggleClass("hidden");
+            subscriptionData = instance.fetchSettings("data", true);
+
+            delete subscriptionData[instance.getSubscriberId()];
+            instance.pushSettings("data", subscriptionData);
+        });
+
+        instance.appendSubscribeButtons($subscribeButton, $unsubscribeButton)
+    }
+
     /**
      * Adds the passed updates to the tab of the subscriber
      */
@@ -205,6 +238,12 @@ export class SubscriptionManager extends RE6Module {
         return this.instance;
     }
 
+}
+
+
+
+export interface SubscriptionSettings {
+    [id: number]: any
 }
 
 export interface UpdateData {
