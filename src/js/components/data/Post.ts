@@ -112,6 +112,10 @@ export class Post {
         }
     }
 
+    public static createPreviewUrlFromMd5(md5: string) {
+        return `https://static1.e621.net/data/preview/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`;
+    }
+
     /**
      * Hides or shows the post, depending on the state
      * Show if blacklist is not active, hide if blacklist is active and post matches blacklist

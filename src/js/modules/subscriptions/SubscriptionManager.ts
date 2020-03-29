@@ -162,6 +162,6 @@ export interface Update {
     name: string,
     date: Date,
     last: number,
-    thumbnail: string
+    thumbnailMd5: string
     extra?: any
 }

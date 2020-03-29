@@ -6,6 +6,7 @@ import { RE6Module } from "../../components/RE6Module";
 import { Subscription } from "./Subscription";
 import { Util } from "../../components/structure/Util";
 import { ApiPost } from "../../components/api/responses/ApiPost";
+import { Post } from "../../components/data/Post";
 
 export class PoolSubscriptions extends RE6Module implements Subscription {
 
@@ -65,7 +66,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             .addClass("subscription-update-preview")
             .appendTo($content);
         $("<img>")
-            .attr("src", data.thumbnail)
+            .attr("src", Post.createPreviewUrlFromMd5(data.thumbnailMd5))
             .appendTo($image);
 
         // Entry Title
@@ -129,7 +130,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             name: value.name.replace(/_/g, " "),
             date: new Date(value.updated_at),
             last: value.post_ids[value.post_ids.length - 1],
-            thumbnail: poolInfo[value.id].thumbnail
+            thumbnailMd5: poolInfo[value.id].thumbnail
         };
     }
 
