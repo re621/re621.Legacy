@@ -39,6 +39,7 @@ export class BlacklistEnhancer extends RE6Module {
         return {
             enabled: true,
             quickaddTags: true,
+            hideFilterList: true,
         };
     }
 
@@ -76,13 +77,14 @@ export class BlacklistEnhancer extends RE6Module {
                 filter.setEnabled(false);
             }
             this.applyBlacklist();
+            this.showFilterList();
         });
         $enableAllbutton.on("click", () => {
             for (const filter of User.getBlacklist().values()) {
                 filter.setEnabled(true);
             }
             this.applyBlacklist();
-        })
+        });
 
 
 
@@ -97,13 +99,13 @@ export class BlacklistEnhancer extends RE6Module {
             .html(`<a href="/help/blacklist" data-ytta-id="-">(filter help)</a>`)
             .appendTo($toggleContainer);
 
-        this.showBlacklistedTags();
+        this.$box.attr("data-filters-hidden", this.fetchSettings("hideFilterList"));
 
         // Toggle the filter list when clicking the header
         $("a#blacklist-toggle").click(e => {
             e.preventDefault();
             //Togle display state
-            this.toggleBlacklistedTags();
+            this.toggleFilterList();
         });
 
         //Add x next to tag names to toggle them from the blacklist
@@ -137,20 +139,26 @@ export class BlacklistEnhancer extends RE6Module {
         this.applyBlacklist();
     }
 
-    private toggleBlacklistedTags() {
-        if (this.blacklistedTagsAreVisible()) { this.hideBlacklistedTags(); }
-        else { this.showBlacklistedTags(); }
+    /** Toggles the filter list state */
+    private toggleFilterList() {
+        if (this.filterListVisible()) { this.hideFilterList(); }
+        else { this.showFilterList(); }
     }
 
-    private blacklistedTagsAreVisible() {
+    /** Returns true if the filter list is visible, false otherwise */
+    private filterListVisible() {
         return this.$box.attr("data-filters-hidden") == "false";
     }
 
-    private hideBlacklistedTags() {
+    /** Hides the filter list */
+    private hideFilterList() {
+        this.pushSettings("hideFilterList", true);
         this.$box.attr("data-filters-hidden", "true");
     }
 
-    private showBlacklistedTags() {
+    /** Shows the filter list */
+    private showFilterList() {
+        this.pushSettings("hideFilterList", false);
         this.$box.attr("data-filters-hidden", "false");
     }
 
@@ -219,7 +227,7 @@ export class BlacklistEnhancer extends RE6Module {
             filter.toggleEnabled();
             this.applyBlacklist();
             $link.toggleClass("blacklisted-active");
-        })
+        });
 
         if (!filter.isEnabled()) {
             $link.addClass("blacklisted-active");
