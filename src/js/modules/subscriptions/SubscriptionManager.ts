@@ -52,12 +52,14 @@ export class SubscriptionManager extends RE6Module {
         //clear the notifications if the user opened the tab
         modal.getElement().on("dialogopen", event => {
             const index = modal.getElement().tabs("option", "active");
-            this.removeUnopened($(event.currentTarget).find("[data-subscribtion-class]").eq(index).attr("data-subscribtion-class"));
+            const $element = $(event.currentTarget).find("[data-subscribtion-class]").eq(index);
+            this.removeUnopened($element);
         });
 
         modal.getElement().tabs({
-            activate: (event, element) => {
-                this.removeUnopened(element.newPanel.find(".subscriptions-list").attr("data-subscription-class"));
+            activate: (event, tabProperties) => {
+                const $element = tabProperties.newPanel.find(".subscriptions-list");
+                this.removeUnopened($element);
             }
         });
     }
@@ -130,12 +132,15 @@ export class SubscriptionManager extends RE6Module {
                 instance.tab.append(instance.createUpdateEntry(entry));
             });
             this.updateNotificationSymbol(1);
+            instance.tab.attr("data-remove-notification-count", "true");
         }
     }
 
-    protected removeUnopened(moduleName: string) {
-        this.updateNotificationSymbol(-1);
-        this.pushSettings("cache-" + moduleName, []);
+    protected removeUnopened($element: JQuery<HTMLElement>) {
+        if ($element.attr("data-remove-notification-count") === "true") {
+            this.updateNotificationSymbol(-1);
+            this.pushSettings("cache-" + $element.attr("data-subscription-class"), []);
+        }
     }
 
     protected getDefaultSettings() {
