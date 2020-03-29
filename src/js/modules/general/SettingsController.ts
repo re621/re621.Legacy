@@ -258,27 +258,32 @@ export class SettingsController {
         // General
         postsPageInput.get("general-title-template").on("re621:form:input", (event, data) => {
             titleCustomizer.pushSettings("template", data);
-            titleCustomizer.refreshPageTitle();
+            if (titleCustomizer.isInitialized())
+                titleCustomizer.refreshPageTitle();
         });
 
         postsPageInput.get("general-title-symbol-enabled").on("re621:form:input", (event, data) => {
             titleCustomizer.pushSettings("symbolsEnabled", data);
-            titleCustomizer.refreshPageTitle();
+            if (titleCustomizer.isInitialized())
+                titleCustomizer.refreshPageTitle();
         });
 
         postsPageInput.get("general-title-symbol-fav").on("re621:form:input", (event, data) => {
             titleCustomizer.pushSettings("symbol-fav", data);
-            titleCustomizer.refreshPageTitle();
+            if (titleCustomizer.isInitialized())
+                titleCustomizer.refreshPageTitle();
         });
 
         postsPageInput.get("general-title-symbol-voteup").on("re621:form:input", (event, data) => {
             titleCustomizer.pushSettings("symbol-voteup", data);
-            titleCustomizer.refreshPageTitle();
+            if (titleCustomizer.isInitialized())
+                titleCustomizer.refreshPageTitle();
         });
 
         postsPageInput.get("general-title-symbol-votedown").on("re621:form:input", (event, data) => {
             titleCustomizer.pushSettings("symbol-votedown", data);
-            titleCustomizer.refreshPageTitle();
+            if (titleCustomizer.isInitialized())
+                titleCustomizer.refreshPageTitle();
         });
 
         postsPageInput.get("general-improved-tagcount").on("re621:form:input", (event, data) => {
@@ -288,7 +293,8 @@ export class SettingsController {
         // Actions
         postsPageInput.get("action-download-template").on("re621:form:input", (event, data) => {
             downloadCustomizer.pushSettings("template", data);
-            downloadCustomizer.refreshDownloadLink();
+            if (downloadCustomizer.isInitialized())
+                downloadCustomizer.refreshDownloadLink();
         });
 
         postsPageInput.get("actions-votefavorite").on("re621:form:input", (event, data) => {
