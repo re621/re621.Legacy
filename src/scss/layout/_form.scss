@@ -4,6 +4,7 @@ form.grid-form {
     grid-template-columns: 1fr 2fr;
     grid-row-gap: 1rem;
     grid-column-gap: 0.5rem;
+    margin-bottom: 0.5rem;
     width: 15rem;
 
     &.columns-2 {
