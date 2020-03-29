@@ -89,7 +89,7 @@ export class PostViewer extends RE6Module {
         let $voteUpButton = $("#post-vote-up-" + postID).addClass("image-score-up").appendTo($ratingContainer);
 
         if ($voteDownButton.hasClass("score-negative")) $ratingContainer.addClass("score-down");
-        if ($voteUpButton.hasClass("score-negative")) $ratingContainer.addClass("score-up");
+        if ($voteUpButton.hasClass("score-positive")) $ratingContainer.addClass("score-up");
 
         $voteDownButton.find("a").on("click", function () {
             if ($voteDownButton.hasClass("score-negative")) { $ratingContainer.removeClass("score-down"); }
