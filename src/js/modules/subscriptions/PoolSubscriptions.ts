@@ -65,7 +65,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             .addClass("subscription-update-preview")
             .appendTo($content);
         $("<img>")
-            .attr("src", data.extra)
+            .attr("src", data.thumbnail)
             .appendTo($image);
 
         // Entry Title
