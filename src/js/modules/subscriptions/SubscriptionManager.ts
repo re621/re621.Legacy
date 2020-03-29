@@ -9,10 +9,10 @@ export class SubscriptionManager extends RE6Module {
 
     private static instance: SubscriptionManager;
     public static dismissOnUpdate: boolean = true;
-    private static updateInterval = 60 * 60; //1 hour, in seconds
+    private updateInterval = 60 * 60; //1 hour, in seconds
 
-
-    private tabs = new Map<string, JQuery<HTMLElement>>();
+    private tabNotificationsCount = 0;
+    private subscribers: Subscription[] = [];
 
     public openSubsButton: { link: any; tab?: JQuery<HTMLElement>; };
 
@@ -20,7 +20,7 @@ export class SubscriptionManager extends RE6Module {
      * Creates the module's structure.  
      * Should be run immediately after the constructor finishes.
      */
-    public create() {
+    public async create() {
         if (!this.canInitialize()) return;
         super.create();
         // Create a button in the header
@@ -31,8 +31,9 @@ export class SubscriptionManager extends RE6Module {
         });
 
         let content = [];
-        for (const entry of this.tabs.entries()) {
-            content.push({ name: entry[0], page: entry[1] });
+        for (const sub of this.subscribers) {
+            await this.initSubscriber(sub);
+            content.push({ name: sub.getName(), page: sub.tab });
         }
 
         let $subsTabs = new Tabbed({
@@ -48,6 +49,23 @@ export class SubscriptionManager extends RE6Module {
             content: $subsTabs.create(),
             position: { my: "right top", at: "right top" }
         });
+
+        //clear the notifications if the user opened the tab
+        modal.getElement().on("dialogopen", event => {
+            const index = modal.getElement().tabs("option", "active");
+            this.removeUnopened($(event.currentTarget).find("[data-subscribtion-class]").eq(index).attr("data-subscribtion-class"));
+        });
+
+        modal.getElement().tabs({
+            activate: (event, element) => {
+                this.removeUnopened(element.newPanel.find(".subscriptions-list").attr("data-subscription-class"));
+            }
+        });
+    }
+
+    public updateNotificationSymbol(difference: number) {
+        this.tabNotificationsCount += difference;
+        this.openSubsButton.link.attr("data-has-notifications", (this.tabNotificationsCount > 0).toString());
     }
 
     /**
@@ -55,7 +73,7 @@ export class SubscriptionManager extends RE6Module {
      * @param instance subscriber to be queued for update check
      */
     public static registerSubscriber(instance: Subscription) {
-        this.getInstance().tabs.set(instance.getName(), instance.tab);
+        this.getInstance().subscribers.push(instance);
         instance.addSubscribeButtons();
     }
 
@@ -69,30 +87,41 @@ export class SubscriptionManager extends RE6Module {
     /**
      * Starts checking for updates for the passed subscriber
      */
-    public static async initSubscriber(instance: Subscription) {
+    public async initSubscriber(instance: Subscription) {
+        const moduleName = instance.constructor.name;
         let lastUpdate: number = instance.fetchSettings("lastUpdate");
+        let cachedUpdates: Update[] = this.fetchSettings("cache-" + moduleName);
+
         if (lastUpdate === undefined) {
             lastUpdate = new Date().getTime();
             instance.pushSettings("lastUpdate", lastUpdate);
         }
-        instance.lastUpdate = lastUpdate;
-        const currentDate = new Date().getTime();
-        //don't update if the last check was pretty recently
-        if (currentDate - lastUpdate - (this.updateInterval * 1000) < 0) {
-            return;
+        if (cachedUpdates === undefined) {
+            cachedUpdates = [];
         }
 
         instance.tab = SubscriptionManager.createTabContent();
+        instance.tab.attr("data-subscribtion-class", moduleName);
+        instance.lastUpdate = lastUpdate;
+        const currentDate = new Date().getTime();
+
+        //don't update if the last check was pretty recently
+        if (currentDate - lastUpdate - (this.updateInterval * 1000) < 0) {
+            this.addUpdateEntries(instance, cachedUpdates);
+            return;
+        }
+
         const updates = await instance.getUpdatedEntries();
         this.addUpdateEntries(instance, updates);
         instance.pushSettings("lastUpdate", currentDate);
+        this.pushSettings("cache-" + moduleName, updates);
     }
 
     /**
      * Adds the passed updates to the tab of the subscriber
      */
-    public static addUpdateEntries(instance: Subscription, updates: Update[]) {
-        if (updates.length == 0) {
+    public addUpdateEntries(instance: Subscription, updates: Update[]) {
+        if (updates.length === 0) {
             $("<div>")
                 .addClass("subscriptions-notice")
                 .html("All caught up!")
@@ -101,8 +130,19 @@ export class SubscriptionManager extends RE6Module {
             updates.forEach(entry => {
                 instance.tab.append(instance.createUpdateEntry(entry));
             });
-            this.getInstance().openSubsButton.link.attr("data-has-notifications", "true");
+            this.updateNotificationSymbol(1);
         }
+    }
+
+    protected removeUnopened(moduleName: string) {
+        this.updateNotificationSymbol(-1);
+        this.pushSettings("cache-" + moduleName, []);
+    }
+
+    protected getDefaultSettings() {
+        return {
+            enabled: true
+        };
     }
 
     public static getInstance() {

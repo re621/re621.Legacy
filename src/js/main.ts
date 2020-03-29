@@ -57,10 +57,10 @@ const subscribers = [
 
 subscribers.forEach((module) => {
     let instance = module.class.getInstance();
-    if (instance.canInitialize()) instance.create();
-    SubscriptionManager.registerSubscriber(instance);
+    if (instance.canInitialize()) {
+        SubscriptionManager.registerSubscriber(instance);
+    }
 });
-
 
 StructureUtilities.createDOM();
 

@@ -15,11 +15,6 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
 
     private static instance: PoolSubscriptions;
 
-    public create() {
-        if (!this.canInitialize()) return;
-        SubscriptionManager.initSubscriber(this);
-    }
-
     public getName(): string {
         return "Pools";
     }
@@ -157,7 +152,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
 
 
 
-interface PoolSettings {
+export interface PoolSettings {
     [poolId: number]: PoolInfo
 }
 
