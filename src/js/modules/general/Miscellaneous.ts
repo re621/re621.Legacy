@@ -196,11 +196,12 @@ export class Miscellaneous extends RE6Module {
 
         if (($textarea.val() + "").length > 0) { stripped_body = "\n\n" + stripped_body; }
 
-        $textarea.val($textarea.val() + stripped_body);
         $responseButton[0].click();
         setTimeout(function () {
-            $responseButton[0].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-        }, 15);
+        $textarea.scrollTop($textarea[0].scrollHeight);
+
+        let newVal = $textarea.val() + stripped_body;
+        $textarea.focus().val("").val(newVal);
     }
 
 }
