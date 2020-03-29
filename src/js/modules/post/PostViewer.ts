@@ -84,9 +84,27 @@ export class PostViewer extends RE6Module {
         let postID = this.post.getId();
         let original = $("#post-vote-up-" + postID).parent().parent();
 
-        $("#post-vote-down-" + postID).addClass("image-score-down").appendTo($ratingContainer);
+        let $voteDownButton = $("#post-vote-down-" + postID).addClass("image-score-down").appendTo($ratingContainer);
         $("#post-score-" + postID).addClass("image-score-num").appendTo($ratingContainer);
-        $("#post-vote-up-" + postID).addClass("image-score-up").appendTo($ratingContainer);
+        let $voteUpButton = $("#post-vote-up-" + postID).addClass("image-score-up").appendTo($ratingContainer);
+
+        if ($voteDownButton.hasClass("score-negative")) $ratingContainer.addClass("score-down");
+        if ($voteUpButton.hasClass("score-negative")) $ratingContainer.addClass("score-up");
+
+        $voteDownButton.find("a").on("click", function () {
+            if ($voteDownButton.hasClass("score-negative")) { $ratingContainer.removeClass("score-down"); }
+            else { $ratingContainer.removeClass("score-up").addClass("score-down"); }
+        });
+
+        $voteUpButton.find("a").on("click", function () {
+            if ($voteUpButton.hasClass("score-positive")) { $ratingContainer.removeClass("score-up"); }
+            else { $ratingContainer.removeClass("score-down").addClass("score-up"); }
+        });
+
+        // Move the add to set / pool buttons
+        let $addToContainer = $("<div>").attr("id", "image-add-links").insertAfter("#image-download-link");
+        $("li#add-to-set-list > a").addClass("image-add-set").html("+ Set").appendTo($addToContainer);
+        $("li#add-to-pool-list > a").addClass("image-add-pool").html("+ Pool").appendTo($addToContainer);
 
         original.remove();
 

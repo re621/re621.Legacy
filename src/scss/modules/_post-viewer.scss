@@ -1,7 +1,7 @@
 /* Post Viewer Styles */
 section#image-extra-controls {
     display: inline-grid !important;
-    grid-template-columns: max-content max-content max-content auto;
+    grid-template-columns: max-content max-content max-content max-content auto;
     margin: 0.5rem 0;
     grid-column-gap: 0.5rem;
 
@@ -11,13 +11,44 @@ section#image-extra-controls {
 
     div#image-score-links {
 
+        background: #19586b;
+
         @include themable {
-            background: themed("color-section");
+            //background: themed("color-section");
             color: themed("color-text");
+        }
+
+        &.score-up {
+            @include themable {
+                background: themed("color-success");
+            }
+        }
+
+        &.score-down {
+            @include themable {
+                background: themed("color-danger");
+            }
+        }
+
+        span.image-score-down a,
+        span.image-score-up a {
+            @include themable {
+                color: themed("color-text");
+            }
+
+            &:hover {
+                @include themable {
+                    color: themed("color-text-muted");
+                }
+            }
         }
 
         span.image-score-num {
             margin: 0 1rem;
+
+            @include themable {
+                color: themed("color-text");
+            }
         }
     }
 
@@ -27,10 +58,30 @@ section#image-extra-controls {
         }
     }
 
+    div#image-add-links {
+        margin-left: 0.25rem;
+
+        a {
+            margin: 0.25rem;
+
+            @include themable {
+                background: themed("color-section");
+                color: themed("color-text");
+            }
+
+            &:hover {
+                @include themable {
+                    color: themed("color-link-hover");
+                }
+            }
+        }
+    }
+
     div#image-score-links,
     div.fav-buttons>button,
     div.fav-buttons>button::after,
     div#image-download-link a,
+    div#image-add-links a,
     div#image-resize-cycle select,
     div#image-resize-cycle a {
         display: inline-flex;
