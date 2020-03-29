@@ -102,6 +102,7 @@ export class SettingsController {
         let downloadCustomizer = this.modules.get("DownloadCustomizer");
         let miscellaneous = this.modules.get("Miscellaneous");
         let postViewer = this.modules.get("PostViewer");
+        let formattingManager = this.modules.get("FormattingManager");
 
         let template_icons = new Form(
             { id: "title-template-icons", columns: 2, },
@@ -222,7 +223,19 @@ export class SettingsController {
                     id: "inter-spacer-2",
                     type: "div",
                     value: " ",
-                    stretch: "full",
+                    stretch: "mid",
+                },
+                {
+                    id: "actions-submit-hotkey",
+                    type: "checkbox",
+                    value: formattingManager.fetchSettings("hotkey_submit_active"),
+                    label: "Submit Comments with Alt+Enter",
+                },
+                {
+                    id: "inter-spacer-4",
+                    type: "div",
+                    value: " ",
+                    stretch: "mid",
                 },
             ]
         );
@@ -239,6 +252,7 @@ export class SettingsController {
         let downloadCustomizer = <DownloadCustomizer>this.modules.get("DownloadCustomizer");
         let miscellaneous = <Miscellaneous>this.modules.get("Miscellaneous");
         let postViewer = <PostViewer>this.modules.get("PostViewer");
+        let formattingManager = this.modules.get("FormattingManager");
         let postsPageInput = form.getInputList();
 
         // General
@@ -280,6 +294,10 @@ export class SettingsController {
         postsPageInput.get("actions-votefavorite").on("re621:form:input", (event, data) => {
             postViewer.pushSettings("upvote_on_favorite", data);
         });
+
+        postsPageInput.get("actions-submit-hotkey").on("re621:form:input", (event, data) => {
+            formattingManager.pushSettings("hotkey_submit_active", data);
+        });
     }
 
     /** Creates the DOM for the hotkey settings page */
@@ -288,6 +306,7 @@ export class SettingsController {
         let poolNavigator = this.modules.get("PoolNavigator");
         let imageScaler = this.modules.get("ImageScaler");
         let miscellaneous = this.modules.get("Miscellaneous");
+        let headerCustomizer = this.modules.get("HeaderCustomizer");
 
         let form = new Form(
             {
@@ -296,12 +315,28 @@ export class SettingsController {
                 parent: "re-modal-container"
             },
             [
+                // Listing
+                {
+                    id: "hotkey-listing-title",
+                    type: "div",
+                    value: "<h3>Listing</h3>",
+                    stretch: "full",
+                },
+
+                createLabel("hotkey_focussearch", "Search"),
+                createInput(miscellaneous, "hotkey_focussearch", "", 0),
+                createInput(miscellaneous, "hotkey_focussearch", "", 1),
+
+                createLabel("hotkey_randompost", "Random Post"),
+                createInput(miscellaneous, "hotkey_randompost", "", 0),
+                createInput(miscellaneous, "hotkey_randompost", "", 1),
+
                 // Posts
                 {
                     id: "hotkey-posts-title",
                     type: "div",
                     value: "<h3>Posts</h3>",
-                    stretch: "full"
+                    stretch: "full",
                 },
 
                 // - Voting
@@ -352,6 +387,50 @@ export class SettingsController {
                 createLabel("hotkey_editpost", "Edit Post"),
                 createInput(miscellaneous, "hotkey_editpost", "", 0),
                 createInput(miscellaneous, "hotkey_editpost", "", 1),
+
+                // Tabs
+                {
+                    id: "hotkey-tabs-title",
+                    type: "div",
+                    value: "<h3>Header Tabs</h3>",
+                    stretch: "full",
+                },
+
+                createLabel("hotkey_tab_1", "Tab #1"),
+                createInput(headerCustomizer, "hotkey_tab_1", "", 0),
+                createInput(headerCustomizer, "hotkey_tab_1", "", 1),
+
+                createLabel("hotkey_tab_2", "Tab #2"),
+                createInput(headerCustomizer, "hotkey_tab_2", "", 0),
+                createInput(headerCustomizer, "hotkey_tab_2", "", 1),
+
+                createLabel("hotkey_tab_3", "Tab #3"),
+                createInput(headerCustomizer, "hotkey_tab_3", "", 0),
+                createInput(headerCustomizer, "hotkey_tab_3", "", 1),
+
+                createLabel("hotkey_tab_4", "Tab #4"),
+                createInput(headerCustomizer, "hotkey_tab_4", "", 0),
+                createInput(headerCustomizer, "hotkey_tab_4", "", 1),
+
+                createLabel("hotkey_tab_5", "Tab #5"),
+                createInput(headerCustomizer, "hotkey_tab_5", "", 0),
+                createInput(headerCustomizer, "hotkey_tab_5", "", 1),
+
+                createLabel("hotkey_tab_6", "Tab #6"),
+                createInput(headerCustomizer, "hotkey_tab_6", "", 0),
+                createInput(headerCustomizer, "hotkey_tab_6", "", 1),
+
+                createLabel("hotkey_tab_7", "Tab #7"),
+                createInput(headerCustomizer, "hotkey_tab_7", "", 0),
+                createInput(headerCustomizer, "hotkey_tab_7", "", 1),
+
+                createLabel("hotkey_tab_8", "Tab #8"),
+                createInput(headerCustomizer, "hotkey_tab_8", "", 0),
+                createInput(headerCustomizer, "hotkey_tab_8", "", 1),
+
+                createLabel("hotkey_tab_9", "Tab #9"),
+                createInput(headerCustomizer, "hotkey_tab_9", "", 0),
+                createInput(headerCustomizer, "hotkey_tab_9", "", 1),
             ]
         );
 
@@ -390,6 +469,10 @@ export class SettingsController {
         let poolNavigator = this.modules.get("PoolNavigator");
         let imageScaler = this.modules.get("ImageScaler");
         let miscellaneous = this.modules.get("Miscellaneous");
+        let headerCustomizer = this.modules.get("HeaderCustomizer");
+
+        // Listing
+        createListener(miscellaneous, "hotkey_focussearch", 2);
 
         // Posts
         // - Voting
@@ -409,6 +492,17 @@ export class SettingsController {
         // Comments
         createListener(miscellaneous, "hotkey_newcomment", 2);
         createListener(miscellaneous, "hotkey_editpost", 2);
+
+        // Tabs
+        createListener(headerCustomizer, "hotkey_tab_1", 2);
+        createListener(headerCustomizer, "hotkey_tab_2", 2);
+        createListener(headerCustomizer, "hotkey_tab_3", 2);
+        createListener(headerCustomizer, "hotkey_tab_4", 2);
+        createListener(headerCustomizer, "hotkey_tab_5", 2);
+        createListener(headerCustomizer, "hotkey_tab_6", 2);
+        createListener(headerCustomizer, "hotkey_tab_7", 2);
+        createListener(headerCustomizer, "hotkey_tab_8", 2);
+        createListener(headerCustomizer, "hotkey_tab_9", 2);
 
         /** Creates a listener for the hotkey input */
         function createListener(module: RE6Module, settingsKey: string, bindings: number = 1) {

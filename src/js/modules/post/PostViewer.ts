@@ -36,8 +36,8 @@ export class PostViewer extends RE6Module {
     protected getDefaultSettings() {
         return {
             enabled: true,
-            hotkey_upvote: "a",
-            hotkey_downvote: "z",
+            hotkey_upvote: "w",
+            hotkey_downvote: "s",
             hotkey_favorite: "f",
 
             auto_open_parent_child: true,
@@ -97,7 +97,7 @@ export class PostViewer extends RE6Module {
         let $parentRel = $("#has-parent-relationship-preview-link");
         let $childRel = $("#has-children-relationship-preview-link");
 
-        let autoOpen = this.fetchSettings("auto_open_parent_child")
+        let autoOpen = this.fetchSettings("auto_open_parent_child");
         //only click on one container, because both open with one click. Clicking both results in them open and the closing
         if ($parentRel.length !== 0 && !$parentRel.is(":visible") && autoOpen) {
             $parentRel.click();

@@ -18,6 +18,8 @@ export class Miscellaneous extends RE6Module {
     private constructor() {
         super();
         this.registerHotkeys(
+            { keys: "hotkey_focussearch", fnct: this.focusSearchbar },
+            { keys: "hotkey_randompost", fnct: this.randomPost },
             { keys: "hotkey_newcomment", fnct: this.openNewComment },
             { keys: "hotkey_editpost", fnct: this.openEditTab },
         );
@@ -39,8 +41,10 @@ export class Miscellaneous extends RE6Module {
     protected getDefaultSettings() {
         return {
             enabled: true,
+            hotkey_focussearch: "q",
+            hotkey_randompost: "r",
             hotkey_newcomment: "n",
-            hotkey_editpost: "m",
+            hotkey_editpost: "e",
             removeSearchQueryString: true,
             loadRedesignFixes: true,
             improveTagCount: true,
@@ -70,7 +74,7 @@ export class Miscellaneous extends RE6Module {
 
         // Auto-focus on the searchbar
         if (Page.matches(PageDefintion.search)) {
-            this.focusSearchBar();
+            this.autoFocusSearchBar();
         }
 
         if (Page.matches([PageDefintion.post, PageDefintion.forum])) {
@@ -138,12 +142,21 @@ export class Miscellaneous extends RE6Module {
         });
     }
 
-    /**
-     * Set focus on the search bar
-     */
-    private focusSearchBar() {
+    /** If the searchbar is empty, focuses on it. */
+    private autoFocusSearchBar() {
         let searchbox = $("section#search-box input");
         if (searchbox.val() == "") searchbox.focus();
+    }
+
+    /** Sets the focus on the search bar */
+    private focusSearchbar(event) {
+        event.preventDefault();
+        $("section#search-box input").focus();
+    }
+
+    /** Triggers a random post with the current tags */
+    private randomPost() {
+        $("a#random-post")[0].click();
     }
 
     /**
@@ -197,7 +210,6 @@ export class Miscellaneous extends RE6Module {
         if (($textarea.val() + "").length > 0) { stripped_body = "\n\n" + stripped_body; }
 
         $responseButton[0].click();
-        setTimeout(function () {
         $textarea.scrollTop($textarea[0].scrollHeight);
 
         let newVal = $textarea.val() + stripped_body;

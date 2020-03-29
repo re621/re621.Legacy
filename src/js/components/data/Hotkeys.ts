@@ -35,7 +35,7 @@ export class Hotkeys {
                 .replace(/enter/g, "return")
                 .replace(/arrow/g, "");
             if (validKeys.indexOf(key) == -1) return;
-            keys.push(key)
+            keys.push(key);
         });
 
         $(document).on("keyup.re621.record", function (event) {
@@ -68,7 +68,7 @@ export class Hotkeys {
         this.unregister(key);
         $(document).bind("keydown.re621.hotkey-" + key, key, function (event) {
             if ($("body").attr("data-recording-hotkey") === "true") return;
-            fn(event);
+            fn(event, key);
         });
         this.getListeners().push(key);
         return true;
@@ -95,7 +95,7 @@ export class Hotkeys {
         this.unregisterInput(key, element);
         $(element).bind("keydown.re621.hotkey-" + key, key, function (event) {
             if ($("body").attr("data-recording-hotkey") === "true") return;
-            fn(event);
+            fn(event, key);
         });
         this.getListeners().push(key);
         return true;

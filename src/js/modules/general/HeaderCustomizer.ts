@@ -26,6 +26,17 @@ export class HeaderCustomizer extends RE6Module {
 
     private constructor() {
         super();
+        this.registerHotkeys(
+            { keys: "hotkey_tab_1", fnct: this.openTabNum },
+            { keys: "hotkey_tab_2", fnct: this.openTabNum },
+            { keys: "hotkey_tab_3", fnct: this.openTabNum },
+            { keys: "hotkey_tab_4", fnct: this.openTabNum },
+            { keys: "hotkey_tab_5", fnct: this.openTabNum },
+            { keys: "hotkey_tab_6", fnct: this.openTabNum },
+            { keys: "hotkey_tab_7", fnct: this.openTabNum },
+            { keys: "hotkey_tab_8", fnct: this.openTabNum },
+            { keys: "hotkey_tab_9", fnct: this.openTabNum },
+        );
     }
 
     /**
@@ -44,6 +55,15 @@ export class HeaderCustomizer extends RE6Module {
     protected getDefaultSettings() {
         let def_settings = {
             enabled: true,
+            hotkey_tab_1: "1",
+            hotkey_tab_2: "2",
+            hotkey_tab_3: "3",
+            hotkey_tab_4: "4",
+            hotkey_tab_5: "5",
+            hotkey_tab_6: "6",
+            hotkey_tab_7: "7",
+            hotkey_tab_8: "8",
+            hotkey_tab_9: "9",
             tabs: [
                 { name: "Account", href: "/users/home" },
                 { name: "Posts", href: "/posts" },
@@ -346,6 +366,12 @@ export class HeaderCustomizer extends RE6Module {
             });
         });
         this.pushSettings("tabs", tabData);
+    }
+
+    private openTabNum(event, key: string) {
+        let tabs = HeaderCustomizer.getInstance().$menu.find("li > a");
+        if (parseInt(key) > tabs.length) return;
+        tabs[parseInt(key) - 1].click();
     }
 
 }

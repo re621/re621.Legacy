@@ -33,9 +33,9 @@ export class PoolNavigator extends RE6Module {
     protected getDefaultSettings() {
         return {
             enabled: true,
-            hotkey_cycle: "r|.",
-            hotkey_prev: "q|left",
-            hotkey_next: "e|right",
+            hotkey_cycle: "x|.",
+            hotkey_prev: "a|left",
+            hotkey_next: "d|right",
         };
     }
 

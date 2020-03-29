@@ -94,6 +94,7 @@ export class FormattingManager extends RE6Module {
                 { name: "Link (Prompted)", icon: "link_prompt", text: "\"%selection%\":%prompt:Address%" },
             ],
             "hotkey_submit": "alt+return",
+            "hotkey_submit_active": true,
         };
     }
 
@@ -157,7 +158,9 @@ class FormattingHelper {
 
     /** Registers the module's hotkeys */
     public registerHotkeys() {
-        Hotkeys.registerInput(FormattingManager.getInstance().fetchSettings("hotkey_submit"), this.$textarea, () => {
+        let manager = FormattingManager.getInstance();
+        Hotkeys.registerInput(manager.fetchSettings("hotkey_submit"), this.$textarea, () => {
+            if (!manager.fetchSettings("hotkey_submit_active")) return;
             this.$form.submit();
         });
     }
@@ -256,7 +259,7 @@ class FormattingHelper {
 
         $editButtonsForm.getInputList().get("delete").click(event => {
             event.preventDefault();
-            this.deleteButton(this.$editButtonsModal.getActiveTrigger().parent())
+            this.deleteButton(this.$editButtonsModal.getActiveTrigger().parent());
             this.$editButtonsModal.close();
         });
 
@@ -414,7 +417,7 @@ class FormattingHelper {
         buttonData = [];
         this.$formatButtonsDrawer.find("li").each(function (i, element) {
             buttonData.push(fetchData(element));
-        })
+        });
         FormattingManager.getInstance().pushSettings("btn_inactive", buttonData);
 
         this.$container.trigger("re621:formatter:update", [this]);
