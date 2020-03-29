@@ -51,17 +51,40 @@ export class SubscriptionManager extends RE6Module {
             position: { my: "right top", at: "right top" }
         });
 
+        let firstOpen = true;
+
         //clear the notifications if the user opened the tab
         modal.getElement().on("dialogopen", event => {
+            if (firstOpen) {
+                this.addTabNotifications($(event.currentTarget));
+                firstOpen = false;
+            }
             const index = modal.getElement().tabs("option", "active");
-            const $element = $(event.currentTarget).find("[data-subscription-class]").eq(index);
+            const $element = $(event.currentTarget).find(".subscriptions-list").eq(index);
+            //remove individual tab notification
+            $(event.currentTarget).find(".ui-tabs-tab").eq(index).attr("data-has-notifications", "false");
             this.removeUnopened($element);
         });
 
         modal.getElement().tabs({
             activate: (event, tabProperties) => {
                 const $element = tabProperties.newPanel.find(".subscriptions-list");
+                tabProperties.newTab.attr("data-has-notifications", "false");
                 this.removeUnopened($element);
+            }
+        });
+    }
+
+    /**
+     * If the attribute remove from notification count is present it means
+     * that there are updates in that tap. If it is so also add a  notification icon
+     */
+    private addTabNotifications($target: JQuery<HTMLElement>) {
+        const allTabs = $target.find(".ui-tabs-tab");
+        const allPanels = $target.find(".subscriptions-list");
+        allPanels.each((index, element) => {
+            if ($(element).attr("data-remove-notification-count") === "true") {
+                allTabs.eq(index).attr("data-has-notifications", "true");
             }
         });
     }

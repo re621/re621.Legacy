@@ -1,6 +1,6 @@
 /* Subscription Manager Styles */
 
-a[data-has-notifications=true] {
+[data-has-notifications=true] {
     position: relative;
 
     &::after {
@@ -11,7 +11,6 @@ a[data-has-notifications=true] {
         color: red;
 
         position: absolute;
-        right: 15%;
         top: 0;
     }
 }
