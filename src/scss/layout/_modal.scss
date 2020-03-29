@@ -102,6 +102,9 @@ re-modal-container {
             padding: 1em 1em;
             min-width: fit-content;
 
+            height: 90% !important;
+            overflow: hidden scroll;
+
             @include themable {
                 border: unset !important;
                 background-color: unset !important;
@@ -110,6 +113,30 @@ re-modal-container {
 
             div.ui-tabs {
                 margin-top: -1em;
+            }
+
+            &::-webkit-scrollbar {
+                width: 14px;
+                height: 18px;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                height: 6px;
+                border: 4px solid rgba(0, 0, 0, 0);
+                background-clip: padding-box;
+                border-radius: 7px;
+                background-color: rgba(0, 0, 0, 0.35);
+                box-shadow: inset -1px -1px 0px rgba(0, 0, 0, 0.05), inset 1px 1px 0px rgba(0, 0, 0, 0.05);
+            }
+
+            &::-webkit-scrollbar-button {
+                width: 0;
+                height: 0;
+                display: none;
+            }
+
+            &::-webkit-scrollbar-corner {
+                background-color: transparent;
             }
         }
     }
