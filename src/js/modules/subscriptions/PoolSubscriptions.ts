@@ -84,7 +84,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
         return {
             id: value.id,
             name: value.name.replace(/_/g, " "),
-            date: new Date(value.updated_at),
+            date: new Date(value.updated_at).getTime(),
             last: value.post_ids[value.post_ids.length - 1],
             md5: poolInfo.md5
         };

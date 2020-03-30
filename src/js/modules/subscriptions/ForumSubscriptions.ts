@@ -75,7 +75,7 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         return {
             id: value.id,
             name: value.title,
-            date: new Date(value.updated_at),
+            date: new Date(value.updated_at).getTime(),
             last: value.response_count,
             md5: ""
         };
