@@ -6,6 +6,7 @@
 // Load Modules
 // - requied
 import { StructureUtilities } from "./modules/general/StructureUtilities";
+import { ModuleController } from "./components/ModuleController";
 // - general
 import { FormattingManager } from "./modules/general/FormattingHelper";
 import { HeaderCustomizer } from "./modules/general/HeaderCustomizer";
@@ -51,7 +52,9 @@ const loadOrder = [
     InfiniteScroll,
     InstantSearch,
 
-    TinyAlias
+    TinyAlias,
+
+    SettingsController
 ];
 
 const subscriptions = [
@@ -70,7 +73,5 @@ subscriptions.forEach((module) => {
 StructureUtilities.createDOM();
 
 loadOrder.forEach((module) => {
-    SettingsController.registerModule(module);
+    ModuleController.register(module);
 });
-
-SettingsController.getInstance().init();

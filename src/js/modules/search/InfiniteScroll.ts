@@ -6,7 +6,7 @@ import { PostHtml } from "../../components/api/PostHtml";
 import { InstantSearch } from "./InstantSearch";
 import { Post } from "../../components/data/Post";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
-import { SettingsController } from "../general/SettingsController";
+import { ModuleController } from "../../components/ModuleController";
 
 declare const Danbooru;
 
@@ -94,8 +94,8 @@ export class InfiniteScroll extends RE6Module {
         this.isInProgress = false;
         this.$loadingIndicator.hide();
 
-        SettingsController.getModuleWithType<BlacklistEnhancer>(BlacklistEnhancer).updateSidebar();
-        SettingsController.getModuleWithType<InstantSearch>(InstantSearch).applyFilter();
+        ModuleController.getWithType<BlacklistEnhancer>(BlacklistEnhancer).updateSidebar();
+        ModuleController.getWithType<InstantSearch>(InstantSearch).applyFilter();
 
         this.nextPageToGet++;
     }

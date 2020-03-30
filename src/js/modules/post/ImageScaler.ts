@@ -2,7 +2,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 import { Post } from "../../components/data/Post";
 import { Form } from "../../components/structure/Form";
 import { PageDefintion } from "../../components/data/Page";
-import { SettingsController } from "../general/SettingsController";
+import { ModuleController } from "../../components/ModuleController";
 
 declare const Danbooru;
 
@@ -99,7 +99,7 @@ export class ImageScaler extends RE6Module {
      * @param save Set to false to prevent saving the scale to settings
      */
     private setScale(size = "", save = true): void {
-        const selector = SettingsController.getModuleWithType<ImageScaler>(ImageScaler).resizeSelector;
+        const selector = ModuleController.getWithType<ImageScaler>(ImageScaler).resizeSelector;
         if (size === "") {
             const $next = selector.find("option:selected").next();
             if ($next.length > 0) { size = $next.val() + ""; }

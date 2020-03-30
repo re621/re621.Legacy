@@ -6,7 +6,7 @@ import { HeaderCustomizer } from "./HeaderCustomizer";
 import { Modal } from "../../components/structure/Modal";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
-import { SettingsController } from "./SettingsController";
+import { ModuleController } from "../../components/ModuleController";
 
 const THEME_MAIN = [
     { value: "hexagon", name: "Hexagon" },
@@ -56,7 +56,7 @@ export class ThemeCustomizer extends RE6Module {
         super.create();
 
         // === Create a button in the header
-        const addTabButton = SettingsController.getModuleWithType<HeaderCustomizer>(HeaderCustomizer).createTabElement({
+        const addTabButton = ModuleController.getWithType<HeaderCustomizer>(HeaderCustomizer).createTabElement({
             name: `<i class="fas fa-paint-brush"></i>`,
             parent: "menu.extra",
             controls: false,

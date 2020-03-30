@@ -1,6 +1,6 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
-import { SettingsController } from "../general/SettingsController";
+import { ModuleController } from "../../components/ModuleController";
 
 export class PoolNavigator extends RE6Module {
 
@@ -48,7 +48,7 @@ export class PoolNavigator extends RE6Module {
 
     /** Loops through available navbars */
     private cycleNavbars(): void {
-        const poolNavigator = SettingsController.getModuleWithType<PoolNavigator>(PoolNavigator);
+        const poolNavigator = ModuleController.getWithType<PoolNavigator>(PoolNavigator);
         const navbars = poolNavigator.navbars,
             active = poolNavigator.activeNav;
 
@@ -63,7 +63,7 @@ export class PoolNavigator extends RE6Module {
 
     /** Emulates a click on the "next" button */
     private triggerNextPost(): void {
-        const poolNavigator = SettingsController.getModuleWithType<PoolNavigator>(PoolNavigator);
+        const poolNavigator = ModuleController.getWithType<PoolNavigator>(PoolNavigator);
         const navbars = poolNavigator.navbars,
             active = poolNavigator.activeNav;
         if (navbars.length == 0) return;
@@ -72,7 +72,7 @@ export class PoolNavigator extends RE6Module {
 
     /** Emulates a click on the "prev" button */
     private triggerPrevPost(): void {
-        const poolNavigator = SettingsController.getModuleWithType<PoolNavigator>(PoolNavigator);
+        const poolNavigator = ModuleController.getWithType<PoolNavigator>(PoolNavigator);
         const navbars = poolNavigator.navbars,
             active = poolNavigator.activeNav;
         if (navbars.length == 0) return;
