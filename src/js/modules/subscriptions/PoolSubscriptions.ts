@@ -76,7 +76,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
     }
 
     private async formatPoolUpdate(value: ApiPool, subSettings: SubscriptionSettings): Promise<UpdateData> {
-        const poolInfo = subSettings[value.id] as PoolInfo;
+        const poolInfo = subSettings[value.id];
         if (poolInfo.md5 === undefined) {
             const post: ApiPost = (await Api.getJson(`/posts/${value.post_ids[0]}.json`)).post;
             poolInfo.md5 = post.file.md5;
@@ -102,8 +102,4 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             data: {}
         };
     }
-}
-
-export interface PoolInfo {
-    md5?: string;
 }

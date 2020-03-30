@@ -5,11 +5,11 @@ import { RE6Module } from "../../components/RE6Module";
 import { Miscellaneous } from "./Miscellaneous";
 import { Form, FormElement } from "../../components/structure/Form";
 import { Hotkeys } from "../../components/data/Hotkeys";
-import { PoolInfo, PoolSubscriptions } from "../subscriptions/PoolSubscriptions";
+import { PoolSubscriptions } from "../subscriptions/PoolSubscriptions";
 import { Util } from "../../components/structure/Util";
 import { User } from "../../components/data/User";
-import { ForumSubscriptions, ForumInfo } from "../subscriptions/ForumSubscriptions";
-import { TagSubscriptions, TagInfo } from "../subscriptions/TagSubscriptions";
+import { ForumSubscriptions } from "../subscriptions/ForumSubscriptions";
+import { TagSubscriptions } from "../subscriptions/TagSubscriptions";
 import { TitleCustomizer } from "../post/TitleCustomizer";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { PostViewer } from "../post/PostViewer";
@@ -19,6 +19,7 @@ import { PoolNavigator } from "../post/PoolNavigator";
 import { ImageScaler } from "../post/ImageScaler";
 import { ModuleController } from "../../components/ModuleController";
 import { DomUtilities } from "../../components/structure/DomUtilities";
+import { ExtraInfo } from "../subscriptions/SubscriptionManager";
 
 /**
  * SettingsController  
@@ -705,7 +706,7 @@ export class SettingsController extends RE6Module {
                 if (parsedData["pools"]) {
                     $info.html("Processing pools . . .");
                     const poolSubs = PoolSubscriptions.getInstance(),
-                        poolData: PoolInfo = poolSubs.fetchSettings("data", true);
+                        poolData: ExtraInfo = poolSubs.fetchSettings("data", true);
                     for (const [key, value] of Object.entries(parsedData["pools"])) {
                         poolData[key] = value;
                     }
@@ -716,7 +717,7 @@ export class SettingsController extends RE6Module {
                 if (parsedData["forums"]) {
                     $info.html("Processing forums . . .");
                     const forumSubs = ForumSubscriptions.getInstance(),
-                        forumData: ForumInfo = forumSubs.fetchSettings("data", true);
+                        forumData: ExtraInfo = forumSubs.fetchSettings("data", true);
                     for (const [key, value] of Object.entries(parsedData["forums"])) {
                         forumData[key] = value;
                     }
@@ -727,7 +728,7 @@ export class SettingsController extends RE6Module {
                 if (parsedData["tags"]) {
                     $info.html("Processing tags . . .");
                     const tagSubs = TagSubscriptions.getInstance(),
-                        tagData: TagInfo = tagSubs.fetchSettings("data", true);
+                        tagData: ExtraInfo = tagSubs.fetchSettings("data", true);
                     for (const [key, value] of Object.entries(parsedData["tags"])) {
                         tagData[key] = value;
                     }
@@ -759,7 +760,7 @@ export class SettingsController extends RE6Module {
                 // parsedData[2] : pools
                 $info.html("Processing pools . . .");
                 const poolSubs = PoolSubscriptions.getInstance(),
-                    poolData: PoolInfo = poolSubs.fetchSettings("data", true);
+                    poolData: ExtraInfo = poolSubs.fetchSettings("data", true);
                 for (const entry of parsedData[2]) {
                     poolData[entry["id"]] = { md5s: entry["thumb"]["url"].substr(6, 32) };
                 }
@@ -768,7 +769,7 @@ export class SettingsController extends RE6Module {
                 // parsedData[3] : forums
                 $info.html("Processing forums . . .");
                 const forumSubs = ForumSubscriptions.getInstance(),
-                    forumData: ForumInfo = forumSubs.fetchSettings("data", true);
+                    forumData: ExtraInfo = forumSubs.fetchSettings("data", true);
                 for (const entry of parsedData[3]) {
                     forumData[entry["id"]] = {};
                 }

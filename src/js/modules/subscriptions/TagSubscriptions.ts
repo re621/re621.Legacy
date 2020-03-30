@@ -94,8 +94,3 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         };
     }
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TagInfo {
-    // TODO Fix this
-}

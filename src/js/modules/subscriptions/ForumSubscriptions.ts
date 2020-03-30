@@ -94,8 +94,3 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         };
     }
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ForumInfo {
-    // TODO Fix this
-}

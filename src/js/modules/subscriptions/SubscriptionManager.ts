@@ -350,7 +350,12 @@ export class SubscriptionManager extends RE6Module {
 
 
 export interface SubscriptionSettings {
-    [id: number]: any;
+    [id: number]: ExtraInfo;
+}
+
+export interface ExtraInfo {
+    md5?: string;
+    lastId?: number;
 }
 
 interface UpdateCache {
