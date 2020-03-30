@@ -4,10 +4,10 @@ import { Tabbed } from "../../components/structure/Tabbed";
 import { Modal } from "../../components/structure/Modal";
 import { Subscription } from "./Subscription";
 import { Util } from "../../components/structure/Util";
+import { SettingsController } from "../general/SettingsController";
 
 export class SubscriptionManager extends RE6Module {
 
-    private static instance: SubscriptionManager;
     //should notifications be cleared once seen?
     public dismissOnUpdate = true;
     private updateInterval = 60 * 60; //1 hour, in seconds
@@ -17,6 +17,10 @@ export class SubscriptionManager extends RE6Module {
 
     public openSubsButton: HeaderTabElement;
 
+    public constructor() {
+        super();
+    }
+
     /**
      * Creates the module's structure.  
      * Should be run immediately after the constructor finishes.
@@ -25,7 +29,7 @@ export class SubscriptionManager extends RE6Module {
         if (!this.canInitialize()) return;
         super.create();
         // Create a button in the header
-        this.openSubsButton = HeaderCustomizer.getInstance().createTabElement({
+        this.openSubsButton = SettingsController.getModule<HeaderCustomizer>(HeaderCustomizer).createTabElement({
             name: `<i class="fas fa-bell"></i>`,
             parent: "menu.extra",
             controls: false,
@@ -99,7 +103,8 @@ export class SubscriptionManager extends RE6Module {
      * @param instance subscriber to be queued for update check
      */
     public static registerSubscriber(instance: Subscription): void {
-        this.getInstance().subscribers.push(instance);
+        const manager = this.getInstance() as SubscriptionManager;
+        manager.subscribers.push(instance);
     }
 
     public static createTabContent(): JQuery<HTMLElement> {
@@ -283,12 +288,6 @@ export class SubscriptionManager extends RE6Module {
             enabled: true
         };
     }
-
-    public static getInstance(): SubscriptionManager {
-        if (this.instance == undefined) this.instance = new SubscriptionManager();
-        return this.instance;
-    }
-
 }
 
 

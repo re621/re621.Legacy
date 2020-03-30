@@ -9,8 +9,6 @@ declare const Danbooru;
 
 export class TinyAlias extends RE6Module {
 
-    private static instance: TinyAlias;
-
     private $textarea: JQuery<HTMLElement>;
     private $container: JQuery<HTMLElement>;
 
@@ -20,20 +18,8 @@ export class TinyAlias extends RE6Module {
     private tagAlreadyChecked: boolean;
     private aliasData;
 
-    private constructor() {
+    public constructor() {
         super(PageDefintion.upload);
-    }
-
-    /**
-     * Returns a singleton instance of the SettingsController
-     * @returns ThemeCustomizer instance
-     */
-    public static getInstance(): TinyAlias {
-        if (this.instance === undefined) {
-            this.instance = new TinyAlias();
-            this.instance.create();
-        }
-        return this.instance;
     }
 
     /**

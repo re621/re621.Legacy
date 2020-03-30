@@ -10,22 +10,11 @@ declare const GM_download;
  */
 export class DownloadCustomizer extends RE6Module {
 
-    private static instance: DownloadCustomizer;
-
     private post: ViewingPost;
     private link: JQuery<HTMLElement>;
 
-    private constructor() {
+    public constructor() {
         super(PageDefintion.post);
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns DownloadCustomizer instance
-     */
-    public static getInstance(): DownloadCustomizer {
-        if (this.instance == undefined) this.instance = new DownloadCustomizer();
-        return this.instance;
     }
 
     /**

@@ -28,12 +28,12 @@ export class SettingsController {
 
     private modules: Map<string, RE6Module> = new Map();
 
-    private constructor() { return; }
+    public constructor() { return; }
 
     public init(): void {
 
         // Create a button in the header
-        const addSettingsButton = HeaderCustomizer.getInstance().createTabElement({
+        const addSettingsButton = this.getModule<HeaderCustomizer>(HeaderCustomizer).createTabElement({
             name: `<i class="fas fa-wrench"></i>`,
             parent: "menu.extra",
             class: "float-right",
@@ -86,29 +86,41 @@ export class SettingsController {
     /**
      * Registers the module so that its settings could be changed
      * @param module Module to register
+     * @todo any parameter is not correct here but I couldn't figure the right types out
+     *  { new(): RE6Module } works to access constructor name but not static methods
      */
-    public static registerModule(...moduleList: RE6Module[]): void {
-        for (const module of moduleList) {
-            this.getInstance().modules.set(module.getPrefix(), module);
-        }
+    public static registerModule<T>(moduleClass: any): void {
+        this.getInstance().modules.set(moduleClass.prototype.constructor.name, moduleClass.getInstance());
+    }
+
+    /**
+     * Returns a previously registered module with the specified class
+     * @param moduleClass Module class
+     */
+    public static getModule<T extends RE6Module>(moduleClass: { new(): T }): T {
+        return this.getInstance().modules.get(moduleClass.prototype.constructor.name) as T;
+    }
+
+    private getModuleByName(name: string): RE6Module {
+        return this.modules.get(name);
     }
 
     /**
      * Returns a previously registered module with the specified name
      * @param moduleName Module name
      */
-    public static getModule(moduleName: string): RE6Module {
-        return this.getInstance().modules.get(moduleName);
+    public getModule<T extends RE6Module>(moduleClass: { new(): T }): T {
+        return this.modules.get(moduleClass.prototype.constructor.name) as T;
     }
 
     /** Create the DOM for the Title Customizer page */
     private createTabPostsPage(): Form {
-        const titleCustomizer = this.modules.get("TitleCustomizer");
-        const downloadCustomizer = this.modules.get("DownloadCustomizer");
-        const miscellaneous = this.modules.get("Miscellaneous");
-        const postViewer = this.modules.get("PostViewer");
-        const formattingManager = this.modules.get("FormattingManager");
-        const blacklistEnhancer = this.modules.get("BlacklistEnhancer");
+        const titleCustomizer = this.getModule<TitleCustomizer>(TitleCustomizer);
+        const downloadCustomizer = this.getModule<DownloadCustomizer>(DownloadCustomizer);
+        const miscellaneous = this.getModule<Miscellaneous>(Miscellaneous);
+        const postViewer = this.getModule<PostViewer>(PostViewer);
+        const formattingManager = this.getModule<FormattingManager>(FormattingManager);
+        const blacklistEnhancer = this.getModule<BlacklistEnhancer>(BlacklistEnhancer);
 
         const templateIcons = new Form(
             { id: "title-template-icons", columns: 2, },
@@ -274,12 +286,12 @@ export class SettingsController {
      * @param form Miscellaneous settings form
      */
     private handleTabPostsPage(form: Form): void {
-        const titleCustomizer = this.modules.get("TitleCustomizer") as TitleCustomizer;
-        const downloadCustomizer = this.modules.get("DownloadCustomizer") as DownloadCustomizer;
-        const miscellaneous = this.modules.get("Miscellaneous") as Miscellaneous;
-        const postViewer = this.modules.get("PostViewer") as PostViewer;
-        const formattingManager = this.modules.get("FormattingManager") as FormattingManager;
-        const blacklistEnhancer = this.modules.get("BlacklistEnhancer") as BlacklistEnhancer;
+        const titleCustomizer = this.getModule<TitleCustomizer>(TitleCustomizer);
+        const downloadCustomizer = this.getModule<DownloadCustomizer>(DownloadCustomizer);
+        const miscellaneous = this.getModule<Miscellaneous>(Miscellaneous);
+        const postViewer = this.getModule<PostViewer>(PostViewer);
+        const formattingManager = this.getModule<FormattingManager>(FormattingManager);
+        const blacklistEnhancer = this.getModule<BlacklistEnhancer>(BlacklistEnhancer);
         const postsPageInput = form.getInputList();
 
         // General
@@ -340,11 +352,11 @@ export class SettingsController {
 
     /** Creates the DOM for the hotkey settings page */
     private createTabHotkeys(): Form {
-        const postViewer = this.modules.get("PostViewer");
-        const poolNavigator = this.modules.get("PoolNavigator");
-        const imageScaler = this.modules.get("ImageScaler");
-        const miscellaneous = this.modules.get("Miscellaneous");
-        const headerCustomizer = this.modules.get("HeaderCustomizer");
+        const postViewer = this.getModule<TitleCustomizer>(TitleCustomizer);
+        const poolNavigator = this.getModule<PoolNavigator>(PoolNavigator);
+        const imageScaler = this.getModule<ImageScaler>(ImageScaler);
+        const miscellaneous = this.getModule<Miscellaneous>(Miscellaneous);
+        const headerCustomizer = this.getModule<HeaderCustomizer>(HeaderCustomizer);
 
         function createLabel(settingsKey: string, label: string): FormElement {
             return {
@@ -503,11 +515,11 @@ export class SettingsController {
      */
     private handleTabHotkeys(form: Form): void {
         const hotkeyFormInput = form.getInputList();
-        const postViewer = this.modules.get("PostViewer") as PostViewer;
-        const poolNavigator = this.modules.get("PoolNavigator") as PoolNavigator;
-        const imageScaler = this.modules.get("ImageScaler") as ImageScaler;
-        const miscellaneous = this.modules.get("Miscellaneous") as Miscellaneous;
-        const headerCustomizer = this.modules.get("HeaderCustomizer") as HeaderCustomizer;
+        const postViewer = this.getModule<PostViewer>(PostViewer);
+        const poolNavigator = this.getModule<PoolNavigator>(PoolNavigator);
+        const imageScaler = this.getModule<ImageScaler>(ImageScaler);
+        const miscellaneous = this.getModule<Miscellaneous>(Miscellaneous);
+        const headerCustomizer = this.getModule<HeaderCustomizer>(HeaderCustomizer);
 
         /** Creates a listener for the hotkey input */
         function createListener(module: RE6Module, settingsKey: string, bindings = 1): void {
@@ -566,7 +578,7 @@ export class SettingsController {
 
     /** Creates the DOM for the miscellaneous settings page */
     private createTabMiscellaneous(): Form {
-        const module = this.modules.get("Miscellaneous") as Miscellaneous;
+        const module = this.getModule<Miscellaneous>(Miscellaneous);
 
         // Create the settings form
         const form = new Form(
@@ -698,7 +710,7 @@ export class SettingsController {
      * @param form Miscellaneous settings form
      */
     private handleTabMiscellaneous(form: Form): void {
-        const miscModule = this.modules.get("Miscellaneous") as Miscellaneous;
+        const miscModule = this.getModule<Miscellaneous>(Miscellaneous);
         const miscFormInput = form.getInputList();
 
         miscFormInput.get("misc-redesign-fixes").on("re621:form:input", (event, data) => {
@@ -880,7 +892,7 @@ export class SettingsController {
         const inputs = form.getInputList("checkbox");
 
         for (const formName of inputs.keys()) {
-            const module = this.modules.get(formName.split("-")[0]);
+            const module = this.getModuleByName(formName.split("-")[0]);
 
             inputs.get(formName).on("re621:form:input", (event, data) => {
                 module.pushSettings("enabled", data);

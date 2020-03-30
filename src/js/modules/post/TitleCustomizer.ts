@@ -9,21 +9,10 @@ import { PageDefintion } from "../../components/data/Page";
  */
 export class TitleCustomizer extends RE6Module {
 
-    private static instance: TitleCustomizer;
-
     private post: ViewingPost;
 
-    private constructor() {
+    public constructor() {
         super(PageDefintion.post);
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns FormattingHelper instance
-     */
-    public static getInstance(): TitleCustomizer {
-        if (this.instance == undefined) this.instance = new TitleCustomizer();
-        return this.instance;
     }
 
     /**

@@ -29,7 +29,9 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
     lastUpdate: number;
     tab: JQuery<HTMLElement>;
 
-    private static instance: ForumSubscriptions;
+    public constructor() {
+        super();
+    }
 
     public getName(): string {
         return "Forums";
@@ -92,11 +94,6 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
             enabled: true,
             data: {}
         };
-    }
-
-    public static getInstance(): ForumSubscriptions {
-        if (this.instance == undefined) this.instance = new ForumSubscriptions();
-        return this.instance;
     }
 }
 

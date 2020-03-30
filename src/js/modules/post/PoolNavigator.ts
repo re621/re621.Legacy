@@ -1,29 +1,19 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
+import { SettingsController } from "../general/SettingsController";
 
 export class PoolNavigator extends RE6Module {
-
-    private static instance: PoolNavigator;
 
     private activeNav = 0;
     private navbars: PostNav[] = [];
 
-    private constructor() {
+    public constructor() {
         super(PageDefintion.post);
         this.registerHotkeys(
             { keys: "hotkeyCycle", fnct: this.cycleNavbars },
             { keys: "hotkeyNext", fnct: this.triggerNextPost },
             { keys: "hotkeyPrev", fnct: this.triggerPrevPost },
         );
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns FormattingHelper instance
-     */
-    public static getInstance(): PoolNavigator {
-        if (this.instance == undefined) this.instance = new PoolNavigator();
-        return this.instance;
     }
 
     /**
@@ -58,30 +48,33 @@ export class PoolNavigator extends RE6Module {
 
     /** Loops through available navbars */
     private cycleNavbars(): void {
-        const navbars = PoolNavigator.getInstance().navbars,
-            active = PoolNavigator.getInstance().activeNav;
+        const poolNavigator = SettingsController.getModule<PoolNavigator>(PoolNavigator);
+        const navbars = poolNavigator.navbars,
+            active = poolNavigator.activeNav;
 
         if ((active + 1) >= navbars.length) {
             navbars[0].checkbox.click();
-            PoolNavigator.getInstance().activeNav = 0;
+            poolNavigator.activeNav = 0;
         } else {
             navbars[active + 1].checkbox.click();
-            PoolNavigator.getInstance().activeNav += 1;
+            poolNavigator.activeNav += 1;
         }
     }
 
     /** Emulates a click on the "next" button */
     private triggerNextPost(): void {
-        const navbars = PoolNavigator.getInstance().navbars,
-            active = PoolNavigator.getInstance().activeNav;
+        const poolNavigator = SettingsController.getModule<PoolNavigator>(PoolNavigator);
+        const navbars = poolNavigator.navbars,
+            active = poolNavigator.activeNav;
         if (navbars.length == 0) return;
         navbars[active].element.find("a.next").first()[0].click();
     }
 
     /** Emulates a click on the "prev" button */
     private triggerPrevPost(): void {
-        const navbars = PoolNavigator.getInstance().navbars,
-            active = PoolNavigator.getInstance().activeNav;
+        const poolNavigator = SettingsController.getModule<PoolNavigator>(PoolNavigator);
+        const navbars = poolNavigator.navbars,
+            active = poolNavigator.activeNav;
         if (navbars.length == 0) return;
         navbars[active].element.find("a.prev").first()[0].click();
     }

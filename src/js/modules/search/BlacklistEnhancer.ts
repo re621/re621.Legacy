@@ -3,6 +3,7 @@ import { PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
 import { User } from "../../components/data/User";
 import { PostFilter } from "../../components/data/PostFilter";
+import { SettingsController } from "../general/SettingsController";
 
 /* eslint-disable @typescript-eslint/camelcase */
 
@@ -14,23 +15,12 @@ declare const Danbooru;
  */
 export class BlacklistEnhancer extends RE6Module {
 
-    private static instance: BlacklistEnhancer;
-
     private $box: JQuery<HTMLElement>;
     private $toggle: JQuery<HTMLElement>;
     private $list: JQuery<HTMLElement>;
 
-    private constructor() {
+    public constructor() {
         super([PageDefintion.search, PageDefintion.post]);
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns BlacklistEnhancer instance
-     */
-    public static getInstance(): BlacklistEnhancer {
-        if (this.instance == undefined) this.instance = new BlacklistEnhancer();
-        return this.instance;
     }
 
     /**
@@ -143,7 +133,7 @@ export class BlacklistEnhancer extends RE6Module {
         }
         await User.setSettings({ blacklisted_tags: currentBlacklist.join("\n") });
         Danbooru.notice("Done!");
-        User.getInstance().addBlacklistFilter(tag);
+        SettingsController.getModule<User>(User).addBlacklistFilter(tag);
         this.applyBlacklist();
     }
 

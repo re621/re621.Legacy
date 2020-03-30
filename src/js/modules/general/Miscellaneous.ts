@@ -11,11 +11,9 @@ declare const GM_getResourceText;
  */
 export class Miscellaneous extends RE6Module {
 
-    private static instance: Miscellaneous;
-
     private redesignStylesheet: JQuery<HTMLElement>;
 
-    private constructor() {
+    public constructor() {
         super();
         this.registerHotkeys(
             { keys: "hotkeyFocusSearch", fnct: this.focusSearchbar },
@@ -23,15 +21,6 @@ export class Miscellaneous extends RE6Module {
             { keys: "hotkeyNewComment", fnct: this.openNewComment },
             { keys: "hotkeyEditPost", fnct: this.openEditTab },
         );
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns FormattingHelper instance
-     */
-    public static getInstance(): Miscellaneous {
-        if (this.instance == undefined) this.instance = new Miscellaneous();
-        return this.instance;
     }
 
     /**

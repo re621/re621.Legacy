@@ -6,6 +6,7 @@ import { PostHtml } from "../../components/api/PostHtml";
 import { InstantSearch } from "./InstantSearch";
 import { Post } from "../../components/data/Post";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
+import { SettingsController } from "../general/SettingsController";
 
 declare const Danbooru;
 
@@ -22,19 +23,8 @@ export class InfiniteScroll extends RE6Module {
     private isInProgress: boolean;
     private pagesLeft: boolean;
 
-    private static instance: InfiniteScroll;
-
-    private constructor() {
+    public constructor() {
         super(PageDefintion.search);
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns InfiniteScroll instance
-     */
-    public static getInstance(): InfiniteScroll {
-        if (this.instance == undefined) this.instance = new InfiniteScroll();
-        return this.instance;
     }
 
     /**
@@ -104,9 +94,9 @@ export class InfiniteScroll extends RE6Module {
         this.isInProgress = false;
         this.$loadingIndicator.hide();
 
-        BlacklistEnhancer.getInstance().updateSidebar();
+        SettingsController.getModule<BlacklistEnhancer>(BlacklistEnhancer).updateSidebar();
+        SettingsController.getModule<InstantSearch>(InstantSearch).applyFilter();
 
-        InstantSearch.getInstance().applyFilter();
         this.nextPageToGet++;
     }
 

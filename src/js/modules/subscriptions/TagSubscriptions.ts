@@ -28,7 +28,9 @@ export class TagSubscriptions extends RE6Module implements Subscription {
     lastUpdate: number;
     tab: JQuery<HTMLElement>;
 
-    private static instance: TagSubscriptions;
+    public constructor() {
+        super();
+    }
 
     public getName(): string {
         return "Tags";
@@ -95,11 +97,6 @@ export class TagSubscriptions extends RE6Module implements Subscription {
             enabled: true,
             data: {}
         };
-    }
-
-    public static getInstance(): TagSubscriptions {
-        if (this.instance == undefined) this.instance = new TagSubscriptions();
-        return this.instance;
     }
 }
 

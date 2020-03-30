@@ -2,6 +2,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 import { Post } from "../../components/data/Post";
 import { Form } from "../../components/structure/Form";
 import { PageDefintion } from "../../components/data/Page";
+import { SettingsController } from "../general/SettingsController";
 
 declare const Danbooru;
 
@@ -17,27 +18,16 @@ const IMAGE_SIZES = [
  */
 export class ImageScaler extends RE6Module {
 
-    private static instance: ImageScaler;
-
     private post: Post;
     private image: JQuery<HTMLElement>;
 
     private resizeSelector: JQuery<HTMLElement>;
 
-    constructor() {
+    public constructor() {
         super(PageDefintion.post);
         this.registerHotkeys(
             { keys: "hotkeyScale", fnct: () => { this.setScale(); } }
         );
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns BlacklistToggler instance
-     */
-    public static getInstance(): ImageScaler {
-        if (this.instance == undefined) this.instance = new ImageScaler();
-        return this.instance;
     }
 
     /**
@@ -109,7 +99,7 @@ export class ImageScaler extends RE6Module {
      * @param save Set to false to prevent saving the scale to settings
      */
     private setScale(size = "", save = true): void {
-        const selector = ImageScaler.getInstance().resizeSelector;
+        const selector = SettingsController.getModule<ImageScaler>(ImageScaler).resizeSelector;
         if (size === "") {
             const $next = selector.find("option:selected").next();
             if ($next.length > 0) { size = $next.val() + ""; }

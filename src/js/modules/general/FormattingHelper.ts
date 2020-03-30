@@ -47,21 +47,10 @@ const iconDefinitions = [
 
 export class FormattingManager extends RE6Module {
 
-    private static instance: FormattingManager;
-
     private formatters: FormattingHelper[] = [];
 
-    private constructor() {
+    public constructor() {
         super();
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns FormattingHelper instance
-     */
-    public static getInstance(): FormattingManager {
-        if (this.instance == undefined) this.instance = new FormattingManager();
-        return this.instance;
     }
 
     /**

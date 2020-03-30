@@ -8,25 +8,15 @@ import { PageDefintion } from "../../components/data/Page";
  */
 export class PostViewer extends RE6Module {
 
-    private static instance: PostViewer;
     private post: ViewingPost;
 
-    private constructor() {
+    public constructor() {
         super(PageDefintion.post);
         this.registerHotkeys(
             { keys: "hotkeyUpvote", fnct: this.triggerUpvote },
             { keys: "hotkeyDownvote", fnct: this.triggerDownvote },
             { keys: "hotkeyFavorite", fnct: this.toggleFavorite }
         );
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns FormattingHelper instance
-     */
-    public static getInstance(): PostViewer {
-        if (this.instance == undefined) this.instance = new PostViewer();
-        return this.instance;
     }
 
     /**
