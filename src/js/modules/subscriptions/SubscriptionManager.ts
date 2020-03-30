@@ -325,6 +325,10 @@ export class SubscriptionManager extends RE6Module {
                 }
             }
             cache[timestamp] = cache[timestamp].filter(update => !nonUniqueKeys.includes(update.id));
+            //remove empty 
+            if (cache[timestamp].length === 0) {
+                delete cache[timestamp];
+            }
         }
 
         instance.pushSettings("cache", cache);
