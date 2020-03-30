@@ -97,31 +97,44 @@ export class SettingsController {
 
     /**
      * Returns a previously registered module with the specified class
+     * This simply calls the non static variant, making the use in this class a bit more convinien
      * @param moduleClass Module class
+     * @returns the module interpreted as T (which must extend the RE6Module class)
      */
     public static getModuleWithType<T extends RE6Module>(moduleClass: { new(): T }): T {
         return this.getInstance().getModuleWithType(moduleClass) as T;
     }
 
+    /**
+     * Same as getModuleWithType except that it returns it as a RE6Module
+     * This simply calls the non static variant, making the use in this class a bit more convinien
+     * @param moduleClass 
+     * @returns RE6Module instance
+     */
     public static getModuleNoType(moduleClass: { new(): RE6Module }): RE6Module {
         return this.getInstance().getModuleNoType(moduleClass);
     }
 
+    /**
+     * Gets a module without a specific tpye from the passed class name
+     */
     private getModuleByName(name: string): RE6Module {
         return this.modules.get(name);
     }
 
     /**
-     * Returns a previously registered module with the specified name
-     * @param moduleName Module name
+     * Returns a previously registered module with the specified class
+     * @param moduleClass Module class
+     * @returns the module interpreted as T (which must extend the RE6Module class)
      */
     public getModuleWithType<T extends RE6Module>(moduleClass: { new(): T }): T {
         return this.modules.get(moduleClass.prototype.constructor.name) as T;
     }
 
     /**
-     * Returns a previously registered module with the specified name
-     * @param moduleName Module name
+     * Same as getModuleWithType except that it returns it as a RE6Module
+     * @param moduleClass 
+     * @returns RE6Module instance
      */
     public getModuleNoType(moduleClass: { new(): RE6Module }): RE6Module {
         return this.modules.get(moduleClass.prototype.constructor.name);
