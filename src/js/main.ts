@@ -32,37 +32,36 @@ import { TagSubscriptions } from "./modules/subscriptions/TagSubscriptions";
 // - settings
 import { SettingsController } from "./modules/general/SettingsController";
 import { Subscription } from "./modules/subscriptions/Subscription";
-import { RE6Module } from "./components/RE6Module";
 
 const loadOrder = [
-    { class: FormattingManager },
-    { class: HeaderCustomizer },
-    { class: ThemeCustomizer },
-    { class: Miscellaneous },
-    { class: SubscriptionManager },
-    { class: ThemeCustomizer },
+    FormattingManager,
+    HeaderCustomizer,
+    ThemeCustomizer,
+    Miscellaneous,
+    SubscriptionManager,
+    ThemeCustomizer,
 
-    { class: DownloadCustomizer },
-    { class: ImageScaler },
-    { class: PoolNavigator },
-    { class: PostViewer },
-    { class: TitleCustomizer },
+    DownloadCustomizer,
+    ImageScaler,
+    PoolNavigator,
+    PostViewer,
+    TitleCustomizer,
 
-    { class: BlacklistEnhancer },
-    { class: InfiniteScroll },
-    { class: InstantSearch },
+    BlacklistEnhancer,
+    InfiniteScroll,
+    InstantSearch,
 
-    { class: TinyAlias },
+    TinyAlias
 ];
 
 const subscriptions = [
-    { class: PoolSubscriptions },
-    { class: ForumSubscriptions },
-    { class: TagSubscriptions }
+    PoolSubscriptions,
+    ForumSubscriptions,
+    TagSubscriptions
 ];
 
 subscriptions.forEach((module) => {
-    const instance = module.class.getInstance() as Subscription;
+    const instance = module.getInstance() as Subscription;
     if (instance.canInitialize()) {
         SubscriptionManager.registerSubscriber(instance);
     }
@@ -71,7 +70,7 @@ subscriptions.forEach((module) => {
 StructureUtilities.createDOM();
 
 loadOrder.forEach((module) => {
-    SettingsController.registerModule(module.class);
+    SettingsController.registerModule(module);
 });
 
 SettingsController.getInstance().init();
