@@ -90,11 +90,11 @@ export class SettingsController {
     }
 
     /**
-     * Registers a new settings page
-     * @param page ModalContent with the page data
+     * Returns a previously registered module with the specified name
+     * @param moduleName Module name
      */
-    public static addPage(page: TabContent) {
-        //this.getInstance().modal.addPage(page);
+    public static getModule(moduleName: string) {
+        return this.getInstance().modules.get(moduleName);
     }
 
     /** Create the DOM for the Title Customizer page */
