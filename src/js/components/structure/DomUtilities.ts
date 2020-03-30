@@ -12,7 +12,7 @@ export class DomUtilities {
         GM_addStyle(GM_getResourceText("re621_styles"));
 
         // Create a modal container
-        $("<div>").attr("id", "modal-container").prependTo("body");
+        $("<div>").attr("id", "modal-container").prependTo("div#page");
 
         // Create a more sensible header structure
         const $menuContainer = $("nav#nav");
