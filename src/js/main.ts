@@ -36,8 +36,8 @@ import { RE6Module } from "./components/RE6Module";
 
 const loadOrder = [
     { class: FormattingManager },
-    { class: ThemeCustomizer },
     { class: HeaderCustomizer },
+    { class: ThemeCustomizer },
     { class: Miscellaneous },
     { class: SubscriptionManager },
     { class: ThemeCustomizer },
