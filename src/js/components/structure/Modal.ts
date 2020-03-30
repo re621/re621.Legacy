@@ -51,7 +51,7 @@ export class Modal {
             });
 
         if (config.fixed) {
-            let widget = this.$modal.dialog("widget");
+            const widget = this.$modal.dialog("widget");
             widget.addClass("modal-fixed");
 
             this.$modal.dialog(
@@ -69,11 +69,11 @@ export class Modal {
             widget.draggable("option", "containment", "window");
             widget.resizable("option", "containment", "window");
 
-            let timer: number = 0,
+            let timer = 0,
                 left = widget.css("left"),
                 top = widget.css("top");
 
-            let style = $("<style>")
+            const style = $("<style>")
                 .attr("id", "style-" + this.uid)
                 .attr("type", "text/css")
                 .html(`
@@ -84,7 +84,7 @@ export class Modal {
                 )
                 .appendTo("head");
 
-            $(window).scroll((event) => {
+            $(window).scroll(() => {
                 if (timer) clearTimeout(timer);
                 else {
                     left = widget.css("left");
@@ -116,7 +116,7 @@ export class Modal {
     }
 
     /** Returns this modal's unique ID */
-    public getUID() {
+    public getUID(): number {
         return this.uid;
     }
 
@@ -124,7 +124,7 @@ export class Modal {
      * Parses the configuration and sets the default values for missing entries
      * @param config Configuration to parse
      */
-    private validateConfig(config: ModalConfig) {
+    private validateConfig(config: ModalConfig): ModalConfig {
         if (config.title === undefined) config.title = "Dialog";
         if (config.content === undefined) config.content = $("");
         if (config.triggers === undefined) config.triggers = [];
@@ -149,7 +149,7 @@ export class Modal {
      * Appends more content to the modal
      * @param $content Content to add
      */
-    public addContent($content: JQuery<HTMLElement>) {
+    public addContent($content: JQuery<HTMLElement>): void {
         this.$modal.append($content);
     }
 
@@ -157,7 +157,7 @@ export class Modal {
      * Listens to the specified element in order to trigger the modal
      * @param trigger Element-event pair to listen to
      */
-    public registerTrigger(trigger: ModalTrigger) {
+    public registerTrigger(trigger: ModalTrigger): void {
 
         if (trigger.event === undefined) trigger.event = "click";
         if (this.triggers.length == 0) this.$activeTrigger = trigger.element;
@@ -166,7 +166,7 @@ export class Modal {
         trigger.element.on(trigger.event, (event) => {
             if (this.isDisabled()) return;
 
-            let $target = $(event.currentTarget);
+            const $target = $(event.currentTarget);
             if (this.config.triggerMulti && !this.$activeTrigger.is($target) && this.isOpen()) {
                 this.toggle(); // Update the modal window instead of toggling
             }
@@ -178,25 +178,25 @@ export class Modal {
         });
     }
 
-    public getElement() { return this.$modal; }
+    public getElement(): JQuery<HTMLElement> { return this.$modal; }
 
     /** Togle the modal visibility */
-    public toggle() {
+    public toggle(): void {
         if (this.isOpen()) this.close();
         else this.open();
     }
-    public isOpen() { return this.$modal.dialog("isOpen"); }
-    public open() { return this.$modal.dialog("open"); }
-    public close() { return this.$modal.dialog("close"); }
+    public isOpen(): boolean { return this.$modal.dialog("isOpen"); }
+    public open(): JQuery<HTMLElement> { return this.$modal.dialog("open"); }
+    public close(): JQuery<HTMLElement> { return this.$modal.dialog("close"); }
 
-    public isDisabled() { return this.config.disabled; }
-    public enable() { this.config.disabled = false; }
-    public disable() { this.config.disabled = true; }
+    public isDisabled(): boolean { return this.config.disabled; }
+    public enable(): void { this.config.disabled = false; }
+    public disable(): void { this.config.disabled = true; }
 
     /**
      * Completely and irreversibly destorys the modal window
      */
-    public destroy() {
+    public destroy(): void {
         this.$modal.dialog("destroy");
         this.$modal.remove();
     }
@@ -205,37 +205,37 @@ export class Modal {
      * Returns the element that triggered the modal
      * @returns JQuery<HTMLElement> trigger
      */
-    public getActiveTrigger() {
+    public getActiveTrigger(): JQuery<HTMLElement> {
         return this.$activeTrigger;
     }
 
 }
 
 interface ModalConfig {
-    title?: string,
-    content?: JQuery<HTMLElement>,
-    triggers?: ModalTrigger[],
-    triggerMulti?: boolean,
+    title?: string;
+    content?: JQuery<HTMLElement>;
+    triggers?: ModalTrigger[];
+    triggerMulti?: boolean;
 
-    escapable?: boolean,
-    resizable?: boolean,
-    draggable?: boolean,
+    escapable?: boolean;
+    resizable?: boolean;
+    draggable?: boolean;
 
-    minWidth?: number,
-    minHeight?: number,
-    fixed?: boolean,
-    reserveHeight?: boolean,
+    minWidth?: number;
+    minHeight?: number;
+    fixed?: boolean;
+    reserveHeight?: boolean;
 
-    disabled?: boolean,
+    disabled?: boolean;
     position?: {
-        at: string,
-        my: string,
+        at: string;
+        my: string;
     };
 }
 
 interface ModalTrigger {
     /** Query selector containing a trigger - or a collection of triggers */
-    element: JQuery<HTMLElement>,
+    element: JQuery<HTMLElement>;
     /** Event that the trigger should respond to */
-    event?: string,
+    event?: string;
 }

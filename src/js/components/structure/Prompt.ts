@@ -5,12 +5,12 @@ import { Modal } from "./Modal";
  */
 export class Prompt extends Modal {
 
-    private promise;
+    private promise: Promise<string | number | string[]>;
 
     private $form: JQuery<HTMLElement>;
     private $input: JQuery<HTMLElement>;
 
-    constructor(title: string = "Prompt") {
+    constructor(title = "Prompt") {
         super({
             title: title,
             fixed: true,
@@ -27,11 +27,12 @@ export class Prompt extends Modal {
                 event.preventDefault();
                 this.destroy();
                 resolve(this.$input.val());
+                reject();
             });
         });
     }
 
-    private createForm() {
+    private createForm(): void {
         this.$form = $("<form>")
             .addClass("prompt-input");
 
@@ -45,7 +46,7 @@ export class Prompt extends Modal {
             .appendTo(this.$form);
     }
 
-    public getPromise() {
+    public getPromise(): Promise<string | number | string[]> {
         return this.promise;
     }
 }

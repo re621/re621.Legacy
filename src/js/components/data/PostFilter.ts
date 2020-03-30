@@ -16,7 +16,7 @@ export class PostFilter {
         this.createPostFilter(input);
     }
 
-    private createPostFilter(input: string) {
+    private createPostFilter(input: string): void {
         const seperatedFilters = input.split(" ");
         for (let filter of seperatedFilters) {
             //Remove dash from filter, if it starts with one
@@ -52,7 +52,7 @@ export class PostFilter {
      * should be false for newly added posts, and true otherwise
      * @returns wether or not the filter matches the post
      */
-    public addPost(post: Post, shouldDecrement: boolean) {
+    public addPost(post: Post, shouldDecrement: boolean): boolean {
         let result = true;
         for (const filter of this.entries) {
             //If the result is already negative, bail. All filters must match
@@ -81,7 +81,7 @@ export class PostFilter {
                     result = this.tagsMatchesFilter(post, content);
                     break;
                 case PostFilterType.Uploader:
-                    const uploader = content
+                    const uploader = content;
                     result = post.getUploaderID() === parseInt(uploader) || post.getUploaderName() === uploader;
                     break;
             }
@@ -90,7 +90,7 @@ export class PostFilter {
         }
         if (result === true) {
             this.matchesCount++;
-            this.matchesIds.add(post.getId())
+            this.matchesIds.add(post.getId());
         } else if (result === false && shouldDecrement) {
             this.matchesCount--;
             this.matchesIds.delete(post.getId());
@@ -98,11 +98,11 @@ export class PostFilter {
         return result;
     }
 
-    public matchesPost(post: Post) {
+    public matchesPost(post: Post): boolean {
         return this.enabled && this.matchesIds.has(post.getId());
     }
 
-    public compareNumbers(a: number, b: number, mode: Comparable) {
+    public compareNumbers(a: number, b: number, mode: Comparable): boolean {
         switch (mode) {
             case Comparable.Equals:
                 return a === b;
@@ -117,7 +117,7 @@ export class PostFilter {
         }
     }
 
-    public tagsMatchesFilter(post: Post, filter: string) {
+    public tagsMatchesFilter(post: Post, filter: string): boolean {
         if (filter.includes("*")) {
             const regex = Tag.escapeSearchToRegex(filter);
             return regex.test(post.getTags());
@@ -135,31 +135,31 @@ export class PostFilter {
     /**
      * Returns how many posts are affected by this filter
      */
-    public getMatches() {
+    public getMatches(): number {
         return this.matchesCount;
     }
 
     /**
      * Enables/Disables the filter
      */
-    public toggleEnabled() {
+    public toggleEnabled(): void {
         this.enabled = !this.enabled;
     }
 
-    public setEnabled(enabled: boolean) {
+    public setEnabled(enabled: boolean): void {
         this.enabled = enabled;
     }
 
-    public isEnabled() {
+    public isEnabled(): boolean {
         return this.enabled;
     }
 }
 
 export interface SinglePostFilter {
-    type: PostFilterType
-    content: string,
-    invert: boolean,
-    comparable: Comparable
+    type: PostFilterType;
+    content: string;
+    invert: boolean;
+    comparable: Comparable;
 }
 
 export enum PostFilterType {

@@ -1,4 +1,4 @@
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
 import { PostFilter } from "../../components/data/PostFilter";
@@ -22,7 +22,7 @@ export class InstantSearch extends RE6Module {
      * Returns a singleton instance of the class
      * @returns InstantSearch instance
      */
-    public static getInstance() {
+    public static getInstance(): InstantSearch {
         if (this.instance == undefined) this.instance = new InstantSearch();
         return this.instance;
     }
@@ -31,7 +31,7 @@ export class InstantSearch extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings() {
+    protected getDefaultSettings(): Settings {
         return { enabled: true };
     }
 
@@ -39,24 +39,23 @@ export class InstantSearch extends RE6Module {
      * Creates the module's structure.  
      * Should be run immediately after the constructor finishes.
      */
-    public create() {
+    public create(): void {
         if (!this.canInitialize()) return;
         super.create();
 
         this.createDOM();
-        let typingTimeout: number;
-        let doneTyping = 500;
 
+        let typingTimeout: number;
         this.$searchbox.on("input", () => {
             clearTimeout(typingTimeout);
-            typingTimeout = window.setTimeout(() => { this.applyFilter(); }, doneTyping);
+            typingTimeout = window.setTimeout(() => { this.applyFilter(); }, 500);
         });
         //The user might have paginated, which means the input is not empty,
         //but there was no input event yet.
         this.$searchbox.trigger("input");
     }
 
-    public destroy() {
+    public destroy(): void {
         if (!this.isInitialized()) return;
         super.destroy();
         this.$searchbox.val("");
@@ -64,7 +63,7 @@ export class InstantSearch extends RE6Module {
         $("section#re-instantsearch").remove();
     }
 
-    public applyFilter() {
+    public applyFilter(): void {
         const filterText = this.$searchbox.val().toString().trim();
         const filter = new PostFilter(filterText);
         sessionStorage.setItem("re-instantsearch", filterText);
@@ -81,7 +80,7 @@ export class InstantSearch extends RE6Module {
         }
     }
 
-    protected createDOM() {
+    protected createDOM(): void {
         const $section = $("<section>").attr("id", "re-instantsearch");
         this.$searchbox = $("<input>").
             attr("id", "re-instantsearch-input").

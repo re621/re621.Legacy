@@ -72,9 +72,9 @@ export class Post {
     /**
      * Fetches the posts from the current page.
      */
-    public static fetchPosts() {
+    public static fetchPosts(): Post[] {
         if (this.initalPosts === undefined) {
-            let imageContainer = $("#image-container");
+            const imageContainer = $("#image-container");
             this.initalPosts = [];
             if (imageContainer.length === 0) {
                 $("#posts-container").children(".post-preview").each((index, element) => {
@@ -95,7 +95,7 @@ export class Post {
      * Adds a post which will now be returned with fetchPosts
      * @param post the post to appened
      */
-    public static appendPost(post) {
+    public static appendPost(post): void {
         this.addedPosts.push(post);
     }
 
@@ -103,16 +103,16 @@ export class Post {
      * Creates a ViewingPost if you are on a post page (https://e621.net/posts/:id)
      * @returns the current ViewingPost if it exists, undefined otherwise
      */
-    public static getViewingPost() {
+    public static getViewingPost(): ViewingPost {
         const posts = this.fetchPosts();
         if (posts[0] instanceof ViewingPost) {
-            return <ViewingPost>posts[0];
+            return posts[0] as ViewingPost;
         } else {
             return undefined;
         }
     }
 
-    public static createPreviewUrlFromMd5(md5: string) {
+    public static createPreviewUrlFromMd5(md5: string): string {
         return `https://static1.e621.net/data/preview/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`;
     }
 
@@ -120,14 +120,14 @@ export class Post {
      * Hides or shows the post, depending on the state
      * Show if blacklist is not active, hide if blacklist is active and post matches blacklist
      */
-    public applyBlacklist() {
+    public applyBlacklist(): void {
         this.matchesBlacklist() ? this.hide() : this.show();
     }
 
     /**
      * Checks if the post is found in an activated blacklist filter
      */
-    private matchesBlacklist() {
+    private matchesBlacklist(): boolean {
         for (const filter of User.getBlacklist().values()) {
             if (filter.matchesPost(this)) {
                 return true;
@@ -140,7 +140,7 @@ export class Post {
      * Hides the post and removes its src attribute, to prevent
      * loading of the image, if it's not already appended
      */
-    public hide() {
+    public hide(): void {
         const $img = this.element.find("img");
         $img.attr("src", "/images/blacklisted-preview.png");
         this.element.addClass("filtered");
@@ -149,7 +149,7 @@ export class Post {
     /**
      * Shows the post and restores the src attribute, if the blacklist allows it
      */
-    public show() {
+    public show(): void {
         if (this.matchesBlacklist()) {
             return;
         }
@@ -162,27 +162,27 @@ export class Post {
      * Returns the JQuery Object for the post
      * @returns JQuery<HTMLElement> DOM Element
      */
-    public getDomElement() {
+    public getDomElement(): JQuery<HTMLElement> {
         return this.element;
     }
 
-    public getId() { return this.id; }
-    public getTags() { return this.tags; }
-    public getRating() { return this.rating; }
-    public getFavCount() { return this.favorites; }
-    public getScoreCount() { return this.score; }
+    public getId(): number { return this.id; }
+    public getTags(): string { return this.tags; }
+    public getRating(): PostRating { return this.rating; }
+    public getFavCount(): number { return this.favorites; }
+    public getScoreCount(): number { return this.score; }
 
-    public getImageURL() { return this.fileURL; }
-    public getSampleURL() { return this.sampleURL; }
-    public getPreviewURL() { return this.previewURL; }
+    public getImageURL(): string { return this.fileURL; }
+    public getSampleURL(): string { return this.sampleURL; }
+    public getPreviewURL(): string { return this.previewURL; }
 
-    public getFileExtension() { return this.fileExtension; }
+    public getFileExtension(): string { return this.fileExtension; }
 
-    public getUploaderID() { return this.uploaderID; }
-    public getUploaderName() { return this.uploaderName; }
+    public getUploaderID(): number { return this.uploaderID; }
+    public getUploaderName(): string { return this.uploaderName; }
 
-    public hasSound() { return this.sound; }
-    public getFlags() { return this.flags; }
+    public hasSound(): boolean { return this.sound; }
+    public getFlags(): string { return this.flags; }
 }
 
 
@@ -218,7 +218,7 @@ export class ViewingPost extends Post {
         this.loreTags = this.getAllFromTaggroup("lore");
     }
 
-    private getAllFromTaggroup(taggroup: string) {
+    private getAllFromTaggroup(taggroup: string): string[] {
         const result = [];
         for (const element of $(`#tag-list .${taggroup}-tag-list`).children()) {
             result.push($(element).find(".search-tag").text().replace(/ /g, "_"));
@@ -228,21 +228,21 @@ export class ViewingPost extends Post {
     /**
      * Returns true if the post is favorited
      */
-    public getIsFaved() {
+    public getIsFaved(): boolean {
         return this.isFaved;
     }
 
     /**
      * Returns true if the post is upvoted
      */
-    public getIsUpvoted() {
+    public getIsUpvoted(): boolean {
         return this.isUpvoted;
     }
 
     /**
      * Returns true if the post is downvoted
      */
-    public getIsDownvoted() {
+    public getIsDownvoted(): boolean {
         return this.isDownvoted;
     }
 
@@ -261,7 +261,7 @@ export enum PostRating {
 }
 
 export namespace PostRating {
-    export function fromValue(value: string) {
+    export function fromValue(value: string): PostRating {
         for (const key of Object.keys(PostRating)) {
             if (PostRating[key] === value) {
                 return PostRating[key];
