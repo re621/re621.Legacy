@@ -311,6 +311,22 @@ export class SubscriptionManager extends RE6Module {
         if (Object.keys(cache).length > this.historySize) {
             delete cache[Math.min(...Object.keys(cache).map(e => parseInt(e)))];
         }
+
+        //remove all non unique updates
+        //forumposts may get replies all the time, only the recent one is important
+        const uniqueKeys = [];
+        const nonUniqueKeys = [];
+        for (const timestamp of Object.keys(cache).sort((a, b) => parseInt(b) - parseInt(a))) {
+            for (const update of cache[timestamp]) {
+                if (uniqueKeys.indexOf(update.id) === -1) {
+                    uniqueKeys.push(update.id);
+                } else {
+                    nonUniqueKeys.push(update.id);
+                }
+            }
+            cache[timestamp] = cache[timestamp].filter(update => !nonUniqueKeys.includes(update.id));
+        }
+
         instance.pushSettings("cache", cache);
         return cache;
 
