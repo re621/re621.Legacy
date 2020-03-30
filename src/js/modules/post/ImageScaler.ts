@@ -3,6 +3,8 @@ import { Post } from "../../components/data/Post";
 import { Form } from "../../components/structure/Form";
 import { PageDefintion } from "../../components/data/Page";
 
+declare var Danbooru;
+
 const IMAGE_SIZES = [
     { value: "sample", name: "Sample" },
     { value: "fit-vertical", name: "Fit Vertically" },
@@ -65,7 +67,7 @@ export class ImageScaler extends RE6Module {
         this.resizeSelector.getInputList().get("scale").change(event => {
             let size = $(event.target).val() + "";
             this.setImageSize(size);
-            this.pushSettings("size", size)
+            this.pushSettings("size", size);
         });
 
         this.registerHotkeys();
@@ -107,7 +109,7 @@ export class ImageScaler extends RE6Module {
                     value: `<a href="` + this.post.getImageURL() + `" id="fullsize-image">Fullscreen</a>`,
                 }
             ]
-        )
+        );
 
         resizeButtonContainer.append(this.resizeSelector.get());
     }
@@ -120,13 +122,18 @@ export class ImageScaler extends RE6Module {
         this.image.removeClass();
         this.image.parent().addClass("loading");
 
+        this.image.on("load", () => {
+            Danbooru.Note.Box.scale_all();
+            this.image.parent().removeClass("loading");
+        });
+
         switch (size) {
             case ("sample"): {
                 this.image.attr("src", this.post.getSampleURL());
                 break;
             }
             case ("fit-vertical"): {
-                this.image.addClass("re621-fit-vertical")
+                this.image.addClass("re621-fit-vertical");
                 if (this.image.attr("src") !== this.post.getImageURL()) {
                     this.image.attr("src", this.post.getImageURL());
                 } else { this.image.parent().removeClass("loading"); }
@@ -147,10 +154,7 @@ export class ImageScaler extends RE6Module {
             }
         }
 
-        this.image.on("load", () => {
-            this.image.resize();
-            this.image.parent().removeClass("loading");
-        });
+        Danbooru.Note.Box.scale_all();
     }
 
 }
