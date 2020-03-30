@@ -549,7 +549,7 @@ export class SettingsController {
         const headerCustomizer = this.getModuleNoType(HeaderCustomizer);
 
         /** Creates a listener for the hotkey input */
-        function createListener(module: RE6Module, settingsKey: string, bindings = 1): void {
+        function createListener(module: RE6Module, settingsKey: string, bindings = 2): void {
             for (let i = 0; i < bindings; i++) {
                 hotkeyFormInput.get(settingsKey + "-input-" + i).on("re621:form:input", (event, newKey, oldKey) => {
                     if (i === 0) {
@@ -570,37 +570,37 @@ export class SettingsController {
         }
 
         // Listing
-        createListener(miscellaneous, "hotkeyFocusSearch", 2);
+        createListener(miscellaneous, "hotkeyFocusSearch");
 
         // Posts
         // - Voting
-        createListener(postViewer, "hotkeyUpvote", 2);
+        createListener(postViewer, "hotkeyUpvote");
 
-        createListener(postViewer, "hotkeyDownvote", 2);
-        createListener(postViewer, "hotkeyFavorite", 2);
+        createListener(postViewer, "hotkeyDownvote");
+        createListener(postViewer, "hotkeyFavorite");
 
         // - Navigation
-        createListener(poolNavigator, "hotkeyPrev", 2);
-        createListener(poolNavigator, "hotkeyNext", 2);
-        createListener(poolNavigator, "hotkeyCycle", 2);
+        createListener(poolNavigator, "hotkeyPrev");
+        createListener(poolNavigator, "hotkeyNext");
+        createListener(poolNavigator, "hotkeyCycle");
 
         // - Scaling
-        createListener(imageScaler, "hotkeyScale", 2);
+        createListener(imageScaler, "hotkeyScale");
 
         // Comments
-        createListener(miscellaneous, "hotkeyNewComment", 2);
-        createListener(miscellaneous, "hotkeyEditPost", 2);
+        createListener(miscellaneous, "hotkeyNewComment");
+        createListener(miscellaneous, "hotkeyEditPost");
 
         // Tabs
-        createListener(headerCustomizer, "hotkeyTab1", 2);
-        createListener(headerCustomizer, "hotkeyTab2", 2);
-        createListener(headerCustomizer, "hotkeyTab3", 2);
-        createListener(headerCustomizer, "hotkeyTab4", 2);
-        createListener(headerCustomizer, "hotkeyTab5", 2);
-        createListener(headerCustomizer, "hotkeyTab6", 2);
-        createListener(headerCustomizer, "hotkeyTab7", 2);
-        createListener(headerCustomizer, "hotkeyTab8", 2);
-        createListener(headerCustomizer, "hotkeyTab9", 2);
+        createListener(headerCustomizer, "hotkeyTab1");
+        createListener(headerCustomizer, "hotkeyTab2");
+        createListener(headerCustomizer, "hotkeyTab3");
+        createListener(headerCustomizer, "hotkeyTab4");
+        createListener(headerCustomizer, "hotkeyTab5");
+        createListener(headerCustomizer, "hotkeyTab6");
+        createListener(headerCustomizer, "hotkeyTab7");
+        createListener(headerCustomizer, "hotkeyTab8");
+        createListener(headerCustomizer, "hotkeyTab9");
     }
 
     /** Creates the DOM for the miscellaneous settings page */
