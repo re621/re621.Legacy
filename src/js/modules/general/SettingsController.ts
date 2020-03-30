@@ -89,7 +89,7 @@ export class SettingsController {
      * @todo any parameter is not correct here but I couldn't figure the right types out
      *  { new(): RE6Module } works to access constructor name but not static methods
      */
-    public static registerModule<T>(moduleClass: any): void {
+    public static registerModule(moduleClass: any): void {
         const moduleInstance = moduleClass.getInstance();
         moduleInstance.create();
         this.getInstance().modules.set(moduleClass.prototype.constructor.name, moduleInstance);
