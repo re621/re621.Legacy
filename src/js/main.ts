@@ -55,18 +55,18 @@ const loadOrder = [
     { class: TinyAlias },
 ];
 
-// const subscriptions = [
-//     { class: PoolSubscriptions },
-//     { class: ForumSubscriptions },
-//     { class: TagSubscriptions }
-// ];
+const subscriptions = [
+    { class: PoolSubscriptions },
+    { class: ForumSubscriptions },
+    { class: TagSubscriptions }
+];
 
-// subscriptions.forEach((module) => {
-//     const instance = module.class.getInstance() as Subscription;
-//     if (instance.canInitialize()) {
-//         SubscriptionManager.registerSubscriber(instance);
-//     }
-// });
+subscriptions.forEach((module) => {
+    const instance = module.class.getInstance() as Subscription;
+    if (instance.canInitialize()) {
+        SubscriptionManager.registerSubscriber(instance);
+    }
+});
 
 StructureUtilities.createDOM();
 
