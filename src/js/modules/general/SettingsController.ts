@@ -762,7 +762,10 @@ export class SettingsController extends RE6Module {
                 const poolSubs = PoolSubscriptions.getInstance(),
                     poolData: ExtraInfo = poolSubs.fetchSettings("data", true);
                 for (const entry of parsedData[2]) {
-                    poolData[entry["id"]] = { md5s: entry["thumb"]["url"].substr(6, 32) };
+                    poolData[entry["id"]] = {
+                        md5: entry["thumb"]["url"].substr(6, 32),
+                        lasdID: entry["last"],
+                    };
                 }
                 poolSubs.pushSettings("data", poolData);
 
