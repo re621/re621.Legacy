@@ -20,7 +20,7 @@ export class Tag {
      * Does NOT take into consideration the tag type
      * In this functions eyes a general tag will also be an artist tag
      */
-    public static isArist(tag: string) {
+    public static isArist(tag: string): boolean {
         return Tag.nonArtistTags.indexOf(tag) === -1;
     }
 
@@ -32,7 +32,7 @@ export class Tag {
      * This ways if you have a space seperated string of tags this function will tell you wether or not the filter matches
      * @param string 
      */
-    public static escapeSearchToRegex(string: string) {
+    public static escapeSearchToRegex(string: string): RegExp {
         return new RegExp(string.replace(/[-\/\\^$+?.()|[\]{}]/g, "\\$&").replace(/\*/g, "[\\S]\*\?"));
     }
 }

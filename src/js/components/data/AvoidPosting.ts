@@ -1,4 +1,5 @@
-declare var GM_getResourceText;
+// eslint-disable-next-line @typescript-eslint/camelcase
+declare const GM_getResourceText;
 
 /**
  * Manages the Avoid Posted list
@@ -14,16 +15,16 @@ export class AvoidPosting {
     }
 
     /** Returns a new instance of the current object */
-    private static getInstance() {
+    private static getInstance(): AvoidPosting {
         if (this.instance === undefined) this.instance = new AvoidPosting();
         return this.instance;
     }
 
-    public static contains(name: string) {
+    public static contains(name: string): boolean {
         return this.getInstance().data[name] !== undefined;
     }
 
-    public static get(name: string) {
+    public static get(name: string): {} {
         return this.getInstance().data[name];
     }
 

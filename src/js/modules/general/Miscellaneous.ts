@@ -1,10 +1,12 @@
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { Api } from "../../components/api/Api";
 import { ApiForumPost } from "../../components/api/responses/ApiForum";
 
-declare var GM_addStyle;
-declare var GM_getResourceText;
+// eslint-disable-next-line @typescript-eslint/camelcase
+declare const GM_addStyle;
+// eslint-disable-next-line @typescript-eslint/camelcase
+declare const GM_getResourceText;
 
 /**
  * Miscellaneous functionality that does not require a separate module
@@ -18,10 +20,10 @@ export class Miscellaneous extends RE6Module {
     private constructor() {
         super();
         this.registerHotkeys(
-            { keys: "hotkey_focussearch", fnct: this.focusSearchbar },
-            { keys: "hotkey_randompost", fnct: this.randomPost },
-            { keys: "hotkey_newcomment", fnct: this.openNewComment },
-            { keys: "hotkey_editpost", fnct: this.openEditTab },
+            { keys: "hotkeyFocusSearch", fnct: this.focusSearchbar },
+            { keys: "hotkeyRandomPost", fnct: this.randomPost },
+            { keys: "hotkeyNewComment", fnct: this.openNewComment },
+            { keys: "hotkeyEditPost", fnct: this.openEditTab },
         );
     }
 
@@ -29,7 +31,7 @@ export class Miscellaneous extends RE6Module {
      * Returns a singleton instance of the class
      * @returns FormattingHelper instance
      */
-    public static getInstance() {
+    public static getInstance(): Miscellaneous {
         if (this.instance == undefined) this.instance = new Miscellaneous();
         return this.instance;
     }
@@ -38,13 +40,13 @@ export class Miscellaneous extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings() {
+    protected getDefaultSettings(): Settings {
         return {
             enabled: true,
-            hotkey_focussearch: "q",
-            hotkey_randompost: "r",
-            hotkey_newcomment: "n",
-            hotkey_editpost: "e",
+            hotkeyFocusSearch: "q",
+            hotkeyRandomPost: "r",
+            hotkeyNewComment: "n",
+            hotkeyEditPost: "e",
             removeSearchQueryString: true,
             loadRedesignFixes: true,
             improveTagCount: true,
@@ -55,7 +57,7 @@ export class Miscellaneous extends RE6Module {
      * Creates the module's structure.  
      * Should be run immediately after the constructor finishes.
      */
-    public create() {
+    public create(): void {
         if (!this.canInitialize()) return;
         super.create();
 
@@ -85,7 +87,7 @@ export class Miscellaneous extends RE6Module {
     }
 
     /** Emulates the clicking on "New Comment" link */
-    private openNewComment() {
+    private openNewComment(): void {
         if (Page.matches(PageDefintion.post)) {
             $("menu#post-sections > li > a[href$=comments]")[0].click();
             $("a.expand-comment-response")[0].click();
@@ -93,7 +95,7 @@ export class Miscellaneous extends RE6Module {
     }
 
     /** Emulated clicking on "Edit" tab */
-    private openEditTab() {
+    private openEditTab(): void {
         if (Page.matches(PageDefintion.post)) {
             $("menu#post-sections > li > a[href$=edit]")[0].click();
         }
@@ -102,7 +104,7 @@ export class Miscellaneous extends RE6Module {
     /**
      * Removes the search query from the address bar
      */
-    private removeSearchQueryString() {
+    private removeSearchQueryString(): void {
         Page.removeQueryParameter("q");
     }
 
@@ -110,26 +112,25 @@ export class Miscellaneous extends RE6Module {
      * Loads the Redesign Fixes stylesheet
      * @param enabled Should the stylesheet be enabled
      */
-    private loadRedesignFixes(enabled: boolean = true) {
+    private loadRedesignFixes(enabled = true): void {
         this.redesignStylesheet = $(GM_addStyle(GM_getResourceText("redesignFixes")));
         if (!enabled) { this.disableRedesignFixes(); }
     }
 
     /** Enable the redesign stylesheet */
-    public enableRedesignFixes() {
+    public enableRedesignFixes(): void {
         this.redesignStylesheet.removeAttr("media");
     }
 
     /** Disable the redesign stylesheet */
-    public disableRedesignFixes() {
+    public disableRedesignFixes(): void {
         this.redesignStylesheet.attr("media", "max-width: 1px");
     }
 
     /**
      * Replaces the tag estimates with the real count
      */
-    private async improveTagCount() {
-        const $tags = $(".post-count");
+    private async improveTagCount(): Promise<void> {
         $("#tag-box > ul > li span.post-count, #tag-list > ul > li span.post-count").each(function (index, element) {
             const $container = $(element);
             const tagCount = $container.attr("data-count");
@@ -138,29 +139,29 @@ export class Miscellaneous extends RE6Module {
     }
 
     /** If the searchbar is empty, focuses on it. */
-    private autoFocusSearchBar() {
-        let searchbox = $("section#search-box input");
+    private autoFocusSearchBar(): void {
+        const searchbox = $("section#search-box input");
         if (searchbox.val() == "") searchbox.focus();
     }
 
     /** Sets the focus on the search bar */
-    private focusSearchbar(event) {
+    private focusSearchbar(event): void {
         event.preventDefault();
         $("section#search-box input").focus();
     }
 
     /** Triggers a random post with the current tags */
-    private randomPost() {
+    private randomPost(): void {
         $("a#random-post")[0].click();
     }
 
     /**
      * Handles the "Reply" button functionality
      */
-    private handleQuoteButton() {
+    private handleQuoteButton(): void {
         if (Page.matches(PageDefintion.forum)) {
             $(".forum-post-reply-link").each(function (index, element) {
-                let $newLink = $("<a>")
+                const $newLink = $("<a>")
                     .attr("href", "#")
                     .addClass("re621-forum-post-reply")
                     .html("Respond");
@@ -169,12 +170,12 @@ export class Miscellaneous extends RE6Module {
 
             $(".re621-forum-post-reply").on('click', (event) => {
                 event.preventDefault();
-                let $parent = $(event.target).parents("article.forum-post");
+                const $parent = $(event.target).parents("article.forum-post");
                 this.quote($parent, "/forum_posts/" + $parent.data("forum-post-id") + ".json", $("#forum_post_body"), $("a#new-response-link"));
             });
         } else if (Page.matches(PageDefintion.post)) {
             $(".comment-reply-link").each(function (index, element) {
-                let $newLink = $("<a>")
+                const $newLink = $("<a>")
                     .attr("href", "#")
                     .addClass("re621-comment-reply")
                     .html("Respond");
@@ -183,31 +184,30 @@ export class Miscellaneous extends RE6Module {
 
             $(".re621-comment-reply").on('click', (event) => {
                 event.preventDefault();
-                let $parent = $(event.target).parents("article.comment");
+                const $parent = $(event.target).parents("article.comment");
                 this.quote($parent, "/comments/" + $parent.data("comment-id") + ".json", $("#comment_body_for_"), $("a.expand-comment-response"));
             });
         }
     }
 
-    private async quote($parent: JQuery<HTMLElement>, request_url: string, $textarea: JQuery<HTMLElement>, $responseButton: JQuery<HTMLElement>) {
-        let stripped_body = "",
-            selection = window.getSelection().toString();
-        console.log(request_url);
+    private async quote($parent: JQuery<HTMLElement>, requestURL: string, $textarea: JQuery<HTMLElement>, $responseButton: JQuery<HTMLElement>): Promise<void> {
+        let strippedBody = "";
+        const selection = window.getSelection().toString();
 
         if (selection === "") {
-            let jsonData: ApiForumPost = await Api.getJson(request_url);
-            stripped_body = jsonData.body.replace(/\[quote\](?:.|\n|\r)+?\[\/quote\][\n\r]*/gm, "");
-            stripped_body = `[quote]"` + $parent.data('creator') + `":/user/show/` + $parent.data('creator-id') + `said:\n` + stripped_body + `\n[/quote]`;
+            const jsonData: ApiForumPost = await Api.getJson(requestURL);
+            strippedBody = jsonData.body.replace(/\[quote\](?:.|\n|\r)+?\[\/quote\][\n\r]*/gm, "");
+            strippedBody = `[quote]"` + $parent.data('creator') + `":/user/show/` + $parent.data('creator-id') + `said:\n` + strippedBody + `\n[/quote]`;
         } else {
-            stripped_body = `[quote]"` + $parent.data('creator') + `":/user/show/` + $parent.data('creator-id') + `said:\n` + selection + `\n[/quote]`;
+            strippedBody = `[quote]"` + $parent.data('creator') + `":/user/show/` + $parent.data('creator-id') + `said:\n` + selection + `\n[/quote]`;
         }
 
-        if (($textarea.val() + "").length > 0) { stripped_body = "\n\n" + stripped_body; }
+        if (($textarea.val() + "").length > 0) { strippedBody = "\n\n" + strippedBody; }
 
         $responseButton[0].click();
         $textarea.scrollTop($textarea[0].scrollHeight);
 
-        let newVal = $textarea.val() + stripped_body;
+        const newVal = $textarea.val() + strippedBody;
         $textarea.focus().val("").val(newVal);
     }
 

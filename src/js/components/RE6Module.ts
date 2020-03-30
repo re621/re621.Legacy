@@ -1,8 +1,10 @@
 import { Page } from "./data/Page";
 import { Hotkeys } from "./data/Hotkeys";
 
-declare var GM_getValue;
-declare var GM_setValue;
+// eslint-disable-next-line @typescript-eslint/camelcase
+declare const GM_getValue;
+// eslint-disable-next-line @typescript-eslint/camelcase
+declare const GM_setValue;
 
 /**
  * Abstract class that other modules extend.  
@@ -10,7 +12,7 @@ declare var GM_setValue;
  */
 export class RE6Module {
 
-    private settings: any;
+    private settings: Settings;
     private readonly prefix: string = this.constructor.name;
 
     private enabled: boolean;
@@ -33,12 +35,12 @@ export class RE6Module {
     }
 
     /** Returns true if the module has already been initialized */
-    public isInitialized() {
+    public isInitialized(): boolean {
         return this.initialized;
     }
 
     /** Checks if the module should call the init function */
-    public canInitialize() {
+    public canInitialize(): boolean {
         return !this.initialized && this.pageMatchesFilter() && this.enabled;
     }
 
@@ -46,7 +48,7 @@ export class RE6Module {
      * Evaluates whether the module should be executed.
      * @returns true if the page matches the constraint, false otherwise.
      */
-    private pageMatchesFilter() {
+    private pageMatchesFilter(): boolean {
         return this.constraint.length == 0 || Page.matches(this.constraint);
     }
 
@@ -54,7 +56,7 @@ export class RE6Module {
      * Creates the module's structure.  
      * Should be run immediately after the constructor finishes.
      */
-    public create() {
+    public create(): void {
         this.initialized = true;
     }
 
@@ -62,7 +64,7 @@ export class RE6Module {
      * Removes the module's structure.  
      * Must clean up everything that create() has added.
      */
-    public destroy() {
+    public destroy(): void {
         this.initialized = false;
     }
 
@@ -70,7 +72,7 @@ export class RE6Module {
      * Returns the module's current state
      * @returns True if the module is enabled, false otherwise
      */
-    public isEnabled() {
+    public isEnabled(): boolean {
         return this.enabled;
     }
 
@@ -78,7 +80,7 @@ export class RE6Module {
      * Sets the module's enabled / disabled state
      * @param enabled True to enable, False to disable
      */
-    public setEnabled(enabled: boolean) {
+    public setEnabled(enabled: boolean): void {
         this.enabled = enabled;
     }
 
@@ -88,7 +90,7 @@ export class RE6Module {
      * @param fresh Fetches some freshly baked cookies
      * @returns Property value
      */
-    public fetchSettings(property?: string, fresh?: boolean) {
+    public fetchSettings(property?: string, fresh?: boolean): any {
         if (fresh) this.loadSettingsData();
         if (property === undefined) return this.settings;
         return this.settings[property];
@@ -100,7 +102,7 @@ export class RE6Module {
      * @param value Property value
      * @param preserve Ensures that all other values are preserved
      */
-    public pushSettings(property: string, value: any, preserve?: boolean) {
+    public pushSettings(property: string, value: any, preserve?: boolean): void {
         if (preserve) { this.loadSettingsData(); }
         this.settings[property] = value;
         this.saveSettingsData();
@@ -110,7 +112,7 @@ export class RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings() {
+    protected getDefaultSettings(): Settings {
         return { enabled: true };
     }
 
@@ -118,7 +120,7 @@ export class RE6Module {
      * Loads settings values from cookies if they exist.  
      * Otherwise, loads the default values
      */
-    private loadSettingsData() {
+    private loadSettingsData(): void {
         const defaultValues = this.getDefaultSettings();
         this.settings = GM_getValue("re621." + this.prefix, defaultValues);
 
@@ -134,26 +136,26 @@ export class RE6Module {
     /**
      * Saves the settings to cookies
      */
-    private saveSettingsData() {
+    private saveSettingsData(): void {
         GM_setValue("re621." + this.prefix, this.settings);
     }
 
     /**
      * @returns the class name of the module
      */
-    public getPrefix() {
+    public getPrefix(): string {
         return this.prefix;
     }
 
     /** Establish the module's hotkeys */
-    public resetHotkeys() {
-        let enabled = this.pageMatchesFilter();
+    public resetHotkeys(): void {
+        const enabled = this.pageMatchesFilter();
         this.hotkeys.forEach((value) => {
 
-            let keys = this.fetchSettings(value.keys, true).split("|");
-            keys.forEach((key) => {
+            const keys = this.fetchSettings(value.keys, true) as string;
+            keys.split("|").forEach((key) => {
                 if (enabled) Hotkeys.register(key, value.fnct);
-                else Hotkeys.register(key, function () { });
+                else Hotkeys.register(key, () => { return; });
             });
         });
     }
@@ -162,7 +164,7 @@ export class RE6Module {
      * Registers the provided hotkeys with the module
      * @param hotkeys Hotkey to register
      */
-    protected registerHotkeys(...hotkeys: Hotkey[]) {
+    protected registerHotkeys(...hotkeys: Hotkey[]): void {
         this.hotkeys = this.hotkeys.concat(hotkeys);
         this.resetHotkeys();
     }
@@ -170,6 +172,12 @@ export class RE6Module {
 }
 
 interface Hotkey {
-    keys: string,
-    fnct: Function,
+    keys: string;
+    fnct: Function;
 }
+
+export type Settings = {
+    enabled: boolean;
+} & {
+    [prop: string]: any;
+};

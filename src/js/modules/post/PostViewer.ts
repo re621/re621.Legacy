@@ -1,5 +1,5 @@
 import { Post, ViewingPost, PostRating } from "../../components/data/Post";
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 
 
@@ -14,9 +14,9 @@ export class PostViewer extends RE6Module {
     private constructor() {
         super(PageDefintion.post);
         this.registerHotkeys(
-            { keys: "hotkey_upvote", fnct: this.triggerUpvote },
-            { keys: "hotkey_downvote", fnct: this.triggerDownvote },
-            { keys: "hotkey_favorite", fnct: this.toggleFavorite }
+            { keys: "hotkeyUpvote", fnct: this.triggerUpvote },
+            { keys: "hotkeyDownvote", fnct: this.triggerDownvote },
+            { keys: "hotkeyFavorite", fnct: this.toggleFavorite }
         );
     }
 
@@ -24,7 +24,7 @@ export class PostViewer extends RE6Module {
      * Returns a singleton instance of the class
      * @returns FormattingHelper instance
      */
-    public static getInstance() {
+    public static getInstance(): PostViewer {
         if (this.instance == undefined) this.instance = new PostViewer();
         return this.instance;
     }
@@ -33,15 +33,15 @@ export class PostViewer extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings() {
+    protected getDefaultSettings(): Settings {
         return {
             enabled: true,
-            hotkey_upvote: "w",
-            hotkey_downvote: "s",
-            hotkey_favorite: "f",
+            hotkeyUpvote: "w",
+            hotkeyDownvote: "s",
+            hotkeyFavorite: "f",
 
-            auto_open_parent_child: true,
-            upvote_on_favorite: true,
+            autoOpenParentChild: true,
+            upvoteOnFavorite: true,
         };
     }
 
@@ -49,16 +49,16 @@ export class PostViewer extends RE6Module {
      * Creates the module's structure.  
      * Should be run immediately after the constructor finishes.
      */
-    public create() {
+    public create(): void {
         if (!this.canInitialize()) return;
         super.create();
 
         this.post = Post.getViewingPost();
         this.createDOM();
 
-        let upvoteButton = $("a.post-vote-up-link");
+        const upvoteButton = $("a.post-vote-up-link");
         $("button#add-fav-button").click(() => {
-            if (this.fetchSettings("upvote_on_favorite") && !upvoteButton.parent().hasClass("score-positive")) {
+            if (this.fetchSettings("upvoteOnFavorite") && !upvoteButton.parent().hasClass("score-positive")) {
                 upvoteButton.click();
             }
         });
@@ -67,7 +67,7 @@ export class PostViewer extends RE6Module {
     }
 
     /** Creates the document structure for the module */
-    private createDOM() {
+    private createDOM(): void {
         // Add the uploader name
         $("<li>")
             .append("Uploader: ")
@@ -80,13 +80,13 @@ export class PostViewer extends RE6Module {
             .append($("<b>").text(PostRating.toString(this.post.getRating())).addClass("colorize-rating-" + this.post.getRating()));
 
         // Move the scoring block
-        let $ratingContainer = $("<div>").attr("id", "image-score-links").prependTo("section#image-extra-controls");
-        let postID = this.post.getId();
-        let original = $("#post-vote-up-" + postID).parent().parent();
+        const $ratingContainer = $("<div>").attr("id", "image-score-links").prependTo("section#image-extra-controls");
+        const postID = this.post.getId();
+        const original = $("#post-vote-up-" + postID).parent().parent();
 
-        let $voteDownButton = $("#post-vote-down-" + postID).addClass("image-score-down").appendTo($ratingContainer);
+        const $voteDownButton = $("#post-vote-down-" + postID).addClass("image-score-down").appendTo($ratingContainer);
         $("#post-score-" + postID).addClass("image-score-num").appendTo($ratingContainer);
-        let $voteUpButton = $("#post-vote-up-" + postID).addClass("image-score-up").appendTo($ratingContainer);
+        const $voteUpButton = $("#post-vote-up-" + postID).addClass("image-score-up").appendTo($ratingContainer);
 
         if ($voteDownButton.hasClass("score-negative")) $ratingContainer.addClass("score-down");
         if ($voteUpButton.hasClass("score-positive")) $ratingContainer.addClass("score-up");
@@ -102,20 +102,20 @@ export class PostViewer extends RE6Module {
         });
 
         // Move the add to set / pool buttons
-        let $addToContainer = $("<div>").attr("id", "image-add-links").insertAfter("#image-download-link");
+        const $addToContainer = $("<div>").attr("id", "image-add-links").insertAfter("#image-download-link");
         $("li#add-to-set-list > a").addClass("image-add-set").html("+ Set").appendTo($addToContainer);
         $("li#add-to-pool-list > a").addClass("image-add-pool").html("+ Pool").appendTo($addToContainer);
 
         original.remove();
 
         // Move bottom notice, like child/parent indicator
-        let $bottomNotices = $(".bottom-notices");
+        const $bottomNotices = $(".bottom-notices");
         $bottomNotices.insertAfter($("#search-box"));
         //expand child/parent container
-        let $parentRel = $("#has-parent-relationship-preview-link");
-        let $childRel = $("#has-children-relationship-preview-link");
+        const $parentRel = $("#has-parent-relationship-preview-link");
+        const $childRel = $("#has-children-relationship-preview-link");
 
-        let autoOpen = this.fetchSettings("auto_open_parent_child");
+        const autoOpen = this.fetchSettings("autoOpenParentChild");
         //only click on one container, because both open with one click. Clicking both results in them open and the closing
         if ($parentRel.length !== 0 && !$parentRel.is(":visible") && autoOpen) {
             $parentRel.click();
@@ -124,22 +124,22 @@ export class PostViewer extends RE6Module {
         }
         //remeber toggle state
         $parentRel.add($childRel).on("click", () => {
-            this.pushSettings("auto_open_parent_child", !autoOpen);
+            this.pushSettings("autoOpenParentChild", !autoOpen);
         });
     }
 
     /** Emulates a click on the upvote button */
-    private triggerUpvote() {
+    private triggerUpvote(): void {
         $("a.post-vote-up-link")[0].click();
     }
 
     /** Emulates a click on the downvote button */
-    private triggerDownvote() {
+    private triggerDownvote(): void {
         $("a.post-vote-down-link")[0].click();
     }
 
     /** Toggles the favorite state */
-    private toggleFavorite() {
+    private toggleFavorite(): void {
         if ($("div.fav-buttons").hasClass("fav-buttons-false")) { $("button#add-fav-button")[0].click(); }
         else { $("button#remove-fav-button")[0].click(); }
     }

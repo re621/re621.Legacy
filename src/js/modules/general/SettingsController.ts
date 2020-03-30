@@ -1,18 +1,22 @@
 import { HeaderCustomizer } from "./HeaderCustomizer";
 import { Modal } from "../../components/structure/Modal";
-import { Tabbed, TabContent } from "../../components/structure/Tabbed";
+import { Tabbed } from "../../components/structure/Tabbed";
 import { RE6Module } from "../../components/RE6Module";
 import { Miscellaneous } from "./Miscellaneous";
 import { Form, FormElement } from "../../components/structure/Form";
-import { TitleCustomizer } from "../post/TitleCustomizer";
-import { DownloadCustomizer } from "../post/DownloadCustomizer";
-import { PostViewer } from "../post/PostViewer";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { PoolInfo, PoolSubscriptions } from "../subscriptions/PoolSubscriptions";
 import { Util } from "../../components/structure/Util";
 import { User } from "../../components/data/User";
 import { ForumSubscriptions, ForumInfo } from "../subscriptions/ForumSubscriptions";
 import { TagSubscriptions, TagInfo } from "../subscriptions/TagSubscriptions";
+import { TitleCustomizer } from "../post/TitleCustomizer";
+import { DownloadCustomizer } from "../post/DownloadCustomizer";
+import { PostViewer } from "../post/PostViewer";
+import { FormattingManager } from "./FormattingHelper";
+import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
+import { PoolNavigator } from "../post/PoolNavigator";
+import { ImageScaler } from "../post/ImageScaler";
 
 /**
  * SettingsController  
@@ -24,12 +28,12 @@ export class SettingsController {
 
     private modules: Map<string, RE6Module> = new Map();
 
-    private constructor() { }
+    private constructor() { return; }
 
-    public init() {
+    public init(): void {
 
         // Create a button in the header
-        let addSettingsButton = HeaderCustomizer.getInstance().createTabElement({
+        const addSettingsButton = HeaderCustomizer.getInstance().createTabElement({
             name: `<i class="fas fa-wrench"></i>`,
             parent: "menu.extra",
             class: "float-right",
@@ -37,12 +41,12 @@ export class SettingsController {
         });
 
         // Establish the settings window contents
-        let moduleStatusTab = this.createModuleStatus();
-        let postsPageTab = this.createTabPostsPage();
-        let hotkeyTab = this.createTabHotkeys();
-        let miscSettingsTab = this.createTabMiscellaneous();
+        const moduleStatusTab = this.createModuleStatus();
+        const postsPageTab = this.createTabPostsPage();
+        const hotkeyTab = this.createTabHotkeys();
+        const miscSettingsTab = this.createTabMiscellaneous();
 
-        let $settings = new Tabbed({
+        const $settings = new Tabbed({
             name: "settings-tabs",
             content: [
                 { name: "Features", page: moduleStatusTab.get() },
@@ -74,7 +78,7 @@ export class SettingsController {
      * Returns a singleton instance of the SettingsController
      * @returns SettingsController instance
      */
-    public static getInstance() {
+    public static getInstance(): SettingsController {
         if (this.instance == undefined) { this.instance = new SettingsController(); }
         return this.instance;
     }
@@ -83,7 +87,7 @@ export class SettingsController {
      * Registers the module so that its settings could be changed
      * @param module Module to register
      */
-    public static registerModule(...moduleList: RE6Module[]) {
+    public static registerModule(...moduleList: RE6Module[]): void {
         for (const module of moduleList) {
             this.getInstance().modules.set(module.getPrefix(), module);
         }
@@ -93,20 +97,20 @@ export class SettingsController {
      * Returns a previously registered module with the specified name
      * @param moduleName Module name
      */
-    public static getModule(moduleName: string) {
+    public static getModule(moduleName: string): RE6Module {
         return this.getInstance().modules.get(moduleName);
     }
 
     /** Create the DOM for the Title Customizer page */
-    private createTabPostsPage() {
-        let titleCustomizer = this.modules.get("TitleCustomizer");
-        let downloadCustomizer = this.modules.get("DownloadCustomizer");
-        let miscellaneous = this.modules.get("Miscellaneous");
-        let postViewer = this.modules.get("PostViewer");
-        let formattingManager = this.modules.get("FormattingManager");
-        let blacklistEnhancer = this.modules.get("BlacklistEnhancer");
+    private createTabPostsPage(): Form {
+        const titleCustomizer = this.modules.get("TitleCustomizer");
+        const downloadCustomizer = this.modules.get("DownloadCustomizer");
+        const miscellaneous = this.modules.get("Miscellaneous");
+        const postViewer = this.modules.get("PostViewer");
+        const formattingManager = this.modules.get("FormattingManager");
+        const blacklistEnhancer = this.modules.get("BlacklistEnhancer");
 
-        let template_icons = new Form(
+        const templateIcons = new Form(
             { id: "title-template-icons", columns: 2, },
             [
                 { id: "explain", type: "div", stretch: "mid", value: `<div class="notice unmargin">The following variables can be used:</div>` },
@@ -117,7 +121,7 @@ export class SettingsController {
             ]
         );
 
-        let form = new Form(
+        const form = new Form(
             {
                 id: "title-customizer-misc",
                 columns: 3,
@@ -148,7 +152,7 @@ export class SettingsController {
                     id: "general-title-template-variables",
                     type: "div",
                     label: " ",
-                    value: template_icons.get(),
+                    value: templateIcons.get(),
                     stretch: "full",
                 },
                 {
@@ -166,19 +170,19 @@ export class SettingsController {
                 {
                     id: "general-title-symbol-fav",
                     type: "input",
-                    value: titleCustomizer.fetchSettings("symbol_fav"),
+                    value: titleCustomizer.fetchSettings("symbolFav"),
                     label: "Favorite",
                 },
                 {
                     id: "general-title-symbol-voteup",
                     type: "input",
-                    value: titleCustomizer.fetchSettings("symbol_voteup"),
+                    value: titleCustomizer.fetchSettings("symbolVoteUp"),
                     label: "Upvote",
                 },
                 {
                     id: "general-title-symbol-votedown",
                     type: "input",
-                    value: titleCustomizer.fetchSettings("symbol_votedown"),
+                    value: titleCustomizer.fetchSettings("symbolVoteDown"),
                     label: "Downvote",
                 },
                 {
@@ -218,7 +222,7 @@ export class SettingsController {
                 {
                     id: "actions-votefavorite",
                     type: "checkbox",
-                    value: postViewer.fetchSettings("upvote_on_favorite"),
+                    value: postViewer.fetchSettings("upvoteOnFavorite"),
                     label: "Upvote Favorites",
                 },
                 {
@@ -230,7 +234,7 @@ export class SettingsController {
                 {
                     id: "actions-submit-hotkey",
                     type: "checkbox",
-                    value: formattingManager.fetchSettings("hotkey_submit_active"),
+                    value: formattingManager.fetchSettings("hotkeySubmitActive"),
                     label: "Submit Comments with Alt+Enter",
                 },
                 {
@@ -269,14 +273,14 @@ export class SettingsController {
      * Event handlers for the title customizer settings page
      * @param form Miscellaneous settings form
      */
-    private handleTabPostsPage(form: Form) {
-        let titleCustomizer = <TitleCustomizer>this.modules.get("TitleCustomizer");
-        let downloadCustomizer = <DownloadCustomizer>this.modules.get("DownloadCustomizer");
-        let miscellaneous = <Miscellaneous>this.modules.get("Miscellaneous");
-        let postViewer = <PostViewer>this.modules.get("PostViewer");
-        let formattingManager = this.modules.get("FormattingManager");
-        let blacklistEnhancer = this.modules.get("BlacklistEnhancer");
-        let postsPageInput = form.getInputList();
+    private handleTabPostsPage(form: Form): void {
+        const titleCustomizer = this.modules.get("TitleCustomizer") as TitleCustomizer;
+        const downloadCustomizer = this.modules.get("DownloadCustomizer") as DownloadCustomizer;
+        const miscellaneous = this.modules.get("Miscellaneous") as Miscellaneous;
+        const postViewer = this.modules.get("PostViewer") as PostViewer;
+        const formattingManager = this.modules.get("FormattingManager") as FormattingManager;
+        const blacklistEnhancer = this.modules.get("BlacklistEnhancer") as BlacklistEnhancer;
+        const postsPageInput = form.getInputList();
 
         // General
         postsPageInput.get("general-title-template").on("re621:form:input", (event, data) => {
@@ -335,14 +339,36 @@ export class SettingsController {
     }
 
     /** Creates the DOM for the hotkey settings page */
-    private createTabHotkeys() {
-        let postViewer = this.modules.get("PostViewer");
-        let poolNavigator = this.modules.get("PoolNavigator");
-        let imageScaler = this.modules.get("ImageScaler");
-        let miscellaneous = this.modules.get("Miscellaneous");
-        let headerCustomizer = this.modules.get("HeaderCustomizer");
+    private createTabHotkeys(): Form {
+        const postViewer = this.modules.get("PostViewer");
+        const poolNavigator = this.modules.get("PoolNavigator");
+        const imageScaler = this.modules.get("ImageScaler");
+        const miscellaneous = this.modules.get("Miscellaneous");
+        const headerCustomizer = this.modules.get("HeaderCustomizer");
 
-        let form = new Form(
+        function createLabel(settingsKey: string, label: string): FormElement {
+            return {
+                id: settingsKey + "-label",
+                type: "div",
+                value: label,
+                stretch: "column"
+            };
+        }
+
+        function createInput(module: RE6Module, settingsKey: string, label: string, suffix = 0): FormElement {
+            const values = module.fetchSettings(settingsKey).split("|");
+            let binding = "";
+            if (values[suffix] !== undefined) binding = values[suffix];
+
+            return {
+                id: settingsKey + "-input-" + suffix,
+                type: "key",
+                label: label,
+                value: binding
+            };
+        }
+
+        const form = new Form(
             {
                 "id": "settings-hotkeys",
                 columns: 3,
@@ -357,13 +383,13 @@ export class SettingsController {
                     stretch: "full",
                 },
 
-                createLabel("hotkey_focussearch", "Search"),
-                createInput(miscellaneous, "hotkey_focussearch", "", 0),
-                createInput(miscellaneous, "hotkey_focussearch", "", 1),
+                createLabel("hotkeyFocusSearch", "Search"),
+                createInput(miscellaneous, "hotkeyFocusSearch", "", 0),
+                createInput(miscellaneous, "hotkeyFocusSearch", "", 1),
 
-                createLabel("hotkey_randompost", "Random Post"),
-                createInput(miscellaneous, "hotkey_randompost", "", 0),
-                createInput(miscellaneous, "hotkey_randompost", "", 1),
+                createLabel("hotkeyRandomPost", "Random Post"),
+                createInput(miscellaneous, "hotkeyRandomPost", "", 0),
+                createInput(miscellaneous, "hotkeyRandomPost", "", 1),
 
                 // Posts
                 {
@@ -374,37 +400,37 @@ export class SettingsController {
                 },
 
                 // - Voting
-                createLabel("hotkey_upvote", "Upvote"),
-                createInput(postViewer, "hotkey_upvote", "", 0),
-                createInput(postViewer, "hotkey_upvote", "", 1),
+                createLabel("hotkeyUpvote", "Upvote"),
+                createInput(postViewer, "hotkeyUpvote", "", 0),
+                createInput(postViewer, "hotkeyUpvote", "", 1),
 
-                createLabel("hotkey_downvote", "Downvote"),
-                createInput(postViewer, "hotkey_downvote", "", 0),
-                createInput(postViewer, "hotkey_downvote", "", 1),
+                createLabel("hotkeyDownvote", "Downvote"),
+                createInput(postViewer, "hotkeyDownvote", "", 0),
+                createInput(postViewer, "hotkeyDownvote", "", 1),
 
-                createLabel("hotkey_favorite", "Favorite"),
-                createInput(postViewer, "hotkey_favorite", "", 0),
-                createInput(postViewer, "hotkey_favorite", "", 1),
+                createLabel("hotkeyFavorite", "Favorite"),
+                createInput(postViewer, "hotkeyFavorite", "", 0),
+                createInput(postViewer, "hotkeyFavorite", "", 1),
 
                 // - Navigation
-                createLabel("hotkey_prev", "Previous Post"),
-                createInput(poolNavigator, "hotkey_prev", "", 0),
-                createInput(poolNavigator, "hotkey_prev", "", 1),
+                createLabel("hotkeyPrev", "Previous Post"),
+                createInput(poolNavigator, "hotkeyPrev", "", 0),
+                createInput(poolNavigator, "hotkeyPrev", "", 1),
 
 
-                createLabel("hotkey_next", "Next Post"),
-                createInput(poolNavigator, "hotkey_next", "", 0),
-                createInput(poolNavigator, "hotkey_next", "", 1),
+                createLabel("hotkeyNext", "Next Post"),
+                createInput(poolNavigator, "hotkeyNext", "", 0),
+                createInput(poolNavigator, "hotkeyNext", "", 1),
 
 
-                createLabel("hotkey_cycle", "Cycle Navigation"),
-                createInput(poolNavigator, "hotkey_cycle", "", 0),
-                createInput(poolNavigator, "hotkey_cycle", "", 1),
+                createLabel("hotkeyCycle", "Cycle Navigation"),
+                createInput(poolNavigator, "hotkeyCycle", "", 0),
+                createInput(poolNavigator, "hotkeyCycle", "", 1),
 
                 // - Scaling
-                createLabel("hotkey_scale", "Change Scale"),
-                createInput(imageScaler, "hotkey_scale", "", 0),
-                createInput(imageScaler, "hotkey_scale", "", 1),
+                createLabel("hotkeyScale", "Change Scale"),
+                createInput(imageScaler, "hotkeyScale", "", 0),
+                createInput(imageScaler, "hotkeyScale", "", 1),
 
                 // Comments
                 {
@@ -414,13 +440,13 @@ export class SettingsController {
                     stretch: "full"
                 },
 
-                createLabel("hotkey_newcomment", "New Comment"),
-                createInput(miscellaneous, "hotkey_newcomment", "", 0),
-                createInput(miscellaneous, "hotkey_newcomment", "", 1),
+                createLabel("hotkeyNewComment", "New Comment"),
+                createInput(miscellaneous, "hotkeyNewComment", "", 0),
+                createInput(miscellaneous, "hotkeyNewComment", "", 1),
 
-                createLabel("hotkey_editpost", "Edit Post"),
-                createInput(miscellaneous, "hotkey_editpost", "", 0),
-                createInput(miscellaneous, "hotkey_editpost", "", 1),
+                createLabel("hotkeyEditPost", "Edit Post"),
+                createInput(miscellaneous, "hotkeyEditPost", "", 0),
+                createInput(miscellaneous, "hotkeyEditPost", "", 1),
 
                 // Tabs
                 {
@@ -430,65 +456,43 @@ export class SettingsController {
                     stretch: "full",
                 },
 
-                createLabel("hotkey_tab_1", "Tab #1"),
-                createInput(headerCustomizer, "hotkey_tab_1", "", 0),
-                createInput(headerCustomizer, "hotkey_tab_1", "", 1),
+                createLabel("hotkeyTab1", "Tab #1"),
+                createInput(headerCustomizer, "hotkeyTab1", "", 0),
+                createInput(headerCustomizer, "hotkeyTab1", "", 1),
 
-                createLabel("hotkey_tab_2", "Tab #2"),
-                createInput(headerCustomizer, "hotkey_tab_2", "", 0),
-                createInput(headerCustomizer, "hotkey_tab_2", "", 1),
+                createLabel("hotkeyTab2", "Tab #2"),
+                createInput(headerCustomizer, "hotkeyTab2", "", 0),
+                createInput(headerCustomizer, "hotkeyTab2", "", 1),
 
-                createLabel("hotkey_tab_3", "Tab #3"),
-                createInput(headerCustomizer, "hotkey_tab_3", "", 0),
-                createInput(headerCustomizer, "hotkey_tab_3", "", 1),
+                createLabel("hotkeyTab3", "Tab #3"),
+                createInput(headerCustomizer, "hotkeyTab3", "", 0),
+                createInput(headerCustomizer, "hotkeyTab3", "", 1),
 
-                createLabel("hotkey_tab_4", "Tab #4"),
-                createInput(headerCustomizer, "hotkey_tab_4", "", 0),
-                createInput(headerCustomizer, "hotkey_tab_4", "", 1),
+                createLabel("hotkeyTab4", "Tab #4"),
+                createInput(headerCustomizer, "hotkeyTab4", "", 0),
+                createInput(headerCustomizer, "hotkeyTab4", "", 1),
 
-                createLabel("hotkey_tab_5", "Tab #5"),
-                createInput(headerCustomizer, "hotkey_tab_5", "", 0),
-                createInput(headerCustomizer, "hotkey_tab_5", "", 1),
+                createLabel("hotkeyTab5", "Tab #5"),
+                createInput(headerCustomizer, "hotkeyTab5", "", 0),
+                createInput(headerCustomizer, "hotkeyTab5", "", 1),
 
-                createLabel("hotkey_tab_6", "Tab #6"),
-                createInput(headerCustomizer, "hotkey_tab_6", "", 0),
-                createInput(headerCustomizer, "hotkey_tab_6", "", 1),
+                createLabel("hotkeyTab6", "Tab #6"),
+                createInput(headerCustomizer, "hotkeyTab6", "", 0),
+                createInput(headerCustomizer, "hotkeyTab6", "", 1),
 
-                createLabel("hotkey_tab_7", "Tab #7"),
-                createInput(headerCustomizer, "hotkey_tab_7", "", 0),
-                createInput(headerCustomizer, "hotkey_tab_7", "", 1),
+                createLabel("hotkeyTab7", "Tab #7"),
+                createInput(headerCustomizer, "hotkeyTab7", "", 0),
+                createInput(headerCustomizer, "hotkeyTab7", "", 1),
 
-                createLabel("hotkey_tab_8", "Tab #8"),
-                createInput(headerCustomizer, "hotkey_tab_8", "", 0),
-                createInput(headerCustomizer, "hotkey_tab_8", "", 1),
+                createLabel("hotkeyTab8", "Tab #8"),
+                createInput(headerCustomizer, "hotkeyTab8", "", 0),
+                createInput(headerCustomizer, "hotkeyTab8", "", 1),
 
-                createLabel("hotkey_tab_9", "Tab #9"),
-                createInput(headerCustomizer, "hotkey_tab_9", "", 0),
-                createInput(headerCustomizer, "hotkey_tab_9", "", 1),
+                createLabel("hotkeyTab9", "Tab #9"),
+                createInput(headerCustomizer, "hotkeyTab9", "", 0),
+                createInput(headerCustomizer, "hotkeyTab9", "", 1),
             ]
         );
-
-        function createLabel(settingsKey: string, label: string): FormElement {
-            return {
-                id: settingsKey + "-label",
-                type: "div",
-                value: label,
-                stretch: "column"
-            };
-        }
-
-        function createInput(module: RE6Module, settingsKey: string, label: string, suffix: number = 0): FormElement {
-            let values = module.fetchSettings(settingsKey).split("|"),
-                binding = "";
-            if (values[suffix] !== undefined) binding = values[suffix];
-
-            return {
-                id: settingsKey + "-input-" + suffix,
-                type: "key",
-                label: label,
-                value: binding
-            };
-        }
 
         return form;
     }
@@ -497,53 +501,20 @@ export class SettingsController {
      * Event handlers for the hotkey settings page
      * @param form Miscellaneous settings form
      */
-    private handleTabHotkeys(form: Form) {
-        let hotkeyFormInput = form.getInputList();
-        let postViewer = this.modules.get("PostViewer");
-        let poolNavigator = this.modules.get("PoolNavigator");
-        let imageScaler = this.modules.get("ImageScaler");
-        let miscellaneous = this.modules.get("Miscellaneous");
-        let headerCustomizer = this.modules.get("HeaderCustomizer");
-
-        // Listing
-        createListener(miscellaneous, "hotkey_focussearch", 2);
-
-        // Posts
-        // - Voting
-        createListener(postViewer, "hotkey_upvote", 2);
-
-        createListener(postViewer, "hotkey_downvote", 2);
-        createListener(postViewer, "hotkey_favorite", 2);
-
-        // - Navigation
-        createListener(poolNavigator, "hotkey_prev", 2);
-        createListener(poolNavigator, "hotkey_next", 2);
-        createListener(poolNavigator, "hotkey_cycle", 2);
-
-        // - Scaling
-        createListener(imageScaler, "hotkey_scale", 2);
-
-        // Comments
-        createListener(miscellaneous, "hotkey_newcomment", 2);
-        createListener(miscellaneous, "hotkey_editpost", 2);
-
-        // Tabs
-        createListener(headerCustomizer, "hotkey_tab_1", 2);
-        createListener(headerCustomizer, "hotkey_tab_2", 2);
-        createListener(headerCustomizer, "hotkey_tab_3", 2);
-        createListener(headerCustomizer, "hotkey_tab_4", 2);
-        createListener(headerCustomizer, "hotkey_tab_5", 2);
-        createListener(headerCustomizer, "hotkey_tab_6", 2);
-        createListener(headerCustomizer, "hotkey_tab_7", 2);
-        createListener(headerCustomizer, "hotkey_tab_8", 2);
-        createListener(headerCustomizer, "hotkey_tab_9", 2);
+    private handleTabHotkeys(form: Form): void {
+        const hotkeyFormInput = form.getInputList();
+        const postViewer = this.modules.get("PostViewer") as PostViewer;
+        const poolNavigator = this.modules.get("PoolNavigator") as PoolNavigator;
+        const imageScaler = this.modules.get("ImageScaler") as ImageScaler;
+        const miscellaneous = this.modules.get("Miscellaneous") as Miscellaneous;
+        const headerCustomizer = this.modules.get("HeaderCustomizer") as HeaderCustomizer;
 
         /** Creates a listener for the hotkey input */
-        function createListener(module: RE6Module, settingsKey: string, bindings: number = 1) {
+        function createListener(module: RE6Module, settingsKey: string, bindings = 1): void {
             for (let i = 0; i < bindings; i++) {
                 hotkeyFormInput.get(settingsKey + "-input-" + i).on("re621:form:input", (event, newKey, oldKey) => {
                     if (i === 0) {
-                        let bindingData = [];
+                        const bindingData = [];
                         for (let j = 0; j < bindings; j++) {
                             bindingData.push(hotkeyFormInput.get(settingsKey + "-input-" + j).val());
                         }
@@ -558,14 +529,47 @@ export class SettingsController {
                 });
             }
         }
+
+        // Listing
+        createListener(miscellaneous, "hotkeyFocusSearch", 2);
+
+        // Posts
+        // - Voting
+        createListener(postViewer, "hotkeyUpvote", 2);
+
+        createListener(postViewer, "hotkeyDownvote", 2);
+        createListener(postViewer, "hotkeyFavorite", 2);
+
+        // - Navigation
+        createListener(poolNavigator, "hotkeyPrev", 2);
+        createListener(poolNavigator, "hotkeyNext", 2);
+        createListener(poolNavigator, "hotkeyCycle", 2);
+
+        // - Scaling
+        createListener(imageScaler, "hotkeyScale", 2);
+
+        // Comments
+        createListener(miscellaneous, "hotkeyNewComment", 2);
+        createListener(miscellaneous, "hotkeyEditPost", 2);
+
+        // Tabs
+        createListener(headerCustomizer, "hotkeyTab1", 2);
+        createListener(headerCustomizer, "hotkeyTab2", 2);
+        createListener(headerCustomizer, "hotkeyTab3", 2);
+        createListener(headerCustomizer, "hotkeyTab4", 2);
+        createListener(headerCustomizer, "hotkeyTab5", 2);
+        createListener(headerCustomizer, "hotkeyTab6", 2);
+        createListener(headerCustomizer, "hotkeyTab7", 2);
+        createListener(headerCustomizer, "hotkeyTab8", 2);
+        createListener(headerCustomizer, "hotkeyTab9", 2);
     }
 
     /** Creates the DOM for the miscellaneous settings page */
-    private createTabMiscellaneous() {
-        let module = <Miscellaneous>this.modules.get("Miscellaneous");
+    private createTabMiscellaneous(): Form {
+        const module = this.modules.get("Miscellaneous") as Miscellaneous;
 
         // Create the settings form
-        let form = new Form(
+        const form = new Form(
             {
                 id: "settings-misc",
                 columns: 3,
@@ -693,9 +697,9 @@ export class SettingsController {
      * Event handlers for the miscellaneous settings page
      * @param form Miscellaneous settings form
      */
-    private handleTabMiscellaneous(form: Form) {
-        let miscModule = <Miscellaneous>this.modules.get("Miscellaneous");
-        let miscFormInput = form.getInputList();
+    private handleTabMiscellaneous(form: Form): void {
+        const miscModule = this.modules.get("Miscellaneous") as Miscellaneous;
+        const miscFormInput = form.getInputList();
 
         miscFormInput.get("misc-redesign-fixes").on("re621:form:input", (event, data) => {
             miscModule.pushSettings("loadRedesignFixes", data);
@@ -704,8 +708,8 @@ export class SettingsController {
         });
 
         // Import / Export to file
-        miscFormInput.get("misc-export-button").on("click", (event, data) => {
-            let exportData = {
+        miscFormInput.get("misc-export-button").on("click", () => {
+            const exportData = {
                 "meta": "re621/1.0",
                 "pools": PoolSubscriptions.getInstance().fetchSettings("data"),
                 "forums": ForumSubscriptions.getInstance().fetchSettings("data"),
@@ -717,12 +721,12 @@ export class SettingsController {
 
         miscFormInput.get("misc-import-button").on("re621:form:input", (event, data) => {
             if (!data) return;
-            let $info = $("div#file-import-status").html("Loading . . .");
+            const $info = $("div#file-import-status").html("Loading . . .");
 
-            var reader = new FileReader();
+            const reader = new FileReader();
             reader.readAsText(data, "UTF-8");
-            reader.onload = function (event) {
-                let parsedData = JSON.parse(event.target.result.toString());
+            reader.onload = function (event): void {
+                const parsedData = JSON.parse(event.target.result.toString());
                 console.log(parsedData);
 
                 if (!parsedData["meta"] || parsedData["meta"] !== "re621/1.0") {
@@ -733,7 +737,7 @@ export class SettingsController {
                 // parsedData["pools"] : pools
                 if (parsedData["pools"]) {
                     $info.html("Processing pools . . .");
-                    let poolSubs = PoolSubscriptions.getInstance(),
+                    const poolSubs = PoolSubscriptions.getInstance(),
                         poolData: PoolInfo = poolSubs.fetchSettings("data", true);
                     for (const [key, value] of Object.entries(parsedData["pools"])) {
                         poolData[key] = value;
@@ -744,7 +748,7 @@ export class SettingsController {
                 // parsedData["forums"] : forums
                 if (parsedData["forums"]) {
                     $info.html("Processing forums . . .");
-                    let forumSubs = ForumSubscriptions.getInstance(),
+                    const forumSubs = ForumSubscriptions.getInstance(),
                         forumData: ForumInfo = forumSubs.fetchSettings("data", true);
                     for (const [key, value] of Object.entries(parsedData["forums"])) {
                         forumData[key] = value;
@@ -755,7 +759,7 @@ export class SettingsController {
                 // parsedData[3] : tags (???)
                 if (parsedData["tags"]) {
                     $info.html("Processing tags . . .");
-                    let tagSubs = TagSubscriptions.getInstance(),
+                    const tagSubs = TagSubscriptions.getInstance(),
                         tagData: TagInfo = tagSubs.fetchSettings("data", true);
                     for (const [key, value] of Object.entries(parsedData["tags"])) {
                         tagData[key] = value;
@@ -766,19 +770,19 @@ export class SettingsController {
                 //console.log(parsedData);
                 $info.html("Settings imported!");
             };
-            reader.onerror = function (evt) { $info.html("Error loading file"); };
+            reader.onerror = function (): void { $info.html("Error loading file"); };
 
         });
 
         // eSix Legacy
         miscFormInput.get("misc-esix-button").on("re621:form:input", (event, data) => {
             if (!data) return;
-            let $info = $("div#file-esix-status").html("Loading . . .");
+            const $info = $("div#file-esix-status").html("Loading . . .");
 
-            var reader = new FileReader();
+            const reader = new FileReader();
             reader.readAsText(data, "UTF-8");
-            reader.onload = function (event) {
-                let parsedData = event.target.result.toString().split("\n");
+            reader.onload = function (event): void {
+                const parsedData = event.target.result.toString().split("\n");
                 if (parsedData[0] !== "eSixExtend User Prefs") { $info.html("Invalid file format"); return; }
 
                 parsedData.forEach((value, index) => {
@@ -787,19 +791,18 @@ export class SettingsController {
 
                 // parsedData[2] : pools
                 $info.html("Processing pools . . .");
-                let poolSubs = PoolSubscriptions.getInstance(),
+                const poolSubs = PoolSubscriptions.getInstance(),
                     poolData: PoolInfo = poolSubs.fetchSettings("data", true);
-                for (let entry of parsedData[2]) {
-                    let thumb = entry["thumb"]["url"].substr(6, 32);
-                    poolData[entry["id"]] = { thumbnailMd5: thumb };
+                for (const entry of parsedData[2]) {
+                    poolData[entry["id"]] = { thumbnailMd5: entry["thumb"]["url"].substr(6, 32) };
                 }
                 poolSubs.pushSettings("data", poolData);
 
                 // parsedData[3] : forums
                 $info.html("Processing forums . . .");
-                let forumSubs = ForumSubscriptions.getInstance(),
+                const forumSubs = ForumSubscriptions.getInstance(),
                     forumData: ForumInfo = forumSubs.fetchSettings("data", true);
-                for (let entry of parsedData[3]) {
+                for (const entry of parsedData[3]) {
                     forumData[entry["id"]] = {};
                 }
                 forumSubs.pushSettings("data", forumData);
@@ -812,15 +815,34 @@ export class SettingsController {
                 //console.log(parsedData);
                 $info.html("Settings imported!");
             };
-            reader.onerror = function (evt) { $info.html("Error loading file"); };
+            reader.onerror = function (): void { $info.html("Error loading file"); };
 
         });
     }
 
-    private createModuleStatus() {
-        let modules = this.modules;
+    private createModuleStatus(): Form {
+        const modules = this.modules;
 
-        let form = new Form(
+        function createInput(moduleName: string, label: string): FormElement {
+            const module = modules.get(moduleName);
+            return {
+                id: moduleName + "-enabled",
+                type: "checkbox",
+                value: module.fetchSettings("enabled"),
+                label: label,
+            };
+        }
+
+        function createLabel(moduleName: string, label: string): FormElement {
+            return {
+                id: moduleName + "-label",
+                type: "div",
+                value: label,
+                stretch: "mid",
+            };
+        }
+
+        const form = new Form(
             {
                 id: "settings-module-status",
                 columns: 3,
@@ -851,30 +873,11 @@ export class SettingsController {
             ]
         );
 
-        function createInput(moduleName: string, label: string): FormElement {
-            const module = modules.get(moduleName);
-            return {
-                id: moduleName + "-enabled",
-                type: "checkbox",
-                value: module.fetchSettings("enabled"),
-                label: label,
-            };
-        }
-
-        function createLabel(moduleName: string, label: string): FormElement {
-            return {
-                id: moduleName + "-label",
-                type: "div",
-                value: label,
-                stretch: "mid",
-            };
-        }
-
         return form;
     }
 
-    private handleModuleStatus(form: Form) {
-        let inputs = form.getInputList("checkbox");
+    private handleModuleStatus(form: Form): void {
+        const inputs = form.getInputList("checkbox");
 
         for (const formName of inputs.keys()) {
             const module = this.modules.get(formName.split("-")[0]);

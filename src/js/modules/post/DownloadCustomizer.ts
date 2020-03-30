@@ -1,9 +1,10 @@
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { Post, ViewingPost } from "../../components/data/Post";
 import { TagTypes } from "../../components/data/Tag";
 import { PageDefintion } from "../../components/data/Page";
 
-declare var GM_download;
+// eslint-disable-next-line @typescript-eslint/camelcase
+declare const GM_download;
 
 /**
  * Renames the files to a user-readable scheme for download
@@ -23,7 +24,7 @@ export class DownloadCustomizer extends RE6Module {
      * Returns a singleton instance of the class
      * @returns DownloadCustomizer instance
      */
-    public static getInstance() {
+    public static getInstance(): DownloadCustomizer {
         if (this.instance == undefined) this.instance = new DownloadCustomizer();
         return this.instance;
     }
@@ -32,7 +33,7 @@ export class DownloadCustomizer extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings() {
+    protected getDefaultSettings(): Settings {
         return {
             enabled: true,
             template: "%postid%-%artist%-%copyright%-%character%",
@@ -43,7 +44,7 @@ export class DownloadCustomizer extends RE6Module {
      * Creates the module's structure.  
      * Should be run immediately after the constructor finishes.
      */
-    public create() {
+    public create(): void {
         if (!this.canInitialize()) return;
         super.create();
 
@@ -65,7 +66,7 @@ export class DownloadCustomizer extends RE6Module {
     /**
      * Creates a download link with the saved template
      */
-    public refreshDownloadLink() {
+    public refreshDownloadLink(): void {
         this.link.attr("download", this.parseTemplate());
     }
 
@@ -73,7 +74,7 @@ export class DownloadCustomizer extends RE6Module {
      * Parses the download link template, replacing variables with their corresponding values
      * @returns string Download link
      */
-    private parseTemplate() {
+    private parseTemplate(): string {
         return this.fetchSettings("template")
             .replace(/%postid%/g, this.post.getId())
             .replace(/%artist%/g, this.post.getTagsFromType(TagTypes.Artist).join("-"))
