@@ -56,9 +56,9 @@ export class TitleCustomizer extends RE6Module {
     private parseTemplate(): string {
         let prefix = "";
         if (this.fetchSettings("symbolsEnabled")) {
-            if (this.post.getIsFaved()) { prefix += this.fetchSettings("symbol_fav"); }
-            if (this.post.getIsUpvoted()) { prefix += this.fetchSettings("symbol_voteup"); }
-            else if (this.post.getIsDownvoted()) { prefix += this.fetchSettings("symbol_votedown"); }
+            if (this.post.getIsFaved()) { prefix += this.fetchSettings("symbolFav"); }
+            if (this.post.getIsUpvoted()) { prefix += this.fetchSettings("symbolVoteup"); }
+            else if (this.post.getIsDownvoted()) { prefix += this.fetchSettings("symbolVotedown"); }
             if (prefix) prefix += " ";
         }
 

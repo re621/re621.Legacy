@@ -337,11 +337,11 @@ export class SettingsController {
         });
 
         postsPageInput.get("actions-votefavorite").on("re621:form:input", (event, data) => {
-            postViewer.pushSettings("upvote_on_favorite", data);
+            postViewer.pushSettings("upvoteOnFavorite", data);
         });
 
         postsPageInput.get("actions-submit-hotkey").on("re621:form:input", (event, data) => {
-            formattingManager.pushSettings("hotkey_submit_active", data);
+            formattingManager.pushSettings("hotkeySubmitActive", data);
         });
 
         // Blacklist
