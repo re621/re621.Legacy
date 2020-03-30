@@ -67,9 +67,16 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
 
         const poolsJson: ApiPool[] = await Api.getJson("/pools.json?search[id]=" + Object.keys(poolData).join(","));
         for (const poolJson of poolsJson) {
-            if (new Date(poolJson.updated_at).getTime() > this.lastUpdate) {
+            if (poolData[poolJson.id].lastId === undefined || !poolJson.post_ids.includes(poolData[poolJson.id].lastId)) {
+                poolData[poolJson.id].lastId = poolJson.post_ids[poolJson.post_ids.length - 1];
+            }
+            const previousStop = poolJson.post_ids.indexOf(poolData[poolJson.id].lastId);
+            //there is only an update if there are posts after the previous last post id
+            //If the post id isn't there anymore (supperior version added) show an update
+            if (new Date(poolJson.updated_at).getTime() > this.lastUpdate && poolJson.post_ids.length > previousStop) {
                 results.push(await this.formatPoolUpdate(poolJson, poolData));
             }
+            poolData[poolJson.id].lastId = poolJson.post_ids[poolJson.post_ids.length - 1];
         }
         this.pushSettings("data", poolData);
         return results;
