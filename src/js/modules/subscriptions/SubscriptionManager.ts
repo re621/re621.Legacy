@@ -1,4 +1,4 @@
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { HeaderCustomizer } from "../general/HeaderCustomizer";
 import { Tabbed } from "../../components/structure/Tabbed";
 import { Modal } from "../../components/structure/Modal";
@@ -9,19 +9,22 @@ export class SubscriptionManager extends RE6Module {
 
     private static instance: SubscriptionManager;
     //should notifications be cleared once seen?
-    public dismissOnUpdate: boolean = true;
+    public dismissOnUpdate = true;
     private updateInterval = 60 * 60; //1 hour, in seconds
 
     private tabNotificationsCount = 0;
     private subscribers: Subscription[] = [];
 
-    public openSubsButton: { link: any; tab?: JQuery<HTMLElement>; };
+    public openSubsButton: {
+        link: any;
+        tab?: JQuery<HTMLElement>;
+    };
 
     /**
      * Creates the module's structure.  
      * Should be run immediately after the constructor finishes.
      */
-    public async create() {
+    public async create(): Promise<void> {
         if (!this.canInitialize()) return;
         super.create();
         // Create a button in the header
@@ -31,19 +34,19 @@ export class SubscriptionManager extends RE6Module {
             controls: false,
         });
 
-        let content = [];
+        const content = [];
         for (const sub of this.subscribers) {
             await this.initSubscriber(sub);
             content.push({ name: sub.getName(), page: sub.tab });
         }
 
-        let $subsTabs = new Tabbed({
+        const $subsTabs = new Tabbed({
             name: "settings-tabs",
             content: content
         });
 
         // Create the modal
-        let modal = new Modal({
+        const modal = new Modal({
             title: "Subscriptions",
             triggers: [{ element: this.openSubsButton.link }],
             escapable: false,
@@ -79,7 +82,7 @@ export class SubscriptionManager extends RE6Module {
      * If the attribute remove from notification count is present it means
      * that there are updates in that tap. If it is so also add a  notification icon
      */
-    private addTabNotifications($target: JQuery<HTMLElement>) {
+    private addTabNotifications($target: JQuery<HTMLElement>): void {
         const allTabs = $target.find(".ui-tabs-tab");
         const allPanels = $target.find(".subscriptions-list");
         allPanels.each((index, element) => {
@@ -89,7 +92,7 @@ export class SubscriptionManager extends RE6Module {
         });
     }
 
-    public updateNotificationSymbol(difference: number) {
+    public updateNotificationSymbol(difference: number): void {
         this.tabNotificationsCount += difference;
         this.openSubsButton.link.attr("data-has-notifications", (this.tabNotificationsCount > 0).toString());
     }
@@ -98,12 +101,12 @@ export class SubscriptionManager extends RE6Module {
      * Adds a subscriber to the list of them and creates a tab for it.
      * @param instance subscriber to be queued for update check
      */
-    public static registerSubscriber(instance: Subscription) {
+    public static registerSubscriber(instance: Subscription): void {
         this.getInstance().subscribers.push(instance);
     }
 
-    public static createTabContent() {
-        let $content = $("<div>")
+    public static createTabContent(): JQuery<HTMLElement> {
+        const $content = $("<div>")
             .addClass("subscriptions-list");
 
         return $content;
@@ -112,7 +115,7 @@ export class SubscriptionManager extends RE6Module {
     /**
      * Starts checking for updates for the passed subscriber
      */
-    public async initSubscriber(instance: Subscription) {
+    public async initSubscriber(instance: Subscription): Promise<void> {
         const moduleName = instance.constructor.name;
         let lastUpdate: number = instance.fetchSettings("lastUpdate");
         let cachedUpdates: UpdateData[] = this.fetchSettings("cache-" + moduleName);
@@ -147,17 +150,17 @@ export class SubscriptionManager extends RE6Module {
      * Creates an element through the data and how the subscriber defines it
      * @returns the element to append to a tab
      */
-    private createUpdateEntry(data: UpdateData, definition: UpdateDefinition) {
-        let $content = $("<div>")
+    private createUpdateEntry(data: UpdateData, definition: UpdateDefinition): JQuery<HTMLElement> {
+        const $content = $("<div>")
             .addClass("subscription-update");
 
         // Image
-        let $imageDiv = $("<div>")
+        const $imageDiv = $("<div>")
             .addClass("subscription-update-preview")
             .appendTo($content);
 
         if (definition.imageHref !== undefined) {
-            let $a = $("<a>")
+            const $a = $("<a>")
                 .attr("href", definition.imageHref(data));
             $("<img>")
                 .attr("src", definition.imageSrc(data))
@@ -170,7 +173,7 @@ export class SubscriptionManager extends RE6Module {
         }
 
         // Entry Title
-        let $title = $("<div>")
+        const $title = $("<div>")
             .addClass("subscription-update-title")
             .appendTo($content);
         if (definition.updateHref !== undefined) {
@@ -190,7 +193,7 @@ export class SubscriptionManager extends RE6Module {
 
 
         // Link to all posts page
-        let $full = $("<div>")
+        const $full = $("<div>")
             .addClass("subscription-update-full")
             .appendTo($content);
         if (definition.sourceHref !== undefined) {
@@ -206,7 +209,7 @@ export class SubscriptionManager extends RE6Module {
 
 
         // Last Updated
-        let $date = $("<div>")
+        const $date = $("<div>")
             .addClass("subscription-update-date")
             .appendTo($content);
         $("<span>")
@@ -217,13 +220,13 @@ export class SubscriptionManager extends RE6Module {
         return $content;
     }
 
-    public addSubscribeButtons(instance: Subscription) {
+    public addSubscribeButtons(instance: Subscription): void {
         let subscriptionData: SubscriptionSettings = instance.fetchSettings("data", true);
         instance.getElementsToInsertAfter().each((index, element) => {
             const $element = $(element);
 
-            let $subscribeButton = instance.createSubscribeButton();
-            let $unsubscribeButton = instance.createUnsubscribeButton();
+            const $subscribeButton = instance.createSubscribeButton();
+            const $unsubscribeButton = instance.createUnsubscribeButton();
 
             const id = instance.getSubscriberId($element);
 
@@ -251,13 +254,12 @@ export class SubscriptionManager extends RE6Module {
             $subscribeButton.insertAfter($element);
             $unsubscribeButton.insertAfter($element);
         });
-
     }
 
     /**
      * Adds the passed updates to the tab of the subscriber
      */
-    public addUpdateEntries(instance: Subscription, updates: UpdateData[]) {
+    public addUpdateEntries(instance: Subscription, updates: UpdateData[]): void {
         if (updates.length === 0) {
             $("<div>")
                 .addClass("subscriptions-notice")
@@ -272,20 +274,20 @@ export class SubscriptionManager extends RE6Module {
         }
     }
 
-    protected removeUnopened($element: JQuery<HTMLElement>) {
+    protected removeUnopened($element: JQuery<HTMLElement>): void {
         if ($element.attr("data-remove-notification-count") === "true" && this.dismissOnUpdate === true) {
             this.updateNotificationSymbol(-1);
             this.pushSettings("cache-" + $element.attr("data-subscription-class"), []);
         }
     }
 
-    protected getDefaultSettings() {
+    protected getDefaultSettings(): Settings {
         return {
             enabled: true
         };
     }
 
-    public static getInstance() {
+    public static getInstance(): SubscriptionManager {
         if (this.instance == undefined) this.instance = new SubscriptionManager();
         return this.instance;
     }
@@ -295,29 +297,29 @@ export class SubscriptionManager extends RE6Module {
 
 
 export interface SubscriptionSettings {
-    [id: number]: any
+    [id: number]: any;
 }
 
 export interface UpdateData {
-    id: number,
-    name: string,
-    date: Date,
-    last: number,
-    thumbnailMd5: string
-    extra?: any
+    id: number;
+    name: string;
+    date: Date;
+    last: number;
+    thumbnailMd5: string;
+    extra?: any;
 }
 
 export interface UpdateDefinition {
     //what link should be opened when you click on the image? Leave empty for no action
-    imageHref?: (data: UpdateData) => string,
+    imageHref?: (data: UpdateData) => string;
     //image link which should be displayed on the left side of the entry
-    imageSrc: (data: UpdateData) => string,
+    imageSrc: (data: UpdateData) => string;
     //Link to get to the update
-    updateHref?: (data: UpdateData) => string,
+    updateHref?: (data: UpdateData) => string;
     //Text for the updatelink
-    updateText: (data: UpdateData) => string,
+    updateText: (data: UpdateData) => string;
     //Text to display when clicking on sourceLink
-    sourceHref?: (data: UpdateData) => string,
+    sourceHref?: (data: UpdateData) => string;
     //Link to where the "first page" of the subscription
-    sourceText: (data: UpdateData) => string,
+    sourceText: (data: UpdateData) => string;
 }

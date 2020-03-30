@@ -10,13 +10,13 @@ export class Tabbed {
         this.config = config;
     }
 
-    public create() {
+    public create(): JQuery<HTMLElement> {
 
-        let $container = $("<div>");
-        let $tabList = $("<ul>").appendTo($container);
+        const $container = $("<div>");
+        const $tabList = $("<ul>").appendTo($container);
 
         this.config.content.forEach(function (entry, index) {
-            let $tab = $("<a>")
+            const $tab = $("<a>")
                 .attr("href", "#fragment-" + index)
                 .html(entry.name);
             $("<li>").appendTo($tabList).append($tab);
@@ -37,15 +37,15 @@ export class Tabbed {
 }
 
 interface TabbedConfig {
-    name: string,
-    content: TabContent[],
+    name: string;
+    content: TabContent[];
 }
 
 export interface TabContent {
     /** Tab name. If there is only one tab, does nothing. */
-    name: string,
+    name: string;
     /** JQuery element with the modal contents */
-    page: JQuery<HTMLElement>,
+    page: JQuery<HTMLElement>;
     /** If true, strips the top margins so that a Tabbed object could be fitted in it */
-    tabbable?: boolean,
+    tabbable?: boolean;
 }

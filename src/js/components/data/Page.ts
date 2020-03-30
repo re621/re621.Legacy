@@ -15,7 +15,7 @@ export class Page {
      *               you can prepend =
      * @returns true if at least on filter is fullfilled
      */
-    public static matches(filter: RegExp | RegExp[]) {
+    public static matches(filter: RegExp | RegExp[]): boolean {
         if (filter instanceof RegExp) filter = [filter];
         const pathname = this.getInstance().url.pathname.replace(/[\/?]$/g, "");
         let result = false;
@@ -26,7 +26,7 @@ export class Page {
     }
 
     /** Returns a URL object */
-    public static getURL() {
+    public static getURL(): URL {
         return this.getInstance().url;
     }
 
@@ -44,7 +44,7 @@ export class Page {
      * @param key 
      * @param value 
      */
-    public static setQueryParameter(key: string, value: string) {
+    public static setQueryParameter(key: string, value: string): void {
         this.getInstance().url.searchParams.set(key, value);
         this.refreshCurrentUrl();
     }
@@ -52,7 +52,7 @@ export class Page {
     /**
      * Removes a querystring from the url
      */
-    public static removeQueryParameter(key: string) {
+    public static removeQueryParameter(key: string): void {
         this.getInstance().url.searchParams.delete(key);
         this.refreshCurrentUrl();
     }
@@ -60,8 +60,8 @@ export class Page {
     /**
      * Replaces the current url without reloading or pushing the old one to the history
      */
-    private static refreshCurrentUrl() {
-        let url = this.getInstance().url;
+    private static refreshCurrentUrl(): void {
+        const url = this.getInstance().url;
         const searchPrefix = url.searchParams.toString().length === 0 ? "" : "?";
         history.replaceState({}, "", url.origin + url.pathname + searchPrefix + url.searchParams.toString());
     }
@@ -69,7 +69,7 @@ export class Page {
     /**
      * Returns the ID from the second part of the pathname
      */
-    public static getPageID() {
+    public static getPageID(): string {
         return this.getInstance().url.pathname.split("/")[2];
     }
 

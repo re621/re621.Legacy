@@ -1,5 +1,5 @@
 import { Post, ViewingPost } from "../../components/data/Post";
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { TagTypes, Tag } from "../../components/data/Tag";
 import { PageDefintion } from "../../components/data/Page";
 
@@ -21,7 +21,7 @@ export class TitleCustomizer extends RE6Module {
      * Returns a singleton instance of the class
      * @returns FormattingHelper instance
      */
-    public static getInstance() {
+    public static getInstance(): TitleCustomizer {
         if (this.instance == undefined) this.instance = new TitleCustomizer();
         return this.instance;
     }
@@ -30,14 +30,14 @@ export class TitleCustomizer extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings() {
+    protected getDefaultSettings(): Settings {
         return {
             enabled: true,
             template: "#%postid% by %artist% (%copyright%) - %character%",
             symbolsEnabled: true,
-            symbol_fav: "\u2665",      //heart symbol
-            symbol_voteup: "\u2191",   //arrow up
-            symbol_votedown: "\u2193",  //arrow down
+            symbolFav: "\u2665",      //heart symbol
+            symbolVoteUp: "\u2191",   //arrow up
+            symbolVoteDown: "\u2193",  //arrow down
         };
     }
 
@@ -45,7 +45,7 @@ export class TitleCustomizer extends RE6Module {
      * Creates the module's structure.  
      * Should be run immediately after the constructor finishes.
      */
-    public create() {
+    public create(): void {
         if (!this.canInitialize()) return;
         super.create();
 
@@ -56,7 +56,7 @@ export class TitleCustomizer extends RE6Module {
     /**
      * Refreshes the page's title according to the template in the settings
      */
-    public refreshPageTitle() {
+    public refreshPageTitle(): void {
         document.title = this.parseTemplate();
     }
 
@@ -64,7 +64,7 @@ export class TitleCustomizer extends RE6Module {
      * Parses the page title template, replacing variables with their corresponding values
      * @returns string Page title
      */
-    private parseTemplate() {
+    private parseTemplate(): string {
         let prefix = "";
         if (this.fetchSettings("symbolsEnabled")) {
             if (this.post.getIsFaved()) { prefix += this.fetchSettings("symbol_fav"); }

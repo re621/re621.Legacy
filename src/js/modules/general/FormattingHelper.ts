@@ -1,4 +1,4 @@
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { Prompt } from "../../components/structure/Prompt";
 import { Modal } from "../../components/structure/Modal";
 import { Form } from "../../components/structure/Form";
@@ -6,7 +6,7 @@ import { Hotkeys } from "../../components/data/Hotkeys";
 import { Api } from "../../components/api/Api";
 
 // Avaliable icons for formatting buttons
-const icon_definitions = [
+const iconDefinitions = [
     { value: "spacer", name: "&nbsp;" },
 
     { value: "bold", name: "&#x" + "f032" },
@@ -59,7 +59,7 @@ export class FormattingManager extends RE6Module {
      * Returns a singleton instance of the class
      * @returns FormattingHelper instance
      */
-    public static getInstance() {
+    public static getInstance(): FormattingManager {
         if (this.instance == undefined) this.instance = new FormattingManager();
         return this.instance;
     }
@@ -68,10 +68,10 @@ export class FormattingManager extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings() {
+    protected getDefaultSettings(): Settings {
         return {
-            "enabled": true,
-            "btn_active": [
+            enabled: true,
+            buttonsActive: [
                 { name: "Bold", icon: "bold", text: "[b]%selection%[/b]" },
                 { name: "Italic", icon: "italic", text: "[i]%selection%[/i]" },
                 { name: "Strikethrough", icon: "strikethrough", text: "[s]%selection%[/s]" },
@@ -87,22 +87,22 @@ export class FormattingManager extends RE6Module {
                 { name: "Tag", icon: "tag", text: "{{%selection%}}" },
                 { name: "Link", icon: "link", text: "\"%selection%\":" },
             ],
-            "btn_inactive": [
+            buttonInactive: [
                 { name: "Superscript", icon: "superscript", text: "[sup]%selection%[/sup]" },
                 { name: "Color", icon: "color", text: "[color=]%selection%[/color]" },
                 { name: "Wiki", icon: "wiki", text: "[[%selection%]]" },
                 { name: "Link (Prompted)", icon: "link_prompt", text: "\"%selection%\":%prompt:Address%" },
             ],
-            "hotkey_submit": "alt+return",
-            "hotkey_submit_active": true,
+            hotkeySubmit: "alt+return",
+            hotkeySubmitActive: true,
         };
     }
 
     /** Creates the Formatting Helpers for appropriate textareas */
-    public create() {
+    public create(): void {
         $("div.dtext-previewable:has(textarea)").each((i, element) => {
-            let $container = $(element);
-            let newFormatter = new FormattingHelper($container);
+            const $container = $(element);
+            const newFormatter = new FormattingHelper($container);
             this.formatters.push(newFormatter);
 
             $container.on("re621:formatter:update", () => {
@@ -116,7 +116,7 @@ export class FormattingManager extends RE6Module {
     }
 
     /** Removes the module's structure */
-    public destroy() {
+    public destroy(): void {
         this.formatters.forEach((entry) => {
             entry.destroy();
         });
@@ -157,23 +157,23 @@ class FormattingHelper {
     }
 
     /** Registers the module's hotkeys */
-    public registerHotkeys() {
-        let manager = FormattingManager.getInstance();
-        Hotkeys.registerInput(manager.fetchSettings("hotkey_submit"), this.$textarea, () => {
-            if (!manager.fetchSettings("hotkey_submit_active")) return;
+    public registerHotkeys(): void {
+        const manager = FormattingManager.getInstance();
+        Hotkeys.registerInput(manager.fetchSettings("hotkeySubmit"), this.$textarea, () => {
+            if (!manager.fetchSettings("hotkeySubmitActive")) return;
             this.$form.submit();
         });
     }
 
     /** Returns the formatter's container element */
-    public getContainer() {
+    public getContainer(): JQuery<HTMLElement> {
         return this.$container;
     }
 
     /**
      * Builds basic structure for the module
      */
-    private createDOM() {
+    private createDOM(): void {
         /* === Basic Structure === */
         this.$container.attr("data-editing", "true");
         this.$container.attr("data-drawer", "false");
@@ -212,11 +212,11 @@ class FormattingHelper {
         });
 
         // Create the Button Editing Modal
-        let $editButtonsForm = new Form(
+        const $editButtonsForm = new Form(
             { id: "dtext-edit-button", parent: "re-modal-container", },
             [
                 { id: "name", type: "input", label: "Name", },
-                { id: "icon", type: "icon", label: "Icon", data: icon_definitions, },
+                { id: "icon", type: "icon", label: "Icon", data: iconDefinitions, },
                 { id: "text", type: "input", label: "Content", },
                 { id: "delete", type: "button", value: "Delete", },
                 { id: "update", type: "submit", value: "Update", },
@@ -235,9 +235,9 @@ class FormattingHelper {
             disabled: true,
         });
 
-        this.$editButtonsModal.getElement().on("dialogopen", (event, modal) => {
-            let $button = this.$editButtonsModal.getActiveTrigger().parent();
-            let $updateTabInputs = $editButtonsForm.getInputList();
+        this.$editButtonsModal.getElement().on("dialogopen", () => {
+            const $button = this.$editButtonsModal.getActiveTrigger().parent();
+            const $updateTabInputs = $editButtonsForm.getInputList();
 
             $updateTabInputs.get("name").val($button.attr("data-name"));
             $updateTabInputs.get("icon").val($button.attr("data-icon")).trigger("re621:form:update");
@@ -268,7 +268,7 @@ class FormattingHelper {
     }
 
     /** Makes an effort to reset the interface to default */
-    public destroy() {
+    public destroy(): void {
         this.$container
             .find(".comment-header, .dtext-button-drawer-title, .dtext-button-drawer, .dtext-character-counter-box")
             .remove();
@@ -276,8 +276,8 @@ class FormattingHelper {
     }
 
     /** Creates the toolbar DOM structure */
-    private createToolbar() {
-        let $bar = $("<div>").addClass("comment-header").prependTo(this.$container);
+    private createToolbar(): void {
+        const $bar = $("<div>").addClass("comment-header").prependTo(this.$container);
 
         // - Editing State Tabs
         this.$toggleTabs = $("<div>")
@@ -302,7 +302,7 @@ class FormattingHelper {
         this.$formatButtons = $("<div>").addClass("comment-buttons").appendTo($bar);
 
         // - Drawer Toggle Button
-        let $drawerButtonBox = $("<li>")
+        const $drawerButtonBox = $("<li>")
             .appendTo($("<div>").addClass("settings-buttons").appendTo($bar));
         $("<a>")
             .html("&#x" + "f1de")
@@ -315,9 +315,9 @@ class FormattingHelper {
     }
 
     /** Creates the button drawer structure */
-    private createButtonDrawer() {
+    private createButtonDrawer(): void {
         // - Drawer Header
-        let $newFormatButton = $("<a>")
+        const $newFormatButton = $("<a>")
             .html("Add Button");
 
         $("<div>")
@@ -326,11 +326,11 @@ class FormattingHelper {
             .appendTo(this.$container);
 
         // - New Button Process
-        let newFormatForm = new Form(
+        const newFormatForm = new Form(
             { id: "dtext-custom-button", parent: "re-modal-container", },
             [
                 { id: "name", type: "input", label: "Name", },
-                { id: "icon", type: "icon", label: "Icon", data: icon_definitions, },
+                { id: "icon", type: "icon", label: "Icon", data: iconDefinitions, },
                 { id: "text", type: "input", label: "Content", },
                 { id: "create", type: "submit", value: "Create", stretch: "column", },
                 { id: "hr", type: "hr" },
@@ -339,7 +339,7 @@ class FormattingHelper {
                 { id: "var-prompt", label: "Prompt for input", value: "%prompt%", type: "copy" },
             ]);
 
-        let newFormatModal = new Modal({
+        const newFormatModal = new Modal({
             title: "New Custom Button",
             content: newFormatForm.get(),
             triggers: [{ element: $newFormatButton }],
@@ -348,7 +348,7 @@ class FormattingHelper {
 
         newFormatForm.get().on("re621:form:submit", (event, data) => {
             event.preventDefault();
-            let buttonData = this.createButton({
+            const buttonData = this.createButton({
                 name: data.get("name"),
                 icon: data.get("icon"),
                 text: data.get("text"),
@@ -367,8 +367,8 @@ class FormattingHelper {
     }
 
     /** Creates the character counter  */
-    private createCharacterCounter() {
-        let charCounter = $("<span>")
+    private createCharacterCounter(): void {
+        const charCounter = $("<span>")
             .addClass("char-counter")
             .html((this.$textarea.val() + "").length + " / 50000");
         $("<div>")
@@ -382,11 +382,11 @@ class FormattingHelper {
     }
 
     /** Updates the buttons toolbar based on saved settings */
-    public loadButtons() {
+    public loadButtons(): void {
         this.$formatButtons.empty();
 
-        FormattingManager.getInstance().fetchSettings("btn_active", true).forEach((data: ButtonDefinition) => {
-            let buttonElement = this.createButton(data);
+        FormattingManager.getInstance().fetchSettings("buttonsActive", true).forEach((data: ButtonDefinition) => {
+            const buttonElement = this.createButton(data);
             buttonElement.box.appendTo(this.$formatButtons);
 
             if (buttonElement.button.attr("data-text") === "%spacer%") {
@@ -396,30 +396,30 @@ class FormattingHelper {
         });
 
         this.$formatButtonsDrawer.empty();
-        FormattingManager.getInstance().fetchSettings("btn_inactive", true).forEach((data: ButtonDefinition) => {
-            let buttonData = this.createButton(data);
+        FormattingManager.getInstance().fetchSettings("buttonInactive", true).forEach((data: ButtonDefinition) => {
+            const buttonData = this.createButton(data);
             buttonData.box.appendTo(this.$formatButtonsDrawer);
         });
     }
 
     /** Re-indexes and saves the toolbar configuration */
-    private saveButtons() {
+    private saveButtons(): void {
         let buttonData: ButtonDefinition[] = [];
         this.$formatButtons.find("li").each(function (i, element) {
             buttonData.push(fetchData(element));
         });
-        FormattingManager.getInstance().pushSettings("btn_active", buttonData);
+        FormattingManager.getInstance().pushSettings("buttonsActive", buttonData);
 
         buttonData = [];
         this.$formatButtonsDrawer.find("li").each(function (i, element) {
             buttonData.push(fetchData(element));
         });
-        FormattingManager.getInstance().pushSettings("btn_inactive", buttonData);
+        FormattingManager.getInstance().pushSettings("buttonInactive", buttonData);
 
         this.$container.trigger("re621:formatter:update", [this]);
 
         function fetchData(element: HTMLElement): ButtonDefinition {
-            let $button = $(element);
+            const $button = $(element);
             return {
                 name: $button.attr("data-name"),
                 icon: $button.attr("data-icon"),
@@ -432,7 +432,7 @@ class FormattingHelper {
      * Parses the provided configuration file for missing values
      * @param config Configuration to process
      */
-    private parseButtonConfig(config: ButtonDefinition) {
+    private parseButtonConfig(config: ButtonDefinition): ButtonDefinition {
         if (config.name === undefined) config.name = "New Button";
         if (config.icon === undefined) config.icon = "#";
         if (config.text === undefined) config.text = "";
@@ -444,16 +444,16 @@ class FormattingHelper {
      * Creates a new element based on provided definition
      * @param config Button definition
      */
-    private createButton(config: ButtonDefinition) {
+    private createButton(config: ButtonDefinition): ButtonElement {
         config = this.parseButtonConfig(config);
-        let box = $("<li>")
+        const box = $("<li>")
             .attr({
                 "data-name": config.name,
                 "data-icon": config.icon,
                 "data-text": config.text,
             })
             .appendTo(this.$formatButtons);
-        let button = $("<a>")
+        const button = $("<a>")
             .html(this.getIcon(config.icon))
             .addClass("format-button")
             .attr("title", config.name)
@@ -475,7 +475,7 @@ class FormattingHelper {
      * @param $element LI element of the button to update
      * @param config New configuration
      */
-    private updateButton($element: JQuery<HTMLElement>, config: ButtonDefinition) {
+    private updateButton($element: JQuery<HTMLElement>, config: ButtonDefinition): void {
         config = this.parseButtonConfig(config);
         $element
             .attr("data-name", config.name)
@@ -491,7 +491,7 @@ class FormattingHelper {
      * Remove the specified button
      * @param $element LI element of the tab
      */
-    private deleteButton($element: JQuery<HTMLElement>) {
+    private deleteButton($element: JQuery<HTMLElement>): void {
         $element.remove();
         this.saveButtons();
     }
@@ -499,7 +499,7 @@ class FormattingHelper {
     /**
      * Toggles the comment form from editing to preview
      */
-    private toggleEditing() {
+    private toggleEditing(): void {
         if (this.$container.attr("data-editing") === "true") {
             this.$container.attr("data-editing", "false");
             this.$toggleTabs.find("a").toggleClass("active");
@@ -517,7 +517,7 @@ class FormattingHelper {
     /**
      * Toggles the settings box
      */
-    private toggleButtonDrawer() {
+    private toggleButtonDrawer(): void {
         if (this.$container.attr("data-drawer") === "true") {
             this.$container.attr("data-drawer", "false");
 
@@ -539,8 +539,8 @@ class FormattingHelper {
      * Provided with a valid icon name, returns its character value
      * @param name Icon name
      */
-    private getIcon(name: string) {
-        for (let icon of icon_definitions) {
+    private getIcon(name: string): string {
+        for (const icon of iconDefinitions) {
             if (icon.value === name) { return icon.name; }
         }
         return "";
@@ -550,15 +550,15 @@ class FormattingHelper {
      * Adds the provided tag text to the textarea
      * @param content Tag text (i.e. "[b]%selection%[/b]")
      */
-    private processFormattingTag(content: string) {
-        let promises = [];
+    private processFormattingTag(content: string): void {
+        const promises = [];
 
-        let lookup = content.match(/%prompt[:]?[^%]*?(%|$)/g);
-        let replacedTags = [];
+        const lookup = content.match(/%prompt[:]?[^%]*?(%|$)/g);
+        const replacedTags = [];
 
         if (lookup !== null) {
             lookup.forEach(function (element) {
-                let title = element.replace(/(%$)|(^%prompt[:]?)/g, "");
+                const title = element.replace(/(%$)|(^%prompt[:]?)/g, "");
                 replacedTags.push(element);
                 promises.push(new Prompt(title).getPromise());
             });
@@ -571,8 +571,8 @@ class FormattingHelper {
             });
 
             // Handle the %selection% tag
-            let currentText = this.$textarea.val() + "";
-            let position = {
+            const currentText = this.$textarea.val() + "";
+            const position = {
                 start: this.$textarea.prop('selectionStart'),
                 end: this.$textarea.prop('selectionEnd')
             };
@@ -592,7 +592,7 @@ class FormattingHelper {
      * @param input string
      * @param handleData Callback function
      */
-    private async formatDText(input: string | string[] | number, handleData: any) {
+    private async formatDText(input: string | string[] | number, handleData: any): Promise<void> {
         const response = await Api.postUrl(
             "/dtext_preview",
             { body: input }
@@ -601,8 +601,13 @@ class FormattingHelper {
     }
 }
 
+interface ButtonElement {
+    button: JQuery<HTMLElement>;
+    box: JQuery<HTMLElement>;
+}
+
 interface ButtonDefinition {
-    name: string,
-    icon: string,
-    text: string,
+    name: string;
+    icon: string;
+    text: string;
 }

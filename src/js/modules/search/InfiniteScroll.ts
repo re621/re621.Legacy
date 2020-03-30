@@ -1,4 +1,4 @@
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { Api } from "../../components/api/Api";
 import { ApiPost } from "../../components/api/responses/ApiPost";
@@ -7,7 +7,7 @@ import { InstantSearch } from "./InstantSearch";
 import { Post } from "../../components/data/Post";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
 
-declare var Danbooru;
+declare const Danbooru;
 
 /**
  * Gets rid of the default pagination and instead appends new posts
@@ -32,7 +32,7 @@ export class InfiniteScroll extends RE6Module {
      * Returns a singleton instance of the class
      * @returns InfiniteScroll instance
      */
-    public static getInstance() {
+    public static getInstance(): InfiniteScroll {
         if (this.instance == undefined) this.instance = new InfiniteScroll();
         return this.instance;
     }
@@ -41,7 +41,7 @@ export class InfiniteScroll extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings() {
+    protected getDefaultSettings(): Settings {
         return { enabled: true };
     }
 
@@ -49,7 +49,7 @@ export class InfiniteScroll extends RE6Module {
      * Creates the module's structure.  
      * Should be run immediately after the constructor finishes.
      */
-    public create() {
+    public create(): void {
         if (!this.canInitialize()) return;
         super.create();
 
@@ -68,7 +68,7 @@ export class InfiniteScroll extends RE6Module {
         //Wait until all images are loaded, to prevent fetching posts 
         //while the layout is still changing
         $(() => {
-            $(window).scroll(async () => { await this.addMorePosts() });
+            $(window).scroll(async () => { await this.addMorePosts(); });
 
             //If the user has few posts per page, he might already be scrolled to the bottom
             this.addMorePosts();
@@ -78,7 +78,7 @@ export class InfiniteScroll extends RE6Module {
     /**
      * Adds more posts to the site, if the user has scrolled down enough
      */
-    private async addMorePosts() {
+    private async addMorePosts(): Promise<void> {
         if (!this.isEnabled() || this.isInProgress || !this.pagesLeft || !this.shouldAddMore()) {
             return;
         }
@@ -110,7 +110,7 @@ export class InfiniteScroll extends RE6Module {
         this.nextPageToGet++;
     }
 
-    private addPageIndicator() {
+    private addPageIndicator(): void {
         const url = document.location.href;
         this.$postContainer.append($("<a>").attr("href", url).addClass("instantsearch-seperator").html(`<h2>Page: ${this.nextPageToGet}</h2>`));
     }
@@ -119,7 +119,7 @@ export class InfiniteScroll extends RE6Module {
      * Checks if the user has scrolled down enough, so that more
      * posts should be appended
      */
-    private shouldAddMore() {
+    private shouldAddMore(): boolean {
         return $(window).scrollTop() + $(window).height() > $(document).height() - 50;
     }
 }

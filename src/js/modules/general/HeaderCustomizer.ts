@@ -1,5 +1,5 @@
 import { Modal } from "../../components/structure/Modal";
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { User } from "../../components/data/User";
 import { Form } from "../../components/structure/Form";
 import { Page } from "../../components/data/Page";
@@ -25,15 +25,15 @@ export class HeaderCustomizer extends RE6Module {
     private constructor() {
         super();
         this.registerHotkeys(
-            { keys: "hotkey_tab_1", fnct: this.openTabNum },
-            { keys: "hotkey_tab_2", fnct: this.openTabNum },
-            { keys: "hotkey_tab_3", fnct: this.openTabNum },
-            { keys: "hotkey_tab_4", fnct: this.openTabNum },
-            { keys: "hotkey_tab_5", fnct: this.openTabNum },
-            { keys: "hotkey_tab_6", fnct: this.openTabNum },
-            { keys: "hotkey_tab_7", fnct: this.openTabNum },
-            { keys: "hotkey_tab_8", fnct: this.openTabNum },
-            { keys: "hotkey_tab_9", fnct: this.openTabNum },
+            { keys: "hotkeyTab1", fnct: this.openTabNum },
+            { keys: "hotkeyTab2", fnct: this.openTabNum },
+            { keys: "hotkeyTab3", fnct: this.openTabNum },
+            { keys: "hotkeyTab4", fnct: this.openTabNum },
+            { keys: "hotkeyTab5", fnct: this.openTabNum },
+            { keys: "hotkeyTab6", fnct: this.openTabNum },
+            { keys: "hotkeyTab7", fnct: this.openTabNum },
+            { keys: "hotkeyTab8", fnct: this.openTabNum },
+            { keys: "hotkeyTab9", fnct: this.openTabNum },
         );
     }
 
@@ -41,7 +41,7 @@ export class HeaderCustomizer extends RE6Module {
      * Returns a singleton instance of the class
      * @returns HeaderCustomizer instance
      */
-    public static getInstance() {
+    public static getInstance(): HeaderCustomizer {
         if (this.instance == undefined) this.instance = new HeaderCustomizer();
         return this.instance;
     }
@@ -50,18 +50,18 @@ export class HeaderCustomizer extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings() {
-        let def_settings = {
+    protected getDefaultSettings(): Settings {
+        return {
             enabled: true,
-            hotkey_tab_1: "1",
-            hotkey_tab_2: "2",
-            hotkey_tab_3: "3",
-            hotkey_tab_4: "4",
-            hotkey_tab_5: "5",
-            hotkey_tab_6: "6",
-            hotkey_tab_7: "7",
-            hotkey_tab_8: "8",
-            hotkey_tab_9: "9",
+            hotkeyTab1: "1",
+            hotkeyTab2: "2",
+            hotkeyTab3: "3",
+            hotkeyTab4: "4",
+            hotkeyTab5: "5",
+            hotkeyTab6: "6",
+            hotkeyTab7: "7",
+            hotkeyTab8: "8",
+            hotkeyTab9: "9",
             tabs: [
                 { name: "Account", href: "/users/home" },
                 { name: "Posts", href: "/posts" },
@@ -78,14 +78,13 @@ export class HeaderCustomizer extends RE6Module {
                 { name: "More »", href: "/static/site_map" },
             ]
         };
-        return def_settings;
     }
 
     /**
      * Creates the module's structure.  
      * Should be run immediately after the constructor finishes.
      */
-    public create() {
+    public create(): void {
         if (!this.canInitialize()) return;
         super.create();
 
@@ -126,7 +125,7 @@ export class HeaderCustomizer extends RE6Module {
         this.addTabModal.getElement().on("dialogclose", () => { this.disableEditingMode(); });
     }
 
-    public destroy() {
+    public destroy(): void {
         if (!this.isInitialized()) return;
         super.destroy();
         this.$menu.removeClass("custom").empty();
@@ -142,7 +141,7 @@ export class HeaderCustomizer extends RE6Module {
     /**
      * Builds basic structure for the module
      */
-    private createDOM() {
+    private createDOM(): void {
         this.$oldMenu = $("<div>").css("display", "none").appendTo("body");
         this.$menu.children().appendTo(this.$oldMenu);
         this.$menu.addClass("custom");
@@ -230,15 +229,15 @@ export class HeaderCustomizer extends RE6Module {
     /**
      * Turns on editing mode on the header
      */
-    private enableEditingMode() {
+    private enableEditingMode(): void {
         this.$menu.attr("data-editing", "true");
         this.$menu.sortable("enable");
         this.updateTabModal.enable();
 
         // Fill in update tab data
-        this.updateTabModal.getElement().on("dialogopen", (event, modal) => {
-            let $tab = this.updateTabModal.getActiveTrigger().parent();
-            let $updateTabInputs = this.updateTabForm.getInputList();
+        this.updateTabModal.getElement().on("dialogopen", () => {
+            const $tab = this.updateTabModal.getActiveTrigger().parent();
+            const $updateTabInputs = this.updateTabForm.getInputList();
 
             $updateTabInputs.get("name").val($tab.attr("data-name"));
             $updateTabInputs.get("title").val($tab.attr("data-title"));
@@ -249,7 +248,7 @@ export class HeaderCustomizer extends RE6Module {
     /**
      * Turns off the header editing mode
      */
-    private disableEditingMode() {
+    private disableEditingMode(): void {
         this.$menu.attr("data-editing", "false");
         this.$menu.sortable("disable");
 
@@ -261,16 +260,16 @@ export class HeaderCustomizer extends RE6Module {
      * Creates a new styled tab
      * @param config Tab configuration
      */
-    public createTabElement(config: HeaderTab, triggerUpdate?: boolean) {
+    public createTabElement(config: HeaderTab, triggerUpdate?: boolean): HeaderTabElement {
         config = this.parseHeaderTabConfig(config);
         if (triggerUpdate === undefined) triggerUpdate = false;
 
-        let $tab = $(`<li>`)
+        const $tab = $(`<li>`)
             .attr("data-name", config.name)
             .attr("data-title", config.title)
             .attr("data-href", config.href)
             .appendTo($(config.parent));
-        let $link = $("<a>")
+        const $link = $("<a>")
             .html(this.processTabVariables(config.name))
             .attr("title", this.processTabVariables(config.title))
 
@@ -294,7 +293,7 @@ export class HeaderCustomizer extends RE6Module {
      * Parses the provided configuration file for missing values
      * @param config Configuration to process
      */
-    private parseHeaderTabConfig(config: HeaderTab) {
+    private parseHeaderTabConfig(config: HeaderTab): HeaderTab {
         if (config.name === undefined) config.name = "New Tab";
         if (config.href === undefined) config.href = "";
         if (config.title === undefined) config.title = "";
@@ -310,9 +309,9 @@ export class HeaderCustomizer extends RE6Module {
      * Creates a new tab based on specified configuration
      * @param config Configuration
      */
-    private addTab(config: HeaderTab) {
+    private addTab(config: HeaderTab): void {
         config = this.parseHeaderTabConfig(config);
-        let newTab = this.createTabElement(config, true);
+        const newTab = this.createTabElement(config, true);
         this.updateTabModal.registerTrigger({ element: newTab.link });
     }
 
@@ -321,7 +320,7 @@ export class HeaderCustomizer extends RE6Module {
      * @param $element Tab to update
      * @param config New configuration
      */
-    private updateTab($element: JQuery<HTMLElement>, config: HeaderTab) {
+    private updateTab($element: JQuery<HTMLElement>, config: HeaderTab): void {
         config = this.parseHeaderTabConfig(config);
         $element
             .attr("data-name", config.name)
@@ -338,7 +337,7 @@ export class HeaderCustomizer extends RE6Module {
      * Remove the specified tab
      * @param $element LI element of the tab
      */
-    private deleteTab($element: JQuery<HTMLElement>) {
+    private deleteTab($element: JQuery<HTMLElement>): void {
         $element.remove();
         this.saveNavbarSettings();
     }
@@ -347,19 +346,19 @@ export class HeaderCustomizer extends RE6Module {
      * Replaces the variables in the text with corresponding values
      * @param text Text to parse
      */
-    private processTabVariables(text: string) {
+    private processTabVariables(text: string): string {
         return text
-            .replace(/%userid%/g, User.getUserID())
+            .replace(/%userid%/g, User.getUserID() + "")
             .replace(/%username%/g, User.getUsername());
     }
 
     /**
      * Iterates over the header menu and saves the data to cookies
      */
-    private saveNavbarSettings() {
-        let tabData = [];
+    private saveNavbarSettings(): void {
+        const tabData = [];
         this.$menu.find("li").each(function (i, element) {
-            let $tab = $(element);
+            const $tab = $(element);
             tabData.push({
                 name: $tab.attr("data-name"),
                 title: $tab.attr("data-title"),
@@ -369,26 +368,31 @@ export class HeaderCustomizer extends RE6Module {
         this.pushSettings("tabs", tabData);
     }
 
-    private openTabNum(event, key: string) {
-        let tabs = HeaderCustomizer.getInstance().$menu.find("li > a");
+    private openTabNum(event, key: string): void {
+        const tabs = HeaderCustomizer.getInstance().$menu.find("li > a");
         if (parseInt(key) > tabs.length) return;
         tabs[parseInt(key) - 1].click();
     }
 
 }
 
+interface HeaderTabElement {
+    tab: JQuery<HTMLElement>;
+    link: JQuery<HTMLElement>;
+}
+
 interface HeaderTab {
     /** Text inside the link */
-    name?: string,
+    name?: string;
     /** Link address */
-    href?: string,
+    href?: string;
     /** Hover text */
-    title?: string,
+    title?: string;
 
     /** Extra class to append to the tab */
-    class?: string,
+    class?: string;
     /** Element to append the tab to */
-    parent?: string,
+    parent?: string;
     /** Should the tab have controls in editing mode */
     controls?: boolean;
 }

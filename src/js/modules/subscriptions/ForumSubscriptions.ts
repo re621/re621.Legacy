@@ -1,29 +1,29 @@
 import { UpdateData, UpdateDefinition, SubscriptionSettings } from "./SubscriptionManager";
 import { Api } from "../../components/api/Api";
-import { PageDefintion, Page } from "../../components/data/Page";
-import { RE6Module } from "../../components/RE6Module";
+import { Page } from "../../components/data/Page";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { Subscription } from "./Subscription";
 import { ApiForumTopic } from "../../components/api/responses/ApiForum";
 
 export class ForumSubscriptions extends RE6Module implements Subscription {
 
     updateDefinition: UpdateDefinition = {
-        imageSrc: data => {
+        imageSrc: () => {
             return "";
         },
-        updateHref: data => {
+        updateHref: (data) => {
             return `/forum_topics/${data.id}?page=${Math.ceil(data.last / 75)}`;   //75 replies per page
         },
-        updateText: data => {
+        updateText: (data) => {
             return data.name;
         },
-        sourceHref: data => {
+        sourceHref: (data) => {
             return `/forum_topics/${data.id}`;
         },
-        sourceText: data => {
+        sourceText: () => {
             return "First Page";
         }
-    }
+    };
 
     limit: number;
     lastUpdate: number;
@@ -39,41 +39,41 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         return Page.getPageID();
     }
 
-    getElementsToInsertAfter() {
+    getElementsToInsertAfter(): JQuery<HTMLElement> {
         return $("div#c-forum-topics > div#a-show > h1").first();
     }
 
-    public createSubscribeButton() {
+    public createSubscribeButton(): JQuery<HTMLElement> {
         return $("<button>")
             .addClass(`large-subscribe-button subscribe`)
             .html("Subscribe");
     }
 
-    public createUnsubscribeButton() {
+    public createUnsubscribeButton(): JQuery<HTMLElement> {
         return $("<button>")
             .addClass(`large-subscribe-button unsubscribe`)
             .html("Unsubscribe");
     }
 
-    public async getUpdatedEntries() {
-        let results: UpdateData[] = [];
+    public async getUpdatedEntries(): Promise<UpdateData[]> {
+        const results: UpdateData[] = [];
 
-        let forumData: SubscriptionSettings = this.fetchSettings("data", true);
+        const forumData: SubscriptionSettings = this.fetchSettings("data", true);
         if (Object.keys(forumData).length === 0) {
             return results;
         }
 
-        let forumsJson: ApiForumTopic[] = await Api.getJson("/forum_topics.json?search[id]=" + Object.keys(forumData).join(","));
+        const forumsJson: ApiForumTopic[] = await Api.getJson("/forum_topics.json?search[id]=" + Object.keys(forumData).join(","));
         for (const forumJson of forumsJson) {
             if (new Date(forumJson.updated_at).getTime() > this.lastUpdate) {
-                results.push(await this.formatForumUpdate(forumJson, forumData));
+                results.push(await this.formatForumUpdate(forumJson));
             }
         }
         this.pushSettings("data", forumData);
         return results;
     }
 
-    private async formatForumUpdate(value: ApiForumTopic, forumInfo: SubscriptionSettings): Promise<UpdateData> {
+    private async formatForumUpdate(value: ApiForumTopic): Promise<UpdateData> {
         return {
             id: value.id,
             name: value.title,
@@ -87,18 +87,20 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings() {
+    protected getDefaultSettings(): Settings {
         return {
             enabled: true,
             data: {}
         };
     }
 
-    public static getInstance() {
+    public static getInstance(): ForumSubscriptions {
         if (this.instance == undefined) this.instance = new ForumSubscriptions();
         return this.instance;
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ForumInfo {
+    // TODO Fix this
 }

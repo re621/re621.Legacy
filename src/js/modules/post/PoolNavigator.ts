@@ -1,19 +1,19 @@
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 
 export class PoolNavigator extends RE6Module {
 
     private static instance: PoolNavigator;
 
-    private activeNav: number = 0;
+    private activeNav = 0;
     private navbars: PostNav[] = [];
 
     private constructor() {
         super(PageDefintion.post);
         this.registerHotkeys(
-            { keys: "hotkey_cycle", fnct: this.cycleNavbars },
-            { keys: "hotkey_next", fnct: this.triggerNextPost },
-            { keys: "hotkey_prev", fnct: this.triggerPrevPost },
+            { keys: "hotkeyCycle", fnct: this.cycleNavbars },
+            { keys: "hotkeyNext", fnct: this.triggerNextPost },
+            { keys: "hotkeyPrev", fnct: this.triggerPrevPost },
         );
     }
 
@@ -21,7 +21,7 @@ export class PoolNavigator extends RE6Module {
      * Returns a singleton instance of the class
      * @returns FormattingHelper instance
      */
-    public static getInstance() {
+    public static getInstance(): PoolNavigator {
         if (this.instance == undefined) this.instance = new PoolNavigator();
         return this.instance;
     }
@@ -30,12 +30,12 @@ export class PoolNavigator extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings() {
+    protected getDefaultSettings(): Settings {
         return {
             enabled: true,
-            hotkey_cycle: "x|.",
-            hotkey_prev: "a|left",
-            hotkey_next: "d|right",
+            hotkeyCycle: "x|.",
+            hotkeyPrev: "a|left",
+            hotkeyNext: "d|right",
         };
     }
 
@@ -43,7 +43,7 @@ export class PoolNavigator extends RE6Module {
      * Creates the module's structure.  
      * Should be run immediately after the constructor finishes.
      */
-    public create() {
+    public create(): void {
         if (!this.canInitialize()) return;
         super.create();
 
@@ -57,8 +57,8 @@ export class PoolNavigator extends RE6Module {
     }
 
     /** Loops through available navbars */
-    private cycleNavbars() {
-        let navbars = PoolNavigator.getInstance().navbars,
+    private cycleNavbars(): void {
+        const navbars = PoolNavigator.getInstance().navbars,
             active = PoolNavigator.getInstance().activeNav;
 
         if ((active + 1) >= navbars.length) {
@@ -71,23 +71,23 @@ export class PoolNavigator extends RE6Module {
     }
 
     /** Emulates a click on the "next" button */
-    private triggerNextPost() {
-        let navbars = PoolNavigator.getInstance().navbars,
+    private triggerNextPost(): void {
+        const navbars = PoolNavigator.getInstance().navbars,
             active = PoolNavigator.getInstance().activeNav;
         if (navbars.length == 0) return;
         navbars[active].element.find("a.next").first()[0].click();
     }
 
     /** Emulates a click on the "prev" button */
-    private triggerPrevPost() {
-        let navbars = PoolNavigator.getInstance().navbars,
+    private triggerPrevPost(): void {
+        const navbars = PoolNavigator.getInstance().navbars,
             active = PoolNavigator.getInstance().activeNav;
         if (navbars.length == 0) return;
         navbars[active].element.find("a.prev").first()[0].click();
     }
 
     /** Creates the module structure */
-    private buildDOM() {
+    private buildDOM(): void {
         // Search-nav
         if ($("div#search-seq-nav").length) {
             this.navbars.push({ type: "search", element: $("div#search-seq-nav > ul > li").first(), checkbox: undefined, });
@@ -104,7 +104,7 @@ export class PoolNavigator extends RE6Module {
         this.navbars.forEach((nav, index) => {
             nav.element.addClass("post-nav");
 
-            let $radioBox = $("<div>")
+            const $radioBox = $("<div>")
                 .addClass("post-nav-switch-box")
                 .appendTo(nav.element);
             nav.checkbox = $("<input>")
@@ -123,7 +123,7 @@ export class PoolNavigator extends RE6Module {
 }
 
 interface PostNav {
-    type: "search" | "pool",
-    element: JQuery<HTMLElement>,
-    checkbox: JQuery<HTMLElement>,
+    type: "search" | "pool";
+    element: JQuery<HTMLElement>;
+    checkbox: JQuery<HTMLElement>;
 }

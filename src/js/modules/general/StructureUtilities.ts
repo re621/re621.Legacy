@@ -1,5 +1,7 @@
-declare var GM_addStyle;
-declare var GM_getResourceText;
+// eslint-disable-next-line @typescript-eslint/camelcase
+declare const GM_addStyle;
+// eslint-disable-next-line @typescript-eslint/camelcase
+declare const GM_getResourceText;
 
 /**
  * StructureUtilities  
@@ -7,25 +9,25 @@ declare var GM_getResourceText;
  */
 export class StructureUtilities {
 
-    public static createDOM() {
+    public static createDOM(): void {
         // Load in the external stylesheet
         GM_addStyle(GM_getResourceText("re621_styles"));
 
         // Create a modal container
-        let $modalContainer = $("<re-modal-container>").prependTo("body");
+        $("<re-modal-container>").prependTo("body");
 
         // Create a more sensible header structure
-        let $menuContainer = $("nav#nav");
-        let $menuMain = $("menu.main");
+        const $menuContainer = $("nav#nav");
+        const $menuMain = $("menu.main");
 
         if ($("nav#nav menu").length < 2) {
             $menuContainer.append(`<menu>`);
         }
 
-        let $menuLogo = $("<menu>").addClass("logo desktop-only").html(`<a href="/" data-ytta-id="-">e621</a>`);
+        const $menuLogo = $("<menu>").addClass("logo desktop-only").html(`<a href="/" data-ytta-id="-">e621</a>`);
         $menuContainer.prepend($menuLogo);
 
-        let $menuExtra = $("<menu>").addClass("extra");
+        const $menuExtra = $("<menu>").addClass("extra");
         $menuMain.after($menuExtra);
 
         $("menu:last-child").addClass("submenu");
@@ -33,16 +35,16 @@ export class StructureUtilities {
         // Tweak the tag lists
         const $tags = $("#tag-box > ul > li, #tag-list > ul > li");
         $tags.each((index, element) => {
-            let $container = $(element);
+            const $container = $(element);
 
-            let $tagLink = $container.find("a.search-tag").first();
+            const $tagLink = $container.find("a.search-tag").first();
             $container.find("a.wiki-link").insertBefore($tagLink);
 
-            let $countBox = $container.find(".post-count");
+            const $countBox = $container.find(".post-count");
             $countBox.attr("data-count-short", $countBox.text());
             if (!$countBox.attr("data-count")) { $countBox.attr("data-count", $countBox.text()); }
 
-            let $buttonBox = $("<div>")
+            const $buttonBox = $("<div>")
                 .addClass("tag-actions")
                 .attr("data-tag", $container.find("a.search-tag").text().replace(/ /g, "_"))
                 .appendTo($container);

@@ -1,10 +1,12 @@
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
 import { User } from "../../components/data/User";
 import { PostFilter } from "../../components/data/PostFilter";
 
-declare var Danbooru;
+/* eslint-disable @typescript-eslint/camelcase */
+
+declare const Danbooru;
 
 /**
  * Blacklist Enhancer  
@@ -26,7 +28,7 @@ export class BlacklistEnhancer extends RE6Module {
      * Returns a singleton instance of the class
      * @returns BlacklistEnhancer instance
      */
-    public static getInstance() {
+    public static getInstance(): BlacklistEnhancer {
         if (this.instance == undefined) this.instance = new BlacklistEnhancer();
         return this.instance;
     }
@@ -35,7 +37,7 @@ export class BlacklistEnhancer extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings() {
+    protected getDefaultSettings(): Settings {
         return {
             enabled: true,
             quickaddTags: true,
@@ -47,14 +49,14 @@ export class BlacklistEnhancer extends RE6Module {
      * Creates the module's structure.  
      * Should be run immediately after the constructor finishes.
      */
-    public create() {
+    public create(): void {
         if (!this.canInitialize()) return;
         super.create();
 
         //Override default blacklist function
-        Danbooru.Blacklist.apply = () => { };
-        Danbooru.Blacklist.initialize_anonymous_blacklist = () => { };
-        Danbooru.Blacklist.initialize_all = () => { };
+        Danbooru.Blacklist.apply = (): void => { return; };
+        Danbooru.Blacklist.initialize_anonymous_blacklist = (): void => { return; };
+        Danbooru.Blacklist.initialize_all = (): void => { return; };
 
         this.modifyDOM();
 
@@ -62,14 +64,14 @@ export class BlacklistEnhancer extends RE6Module {
         this.applyBlacklist(true);
     }
 
-    private modifyDOM() {
+    private modifyDOM(): void {
         //Remove already added entries
         this.$box = $("section#blacklist-box");
         this.$list = $("#blacklist-list").empty();
 
 
-        let $disableAllButton = $("#disable-all-blacklists").text("Disable all filters");
-        let $enableAllbutton = $("#re-enable-all-blacklists").text("Enable all filters");
+        const $disableAllButton = $("#disable-all-blacklists").text("Disable all filters");
+        const $enableAllbutton = $("#re-enable-all-blacklists").text("Enable all filters");
 
         //catch when the user toggles the blacklist
         $disableAllButton.on("click", () => {
@@ -90,7 +92,7 @@ export class BlacklistEnhancer extends RE6Module {
 
         // Create blacklis toggle dom
 
-        let $toggleContainer = $("section#blacklist-box h1").empty();
+        const $toggleContainer = $("section#blacklist-box h1").empty();
         this.$toggle = $(`<a href="">Blacklisted</a>`)
             .attr("id", "blacklist-toggle")
             .appendTo($toggleContainer);
@@ -111,9 +113,9 @@ export class BlacklistEnhancer extends RE6Module {
         //Add x next to tag names to toggle them from the blacklist
         if (this.fetchSettings("quickaddTags") === true && User.isLoggedIn()) {
             $(".tag-actions").each((index, element) => {
-                let $container = $(element);
+                const $container = $(element);
 
-                let toggleButton = $("<a>")
+                const toggleButton = $("<a>")
                     .addClass("blacklist-tag-toggle")
                     .html(`<i class="fas fa-times"></i>`)
                     .prependTo($container);
@@ -128,7 +130,7 @@ export class BlacklistEnhancer extends RE6Module {
     /**
      * Removes or adds a tag to the users blacklist
      */
-    private async toggleBlacklistTag(tag) {
+    private async toggleBlacklistTag(tag): Promise<void> {
         Danbooru.notice("Getting current blacklist");
         let currentBlacklist = (await User.getCurrentSettings()).blacklisted_tags.split("\n");
 
@@ -146,24 +148,24 @@ export class BlacklistEnhancer extends RE6Module {
     }
 
     /** Toggles the filter list state */
-    private toggleFilterList() {
+    private toggleFilterList(): void {
         if (this.filterListVisible()) { this.hideFilterList(); }
         else { this.showFilterList(); }
     }
 
     /** Returns true if the filter list is visible, false otherwise */
-    private filterListVisible() {
+    private filterListVisible(): boolean {
         return this.$box.attr("data-filters-hidden") == "false";
     }
 
     /** Hides the filter list */
-    private hideFilterList() {
+    private hideFilterList(): void {
         this.pushSettings("hideFilterList", true);
         this.$box.attr("data-filters-hidden", "true");
     }
 
     /** Shows the filter list */
-    private showFilterList() {
+    private showFilterList(): void {
         this.pushSettings("hideFilterList", false);
         this.$box.attr("data-filters-hidden", "false");
     }
@@ -172,7 +174,7 @@ export class BlacklistEnhancer extends RE6Module {
      * Hides posts, if they are blacklisted and blacklist is active, show otherwise
      * @param hide 
      */
-    private applyBlacklist(firstRun = false) {
+    private applyBlacklist(firstRun = false): void {
         for (const post of Post.fetchPosts()) {
             //Skip over posts who were already hidden by other means, like instantsearch
             if (firstRun && !post.getDomElement().is(":visible")) {
@@ -188,7 +190,7 @@ export class BlacklistEnhancer extends RE6Module {
         this.updateSidebar();
     }
 
-    public updateSidebar() {
+    public updateSidebar(): void {
         //remove already added entries
         this.$list.empty();
 
@@ -210,7 +212,7 @@ export class BlacklistEnhancer extends RE6Module {
         }
     }
 
-    private addSidebarEntry(filterString, filter: PostFilter) {
+    private addSidebarEntry(filterString, filter: PostFilter): void {
         //https://github.com/zwagoth/e621ng/blob/master/app/javascript/src/javascripts/blacklists.js
 
         //don't display filters with zero matches
@@ -239,7 +241,7 @@ export class BlacklistEnhancer extends RE6Module {
             $link.addClass("blacklisted-active");
         }
 
-        $count.html(filter.getMatches());
+        $count.html(filter.getMatches() + "");
         $count.addClass("post-count");
         $entry.append($link);
         $entry.append(" ");

@@ -1,7 +1,8 @@
 import { ApiPost } from "./responses/ApiPost";
 
 export class PostHtml {
-    public static create(json: ApiPost) {
+
+    public static create(json: ApiPost): JQuery<HTMLElement> {
         //data-has-sound
         //data-flags
         //data-uploader
@@ -9,25 +10,27 @@ export class PostHtml {
         //this must be possible in another way
         const allTags = tags.artist.concat(tags.character, tags.copyright, tags.general,
             tags.invalid, tags.lore, tags.meta, tags.species).join(" ");
-        let $article = $("<article>").
-            attr("id", "post_" + json.id).
-            attr("data-id", json.id).
-            attr("data-flags", this.getFlags(json).join(" ")).
-            attr("data-tags", allTags).
-            attr("data-rating", json.rating).
-            attr("data-uploader-id", json.uploader_id).
-            attr("data-file-ext", json.file.ext).
-            attr("data-file-url", json.file.url).
-            attr("data-large-file-url", json.sample.url).       //yes, even though the name has large in it, sample is correct here
-            attr("data-preview-file-url", json.preview.url).
-            attr("data-uploader", json.uploader_id);            // TODO temporary, replace with actual uploader name
+        const $article = $("<article>")
+            .attr({
+                "id": "post_" + json.id,
+                "data-id": json.id,
+                "data-flags": this.getFlags(json).join(" "),
+                "data-tags": allTags,
+                "data-rating": json.rating,
+                "data-uploader-id": json.uploader_id,
+                "data-file-ext": json.file.ext,
+                "data-file-url": json.file.url,
+                "data-large-file-url": json.sample.url,       // yes, even though the name has large in it, sample is correct here
+                "data-preview-file-url": json.preview.url,
+                "data-uploader": json.uploader_id,
+            });
 
         for (const className of this.getArticleClasses(json)) {
             $article.addClass(className);
         }
-        let $href = $("<a>").
+        const $href = $("<a>").
             attr("href", "/posts/" + json.id);
-        let $picture = $("<picture>");
+        const $picture = $("<picture>");
         //TODO title status
         $picture.append($("<img>").
             attr("class", "has-cropped-false").
@@ -36,9 +39,9 @@ export class PostHtml {
             attr("alt", allTags));
 
         $href.append($picture);
-        let $desc = $("<div>").
+        const $desc = $("<div>").
             attr("class", "desc");
-        let $postScore = $("<div>").attr("id", "post-score-" + json.id).attr("class", "post-score");
+        const $postScore = $("<div>").attr("id", "post-score-" + json.id).attr("class", "post-score");
 
         //Score
         const scoreInfo = this.getScoreInfo(json);
@@ -70,7 +73,7 @@ export class PostHtml {
         return $article;
     }
 
-    private static getScoreInfo(json: ApiPost) {
+    private static getScoreInfo(json: ApiPost): ScoreInfo {
         if (json.score.total === 0) {
             return {
                 class: "score-neutral",
@@ -80,17 +83,17 @@ export class PostHtml {
             return {
                 class: "score-positive",
                 modifier: "\u2191"
-            }
+            };
         } else {
             return {
                 class: "score-negative",
                 modifier: "\u2193"
-            }
+            };
         }
     }
 
-    private static getArticleClasses(json: ApiPost) {
-        let result = [
+    private static getArticleClasses(json: ApiPost): string[] {
+        const result = [
             "blacklisted",
             "captioned",
             "post-preview"
@@ -120,19 +123,19 @@ export class PostHtml {
         return result;
     }
 
-    private static getFlags(json: ApiPost) {
+    private static getFlags(json: ApiPost): string[] {
         const result = [];
         if (json.flags.deleted) {
             result.push("deleted");
         } else if (json.flags.flagged) {
             result.push("flagged");
         } else if (json.flags.pending) {
-            result.push("pending")
+            result.push("pending");
         }
         return result;
     }
 
-    private static getExtra(json: ApiPost) {
+    private static getExtra(json: ApiPost): string {
         let result = "";
         if (json.relationships.parent_id !== null) {
             result += "P";
@@ -148,4 +151,9 @@ export class PostHtml {
         }
         return result;
     }
+}
+
+interface ScoreInfo {
+    class: string;
+    modifier: string;
 }

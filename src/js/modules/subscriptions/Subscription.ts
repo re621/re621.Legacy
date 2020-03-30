@@ -10,9 +10,9 @@ export interface Subscription extends RE6Module {
      * Elements where a subscribe/unsubscribe button should be appended to
      * The elements will be passedt to getSubscriberId
      */
-    getElementsToInsertAfter(): JQuery<HTMLElement>
-    createSubscribeButton(): JQuery<HTMLElement>
-    createUnsubscribeButton(): JQuery<HTMLElement>
+    getElementsToInsertAfter(): JQuery<HTMLElement>;
+    createSubscribeButton(): JQuery<HTMLElement>;
+    createUnsubscribeButton(): JQuery<HTMLElement>;
     /**
      * Returns all entries which are considered to be updated,
      * i.e the api update date is larger than the last updated date
@@ -23,7 +23,7 @@ export interface Subscription extends RE6Module {
      * for example the pool or forum_topic id
      * @param $element the element which matched the selector on which to append buttons to
      */
-    getSubscriberId($element: JQuery<HTMLElement>): string
+    getSubscriberId($element: JQuery<HTMLElement>): string;
     /**
      * Holds the last time checked for updates in ms since epoch
      */

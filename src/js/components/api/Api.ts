@@ -25,7 +25,7 @@ export class Api {
      */
     protected static async requestFunction(url: string, method: string, data = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            let requestInfo: RequestInit = {
+            const requestInfo: RequestInit = {
                 credentials: "include",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
@@ -35,7 +35,7 @@ export class Api {
                 mode: "cors"
             };
             if (method !== "GET" && method !== "get") {
-                let postData = [];
+                const postData = [];
                 data["authenticity_token"] = Api.getInstance().authenticityToken;
                 for (const key of Object.keys(data)) {
                     postData.push(encodeURIComponent(key) + "=" + encodeURIComponent(data[key]));
@@ -51,7 +51,7 @@ export class Api {
         });
     }
 
-    private static async request(url: string, method: string, data?: {}) {
+    private static async request(url: string, method: string, data?: {}): Promise<string> {
         const queue = this.getInstance().queue;
         const id = queue.getRequestId();
         queue.add(this.requestFunction, id, url, method, data);
@@ -63,7 +63,7 @@ export class Api {
      * @param url e6 endpoint without the host, => /posts/123456.json
      * @returns the response as a string
      */
-    public static async getUrl(url: string) {
+    public static async getUrl(url: string): Promise<string> {
         return await this.request(url, "GET");
     }
 
@@ -72,7 +72,7 @@ export class Api {
      * @param url e6 endpoint without the host, => /posts/123456.json
      * @returns the response as a string
      */
-    public static async getJson(url: string) {
+    public static async getJson(url: string): Promise<any> {
         const response = await this.getUrl(url);
         return JSON.parse(response);
     }
@@ -82,7 +82,7 @@ export class Api {
      * @param url e6 endpoint without the host, => /posts/123456.json
      * @returns the response as a string
      */
-    public static async postUrl(url: string, json?: {}) {
+    public static async postUrl(url: string, json?: {}): Promise<string> {
         return await this.request(url, "POST", json);
     }
 

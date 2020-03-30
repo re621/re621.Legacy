@@ -1,9 +1,9 @@
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { Post } from "../../components/data/Post";
 import { Form } from "../../components/structure/Form";
 import { PageDefintion } from "../../components/data/Page";
 
-declare var Danbooru;
+declare const Danbooru;
 
 const IMAGE_SIZES = [
     { value: "sample", name: "Sample" },
@@ -27,7 +27,7 @@ export class ImageScaler extends RE6Module {
     constructor() {
         super(PageDefintion.post);
         this.registerHotkeys(
-            { keys: "hotkey_scale", fnct: () => { this.setScale(); } }
+            { keys: "hotkeyScale", fnct: () => { this.setScale(); } }
         );
     }
 
@@ -35,7 +35,7 @@ export class ImageScaler extends RE6Module {
      * Returns a singleton instance of the class
      * @returns BlacklistToggler instance
      */
-    public static getInstance() {
+    public static getInstance(): ImageScaler {
         if (this.instance == undefined) this.instance = new ImageScaler();
         return this.instance;
     }
@@ -44,11 +44,11 @@ export class ImageScaler extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings() {
+    protected getDefaultSettings(): Settings {
         return {
             enabled: true,
             size: "sample",
-            hotkey_scale: "v|0",
+            hotkeyScale: "v|0",
         };
     }
 
@@ -56,17 +56,17 @@ export class ImageScaler extends RE6Module {
      * Creates the module's structure.  
      * Should be run immediately after the constructor finishes.
      */
-    public create() {
+    public create(): void {
         if (!this.canInitialize()) return;
         super.create();
 
         this.post = Post.getViewingPost();
         this.image = $("img#image");
 
-        let resizeButtonContainer = $("#image-resize-cycle").empty();
+        const resizeButtonContainer = $("#image-resize-cycle").empty();
         this.setImageSize(this.fetchSettings("size"));
 
-        let resizeForm = new Form(
+        const resizeForm = new Form(
             {
                 id: "resize-image",
                 parent: "#image-resize-cycle",
@@ -91,12 +91,12 @@ export class ImageScaler extends RE6Module {
         this.resizeSelector = resizeForm.getInputList().get("scale");
 
         this.resizeSelector.change((event, save) => {
-            let size = $(event.target).val() + "";
+            const size = $(event.target).val() + "";
             this.setImageSize(size);
             if (save) ImageScaler.getInstance().pushSettings("size", size);
         });
 
-        this.image.click(event => {
+        this.image.click(() => {
             this.setScale("", false);
         });
 
@@ -108,10 +108,10 @@ export class ImageScaler extends RE6Module {
      * @param size New size. If none specified, cycles to the next in the list
      * @param save Set to false to prevent saving the scale to settings
      */
-    private setScale(size: string = "", save: boolean = true) {
-        let selector = ImageScaler.getInstance().resizeSelector;
+    private setScale(size = "", save = true): void {
+        const selector = ImageScaler.getInstance().resizeSelector;
         if (size === "") {
-            let $next = selector.find("option:selected").next();
+            const $next = selector.find("option:selected").next();
             if ($next.length > 0) { size = $next.val() + ""; }
             else { size = selector.find("option").first().val() + ""; }
         }
@@ -123,7 +123,7 @@ export class ImageScaler extends RE6Module {
      * Set the page image to the specified size
      * @param size sample, fit-gorizontal, fit-vertical, or original
      */
-    private setImageSize(size: string) {
+    private setImageSize(size: string): void {
         this.image.removeClass();
         this.image.parent().addClass("loading");
 

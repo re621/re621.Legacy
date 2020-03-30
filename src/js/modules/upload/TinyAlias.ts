@@ -1,11 +1,11 @@
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 import { Api } from "../../components/api/Api";
 import { ApiTag } from "../../components/api/responses/ApiTag";
 import { Modal } from "../../components/structure/Modal";
 import { AvoidPosting } from "../../components/data/AvoidPosting";
 
-declare var Danbooru;
+declare const Danbooru;
 
 export class TinyAlias extends RE6Module {
 
@@ -28,7 +28,7 @@ export class TinyAlias extends RE6Module {
      * Returns a singleton instance of the SettingsController
      * @returns ThemeCustomizer instance
      */
-    public static getInstance() {
+    public static getInstance(): TinyAlias {
         if (this.instance === undefined) {
             this.instance = new TinyAlias();
             this.instance.create();
@@ -40,7 +40,7 @@ export class TinyAlias extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings() {
+    protected getDefaultSettings(): Settings {
         return {
             enabled: true,
             checkDNP: true,
@@ -52,14 +52,14 @@ export class TinyAlias extends RE6Module {
      * Creates the module's structure.  
      * Should be run immediately after the constructor finishes.
      */
-    public create() {
+    public create(): void {
         if (!this.canInitialize()) return;
         super.create();
 
         this.buildDOM();
     }
 
-    public destroy() {
+    public destroy(): void {
         if (!this.isInitialized()) return;
         super.destroy();
         this.$container.find("input").unbind();
@@ -67,27 +67,27 @@ export class TinyAlias extends RE6Module {
     }
 
     /** Creates the document structure for the module */
-    private buildDOM() {
+    private buildDOM(): void {
         this.$textarea = $("textarea#post_tags");
         this.$container = this.$textarea.parent();
 
         // Building the structure
-        let $toolbar = $("<div>")
+        const $toolbar = $("<div>")
             .addClass("tiny-alias-container")
             .appendTo(this.$container);
 
-        let $input = $("<input>")
+        const $input = $("<input>")
             .attr({ type: "text", required: "", pattern: ".+", })
             .appendTo($toolbar);
-        let $insertButton = $("<button>")
+        const $insertButton = $("<button>")
             .html("Insert")
             .appendTo($toolbar);
 
-        let $infoTextBox = $("<div>").appendTo($toolbar);
+        const $infoTextBox = $("<div>").appendTo($toolbar);
         this.$infoText = $("<div>").addClass("info-text").appendTo($infoTextBox);
         this.$infoLoad = $("<div>").addClass("info-load").html(`<i class="fas fa-spinner fa-spin"></i>`).appendTo($infoTextBox);
-        let $settingsButton = $("<button>").html("TinyAlias").appendTo($toolbar);
-        let $sortButton = $("<button>").html("Sort").appendTo($toolbar);
+        const $settingsButton = $("<button>").html("TinyAlias").appendTo($toolbar);
+        const $sortButton = $("<button>").html("Sort").appendTo($toolbar);
 
         // Adding Functionality
         this.tagAlreadyChecked = false;
@@ -126,10 +126,10 @@ export class TinyAlias extends RE6Module {
         });
 
         // Settings Page
-        let $aliasList = $("<div>").addClass("alias-list");
+        const $aliasList = $("<div>").addClass("alias-list");
 
         $("<div>").html("<h3>New Alias</h3>").appendTo($aliasList);
-        let $newAliasForm = this.buildAliasForm($aliasList, "", "", "alias-form-new");
+        const $newAliasForm = this.buildAliasForm($aliasList, "", "", "alias-form-new");
         $newAliasForm.css("margin-bottom", "1.5rem");
         $newAliasForm.find("button[type='button']").css("visibility", "hidden");
         $newAliasForm.find("button[type='submit']").html("Create");
@@ -147,8 +147,8 @@ export class TinyAlias extends RE6Module {
 
         $newAliasForm.submit((event) => {
             event.preventDefault();
-            let $name = $newAliasForm.find("input[type='text']");
-            let $data = $newAliasForm.find("textarea");
+            const $name = $newAliasForm.find("input[type='text']");
+            const $data = $newAliasForm.find("textarea");
 
             $name.removeClass("invalid");
             $data.removeClass("invalid");
@@ -182,7 +182,7 @@ export class TinyAlias extends RE6Module {
     }
 
     /** Handles the process of tag insertion */
-    private handleInsertButton($input: JQuery<HTMLElement>) {
+    private handleInsertButton($input: JQuery<HTMLElement>): void {
         if (!this.insertAlias($input.val().toString())) {
             this.insertTag($input.val().toString());
         }
@@ -191,8 +191,8 @@ export class TinyAlias extends RE6Module {
     }
 
     /** Handles the tag checking */
-    private async handleCheckButton($input: JQuery<HTMLElement>) {
-        let tag = this.prepareTag($input.val().toString());
+    private async handleCheckButton($input: JQuery<HTMLElement>): Promise<void> {
+        const tag = this.prepareTag($input.val().toString());
         if (this.tagAlreadyAdded(tag)) {
             this.$infoText.html("Tag has already been added");
             return;
@@ -206,30 +206,31 @@ export class TinyAlias extends RE6Module {
         }
 
         const tagInfo = await this.getTagInfo(tag);
-        if (tagInfo.invalid) {
+        if (tagInfo.isInvalid) {
             this.$infoText.html("Invalid tagname");
             return;
         }
 
         this.tagAlreadyChecked = true;
 
-        if (tagInfo.is_alias) {
-            this.$infoText.append(" (~" + tagInfo.true_name + ")");
-            $input.val(tagInfo.true_name);
+        if (tagInfo.isAliased) {
+            this.$infoText.append(" (~" + tagInfo.realName + ")");
+            $input.val(tagInfo.realName);
         }
 
-        if (tagInfo.is_dnp) {
+        if (tagInfo.isDNP) {
             this.$infoText.append(`: ` + tag + ` is on <a href="/wiki_pages/85">DNP</a> list`);
         }
 
         this.$infoLoad.removeClass("visible");
+        return;
     }
 
     /**
      * Normalizes input into a standard form
      * @param input Input to normalize
      */
-    private prepareInput(input) {
+    private prepareInput(input): string {
         return input.trim().toLowerCase();
     }
 
@@ -237,7 +238,7 @@ export class TinyAlias extends RE6Module {
      * Converts a human-readable tag name into a proper tag
      * @param input Tag to convert
      */
-    private prepareTag(input: string) {
+    private prepareTag(input: string): string {
         return this.prepareInput(input).replace(/ /g, "_");
     }
 
@@ -245,7 +246,7 @@ export class TinyAlias extends RE6Module {
      * Inserts the specified tag into the textarea
      * @param input Tag to insert
      */
-    private insertTag(input: string) {
+    private insertTag(input: string): void {
         input = this.prepareTag(input);
         this.$textarea.val((i, text) => {
             if (text.endsWith(" ") || text.length === 0) return text + input;
@@ -258,7 +259,7 @@ export class TinyAlias extends RE6Module {
      * @param input Aliased input
      * @returns True if the input had aliases, false otherwise
      */
-    private insertAlias(input: string) {
+    private insertAlias(input: string): boolean {
         console.log("looking up <" + input + ">");
         const aliasList = this.fetchSettings("data");
         input = this.prepareTag(input);
@@ -279,7 +280,7 @@ export class TinyAlias extends RE6Module {
      * @param input Tag to look for
      * @returns True if the tag exists, false otherwise
      */
-    private tagAlreadyAdded(input: string) {
+    private tagAlreadyAdded(input: string): boolean {
         input = this.prepareTag(input);
         return this.$textarea.val().toString().includes(input);
     }
@@ -288,21 +289,21 @@ export class TinyAlias extends RE6Module {
      * Searches the API for the tag data
      * @param tag Tag to look up
      */
-    private async getTagInfo(tag: string) {
+    private async getTagInfo(tag: string): Promise<TagResult> {
         this.$infoLoad.addClass("visible");
         tag = encodeURIComponent(tag);
-        const result = {
+        const result: TagResult = {
             count: 0,
-            invalid: false,
-            is_alias: false,
-            is_dnp: false,
-            true_name: undefined
+            isInvalid: false,
+            isAliased: false,
+            isDNP: false,
+            realName: undefined,
         };
 
         // First data query
         let jsonData: ApiTag = await Api.getJson("/tags/" + tag + ".json");
         if (jsonData === null) {
-            result.invalid = true;
+            result.isInvalid = true;
             return result;
         }
 
@@ -310,32 +311,39 @@ export class TinyAlias extends RE6Module {
         this.$infoText.html(result.count + " posts");
 
         // Checking for aliases
-        let aliasJson: ApiTag = await Api.getJson("/tag_aliases.json?search[antecedent_name]=" + tag);
+        const aliasJson: ApiTag = await Api.getJson("/tag_aliases.json?search[antecedent_name]=" + tag);
         if (aliasJson[0] !== undefined) {
-            result.is_alias = true;
+            result.isAliased = true;
             const trueTagName = aliasJson[0].consequent_name;
 
             // Getting alias data
             jsonData = await Api.getJson("/tags/" + encodeURIComponent(trueTagName) + ".json");
             result.count = jsonData.post_count;
-            result.true_name = trueTagName;
+            result.realName = trueTagName;
         }
 
         // Checking for DNP implications
-        if (AvoidPosting.contains(tag) || (result.is_alias && AvoidPosting.contains(result.true_name))) {
-            result.is_dnp = true;
+        if (AvoidPosting.contains(tag) || (result.isAliased && AvoidPosting.contains(result.realName))) {
+            result.isDNP = true;
         }
 
         return result;
     }
 
-    private makeAliasEntry($aliasList: JQuery<HTMLElement>, name: string, data: string, id: string) {
-        let $aliasForm = this.buildAliasForm($aliasList, name, data, "alias-form-" + id);
+    /**
+     * Creates a new entry with an alias editing form
+     * @param $aliasList Object to append the entry to
+     * @param name Alias name
+     * @param data Contents
+     * @param id Unique ID
+     */
+    private makeAliasEntry($aliasList: JQuery<HTMLElement>, name: string, data: string, id: string): void {
+        const $aliasForm = this.buildAliasForm($aliasList, name, data, "alias-form-" + id);
         $aliasForm.appendTo($aliasList);
         $aliasForm.submit((event) => {
             event.preventDefault();
-            let $name = $aliasForm.find("input[type='text']");
-            let $data = $aliasForm.find("textarea");
+            const $name = $aliasForm.find("input[type='text']");
+            const $data = $aliasForm.find("textarea");
 
             console.log("pushing " + $name.val() + " with " + $data.val());
             console.log(this.aliasData[$name.val() + ""]);
@@ -347,15 +355,22 @@ export class TinyAlias extends RE6Module {
         });
         $aliasForm.find("button[type='button']").click((event) => {
             event.preventDefault();
-            let $name = $aliasForm.find("input[type='text']");
+            const $name = $aliasForm.find("input[type='text']");
             this.aliasData[$name.val() + ""] = undefined;
             this.pushSettings("data", this.aliasData);
             $aliasForm.remove();
         });
     }
 
-    private buildAliasForm($aliasList: JQuery<HTMLElement>, name: string, data: string, id: string) {
-        let $aliasForm = $("<form>")
+    /**
+     * Creates a form within an alias entry
+     * @param $aliasList Object to append the entry to
+     * @param name Alias name
+     * @param data Contents
+     * @param id Unique ID
+     */
+    private buildAliasForm($aliasList: JQuery<HTMLElement>, name: string, data: string, id: string): JQuery<HTMLElement> {
+        const $aliasForm = $("<form>")
             .attr("id", id)
             .appendTo($aliasList);
 
@@ -381,4 +396,12 @@ export class TinyAlias extends RE6Module {
         return $aliasForm;
     }
 
+}
+
+interface TagResult {
+    count: number;
+    isInvalid: boolean;
+    isAliased: boolean;
+    realName: string;
+    isDNP: boolean;
 }

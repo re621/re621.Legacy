@@ -18,7 +18,7 @@ import { PoolNavigator } from "./modules/post/PoolNavigator";
 import { PostViewer } from "./modules/post/PostViewer";
 import { TitleCustomizer } from "./modules/post/TitleCustomizer";
 // - search
-import { BlacklistEnhancer } from "./modules/search/BlacklistEnhancer"
+import { BlacklistEnhancer } from "./modules/search/BlacklistEnhancer";
 import { InstantSearch } from "./modules/search/InstantSearch";
 import { InfiniteScroll } from "./modules/search/InfiniteScroll";
 // - upload
@@ -32,7 +32,7 @@ import { TagSubscriptions } from "./modules/subscriptions/TagSubscriptions";
 // - settings
 import { SettingsController } from "./modules/general/SettingsController";
 
-const load_order = [
+const loadOrder = [
     { class: FormattingManager },
     { class: ThemeCustomizer },
     { class: HeaderCustomizer },
@@ -53,14 +53,14 @@ const load_order = [
     { class: TinyAlias },
 ];
 
-const subscribers = [
+const subscriptions = [
     { class: PoolSubscriptions },
     { class: ForumSubscriptions },
     { class: TagSubscriptions }
-]
+];
 
-subscribers.forEach((module) => {
-    let instance = module.class.getInstance();
+subscriptions.forEach((module) => {
+    const instance = module.class.getInstance();
     if (instance.canInitialize()) {
         SubscriptionManager.registerSubscriber(instance);
     }
@@ -68,10 +68,10 @@ subscribers.forEach((module) => {
 
 StructureUtilities.createDOM();
 
-load_order.forEach((module) => {
-    let instance = module.class.getInstance();
+loadOrder.forEach((module) => {
+    const instance = module.class.getInstance();
     if (instance.canInitialize()) instance.create();
     SettingsController.registerModule(instance);
-})
+});
 
 SettingsController.getInstance().init();

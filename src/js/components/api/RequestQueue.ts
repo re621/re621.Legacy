@@ -6,7 +6,7 @@ export class RequestQueue {
     private emitter = $({});
 
     //Holds request data which has yet to be processed. Content will be filled, once the request is done
-    private requestQueue = new Map<number, { url: string, method: string, data: {}, content: string }>();
+    private requestQueue = new Map<number, RequestEntry>();
 
     //True, if the queue is currently being emptied
     private workingQueue = false;
@@ -21,14 +21,14 @@ export class RequestQueue {
     /**
      * @returns the next id to uniquely identify a request
      */
-    public getRequestId() {
+    public getRequestId(): number {
         return this.requestCounter++;
     }
 
     /**
      * Starts working through the queue and notify listeners on completion
      */
-    private async workQueue(requestMethod: Function) {
+    private async workQueue(requestMethod: Function): Promise<void> {
         //If queue is already being worked on, don't start another round
         if (this.workingQueue === true) {
             return;
@@ -54,7 +54,7 @@ export class RequestQueue {
      * @param method 2nd requestMethod parameter
      * @param data 3rd requestMethod paramter
      */
-    public async add(requestMethod: Function, id: number, url: string, method: string, data = {}) {
+    public async add(requestMethod: Function, id: number, url: string, method: string, data = {}): Promise<void> {
         this.requestQueue.set(id, {
             url: url,
             method: method,
@@ -76,4 +76,11 @@ export class RequestQueue {
             });
         });
     }
+}
+
+interface RequestEntry {
+    url: string;
+    method: string;
+    data: {};
+    content: string;
 }

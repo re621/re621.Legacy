@@ -1,4 +1,4 @@
-declare var Danbooru;
+declare const Danbooru;
 
 const validKeys = [
     "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", ".", ",",
@@ -20,17 +20,17 @@ export class Hotkeys {
         Danbooru.Utility.disableShortcuts = true;
     }
 
-    public static getInstance() {
+    private static getInstance(): Hotkeys {
         if (this.instance === undefined) this.instance = new Hotkeys();
         return this.instance;
     }
 
-    public static recordSingleKeypress(callback: Function) {
+    public static recordSingleKeypress(callback: Function): void {
         $("body").attr("data-recording-hotkey", "true");
         let keys = [];
 
-        $(document).on("keydown.re621.record", function (event) {
-            let key = event.key
+        $(document).on("keydown.re621.record", (event) => {
+            const key = event.key
                 .toLowerCase()
                 .replace(/enter/g, "return")
                 .replace(/arrow/g, "");
@@ -38,7 +38,7 @@ export class Hotkeys {
             keys.push(key);
         });
 
-        $(document).on("keyup.re621.record", function (event) {
+        $(document).on("keyup.re621.record", () => {
             if (keys.length !== 0) {
                 $(document).off(".re621.record");
                 callback(keys.join("+"));
@@ -50,12 +50,12 @@ export class Hotkeys {
     }
 
     /** Returns a list of currently bound keys  */
-    private static getListeners() {
+    private static getListeners(): string[] {
         return this.getInstance().listeners;
     }
 
     /** Returns true of the specified key is bound, false otherwise */
-    public static isRegistered(key: string) {
+    public static isRegistered(key: string): boolean {
         return this.getInstance().listeners.indexOf(key) != -1;
     }
 
@@ -64,10 +64,10 @@ export class Hotkeys {
      * @param key Key to bind
      * @param fn Function to execute on keypress
      */
-    public static register(key: string, fn: Function) {
+    public static register(key: string, fn: Function): boolean {
         this.unregister(key);
         $(document).bind("keydown.re621.hotkey-" + key, key, function (event) {
-            if ($("body").attr("data-recording-hotkey") === "true") return;
+            if ($("body").attr("data-recording-hotkey") === "true") return false;
             fn(event, key);
         });
         this.getListeners().push(key);
@@ -78,10 +78,11 @@ export class Hotkeys {
      * Unbinds the specified key from its current function
      * @param key Key to inbind
      */
-    public static unregister(key: string) {
+    public static unregister(key: string): boolean {
         if (!this.isRegistered(key)) { return false; }
         $(document).unbind("keydown.re621.hotkey-" + key);
         this.getInstance().listeners = this.getListeners().filter(e => e !== key);
+        return true;
     }
 
     /**
@@ -91,10 +92,10 @@ export class Hotkeys {
      * @param element Input to bind it to
      * @param fn Function to execute on keypress
      */
-    public static registerInput(key: string, element: JQuery<HTMLElement>, fn: Function) {
+    public static registerInput(key: string, element: JQuery<HTMLElement>, fn: Function): boolean {
         this.unregisterInput(key, element);
         $(element).bind("keydown.re621.hotkey-" + key, key, function (event) {
-            if ($("body").attr("data-recording-hotkey") === "true") return;
+            if ($("body").attr("data-recording-hotkey") === "true") return false;
             fn(event, key);
         });
         this.getListeners().push(key);
@@ -106,9 +107,10 @@ export class Hotkeys {
      * @param key Key to unbind
      * @param element Input to unbind it from
      */
-    public static unregisterInput(key: string, element: JQuery<HTMLElement>) {
+    public static unregisterInput(key: string, element: JQuery<HTMLElement>): boolean {
         if (!this.isRegistered(key)) { return false; }
         $(element).unbind("keydown.re621.hotkey-" + key);
         this.getInstance().listeners = this.getListeners().filter(e => e !== key);
+        return true;
     }
 }
