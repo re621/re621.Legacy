@@ -205,8 +205,6 @@ export class TinyAlias extends RE6Module {
             return;
         }
 
-        this.$infoText.html(`<i class="fas fa-spinner fa-spin"></i>`);
-
         const tagInfo = await this.getTagInfo(tag);
         if (tagInfo.invalid) {
             this.$infoText.html("Invalid tagname");
