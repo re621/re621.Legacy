@@ -255,10 +255,7 @@ export class SubscriptionManager extends RE6Module {
      */
     public addUpdateEntries(instance: Subscription, updates: UpdateData[]): void {
         if (updates.length === 0) {
-            $("<div>")
-                .addClass("subscriptions-notice")
-                .html("All caught up!")
-                .appendTo(instance.tab);
+            instance.tab.append(this.createUpdateDivider());
         } else {
             instance.tab.attr("data-remove-notification-count", "true");
             this.updateNotificationSymbol(1);
@@ -272,6 +269,17 @@ export class SubscriptionManager extends RE6Module {
                 instance.tab.append(this.createUpdateEntry(update, instance.updateDefinition));
             }
         }
+    }
+
+    public createUpdateDivider() {
+        const update: UpdateData = { date: new Date(), id: -1, last: -1, name: "All up to date!", thumbnailMd5: "" };
+        const definition: UpdateDefinition = {
+            imageSrc: () => "",
+            sourceText: () => "",
+            updateText: data => data.name
+
+        }
+        return this.createUpdateEntry(update, definition);
     }
 
     public addToCache(instance: Subscription, updates: UpdateData[]): UpdateCache {
