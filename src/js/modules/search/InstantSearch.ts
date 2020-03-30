@@ -12,19 +12,8 @@ export class InstantSearch extends RE6Module {
     // TODO: this can be of type HTMLInputElememnt, but I don't know how to do that
     private $searchbox: JQuery<HTMLElement>;
 
-    private static instance: InstantSearch = new InstantSearch();
-
-    private constructor() {
+    public constructor() {
         super(PageDefintion.search);
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns InstantSearch instance
-     */
-    public static getInstance(): InstantSearch {
-        if (this.instance == undefined) this.instance = new InstantSearch();
-        return this.instance;
     }
 
     /**

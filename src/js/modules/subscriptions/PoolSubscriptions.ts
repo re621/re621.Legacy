@@ -33,7 +33,9 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
     lastUpdate: number;
     tab: JQuery<HTMLElement>;
 
-    private static instance: PoolSubscriptions;
+    public constructor() {
+        super();
+    }
 
     public getName(): string {
         return "Pools";
@@ -101,11 +103,6 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             enabled: true,
             data: {}
         };
-    }
-
-    public static getInstance(): PoolSubscriptions {
-        if (this.instance == undefined) this.instance = new PoolSubscriptions();
-        return this.instance;
     }
 }
 

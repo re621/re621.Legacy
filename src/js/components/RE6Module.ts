@@ -5,10 +5,12 @@ declare const GM_getValue;
 declare const GM_setValue;
 
 /**
- * Abstract class that other modules extend.  
+ * Class that other modules extend.  
  * Provides methods to save and load settings from cookies.
  */
 export class RE6Module {
+
+    private static instance: RE6Module;
 
     private settings: Settings;
     private readonly prefix: string = this.constructor.name;
@@ -165,6 +167,15 @@ export class RE6Module {
     protected registerHotkeys(...hotkeys: Hotkey[]): void {
         this.hotkeys = this.hotkeys.concat(hotkeys);
         this.resetHotkeys();
+    }
+
+    /**
+ * Returns a singleton instance of the class
+ * @returns FormattingHelper instance
+ */
+    public static getInstance(): RE6Module {
+        if (this.instance == undefined) this.instance = new this();
+        return this.instance;
     }
 
 }

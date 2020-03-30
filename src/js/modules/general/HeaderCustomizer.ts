@@ -3,14 +3,13 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 import { User } from "../../components/data/User";
 import { Form } from "../../components/structure/Form";
 import { Page } from "../../components/data/Page";
+import { SettingsController } from "./SettingsController";
 
 /**
  * HeaderCustomizer  
  * Add, remove, and re-arrange the tabs in the customizable navbar
  */
 export class HeaderCustomizer extends RE6Module {
-
-    private static instance: HeaderCustomizer;
 
     private $oldMenu: JQuery<HTMLElement>;
     private $menu: JQuery<HTMLElement>;
@@ -22,7 +21,7 @@ export class HeaderCustomizer extends RE6Module {
     private addTabModal: Modal;
     private addTabForm: Form;
 
-    private constructor() {
+    public constructor() {
         super();
         this.registerHotkeys(
             { keys: "hotkeyTab1", fnct: this.openTabNum },
@@ -35,15 +34,6 @@ export class HeaderCustomizer extends RE6Module {
             { keys: "hotkeyTab8", fnct: this.openTabNum },
             { keys: "hotkeyTab9", fnct: this.openTabNum },
         );
-    }
-
-    /**
-     * Returns a singleton instance of the class
-     * @returns HeaderCustomizer instance
-     */
-    public static getInstance(): HeaderCustomizer {
-        if (this.instance == undefined) this.instance = new HeaderCustomizer();
-        return this.instance;
     }
 
     /**
@@ -369,7 +359,7 @@ export class HeaderCustomizer extends RE6Module {
     }
 
     private openTabNum(event, key: string): void {
-        const tabs = HeaderCustomizer.getInstance().$menu.find("li > a");
+        const tabs = SettingsController.getModule<HeaderCustomizer>(HeaderCustomizer).$menu.find("li > a");
         if (parseInt(key) > tabs.length) return;
         tabs[parseInt(key) - 1].click();
     }

@@ -10,8 +10,6 @@ import { ApiUserSettings } from "../api/responses/ApiUserSettings";
  */
 export class User extends RE6Module {
 
-    private static instance: User;
-
     private loggedin: boolean;
     private username: string;
     private userid: number;
@@ -20,7 +18,7 @@ export class User extends RE6Module {
 
     private blacklist = new Map<string, PostFilter>();
 
-    private constructor() {
+    public constructor() {
         super();
         const $ref = $("body");
 
@@ -37,13 +35,8 @@ export class User extends RE6Module {
         }
     }
 
-    /**
-     * Returns a singleton instance of the class
-     * @returns User instance
-     */
-    public static getInstance(): User {
-        if (this.instance === undefined) this.instance = new User();
-        return this.instance;
+    private static get(): User {
+        return super.getInstance() as User;
     }
 
     /**
@@ -51,7 +44,7 @@ export class User extends RE6Module {
      * @returns boolean true if the user is logged in, false otherwise
      */
     public static isLoggedIn(): boolean {
-        return this.getInstance().loggedin;
+        return this.get().loggedin;
     }
 
     /**
@@ -59,7 +52,7 @@ export class User extends RE6Module {
      * @returns string Username if the user is logged in, "Anonymous" otherwise
      */
     public static getUsername(): string {
-        return this.getInstance().username;
+        return this.get().username;
     }
 
     /**
@@ -67,7 +60,7 @@ export class User extends RE6Module {
      * @returns string User ID if the user is logged in, 0 otherwise
      */
     public static getUserID(): number {
-        return this.getInstance().userid;
+        return this.get().userid;
     }
 
     /**
@@ -75,7 +68,7 @@ export class User extends RE6Module {
      * @returns string Group if the user is logged in, "Guest" otherwise
      */
     public static getLevel(): string {
-        return this.getInstance().level;
+        return this.get().level;
     }
 
     /**
@@ -83,7 +76,7 @@ export class User extends RE6Module {
      * @returns PostFilter[] A array of the users current filters
      */
     public static getBlacklist(): Map<string, PostFilter> {
-        return this.getInstance().blacklist;
+        return this.get().blacklist;
     }
 
     /**

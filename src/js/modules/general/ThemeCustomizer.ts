@@ -6,6 +6,7 @@ import { HeaderCustomizer } from "./HeaderCustomizer";
 import { Modal } from "../../components/structure/Modal";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
+import { SettingsController } from "./SettingsController";
 
 const THEME_MAIN = [
     { value: "hexagon", name: "Hexagon" },
@@ -31,21 +32,10 @@ const THEME_EXTRA = [
  */
 export class ThemeCustomizer extends RE6Module {
 
-    private static instance: ThemeCustomizer;
-
     private themeCustomizerForm: Form;
 
-    private constructor() {
+    public constructor() {
         super();
-    }
-
-    /**
-     * Returns a singleton instance of the SettingsController
-     * @returns ThemeCustomizer instance
-     */
-    public static getInstance(): ThemeCustomizer {
-        if (this.instance == undefined) this.instance = new ThemeCustomizer();
-        return this.instance;
     }
 
     /**
@@ -70,7 +60,7 @@ export class ThemeCustomizer extends RE6Module {
         super.create();
 
         // === Create a button in the header
-        const addTabButton = HeaderCustomizer.getInstance().createTabElement({
+        const addTabButton = SettingsController.getModule<HeaderCustomizer>(HeaderCustomizer).createTabElement({
             name: `<i class="fas fa-paint-brush"></i>`,
             parent: "menu.extra",
             controls: false,
