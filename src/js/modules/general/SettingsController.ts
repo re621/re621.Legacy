@@ -102,7 +102,7 @@ export class SettingsController {
      * @returns the module interpreted as T (which must extend the RE6Module class)
      */
     public static getModuleWithType<T extends RE6Module>(moduleClass: { new(): T }): T {
-        return this.getInstance().getModuleWithType(moduleClass) as T;
+        return this.getInstance().getModuleWithType<T>(moduleClass);
     }
 
     /**
@@ -116,19 +116,12 @@ export class SettingsController {
     }
 
     /**
-     * Gets a module without a specific tpye from the passed class name
-     */
-    private getModuleByName(name: string): RE6Module {
-        return this.modules.get(name);
-    }
-
-    /**
      * Returns a previously registered module with the specified class
      * @param moduleClass Module class
      * @returns the module interpreted as T (which must extend the RE6Module class)
      */
     public getModuleWithType<T extends RE6Module>(moduleClass: { new(): T }): T {
-        return this.modules.get(moduleClass.prototype.constructor.name) as T;
+        return this.getModuleNoType(moduleClass) as T;
     }
 
     /**
@@ -137,7 +130,14 @@ export class SettingsController {
      * @returns RE6Module instance
      */
     public getModuleNoType(moduleClass: { new(): RE6Module }): RE6Module {
-        return this.modules.get(moduleClass.prototype.constructor.name);
+        return this.getModuleByName(moduleClass.prototype.constructor.name)
+    }
+
+    /**
+     * Gets a module without a specific tpye from the passed class name
+     */
+    private getModuleByName(name: string): RE6Module {
+        return this.modules.get(name);
     }
 
     /** Create the DOM for the Title Customizer page */
