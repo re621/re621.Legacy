@@ -29,13 +29,13 @@ export class Api {
                 credentials: "include",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
-                    "Header": "re621 userscript https://github.com/re621/re621"
+                    "Header": "re621/1.0 userscript re621.github.io"
                 },
                 method: method,
                 mode: "cors"
             };
             if (method !== "GET" && method !== "get") {
-                let postData = []
+                let postData = [];
                 data["authenticity_token"] = Api.getInstance().authenticityToken;
                 for (const key of Object.keys(data)) {
                     postData.push(encodeURIComponent(key) + "=" + encodeURIComponent(data[key]));
