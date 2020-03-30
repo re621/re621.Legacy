@@ -129,16 +129,11 @@ export class Miscellaneous extends RE6Module {
      * Replaces the tag estimates with the real count
      */
     private async improveTagCount() {
-        const $tags = $("#tag-box > ul > li, #tag-list > ul > li");
-        $tags.each(function (index, element) {
-            const $element = $(element);
-            $element.find(".post-count").each(function (index, tagElement) {
-                const $tagElement = $(tagElement);
-                const tagCount = $tagElement.attr("data-count");
-                if (tagCount) {
-                    $tagElement.text(tagCount);
-                }
-            });
+        const $tags = $(".post-count");
+        $("#tag-box > ul > li span.post-count, #tag-list > ul > li span.post-count").each(function (index, element) {
+            const $container = $(element);
+            const tagCount = $container.attr("data-count");
+            if (tagCount) { $container.text(tagCount); }
         });
     }
 

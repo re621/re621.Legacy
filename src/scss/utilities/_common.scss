@@ -39,6 +39,63 @@ a {
     display: none;
 }
 
+/* Taglist Helpers */
+#tag-box>ul,
+#tag-list>ul {
+
+    margin-left: -0.25rem;
+    margin-right: -0.5rem;
+
+    li {
+
+        display: flex;
+
+        a.search-inc-tag,
+        a.search-exl-tag {
+            padding-right: 0.125rem;
+        }
+
+        a.search-tag {
+            max-width: min-content;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        span.post-count {
+            margin: 0 0.5rem 0 0.5rem;
+            min-width: fit-content;
+        }
+
+        div.tag-actions {
+            min-width: fit-content;
+            margin-left: auto;
+
+            a {
+                visibility: hidden;
+            }
+        }
+
+        &:hover {
+
+            a.search-tag {
+                white-space: normal;
+                max-width: unset;
+            }
+
+            span.post-count {
+                display: none;
+            }
+
+            div.tag-actions a {
+                visibility: visible;
+            }
+        }
+
+    }
+}
+
+
 /* Animated loading spinner, from https://loading.io/css/ */
 .lds-dual-ring {
     display: inline-block;

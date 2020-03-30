@@ -22,7 +22,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         sourceText: data => {
             return "View Tag";
         }
-    }
+    };
 
     limit: number;
     lastUpdate: number;
@@ -35,25 +35,25 @@ export class TagSubscriptions extends RE6Module implements Subscription {
     }
 
     public getSubscriberId($element: JQuery<HTMLElement>): string {
-        return $element.parent().find(".search-tag").text();
+        return $element.parent().attr("data-tag");
     }
 
     public getElementsToInsertAfter() {
-        return $("#tag-box a:first-child, #tag-list a:first-child");
+        return $("#tag-box li span.tag-action-dummy, #tag-list li span.tag-action-dummy");
     }
 
     public createSubscribeButton() {
         return $("<a>")
             .attr("href", "#")
-            .addClass("tag-subscribtion-button")
-            .html("\u2661")
+            .addClass("tag-subscription-button subscribe")
+            .html(`<i class="far fa-heart"></i>`);
     }
 
     public createUnsubscribeButton() {
         return $("<a>")
             .attr("href", "#")
-            .addClass("tag-subscribtion-button")
-            .html("\u2665");
+            .addClass("tag-subscription-button unsubscribe")
+            .html(`<i class="fas fa-heart"></i>`);
     }
 
     public async getUpdatedEntries() {

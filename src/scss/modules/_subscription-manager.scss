@@ -40,9 +40,11 @@ button.large-subscribe-button {
     }
 }
 
-.tag-subscribtion-button {
-    &::after {
-        content: " "
+#tag-box>ul>li,
+#tag-list>ul>li {
+
+    div.tag-actions a.tag-subscription-button.unsubscribe {
+        visibility: visible;
     }
 }
 
@@ -99,30 +101,6 @@ div.subscriptions-list {
             margin: 0rem 0.5rem 0.5rem;
             justify-content: flex-end;
         }
-    }
-
-    &::-webkit-scrollbar {
-        width: 14px;
-        height: 18px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        height: 6px;
-        border: 4px solid rgba(0, 0, 0, 0);
-        background-clip: padding-box;
-        border-radius: 7px;
-        background-color: rgba(0, 0, 0, 0.35);
-        box-shadow: inset -1px -1px 0px rgba(0, 0, 0, 0.05), inset 1px 1px 0px rgba(0, 0, 0, 0.05);
-    }
-
-    &::-webkit-scrollbar-button {
-        width: 0;
-        height: 0;
-        display: none;
-    }
-
-    &::-webkit-scrollbar-corner {
-        background-color: transparent;
     }
 
 }
