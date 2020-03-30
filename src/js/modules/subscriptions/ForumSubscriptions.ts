@@ -11,9 +11,6 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         imageSrc: data => {
             return "";
         },
-        imageHref: data => {
-            return "";
-        },
         updateHref: data => {
             return `/forum_topics/${data.id}?page=${Math.ceil(data.last / 75)}`;   //75 replies per page
         },
@@ -38,14 +35,24 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         return "Forums";
     }
 
-    getSubscriberId(): string {
+    getSubscriberId($element: JQuery<HTMLElement>): string {
         return Page.getPageID();
     }
 
-    appendSubscribeButtons($subscribeButton: JQuery<HTMLElement>, $unsubscribeButton: JQuery<HTMLElement>) {
-        let $header = $("div#c-forum-topics > div#a-show > h1").first();
-        $header.append($subscribeButton);
-        $header.append($unsubscribeButton);
+    getElementsToInsertAfter() {
+        return $("div#c-forum-topics > div#a-show > h1").first();
+    }
+
+    public createSubscribeButton() {
+        return $("<button>")
+            .addClass(`large-subscribe-button subscribe`)
+            .html("Subscribe");
+    }
+
+    public createUnsubscribeButton() {
+        return $("<button>")
+            .addClass(`large-subscribe-button unsubscribe`)
+            .html("Unsubscribe");
     }
 
     public async getUpdatedEntries() {

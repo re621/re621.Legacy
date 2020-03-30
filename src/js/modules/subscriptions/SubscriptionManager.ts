@@ -51,17 +51,40 @@ export class SubscriptionManager extends RE6Module {
             position: { my: "right top", at: "right top" }
         });
 
+        let firstOpen = true;
+
         //clear the notifications if the user opened the tab
         modal.getElement().on("dialogopen", event => {
+            if (firstOpen) {
+                this.addTabNotifications($(event.currentTarget));
+                firstOpen = false;
+            }
             const index = modal.getElement().tabs("option", "active");
-            const $element = $(event.currentTarget).find("[data-subscription-class]").eq(index);
+            const $element = $(event.currentTarget).find(".subscriptions-list").eq(index);
+            //remove individual tab notification
+            $(event.currentTarget).find(".ui-tabs-tab").eq(index).attr("data-has-notifications", "false");
             this.removeUnopened($element);
         });
 
         modal.getElement().tabs({
             activate: (event, tabProperties) => {
                 const $element = tabProperties.newPanel.find(".subscriptions-list");
+                tabProperties.newTab.attr("data-has-notifications", "false");
                 this.removeUnopened($element);
+            }
+        });
+    }
+
+    /**
+     * If the attribute remove from notification count is present it means
+     * that there are updates in that tap. If it is so also add a  notification icon
+     */
+    private addTabNotifications($target: JQuery<HTMLElement>) {
+        const allTabs = $target.find(".ui-tabs-tab");
+        const allPanels = $target.find(".subscriptions-list");
+        allPanels.each((index, element) => {
+            if ($(element).attr("data-remove-notification-count") === "true") {
+                allTabs.eq(index).attr("data-has-notifications", "true");
             }
         });
     }
@@ -129,33 +152,58 @@ export class SubscriptionManager extends RE6Module {
             .addClass("subscription-update");
 
         // Image
-        let $image = $("<div>")
+        let $imageDiv = $("<div>")
             .addClass("subscription-update-preview")
             .appendTo($content);
-        $("<img>")
-            .attr("src", definition.imageSrc(data))
-            .appendTo($image);
+
+        if (definition.imageHref !== undefined) {
+            let $a = $("<a>")
+                .attr("href", definition.imageHref(data));
+            $("<img>")
+                .attr("src", definition.imageSrc(data))
+                .appendTo($a);
+            $a.appendTo($imageDiv);
+        } else {
+            $("<img>")
+                .attr("src", definition.imageSrc(data))
+                .appendTo($imageDiv);
+        }
 
         // Entry Title
         let $title = $("<div>")
             .addClass("subscription-update-title")
             .appendTo($content);
-        $("<a>")
-            .html(definition.updateText(data))
-            .attr({
-                "href": definition.updateHref(data),
-                "data-id": data.id,
-            })
-            .appendTo($title);
+        if (definition.updateHref !== undefined) {
+            $("<a>")
+                .html(definition.updateText(data))
+                .attr({
+                    "href": definition.updateHref(data),
+                    "data-id": data.id,
+                })
+                .appendTo($title);
+        } else {
+            $("<div>")
+                .html(definition.updateText(data))
+                .attr("data-id", data.id)
+                .appendTo($title);
+        }
+
 
         // Link to all posts page
         let $full = $("<div>")
             .addClass("subscription-update-full")
             .appendTo($content);
-        $("<a>")
-            .attr("href", definition.sourceHref(data))
-            .html(definition.sourceText(data))
-            .appendTo($full);
+        if (definition.sourceHref !== undefined) {
+            $("<a>")
+                .attr("href", definition.sourceHref(data))
+                .html(definition.sourceText(data))
+                .appendTo($full);
+        } else {
+            $("<div>")
+                .html(definition.sourceText(data))
+                .appendTo($full);
+        }
+
 
         // Last Updated
         let $date = $("<div>")
@@ -170,36 +218,40 @@ export class SubscriptionManager extends RE6Module {
     }
 
     public addSubscribeButtons(instance: Subscription) {
-        let $subscribeButton = $("<button>")
-            .addClass("subscribe-button subscribe")
-            .html("Subscribe");
-        let $unsubscribeButton = $("<button>")
-            .addClass("subscribe-button unsubscribe")
-            .html("Unsubscribe");
-
         let subscriptionData: SubscriptionSettings = instance.fetchSettings("data", true);
+        instance.getElementsToInsertAfter().each((index, element) => {
+            const $element = $(element);
 
-        if (subscriptionData[instance.getSubscriberId()] === undefined) {
-            $unsubscribeButton.addClass("hidden");
-        } else { $subscribeButton.addClass("hidden"); }
+            let $subscribeButton = instance.createSubscribeButton();
+            let $unsubscribeButton = instance.createUnsubscribeButton();
 
-        $subscribeButton.click(() => {
-            $subscribeButton.toggleClass("hidden");
-            $unsubscribeButton.toggleClass("hidden");
-            subscriptionData = instance.fetchSettings("data", true);
-            subscriptionData[instance.getSubscriberId()] = {};
-            instance.pushSettings("data", subscriptionData);
+            const id = instance.getSubscriberId($element);
+
+            if (subscriptionData[id] === undefined) {
+                $unsubscribeButton.addClass("hidden");
+            } else { $subscribeButton.addClass("hidden"); }
+
+            $subscribeButton.click((e) => {
+                e.preventDefault();
+                $subscribeButton.toggleClass("hidden");
+                $unsubscribeButton.toggleClass("hidden");
+                subscriptionData = instance.fetchSettings("data", true);
+                subscriptionData[id] = {};
+                instance.pushSettings("data", subscriptionData);
+            });
+            $unsubscribeButton.click((e) => {
+                e.preventDefault();
+                $subscribeButton.toggleClass("hidden");
+                $unsubscribeButton.toggleClass("hidden");
+                subscriptionData = instance.fetchSettings("data", true);
+
+                delete subscriptionData[id];
+                instance.pushSettings("data", subscriptionData);
+            });
+            $subscribeButton.insertAfter($element);
+            $unsubscribeButton.insertAfter($element);
         });
-        $unsubscribeButton.click(() => {
-            $subscribeButton.toggleClass("hidden");
-            $unsubscribeButton.toggleClass("hidden");
-            subscriptionData = instance.fetchSettings("data", true);
 
-            delete subscriptionData[instance.getSubscriberId()];
-            instance.pushSettings("data", subscriptionData);
-        });
-
-        instance.appendSubscribeButtons($subscribeButton, $unsubscribeButton)
     }
 
     /**
@@ -257,15 +309,15 @@ export interface UpdateData {
 
 export interface UpdateDefinition {
     //what link should be opened when you click on the image? Leave empty for no action
-    imageHref: (data: UpdateData) => string,
+    imageHref?: (data: UpdateData) => string,
     //image link which should be displayed on the left side of the entry
     imageSrc: (data: UpdateData) => string,
     //Link to get to the update
-    updateHref: (data: UpdateData) => string,
+    updateHref?: (data: UpdateData) => string,
     //Text for the updatelink
     updateText: (data: UpdateData) => string,
     //Text to display when clicking on sourceLink
-    sourceText: (data: UpdateData) => string,
+    sourceHref?: (data: UpdateData) => string,
     //Link to where the "first page" of the subscription
-    sourceHref: (data: UpdateData) => string,
+    sourceText: (data: UpdateData) => string,
 }

@@ -35,6 +35,10 @@ a {
     text-align: right;
 }
 
+.hidden {
+    display: none;
+}
+
 /* Animated loading spinner, from https://loading.io/css/ */
 .lds-dual-ring {
     display: inline-block;
