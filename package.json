@@ -16,7 +16,8 @@
         "typescript": "tsc",
         "browserify": "browserify ./build/temp/js/main.js -o ./build/script.user.js",
         "userscript": "node ./bin/userscript-format.js",
-        "sass": "sass ./src/scss/style.scss ./build/style.min.css --no-source-map --style compressed"
+        "sass": "sass ./src/scss/style.scss ./build/style.min.css --no-source-map --style compressed",
+        "creatednp": "node ./bin/create-dnp.js"
     },
     "repository": {
         "type": "git",
@@ -43,6 +44,7 @@
         "postcss-cli": "^7.1.0",
         "rimraf": "^3.0.2",
         "sass": "^1.26.3",
-        "typescript": "^3.8.3"
+        "typescript": "^3.8.3",
+        "xmlhttprequest": "^1.8.0"
     }
 }

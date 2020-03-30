@@ -3,6 +3,7 @@ import { PageDefintion } from "../../components/data/Page";
 import { Api } from "../../components/api/Api";
 import { ApiTag } from "../../components/api/responses/ApiTag";
 import { Modal } from "../../components/structure/Modal";
+import { AvoidPosting } from "../../components/data/AvoidPosting";
 
 declare var Danbooru;
 
@@ -14,6 +15,7 @@ export class TinyAlias extends RE6Module {
     private $container: JQuery<HTMLElement>;
 
     private $infoText: JQuery<HTMLElement>;
+    private $infoLoad: JQuery<HTMLElement>;
 
     private tagAlreadyChecked: boolean;
     private aliasData;
@@ -41,6 +43,7 @@ export class TinyAlias extends RE6Module {
     protected getDefaultSettings() {
         return {
             enabled: true,
+            checkDNP: true,
             data: {}
         };
     }
@@ -80,7 +83,9 @@ export class TinyAlias extends RE6Module {
             .html("Insert")
             .appendTo($toolbar);
 
-        this.$infoText = $("<div>").appendTo($toolbar);
+        let $infoTextBox = $("<div>").appendTo($toolbar);
+        this.$infoText = $("<div>").addClass("info-text").appendTo($infoTextBox);
+        this.$infoLoad = $("<div>").addClass("info-load").html(`<i class="fas fa-spinner fa-spin"></i>`).appendTo($infoTextBox);
         let $settingsButton = $("<button>").html("TinyAlias").appendTo($toolbar);
         let $sortButton = $("<button>").html("Sort").appendTo($toolbar);
 
@@ -209,11 +214,17 @@ export class TinyAlias extends RE6Module {
         }
 
         this.tagAlreadyChecked = true;
-        this.$infoText.html(tagInfo.count + " posts");
+
         if (tagInfo.is_alias) {
-            this.$infoText.append(": " + tag + " is alias of " + tagInfo.true_name);
+            this.$infoText.append(" (~" + tagInfo.true_name + ")");
             $input.val(tagInfo.true_name);
         }
+
+        if (tagInfo.is_dnp) {
+            this.$infoText.append(`: ` + tag + ` is on <a href="/wiki_pages/85">DNP</a> list`);
+        }
+
+        this.$infoLoad.removeClass("visible");
     }
 
     /**
@@ -280,33 +291,43 @@ export class TinyAlias extends RE6Module {
      * @param tag Tag to look up
      */
     private async getTagInfo(tag: string) {
+        this.$infoLoad.addClass("visible");
         tag = encodeURIComponent(tag);
         const result = {
             count: 0,
             invalid: false,
             is_alias: false,
+            is_dnp: false,
             true_name: undefined
         };
 
+        // First data query
         let jsonData: ApiTag = await Api.getJson("/tags/" + tag + ".json");
         if (jsonData === null) {
             result.invalid = true;
             return result;
-        } else if (jsonData.post_count !== 0) {
-            result.count = jsonData.post_count;
-            return result;
         }
 
-        this.$infoText.html("Checking alias...");
-        let aliasJson: ApiTag = await Api.getJson("/tag_aliases.json?search[antecedent_name]=" + tag);
-        if (aliasJson[0] === undefined) return result;
-
-        result.is_alias = true;
-        const trueTagName = aliasJson[0].consequent_name;
-
-        jsonData = await Api.getJson("/tags/" + encodeURIComponent(trueTagName) + ".json");
         result.count = jsonData.post_count;
-        result.true_name = trueTagName;
+        this.$infoText.html(result.count + " posts");
+
+        // Checking for aliases
+        let aliasJson: ApiTag = await Api.getJson("/tag_aliases.json?search[antecedent_name]=" + tag);
+        if (aliasJson[0] !== undefined) {
+            result.is_alias = true;
+            const trueTagName = aliasJson[0].consequent_name;
+
+            // Getting alias data
+            jsonData = await Api.getJson("/tags/" + encodeURIComponent(trueTagName) + ".json");
+            result.count = jsonData.post_count;
+            result.true_name = trueTagName;
+        }
+
+        // Checking for DNP implications
+        if (AvoidPosting.contains(tag) || (result.is_alias && AvoidPosting.contains(result.true_name))) {
+            result.is_dnp = true;
+        }
+
         return result;
     }
 
