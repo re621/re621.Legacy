@@ -2,11 +2,10 @@
  * Creates and manages a more customizable theme manager
  */
 
-import { HeaderCustomizer } from "./HeaderCustomizer";
 import { Modal } from "../../components/structure/Modal";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
-import { ModuleController } from "../../components/ModuleController";
+import { DomUtilities } from "../../components/structure/DomUtilities";
 
 const THEME_MAIN = [
     { value: "hexagon", name: "Hexagon" },
@@ -56,10 +55,8 @@ export class ThemeCustomizer extends RE6Module {
         super.create();
 
         // === Create a button in the header
-        const addTabButton = ModuleController.getWithType<HeaderCustomizer>(HeaderCustomizer).createTabElement({
+        const openCustomizerButton = DomUtilities.addSettingsButton({
             name: `<i class="fas fa-paint-brush"></i>`,
-            parent: "menu.extra",
-            controls: false,
         });
 
         // === Establish the settings window contents
@@ -95,7 +92,7 @@ export class ThemeCustomizer extends RE6Module {
         // === Create the modal
         new Modal({
             title: "Themes",
-            triggers: [{ element: addTabButton.link }],
+            triggers: [{ element: openCustomizerButton }],
             content: this.themeCustomizerForm.get(),
             position: { my: "right top", at: "right top" }
         });

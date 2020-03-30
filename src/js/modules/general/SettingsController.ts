@@ -18,6 +18,7 @@ import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
 import { PoolNavigator } from "../post/PoolNavigator";
 import { ImageScaler } from "../post/ImageScaler";
 import { ModuleController } from "../../components/ModuleController";
+import { DomUtilities } from "../../components/structure/DomUtilities";
 
 /**
  * SettingsController  
@@ -28,11 +29,9 @@ export class SettingsController extends RE6Module {
     public create(): void {
 
         // Create a button in the header
-        const addSettingsButton = ModuleController.getWithType<HeaderCustomizer>(HeaderCustomizer).createTabElement({
+        const openSettingsButton = DomUtilities.addSettingsButton({
             name: `<i class="fas fa-wrench"></i>`,
-            parent: "menu.extra",
             class: "float-right",
-            controls: false,
         });
 
         // Establish the settings window contents
@@ -54,7 +53,7 @@ export class SettingsController extends RE6Module {
         // Create the modal
         new Modal({
             title: "Settings",
-            triggers: [{ element: addSettingsButton.link }],
+            triggers: [{ element: openSettingsButton }],
             escapable: false,
             fixed: true,
             reserveHeight: true,

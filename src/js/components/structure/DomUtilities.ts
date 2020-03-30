@@ -5,9 +5,9 @@ declare const GM_getResourceText;
  * StructureUtilities  
  * DOM changes that don't belong to any specific project
  */
-export class StructureUtilities {
+export class DomUtilities {
 
-    public static createDOM(): void {
+    public static createStructure(): void {
         // Load in the external stylesheet
         GM_addStyle(GM_getResourceText("re621_styles"));
 
@@ -53,4 +53,38 @@ export class StructureUtilities {
         });
     }
 
+    /**
+     * Adds a button to the top-right of the navbar
+     * @param config Button configuration
+     */
+    public static addSettingsButton(config: SettingsButton): JQuery<HTMLElement> {
+        if (config.name === undefined) config.name = "T";
+        if (config.href === undefined) config.href = "";
+        if (config.title === undefined) config.title = "";
+        if (config.class === undefined) config.class = "";
+
+        const $tab = $(`<li>`).appendTo("menu.extra");
+        const $link = $("<a>")
+            .html(config.name)
+            .attr("title", config.title)
+            .appendTo($tab);
+
+        if (config.href) { $link.attr("href", config.href); }
+        if (config.class) { $tab.addClass(config.class); }
+
+        return $link;
+    }
+
+}
+
+interface SettingsButton {
+    /** Text inside the link */
+    name?: string;
+    /** Link address */
+    href?: string;
+    /** Hover text */
+    title?: string;
+
+    /** Extra class to append to the tab */
+    class?: string;
 }
