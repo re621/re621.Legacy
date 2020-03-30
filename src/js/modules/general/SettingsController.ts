@@ -12,6 +12,7 @@ import { PoolInfo, PoolSubscriptions } from "../subscriptions/PoolSubscriptions"
 import { Util } from "../../components/structure/Util";
 import { User } from "../../components/data/User";
 import { ForumSubscriptions, ForumInfo } from "../subscriptions/ForumSubscriptions";
+import { TagSubscriptions, TagInfo } from "../subscriptions/TagSubscriptions";
 
 /**
  * SettingsController  
@@ -708,6 +709,7 @@ export class SettingsController {
                 "meta": "re621/1.0",
                 "pools": PoolSubscriptions.getInstance().fetchSettings("data"),
                 "forums": ForumSubscriptions.getInstance().fetchSettings("data"),
+                "tags": TagSubscriptions.getInstance().fetchSettings("data"),
             };
 
             Util.downloadJSON(exportData, "re621-" + User.getUsername());
@@ -751,7 +753,15 @@ export class SettingsController {
                 }
 
                 // parsedData[3] : tags (???)
-                $info.html("Processing tags . . .");
+                if (parsedData["tags"]) {
+                    $info.html("Processing tags . . .");
+                    let tagSubs = TagSubscriptions.getInstance(),
+                        tagData: TagInfo = tagSubs.fetchSettings("data", true);
+                    for (const [key, value] of Object.entries(parsedData["tags"])) {
+                        tagData[key] = value;
+                    }
+                    tagSubs.pushSettings("data", tagData);
+                }
 
                 //console.log(parsedData);
                 $info.html("Settings imported!");
@@ -796,6 +806,8 @@ export class SettingsController {
 
                 // parsedData[3] : tags (???)
                 $info.html("Processing tags . . .");
+                // TODO Someone give me a file that has tag subscriptions
+                //      Wait, did eSix Extend even have tag subscriptions
 
                 //console.log(parsedData);
                 $info.html("Settings imported!");

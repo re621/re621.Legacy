@@ -102,3 +102,6 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         return this.instance;
     }
 }
+
+export interface TagInfo {
+}
