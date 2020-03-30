@@ -9,7 +9,7 @@
     "scripts": {
         "autoprefixer": "postcss ./build/style.min.css --no-map --use autoprefixer -r",
         "build": "npm-run-all eslint typescript browserify userscript creatednp sass autoprefixer clean",
-        "build:testing": "npm-run-all typescript browserify userscript creatednp sass autoprefixer clean",
+        "build:testing": "npm-run-all typescript browserify userscript sass autoprefixer clean",
         "eslint": "eslint ./**/*.ts",
         "clean": "rimraf ./build/temp/",
         "test": "echo \"Error: no test specified\" && exit 1",
@@ -44,7 +44,6 @@
         "postcss-cli": "^7.1.0",
         "rimraf": "^3.0.2",
         "sass": "^1.26.3",
-        "typescript": "^3.8.3",
-        "xmlhttprequest": "^1.8.0"
+        "typescript": "^3.8.3"
     }
 }
