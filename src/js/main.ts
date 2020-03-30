@@ -5,7 +5,7 @@
 
 // Load Modules
 // - requied
-import { StructureUtilities } from "./modules/general/StructureUtilities";
+import { DomUtilities } from "./components/structure/DomUtilities";
 import { ModuleController } from "./components/ModuleController";
 // - general
 import { FormattingManager } from "./modules/general/FormattingHelper";
@@ -62,11 +62,11 @@ const subscriptions = [
     TagSubscriptions
 ];
 
-StructureUtilities.createDOM();
+DomUtilities.createStructure();
 
 subscriptions.forEach(module => {
     ModuleController.register(module);
-    SubscriptionManager.register(module)
+    SubscriptionManager.register(module);
 });
 
 loadOrder.forEach(module => {

@@ -1,10 +1,10 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { HeaderCustomizer, HeaderTabElement } from "../general/HeaderCustomizer";
 import { Tabbed } from "../../components/structure/Tabbed";
 import { Modal } from "../../components/structure/Modal";
 import { Subscription } from "./Subscription";
 import { Util } from "../../components/structure/Util";
 import { ModuleController } from "../../components/ModuleController";
+import { DomUtilities } from "../../components/structure/DomUtilities";
 
 export class SubscriptionManager extends RE6Module {
 
@@ -15,7 +15,7 @@ export class SubscriptionManager extends RE6Module {
     private tabNotificationsCount = 0;
     private subscribers: Subscription[] = [];
 
-    public openSubsButton: HeaderTabElement;
+    public openSubsButton: JQuery<HTMLElement>;
 
     /**
      * Creates the module's structure.  
@@ -25,10 +25,8 @@ export class SubscriptionManager extends RE6Module {
         if (!this.canInitialize()) return;
         super.create();
         // Create a button in the header
-        this.openSubsButton = ModuleController.getWithType<HeaderCustomizer>(HeaderCustomizer).createTabElement({
+        this.openSubsButton = DomUtilities.addSettingsButton({
             name: `<i class="fas fa-bell"></i>`,
-            parent: "menu.extra",
-            controls: false,
         });
 
         const content = [];
@@ -45,7 +43,7 @@ export class SubscriptionManager extends RE6Module {
         // Create the modal
         const modal = new Modal({
             title: "Subscriptions",
-            triggers: [{ element: this.openSubsButton.link }],
+            triggers: [{ element: this.openSubsButton }],
             escapable: false,
             content: $subsTabs.create(),
             position: { my: "right top", at: "right top" }
@@ -91,7 +89,7 @@ export class SubscriptionManager extends RE6Module {
 
     public updateNotificationSymbol(difference: number): void {
         this.tabNotificationsCount += difference;
-        this.openSubsButton.link.attr("data-has-notifications", (this.tabNotificationsCount > 0).toString());
+        this.openSubsButton.attr("data-has-notifications", (this.tabNotificationsCount > 0).toString());
     }
 
     /**

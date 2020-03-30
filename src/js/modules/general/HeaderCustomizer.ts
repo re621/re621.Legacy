@@ -4,6 +4,7 @@ import { User } from "../../components/data/User";
 import { Form } from "../../components/structure/Form";
 import { Page } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
+import { DomUtilities } from "../../components/structure/DomUtilities";
 
 /**
  * HeaderCustomizer  
@@ -17,7 +18,7 @@ export class HeaderCustomizer extends RE6Module {
     private updateTabModal: Modal;
     private updateTabForm: Form;
 
-    private addTabButton: HeaderTabElement;
+    private addTabButton: JQuery<HTMLElement>;
     private addTabModal: Modal;
     private addTabForm: Form;
 
@@ -121,7 +122,7 @@ export class HeaderCustomizer extends RE6Module {
         this.$menu.removeClass("custom").empty();
 
         this.$menu.sortable("destroy");
-        this.addTabButton.tab.remove();
+        this.addTabButton.remove();
         this.addTabModal.destroy();
         this.updateTabModal.destroy();
 
@@ -158,11 +159,9 @@ export class HeaderCustomizer extends RE6Module {
         });
 
         // === Tab Configuration Interface
-        this.addTabButton = this.createTabElement({
+        this.addTabButton = DomUtilities.addSettingsButton({
             name: `<i class="fas fa-tasks"></i>`,
-            parent: "menu.extra",
             class: "float-left",
-            controls: false,
         });
 
         this.addTabForm = new Form(
@@ -186,7 +185,7 @@ export class HeaderCustomizer extends RE6Module {
 
         this.addTabModal = new Modal({
             title: "Add Tab",
-            triggers: [{ element: this.addTabButton.link }],
+            triggers: [{ element: this.addTabButton }],
             content: this.addTabForm.get(),
             position: { my: "right top", at: "right top" }
         });
@@ -250,7 +249,7 @@ export class HeaderCustomizer extends RE6Module {
      * Creates a new styled tab
      * @param config Tab configuration
      */
-    public createTabElement(config: HeaderTab, triggerUpdate?: boolean): HeaderTabElement {
+    private createTabElement(config: HeaderTab, triggerUpdate?: boolean): HeaderTabElement {
         config = this.parseHeaderTabConfig(config);
         if (triggerUpdate === undefined) triggerUpdate = false;
 
@@ -258,7 +257,7 @@ export class HeaderCustomizer extends RE6Module {
             .attr("data-name", config.name)
             .attr("data-title", config.title)
             .attr("data-href", config.href)
-            .appendTo($(config.parent));
+            .appendTo("menu.main");
         const $link = $("<a>")
             .html(this.processTabVariables(config.name))
             .attr("title", this.processTabVariables(config.title))
@@ -289,7 +288,6 @@ export class HeaderCustomizer extends RE6Module {
         if (config.title === undefined) config.title = "";
 
         if (config.class === undefined) config.class = "";
-        if (config.parent === undefined) config.parent = "menu.main";
         if (config.controls === undefined) config.controls = true;
 
         return config;
@@ -381,8 +379,6 @@ interface HeaderTab {
 
     /** Extra class to append to the tab */
     class?: string;
-    /** Element to append the tab to */
-    parent?: string;
     /** Should the tab have controls in editing mode */
     controls?: boolean;
 }
