@@ -93,6 +93,9 @@ export class RE6Module {
     public fetchSettings(property?: string, fresh?: boolean): any {
         if (fresh) this.loadSettingsData();
         if (property === undefined) return this.settings;
+        if (this.settings[property] === undefined) {
+            debugger;
+        }
         return this.settings[property];
     }
 

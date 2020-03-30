@@ -133,7 +133,7 @@ export class BlacklistEnhancer extends RE6Module {
         }
         await User.setSettings({ blacklisted_tags: currentBlacklist.join("\n") });
         Danbooru.notice("Done!");
-        SettingsController.getModule<User>(User).addBlacklistFilter(tag);
+        SettingsController.getModuleWithType<User>(User).addBlacklistFilter(tag);
         this.applyBlacklist();
     }
 

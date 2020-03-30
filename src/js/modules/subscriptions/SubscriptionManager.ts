@@ -29,7 +29,7 @@ export class SubscriptionManager extends RE6Module {
         if (!this.canInitialize()) return;
         super.create();
         // Create a button in the header
-        this.openSubsButton = SettingsController.getModule<HeaderCustomizer>(HeaderCustomizer).createTabElement({
+        this.openSubsButton = SettingsController.getModuleWithType<HeaderCustomizer>(HeaderCustomizer).createTabElement({
             name: `<i class="fas fa-bell"></i>`,
             parent: "menu.extra",
             controls: false,
