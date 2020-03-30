@@ -24,7 +24,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
         sourceHref: (data) => {
             return `https://e621.net/pools/${data.id}`;
         },
-        sourceText: (data) => {
+        sourceText: () => {
             return "All Posts";
         }
     };
@@ -39,7 +39,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
         return "Pools";
     }
 
-    public getSubscriberId($element: JQuery<HTMLElement>): string {
+    public getSubscriberId(): string {
         return Page.getPageID();
     }
 

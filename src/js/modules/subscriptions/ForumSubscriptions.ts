@@ -35,7 +35,7 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         return "Forums";
     }
 
-    getSubscriberId($element: JQuery<HTMLElement>): string {
+    getSubscriberId(): string {
         return Page.getPageID();
     }
 
