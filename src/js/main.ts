@@ -71,7 +71,7 @@ subscriptions.forEach((module) => {
 StructureUtilities.createDOM();
 
 loadOrder.forEach((module) => {
-    SettingsController.registerModule<RE6Module>(module.class);
+    SettingsController.registerModule(module.class);
 });
 
 SettingsController.getInstance().init();
