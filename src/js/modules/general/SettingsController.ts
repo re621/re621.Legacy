@@ -270,13 +270,13 @@ export class SettingsController extends RE6Module {
         });
 
         postsPageInput.get("general-title-symbol-voteup").on("re621:form:input", (event, data) => {
-            titleCustomizer.pushSettings("symbolVoteup", data);
+            titleCustomizer.pushSettings("symbolVoteUp", data);
             if (titleCustomizer.isInitialized())
                 titleCustomizer.refreshPageTitle();
         });
 
         postsPageInput.get("general-title-symbol-votedown").on("re621:form:input", (event, data) => {
-            titleCustomizer.pushSettings("symbolVotedown", data);
+            titleCustomizer.pushSettings("symbolVoteDown", data);
             if (titleCustomizer.isInitialized())
                 titleCustomizer.refreshPageTitle();
         });
