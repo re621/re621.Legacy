@@ -98,7 +98,8 @@ export class SubscriptionManager extends RE6Module {
      * Adds a subscriber to the list of them and creates a tab for it.
      * @param instance subscriber to be queued for update check
      */
-    public static registerSubscriber(instance: Subscription): void {
+    public static register(moduleClass: any): void {
+        const instance = ModuleController.getWithType<Subscription>(moduleClass);
         const manager = this.getInstance() as SubscriptionManager;
         manager.subscribers.push(instance);
     }
