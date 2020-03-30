@@ -4,7 +4,6 @@ import { Modal } from "../../components/structure/Modal";
 import { Form } from "../../components/structure/Form";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { Api } from "../../components/api/Api";
-import { ModuleController } from "../../components/ModuleController";
 
 // Avaliable icons for formatting buttons
 const iconDefinitions = [
@@ -88,7 +87,7 @@ export class FormattingManager extends RE6Module {
     public create(): void {
         $("div.dtext-previewable:has(textarea)").each((i, element) => {
             const $container = $(element);
-            const newFormatter = new FormattingHelper($container);
+            const newFormatter = new FormattingHelper($container, this);
             this.formatters.push(newFormatter);
 
             $container.on("re621:formatter:update", () => {
@@ -114,6 +113,8 @@ export class FormattingManager extends RE6Module {
 
 class FormattingHelper {
 
+    private parent: FormattingManager;
+
     private $form: JQuery<HTMLElement>;
     private $container: JQuery<HTMLElement>;
 
@@ -126,8 +127,8 @@ class FormattingHelper {
 
     private $formatButtonsDrawer: JQuery<HTMLElement>;
 
-    public constructor($targetContainer) {
-
+    public constructor($targetContainer: JQuery<HTMLElement>, parent: FormattingManager) {
+        this.parent = parent;
         this.$container = $targetContainer;
 
         this.createDOM();
@@ -144,9 +145,8 @@ class FormattingHelper {
 
     /** Registers the module's hotkeys */
     public registerHotkeys(): void {
-        const manager = ModuleController.get(FormattingManager);
-        Hotkeys.registerInput(manager.fetchSettings("hotkeySubmit"), this.$textarea, () => {
-            if (!manager.fetchSettings("hotkeySubmitActive")) return;
+        Hotkeys.registerInput(this.parent.fetchSettings("hotkeySubmit"), this.$textarea, () => {
+            if (!this.parent.fetchSettings("hotkeySubmitActive")) return;
             this.$form.submit();
         });
     }
@@ -371,7 +371,7 @@ class FormattingHelper {
     public loadButtons(): void {
         this.$formatButtons.empty();
 
-        ModuleController.get(FormattingManager).fetchSettings("buttonsActive", true).forEach((data: ButtonDefinition) => {
+        this.parent.fetchSettings("buttonsActive", true).forEach((data: ButtonDefinition) => {
             const buttonElement = this.createButton(data);
             buttonElement.box.appendTo(this.$formatButtons);
 
@@ -382,7 +382,7 @@ class FormattingHelper {
         });
 
         this.$formatButtonsDrawer.empty();
-        ModuleController.get(FormattingManager).fetchSettings("buttonInactive", true).forEach((data: ButtonDefinition) => {
+        this.parent.fetchSettings("buttonInactive", true).forEach((data: ButtonDefinition) => {
             const buttonData = this.createButton(data);
             buttonData.box.appendTo(this.$formatButtonsDrawer);
         });
@@ -394,13 +394,13 @@ class FormattingHelper {
         this.$formatButtons.find("li").each(function (i, element) {
             buttonData.push(fetchData(element));
         });
-        ModuleController.get(FormattingManager).pushSettings("buttonsActive", buttonData);
+        this.parent.pushSettings("buttonsActive", buttonData);
 
         buttonData = [];
         this.$formatButtonsDrawer.find("li").each(function (i, element) {
             buttonData.push(fetchData(element));
         });
-        ModuleController.get(FormattingManager).pushSettings("buttonInactive", buttonData);
+        this.parent.pushSettings("buttonInactive", buttonData);
 
         this.$container.trigger("re621:formatter:update", [this]);
 
