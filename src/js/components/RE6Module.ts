@@ -21,7 +21,7 @@ export class RE6Module {
     private constraint: RegExp[] = [];
     private hotkeys: Hotkey[] = [];
 
-    protected constructor(constraint?: RegExp | RegExp[]) {
+    public constructor(constraint?: RegExp | RegExp[]) {
         if (constraint === undefined) this.constraint = [];
         else if (constraint instanceof RegExp) this.constraint.push(constraint);
         else this.constraint = constraint;

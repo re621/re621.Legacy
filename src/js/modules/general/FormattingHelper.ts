@@ -49,10 +49,6 @@ export class FormattingManager extends RE6Module {
 
     private formatters: FormattingHelper[] = [];
 
-    public constructor() {
-        super();
-    }
-
     /**
      * Returns a set of default settings values
      * @returns Default settings

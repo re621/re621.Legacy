@@ -17,10 +17,6 @@ export class SubscriptionManager extends RE6Module {
 
     public openSubsButton: HeaderTabElement;
 
-    public constructor() {
-        super();
-    }
-
     /**
      * Creates the module's structure.  
      * Should be run immediately after the constructor finishes.

@@ -34,10 +34,6 @@ export class ThemeCustomizer extends RE6Module {
 
     private themeCustomizerForm: Form;
 
-    public constructor() {
-        super();
-    }
-
     /**
      * Returns a set of default settings values
      * @returns Default settings
