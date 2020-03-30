@@ -170,9 +170,9 @@ export class RE6Module {
     }
 
     /**
- * Returns a singleton instance of the class
- * @returns FormattingHelper instance
- */
+     * Returns a singleton instance of the class
+     * @returns FormattingHelper instance
+     */
     public static getInstance(): RE6Module {
         if (this.instance == undefined) this.instance = new this();
         return this.instance;

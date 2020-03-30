@@ -4,7 +4,7 @@ import { Tabbed } from "../../components/structure/Tabbed";
 import { Modal } from "../../components/structure/Modal";
 import { Subscription } from "./Subscription";
 import { Util } from "../../components/structure/Util";
-import { SettingsController } from "../general/SettingsController";
+import { ModuleController } from "../../components/ModuleController";
 
 export class SubscriptionManager extends RE6Module {
 
@@ -25,7 +25,7 @@ export class SubscriptionManager extends RE6Module {
         if (!this.canInitialize()) return;
         super.create();
         // Create a button in the header
-        this.openSubsButton = SettingsController.getModuleWithType<HeaderCustomizer>(HeaderCustomizer).createTabElement({
+        this.openSubsButton = ModuleController.getWithType<HeaderCustomizer>(HeaderCustomizer).createTabElement({
             name: `<i class="fas fa-bell"></i>`,
             parent: "menu.extra",
             controls: false,

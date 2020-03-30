@@ -3,7 +3,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 import { User } from "../../components/data/User";
 import { Form } from "../../components/structure/Form";
 import { Page } from "../../components/data/Page";
-import { SettingsController } from "./SettingsController";
+import { ModuleController } from "../../components/ModuleController";
 
 /**
  * HeaderCustomizer  
@@ -359,7 +359,7 @@ export class HeaderCustomizer extends RE6Module {
     }
 
     private openTabNum(event, key: string): void {
-        const tabs = SettingsController.getModuleWithType<HeaderCustomizer>(HeaderCustomizer).$menu.find("li > a");
+        const tabs = ModuleController.getWithType<HeaderCustomizer>(HeaderCustomizer).$menu.find("li > a");
         if (parseInt(key) > tabs.length) return;
         tabs[parseInt(key) - 1].click();
     }
