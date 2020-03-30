@@ -60,7 +60,7 @@ export class ThemeCustomizer extends RE6Module {
         super.create();
 
         // === Create a button in the header
-        const addTabButton = SettingsController.getModule<HeaderCustomizer>(HeaderCustomizer).createTabElement({
+        const addTabButton = SettingsController.getModuleWithType<HeaderCustomizer>(HeaderCustomizer).createTabElement({
             name: `<i class="fas fa-paint-brush"></i>`,
             parent: "menu.extra",
             controls: false,

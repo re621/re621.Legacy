@@ -94,8 +94,8 @@ export class InfiniteScroll extends RE6Module {
         this.isInProgress = false;
         this.$loadingIndicator.hide();
 
-        SettingsController.getModule<BlacklistEnhancer>(BlacklistEnhancer).updateSidebar();
-        SettingsController.getModule<InstantSearch>(InstantSearch).applyFilter();
+        SettingsController.getModuleWithType<BlacklistEnhancer>(BlacklistEnhancer).updateSidebar();
+        SettingsController.getModuleWithType<InstantSearch>(InstantSearch).applyFilter();
 
         this.nextPageToGet++;
     }

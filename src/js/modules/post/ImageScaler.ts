@@ -99,7 +99,7 @@ export class ImageScaler extends RE6Module {
      * @param save Set to false to prevent saving the scale to settings
      */
     private setScale(size = "", save = true): void {
-        const selector = SettingsController.getModule<ImageScaler>(ImageScaler).resizeSelector;
+        const selector = SettingsController.getModuleWithType<ImageScaler>(ImageScaler).resizeSelector;
         if (size === "") {
             const $next = selector.find("option:selected").next();
             if ($next.length > 0) { size = $next.val() + ""; }
