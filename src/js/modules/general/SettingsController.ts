@@ -90,7 +90,9 @@ export class SettingsController {
      *  { new(): RE6Module } works to access constructor name but not static methods
      */
     public static registerModule<T>(moduleClass: any): void {
-        this.getInstance().modules.set(moduleClass.prototype.constructor.name, moduleClass.getInstance());
+        const moduleInstance = moduleClass.getInstance();
+        moduleInstance.create();
+        this.getInstance().modules.set(moduleClass.prototype.constructor.name, moduleInstance);
     }
 
     /**
