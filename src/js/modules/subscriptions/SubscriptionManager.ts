@@ -272,7 +272,7 @@ export class SubscriptionManager extends RE6Module {
     }
 
     private createUpToDateDivider(): JQuery<HTMLElement> {
-        const update: UpdateData = { date: new Date().getTime(), id: -1, last: -1, name: "All up to date!", md5: "" };
+        const update: UpdateData = { date: new Date().getTime(), id: -1, name: "All up to date!", md5: "" };
         const definition: UpdateDefinition = {
             imageSrc: () => "",
             sourceText: () => "",
@@ -283,7 +283,7 @@ export class SubscriptionManager extends RE6Module {
     }
 
     private createCacheDivider(index: number, timestamp: number): JQuery<HTMLElement> {
-        const update: UpdateData = { date: new Date(timestamp).getTime(), id: -1, last: -1, name: "Update Nr." + index, md5: "" };
+        const update: UpdateData = { date: new Date(timestamp).getTime(), id: -1, name: "Update Nr." + index, md5: "" };
         const definition: UpdateDefinition = {
             imageSrc: () => "",
             sourceText: () => "",
@@ -361,7 +361,6 @@ export interface UpdateData {
     id: number;
     name: string;
     date: number;
-    last: number;
     md5: string;
     extra?: any;
 }

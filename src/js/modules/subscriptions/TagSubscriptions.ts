@@ -79,7 +79,6 @@ export class TagSubscriptions extends RE6Module implements Subscription {
             id: value.id,
             name: tagName.replace(/ /g, " "),
             date: new Date(value.created_at).getTime(),
-            last: -1,
             md5: value.file.md5
         };
     }

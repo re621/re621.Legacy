@@ -16,7 +16,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             return `https://e621.net/pools/${data.id}`;
         },
         updateHref: (data) => {
-            return `https://e621.net/posts/${data.last}?pool_id=${data.id}`;
+            return `https://e621.net/posts/${data.extra.last}?pool_id=${data.id}`;
         },
         updateText: (data) => {
             return data.name;
@@ -85,8 +85,10 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             id: value.id,
             name: value.name.replace(/_/g, " "),
             date: new Date(value.updated_at).getTime(),
-            last: value.post_ids[value.post_ids.length - 1],
-            md5: poolInfo.md5
+            md5: poolInfo.md5,
+            extra: {    //last pool post id
+                last: value.post_ids[value.post_ids.length - 1]
+            },
         };
     }
 

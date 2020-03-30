@@ -12,7 +12,7 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
             return "";
         },
         updateHref: (data) => {
-            return `/forum_topics/${data.id}?page=${Math.ceil(data.last / 75)}`;   //75 replies per page
+            return `/forum_topics/${data.id}?page=${Math.ceil(data.extra.count / 75)}`;   //75 replies per page
         },
         updateText: (data) => {
             return data.name;
@@ -76,8 +76,10 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
             id: value.id,
             name: value.title,
             date: new Date(value.updated_at).getTime(),
-            last: value.response_count,
-            md5: ""
+            md5: "",
+            extra: {    //comment count
+                count: value.response_count
+            }
         };
     }
 
