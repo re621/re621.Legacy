@@ -255,7 +255,7 @@ export class SubscriptionManager extends RE6Module {
      */
     public addUpdateEntries(instance: Subscription, updates: UpdateData[]): void {
         if (updates.length === 0) {
-            instance.tab.append(this.createUpdateDivider());
+            instance.tab.append(this.createUpToDateDivider());
         } else {
             instance.tab.attr("data-remove-notification-count", "true");
             this.updateNotificationSymbol(1);
@@ -264,15 +264,28 @@ export class SubscriptionManager extends RE6Module {
         const cache = this.addToCache(instance, updates);
 
         //Sort cache by time highest to lowest
-        for (const timestamp of Object.keys(cache).sort((a, b) => parseInt(b) - parseInt(a))) {
-            for (const update of cache[timestamp]) {
+        const timestamps = Object.keys(cache).sort((a, b) => parseInt(b) - parseInt(a));
+        for (let i = 0; i < timestamps.length; i++) {
+            instance.tab.append(this.createCacheDivider(i + 1, parseInt(timestamps[i])));
+            for (const update of cache[timestamps[i]]) {
                 instance.tab.append(this.createUpdateEntry(update, instance.updateDefinition));
             }
         }
     }
 
-    public createUpdateDivider() {
+    private createUpToDateDivider(): JQuery<HTMLElement> {
         const update: UpdateData = { date: new Date(), id: -1, last: -1, name: "All up to date!", thumbnailMd5: "" };
+        const definition: UpdateDefinition = {
+            imageSrc: () => "",
+            sourceText: () => "",
+            updateText: data => data.name
+
+        }
+        return this.createUpdateEntry(update, definition);
+    }
+
+    private createCacheDivider(index: number, timestamp: number): JQuery<HTMLElement> {
+        const update: UpdateData = { date: new Date(timestamp), id: -1, last: -1, name: "Update Nr." + index, thumbnailMd5: "" };
         const definition: UpdateDefinition = {
             imageSrc: () => "",
             sourceText: () => "",
