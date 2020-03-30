@@ -10,7 +10,7 @@ import { Post } from "../../components/data/Post";
 export class PoolSubscriptions extends RE6Module implements Subscription {
     updateDefinition: UpdateDefinition = {
         imageSrc: (data) => {
-            return Post.createPreviewUrlFromMd5(data.thumbnailMd5);
+            return Post.createPreviewUrlFromMd5(data.md5);
         },
         imageHref: (data) => {
             return `https://e621.net/pools/${data.id}`;
@@ -77,16 +77,16 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
 
     private async formatPoolUpdate(value: ApiPool, subSettings: SubscriptionSettings): Promise<UpdateData> {
         const poolInfo = subSettings[value.id] as PoolInfo;
-        if (poolInfo.thumbnailMd5 === undefined) {
+        if (poolInfo.md5 === undefined) {
             const post: ApiPost = (await Api.getJson(`/posts/${value.post_ids[0]}.json`)).post;
-            poolInfo.thumbnailMd5 = post.file.md5;
+            poolInfo.md5 = post.file.md5;
         }
         return {
             id: value.id,
             name: value.name.replace(/_/g, " "),
             date: new Date(value.updated_at),
             last: value.post_ids[value.post_ids.length - 1],
-            thumbnailMd5: poolInfo.thumbnailMd5
+            md5: poolInfo.md5
         };
     }
 
@@ -103,5 +103,5 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
 }
 
 export interface PoolInfo {
-    thumbnailMd5?: string;
+    md5?: string;
 }

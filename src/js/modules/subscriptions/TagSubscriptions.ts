@@ -8,7 +8,7 @@ import { Post } from "../../components/data/Post";
 export class TagSubscriptions extends RE6Module implements Subscription {
     updateDefinition: UpdateDefinition = {
         imageSrc: (data) => {
-            return Post.createPreviewUrlFromMd5(data.thumbnailMd5);
+            return Post.createPreviewUrlFromMd5(data.md5);
         },
         imageHref: (data) => {
             return `https://e621.net/posts/${data.id}`;
@@ -80,7 +80,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
             name: tagName.replace(/ /g, " "),
             date: new Date(value.created_at),
             last: -1,
-            thumbnailMd5: value.file.md5
+            md5: value.file.md5
         };
     }
 
