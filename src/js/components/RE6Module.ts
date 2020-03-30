@@ -1,9 +1,7 @@
 import { Page } from "./data/Page";
 import { Hotkeys } from "./data/Hotkeys";
 
-// eslint-disable-next-line @typescript-eslint/camelcase
 declare const GM_getValue;
-// eslint-disable-next-line @typescript-eslint/camelcase
 declare const GM_setValue;
 
 /**

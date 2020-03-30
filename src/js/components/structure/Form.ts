@@ -92,8 +92,8 @@ export class Form {
      * Aggregates the values of all inputs in the form.  
      * This includes buttons and submit elements.
      */
-    public getInputValues(): Map<string, any> {
-        const values = new Map<string, any>();
+    public getInputValues(): Map<string, string | number | string[]> {
+        const values = new Map<string, string | number | string[]>();
         this.$inputList.forEach(function (input, key) {
             values.set(key, input.val());
         });
@@ -709,7 +709,7 @@ export interface FormElement {
     /** Input label */
     label?: string;
     /** Default value for the input */
-    value?: string | any;
+    value?: any;
 
     /** If true, the field is required to submit the form */
     required?: boolean;

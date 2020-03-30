@@ -4,7 +4,7 @@ export interface ApiComment {
     post_id: number;
     creator_id: number;
     body: string;
-    score: 2;
+    score: number;
     updated_at: string;
     updater_id: number;
     do_not_bump_post: boolean;

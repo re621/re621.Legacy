@@ -1,5 +1,5 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { HeaderCustomizer } from "../general/HeaderCustomizer";
+import { HeaderCustomizer, HeaderTabElement } from "../general/HeaderCustomizer";
 import { Tabbed } from "../../components/structure/Tabbed";
 import { Modal } from "../../components/structure/Modal";
 import { Subscription } from "./Subscription";
@@ -15,10 +15,7 @@ export class SubscriptionManager extends RE6Module {
     private tabNotificationsCount = 0;
     private subscribers: Subscription[] = [];
 
-    public openSubsButton: {
-        link: any;
-        tab?: JQuery<HTMLElement>;
-    };
+    public openSubsButton: HeaderTabElement;
 
     /**
      * Creates the module's structure.  

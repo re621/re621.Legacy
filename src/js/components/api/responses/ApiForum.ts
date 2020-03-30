@@ -9,7 +9,7 @@ export interface ApiForumTopic {
     is_hidden: boolean;
     created_at: string;
     updated_at: string;
-    category_id: 9;
+    category_id: number;
 }
 
 export interface ApiForumPost {

@@ -3,9 +3,7 @@ import { Page, PageDefintion } from "../../components/data/Page";
 import { Api } from "../../components/api/Api";
 import { ApiForumPost } from "../../components/api/responses/ApiForum";
 
-// eslint-disable-next-line @typescript-eslint/camelcase
 declare const GM_addStyle;
-// eslint-disable-next-line @typescript-eslint/camelcase
 declare const GM_getResourceText;
 
 /**

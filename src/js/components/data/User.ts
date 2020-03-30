@@ -2,6 +2,7 @@ import { RE6Module } from "../RE6Module";
 import { Api } from "../api/Api";
 import { PostFilter } from "./PostFilter";
 import { Post } from "./Post";
+import { ApiUserSettings } from "../api/responses/ApiUserSettings";
 
 /**
  * User  
@@ -106,7 +107,7 @@ export class User extends RE6Module {
     /**
      * @returns the users e6 site settings
      */
-    public static async getCurrentSettings(): Promise<any> {
+    public static async getCurrentSettings(): Promise<ApiUserSettings> {
         return Api.getJson("/users/" + this.getUserID() + ".json");
     }
 

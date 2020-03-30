@@ -218,7 +218,7 @@ export class ViewingPost extends Post {
         this.loreTags = this.getAllFromTaggroup("lore");
     }
 
-    private getAllFromTaggroup(taggroup: string): any[] {
+    private getAllFromTaggroup(taggroup: string): string[] {
         const result = [];
         for (const element of $(`#tag-list .${taggroup}-tag-list`).children()) {
             result.push($(element).find(".search-tag").text().replace(/ /g, "_"));

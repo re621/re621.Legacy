@@ -21,17 +21,30 @@
         "@typescript-eslint"
     ],
     "extends": [
-    //    "eslint:recommended",
-    //    "plugin:@typescript-eslint/eslint-recommended",
-    //    "plugin:@typescript-eslint/recommended"
+        //    "eslint:recommended",
+        //    "plugin:@typescript-eslint/eslint-recommended",
+        //    "plugin:@typescript-eslint/recommended"
+    ],
+    "overrides": [
+        {
+            "files": "src/js/components/api/responses/*.ts",
+            "rules": {
+                "camelcase": "off"
+            }
+        }
     ],
     "rules": {
         "@typescript-eslint/adjacent-overload-signatures": "error",
         "@typescript-eslint/ban-ts-ignore": "error",
         "@typescript-eslint/ban-types": "error",
-        "camelcase": "off",
-        "@typescript-eslint/camelcase": "error",
-        "@typescript-eslint/class-name-casing": "error",
+        "@typescript-eslint/camelcase": [
+            "error",
+            {
+                "allow": [
+                    "^GM_"
+                ]
+            }
+        ],
         "@typescript-eslint/consistent-type-assertions": "error",
         "@typescript-eslint/explicit-function-return-type": "warn",
         "@typescript-eslint/interface-name-prefix": "error",

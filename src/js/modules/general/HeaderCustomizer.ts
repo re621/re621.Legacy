@@ -18,7 +18,7 @@ export class HeaderCustomizer extends RE6Module {
     private updateTabModal: Modal;
     private updateTabForm: Form;
 
-    private addTabButton: any;
+    private addTabButton: HeaderTabElement;
     private addTabModal: Modal;
     private addTabForm: Form;
 
@@ -376,7 +376,7 @@ export class HeaderCustomizer extends RE6Module {
 
 }
 
-interface HeaderTabElement {
+export interface HeaderTabElement {
     tab: JQuery<HTMLElement>;
     link: JQuery<HTMLElement>;
 }

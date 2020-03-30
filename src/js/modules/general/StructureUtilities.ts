@@ -1,6 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/camelcase
 declare const GM_addStyle;
-// eslint-disable-next-line @typescript-eslint/camelcase
 declare const GM_getResourceText;
 
 /**

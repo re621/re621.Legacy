@@ -3,7 +3,6 @@ import { Post, ViewingPost } from "../../components/data/Post";
 import { TagTypes } from "../../components/data/Tag";
 import { PageDefintion } from "../../components/data/Page";
 
-// eslint-disable-next-line @typescript-eslint/camelcase
 declare const GM_download;
 
 /**

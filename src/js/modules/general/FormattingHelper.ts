@@ -592,7 +592,7 @@ class FormattingHelper {
      * @param input string
      * @param handleData Callback function
      */
-    private async formatDText(input: string | string[] | number, handleData: any): Promise<void> {
+    private async formatDText(input: string | string[] | number, handleData: (data: any) => void): Promise<void> {
         const response = await Api.postUrl(
             "/dtext_preview",
             { body: input }
