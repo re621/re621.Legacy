@@ -22,12 +22,12 @@ export class ImageScaler extends RE6Module {
     private post: Post;
     private image: JQuery<HTMLElement>;
 
-    private resizeSelector: Form;
+    private resizeSelector: JQuery<HTMLElement>;
 
     constructor() {
         super(PageDefintion.post);
         this.registerHotkeys(
-            { keys: "hotkey_scale", fnct: this.cycleScaling }
+            { keys: "hotkey_scale", fnct: () => { this.setScale(); } }
         );
     }
 
@@ -62,35 +62,11 @@ export class ImageScaler extends RE6Module {
 
         this.post = Post.getViewingPost();
         this.image = $("img#image");
-        this.createDOM();
 
-        this.resizeSelector.getInputList().get("scale").change(event => {
-            let size = $(event.target).val() + "";
-            this.setImageSize(size);
-            this.pushSettings("size", size);
-        });
-
-        this.registerHotkeys();
-    }
-
-    /** Loops through scaling options */
-    private cycleScaling() {
-        let $next = $("#resize-image-scale option:selected").next();
-        if ($next.length > 0) {
-            $("#resize-image-scale").val($next.val()).change();
-        } else {
-            $("#resize-image-scale").val($("#resize-image-scale option").first().val()).change();
-        }
-    }
-
-    /**
-     * Builds basic structure for the module
-     */
-    private createDOM() {
         let resizeButtonContainer = $("#image-resize-cycle").empty();
         this.setImageSize(this.fetchSettings("size"));
 
-        this.resizeSelector = new Form(
+        let resizeForm = new Form(
             {
                 id: "resize-image",
                 parent: "#image-resize-cycle",
@@ -111,7 +87,36 @@ export class ImageScaler extends RE6Module {
             ]
         );
 
-        resizeButtonContainer.append(this.resizeSelector.get());
+        resizeButtonContainer.append(resizeForm.get());
+        this.resizeSelector = resizeForm.getInputList().get("scale");
+
+        this.resizeSelector.change((event, save) => {
+            let size = $(event.target).val() + "";
+            this.setImageSize(size);
+            if (save) ImageScaler.getInstance().pushSettings("size", size);
+        });
+
+        this.image.click(event => {
+            this.setScale("", false);
+        });
+
+        this.registerHotkeys();
+    }
+
+    /**
+     * Sets a new scale for the post image
+     * @param size New size. If none specified, cycles to the next in the list
+     * @param save Set to false to prevent saving the scale to settings
+     */
+    private setScale(size: string = "", save: boolean = true) {
+        let selector = ImageScaler.getInstance().resizeSelector;
+        if (size === "") {
+            let $next = selector.find("option:selected").next();
+            if ($next.length > 0) { size = $next.val() + ""; }
+            else { size = selector.find("option").first().val() + ""; }
+        }
+
+        selector.val(size).trigger("change", save);
     }
 
     /**
