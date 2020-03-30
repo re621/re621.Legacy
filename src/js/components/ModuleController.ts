@@ -46,7 +46,7 @@ export class ModuleController {
     /**
      * @returns a map of all registered modules
      */
-    public static getAll() {
+    public static getAll(): Map<string, RE6Module> {
         return this.modules;
     }
 }

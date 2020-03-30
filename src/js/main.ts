@@ -32,14 +32,13 @@ import { PoolSubscriptions } from "./modules/subscriptions/PoolSubscriptions";
 import { TagSubscriptions } from "./modules/subscriptions/TagSubscriptions";
 // - settings
 import { SettingsController } from "./modules/general/SettingsController";
-import { Subscription } from "./modules/subscriptions/Subscription";
+
 
 const loadOrder = [
     FormattingManager,
     HeaderCustomizer,
     ThemeCustomizer,
     Miscellaneous,
-    SubscriptionManager,
     ThemeCustomizer,
 
     DownloadCustomizer,
@@ -53,7 +52,7 @@ const loadOrder = [
     InstantSearch,
 
     TinyAlias,
-
+    SubscriptionManager,
     SettingsController
 ];
 
@@ -63,15 +62,13 @@ const subscriptions = [
     TagSubscriptions
 ];
 
-subscriptions.forEach((module) => {
-    const instance = module.getInstance() as Subscription;
-    if (instance.canInitialize()) {
-        SubscriptionManager.registerSubscriber(instance);
-    }
-});
-
 StructureUtilities.createDOM();
 
-loadOrder.forEach((module) => {
+subscriptions.forEach(module => {
+    ModuleController.register(module);
+    SubscriptionManager.register(module)
+});
+
+loadOrder.forEach(module => {
     ModuleController.register(module);
 });
