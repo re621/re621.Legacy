@@ -40,7 +40,7 @@ export class Util {
             token = 'ago',
             listChoice = 1;
 
-        if (seconds == 0) { return 'Just now'; }
+        if (seconds >= 0 && seconds < 2) { return 'Just now'; }
         if (seconds < 0) {
             seconds = Math.abs(seconds);
             token = 'from now';

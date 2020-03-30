@@ -9,8 +9,8 @@ import { DomUtilities } from "../../components/structure/DomUtilities";
 export class SubscriptionManager extends RE6Module {
 
     //should notifications be cleared once seen?
-    public dismissOnUpdate = true;
     private updateInterval = 60 * 60; //1 hour, in seconds
+    private historySize = 5;
 
     private tabNotificationsCount = 0;
     private subscribers: Subscription[] = [];
@@ -115,14 +115,10 @@ export class SubscriptionManager extends RE6Module {
     public async initSubscriber(instance: Subscription): Promise<void> {
         const moduleName = instance.constructor.name;
         let lastUpdate: number = instance.fetchSettings("lastUpdate");
-        let cachedUpdates: UpdateData[] = this.fetchSettings("cache-" + moduleName);
 
         if (lastUpdate === undefined) {
             lastUpdate = new Date().getTime();
             instance.pushSettings("lastUpdate", lastUpdate);
-        }
-        if (cachedUpdates === undefined) {
-            cachedUpdates = [];
         }
 
         this.addSubscribeButtons(instance);
@@ -133,14 +129,13 @@ export class SubscriptionManager extends RE6Module {
 
         //don't update if the last check was pretty recently
         if (currentDate - lastUpdate - (this.updateInterval * 1000) < 0) {
-            this.addUpdateEntries(instance, cachedUpdates);
+            this.addUpdateEntries(instance, []);
             return;
         }
 
         const updates = await instance.getUpdatedEntries();
         this.addUpdateEntries(instance, updates);
         instance.pushSettings("lastUpdate", currentDate);
-        this.pushSettings("cache-" + moduleName, updates);
     }
 
     /**
@@ -211,7 +206,7 @@ export class SubscriptionManager extends RE6Module {
             .appendTo($content);
         $("<span>")
             .html(Util.timeAgo(data.date))
-            .attr("title", data.date.toLocaleString())
+            .attr("title", new Date(data.date).toLocaleString())
             .appendTo($date);
 
         return $content;
@@ -258,23 +253,90 @@ export class SubscriptionManager extends RE6Module {
      */
     public addUpdateEntries(instance: Subscription, updates: UpdateData[]): void {
         if (updates.length === 0) {
-            $("<div>")
-                .addClass("subscriptions-notice")
-                .html("All caught up!")
-                .appendTo(instance.tab);
+            instance.tab.append(this.createUpToDateDivider());
         } else {
-            updates.forEach(entry => {
-                instance.tab.append(this.createUpdateEntry(entry, instance.updateDefinition));
-            });
-            this.updateNotificationSymbol(1);
             instance.tab.attr("data-remove-notification-count", "true");
+            this.updateNotificationSymbol(1);
+        }
+
+        const cache = this.addToCache(instance, updates);
+
+        //Sort cache by time highest to lowest
+        const timestamps = Object.keys(cache).sort((a, b) => parseInt(b) - parseInt(a));
+        for (let i = 0; i < timestamps.length; i++) {
+            instance.tab.append(this.createCacheDivider(i + 1, parseInt(timestamps[i])));
+            for (const update of cache[timestamps[i]]) {
+                instance.tab.append(this.createUpdateEntry(update, instance.updateDefinition));
+            }
         }
     }
 
+    private createUpToDateDivider(): JQuery<HTMLElement> {
+        const update: UpdateData = { date: new Date().getTime(), id: -1, name: "All up to date!", md5: "" };
+        const definition: UpdateDefinition = {
+            imageSrc: () => "",
+            sourceText: () => "",
+            updateText: data => data.name
+
+        }
+        return this.createUpdateEntry(update, definition);
+    }
+
+    private createCacheDivider(index: number, timestamp: number): JQuery<HTMLElement> {
+        const update: UpdateData = { date: new Date(timestamp).getTime(), id: -1, name: "Update Nr." + index, md5: "" };
+        const definition: UpdateDefinition = {
+            imageSrc: () => "",
+            sourceText: () => "",
+            updateText: data => data.name
+
+        }
+        return this.createUpdateEntry(update, definition);
+    }
+
+    public addToCache(instance: Subscription, updates: UpdateData[]): UpdateCache {
+        let cache: UpdateCache = instance.fetchSettings("cache");
+        if (cache === undefined) {
+            cache = {};
+        }
+
+        if (updates.length === 0) {
+            return cache;
+        }
+        const currentTime = new Date().getTime();
+        cache[currentTime] = updates;
+
+        //if the cache is larger than the limit, remove the entry with the lowest timestamp
+        if (Object.keys(cache).length > this.historySize) {
+            delete cache[Math.min(...Object.keys(cache).map(e => parseInt(e)))];
+        }
+
+        //remove all non unique updates
+        //forumposts may get replies all the time, only the recent one is important
+        const uniqueKeys = [];
+        const nonUniqueKeys = [];
+        for (const timestamp of Object.keys(cache).sort((a, b) => parseInt(b) - parseInt(a))) {
+            for (const update of cache[timestamp]) {
+                if (uniqueKeys.indexOf(update.id) === -1) {
+                    uniqueKeys.push(update.id);
+                } else {
+                    nonUniqueKeys.push(update.id);
+                }
+            }
+            cache[timestamp] = cache[timestamp].filter(update => !nonUniqueKeys.includes(update.id));
+            //remove empty 
+            if (cache[timestamp].length === 0) {
+                delete cache[timestamp];
+            }
+        }
+
+        instance.pushSettings("cache", cache);
+        return cache;
+
+    }
+
     protected removeUnopened($element: JQuery<HTMLElement>): void {
-        if ($element.attr("data-remove-notification-count") === "true" && this.dismissOnUpdate === true) {
+        if ($element.attr("data-remove-notification-count") === "true") {
             this.updateNotificationSymbol(-1);
-            this.pushSettings("cache-" + $element.attr("data-subscription-class"), []);
         }
     }
 
@@ -288,15 +350,23 @@ export class SubscriptionManager extends RE6Module {
 
 
 export interface SubscriptionSettings {
-    [id: number]: any;
+    [id: number]: ExtraInfo;
+}
+
+export interface ExtraInfo {
+    md5?: string;
+    lastId?: number;
+}
+
+interface UpdateCache {
+    [timestamp: number]: UpdateData[];
 }
 
 export interface UpdateData {
     id: number;
     name: string;
-    date: Date;
-    last: number;
-    thumbnailMd5: string;
+    date: number;
+    md5: string;
     extra?: any;
 }
 

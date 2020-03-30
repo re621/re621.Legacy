@@ -8,7 +8,7 @@ import { Post } from "../../components/data/Post";
 export class TagSubscriptions extends RE6Module implements Subscription {
     updateDefinition: UpdateDefinition = {
         imageSrc: (data) => {
-            return Post.createPreviewUrlFromMd5(data.thumbnailMd5);
+            return Post.createPreviewUrlFromMd5(data.md5);
         },
         imageHref: (data) => {
             return `https://e621.net/posts/${data.id}`;
@@ -78,9 +78,8 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         return {
             id: value.id,
             name: tagName.replace(/ /g, " "),
-            date: new Date(value.created_at),
-            last: -1,
-            thumbnailMd5: value.file.md5
+            date: new Date(value.created_at).getTime(),
+            md5: value.file.md5
         };
     }
 
@@ -94,9 +93,4 @@ export class TagSubscriptions extends RE6Module implements Subscription {
             data: {}
         };
     }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TagInfo {
-    // TODO Fix this
 }
