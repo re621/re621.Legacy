@@ -264,19 +264,19 @@ export class SettingsController extends RE6Module {
         });
 
         postsPageInput.get("general-title-symbol-fav").on("re621:form:input", (event, data) => {
-            titleCustomizer.pushSettings("symbol-fav", data);
+            titleCustomizer.pushSettings("symbolFav", data);
             if (titleCustomizer.isInitialized())
                 titleCustomizer.refreshPageTitle();
         });
 
         postsPageInput.get("general-title-symbol-voteup").on("re621:form:input", (event, data) => {
-            titleCustomizer.pushSettings("symbol-voteup", data);
+            titleCustomizer.pushSettings("symbolVoteup", data);
             if (titleCustomizer.isInitialized())
                 titleCustomizer.refreshPageTitle();
         });
 
         postsPageInput.get("general-title-symbol-votedown").on("re621:form:input", (event, data) => {
-            titleCustomizer.pushSettings("symbol-votedown", data);
+            titleCustomizer.pushSettings("symbolVotedown", data);
             if (titleCustomizer.isInitialized())
                 titleCustomizer.refreshPageTitle();
         });
