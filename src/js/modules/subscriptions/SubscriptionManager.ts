@@ -9,8 +9,8 @@ import { ModuleController } from "../../components/ModuleController";
 export class SubscriptionManager extends RE6Module {
 
     //should notifications be cleared once seen?
-    public dismissOnUpdate = true;
     private updateInterval = 60 * 60; //1 hour, in seconds
+    private historySize = 5;
 
     private tabNotificationsCount = 0;
     private subscribers: Subscription[] = [];
@@ -117,14 +117,10 @@ export class SubscriptionManager extends RE6Module {
     public async initSubscriber(instance: Subscription): Promise<void> {
         const moduleName = instance.constructor.name;
         let lastUpdate: number = instance.fetchSettings("lastUpdate");
-        let cachedUpdates: UpdateData[] = this.fetchSettings("cache-" + moduleName);
 
         if (lastUpdate === undefined) {
             lastUpdate = new Date().getTime();
             instance.pushSettings("lastUpdate", lastUpdate);
-        }
-        if (cachedUpdates === undefined) {
-            cachedUpdates = [];
         }
 
         this.addSubscribeButtons(instance);
@@ -135,14 +131,13 @@ export class SubscriptionManager extends RE6Module {
 
         //don't update if the last check was pretty recently
         if (currentDate - lastUpdate - (this.updateInterval * 1000) < 0) {
-            this.addUpdateEntries(instance, cachedUpdates);
+            this.addUpdateEntries(instance, []);
             return;
         }
 
         const updates = await instance.getUpdatedEntries();
         this.addUpdateEntries(instance, updates);
         instance.pushSettings("lastUpdate", currentDate);
-        this.pushSettings("cache-" + moduleName, updates);
     }
 
     /**
@@ -265,18 +260,44 @@ export class SubscriptionManager extends RE6Module {
                 .html("All caught up!")
                 .appendTo(instance.tab);
         } else {
-            updates.forEach(entry => {
-                instance.tab.append(this.createUpdateEntry(entry, instance.updateDefinition));
-            });
-            this.updateNotificationSymbol(1);
             instance.tab.attr("data-remove-notification-count", "true");
+            this.updateNotificationSymbol(1);
+        }
+
+        const cache = this.addToCache(instance, updates);
+
+        //Sort cache by time highest to lowest
+        for (const timestamp of Object.keys(cache).sort((a, b) => parseInt(b) - parseInt(a))) {
+            for (const update of cache[timestamp]) {
+                instance.tab.append(this.createUpdateEntry(update, instance.updateDefinition));
+            }
         }
     }
 
+    public addToCache(instance: Subscription, updates: UpdateData[]): UpdateCache {
+        let cache: UpdateCache = instance.fetchSettings("cache");
+        if (cache === undefined) {
+            cache = {};
+        }
+
+        if (updates.length === 0) {
+            return cache;
+        }
+        const currentTime = new Date().getTime();
+        cache[currentTime] = updates;
+
+        //if the cache is larger than the limit, remove the entry with the lowest timestamp
+        if (Object.keys(cache).length > this.historySize) {
+            delete cache[Math.min(...Object.keys(cache).map(e => parseInt(e)))];
+        }
+        instance.pushSettings("cache", cache);
+        return cache;
+
+    }
+
     protected removeUnopened($element: JQuery<HTMLElement>): void {
-        if ($element.attr("data-remove-notification-count") === "true" && this.dismissOnUpdate === true) {
+        if ($element.attr("data-remove-notification-count") === "true") {
             this.updateNotificationSymbol(-1);
-            this.pushSettings("cache-" + $element.attr("data-subscription-class"), []);
         }
     }
 
@@ -291,6 +312,10 @@ export class SubscriptionManager extends RE6Module {
 
 export interface SubscriptionSettings {
     [id: number]: any;
+}
+
+interface UpdateCache {
+    [timestamp: number]: UpdateData[];
 }
 
 export interface UpdateData {
