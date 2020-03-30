@@ -14,12 +14,12 @@ export class Modal {
         this.config = this.validateConfig(config);
 
         this.$modal = $("<div>")
-            .appendTo("re-modal-container")
+            .appendTo("div#modal-container")
             .attr("title", config.title)
             .append(this.config.content)
             .dialog({
                 autoOpen: false,
-                appendTo: "re-modal-container",
+                appendTo: "div#modal-container",
 
                 closeOnEscape: config.escapable,
                 draggable: config.draggable,
@@ -32,10 +32,10 @@ export class Modal {
                 position: {
                     my: config.position.my,
                     at: config.position.at,
-                    of: "re-modal-container",
-                    within: "re-modal-container",
+                    of: $("div#modal-container"),
+                    within: $("div#modal-container"),
                     collision: "none",
-                }
+                },
             });
 
         this.$modal.dialog("widget")
@@ -61,7 +61,7 @@ export class Modal {
                     my: config.position.my,
                     at: config.position.at,
                     of: window,
-                    within: "re-modal-container",
+                    within: "div#modal-container",
                     collision: "none",
                 }
             );

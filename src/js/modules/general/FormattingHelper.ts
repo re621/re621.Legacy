@@ -199,7 +199,7 @@ class FormattingHelper {
 
         // Create the Button Editing Modal
         const $editButtonsForm = new Form(
-            { id: "dtext-edit-button", parent: "re-modal-container", },
+            { id: "dtext-edit-button", parent: "div#modal-container", },
             [
                 { id: "name", type: "input", label: "Name", },
                 { id: "icon", type: "icon", label: "Icon", data: iconDefinitions, },
@@ -313,7 +313,7 @@ class FormattingHelper {
 
         // - New Button Process
         const newFormatForm = new Form(
-            { id: "dtext-custom-button", parent: "re-modal-container", },
+            { id: "dtext-custom-button", parent: "div#modal-container", },
             [
                 { id: "name", type: "input", label: "Name", },
                 { id: "icon", type: "icon", label: "Icon", data: iconDefinitions, },

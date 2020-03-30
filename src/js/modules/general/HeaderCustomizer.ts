@@ -167,7 +167,7 @@ export class HeaderCustomizer extends RE6Module {
         this.addTabForm = new Form(
             {
                 id: "header-addtab",
-                parent: "re-modal-container",
+                parent: "div#modal-container",
             },
             [
                 { id: "name", label: "Name", type: "input", required: true, pattern: "[\\S ]+", },
@@ -194,7 +194,7 @@ export class HeaderCustomizer extends RE6Module {
         this.updateTabForm = new Form(
             {
                 id: "header-updatetab",
-                parent: "re-modal-container",
+                parent: "div#modal-container",
             },
             [
                 { id: "name", label: "Name", type: "input", required: true, pattern: "[\\S ]+", },

@@ -63,7 +63,7 @@ export class ThemeCustomizer extends RE6Module {
         this.themeCustomizerForm = new Form(
             {
                 "id": "theme-customizer",
-                "parent": "re-modal-container"
+                "parent": "div#modal-container"
             },
             [
                 {

@@ -92,7 +92,7 @@ export class SettingsController extends RE6Module {
             {
                 id: "title-customizer-misc",
                 columns: 3,
-                parent: "re-modal-container",
+                parent: "div#modal-container",
             },
             [
                 // General
@@ -339,7 +339,7 @@ export class SettingsController extends RE6Module {
             {
                 "id": "settings-hotkeys",
                 columns: 3,
-                parent: "re-modal-container"
+                parent: "div#modal-container"
             },
             [
                 // Listing
@@ -540,7 +540,7 @@ export class SettingsController extends RE6Module {
             {
                 id: "settings-misc",
                 columns: 3,
-                parent: "re-modal-container",
+                parent: "div#modal-container",
             },
             [
                 {
@@ -813,7 +813,7 @@ export class SettingsController extends RE6Module {
             {
                 id: "settings-module-status",
                 columns: 3,
-                parent: "re-modal-container",
+                parent: "div#modal-container",
             },
             [
                 {
