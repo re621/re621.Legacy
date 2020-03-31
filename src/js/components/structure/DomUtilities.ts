@@ -1,3 +1,5 @@
+import { Page } from "../data/Page";
+
 declare const GM_addStyle;
 declare const GM_getResourceText;
 
@@ -22,7 +24,7 @@ export class DomUtilities {
             $menuContainer.append(`<menu>`);
         }
 
-        const $menuLogo = $("<menu>").addClass("logo desktop-only").html(`<a href="/" data-ytta-id="-">e621</a>`);
+        const $menuLogo = $("<menu>").addClass("logo desktop-only").html(`<a href="/" data-ytta-id="-">` + Page.getSiteName() + `</a>`);
         $menuContainer.prepend($menuLogo);
 
         const $menuExtra = $("<menu>").addClass("extra");

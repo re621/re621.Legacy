@@ -67,6 +67,14 @@ export class Page {
     }
 
     /**
+     * Returns the name of the current site
+     * @returns e621 or e926
+     */
+    public static getSiteName(): string {
+        return this.getInstance().url.hostname.replace(/\.net/g, "");;
+    }
+
+    /**
      * Returns the ID from the second part of the pathname
      */
     public static getPageID(): string {
