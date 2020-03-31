@@ -71,7 +71,7 @@ export class FormattingManager extends RE6Module {
                 { name: "Strikethrough", icon: "strikethrough", text: "[s]%selection%[/s]" },
                 { name: "Underscore", icon: "underscore", text: "[u]%selection%[/u]" },
 
-                { name: "Spacer", icon: "spacer", text: "%spacer%" },
+                { name: "Spacer", icon: "spacer", text: "" },
 
                 { name: "Heading", icon: "heading", text: "h2.%selection%" },
                 { name: "Spoiler", icon: "spoiler", text: "[spoiler]%selection%[/spoiler]" },
@@ -385,7 +385,7 @@ class FormattingHelper {
             const buttonElement = this.createButton(data);
             buttonElement.box.appendTo(this.$formatButtons);
 
-            if (buttonElement.button.attr("data-text") === "%spacer%") {
+            if (buttonElement.box.attr("data-text") === "") {
                 buttonElement.button.addClass("disabled");
                 buttonElement.button.removeAttr("title");
             }
@@ -574,11 +574,15 @@ class FormattingHelper {
             };
 
             content = content.replace(/%selection%/g, currentText.substring(position.start, position.end));
-            this.$textarea.val(
-                currentText.substring(0, position.start)
-                + content
-                + currentText.substring(position.end, currentText.length)
-            );
+            const textEl = $("<p>").html(currentText.substring(0, position.start) + content + currentText.substring(position.end, currentText.length));
+
+            this.$textarea.focus();
+            document.execCommand('selectAll', false);
+            document.execCommand('insertHTML', false, textEl.html());
+
+            this.$textarea.prop("selectionStart", position.start);
+            this.$textarea.prop("selectionEnd", position.start + content.length);
+
             this.$textarea.keyup();
         });
     }

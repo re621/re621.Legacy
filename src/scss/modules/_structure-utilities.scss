@@ -11,6 +11,12 @@ body {
         outline: 0;
     }
 
+    button:hover {
+        @include themable {
+            background: themed("color-link-active");
+        }
+    }
+
     div#page {
         flex: 1;
         position: relative;

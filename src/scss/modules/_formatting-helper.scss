@@ -113,6 +113,10 @@ form.simple_form {
             li a {
                 @include themable() {
                     border: 1px dashed themed("color-text-muted");
+
+                    &.disabled {
+                        pointer-events: unset;
+                    }
                 }
             }
         }
