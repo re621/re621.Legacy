@@ -25,7 +25,6 @@ export class TagSubscriptions extends RE6Module implements Subscription {
     };
 
     limit: number;
-    lastUpdate: number;
     tab: JQuery<HTMLElement>;
 
     public getName(): string {
@@ -54,7 +53,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
             .html(`<i class="fas fa-heart"></i>`);
     }
 
-    public async getUpdatedEntries(): Promise<UpdateData[]> {
+    public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData[]> {
         const results: UpdateData[] = [];
 
         const tagData: SubscriptionSettings = this.fetchSettings("data", true);
@@ -65,7 +64,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         for (const tagName of Object.keys(tagData)) {
             const postsJson: ApiPost[] = (await Api.getJson("/posts.json?tags=" + encodeURIComponent(tagName.replace(/ /g, "_")))).posts;
             for (const post of postsJson) {
-                if (new Date(post.created_at).getTime() > this.lastUpdate) {
+                if (new Date(post.created_at).getTime() > lastUpdate) {
                     results.push(await this.formatPostUpdate(post, tagName));
                 }
             }

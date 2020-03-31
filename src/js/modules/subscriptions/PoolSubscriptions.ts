@@ -30,7 +30,6 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
     };
 
     limit: number;
-    lastUpdate: number;
     tab: JQuery<HTMLElement>;
 
     public getName(): string {
@@ -57,7 +56,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             .html("Unsubscribe");
     }
 
-    public async getUpdatedEntries(): Promise<UpdateData[]> {
+    public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData[]> {
         const results: UpdateData[] = [];
 
         const poolData: SubscriptionSettings = this.fetchSettings("data", true);
@@ -73,7 +72,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             const previousStop = poolJson.post_ids.indexOf(poolData[poolJson.id].lastId);
             //there is only an update if there are posts after the previous last post id
             //If the post id isn't there anymore (supperior version added) show an update
-            if (new Date(poolJson.updated_at).getTime() > this.lastUpdate && poolJson.post_ids.length > previousStop) {
+            if (new Date(poolJson.updated_at).getTime() > lastUpdate && poolJson.post_ids.length > previousStop) {
                 results.push(await this.formatPoolUpdate(poolJson, poolData));
             }
             poolData[poolJson.id].lastId = poolJson.post_ids[poolJson.post_ids.length - 1];

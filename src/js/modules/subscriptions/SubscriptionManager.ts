@@ -29,9 +29,11 @@ export class SubscriptionManager extends RE6Module {
             name: `<i class="fas fa-bell"></i>`,
         });
 
+        const now = new Date().getTime();
+        const lastUpdate = this.fetchSettings("lastUpdate");
         const content = [];
         for (const sub of this.subscribers) {
-            await this.initSubscriber(sub);
+            await this.initSubscriber(sub, lastUpdate, now);
             content.push({ name: sub.getName(), page: sub.tab });
         }
 
@@ -113,20 +115,12 @@ export class SubscriptionManager extends RE6Module {
     /**
      * Starts checking for updates for the passed subscriber
      */
-    public async initSubscriber(instance: Subscription): Promise<void> {
+    public async initSubscriber(instance: Subscription, lastUpdate: number, currentDate: number): Promise<void> {
         const moduleName = instance.constructor.name;
-        let lastUpdate: number = instance.fetchSettings("lastUpdate");
-
-        if (lastUpdate === undefined) {
-            lastUpdate = new Date().getTime();
-            instance.pushSettings("lastUpdate", lastUpdate);
-        }
 
         this.addSubscribeButtons(instance);
         instance.tab = SubscriptionManager.createTabContent();
         instance.tab.attr("data-subscription-class", moduleName);
-        instance.lastUpdate = lastUpdate;
-        const currentDate = new Date().getTime();
 
         //don't update if the last check was pretty recently
         if (currentDate - lastUpdate - (this.updateInterval * 1000) < 0) {
@@ -134,7 +128,7 @@ export class SubscriptionManager extends RE6Module {
             return;
         }
 
-        const updates = await instance.getUpdatedEntries();
+        const updates = await instance.getUpdatedEntries(lastUpdate);
         this.addUpdateEntries(instance, updates);
         instance.pushSettings("lastUpdate", currentDate);
     }
@@ -269,7 +263,7 @@ export class SubscriptionManager extends RE6Module {
         //Sort cache by time highest to lowest
         const timestamps = Object.keys(cache).sort((a, b) => parseInt(b) - parseInt(a));
         for (let i = 0; i < timestamps.length; i++) {
-            instance.tab.append(this.createCacheDivider(i + 1, parseInt(timestamps[i])));
+            instance.tab.append(this.createCacheDivider(parseInt(timestamps[i])));
             for (const update of cache[timestamps[i]]) {
                 instance.tab.append(this.createUpdateEntry(update, instance.updateDefinition));
             }
@@ -287,7 +281,7 @@ export class SubscriptionManager extends RE6Module {
         return this.createUpdateEntry(update, definition, "notice notice-uptodate");
     }
 
-    private createCacheDivider(index: number, timestamp: number): JQuery<HTMLElement> {
+    private createCacheDivider(timestamp: number): JQuery<HTMLElement> {
         const update: UpdateData = { date: new Date(timestamp).getTime(), id: -1, name: " ", md5: "" };
         const definition: UpdateDefinition = {
             imageSrc: () => "",
@@ -347,7 +341,8 @@ export class SubscriptionManager extends RE6Module {
 
     protected getDefaultSettings(): Settings {
         return {
-            enabled: true
+            enabled: true,
+            lastUpdate: 0
         };
     }
 }

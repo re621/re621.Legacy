@@ -26,7 +26,6 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
     };
 
     limit: number;
-    lastUpdate: number;
     tab: JQuery<HTMLElement>;
 
     public getName(): string {
@@ -53,7 +52,7 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
             .html("Unsubscribe");
     }
 
-    public async getUpdatedEntries(): Promise<UpdateData[]> {
+    public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData[]> {
         const results: UpdateData[] = [];
 
         const forumData: SubscriptionSettings = this.fetchSettings("data", true);
@@ -63,7 +62,7 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
 
         const forumsJson: ApiForumTopic[] = await Api.getJson("/forum_topics.json?search[id]=" + Object.keys(forumData).join(","));
         for (const forumJson of forumsJson) {
-            if (new Date(forumJson.updated_at).getTime() > this.lastUpdate) {
+            if (new Date(forumJson.updated_at).getTime() > lastUpdate) {
                 results.push(await this.formatForumUpdate(forumJson));
             }
         }
