@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         %NAME%
+// @name         %DISPLAYNAME%
 // @namespace    %NAMESPACE%
 // @version      %VERSION%
 // @description  %DESCRIPTION%
@@ -20,3 +20,22 @@
 // @grant        GM_addStyle
 // @grant        GM_download
 // ==/UserScript==
+
+window.re621 = {
+    name: "%NAME%",
+    displayName: "%DISPLAYNAME%",
+    version: "%VERSION%",
+    build: "%BUILD%",
+    links: {
+        website: "https://re621.github.io/",
+        repository: "https://github.com/re621/re621/",
+        issues: "https://github.com/re621/re621/issues/",
+        releases: "https://github.com/re621/re621/releases",
+        forum: "https://e621.net/forum_topics/25872",
+    },
+    changelog: {
+        changes: "%CHANGELOG%",
+        fixes: "%FIXLOG%",
+    },
+    toString: function() { return this.name + " v." + this.version + " (" + this.build + ")"; }
+};

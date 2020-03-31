@@ -40,6 +40,7 @@ export class SettingsController extends RE6Module {
         const postsPageTab = this.createTabPostsPage();
         const hotkeyTab = this.createTabHotkeys();
         const miscSettingsTab = this.createTabMiscellaneous();
+        const aboutTag = this.createAboutTab();
 
         const $settings = new Tabbed({
             name: "settings-tabs",
@@ -48,6 +49,7 @@ export class SettingsController extends RE6Module {
                 { name: "General", page: postsPageTab.get() },
                 { name: "Hotkeys", page: hotkeyTab.get() },
                 { name: "Other", page: miscSettingsTab.get() },
+                { name: "About", page: aboutTag.get() },
             ]
         });
 
@@ -861,5 +863,83 @@ export class SettingsController extends RE6Module {
                 } else module.destroy();
             });
         }
+    }
+
+    private createAboutTab(): Form {
+
+        const form = new Form(
+            {
+                "id": "about-form",
+                "columns": 3,
+            },
+            [
+                // About
+                {
+                    id: "about-version",
+                    type: "div",
+                    value: `<h3 class="display-inline"><a href="` + window["re621"]["links"]["website"] + `">` + window["re621"]["name"] + ` v.` + window["re621"]["version"] + `</a></h3> <span class="display-inline">(build ` + window["re621"]["build"] + `)</span>`,
+                    stretch: "full",
+                },
+                {
+                    id: "about-text",
+                    type: "div",
+                    value: `<b>` + window["re621"]["name"] + `</b> is a comprehensive set of tools designed to enhance the website for both casual and power users. It is created and maintained by unpaid volunteers, with the hope that it will be useful for the community.`,
+                    stretch: "full",
+                },
+                {
+                    id: "about-issues",
+                    type: "div",
+                    value: `Keeping the script - and the website - fully functional is our highest priority. If you are experiencing bugs or issues, do not hesitate to create a new ticket on <a href="` + window["re621"]["links"]["issues"] + `">github</a>, or leave us a message in the <a href="` + window["re621"]["links"]["forum"] + `">forum thread</a>. Feature requests, comments, and overall feedback are also appreciated.`,
+                    stretch: "full",
+                },
+                {
+                    id: "about-thanks",
+                    type: "div",
+                    value: `Thank you for downloading and using this script. We hope that you enjoy the experience.`,
+                    stretch: "full",
+                },
+                {
+                    id: "about-spacer-1",
+                    type: "div",
+                    value: " ",
+                    stretch: "full",
+                },
+
+                // Changelog
+                {
+                    id: "about-changelog",
+                    type: "div",
+                    value: `<h3><a href="` + window["re621"]["links"]["releases"] + `" class="unmargin">What's new?</a></h3>`,
+                    stretch: "full",
+                },
+                {
+                    id: "about-changelog-changes",
+                    type: "div",
+                    value: buildChangelog("Changes", window["re621"]["changelog"]["changes"]),
+                    stretch: "full",
+                },
+                {
+                    id: "about-changelog-fixes",
+                    type: "div",
+                    value: buildChangelog("Fixes", window["re621"]["changelog"]["changes"]),
+                    stretch: "full",
+                },
+            ]
+        );
+
+        function buildChangelog(title: string, log: string[]): string | JQuery<HTMLElement> {
+            if (log.length == 0) return "";
+
+            const $output = $("<div>"),
+                $list = $("<ul>").addClass("changelog-list");
+
+            $output.html("<b>" + title + ":</b>");
+            log.forEach((entry) => { $("<li>").html(entry).appendTo($list); });
+            $list.appendTo($output);
+
+            return $output;
+        }
+
+        return form;
     }
 }

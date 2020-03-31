@@ -3,3 +3,8 @@ div.settings-page {
     display: grid;
     grid-template-columns: 1fr 1fr;
 }
+
+ul.changelog-list {
+    list-style: lower-greek;
+    margin-left: 1.25rem;
+}

@@ -15,6 +15,7 @@ a {
     cursor: pointer;
 }
 
+// Floats
 .float-left {
     float: left;
 }
@@ -27,6 +28,7 @@ a {
     text-align: left;
 }
 
+// Text Alignment
 .text-center {
     text-align: center;
 }
@@ -35,8 +37,18 @@ a {
     text-align: right;
 }
 
-.hidden {
+// Display
+.hidden,
+.display-hidden {
     display: none;
+}
+
+.display-inline {
+    display: inline;
+}
+
+.display-block {
+    display: block;
 }
 
 
