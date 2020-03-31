@@ -17,7 +17,7 @@ export interface Subscription extends RE6Module {
      * Returns all entries which are considered to be updated,
      * i.e the api update date is larger than the last updated date
      */
-    getUpdatedEntries(lastUpdate: number): Promise<UpdateData[]>;
+    getUpdatedEntries(lastUpdate: number): Promise<UpdateData>;
     /**
      * This function should return the information needed to identify a specific subscription item
      * for example the pool or forum_topic id

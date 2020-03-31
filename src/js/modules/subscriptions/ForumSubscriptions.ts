@@ -1,4 +1,4 @@
-import { UpdateData, UpdateDefinition, SubscriptionSettings } from "./SubscriptionManager";
+import { UpdateData, UpdateDefinition, SubscriptionSettings, UpdateContent } from "./SubscriptionManager";
 import { Api } from "../../components/api/Api";
 import { Page } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -52,8 +52,8 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
             .html("Unsubscribe");
     }
 
-    public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData[]> {
-        const results: UpdateData[] = [];
+    public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData> {
+        const results: UpdateData = {};
 
         const forumData: SubscriptionSettings = this.fetchSettings("data", true);
         if (Object.keys(forumData).length === 0) {
@@ -63,18 +63,17 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         const forumsJson: ApiForumTopic[] = await Api.getJson("/forum_topics.json?search[id]=" + Object.keys(forumData).join(","));
         for (const forumJson of forumsJson) {
             if (new Date(forumJson.updated_at).getTime() > lastUpdate) {
-                results.push(await this.formatForumUpdate(forumJson));
+                results[new Date(forumJson.updated_at).getTime()] = await this.formatForumUpdate(forumJson);
             }
         }
         this.pushSettings("data", forumData);
         return results;
     }
 
-    private async formatForumUpdate(value: ApiForumTopic): Promise<UpdateData> {
+    private async formatForumUpdate(value: ApiForumTopic): Promise<UpdateContent> {
         return {
             id: value.id,
             name: value.title,
-            date: new Date(value.updated_at).getTime(),
             md5: "",
             extra: {    //comment count
                 count: value.response_count
