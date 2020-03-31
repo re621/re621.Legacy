@@ -45,6 +45,7 @@ export class SubscriptionManager extends RE6Module {
             title: "Subscriptions",
             triggers: [{ element: this.openSubsButton }],
             escapable: false,
+            reserveHeight: true,
             content: $subsTabs.create(),
             position: { my: "right top", at: "right top" }
         });
@@ -142,9 +143,11 @@ export class SubscriptionManager extends RE6Module {
      * Creates an element through the data and how the subscriber defines it
      * @returns the element to append to a tab
      */
-    private createUpdateEntry(data: UpdateData, definition: UpdateDefinition): JQuery<HTMLElement> {
+    private createUpdateEntry(data: UpdateData, definition: UpdateDefinition, customClass?: string): JQuery<HTMLElement> {
         const $content = $("<div>")
             .addClass("subscription-update");
+
+        if (customClass) $content.addClass(customClass);
 
         // Image
         const $imageDiv = $("<div>")
@@ -156,11 +159,13 @@ export class SubscriptionManager extends RE6Module {
                 .attr("href", definition.imageHref(data));
             $("<img>")
                 .attr("src", definition.imageSrc(data))
+                .attr("title", definition.updateText(data) + "\n" + Util.timeAgo(data.date) + "\n" + new Date(data.date).toLocaleString())
                 .appendTo($a);
             $a.appendTo($imageDiv);
         } else {
             $("<img>")
                 .attr("src", definition.imageSrc(data))
+                .attr("title", definition.updateText(data) + "\n" + Util.timeAgo(data.date) + "\n" + new Date(data.date).toLocaleString())
                 .appendTo($imageDiv);
         }
 
@@ -278,19 +283,19 @@ export class SubscriptionManager extends RE6Module {
             sourceText: () => "",
             updateText: data => data.name
 
-        }
-        return this.createUpdateEntry(update, definition);
+        };
+        return this.createUpdateEntry(update, definition, "notice notice-uptodate");
     }
 
     private createCacheDivider(index: number, timestamp: number): JQuery<HTMLElement> {
-        const update: UpdateData = { date: new Date(timestamp).getTime(), id: -1, name: "Update Nr." + index, md5: "" };
+        const update: UpdateData = { date: new Date(timestamp).getTime(), id: -1, name: " ", md5: "" };
         const definition: UpdateDefinition = {
             imageSrc: () => "",
             sourceText: () => "",
             updateText: data => data.name
 
-        }
-        return this.createUpdateEntry(update, definition);
+        };
+        return this.createUpdateEntry(update, definition, "notice notice-cached");
     }
 
     public addToCache(instance: Subscription, updates: UpdateData[]): UpdateCache {

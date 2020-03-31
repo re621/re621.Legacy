@@ -31,6 +31,8 @@ export class Tabbed {
             //        heightStyle: "auto",
         });
 
+        $container.tabs().find('.ui-tabs-nav li').off('keydown');
+
         return $container;
     }
 

@@ -48,24 +48,52 @@ button.large-subscribe-button {
     }
 }
 
-
+// Common styles for the subscription list
 div.subscriptions-list {
     position: relative;
-    width: 20rem;
-    max-height: 80vh;
+    width: 30rem;
     overflow: hidden auto;
 
-    div.subscriptions-notice {
-        background: #ffffff33;
-        text-align: center;
-        padding: 0.25rem 0.5rem;
-        margin-top: 0.5rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-column-gap: 0.25rem;
+    grid-row-gap: 0.25rem;
+
+    div.subscription-update.notice {
+
+        &.notice-uptodate {
+            background: #ffffff33;
+            text-align: center;
+            padding: 0.25rem 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        &.notice-cached {
+            display: grid;
+            grid-template-columns: auto auto;
+            margin: 0.5rem 0 0.5rem;
+            font-weight: 900;
+            font-size: 0.85rem;
+            color: darkgrey;
+
+            div.subscription-update-date {
+                display: block;
+                text-align: right;
+                font-weight: 500;
+            }
+        }
+
+        div.subscription-update-preview,
+        div.subscription-update-full,
+        div.subscription-update-date {
+            display: none;
+        }
     }
 
-    div.subscription-update {
+    div.subscription-update:not(.notice) {
         display: grid;
-        grid-template-columns: 5rem auto 1fr;
-        margin-bottom: 1rem;
+        grid-template-columns: 4rem auto 1fr;
+        margin-bottom: 0.5rem;
         background: #ffffff33;
 
         &:last-child {
@@ -76,7 +104,9 @@ div.subscriptions-list {
             grid-row: span 2;
 
             img {
-                max-width: 100%;
+                width: 100%;
+                height: 4rem;
+                object-fit: cover;
             }
         }
 
@@ -103,4 +133,50 @@ div.subscriptions-list {
         }
     }
 
+}
+
+// Forum Subscriptions
+.subscriptions-list[data-subscription-class=ForumSubscriptions] {
+
+    div.subscription-update:not(.notice) {
+
+        div.subscription-update-preview {
+            display: none;
+        }
+
+        div.subscription-update-title {
+            grid-column: span 3;
+        }
+
+        div.subscription-update-full {
+            grid-column: span 2;
+        }
+    }
+}
+
+// Tag Subscriptions
+.subscriptions-list[data-subscription-class=TagSubscriptions] {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+
+    div.subscription-update.notice {
+        grid-column: span 4;
+    }
+
+    div.subscription-update:not(.notice) {
+        display: block;
+        margin-bottom: 0;
+
+        div.subscription-update-title,
+        div.subscription-update-full,
+        div.subscription-update-date {
+            display: none;
+        }
+
+        div.subscription-update-preview {
+
+            img {
+                height: 6rem;
+            }
+        }
+    }
 }

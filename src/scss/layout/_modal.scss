@@ -105,6 +105,9 @@ div#modal-container {
             height: 90% !important;
             overflow: hidden scroll;
 
+            padding-left: 0.75rem;
+            padding-right: 0.5rem;
+
             @include themable {
                 border: unset !important;
                 background-color: unset !important;
