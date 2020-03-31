@@ -52,6 +52,8 @@ export class PoolNavigator extends RE6Module {
         const navbars = poolNavigator.navbars,
             active = poolNavigator.activeNav;
 
+        if (navbars.length == 0) return;
+
         if ((active + 1) >= navbars.length) { navbars[0].checkbox.click(); }
         else { navbars[active + 1].checkbox.click(); }
     }
