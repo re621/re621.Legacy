@@ -116,7 +116,7 @@ export class SubscriptionManager extends RE6Module {
     /**
      * Starts checking for updates for the passed subscriber
      */
-    public async initSubscriber(instance: Subscription, lastUpdate: number, currentDate: number): Promise<void> {
+    public async initSubscriber(instance: Subscription, lastUpdate: number, currentTime: number): Promise<void> {
         const moduleName = instance.constructor.name;
 
         this.addSubscribeButtons(instance);
@@ -124,14 +124,12 @@ export class SubscriptionManager extends RE6Module {
         instance.tab.attr("data-subscription-class", moduleName);
 
         //don't update if the last check was pretty recently
-        if (currentDate - lastUpdate - (this.updateInterval * 1000) < 0) {
-            this.addUpdateEntries(instance, []);
-            return;
+        let updates = [];
+        if(currentTime - lastUpdate - (this.updateInterval * 1000) >= 0) {
+            updates = await instance.getUpdatedEntries(lastUpdate);
         }
 
-        const updates = await instance.getUpdatedEntries(lastUpdate);
-        this.addUpdateEntries(instance, updates);
-        instance.pushSettings("lastUpdate", currentDate);
+        this.addUpdateEntries(instance, updates, currentTime);
     }
 
     /**
@@ -251,7 +249,7 @@ export class SubscriptionManager extends RE6Module {
     /**
      * Adds the passed updates to the tab of the subscriber
      */
-    public addUpdateEntries(instance: Subscription, updates: UpdateData[]): void {
+    public addUpdateEntries(instance: Subscription, updates: UpdateData[], currentTime: number): void {
         if (updates.length === 0) {
             instance.tab.append(this.createUpToDateDivider());
         } else {
@@ -259,7 +257,7 @@ export class SubscriptionManager extends RE6Module {
             this.updateNotificationSymbol(1);
         }
 
-        const cache = this.addToCache(instance, updates);
+        const cache = this.addToCache(instance, updates, currentTime);
 
         //Sort cache by time highest to lowest
         const timestamps = Object.keys(cache).sort((a, b) => parseInt(b) - parseInt(a));
@@ -293,7 +291,7 @@ export class SubscriptionManager extends RE6Module {
         return this.createUpdateEntry(update, definition, "notice notice-cached");
     }
 
-    public addToCache(instance: Subscription, updates: UpdateData[]): UpdateCache {
+    public addToCache(instance: Subscription, updates: UpdateData[], currentTime: number): UpdateCache {
         let cache: UpdateCache = instance.fetchSettings("cache");
         if (cache === undefined) {
             cache = {};
@@ -302,7 +300,6 @@ export class SubscriptionManager extends RE6Module {
         if (updates.length === 0) {
             return cache;
         }
-        const currentTime = new Date().getTime();
         cache[currentTime] = updates;
 
         //if the cache is larger than the limit, remove the entry with the lowest timestamp
