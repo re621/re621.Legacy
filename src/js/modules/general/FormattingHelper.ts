@@ -579,6 +579,10 @@ class FormattingHelper {
             this.$textarea.focus();
             document.execCommand('selectAll', false);
             document.execCommand('insertHTML', false, textEl.html());
+
+            this.$textarea.prop("selectionStart", position.start);
+            this.$textarea.prop("selectionEnd", position.start + content.length);
+
             this.$textarea.keyup();
         });
     }
