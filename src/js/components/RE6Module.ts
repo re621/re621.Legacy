@@ -13,7 +13,6 @@ export class RE6Module {
     private static instance: RE6Module;
 
     private settings: Settings;
-    private readonly prefix: string = this.constructor.name;
 
     private enabled: boolean;
     private initialized = false;
@@ -122,7 +121,7 @@ export class RE6Module {
      */
     private loadSettingsData(): void {
         const defaultValues = this.getDefaultSettings();
-        this.settings = GM_getValue("re621." + this.prefix, defaultValues);
+        this.settings = GM_getValue("re621." + this.constructor.name, defaultValues);
 
         // If defaultValues has a entry the defaultSettings do not have, add it
         // this might happen if the user saved and a defaultSetting gets added afterwards
@@ -137,14 +136,7 @@ export class RE6Module {
      * Saves the settings to cookies
      */
     private saveSettingsData(): void {
-        GM_setValue("re621." + this.prefix, this.settings);
-    }
-
-    /**
-     * @returns the class name of the module
-     */
-    public getPrefix(): string {
-        return this.prefix;
+        GM_setValue("re621." + this.constructor.name, this.settings);
     }
 
     /** Establish the module's hotkeys */
