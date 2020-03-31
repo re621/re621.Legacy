@@ -20,6 +20,8 @@ import { ImageScaler } from "../post/ImageScaler";
 import { ModuleController } from "../../components/ModuleController";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { ExtraInfo } from "../subscriptions/SubscriptionManager";
+import { ApiForumPost } from "../../components/api/responses/ApiForum";
+import { Api } from "../../components/api/Api";
 
 /**
  * SettingsController  
@@ -774,11 +776,18 @@ export class SettingsController extends RE6Module {
                 // parsedData[3] : forums
                 $info.html("Processing forums . . .");
                 const forumSubs = ForumSubscriptions.getInstance(),
-                    forumData: ExtraInfo = forumSubs.fetchSettings("data", true);
+                    forumData: ExtraInfo = forumSubs.fetchSettings("data", true),
+                    postIDs = [];
                 for (const entry of parsedData[3]) {
-                    forumData[entry["id"]] = {};
+                    postIDs.push(entry["id"]);
                 }
-                forumSubs.pushSettings("data", forumData);
+                Api.getJson("/forum_posts.json?search[id]=" + postIDs.join(","))
+                    .then((data) => {
+                        data.forEach((postData) => {
+                            forumData[postData["topic_id"]] = {};
+                        });
+                        forumSubs.pushSettings("data", forumData);
+                    });
 
                 // parsedData[3] : tags (???)
                 $info.html("Processing tags . . .");
