@@ -16,16 +16,15 @@ const iconDefinitions = [
     { value: "superscript", name: "&#x" + "f12b" },
     { value: "subscript", name: "&#x" + "f12c" },
     { value: "spoiler", name: "&#x" + "f29e" },
-
     { value: "color", name: "&#x" + "f53f" },
     { value: "code", name: "&#x" + "f121" },
     { value: "heading", name: "&#x" + "f1dc" },
     { value: "quote", name: "&#x" + "f10e" },
     { value: "section", name: "&#x" + "f103" },
     { value: "tag", name: "&#x" + "f02b" },
+
     { value: "wiki", name: "&#x" + "f002" },
     { value: "keyboard", name: "&#x" + "f11c" },
-
     { value: "link", name: "&#x" + "f0c1" },
     { value: "unlink", name: "&#x" + "f127" },
     { value: "link_prompt", name: "&#x" + "f35d" },
@@ -34,15 +33,25 @@ const iconDefinitions = [
     { value: "drumstick", name: "&#x" + "f6d7" },
     { value: "magic", name: "&#x" + "f0d0" },
     { value: "clipboard", name: "&#x" + "f328" },
-
     { value: "paperclip", name: "&#x" + "f0c6" },
     { value: "fountainpen", name: "&#x" + "f5ad" },
     { value: "comment", name: "&#x" + "f27a" },
     { value: "bell", name: "&#x" + "f0f3" },
+
     { value: "bullhorn", name: "&#x" + "f0a1" },
     { value: "heart", name: "&#x" + "f004" },
     { value: "plus-square", name: "&#x" + "f0fe" },
     { value: "minus-square", name: "&#x" + "f146" },
+    { value: "baby", name: "&#x" + "f77c" },
+    { value: "scales", name: "&#x" + "f24e" },
+    { value: "chart-pie", name: "&#x" + "f200" },
+    { value: "dice", name: "&#x" + "f522" },
+    { value: "hotdog", name: "&#x" + "f80f" },
+    { value: "leaf", name: "&#x" + "f06c" },
+    { value: "paper-plane", name: "&#x" + "f1d8" },
+    { value: "anchor", name: "&#x" + "f13d" },
+    { value: "crown", name: "&#x" + "f521" },
+    { value: "crow", name: "&#x" + "f520" },
 ];
 
 export class FormattingManager extends RE6Module {
@@ -199,17 +208,17 @@ class FormattingHelper {
 
         // Create the Button Editing Modal
         const $editButtonsForm = new Form(
-            { id: "dtext-edit-button", parent: "div#modal-container", },
+            { id: "dtext-edit-button", parent: "div#modal-container", columns: 2, },
             [
-                { id: "name", type: "input", label: "Name", },
-                { id: "icon", type: "icon", label: "Icon", data: iconDefinitions, },
-                { id: "text", type: "input", label: "Content", },
-                { id: "delete", type: "button", value: "Delete", },
-                { id: "update", type: "submit", value: "Update", },
-                { id: "hr", type: "hr" },
-                { id: "vartext", type: "div", value: "Available variables:" },
-                { id: "var-select", label: "Selected text", value: "%selection%", type: "copy" },
-                { id: "var-prompt", label: "Prompt for input", value: "%prompt%", type: "copy" },
+                { id: "name", type: "input", label: "Name", stretch: "mid", },
+                { id: "icon", type: "icon", label: "Icon", data: iconDefinitions, stretch: "mid", },
+                { id: "text", type: "input", label: "Content", stretch: "mid", },
+                { id: "delete", type: "button", value: "Delete", stretch: "column", },
+                { id: "update", type: "submit", value: "Update", stretch: "column", },
+                { id: "hr", type: "hr", stretch: "mid", },
+                { id: "vartext", type: "div", value: "Available variables:", stretch: "mid", },
+                { id: "var-select", label: "Selected text", value: "%selection%", type: "copy", stretch: "mid", },
+                { id: "var-prompt", label: "Prompt for input", value: "%prompt%", type: "copy", stretch: "mid", },
             ]);
 
         this.$editButtonsModal = new Modal({
@@ -313,16 +322,17 @@ class FormattingHelper {
 
         // - New Button Process
         const newFormatForm = new Form(
-            { id: "dtext-custom-button", parent: "div#modal-container", },
+            { id: "dtext-custom-button", parent: "div#modal-container", columns: 2, },
             [
-                { id: "name", type: "input", label: "Name", },
-                { id: "icon", type: "icon", label: "Icon", data: iconDefinitions, },
-                { id: "text", type: "input", label: "Content", },
+                { id: "name", type: "input", label: "Name", stretch: "mid", },
+                { id: "icon", type: "icon", label: "Icon", data: iconDefinitions, stretch: "mid", },
+                { id: "text", type: "input", label: "Content", stretch: "mid", },
+                { id: "icon-spacer", type: "div", value: " ", stretch: "column", },
                 { id: "create", type: "submit", value: "Create", stretch: "column", },
-                { id: "hr", type: "hr" },
-                { id: "vartext", type: "div", value: "Available variables:" },
-                { id: "var-select", label: "Selected text", value: "%selection%", type: "copy" },
-                { id: "var-prompt", label: "Prompt for input", value: "%prompt%", type: "copy" },
+                { id: "hr", type: "hr", stretch: "mid", },
+                { id: "vartext", type: "div", value: "Available variables:", stretch: "mid", },
+                { id: "var-select", label: "Selected text", value: "%selection%", type: "copy", stretch: "mid", },
+                { id: "var-prompt", label: "Prompt for input", value: "%prompt%", type: "copy", stretch: "mid", },
             ]);
 
         const newFormatModal = new Modal({
