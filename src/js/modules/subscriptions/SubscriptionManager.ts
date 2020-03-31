@@ -269,7 +269,8 @@ export class SubscriptionManager extends RE6Module {
         const timestamps = Object.keys(cache).sort((a, b) => parseInt(b) - parseInt(a));
         for (let i = 0; i < timestamps.length; i++) {
             instance.tab.append(this.createCacheDivider(parseInt(timestamps[i])));
-            for (const updateTimestamp of Object.keys(cache[timestamps[i]])) {
+            //also sort the individual update entries
+            for (const updateTimestamp of Object.keys(cache[timestamps[i]]).sort((a, b) => parseInt(b) - parseInt(a))) {
                 const update: UpdateContent = cache[timestamps[i]][updateTimestamp];
                 instance.tab.append(this.createUpdateEntry(update, parseInt(updateTimestamp), instance.updateDefinition));
             }
