@@ -125,14 +125,15 @@ export class BlacklistEnhancer extends RE6Module {
 
         if (currentBlacklist.indexOf(tag) === -1) {
             currentBlacklist.push(tag);
+            User.getInstance().addBlacklistFilter(tag);
             Danbooru.notice("Adding " + tag + " to blacklist");
         } else {
             currentBlacklist = currentBlacklist.filter(e => e !== tag);
+            User.getInstance().removeBlacklistFilter(tag);
             Danbooru.notice("Removing " + tag + " from blacklist");
         }
         await User.setSettings({ blacklisted_tags: currentBlacklist.join("\n") });
         Danbooru.notice("Done!");
-        User.getInstance().addBlacklistFilter(tag);
         this.applyBlacklist();
     }
 

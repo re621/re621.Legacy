@@ -93,6 +93,10 @@ export class User {
         }
     }
 
+    public removeBlacklistFilter(filter: string): void {
+        this.blacklist.delete(filter);
+    }
+
     /**
      * @returns the users e6 site settings
      */
