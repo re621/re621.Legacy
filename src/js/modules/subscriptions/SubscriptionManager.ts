@@ -31,6 +31,7 @@ export class SubscriptionManager extends RE6Module {
 
         const now = new Date().getTime();
         const lastUpdate = this.fetchSettings("lastUpdate");
+        this.pushSettings("lastUpdate", now);
         const content = [];
         for (const sub of this.subscribers) {
             await this.initSubscriber(sub, lastUpdate, now);
