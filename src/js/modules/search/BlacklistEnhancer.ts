@@ -3,7 +3,6 @@ import { PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
 import { User } from "../../components/data/User";
 import { PostFilter } from "../../components/data/PostFilter";
-import { ModuleController } from "../../components/ModuleController";
 
 /* eslint-disable @typescript-eslint/camelcase */
 
@@ -133,7 +132,7 @@ export class BlacklistEnhancer extends RE6Module {
         }
         await User.setSettings({ blacklisted_tags: currentBlacklist.join("\n") });
         Danbooru.notice("Done!");
-        ModuleController.getWithType<User>(User).addBlacklistFilter(tag);
+        User.getInstance().addBlacklistFilter(tag);
         this.applyBlacklist();
     }
 
