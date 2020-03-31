@@ -28,8 +28,13 @@ export class SubscriptionManager extends RE6Module {
         this.openSubsButton = DomUtilities.addSettingsButton({
             name: `<i class="fas fa-bell"></i>`,
         });
-
-        const now = new Date().getTime();
+        let now;
+        let nowFake = this.fetchSettings("now");
+        if(nowFake !== undefined) {
+            now = nowFake;
+        } else {
+            now = new Date().getTime();
+        }
         const lastUpdate = this.fetchSettings("lastUpdate");
         this.pushSettings("lastUpdate", now);
         const content = [];
