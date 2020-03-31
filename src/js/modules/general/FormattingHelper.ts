@@ -71,7 +71,7 @@ export class FormattingManager extends RE6Module {
                 { name: "Strikethrough", icon: "strikethrough", text: "[s]%selection%[/s]" },
                 { name: "Underscore", icon: "underscore", text: "[u]%selection%[/u]" },
 
-                { name: "Spacer", icon: "spacer", text: "%spacer%" },
+                { name: "Spacer", icon: "spacer", text: "" },
 
                 { name: "Heading", icon: "heading", text: "h2.%selection%" },
                 { name: "Spoiler", icon: "spoiler", text: "[spoiler]%selection%[/spoiler]" },
@@ -385,7 +385,7 @@ class FormattingHelper {
             const buttonElement = this.createButton(data);
             buttonElement.box.appendTo(this.$formatButtons);
 
-            if (buttonElement.button.attr("data-text") === "%spacer%") {
+            if (buttonElement.box.attr("data-text") === "") {
                 buttonElement.button.addClass("disabled");
                 buttonElement.button.removeAttr("title");
             }
