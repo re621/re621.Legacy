@@ -1,4 +1,4 @@
-import { UpdateData, UpdateDefinition, SubscriptionSettings } from "./SubscriptionManager";
+import { UpdateData, UpdateDefinition, SubscriptionSettings, UpdateContent } from "./SubscriptionManager";
 import { ApiPool } from "../../components/api/responses/ApiPool";
 import { Api } from "../../components/api/Api";
 import { Page } from "../../components/data/Page";
@@ -30,7 +30,6 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
     };
 
     limit: number;
-    lastUpdate: number;
     tab: JQuery<HTMLElement>;
 
     public getName(): string {
@@ -57,8 +56,8 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             .html("Unsubscribe");
     }
 
-    public async getUpdatedEntries(): Promise<UpdateData[]> {
-        const results: UpdateData[] = [];
+    public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData> {
+        const results: UpdateData = {};
 
         const poolData: SubscriptionSettings = this.fetchSettings("data", true);
         if (Object.keys(poolData).length === 0) {
@@ -73,8 +72,8 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             const previousStop = poolJson.post_ids.indexOf(poolData[poolJson.id].lastId);
             //there is only an update if there are posts after the previous last post id
             //If the post id isn't there anymore (supperior version added) show an update
-            if (new Date(poolJson.updated_at).getTime() > this.lastUpdate && poolJson.post_ids.length > previousStop) {
-                results.push(await this.formatPoolUpdate(poolJson, poolData));
+            if (new Date(poolJson.updated_at).getTime() > lastUpdate && poolJson.post_ids.length > previousStop) {
+                results[new Date(poolJson.updated_at).getTime()] = await this.formatPoolUpdate(poolJson, poolData);
             }
             poolData[poolJson.id].lastId = poolJson.post_ids[poolJson.post_ids.length - 1];
         }
@@ -82,7 +81,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
         return results;
     }
 
-    private async formatPoolUpdate(value: ApiPool, subSettings: SubscriptionSettings): Promise<UpdateData> {
+    private async formatPoolUpdate(value: ApiPool, subSettings: SubscriptionSettings): Promise<UpdateContent> {
         const poolInfo = subSettings[value.id];
         if (poolInfo.md5 === undefined) {
             const post: ApiPost = (await Api.getJson(`/posts/${value.post_ids[0]}.json`)).post;
@@ -91,7 +90,6 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
         return {
             id: value.id,
             name: value.name.replace(/_/g, " "),
-            date: new Date(value.updated_at).getTime(),
             md5: poolInfo.md5,
             extra: {    //last pool post id
                 last: value.post_ids[value.post_ids.length - 1]

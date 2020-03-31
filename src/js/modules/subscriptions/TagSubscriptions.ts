@@ -1,4 +1,4 @@
-import { UpdateData, UpdateDefinition, SubscriptionSettings } from "./SubscriptionManager";
+import { UpdateData, UpdateDefinition, SubscriptionSettings, UpdateContent } from "./SubscriptionManager";
 import { Api } from "../../components/api/Api";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Subscription } from "./Subscription";
@@ -25,7 +25,6 @@ export class TagSubscriptions extends RE6Module implements Subscription {
     };
 
     limit: number;
-    lastUpdate: number;
     tab: JQuery<HTMLElement>;
 
     public getName(): string {
@@ -54,8 +53,8 @@ export class TagSubscriptions extends RE6Module implements Subscription {
             .html(`<i class="fas fa-heart"></i>`);
     }
 
-    public async getUpdatedEntries(): Promise<UpdateData[]> {
-        const results: UpdateData[] = [];
+    public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData> {
+        const results: UpdateData = {};
 
         const tagData: SubscriptionSettings = this.fetchSettings("data", true);
         if (Object.keys(tagData).length === 0) {
@@ -65,8 +64,8 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         for (const tagName of Object.keys(tagData)) {
             const postsJson: ApiPost[] = (await Api.getJson("/posts.json?tags=" + encodeURIComponent(tagName.replace(/ /g, "_")))).posts;
             for (const post of postsJson) {
-                if (new Date(post.created_at).getTime() > this.lastUpdate) {
-                    results.push(await this.formatPostUpdate(post, tagName));
+                if (new Date(post.created_at).getTime() > lastUpdate) {
+                    results[new Date(post.created_at).getTime()] = await this.formatPostUpdate(post, tagName);
                 }
             }
         }
@@ -74,11 +73,10 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         return results;
     }
 
-    private async formatPostUpdate(value: ApiPost, tagName: string): Promise<UpdateData> {
+    private async formatPostUpdate(value: ApiPost, tagName: string): Promise<UpdateContent> {
         return {
             id: value.id,
             name: tagName.replace(/ /g, " "),
-            date: new Date(value.created_at).getTime(),
             md5: value.file.md5
         };
     }

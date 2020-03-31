@@ -28,10 +28,18 @@ export class SubscriptionManager extends RE6Module {
         this.openSubsButton = DomUtilities.addSettingsButton({
             name: `<i class="fas fa-bell"></i>`,
         });
-
+        let now;
+        const nowFake = this.fetchSettings("now");
+        if (nowFake !== undefined) {
+            now = nowFake;
+        } else {
+            now = new Date().getTime();
+        }
+        const lastUpdate = this.fetchSettings("lastUpdate");
+        this.pushSettings("lastUpdate", now);
         const content = [];
         for (const sub of this.subscribers) {
-            await this.initSubscriber(sub);
+            await this.initSubscriber(sub, lastUpdate, now);
             content.push({ name: sub.getName(), page: sub.tab });
         }
 
@@ -113,42 +121,33 @@ export class SubscriptionManager extends RE6Module {
     /**
      * Starts checking for updates for the passed subscriber
      */
-    public async initSubscriber(instance: Subscription): Promise<void> {
+    public async initSubscriber(instance: Subscription, lastUpdate: number, currentTime: number): Promise<void> {
         const moduleName = instance.constructor.name;
-        let lastUpdate: number = instance.fetchSettings("lastUpdate");
-
-        if (lastUpdate === undefined) {
-            lastUpdate = new Date().getTime();
-            instance.pushSettings("lastUpdate", lastUpdate);
-        }
 
         this.addSubscribeButtons(instance);
         instance.tab = SubscriptionManager.createTabContent();
         instance.tab.attr("data-subscription-class", moduleName);
-        instance.lastUpdate = lastUpdate;
-        const currentDate = new Date().getTime();
 
         //don't update if the last check was pretty recently
-        if (currentDate - lastUpdate - (this.updateInterval * 1000) < 0) {
-            this.addUpdateEntries(instance, []);
-            return;
+        let updates: UpdateData = {};
+        if (currentTime - lastUpdate - (this.updateInterval * 1000) >= 0) {
+            updates = await instance.getUpdatedEntries(lastUpdate);
         }
 
-        const updates = await instance.getUpdatedEntries();
-        this.addUpdateEntries(instance, updates);
-        instance.pushSettings("lastUpdate", currentDate);
+        this.addUpdateEntries(instance, updates, currentTime);
     }
 
     /**
      * Creates an element through the data and how the subscriber defines it
      * @returns the element to append to a tab
      */
-    private createUpdateEntry(data: UpdateData, definition: UpdateDefinition, customClass?: string): JQuery<HTMLElement> {
+    private createUpdateEntry(data: UpdateContent, timeStamp: number, definition: UpdateDefinition, customClass?: string): JQuery<HTMLElement> {
         const $content = $("<div>")
             .addClass("subscription-update");
 
         if (customClass) $content.addClass(customClass);
-
+        const timeAgo = Util.timeAgo(timeStamp);
+        const timeString = new Date(timeStamp).toLocaleString();
         // Image
         const $imageDiv = $("<div>")
             .addClass("subscription-update-preview")
@@ -159,14 +158,14 @@ export class SubscriptionManager extends RE6Module {
                 .attr("href", definition.imageHref(data));
             $("<img>")
                 .attr("src", definition.imageSrc(data))
-                .attr("title", definition.updateText(data) + "\n" + Util.timeAgo(data.date) + "\n" + new Date(data.date).toLocaleString())
+                .attr("title", definition.updateText(data) + "\n" + timeAgo + "\n" + timeString)
                 .appendTo($a);
             $a.appendTo($imageDiv);
         } else {
             $("<img>")
                 .attr("src", definition.imageSrc(data))
-                .attr("title", definition.updateText(data) + "\n" + Util.timeAgo(data.date) + "\n" + new Date(data.date).toLocaleString())
-                .appendTo($imageDiv);
+                .attr("title", definition.updateText(data) + "\n" + timeAgo + "\n" + timeString)
+                .appendTo($imageDiv); timeStamp
         }
 
         // Entry Title
@@ -210,8 +209,8 @@ export class SubscriptionManager extends RE6Module {
             .addClass("subscription-update-date")
             .appendTo($content);
         $("<span>")
-            .html(Util.timeAgo(data.date))
-            .attr("title", new Date(data.date).toLocaleString())
+            .html(timeAgo)
+            .attr("title", timeString)
             .appendTo($date);
 
         return $content;
@@ -256,58 +255,59 @@ export class SubscriptionManager extends RE6Module {
     /**
      * Adds the passed updates to the tab of the subscriber
      */
-    public addUpdateEntries(instance: Subscription, updates: UpdateData[]): void {
-        if (updates.length === 0) {
+    public addUpdateEntries(instance: Subscription, updates: UpdateData, currentTime: number): void {
+        if (Object.keys(updates).length === 0) {
             instance.tab.append(this.createUpToDateDivider());
         } else {
             instance.tab.attr("data-remove-notification-count", "true");
             this.updateNotificationSymbol(1);
         }
 
-        const cache = this.addToCache(instance, updates);
+        const cache = this.addToCache(instance, updates, currentTime);
 
         //Sort cache by time highest to lowest
         const timestamps = Object.keys(cache).sort((a, b) => parseInt(b) - parseInt(a));
         for (let i = 0; i < timestamps.length; i++) {
-            instance.tab.append(this.createCacheDivider(i + 1, parseInt(timestamps[i])));
-            for (const update of cache[timestamps[i]]) {
-                instance.tab.append(this.createUpdateEntry(update, instance.updateDefinition));
+            instance.tab.append(this.createCacheDivider(parseInt(timestamps[i])));
+            //also sort the individual update entries
+            for (const updateTimestamp of Object.keys(cache[timestamps[i]]).sort((a, b) => parseInt(b) - parseInt(a))) {
+                const update: UpdateContent = cache[timestamps[i]][updateTimestamp];
+                instance.tab.append(this.createUpdateEntry(update, parseInt(updateTimestamp), instance.updateDefinition));
             }
         }
     }
 
     private createUpToDateDivider(): JQuery<HTMLElement> {
-        const update: UpdateData = { date: new Date().getTime(), id: -1, name: "All up to date!", md5: "" };
+        const update: UpdateContent = { id: -1, name: "All up to date!", md5: "" };
         const definition: UpdateDefinition = {
             imageSrc: () => "",
             sourceText: () => "",
             updateText: data => data.name
 
         };
-        return this.createUpdateEntry(update, definition, "notice notice-uptodate");
+        return this.createUpdateEntry(update, new Date().getTime(), definition, "notice notice-uptodate");
     }
 
-    private createCacheDivider(index: number, timestamp: number): JQuery<HTMLElement> {
-        const update: UpdateData = { date: new Date(timestamp).getTime(), id: -1, name: " ", md5: "" };
+    private createCacheDivider(timestamp: number): JQuery<HTMLElement> {
+        const update: UpdateContent = { id: -1, name: " ", md5: "" };
         const definition: UpdateDefinition = {
             imageSrc: () => "",
             sourceText: () => "",
             updateText: data => data.name
 
         };
-        return this.createUpdateEntry(update, definition, "notice notice-cached");
+        return this.createUpdateEntry(update, new Date(timestamp).getTime(), definition, "notice notice-cached");
     }
 
-    public addToCache(instance: Subscription, updates: UpdateData[]): UpdateCache {
+    public addToCache(instance: Subscription, updates: UpdateData, currentTime: number): UpdateCache {
         let cache: UpdateCache = instance.fetchSettings("cache");
         if (cache === undefined) {
             cache = {};
         }
 
-        if (updates.length === 0) {
+        if (Object.keys(updates).length === 0) {
             return cache;
         }
-        const currentTime = new Date().getTime();
         cache[currentTime] = updates;
 
         //if the cache is larger than the limit, remove the entry with the lowest timestamp
@@ -318,18 +318,20 @@ export class SubscriptionManager extends RE6Module {
         //remove all non unique updates
         //forumposts may get replies all the time, only the recent one is important
         const uniqueKeys = [];
-        const nonUniqueKeys = [];
         for (const timestamp of Object.keys(cache).sort((a, b) => parseInt(b) - parseInt(a))) {
-            for (const update of cache[timestamp]) {
+            for (const updateTimestamp of Object.keys(cache[timestamp])) {
+                const update: UpdateContent = cache[timestamp][updateTimestamp];
                 if (uniqueKeys.indexOf(update.id) === -1) {
                     uniqueKeys.push(update.id);
                 } else {
-                    nonUniqueKeys.push(update.id);
+                    delete cache[timestamp][updateTimestamp];
                 }
             }
-            cache[timestamp] = cache[timestamp].filter(update => !nonUniqueKeys.includes(update.id));
+
+
+
             //remove empty 
-            if (cache[timestamp].length === 0) {
+            if (Object.keys(cache[timestamp]).length === 0) {
                 delete cache[timestamp];
             }
         }
@@ -347,7 +349,8 @@ export class SubscriptionManager extends RE6Module {
 
     protected getDefaultSettings(): Settings {
         return {
-            enabled: true
+            enabled: true,
+            lastUpdate: 0
         };
     }
 }
@@ -364,28 +367,31 @@ export interface ExtraInfo {
 }
 
 interface UpdateCache {
-    [timestamp: number]: UpdateData[];
+    [timestamp: number]: UpdateData;
 }
 
 export interface UpdateData {
+    [timestamp: number]: UpdateContent;
+}
+
+export interface UpdateContent {
     id: number;
     name: string;
-    date: number;
     md5: string;
     extra?: any;
 }
 
 export interface UpdateDefinition {
     //what link should be opened when you click on the image? Leave empty for no action
-    imageHref?: (data: UpdateData) => string;
+    imageHref?: (data: UpdateContent) => string;
     //image link which should be displayed on the left side of the entry
-    imageSrc: (data: UpdateData) => string;
+    imageSrc: (data: UpdateContent) => string;
     //Link to get to the update
-    updateHref?: (data: UpdateData) => string;
+    updateHref?: (data: UpdateContent) => string;
     //Text for the updatelink
-    updateText: (data: UpdateData) => string;
+    updateText: (data: UpdateContent) => string;
     //Text to display when clicking on sourceLink
-    sourceHref?: (data: UpdateData) => string;
+    sourceHref?: (data: UpdateContent) => string;
     //Link to where the "first page" of the subscription
-    sourceText: (data: UpdateData) => string;
+    sourceText: (data: UpdateContent) => string;
 }

@@ -39,7 +39,6 @@ const loadOrder = [
     HeaderCustomizer,
     ThemeCustomizer,
     Miscellaneous,
-    ThemeCustomizer,
 
     DownloadCustomizer,
     ImageScaler,
