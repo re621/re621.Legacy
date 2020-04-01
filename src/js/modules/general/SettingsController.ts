@@ -78,15 +78,17 @@ export class SettingsController extends RE6Module {
         if (new Date().getTime() - (1000 * 60 * 60) > this.fetchSettings("lastVersionCheck")) {
 
             const releases = { latest: null, current: null };
-            $.when(
-                $.get("https://api.github.com/repos/re621/re621/releases/latest", function (data) { releases.latest = data; }),
-                $.get("https://api.github.com/repos/re621/re621/releases/tags/" + window["re621"]["version"], function (data) { releases.current = data; })
-            ).then(() => {
-                this.pushSettings("newVersionAvailable", (releases.latest.name !== releases.current.name));
+            (async (): Promise<void> => {
+                releases.latest = JSON.parse(await Util.userscriptRequest("https://api.github.com/repos/re621/re621/releases/latest"));
+                releases.current = JSON.parse(await Util.userscriptRequest("https://api.github.com/repos/re621/re621/releases/tags/" + window["re621"]["version"]));
+                this.pushSettings("newVersionAvailable", releases.latest.name !== releases.current.name);
                 this.pushSettings("lastVersionCheck", new Date().getTime());
                 this.pushSettings("changelog", releases.current.body);
-                this.modal.getElement().trigger("re621:settings:update");
-            });
+                this.modal.getElement().trigger("re621:settings:update", {
+                    changelog: releases.current.body,
+                    newVersion: releases.latest.name !== releases.current.name
+                });
+            })();
         }
     }
 
@@ -1013,9 +1015,9 @@ export class SettingsController extends RE6Module {
     private handleAboutTab(form: Form): void {
         const inputList = form.getInputList();
 
-        this.modal.getElement().on("re621:settings:update", () => {
-            inputList.get("about-changelog-changes").html(`<div class="changelog-list">` + Util.quickParseMarkdown(this.fetchSettings("changelog")) + `</div>`);
-            $("#project-update-button").attr("data-available", this.fetchSettings("newVersionAvailable"));
+        this.modal.getElement().on("re621:settings:update", (event, data) => {
+            inputList.get("about-changelog-changes").html(`<div class="changelog-list">` + Util.quickParseMarkdown(data.changelog) + `</div>`);
+            $("#project-update-button").attr("data-available", data.newVersion);
         });
     }
 }

@@ -19,21 +19,23 @@
 // @grant        GM_getResourceText
 // @grant        GM_addStyle
 // @grant        GM_download
+// @grant        GM_xmlhttpRequest
+// @connect      api.github.com
 // ==/UserScript==
 
-window.re621 = {
-    name: "%NAME%",
-    displayName: "%DISPLAYNAME%",
-    version: "%VERSION%",
-    build: "%BUILD%",
-    repo: "re621/re621",
-    links: {
+window.re621 = new function () {
+    this.name = "%NAME%";
+    this.displayName = "%DISPLAYNAME%";
+    this.version = "%VERSION%";
+    this.build = "%BUILD%";
+    this.repo = "re621/re621";
+    this.links = {
         website: "https://re621.github.io/",
         repository: "https://github.com/" + this.repo + "/",
         issues: "https://github.com/" + this.repo + "/issues/",
         releases: "https://github.com/" + this.repo + "/releases",
         forum: "https://e621.net/forum_topics/25872",
-    },
-    debug: true,
-    toString: function() { return this.name + " v." + this.version + " (" + this.build + ")"; }
+    };
+    this.debug = true;
+    this.toString = function () { return this.name + " v." + this.version + " (" + this.build + ")"; };
 };

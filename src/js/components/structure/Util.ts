@@ -1,3 +1,5 @@
+declare const GM_xmlhttpRequest;
+
 /**
  * Common utilities used in other modules
  */
@@ -71,6 +73,16 @@ export class Util {
         document.body.appendChild(downloadAnchorNode); // required for firefox
         downloadAnchorNode.click();
         downloadAnchorNode.remove();
+    }
+
+    public static async userscriptRequest(url: string): Promise<string> {
+        return new Promise(resolve => {
+            GM_xmlhttpRequest({
+                method: "GET",
+                url: url,
+                onload: res => { resolve(res.responseText) }
+            });
+        });
     }
 
     /**
