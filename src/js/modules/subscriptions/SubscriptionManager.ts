@@ -52,7 +52,7 @@ export class SubscriptionManager extends RE6Module {
         });
 
         const nowFake = this.fetchSettings("now");
-        const now = nowFake !== nowFake ? nowFake : new Date().getTime();
+        const now = nowFake !== undefined ? nowFake : new Date().getTime();
 
         this.openSubsButton.attr("data-loading", "true");
 
@@ -63,7 +63,6 @@ export class SubscriptionManager extends RE6Module {
         for (const entry of this.subscribers.entries()) {
             const subElements = {
                 instance: entry[1].instance,
-                panel: panels.eq(entry[0]),
                 content: panels.eq(entry[0]).find("div"),
                 tab: tabs.eq(entry[0])
             };
@@ -104,9 +103,8 @@ export class SubscriptionManager extends RE6Module {
 
     /**
      * Starts checking for updates for the passed subscriber
-     * @retuns true if the subscriber has notifications, false otherwise
      */
-    public async initSubscriber(sub: SubscriptionElement, lastUpdate: number, currentTime: number): Promise<boolean> {
+    public async initSubscriber(sub: SubscriptionElement, lastUpdate: number, currentTime: number) {
         const moduleName = sub.instance.constructor.name;
 
         this.addSubscribeButtons(sub.instance);
@@ -127,7 +125,6 @@ export class SubscriptionManager extends RE6Module {
             sub.tab.attr("data-has-notifications", "true");
             this.tabNotificationsCount++;
         }
-        return updateCount !== 0;
     }
 
     /**
@@ -398,6 +395,5 @@ export interface UpdateDefinition {
 interface SubscriptionElement {
     instance: Subscription;
     tab?: JQuery<HTMLElement>;
-    panel?: JQuery<HTMLElement>;
     content?: JQuery<HTMLElement>;
 }
