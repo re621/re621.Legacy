@@ -811,7 +811,7 @@ export class SettingsController extends RE6Module {
 
             const reader = new FileReader();
             reader.readAsText(data, "UTF-8");
-            reader.onload = function (event): void {
+            reader.onload = async (event): Promise<void> => {
                 const parsedData = event.target.result.toString().split("\n");
                 if (parsedData[0] !== "eSixExtend User Prefs") { $info.html("Invalid file format"); return; }
 
@@ -820,78 +820,61 @@ export class SettingsController extends RE6Module {
                 });
 
                 // parsedData[2] : pools
-                $info.html("Processing pools . . .");
-                const poolSubs = PoolSubscriptions.getInstance(),
-                    poolData: ExtraInfo = poolSubs.fetchSettings("data", true);
-                for (const entry of parsedData[2]) {
-                    poolData[entry["id"]] = {
-                        md5: entry["thumb"]["url"].substr(6, 32),
-                        lastID: entry["last"],
-                    };
-                }
-                poolSubs.pushSettings("data", poolData);
+                await this.importPoolData(parsedData[2], $info);
 
                 // parsedData[3] : forums
-                $info.html("Processing forums . . .");
-                const forumSubs = ForumSubscriptions.getInstance(),
-                    forumData: ExtraInfo = forumSubs.fetchSettings("data", true),
-                    postIDs = [];
-                for (const entry of parsedData[3]) {
-                    postIDs.push(entry["id"]);
-                }
-                Api.getJson("/forum_posts.json?search[id]=" + postIDs.join(","))
-                    .then((data) => {
-                        data.forEach((postData) => {
-                            forumData[postData["topic_id"]] = {};
-                        });
-                        forumSubs.pushSettings("data", forumData);
-                    });
+                await this.importForumData(parsedData[3], $info);
 
-                //console.log(parsedData);
                 $info.html("Settings imported!");
             };
             reader.onerror = function (): void { $info.html("Error loading file"); };
         });
 
         // From LocalStorage
-        miscFormInput.get("misc-esix-localstorage").on("click", () => {
+        miscFormInput.get("misc-esix-localstorage").on("click", async () => {
             const $info = $("div#localstorage-esix-status").html("Loading . . .");
 
-            // parsedData[2] : pools
-            if (localStorage.getItem("poolSubscriptions") !== "null") {
-                $info.html("Processing pools . . .");
-                const poolSubs = PoolSubscriptions.getInstance(),
-                    poolData: ExtraInfo = poolSubs.fetchSettings("data", true);
-                for (const entry of JSON.parse(localStorage.getItem("poolSubscriptions"))) {
-                    poolData[entry["id"]] = {
-                        md5: entry["thumb"]["url"].substr(6, 32),
-                        lastID: entry["last"],
-                    };
-                }
-                poolSubs.pushSettings("data", poolData);
+            if (localStorage.getItem("poolSubscriptions") !== null) {
+                await this.importPoolData(JSON.parse(localStorage.getItem("poolSubscriptions")), $info);
             }
 
-            // parsedData[3] : forums
-            if (localStorage.getItem("forumSubscriptions") !== "null") {
-                $info.html("Processing forums . . .");
-                const forumSubs = ForumSubscriptions.getInstance(),
-                    forumData: ExtraInfo = forumSubs.fetchSettings("data", true),
-                    postIDs = [];
-                for (const entry of JSON.parse(localStorage.getItem("forumSubscriptions"))) {
-                    postIDs.push(entry["id"]);
-                }
-                Api.getJson("/forum_posts.json?search[id]=" + postIDs.join(","))
-                    .then((data) => {
-                        data.forEach((postData) => {
-                            forumData[postData["topic_id"]] = {};
-                        });
-                        forumSubs.pushSettings("data", forumData);
-                    });
+            if (localStorage.getItem("forumSubscriptions") !== null) {
+                await this.importForumData(JSON.parse(localStorage.getItem("forumSubscriptions")), $info);
             }
 
-            //console.log(parsedData);
             $info.html("Settings imported!");
         });
+    }
+
+    private async importPoolData(settings: string, $info: JQuery<HTMLElement>): Promise<void> {
+        $info.html("Processing forums . . .");
+        const poolSubs = PoolSubscriptions.getInstance(),
+            forumData: ExtraInfo = poolSubs.fetchSettings("data", true),
+            postIDs = [];
+        for (const entry of settings) {
+            postIDs.push(entry["id"]);
+        }
+        const data = await Api.getJson("/forum_posts.json?search[id]=" + postIDs.join(","));
+        data.forEach((postData) => {
+            forumData[postData["topic_id"]] = {};
+        });
+        poolSubs.pushSettings("data", forumData);
+    }
+
+    private async importForumData(settings: string, $info: JQuery<HTMLElement>): Promise<void> {
+        $info.html("Processing forums . . .");
+        const forumSubs = ForumSubscriptions.getInstance(),
+            forumData: ExtraInfo = forumSubs.fetchSettings("data", true),
+            postIDs = [];
+        for (const entry of settings) {
+            postIDs.push(entry["id"]);
+        }
+        const data = await Api.getJson("/forum_posts.json?search[id]=" + postIDs.join(","));
+        data.forEach((postData) => {
+            forumData[postData["topic_id"]] = {};
+        });
+        forumSubs.pushSettings("data", forumData);
+
     }
 
     private createModuleStatus(): Form {
