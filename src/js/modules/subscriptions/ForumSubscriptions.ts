@@ -35,8 +35,8 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         return Page.getPageID();
     }
 
-    getElementsToInsertAfter(): JQuery<HTMLElement> {
-        return $("div#c-forum-topics > div#a-show > h1").first();
+    getButtonElements(): JQuery<HTMLElement> {
+        return $("div#c-forum-topics").first();
     }
 
     public createSubscribeButton(): JQuery<HTMLElement> {
@@ -49,6 +49,10 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         return $("<button>")
             .addClass(`large-subscribe-button unsubscribe`)
             .html("Unsubscribe");
+    }
+
+    public insertButton($element: JQuery<HTMLElement>, $button: JQuery<HTMLElement>): void {
+        $element.prepend($button);
     }
 
     public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData> {

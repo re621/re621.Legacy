@@ -39,8 +39,8 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
         return Page.getPageID();
     }
 
-    public getElementsToInsertAfter(): JQuery<HTMLElement> {
-        return $("div#c-pools > div#a-show > h1:first").first();
+    public getButtonElements(): JQuery<HTMLElement> {
+        return $("div#c-pools > div#a-show").first();
     }
 
     public createSubscribeButton(): JQuery<HTMLElement> {
@@ -53,6 +53,10 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
         return $("<button>")
             .addClass(`large-subscribe-button unsubscribe`)
             .html("Unsubscribe");
+    }
+
+    public insertButton($element: JQuery<HTMLElement>, $button: JQuery<HTMLElement>): void {
+        $element.prepend($button);
     }
 
     public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData> {

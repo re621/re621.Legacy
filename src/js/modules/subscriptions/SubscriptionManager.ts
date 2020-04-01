@@ -104,7 +104,7 @@ export class SubscriptionManager extends RE6Module {
     /**
      * Starts checking for updates for the passed subscriber
      */
-    public async initSubscriber(sub: SubscriptionElement, lastUpdate: number, currentTime: number) {
+    public async initSubscriber(sub: SubscriptionElement, lastUpdate: number, currentTime: number): Promise<void> {
         const moduleName = sub.instance.constructor.name;
 
         this.addSubscribeButtons(sub.instance);
@@ -208,7 +208,7 @@ export class SubscriptionManager extends RE6Module {
 
     public addSubscribeButtons(instance: Subscription): void {
         let subscriptionData: SubscriptionSettings = instance.fetchSettings("data", true);
-        instance.getElementsToInsertAfter().each((index, element) => {
+        instance.getButtonElements().each((index, element) => {
             const $element = $(element);
 
             const $subscribeButton = instance.createSubscribeButton();
@@ -237,8 +237,8 @@ export class SubscriptionManager extends RE6Module {
                 delete subscriptionData[id];
                 instance.pushSettings("data", subscriptionData);
             });
-            $subscribeButton.insertAfter($element);
-            $unsubscribeButton.insertAfter($element);
+            instance.insertButton($element, $subscribeButton);
+            instance.insertButton($element, $unsubscribeButton)
         });
     }
 

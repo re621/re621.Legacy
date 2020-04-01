@@ -34,7 +34,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         return $element.parent().attr("data-tag");
     }
 
-    public getElementsToInsertAfter(): JQuery<HTMLElement> {
+    public getButtonElements(): JQuery<HTMLElement> {
         return $("#tag-box li span.tag-action-dummy, #tag-list li span.tag-action-dummy");
     }
 
@@ -50,6 +50,10 @@ export class TagSubscriptions extends RE6Module implements Subscription {
             .attr("href", "#")
             .addClass("tag-subscription-button unsubscribe")
             .html(`<i class="fas fa-heart"></i>`);
+    }
+
+    public insertButton($element: JQuery<HTMLElement>, $button: JQuery<HTMLElement>): void {
+        $element.append($button);
     }
 
     public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData> {
