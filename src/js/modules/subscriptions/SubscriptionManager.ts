@@ -118,10 +118,12 @@ export class SubscriptionManager extends RE6Module {
             updates = await sub.instance.getUpdatedEntries(lastUpdate);
         }
 
-        this.addUpdateEntries(sub, updates, currentTime);
+        const lastTimestamp = this.addUpdateEntries(sub, updates, currentTime);
+        const lastSeen = sub.instance.fetchSettings("lastSeen");
         const updateCount = Object.keys(updates).length;
         sub.tab.attr("data-loading", "false");
-        if (updateCount !== 0) {
+        //show notification if there are new updates or there are updates you didn't click on yet
+        if (updateCount !== 0 || lastSeen < lastTimestamp || lastSeen === undefined && !isNaN(lastTimestamp)) {
             sub.tab.attr("data-has-notifications", "true");
             this.tabNotificationsCount++;
         }
@@ -245,8 +247,9 @@ export class SubscriptionManager extends RE6Module {
 
     /**
      * Adds the passed updates to the tab of the subscriber
+     * @returns the subscriptions cache newest entry
      */
-    public addUpdateEntries(sub: SubscriptionElement, updates: UpdateData, currentTime: number): void {
+    public addUpdateEntries(sub: SubscriptionElement, updates: UpdateData, currentTime: number): number {
         if (Object.keys(updates).length === 0) {
             sub.content.append(this.createUpToDateDivider());
         }
@@ -263,6 +266,14 @@ export class SubscriptionManager extends RE6Module {
                 sub.content.append(this.createUpdateEntry(update, parseInt(updateTimestamp), sub.instance.updateDefinition));
             }
         }
+        return this.getLastCacheTimestamp(cache);
+    }
+
+    /**
+     * Returns the most recent timestamp in the cache
+     */
+    public getLastCacheTimestamp(cache: UpdateCache): number {
+        return Math.max(...Object.keys(cache).map(a => parseInt(a)));
     }
 
     private createUpToDateDivider(): JQuery<HTMLElement> {
@@ -328,6 +339,7 @@ export class SubscriptionManager extends RE6Module {
 
     protected removeUnopened(index: number): void {
         const sub = this.subscribers.get(index);
+        sub.instance.pushSettings("lastSeen", new Date().getTime());
         if (sub.tab.attr("data-has-notifications") === "true") {
             this.updateNotificationSymbol(-1);
             sub.tab.attr("data-has-notifications", "false");
