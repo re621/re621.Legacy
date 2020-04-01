@@ -27,6 +27,5 @@ export interface Subscription extends RE6Module {
     /**
      * Tab which will hold the updates. Updates are automatically added by the SubscriptionManager
      */
-    tab: JQuery<HTMLElement>;
     updateDefinition: UpdateDefinition;
 }

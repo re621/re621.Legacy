@@ -25,7 +25,6 @@ export class TagSubscriptions extends RE6Module implements Subscription {
     };
 
     limit: number;
-    tab: JQuery<HTMLElement>;
 
     public getName(): string {
         return "Tags";

@@ -30,7 +30,6 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
     };
 
     limit: number;
-    tab: JQuery<HTMLElement>;
 
     public getName(): string {
         return "Pools";
