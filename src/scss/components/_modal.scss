@@ -1,0 +1,111 @@
+/* Modal Helper Styles */
+div#modal-container {
+    position: absolute;
+    height: 100%;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    pointer-events: none;
+
+    box-sizing: border-box;
+    //padding: 4rem 1rem 0;
+    margin-top: -8px;
+
+    /* Modal Styling Overrides */
+    div.re621-ui-dialog {
+        position: absolute !important;
+        pointer-events: auto;
+        border-radius: 6px;
+        min-width: max-content;
+        max-width: fit-content;
+        box-shadow: 0 5px 15px -5px black;
+        outline: 0;
+
+        background-image: url("/packs/media/src/styles/images/extras/hex-6029a8f11b7ec7b1f0638e3d8f18b6cb.png");
+        background-position: left 2rem;
+        background-repeat: repeat-x;
+
+        &.modal-fixed {
+            position: fixed !important;
+        }
+
+        &.modal-reserve-height div.ui-dialog-content {
+            height: 75vh !important;
+        }
+
+        div.ui-dialog-titlebar {
+            position: relative;
+            padding: 0;
+            border: unset !important;
+            border-radius: 6px 6px 0 0;
+            color: inherit !important;
+            background-color: #00000066;
+            cursor: grab;
+            height: 2rem;
+
+            span.ui-dialog-title {
+                float: left;
+                padding: .4em 1em;
+                margin: .1em 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            button.ui-dialog-titlebar-close {
+                position: absolute;
+                height: 100%;
+                margin: 0;
+                right: 0;
+                top: 0;
+                padding: 0;
+                width: 3em;
+                outline: 0;
+
+                border-width: 0 0 0 1px !important;
+                background: unset;
+                box-shadow: unset;
+
+                &:hover,
+                &:active {
+                    background: #00000033;
+                    border-left-color: transparent;
+
+                    span.ui-icon {
+                        background-image: url(/packs/media/images/ui-icons_ffffff_256x240-bf27228a.png);
+                        background-position: -96px -128px;
+                    }
+                }
+            }
+        }
+
+        &.ui-draggable-dragging {
+            div.ui-dialog-titlebar {
+                cursor: grabbing;
+            }
+        }
+
+        div.ui-dialog-content {
+            position: relative;
+            padding: 1em 1em;
+            min-width: fit-content;
+
+            height: 90% !important;
+            overflow: hidden scroll;
+
+            padding-left: 0.75rem;
+            padding-right: 0.5rem;
+
+            border: unset !important;
+            background-color: unset !important;
+            color: unset !important;
+
+            div.ui-tabs {
+                margin-top: -1em;
+            }
+
+            @include scrollbars;
+        }
+    }
+
+}

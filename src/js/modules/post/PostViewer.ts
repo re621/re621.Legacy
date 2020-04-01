@@ -52,25 +52,23 @@ export class PostViewer extends RE6Module {
 
     /** Creates the document structure for the module */
     private createDOM(): void {
-        // Add the uploader name
-        $("<li>")
-            .append("Uploader: ")
-            .append($("<a>").attr("href", "/users/" + this.post.getUploaderID()).text(this.post.getUploaderName()))
-            .appendTo("#post-information ul");
-
-        // Make the rating bold
-        const rating = $("#post-rating-text").html();
-        $("#post-rating-text").html("<b>" + rating + "</br>");
-
         // Move the add to set / pool buttons
         const $addToContainer = $("<div>").attr("id", "image-add-links").insertAfter("#image-download-link");
-        $("li#add-to-set-list > a").addClass("image-add-set").html("+ Set").appendTo($addToContainer);
-        $("li#add-to-pool-list > a").addClass("image-add-pool").html("+ Pool").appendTo($addToContainer);
+        $("li#add-to-set-list > a")
+            .addClass("image-add-set")
+            .addClass("button btn-neutral")
+            .html("+ Set")
+            .appendTo($addToContainer);
+        $("li#add-to-pool-list > a")
+            .addClass("image-add-pool")
+            .addClass("button btn-neutral")
+            .html("+ Pool")
+            .appendTo($addToContainer);
 
         // Move child/parent indicator, leave others as is, like marked for deleteion
         const $bottomNotices = $(".parent-children");
         $bottomNotices.insertAfter($("#search-box"));
-        //expand child/parent container
+        // Expand child/parent container
         const $parentRel = $("#has-parent-relationship-preview-link");
         const $childRel = $("#has-children-relationship-preview-link");
 
@@ -89,12 +87,12 @@ export class PostViewer extends RE6Module {
 
     /** Emulates a click on the upvote button */
     private triggerUpvote(): void {
-        Danbooru.Post.vote(this.post.getId(), 1);
+        $("a.post-vote-up-link span").first()[0].click();
     }
 
     /** Emulates a click on the downvote button */
     private triggerDownvote(): void {
-        Danbooru.Post.vote(this.post.getId(), -1);
+        $("a.post-vote-down-link span").first()[0].click();
     }
 
     /** Toggles the favorite state */

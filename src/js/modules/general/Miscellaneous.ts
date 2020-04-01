@@ -48,9 +48,6 @@ export class Miscellaneous extends RE6Module {
         if (!this.canInitialize()) return;
         super.create();
 
-        // Load the Redesign Fixes stylesheet
-        this.loadRedesignFixes(this.fetchSettings("loadRedesignFixes"));
-
         // Remove the query string on posts
         if (this.fetchSettings("removeSearchQueryString") === true && Page.matches(PageDefintion.post)) {
             this.removeSearchQueryString();
@@ -93,25 +90,6 @@ export class Miscellaneous extends RE6Module {
      */
     private removeSearchQueryString(): void {
         Page.removeQueryParameter("q");
-    }
-
-    /**
-     * Loads the Redesign Fixes stylesheet
-     * @param enabled Should the stylesheet be enabled
-     */
-    private loadRedesignFixes(enabled = true): void {
-        this.redesignStylesheet = $(GM_addStyle(GM_getResourceText("redesignFixes")));
-        if (!enabled) { this.disableRedesignFixes(); }
-    }
-
-    /** Enable the redesign stylesheet */
-    public enableRedesignFixes(): void {
-        this.redesignStylesheet.removeAttr("media");
-    }
-
-    /** Disable the redesign stylesheet */
-    public disableRedesignFixes(): void {
-        this.redesignStylesheet.attr("media", "max-width: 1px");
     }
 
     /**

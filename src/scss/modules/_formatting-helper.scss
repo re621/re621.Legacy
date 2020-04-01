@@ -10,11 +10,6 @@ form.simple_form {
 
         input[type=button],
         input[type=submit] {
-            @include themable {
-                background: lighten(themed("color-section"), 10%);
-                color: themed("color-text");
-            }
-
             padding: 0.25rem 0.5rem;
         }
     }
@@ -33,12 +28,7 @@ form.simple_form {
             width: 100%;
             padding-top: 0.5rem;
             box-sizing: border-box;
-
-            @include themable() {
-                background: lighten(themed("color-section"), 10%);
-                border: 1px solid lighten(themed("color-section"), 10%);
-                border-bottom: 0;
-            }
+            border-bottom: 0;
 
             div.comment-tabs {
                 padding-left: 1rem;
@@ -52,22 +42,9 @@ form.simple_form {
                     outline: 0;
                     font-weight: 500;
 
-                    @include themable() {
-                        color: themed("color-text");
-                    }
-
-                    &:hover {
-                        @include themable() {
-                            color: themed("color-text-muted");
-                        }
-                    }
-
                     &.active {
                         pointer-events: none;
-
-                        @include themable() {
-                            background: themed("color-section");
-                        }
+                        background: #00000040;
                     }
                 }
             }
@@ -111,12 +88,10 @@ form.simple_form {
         &[data-drawer=true] div.comment-buttons,
         &[data-drawer=true] div.dtext-button-drawer {
             li a {
-                @include themable() {
-                    border: 1px dashed themed("color-text-muted");
+                border: 1px dashed #666666;
 
-                    &.disabled {
-                        pointer-events: unset;
-                    }
+                &.disabled {
+                    pointer-events: unset;
                 }
             }
         }
@@ -139,12 +114,7 @@ form.simple_form {
             font-family: inherit;
             font-size: inherit;
 
-            @include themable() {
-                background: themed("color-section");
-                border: 1px solid lighten(themed("color-section"), 10%);
-                border-top: 0;
-                color: themed("color-text");
-            }
+            border-top: 0;
         }
 
         &[data-editing=false] div.comment-buttons,
@@ -165,19 +135,12 @@ form.simple_form {
             text-align: center;
             padding-top: 0.75rem;
 
-            @include themable() {
-                background: lighten(themed("color-section"), 10%);
-                color: themed("color-text");
-            }
-
             a {
                 display: inline-block;
                 padding: .125rem 1.3rem;
                 outline: 0;
 
-                @include themable() {
-                    border: 1px dashed themed("color-text-muted");
-                }
+                border: 1px dashed #666666;
             }
         }
 
@@ -192,13 +155,7 @@ form.simple_form {
 
             min-width: 10rem;
             margin-left: 1rem;
-
-            @include themable() {
-                background: themed("color-section");
-                border: 1px solid lighten(themed("color-section"), 10%);
-                border-top: 0;
-                color: themed("color-text");
-            }
+            border-top: 0;
         }
 
         &[data-drawer=false] div.dtext-button-drawer-title,
@@ -213,7 +170,7 @@ form.simple_form {
             grid-column: 1;
             position: relative;
             bottom: 1.25rem;
-            margin-bottom: -1rem;
+            margin-bottom: -1.25rem;
             text-align: right;
             pointer-events: none;
 

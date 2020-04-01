@@ -36,11 +36,17 @@ export class Modal {
                     within: $("div#modal-container"),
                     collision: "none",
                 },
+
+                classes: {
+                    "ui-dialog": "bg-foreground border-section color-text",
+                    "ui-dialog-titlebar": "color-text",
+                    "ui-dialog-titlebar-close": "border-foreground",
+                }
             });
 
         this.$modal.dialog("widget")
             .addClass("re621-ui-dialog")
-            .removeClass("ui-dialog")
+            .removeClass("ui-dialog ui-widget ui-widget-content")
             .draggable({
                 disabled: !config.draggable,
                 containment: "parent"

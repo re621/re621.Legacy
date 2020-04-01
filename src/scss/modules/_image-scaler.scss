@@ -9,28 +9,12 @@ section#image-extra-controls div#image-resize-cycle {
         margin: 0;
         border: 0;
         font-family: inherit;
-
-        @include themable {
-            background: themed("color-section");
-            color: themed("color-text");
-        }
     }
 
     a#fullsize-image {
         margin: 0;
         border: 0;
         font-family: inherit;
-
-        @include themable {
-            background: themed("color-section");
-            color: themed("color-text");
-        }
-
-        &:hover {
-            @include themable {
-                background: lighten(themed("color-section"), 10%);
-            }
-        }
     }
 }
 

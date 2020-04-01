@@ -13,7 +13,6 @@
 // @require      https://cdn.jsdelivr.net/npm/jquery.hotkeys@0.1.0/jquery.hotkeys.min.js
 // @resource     re621_styles https://github.com/re621/re621/releases/download/%VERSION%/style.min.css
 // @resource     re621_dnp https://github.com/re621/re621/releases/download/%VERSION%/avoid-posting.json
-// @resource     redesignFixes https://re621.github.io/Redesign-Fixes/build/style.min.css
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_getResourceText

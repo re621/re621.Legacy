@@ -74,11 +74,6 @@ form.grid-form {
             border: 1px solid transparent;
             border-left-width: 5px;
 
-            @include themable {
-                background: lighten(themed("color-section"), 10%);
-                color: themed("color-text");
-            }
-
             &:required {
                 border-left: 5px solid grey;
             }
@@ -118,17 +113,6 @@ form.grid-form {
                 width: unset;
                 border-radius: 0 4px 4px 0;
                 outline: 0;
-
-                @include themable {
-                    background: lighten(themed("color-section"), 15%);
-                }
-
-                &:hover {
-                    @include themable {
-                        background: themed("color-foreground");
-                        color: themed("color-text");
-                    }
-                }
             }
         }
 
@@ -148,9 +132,7 @@ form.grid-form {
                 font-family: 'Font Awesome 5 Free';
                 font-weight: 900;
 
-                @include themable {
-                    border: 1px dashed themed("color-text-muted");
-                }
+                border: 1px dashed #666666;
 
                 &.active {
                     background: #ffffff30;
@@ -160,46 +142,22 @@ form.grid-form {
 
         // Checkbox Switch
         &.checkbox-switch {
+
             input[type=checkbox] {
                 display: none;
+            }
 
-                &+label {
-                    position: relative;
-                    display: inline-block;
-                    width: 2.5rem;
-                    height: 1.25rem;
-                    border-radius: 1.25rem;
+            /* to hide the checkbox itself */
+            input[type=checkbox]+label:before {
+                content: "\f0c8";
+                font-family: "Font Awesome 5 Free";
+                display: inline-block;
+                letter-spacing: 10px;
+                cursor: pointer;
+            }
 
-                    @include themable {
-                        background-color: themed("color-foreground");
-                        border: 1px solid themed("color-section");
-                    }
-
-                    &::after {
-                        content: "";
-                        position: absolute;
-                        width: 1.125rem;
-                        height: 1.125rem;
-                        border-radius: 50%;
-                        top: 0.075rem;
-                        left: 0.075rem;
-                        transition: all 0.3s;
-
-                        @include themable {
-                            background-color: themed("color-text-muted");
-                        }
-                    }
-                }
-
-                &:checked+label {
-                    @include themable {
-                        background-color: lighten(themed("color-section"), 10%);
-                    }
-
-                    &::after {
-                        left: 1.325rem;
-                    }
-                }
+            input[type=checkbox]:checked+label:before {
+                content: "\f14a";
             }
         }
 

@@ -167,6 +167,7 @@ export class Form {
                 "data-type": element.type,
                 "id": this.config.id + "-" + element.id,
             })
+            .addClass("bg-section color-text")
             .val(element.value)
             .appendTo($inputContainer);
 
@@ -213,12 +214,14 @@ export class Form {
                 "id": this.config.id + "-" + element.id,
                 "readonly": "",
             })
+            .addClass("bg-section color-text")
             .val(element.value)
             .appendTo($inputContainer);
 
         const $copybutton = $("<button>")
             .attr("type", "button")
             .attr("id", this.config.id + "-" + element.id + "-copy")
+            .addClass("button btn-neutral")
             .html(`<i class="far fa-copy"></i>`)
             .appendTo($inputContainer);
 
@@ -267,12 +270,14 @@ export class Form {
                 "id": this.config.id + "-" + element.id,
                 "readonly": "",
             })
+            .addClass("bg-section color-text")
             .val(element.value)
             .appendTo($inputContainer);
 
         const $recordbutton = $("<button>")
             .attr("type", "button")
             .attr("id", this.config.id + "-" + element.id + "-copy")
+            .addClass("button btn-neutral")
             .html(`<i class="far fa-keyboard"></i>`)
             .appendTo($inputContainer);
 
@@ -344,6 +349,7 @@ export class Form {
                 "data-type": element.type,
                 "id": this.config.id + "-" + element.id,
             })
+            .addClass("bg-section color-text")
             .appendTo($inputContainer);
 
         if (element.pattern) { $input.attr("pattern", element.pattern); }
@@ -493,6 +499,7 @@ export class Form {
                 "data-type": element.type,
                 "id": this.config.id + "-" + element.id,
             })
+            .addClass("button btn-neutral")
             .html(element.value)
             .appendTo($inputContainer);
 
@@ -529,6 +536,7 @@ export class Form {
                 "data-type": element.type,
                 "id": this.config.id + "-" + element.id,
             })
+            .addClass("button btn-neutral")
             .html(element.value)
             .appendTo($inputContainer);
 
@@ -564,6 +572,7 @@ export class Form {
                 "data-type": element.type,
                 "id": this.config.id + "-" + element.id
             })
+            .addClass("bg-section color-text")
             .val(element.value)
             .appendTo($inputContainer);
 
@@ -607,6 +616,7 @@ export class Form {
                 "data-type": element.type,
                 "id": this.config.id + "-" + element.id
             })
+            .addClass("button btn-neutral")
             .appendTo($inputContainer);
 
         element.data.forEach(function (entry) {
@@ -682,6 +692,7 @@ export class Form {
                 "data-type": element.type,
                 "id": this.config.id + "-" + element.id
             })
+            .addClass("color-text-muted")
             .appendTo($inputContainer);
 
         return $input;

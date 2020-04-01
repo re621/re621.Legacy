@@ -21,17 +21,6 @@ section#image-extra-controls {
 
         a {
             margin: 0.25rem;
-
-            @include themable {
-                background: themed("color-section");
-                color: themed("color-text");
-            }
-
-            &:hover {
-                @include themable {
-                    color: themed("color-link-hover");
-                }
-            }
         }
     }
 

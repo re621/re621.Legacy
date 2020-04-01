@@ -567,8 +567,6 @@ export class SettingsController extends RE6Module {
 
     /** Creates the DOM for the miscellaneous settings page */
     private createTabMiscellaneous(): Form {
-        const module = ModuleController.getWithType<Miscellaneous>(Miscellaneous);
-
         // Create the settings form
         const form = new Form(
             {
@@ -582,18 +580,6 @@ export class SettingsController extends RE6Module {
                     type: "div",
                     value: "<h3>Miscellaneous</h3>",
                     stretch: "full",
-                },
-                {
-                    id: "misc-redesign-fixes",
-                    type: "checkbox",
-                    value: module.fetchSettings("loadRedesignFixes"),
-                    label: "Load Redesign Fixes",
-                },
-                {
-                    id: "misc-spacer-1",
-                    type: "div",
-                    value: "<br />",
-                    stretch: "mid",
                 },
 
                 // Import from File
@@ -729,14 +715,7 @@ export class SettingsController extends RE6Module {
      * @param form Miscellaneous settings form
      */
     private handleTabMiscellaneous(form: Form): void {
-        const miscModule = ModuleController.getWithType<Miscellaneous>(Miscellaneous);
         const miscFormInput = form.getInputList();
-
-        miscFormInput.get("misc-redesign-fixes").on("re621:form:input", (event, data) => {
-            miscModule.pushSettings("loadRedesignFixes", data);
-            if (data) { miscModule.enableRedesignFixes(); }
-            else { miscModule.disableRedesignFixes(); }
-        });
 
         // Import / Export to file
         miscFormInput.get("misc-export-button").on("click", () => {
