@@ -87,12 +87,12 @@ export class PostViewer extends RE6Module {
 
     /** Emulates a click on the upvote button */
     private triggerUpvote(): void {
-        $("a.post-vote-up-link span").first()[0].click();
+        Danbooru.Post.vote(Post.getViewingPost().getId(), 1);
     }
 
     /** Emulates a click on the downvote button */
     private triggerDownvote(): void {
-        $("a.post-vote-down-link span").first()[0].click();
+        Danbooru.Post.vote(Post.getViewingPost().getId(), -1);
     }
 
     /** Toggles the favorite state */
