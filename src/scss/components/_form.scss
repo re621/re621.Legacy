@@ -143,6 +143,8 @@ form.grid-form {
         // Checkbox Switch
         &.checkbox-switch {
 
+            justify-content: unset;
+
             input[type=checkbox] {
                 display: none;
             }

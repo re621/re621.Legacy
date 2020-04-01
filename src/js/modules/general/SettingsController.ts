@@ -233,12 +233,6 @@ export class SettingsController extends RE6Module {
                     label: "Upvote Favorites",
                 },
                 {
-                    id: "inter-spacer-2",
-                    type: "div",
-                    value: " ",
-                    stretch: "mid",
-                },
-                {
                     id: "actions-submit-hotkey",
                     type: "checkbox",
                     value: formattingManager.fetchSettings("hotkeySubmitActive"),
@@ -248,7 +242,7 @@ export class SettingsController extends RE6Module {
                     id: "inter-spacer-4",
                     type: "div",
                     value: " ",
-                    stretch: "mid",
+                    stretch: "column",
                 },
                 {
                     id: "inter-spacer-1",

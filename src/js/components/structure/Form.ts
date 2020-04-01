@@ -443,13 +443,6 @@ export class Form {
             .addClass("stretch-" + element.stretch)
             .appendTo($form);
 
-        if (element.label) {
-            $("<label>")
-                .attr("for", this.config.id + "-" + element.id)
-                .html(element.label)
-                .appendTo($inputContainer);
-        }
-
         const $input = $("<input>")
             .attr({
                 "type": "checkbox",
@@ -464,6 +457,15 @@ export class Form {
             .attr("for", this.config.id + "-" + element.id)
             .addClass("switch")
             .appendTo($inputContainer);
+
+
+
+        if (element.label) {
+            $("<label>")
+                .attr("for", this.config.id + "-" + element.id)
+                .html(element.label)
+                .appendTo($inputContainer);
+        }
 
         $input.on("change", () => {
             $input.trigger("re621:form:input", $input.is(":checked"));
