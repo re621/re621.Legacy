@@ -6,8 +6,6 @@ div#nav-links {
         position: relative;
 
         div.post-nav-switch-box {
-            position: absolute;
-            left: 2rem;
 
             input[type=radio] {
                 display: none;
@@ -25,6 +23,13 @@ div#nav-links {
             input[type=radio]:checked+label:before {
                 content: "\f14a";
             }
+        }
+
+        div.post-nav-switch-box,
+        div.post-nav-spacer {
+            width: 25px;
+            text-align: right;
+            margin: 0 0.5rem;
         }
     }
 }

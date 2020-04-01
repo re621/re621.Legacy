@@ -96,6 +96,9 @@ export class PoolNavigator extends RE6Module {
 
             const $radioBox = $("<div>")
                 .addClass("post-nav-switch-box")
+                .prependTo(nav.element);
+            $("<div>")
+                .addClass("post-nav-spacer")
                 .appendTo(nav.element);
             nav.checkbox = $("<input>")
                 .attr("type", "radio")
