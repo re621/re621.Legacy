@@ -137,9 +137,9 @@ export class Miscellaneous extends RE6Module {
         $("section#search-box input").focus();
     }
 
-    /** Triggers a random post with the current tags */
+    /** Switches the location over to a random post */
     private randomPost(): void {
-        $("a#random-post")[0].click();
+        location.pathname = "/posts/random";
     }
 
     /**

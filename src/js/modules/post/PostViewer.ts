@@ -2,6 +2,7 @@ import { Post, ViewingPost } from "../../components/data/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 
+declare const Danbooru;
 
 /**
  * Add various symbols to the tilebar depending on the posts state
@@ -88,12 +89,12 @@ export class PostViewer extends RE6Module {
 
     /** Emulates a click on the upvote button */
     private triggerUpvote(): void {
-        $("a.post-vote-up-link")[0].click();
+        Danbooru.Post.vote(this.post.getId(), 1);
     }
 
     /** Emulates a click on the downvote button */
     private triggerDownvote(): void {
-        $("a.post-vote-down-link")[0].click();
+        Danbooru.Post.vote(this.post.getId(), -1);
     }
 
     /** Toggles the favorite state */
