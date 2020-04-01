@@ -51,6 +51,12 @@ a {
     display: block;
 }
 
+// Border
+.border-left {
+    border-width: 0px !important;
+    border-left-width: 1px !important;
+}
+
 
 /* Animated loading spinner, from https://loading.io/css/ */
 .lds-dual-ring {

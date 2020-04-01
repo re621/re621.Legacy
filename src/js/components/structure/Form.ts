@@ -221,7 +221,7 @@ export class Form {
         const $copybutton = $("<button>")
             .attr("type", "button")
             .attr("id", this.config.id + "-" + element.id + "-copy")
-            .addClass("button btn-neutral")
+            .addClass("button btn-neutral border-highlight border-left")
             .html(`<i class="far fa-copy"></i>`)
             .appendTo($inputContainer);
 
@@ -277,7 +277,7 @@ export class Form {
         const $recordbutton = $("<button>")
             .attr("type", "button")
             .attr("id", this.config.id + "-" + element.id + "-copy")
-            .addClass("button btn-neutral")
+            .addClass("button btn-neutral border-highlight border-left")
             .html(`<i class="far fa-keyboard"></i>`)
             .appendTo($inputContainer);
 
