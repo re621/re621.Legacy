@@ -84,6 +84,7 @@ div.subscriptions-list {
         }
 
         div.subscription-update-preview,
+        div.subscription-update-unsub,
         div.subscription-update-full,
         div.subscription-update-date {
             display: none;
@@ -92,7 +93,7 @@ div.subscriptions-list {
 
     div.subscription-update:not(.notice) {
         display: grid;
-        grid-template-columns: 4rem auto 1fr;
+        grid-template-columns: 4rem auto auto min-content;
         margin-bottom: 0.5rem;
         background: #ffffff33;
 
@@ -117,6 +118,10 @@ div.subscriptions-list {
             margin: 0.5rem 0.5rem 0
         }
 
+        div.subscription-update-unsub {
+            margin: 0.5rem;
+        }
+
         div.subscription-update-full {
             display: flex;
             align-self: end;
@@ -125,6 +130,7 @@ div.subscriptions-list {
         }
 
         div.subscription-update-date {
+            grid-column: span 2;
             display: flex;
             align-self: end;
             font-size: 0.9em;
@@ -167,6 +173,7 @@ div.subscriptions-list {
         margin-bottom: 0;
 
         div.subscription-update-title,
+        div.subscription-update-unsub,
         div.subscription-update-full,
         div.subscription-update-date {
             display: none;

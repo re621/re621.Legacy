@@ -155,7 +155,7 @@ export class SubscriptionManager extends RE6Module {
             $("<img>")
                 .attr("src", definition.imageSrc(data))
                 .attr("title", definition.updateText(data) + "\n" + timeAgo + "\n" + timeString)
-                .appendTo($imageDiv); timeStamp
+                .appendTo($imageDiv); timeStamp;
         }
 
         // Entry Title
@@ -177,6 +177,14 @@ export class SubscriptionManager extends RE6Module {
                 .appendTo($title);
         }
 
+        // Unsubscribe Button
+        const $unsub = $("<div>")
+            .addClass("subscription-update-unsub")
+            .appendTo($content);
+        $("<a>")
+            .html(`<i class="fas fa-heart"></i>`)
+            .attr("href", "#")
+            .appendTo($unsub);
 
         // Link to all posts page
         const $full = $("<div>")
@@ -238,7 +246,7 @@ export class SubscriptionManager extends RE6Module {
                 instance.pushSettings("data", subscriptionData);
             });
             instance.insertButton($element, $subscribeButton);
-            instance.insertButton($element, $unsubscribeButton)
+            instance.insertButton($element, $unsubscribeButton);
         });
     }
 
