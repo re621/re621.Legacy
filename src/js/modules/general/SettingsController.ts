@@ -660,6 +660,8 @@ export class SettingsController extends RE6Module {
                     value: `<div class="notice unmargin">Import the settings from eSix Extended (Legacy)</div>`,
                     stretch: "full",
                 },
+
+                // From File
                 {
                     id: "misc-esix-button",
                     type: "file",
@@ -668,7 +670,7 @@ export class SettingsController extends RE6Module {
                     stretch: "mid",
                 },
                 {
-                    id: "misc-esix-spacer",
+                    id: "misc-esix-spacer-1",
                     type: "div",
                     value: "",
                     stretch: "column",
@@ -681,7 +683,35 @@ export class SettingsController extends RE6Module {
                     stretch: "mid",
                 },
                 {
-                    id: "misc-esix-spacer",
+                    id: "misc-esix-spacer-2",
+                    type: "div",
+                    value: "",
+                    stretch: "column",
+                },
+
+                // From LocalStorage
+                {
+                    id: "misc-esix-localstorage",
+                    type: "button",
+                    label: "From LocalStorage",
+                    value: "Load",
+                    stretch: "mid",
+                },
+                {
+                    id: "misc-esix-spacer-3",
+                    type: "div",
+                    value: "",
+                    stretch: "column",
+                },
+                {
+                    id: "misc-esix-localstorage-status",
+                    type: "div",
+                    label: " ",
+                    value: `<div id="localstorage-esix-status" class="unmargin"></div>`,
+                    stretch: "mid",
+                },
+                {
+                    id: "misc-esix-spacer-4",
                     type: "div",
                     value: "",
                     stretch: "column",
@@ -709,7 +739,7 @@ export class SettingsController extends RE6Module {
         // Import / Export to file
         miscFormInput.get("misc-export-button").on("click", () => {
             const exportData = {
-                "meta": "re621/1.0",
+                "meta": "re621/" + window["re621"]["version"],
                 "pools": PoolSubscriptions.getInstance().fetchSettings("data"),
                 "forums": ForumSubscriptions.getInstance().fetchSettings("data"),
                 "tags": TagSubscriptions.getInstance().fetchSettings("data"),
@@ -774,6 +804,7 @@ export class SettingsController extends RE6Module {
         });
 
         // eSix Legacy
+        // - From File
         miscFormInput.get("misc-esix-button").on("re621:form:input", (event, data) => {
             if (!data) return;
             const $info = $("div#file-esix-status").html("Loading . . .");
@@ -816,16 +847,50 @@ export class SettingsController extends RE6Module {
                         forumSubs.pushSettings("data", forumData);
                     });
 
-                // parsedData[3] : tags (???)
-                $info.html("Processing tags . . .");
-                // TODO Someone give me a file that has tag subscriptions
-                //      Wait, did eSix Extend even have tag subscriptions
-
                 //console.log(parsedData);
                 $info.html("Settings imported!");
             };
             reader.onerror = function (): void { $info.html("Error loading file"); };
+        });
 
+        // From LocalStorage
+        miscFormInput.get("misc-esix-localstorage").on("click", () => {
+            const $info = $("div#localstorage-esix-status").html("Loading . . .");
+
+            // parsedData[2] : pools
+            if (localStorage.getItem("poolSubscriptions") !== "null") {
+                $info.html("Processing pools . . .");
+                const poolSubs = PoolSubscriptions.getInstance(),
+                    poolData: ExtraInfo = poolSubs.fetchSettings("data", true);
+                for (const entry of JSON.parse(localStorage.getItem("poolSubscriptions"))) {
+                    poolData[entry["id"]] = {
+                        md5: entry["thumb"]["url"].substr(6, 32),
+                        lastID: entry["last"],
+                    };
+                }
+                poolSubs.pushSettings("data", poolData);
+            }
+
+            // parsedData[3] : forums
+            if (localStorage.getItem("forumSubscriptions") !== "null") {
+                $info.html("Processing forums . . .");
+                const forumSubs = ForumSubscriptions.getInstance(),
+                    forumData: ExtraInfo = forumSubs.fetchSettings("data", true),
+                    postIDs = [];
+                for (const entry of JSON.parse(localStorage.getItem("forumSubscriptions"))) {
+                    postIDs.push(entry["id"]);
+                }
+                Api.getJson("/forum_posts.json?search[id]=" + postIDs.join(","))
+                    .then((data) => {
+                        data.forEach((postData) => {
+                            forumData[postData["topic_id"]] = {};
+                        });
+                        forumSubs.pushSettings("data", forumData);
+                    });
+            }
+
+            //console.log(parsedData);
+            $info.html("Settings imported!");
         });
     }
 
