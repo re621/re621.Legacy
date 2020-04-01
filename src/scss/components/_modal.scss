@@ -61,6 +61,8 @@ div#modal-container {
                 padding: 0;
                 width: 3em;
                 outline: 0;
+                border: 0;
+                border-left: 1px solid #66666666;
 
                 border-width: 0 0 0 1px !important;
                 background: unset;
@@ -68,8 +70,7 @@ div#modal-container {
 
                 &:hover,
                 &:active {
-                    background: #00000033;
-                    border-left-color: transparent;
+                    background: #ffffff10;
 
                     span.ui-icon {
                         background-image: url(/packs/media/images/ui-icons_ffffff_256x240-bf27228a.png);

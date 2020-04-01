@@ -34,7 +34,7 @@ export class Tabbed {
             },
         });
 
-        $container.tabs().find('.ui-tabs-nav li').off('keydown');
+        $container.tabs("widget").find('.ui-tabs-nav li').off('keydown');
 
         return $container;
     }

@@ -22,6 +22,7 @@ div.ui-widget-content.ui-tabs {
             margin-right: 0.5rem;
             outline: 0;
             border-radius: 0 0 4px 4px;
+            font-weight: normal;
 
             background-color: transparent;
 
@@ -34,6 +35,11 @@ div.ui-widget-content.ui-tabs {
             a:link,
             a:visited {
                 outline: 0;
+                color: inherit;
+            }
+
+            &.ui-state-hover,
+            &.ui-state-default {
                 color: inherit;
             }
         }
