@@ -1,7 +1,7 @@
 import { HeaderCustomizer } from "./HeaderCustomizer";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { Miscellaneous } from "./Miscellaneous";
 import { Form, FormElement } from "../../components/structure/Form";
 import { Hotkeys } from "../../components/data/Hotkeys";
@@ -20,12 +20,15 @@ import { ImageScaler } from "../post/ImageScaler";
 import { ModuleController } from "../../components/ModuleController";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { ExtraInfo } from "../subscriptions/SubscriptionManager";
+import { Api } from "../../components/api/Api";
 
 /**
  * SettingsController  
  * Interface for accessing and changing project settings
  */
 export class SettingsController extends RE6Module {
+
+    private modal: Modal;
 
     public create(): void {
 
@@ -40,7 +43,7 @@ export class SettingsController extends RE6Module {
         const postsPageTab = this.createTabPostsPage();
         const hotkeyTab = this.createTabHotkeys();
         const miscSettingsTab = this.createTabMiscellaneous();
-        const aboutTag = this.createAboutTab();
+        const aboutTab = this.createAboutTab();
 
         const $settings = new Tabbed({
             name: "settings-tabs",
@@ -49,12 +52,12 @@ export class SettingsController extends RE6Module {
                 { name: "General", page: postsPageTab.get() },
                 { name: "Hotkeys", page: hotkeyTab.get() },
                 { name: "Other", page: miscSettingsTab.get() },
-                { name: "About", page: aboutTag.get() },
+                { name: "About", page: aboutTab.get() },
             ]
         });
 
         // Create the modal
-        new Modal({
+        this.modal = new Modal({
             title: "Settings",
             triggers: [{ element: openSettingsButton }],
             escapable: false,
@@ -69,6 +72,32 @@ export class SettingsController extends RE6Module {
         this.handleTabPostsPage(postsPageTab);
         this.handleTabHotkeys(hotkeyTab);
         this.handleTabMiscellaneous(miscSettingsTab);
+        this.handleAboutTab(aboutTab);
+
+        // Start up the version checker
+        if (new Date().getTime() - (1000 * 60 * 60) > this.fetchSettings("lastVersionCheck")) {
+
+            const releases = { latest: null, current: null };
+            $.when(
+                $.get("https://api.github.com/repos/re621/re621/releases/latest", function (data) { releases.latest = data; }),
+                $.get("https://api.github.com/repos/re621/re621/releases/tags/" + window["re621"]["version"], function (data) { releases.current = data; })
+            ).then(() => {
+                this.pushSettings("newVersionAvailable", (releases.latest.name !== releases.current.name));
+                this.pushSettings("lastVersionCheck", new Date().getTime());
+                this.pushSettings("changelog", releases.current.body);
+                this.modal.getElement().trigger("re621:settings:update");
+            });
+        }
+    }
+
+    public getDefaultSettings(): Settings {
+        return {
+            enabled: true,
+
+            newVersionAvailable: false,
+            lastVersionCheck: 0,
+            changelog: "",
+        };
     }
 
     /** Create the DOM for the Title Customizer page */
@@ -631,6 +660,8 @@ export class SettingsController extends RE6Module {
                     value: `<div class="notice unmargin">Import the settings from eSix Extended (Legacy)</div>`,
                     stretch: "full",
                 },
+
+                // From File
                 {
                     id: "misc-esix-button",
                     type: "file",
@@ -639,7 +670,7 @@ export class SettingsController extends RE6Module {
                     stretch: "mid",
                 },
                 {
-                    id: "misc-esix-spacer",
+                    id: "misc-esix-spacer-1",
                     type: "div",
                     value: "",
                     stretch: "column",
@@ -652,7 +683,35 @@ export class SettingsController extends RE6Module {
                     stretch: "mid",
                 },
                 {
-                    id: "misc-esix-spacer",
+                    id: "misc-esix-spacer-2",
+                    type: "div",
+                    value: "",
+                    stretch: "column",
+                },
+
+                // From LocalStorage
+                {
+                    id: "misc-esix-localstorage",
+                    type: "button",
+                    label: "From LocalStorage",
+                    value: "Load",
+                    stretch: "mid",
+                },
+                {
+                    id: "misc-esix-spacer-3",
+                    type: "div",
+                    value: "",
+                    stretch: "column",
+                },
+                {
+                    id: "misc-esix-localstorage-status",
+                    type: "div",
+                    label: " ",
+                    value: `<div id="localstorage-esix-status" class="unmargin"></div>`,
+                    stretch: "mid",
+                },
+                {
+                    id: "misc-esix-spacer-4",
                     type: "div",
                     value: "",
                     stretch: "column",
@@ -680,7 +739,7 @@ export class SettingsController extends RE6Module {
         // Import / Export to file
         miscFormInput.get("misc-export-button").on("click", () => {
             const exportData = {
-                "meta": "re621/1.0",
+                "meta": "re621/" + window["re621"]["version"],
                 "pools": PoolSubscriptions.getInstance().fetchSettings("data"),
                 "forums": ForumSubscriptions.getInstance().fetchSettings("data"),
                 "tags": TagSubscriptions.getInstance().fetchSettings("data"),
@@ -745,6 +804,7 @@ export class SettingsController extends RE6Module {
         });
 
         // eSix Legacy
+        // - From File
         miscFormInput.get("misc-esix-button").on("re621:form:input", (event, data) => {
             if (!data) return;
             const $info = $("div#file-esix-status").html("Loading . . .");
@@ -774,22 +834,63 @@ export class SettingsController extends RE6Module {
                 // parsedData[3] : forums
                 $info.html("Processing forums . . .");
                 const forumSubs = ForumSubscriptions.getInstance(),
-                    forumData: ExtraInfo = forumSubs.fetchSettings("data", true);
+                    forumData: ExtraInfo = forumSubs.fetchSettings("data", true),
+                    postIDs = [];
                 for (const entry of parsedData[3]) {
-                    forumData[entry["id"]] = {};
+                    postIDs.push(entry["id"]);
                 }
-                forumSubs.pushSettings("data", forumData);
-
-                // parsedData[3] : tags (???)
-                $info.html("Processing tags . . .");
-                // TODO Someone give me a file that has tag subscriptions
-                //      Wait, did eSix Extend even have tag subscriptions
+                Api.getJson("/forum_posts.json?search[id]=" + postIDs.join(","))
+                    .then((data) => {
+                        data.forEach((postData) => {
+                            forumData[postData["topic_id"]] = {};
+                        });
+                        forumSubs.pushSettings("data", forumData);
+                    });
 
                 //console.log(parsedData);
                 $info.html("Settings imported!");
             };
             reader.onerror = function (): void { $info.html("Error loading file"); };
+        });
 
+        // From LocalStorage
+        miscFormInput.get("misc-esix-localstorage").on("click", () => {
+            const $info = $("div#localstorage-esix-status").html("Loading . . .");
+
+            // parsedData[2] : pools
+            if (localStorage.getItem("poolSubscriptions") !== "null") {
+                $info.html("Processing pools . . .");
+                const poolSubs = PoolSubscriptions.getInstance(),
+                    poolData: ExtraInfo = poolSubs.fetchSettings("data", true);
+                for (const entry of JSON.parse(localStorage.getItem("poolSubscriptions"))) {
+                    poolData[entry["id"]] = {
+                        md5: entry["thumb"]["url"].substr(6, 32),
+                        lastID: entry["last"],
+                    };
+                }
+                poolSubs.pushSettings("data", poolData);
+            }
+
+            // parsedData[3] : forums
+            if (localStorage.getItem("forumSubscriptions") !== "null") {
+                $info.html("Processing forums . . .");
+                const forumSubs = ForumSubscriptions.getInstance(),
+                    forumData: ExtraInfo = forumSubs.fetchSettings("data", true),
+                    postIDs = [];
+                for (const entry of JSON.parse(localStorage.getItem("forumSubscriptions"))) {
+                    postIDs.push(entry["id"]);
+                }
+                Api.getJson("/forum_posts.json?search[id]=" + postIDs.join(","))
+                    .then((data) => {
+                        data.forEach((postData) => {
+                            forumData[postData["topic_id"]] = {};
+                        });
+                        forumSubs.pushSettings("data", forumData);
+                    });
+            }
+
+            //console.log(parsedData);
+            $info.html("Settings imported!");
         });
     }
 
@@ -877,7 +978,9 @@ export class SettingsController extends RE6Module {
                 {
                     id: "about-version",
                     type: "div",
-                    value: `<h3 class="display-inline"><a href="` + window["re621"]["links"]["website"] + `">` + window["re621"]["name"] + ` v.` + window["re621"]["version"] + `</a></h3> <span class="display-inline">(build ` + window["re621"]["build"] + `)</span>`,
+                    value: `<h3 class="display-inline"><a href="` + window["re621"]["links"]["website"] + `">` + window["re621"]["name"] + ` v.` + window["re621"]["version"] + `</a></h3> 
+                            <span class="display-inline">(build ` + window["re621"]["build"] + `)</span>
+                            <span class="float-right" id="project-update-button" data-available="` + this.fetchSettings("newVersionAvailable") + `"><a href="` + window["re621"]["links"]["releases"] + `">Update Available</a></span>`,
                     stretch: "full",
                 },
                 {
@@ -915,31 +1018,21 @@ export class SettingsController extends RE6Module {
                 {
                     id: "about-changelog-changes",
                     type: "div",
-                    value: buildChangelog("Changes", window["re621"]["changelog"]["changes"]),
-                    stretch: "full",
-                },
-                {
-                    id: "about-changelog-fixes",
-                    type: "div",
-                    value: buildChangelog("Fixes", window["re621"]["changelog"]["changes"]),
+                    value: `<div class="changelog-list">` + Util.quickParseMarkdown(this.fetchSettings("changelog")) + `</div>`,
                     stretch: "full",
                 },
             ]
         );
 
-        function buildChangelog(title: string, log: string[]): string | JQuery<HTMLElement> {
-            if (log.length == 0) return "";
-
-            const $output = $("<div>"),
-                $list = $("<ul>").addClass("changelog-list");
-
-            $output.html("<b>" + title + ":</b>");
-            log.forEach((entry) => { $("<li>").html(entry).appendTo($list); });
-            $list.appendTo($output);
-
-            return $output;
-        }
-
         return form;
+    }
+
+    private handleAboutTab(form: Form): void {
+        const inputList = form.getInputList();
+
+        this.modal.getElement().on("re621:settings:update", () => {
+            inputList.get("about-changelog-changes").html(`<div class="changelog-list">` + Util.quickParseMarkdown(this.fetchSettings("changelog")) + `</div>`);
+            $("#project-update-button").attr("data-available", this.fetchSettings("newVersionAvailable"));
+        });
     }
 }
