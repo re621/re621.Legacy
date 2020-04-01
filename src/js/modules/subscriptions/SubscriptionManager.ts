@@ -54,6 +54,8 @@ export class SubscriptionManager extends RE6Module {
         const nowFake = this.fetchSettings("now");
         const now = nowFake !== nowFake ? nowFake : new Date().getTime();
 
+        this.openSubsButton.attr("data-loading", "true");
+
         const lastUpdate = this.fetchSettings("lastUpdate");
         this.pushSettings("lastUpdate", now);
         const panels = modal.getElement().find(".ui-tabs-panel");
@@ -69,6 +71,7 @@ export class SubscriptionManager extends RE6Module {
             await this.initSubscriber(subElements, lastUpdate, now);
         }
 
+        this.openSubsButton.attr("data-loading", "false");
         this.updateNotificationSymbol(0);
 
         //clear the notifications if the user opened the tab
@@ -108,7 +111,7 @@ export class SubscriptionManager extends RE6Module {
 
         this.addSubscribeButtons(sub.instance);
         sub.content.attr("data-subscription-class", moduleName);
-
+        sub.tab.attr("data-loading", "true");
         //don't update if the last check was pretty recently
         let updates: UpdateData = {};
         if (currentTime - lastUpdate - (this.updateInterval * 1000) >= 0) {
@@ -117,6 +120,7 @@ export class SubscriptionManager extends RE6Module {
 
         this.addUpdateEntries(sub, updates, currentTime);
         const updateCount = Object.keys(updates).length;
+        sub.tab.attr("data-loading", "false");
         if (updateCount !== 0) {
             sub.tab.attr("data-has-notifications", "true");
             this.tabNotificationsCount++;

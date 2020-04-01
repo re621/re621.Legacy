@@ -1,8 +1,6 @@
 /* Subscription Manager Styles */
 
 [data-has-notifications=true] {
-    position: relative;
-
     &::after {
         content: unicode('f111');
         font-family: 'Font Awesome 5 Free';
@@ -12,6 +10,23 @@
 
         position: absolute;
         top: 0;
+    }
+}
+
+[data-loading=true] {
+    @keyframes spinner {
+        to {transform: rotate(360deg);}
+    }
+    
+    &::after {
+        content: unicode('f110');
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        font-size: 0.7em;
+
+        position: absolute;
+        top: -2px;
+        animation: spinner .6s linear infinite;
     }
 }
 
