@@ -37,6 +37,7 @@ export class Miscellaneous extends RE6Module {
             removeSearchQueryString: true,
             loadRedesignFixes: true,
             improveTagCount: true,
+            cropThumbnails: true,
         };
     }
 
@@ -65,6 +66,10 @@ export class Miscellaneous extends RE6Module {
 
         if (Page.matches([PageDefintion.post, PageDefintion.forum])) {
             this.handleQuoteButton();
+        }
+
+        if (Page.matches(PageDefintion.search)) {
+            this.cropThumbnails(this.fetchSettings("cropThumbnails"));
         }
 
         this.registerHotkeys();
@@ -101,6 +106,15 @@ export class Miscellaneous extends RE6Module {
             const tagCount = $container.attr("data-count");
             if (tagCount) { $container.text(tagCount); }
         });
+    }
+
+    /**
+     * Crops the thumbnails to squares to minimize empty space
+     * @param state True to crop, false to restore
+     */
+    public cropThumbnails(state = true): void {
+        if (state) $("div#posts-container").attr("data-cropped-thumbnails", "true");
+        else $("div#posts-container").attr("data-cropped-thumbnails", "false");
     }
 
     /** If the searchbar is empty, focuses on it. */

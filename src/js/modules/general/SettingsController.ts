@@ -193,10 +193,16 @@ export class SettingsController extends RE6Module {
                     label: "Expanded Tag Count",
                 },
                 {
+                    id: "general-crop-thumbnails",
+                    type: "checkbox",
+                    value: miscellaneous.fetchSettings("cropThumbnails"),
+                    label: "Crop Thumbnails",
+                },
+                {
                     id: "inter-spacer-1",
                     type: "div",
                     value: " ",
-                    stretch: "full",
+                    stretch: "column",
                 },
 
                 // Actions
@@ -277,7 +283,7 @@ export class SettingsController extends RE6Module {
     private handleTabPostsPage(form: Form): void {
         const titleCustomizer = ModuleController.getWithType<TitleCustomizer>(TitleCustomizer);
         const downloadCustomizer = ModuleController.getWithType<DownloadCustomizer>(DownloadCustomizer);
-        const miscellaneous = ModuleController.get(Miscellaneous);
+        const miscellaneous = ModuleController.getWithType<Miscellaneous>(Miscellaneous);
         const postViewer = ModuleController.get(PostViewer);
         const formattingManager = ModuleController.get(FormattingManager);
         const blacklistEnhancer = ModuleController.get(BlacklistEnhancer);
@@ -316,6 +322,12 @@ export class SettingsController extends RE6Module {
 
         postsPageInput.get("general-improved-tagcount").on("re621:form:input", (event, data) => {
             miscellaneous.pushSettings("improveTagCount", data);
+        });
+
+        postsPageInput.get("general-crop-thumbnails").on("re621:form:input", (event, data) => {
+            miscellaneous.pushSettings("cropThumbnails", data);
+            miscellaneous.cropThumbnails(data);
+            console.log(data);
         });
 
         // Actions
