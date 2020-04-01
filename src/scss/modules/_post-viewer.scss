@@ -9,49 +9,6 @@ section#image-extra-controls {
         margin: 0;
     }
 
-    div#image-score-links {
-
-        background: #19586b;
-
-        @include themable {
-            //background: themed("color-section");
-            color: themed("color-text");
-        }
-
-        &.score-up {
-            @include themable {
-                background: themed("color-success");
-            }
-        }
-
-        &.score-down {
-            @include themable {
-                background: themed("color-danger");
-            }
-        }
-
-        span.image-score-down a,
-        span.image-score-up a {
-            @include themable {
-                color: themed("color-text");
-            }
-
-            &:hover {
-                @include themable {
-                    color: themed("color-text-muted");
-                }
-            }
-        }
-
-        span.image-score-num {
-            margin: 0 1rem;
-
-            @include themable {
-                color: themed("color-text");
-            }
-        }
-    }
-
     div#image-resize-cycle {
         form.grid-form {
             width: unset;
@@ -93,20 +50,6 @@ section#image-extra-controls {
         padding: 0rem 0.5rem !important;
         border-radius: 4px;
         line-height: 1.25em;
-    }
-}
-
-#post-information>ul>li {
-    & .colorize-rating-s {
-        color: #3e9e49;
-    }
-
-    & .colorize-rating-q {
-        color: #ffe666;
-    }
-
-    & .colorize-rating-e {
-        color: #e45f5f;
     }
 }
 

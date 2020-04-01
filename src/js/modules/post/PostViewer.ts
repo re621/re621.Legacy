@@ -1,4 +1,4 @@
-import { Post, ViewingPost, PostRating } from "../../components/data/Post";
+import { Post, ViewingPost } from "../../components/data/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 
@@ -46,13 +46,6 @@ export class PostViewer extends RE6Module {
         this.post = Post.getViewingPost();
         this.createDOM();
 
-        const upvoteButton = $("a.post-vote-up-link");
-        $("button#add-fav-button").click(() => {
-            if (this.fetchSettings("upvoteOnFavorite") && !upvoteButton.parent().hasClass("score-positive")) {
-                upvoteButton.click();
-            }
-        });
-
         this.registerHotkeys();
     }
 
@@ -64,39 +57,14 @@ export class PostViewer extends RE6Module {
             .append($("<a>").attr("href", "/users/" + this.post.getUploaderID()).text(this.post.getUploaderName()))
             .appendTo("#post-information ul");
 
-        // Colorize the rating
-        $("#post-information ul li:contains('Rating: ')")
-            .html("Rating: ")
-            .append($("<b>").text(PostRating.toString(this.post.getRating())).addClass("colorize-rating-" + this.post.getRating()));
-
-        // Move the scoring block
-        const $ratingContainer = $("<div>").attr("id", "image-score-links").prependTo("section#image-extra-controls");
-        const postID = this.post.getId();
-        const original = $("#post-vote-up-" + postID).parent().parent();
-
-        const $voteDownButton = $("#post-vote-down-" + postID).addClass("image-score-down").appendTo($ratingContainer);
-        $("#post-score-" + postID).addClass("image-score-num").appendTo($ratingContainer);
-        const $voteUpButton = $("#post-vote-up-" + postID).addClass("image-score-up").appendTo($ratingContainer);
-
-        if ($voteDownButton.hasClass("score-negative")) $ratingContainer.addClass("score-down");
-        if ($voteUpButton.hasClass("score-positive")) $ratingContainer.addClass("score-up");
-
-        $voteDownButton.find("a").on("click", function () {
-            if ($voteDownButton.hasClass("score-negative")) { $ratingContainer.removeClass("score-down"); }
-            else { $ratingContainer.removeClass("score-up").addClass("score-down"); }
-        });
-
-        $voteUpButton.find("a").on("click", function () {
-            if ($voteUpButton.hasClass("score-positive")) { $ratingContainer.removeClass("score-up"); }
-            else { $ratingContainer.removeClass("score-down").addClass("score-up"); }
-        });
+        // Make the rating bold
+        const rating = $("#post-rating-text").html();
+        $("#post-rating-text").html("<b>" + rating + "</br>");
 
         // Move the add to set / pool buttons
         const $addToContainer = $("<div>").attr("id", "image-add-links").insertAfter("#image-download-link");
         $("li#add-to-set-list > a").addClass("image-add-set").html("+ Set").appendTo($addToContainer);
         $("li#add-to-pool-list > a").addClass("image-add-pool").html("+ Pool").appendTo($addToContainer);
-
-        original.remove();
 
         // Move bottom notice, like child/parent indicator
         const $bottomNotices = $(".bottom-notices");
