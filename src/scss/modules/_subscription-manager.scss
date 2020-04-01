@@ -15,9 +15,11 @@
 
 [data-loading=true] {
     @keyframes spinner {
-        to {transform: rotate(360deg);}
+        to {
+            transform: rotate(360deg);
+        }
     }
-    
+
     &::after {
         content: unicode('f110');
         font-family: 'Font Awesome 5 Free';
@@ -36,23 +38,6 @@ button.large-subscribe-button {
     outline: 0;
     box-shadow: 0 0 10px -5px black;
     border-radius: 4px;
-
-    @include themable {
-        border: 1px solid themed("color-foreground");
-        color: themed("color-text");
-    }
-
-    &.subscribe {
-        @include themable {
-            background: themed("color-success");
-        }
-    }
-
-    &.unsubscribe {
-        @include themable {
-            background: themed("color-danger");
-        }
-    }
 }
 
 #tag-box>ul>li,

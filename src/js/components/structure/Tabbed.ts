@@ -28,7 +28,10 @@ export class Tabbed {
         });
 
         $container.tabs({
-            //        heightStyle: "auto",
+            classes: {
+                "ui-tabs": "color-text",
+                "ui-tabs-tab": "color-text",
+            },
         });
 
         $container.tabs().find('.ui-tabs-nav li').off('keydown');

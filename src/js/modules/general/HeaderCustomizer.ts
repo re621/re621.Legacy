@@ -272,7 +272,7 @@ export class HeaderCustomizer extends RE6Module {
         if (triggerUpdate) { this.saveNavbarSettings(); }
 
         if (Page.getURL().pathname.includes(this.processTabVariables(config.href).split("?")[0])) {
-            $tab.addClass("active");
+            $tab.addClass("bg-foreground");
         }
 
         return { tab: $tab, link: $link };

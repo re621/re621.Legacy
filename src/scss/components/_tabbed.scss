@@ -2,10 +2,7 @@
 div.ui-widget-content.ui-tabs {
     border: unset !important;
     background-color: unset !important;
-
-    @include themable {
-        color: themed("color-text") !important;
-    }
+    color: unset !important;
 
     ul.ui-tabs-nav {
         border: unset !important;
@@ -26,33 +23,18 @@ div.ui-widget-content.ui-tabs {
             outline: 0;
             border-radius: 0 0 4px 4px;
 
-            @include themable {
-                background-color: transparent;
-                color: themed("color-text");
-            }
+            background-color: transparent;
 
             &:hover,
             &.ui-tabs-active {
-                @include themable {
-                    background-color: themed("color-foreground");
-                    color: themed("color-text");
-                }
+                background-color: #00000033;
             }
 
             a,
             a:link,
             a:visited {
                 outline: 0;
-
-                @include themable {
-                    color: themed("color-text");
-                }
-            }
-
-            a:hover {
-                @include themable {
-                    color: themed("color-link-hover");
-                }
+                color: inherit;
             }
         }
     }

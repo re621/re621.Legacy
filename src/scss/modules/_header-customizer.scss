@@ -16,18 +16,10 @@ header#top nav#nav {
                 padding: 0 0.5rem;
                 outline: 0;
             }
-
-            &.active {
-                @include themable {
-                    background: themed("color-foreground");
-                }
-            }
         }
     }
 
     menu.main.custom[data-editing=true] li {
-        @include themable() {
-            background-color: themed("color-section");
-        }
+        background-color: #ffffff40;
     }
 }

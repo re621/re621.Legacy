@@ -63,8 +63,16 @@ export class PostViewer extends RE6Module {
 
         // Move the add to set / pool buttons
         const $addToContainer = $("<div>").attr("id", "image-add-links").insertAfter("#image-download-link");
-        $("li#add-to-set-list > a").addClass("image-add-set").html("+ Set").appendTo($addToContainer);
-        $("li#add-to-pool-list > a").addClass("image-add-pool").html("+ Pool").appendTo($addToContainer);
+        $("li#add-to-set-list > a")
+            .addClass("image-add-set")
+            .addClass("button btn-neutral")
+            .html("+ Set")
+            .appendTo($addToContainer);
+        $("li#add-to-pool-list > a")
+            .addClass("image-add-pool")
+            .addClass("button btn-neutral")
+            .html("+ Pool")
+            .appendTo($addToContainer);
 
         // Move bottom notice, like child/parent indicator
         const $bottomNotices = $(".bottom-notices");

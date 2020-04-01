@@ -46,12 +46,14 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
     public createSubscribeButton(): JQuery<HTMLElement> {
         return $("<button>")
             .addClass(`large-subscribe-button subscribe`)
+            .addClass("button btn-success")
             .html("Subscribe");
     }
 
     public createUnsubscribeButton(): JQuery<HTMLElement> {
         return $("<button>")
             .addClass(`large-subscribe-button unsubscribe`)
+            .addClass("button btn-danger")
             .html("Unsubscribe");
     }
 

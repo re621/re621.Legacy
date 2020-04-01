@@ -183,6 +183,10 @@ class FormattingHelper {
 
         this.$form.find("input.dtext-preview-button").css("display", "none");
 
+        // Add Styling
+        this.$textarea.addClass("bg-section border-highlight color-text");
+        this.$preview.addClass("bg-section border-highlight color-text");
+
         // Establish Sorting
         this.$formatButtons.sortable({
             helper: "clone",
@@ -272,7 +276,10 @@ class FormattingHelper {
 
     /** Creates the toolbar DOM structure */
     private createToolbar(): void {
-        const $bar = $("<div>").addClass("comment-header").prependTo(this.$container);
+        const $bar = $("<div>")
+            .addClass("comment-header")
+            .addClass("bg-highlight border-highlight")
+            .prependTo(this.$container);
 
         // - Editing State Tabs
         this.$toggleTabs = $("<div>")
@@ -317,6 +324,7 @@ class FormattingHelper {
 
         $("<div>")
             .addClass("dtext-button-drawer-title")
+            .addClass("bg-highlight color-text")
             .append($newFormatButton)
             .appendTo(this.$container);
 
@@ -357,7 +365,10 @@ class FormattingHelper {
         });
 
         // - Drawer Container Element
-        this.$formatButtonsDrawer = $("<div>").addClass("dtext-button-drawer").appendTo(this.$container);
+        this.$formatButtonsDrawer = $("<div>")
+            .addClass("dtext-button-drawer")
+            .addClass("bg-section border-highlight color-text")
+            .appendTo(this.$container);
 
         // - Elements themselves are added when the user opens the drawer
     }
