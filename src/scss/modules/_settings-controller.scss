@@ -4,7 +4,25 @@ div.settings-page {
     grid-template-columns: 1fr 1fr;
 }
 
-ul.changelog-list {
+div.changelog-list ul {
     list-style: lower-greek;
     margin-left: 1.25rem;
+}
+
+span#project-update-button {
+
+    &[data-available=false] {
+        visibility: hidden;
+    }
+
+    a {
+        padding: 0.25rem;
+        border-radius: 4px;
+        background: green;
+        color: white;
+
+        &:hover {
+            background: darkgreen;
+        }
+    }
 }

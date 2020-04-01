@@ -73,4 +73,17 @@ export class Util {
         downloadAnchorNode.remove();
     }
 
+    /**
+     * Limited markdown parser. Don't rely on this thing to be any good, replace with an actual library if really necessary.
+     * @param input Markdown input
+     * @returns HTML output
+     */
+    public static quickParseMarkdown(input: string): string {
+        return input
+            .replace(/\*\*(.*?)\*\*/gm, "<strong>$1</strong>")
+            .replace(/^[-]+(.*)?/gmi, "<ul><li>$1</li></ul>")
+            .replace(/\<\/ul\>\r\n\<ul\>/gm, "")
+            .replace(/\n(?!<)/gm, "<br />");
+    }
+
 }

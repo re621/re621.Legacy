@@ -26,16 +26,14 @@ window.re621 = {
     displayName: "%DISPLAYNAME%",
     version: "%VERSION%",
     build: "%BUILD%",
+    repo: "re621/re621",
     links: {
         website: "https://re621.github.io/",
-        repository: "https://github.com/re621/re621/",
-        issues: "https://github.com/re621/re621/issues/",
-        releases: "https://github.com/re621/re621/releases",
+        repository: "https://github.com/" + this.repo + "/",
+        issues: "https://github.com/" + this.repo + "/issues/",
+        releases: "https://github.com/" + this.repo + "/releases",
         forum: "https://e621.net/forum_topics/25872",
     },
-    changelog: {
-        changes: "%CHANGELOG%",
-        fixes: "%FIXLOG%",
-    },
+    debug: true,
     toString: function() { return this.name + " v." + this.version + " (" + this.build + ")"; }
 };

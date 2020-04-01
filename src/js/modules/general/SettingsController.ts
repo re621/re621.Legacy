@@ -1,7 +1,7 @@
 import { HeaderCustomizer } from "./HeaderCustomizer";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { Miscellaneous } from "./Miscellaneous";
 import { Form, FormElement } from "../../components/structure/Form";
 import { Hotkeys } from "../../components/data/Hotkeys";
@@ -20,7 +20,6 @@ import { ImageScaler } from "../post/ImageScaler";
 import { ModuleController } from "../../components/ModuleController";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { ExtraInfo } from "../subscriptions/SubscriptionManager";
-import { ApiForumPost } from "../../components/api/responses/ApiForum";
 import { Api } from "../../components/api/Api";
 
 /**
@@ -28,6 +27,8 @@ import { Api } from "../../components/api/Api";
  * Interface for accessing and changing project settings
  */
 export class SettingsController extends RE6Module {
+
+    private modal: Modal;
 
     public create(): void {
 
@@ -42,7 +43,7 @@ export class SettingsController extends RE6Module {
         const postsPageTab = this.createTabPostsPage();
         const hotkeyTab = this.createTabHotkeys();
         const miscSettingsTab = this.createTabMiscellaneous();
-        const aboutTag = this.createAboutTab();
+        const aboutTab = this.createAboutTab();
 
         const $settings = new Tabbed({
             name: "settings-tabs",
@@ -51,12 +52,12 @@ export class SettingsController extends RE6Module {
                 { name: "General", page: postsPageTab.get() },
                 { name: "Hotkeys", page: hotkeyTab.get() },
                 { name: "Other", page: miscSettingsTab.get() },
-                { name: "About", page: aboutTag.get() },
+                { name: "About", page: aboutTab.get() },
             ]
         });
 
         // Create the modal
-        new Modal({
+        this.modal = new Modal({
             title: "Settings",
             triggers: [{ element: openSettingsButton }],
             escapable: false,
@@ -71,6 +72,32 @@ export class SettingsController extends RE6Module {
         this.handleTabPostsPage(postsPageTab);
         this.handleTabHotkeys(hotkeyTab);
         this.handleTabMiscellaneous(miscSettingsTab);
+        this.handleAboutTab(aboutTab);
+
+        // Start up the version checker
+        if (new Date().getTime() - (1000 * 60 * 60) > this.fetchSettings("lastVersionCheck")) {
+
+            const releases = { latest: null, current: null };
+            $.when(
+                $.get("https://api.github.com/repos/re621/re621/releases/latest", function (data) { releases.latest = data; }),
+                $.get("https://api.github.com/repos/re621/re621/releases/tags/" + window["re621"]["version"], function (data) { releases.current = data; })
+            ).then(() => {
+                this.pushSettings("newVersionAvailable", (releases.latest.name !== releases.current.name));
+                this.pushSettings("lastVersionCheck", new Date().getTime());
+                this.pushSettings("changelog", releases.current.body);
+                this.modal.getElement().trigger("re621:settings:update");
+            });
+        }
+    }
+
+    public getDefaultSettings(): Settings {
+        return {
+            enabled: true,
+
+            newVersionAvailable: false,
+            lastVersionCheck: 0,
+            changelog: "",
+        };
     }
 
     /** Create the DOM for the Title Customizer page */
@@ -886,7 +913,9 @@ export class SettingsController extends RE6Module {
                 {
                     id: "about-version",
                     type: "div",
-                    value: `<h3 class="display-inline"><a href="` + window["re621"]["links"]["website"] + `">` + window["re621"]["name"] + ` v.` + window["re621"]["version"] + `</a></h3> <span class="display-inline">(build ` + window["re621"]["build"] + `)</span>`,
+                    value: `<h3 class="display-inline"><a href="` + window["re621"]["links"]["website"] + `">` + window["re621"]["name"] + ` v.` + window["re621"]["version"] + `</a></h3> 
+                            <span class="display-inline">(build ` + window["re621"]["build"] + `)</span>
+                            <span class="float-right" id="project-update-button" data-available="` + this.fetchSettings("newVersionAvailable") + `"><a href="` + window["re621"]["links"]["releases"] + `">Update Available</a></span>`,
                     stretch: "full",
                 },
                 {
@@ -924,31 +953,21 @@ export class SettingsController extends RE6Module {
                 {
                     id: "about-changelog-changes",
                     type: "div",
-                    value: buildChangelog("Changes", window["re621"]["changelog"]["changes"]),
-                    stretch: "full",
-                },
-                {
-                    id: "about-changelog-fixes",
-                    type: "div",
-                    value: buildChangelog("Fixes", window["re621"]["changelog"]["changes"]),
+                    value: `<div class="changelog-list">` + Util.quickParseMarkdown(this.fetchSettings("changelog")) + `</div>`,
                     stretch: "full",
                 },
             ]
         );
 
-        function buildChangelog(title: string, log: string[]): string | JQuery<HTMLElement> {
-            if (log.length == 0) return "";
-
-            const $output = $("<div>"),
-                $list = $("<ul>").addClass("changelog-list");
-
-            $output.html("<b>" + title + ":</b>");
-            log.forEach((entry) => { $("<li>").html(entry).appendTo($list); });
-            $list.appendTo($output);
-
-            return $output;
-        }
-
         return form;
+    }
+
+    private handleAboutTab(form: Form): void {
+        const inputList = form.getInputList();
+
+        this.modal.getElement().on("re621:settings:update", () => {
+            inputList.get("about-changelog-changes").html(`<div class="changelog-list">` + Util.quickParseMarkdown(this.fetchSettings("changelog")) + `</div>`);
+            $("#project-update-button").attr("data-available", this.fetchSettings("newVersionAvailable"));
+        });
     }
 }
