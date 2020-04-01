@@ -210,8 +210,8 @@ export class ViewingPost extends Post {
         super($image);
 
         this.isFaved = $("#add-to-favorites").css("display") === "none";
-        this.isUpvoted = $("#post-vote-up-" + this.id).hasClass("score-positive");
-        this.isDownvoted = $("#post-vote-down-" + this.id).hasClass("score-negative");
+        this.isUpvoted = $(".post-vote-up-" + this.id).first().hasClass("score-positive");
+        this.isDownvoted = $(".post-vote-down-" + this.id).first().hasClass("score-negative");
 
         this.artistTags = this.getAllFromTaggroup("artist");
         this.characterTags = this.getAllFromTaggroup("character");
