@@ -565,8 +565,6 @@ export class SettingsController extends RE6Module {
 
     /** Creates the DOM for the miscellaneous settings page */
     private createTabMiscellaneous(): Form {
-        const module = ModuleController.getWithType<Miscellaneous>(Miscellaneous);
-
         // Create the settings form
         const form = new Form(
             {

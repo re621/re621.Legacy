@@ -51,10 +51,6 @@ export class PostViewer extends RE6Module {
 
     /** Creates the document structure for the module */
     private createDOM(): void {
-        // Make the rating bold
-        const rating = $("#post-rating-text").html();
-        $("#post-rating-text").html("<b>" + rating + "</br>");
-
         // Move the add to set / pool buttons
         const $addToContainer = $("<div>").attr("id", "image-add-links").insertAfter("#image-download-link");
         $("li#add-to-set-list > a")
@@ -71,7 +67,7 @@ export class PostViewer extends RE6Module {
         // Move bottom notice, like child/parent indicator
         const $bottomNotices = $(".bottom-notices");
         $bottomNotices.insertAfter($("#search-box"));
-        //expand child/parent container
+        // Expand child/parent container
         const $parentRel = $("#has-parent-relationship-preview-link");
         const $childRel = $("#has-children-relationship-preview-link");
 
@@ -90,12 +86,12 @@ export class PostViewer extends RE6Module {
 
     /** Emulates a click on the upvote button */
     private triggerUpvote(): void {
-        $("a.post-vote-up-link")[0].click();
+        $("a.post-vote-up-link span").first()[0].click();
     }
 
     /** Emulates a click on the downvote button */
     private triggerDownvote(): void {
-        $("a.post-vote-down-link")[0].click();
+        $("a.post-vote-down-link span").first()[0].click();
     }
 
     /** Toggles the favorite state */
