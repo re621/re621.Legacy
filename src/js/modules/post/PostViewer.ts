@@ -67,8 +67,8 @@ export class PostViewer extends RE6Module {
         $("li#add-to-set-list > a").addClass("image-add-set").html("+ Set").appendTo($addToContainer);
         $("li#add-to-pool-list > a").addClass("image-add-pool").html("+ Pool").appendTo($addToContainer);
 
-        // Move bottom notice, like child/parent indicator
-        const $bottomNotices = $(".bottom-notices");
+        // Move child/parent indicator, leave others as is, like marked for deleteion
+        const $bottomNotices = $(".parent-children");
         $bottomNotices.insertAfter($("#search-box"));
         //expand child/parent container
         const $parentRel = $("#has-parent-relationship-preview-link");
