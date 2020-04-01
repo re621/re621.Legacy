@@ -51,12 +51,6 @@ export class PostViewer extends RE6Module {
 
     /** Creates the document structure for the module */
     private createDOM(): void {
-        // Add the uploader name
-        $("<li>")
-            .append("Uploader: ")
-            .append($("<a>").attr("href", "/users/" + this.post.getUploaderID()).text(this.post.getUploaderName()))
-            .appendTo("#post-information ul");
-
         // Make the rating bold
         const rating = $("#post-rating-text").html();
         $("#post-rating-text").html("<b>" + rating + "</br>");
