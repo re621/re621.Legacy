@@ -69,11 +69,11 @@ export class Miscellaneous extends RE6Module {
             this.handleQuoteButton();
         }
 
-        if (Page.matches([PageDefintion.search, PageDefintion.popular])) {
+        if (Page.matches([PageDefintion.search, PageDefintion.popular, PageDefintion.favorites])) {
             this.cropThumbnails(this.fetchSettings("cropThumbnails"));
         }
 
-        if (Page.matches([PageDefintion.search, PageDefintion.post])) {
+        if (Page.matches([PageDefintion.search, PageDefintion.post, PageDefintion.favorites])) {
             this.createStickySearchbox(this.fetchSettings("stickySearchbox"));
         }
 

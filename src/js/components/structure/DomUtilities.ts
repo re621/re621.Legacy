@@ -33,7 +33,7 @@ export class DomUtilities {
         $("menu:last-child").addClass("submenu");
 
         // Create a sticky searchbox container
-        if (Page.matches([PageDefintion.search, PageDefintion.post])) {
+        if (Page.matches([PageDefintion.search, PageDefintion.post, PageDefintion.favorites])) {
             const $searchContainer = $("<div>").attr("id", "re621-search").prependTo("aside#sidebar");
             $("aside#sidebar section#search-box").appendTo($searchContainer);
             $("aside#sidebar section#mode-box").appendTo($searchContainer);
