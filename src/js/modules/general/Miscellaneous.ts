@@ -99,12 +99,13 @@ export class Miscellaneous extends RE6Module {
 
     /**
      * Replaces the tag estimates with the real count
+     * @param state True to replace, false to restore
      */
-    private async improveTagCount(): Promise<void> {
-        $("#tag-box > ul > li span.post-count, #tag-list > ul > li span.post-count").each(function (index, element) {
-            const $container = $(element);
-            const tagCount = $container.attr("data-count");
-            if (tagCount) { $container.text(tagCount); }
+    public async improveTagCount(state = true): Promise<void> {
+        const source = state ? "data-count" : "data-count-short";
+        $("span.re621-post-count").each(function (index, element) {
+            const tag = $(element);
+            tag.text(tag.attr(source));
         });
     }
 

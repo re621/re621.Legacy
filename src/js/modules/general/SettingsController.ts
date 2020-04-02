@@ -316,6 +316,7 @@ export class SettingsController extends RE6Module {
 
         postsPageInput.get("general-improved-tagcount").on("re621:form:input", (event, data) => {
             miscellaneous.pushSettings("improveTagCount", data);
+            miscellaneous.improveTagCount(data);
         });
 
         postsPageInput.get("general-crop-thumbnails").on("re621:form:input", (event, data) => {

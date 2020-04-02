@@ -41,8 +41,9 @@ export class DomUtilities {
             $container.find("a.wiki-link").insertBefore($tagLink);
 
             const $countBox = $container.find(".post-count");
-            $countBox.attr("data-count-short", $countBox.text());
-            if (!$countBox.attr("data-count")) { $countBox.attr("data-count", $countBox.text()); }
+            $countBox
+                .addClass("re621-post-count")
+                .attr("data-count-short", $countBox.text());
 
             const $buttonBox = $("<div>")
                 .addClass("tag-actions")
