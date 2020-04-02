@@ -98,4 +98,5 @@ export const PageDefintion = {
     forum: /^\/forum_topics\/?.*/,
     forumPost: /^\/forum_topics\/\d+.*/,
     pool: /^\/pools\/.+/,
+    popular: /^\/explore\/posts\/popular.?/
 };

@@ -68,7 +68,7 @@ export class Miscellaneous extends RE6Module {
             this.handleQuoteButton();
         }
 
-        if (Page.matches(PageDefintion.search)) {
+        if (Page.matches([PageDefintion.search, PageDefintion.popular])) {
             this.cropThumbnails(this.fetchSettings("cropThumbnails"));
         }
 
