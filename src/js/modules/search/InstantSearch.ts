@@ -70,14 +70,21 @@ export class InstantSearch extends RE6Module {
     }
 
     protected createDOM(): void {
-        const $section = $("<section>").attr("id", "re-instantsearch");
-        this.$searchbox = $("<input>").
-            attr("id", "re-instantsearch-input").
-            val(sessionStorage.getItem("re-instantsearch"));
-        this.$searchbox.attr("type", "text");
-        $section.append("<h1>Filter</h1>");
-        $section.append(this.$searchbox);
-        $section.append($("<button>").attr("type", "submit").append($("<i>").addClass("fas fa-search")));
-        $section.insertAfter($("#search-box"));
+        const $section = $("<section>")
+            .attr("id", "re-instantsearch")
+            .insertAfter("section#search-box");
+        $("<h1>").html("Filter").appendTo($section);
+        const $searchForm = $("<form>").appendTo($section);
+
+        this.$searchbox = $("<input>")
+            .attr("id", "re-instantsearch-input")
+            .attr("type", "text")
+            .val(sessionStorage.getItem("re-instantsearch"))
+            .appendTo($searchForm);
+
+        $("<button>")
+            .attr("type", "submit")
+            .html(`<i class="fas fa-search"></i>`)
+            .appendTo($searchForm);
     }
 }

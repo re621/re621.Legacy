@@ -67,13 +67,61 @@ body {
     }
 }
 
+/* Gridify the sidebar */
+div#c-posts div#a-index,
+div#c-posts div#a-show {
+    display: grid;
+    grid-template-columns: 12rem auto;
+    grid-column-gap: 1rem;
+
+    aside#sidebar {
+        width: unset;
+        float: unset;
+
+        div#re621-search {
+            position: relative;
+            margin: -0.5rem -0.5rem 0;
+            padding: 0.5rem 0.5rem;
+            border-radius: 6px 6px 0 0;
+
+            &[data-sticky=true] {
+                position: sticky;
+                top: -1px;
+            }
+        }
+
+        section {
+            margin-bottom: 0.5rem;
+        }
+
+        section#search-box form,
+        section#re-instantsearch form,
+        section#mode-box form {
+            display: grid;
+            grid-template-columns: auto 2rem;
+
+            input[type=text],
+            button[type=submit] {
+                width: 100%;
+            }
+
+            select[name=mode] {
+                width: unset;
+                grid-column: span 2;
+            }
+        }
+    }
+
+    section#content {
+        margin-left: unset;
+        padding-left: unset;
+    }
+}
+
 
 /* Taglist Helpers */
 #tag-box>ul,
 #tag-list>ul {
-
-    margin-left: -0.25rem;
-    margin-right: -0.5rem;
 
     li {
 

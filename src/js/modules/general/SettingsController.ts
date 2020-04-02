@@ -199,10 +199,10 @@ export class SettingsController extends RE6Module {
                     label: "Crop Thumbnails",
                 },
                 {
-                    id: "inter-spacer-1",
-                    type: "div",
-                    value: " ",
-                    stretch: "column",
+                    id: "general-sticky-searchbox",
+                    type: "checkbox",
+                    value: miscellaneous.fetchSettings("stickySearchbox"),
+                    label: "Fixed Searchbox",
                 },
 
                 // Actions
@@ -322,7 +322,11 @@ export class SettingsController extends RE6Module {
         postsPageInput.get("general-crop-thumbnails").on("re621:form:input", (event, data) => {
             miscellaneous.pushSettings("cropThumbnails", data);
             miscellaneous.cropThumbnails(data);
-            console.log(data);
+        });
+
+        postsPageInput.get("general-sticky-searchbox").on("re621:form:input", (event, data) => {
+            miscellaneous.pushSettings("stickySearchbox", data);
+            miscellaneous.createStickySearchbox(data);
         });
 
         // Actions

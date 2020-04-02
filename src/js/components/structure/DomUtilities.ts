@@ -1,4 +1,4 @@
-import { Page } from "../data/Page";
+import { Page, PageDefintion } from "../data/Page";
 
 declare const GM_addStyle;
 declare const GM_getResourceText;
@@ -31,6 +31,20 @@ export class DomUtilities {
         $menuMain.after($menuExtra);
 
         $("menu:last-child").addClass("submenu");
+
+        // Create a sticky searchbox container
+        if (Page.matches([PageDefintion.search, PageDefintion.post])) {
+            const $searchContainer = $("<div>").attr("id", "re621-search").prependTo("aside#sidebar");
+            $("aside#sidebar section#search-box").appendTo($searchContainer);
+            $("aside#sidebar section#mode-box").appendTo($searchContainer);
+
+            const observer = new IntersectionObserver(
+                ([e]) => e.target.classList.toggle('bg-foreground', e.intersectionRatio < 1),
+                { threshold: [1] }
+            );
+
+            observer.observe($searchContainer[0]);
+        }
 
         // Tweak the tag lists
         const $tags = $("#tag-box > ul > li, #tag-list > ul > li");

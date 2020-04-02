@@ -38,6 +38,7 @@ export class Miscellaneous extends RE6Module {
             loadRedesignFixes: true,
             improveTagCount: true,
             cropThumbnails: true,
+            stickySearchbox: true,
         };
     }
 
@@ -70,6 +71,10 @@ export class Miscellaneous extends RE6Module {
 
         if (Page.matches(PageDefintion.search)) {
             this.cropThumbnails(this.fetchSettings("cropThumbnails"));
+        }
+
+        if (Page.matches([PageDefintion.search, PageDefintion.post])) {
+            this.createStickySearchbox(this.fetchSettings("stickySearchbox"));
         }
 
         this.registerHotkeys();
@@ -116,6 +121,15 @@ export class Miscellaneous extends RE6Module {
     public cropThumbnails(state = true): void {
         if (state) $("div#posts-container").attr("data-cropped-thumbnails", "true");
         else $("div#posts-container").attr("data-cropped-thumbnails", "false");
+    }
+
+    /**
+     * Makes the searchbox stick to the page when scrolling down
+     * @param state True to stick, false to unsetick
+     */
+    public createStickySearchbox(state = true): void {
+        if (state) $("div#re621-search").attr("data-sticky", "true");
+        else $("div#re621-search").attr("data-sticky", "false");
     }
 
     /** If the searchbar is empty, focuses on it. */
