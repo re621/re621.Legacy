@@ -136,7 +136,7 @@ export class SubscriptionManager extends RE6Module {
      * Creates an element through the data and how the subscriber defines it
      * @returns the element to append to a tab
      */
-    private createUpdateEntry(data: UpdateContent, timeStamp: number, definition: UpdateDefinition, customClass?: string, onUnsub?: Function): JQuery<HTMLElement> {
+    private createUpdateEntry(data: UpdateContent, timeStamp: number, definition: UpdateDefinition, customClass?: string, toggleSub?: Function): JQuery<HTMLElement> {
         const $content = $("<div>")
             .addClass("subscription-update");
 
@@ -186,12 +186,16 @@ export class SubscriptionManager extends RE6Module {
         const $unsub = $("<div>")
             .addClass("subscription-update-unsub")
             .appendTo($content);
+        const heart = $(`<i class="fas fa-heart"></i>`);
         $("<a>")
-            .html(`<i class="fas fa-heart"></i>`)
+            .append(heart)
             .attr("href", "#")
             .appendTo($unsub)
             .on("click", () => {
-                if (onUnsub) onUnsub();
+                if (toggleSub) {
+                    toggleSub();
+                    heart.toggleClass("fas far");
+                }
             });
 
         // Link to all posts page
@@ -275,17 +279,25 @@ export class SubscriptionManager extends RE6Module {
             sub.content.append(this.createCacheDivider(parseInt(timestamps[i])));
             //also sort the individual update entries
             for (const updateTimestamp of Object.keys(cache[timestamps[i]]).sort((a, b) => parseInt(b) - parseInt(a))) {
+                let currentlySubbed = true;
                 const update: UpdateContent = cache[timestamps[i]][updateTimestamp];
-                const onUnsub = (): void => {
+                const toggleSub = (): void => {
                     const cache: UpdateCache = sub.instance.fetchSettings("cache", true);
                     const data = sub.instance.fetchSettings("data", true);
-                    delete cache[timestamps[i]][updateTimestamp];
-                    delete data[update.id];
+                    if (currentlySubbed) {
+                        delete cache[timestamps[i]][updateTimestamp];
+                        delete data[update.id];
+                        Danbooru.notice("Successfully unsubbed!");
+                    } else {
+                        cache[timestamps[i]][updateTimestamp] = update;
+                        data[update.id] = {};
+                        Danbooru.notice("Successfully resubbed!");
+                    }
                     sub.instance.pushSettings("cache", cache);
                     sub.instance.pushSettings("data", data);
-                    Danbooru.notice("Successfully unsubscribed!");
+                    currentlySubbed = !currentlySubbed;
                 };
-                sub.content.append(this.createUpdateEntry(update, parseInt(updateTimestamp), sub.instance.updateDefinition, "", onUnsub));
+                sub.content.append(this.createUpdateEntry(update, parseInt(updateTimestamp), sub.instance.updateDefinition, "", toggleSub));
             }
         }
         return this.getLastCacheTimestamp(cache);
