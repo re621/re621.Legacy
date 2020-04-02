@@ -1,6 +1,6 @@
 import { UpdateData, UpdateDefinition, SubscriptionSettings, UpdateContent } from "./SubscriptionManager";
 import { Api } from "../../components/api/Api";
-import { Page } from "../../components/data/Page";
+import { Page, PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Subscription } from "./Subscription";
 import { ApiForumTopic } from "../../components/api/responses/ApiForum";
@@ -36,7 +36,8 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
     }
 
     getButtonElements(): JQuery<HTMLElement> {
-        return $("div#c-forum-topics").first();
+        if (Page.matches(PageDefintion.forumPost)) return $("div#c-forum-topics").first();
+        else return $();
     }
 
     public createSubscribeButton(): JQuery<HTMLElement> {

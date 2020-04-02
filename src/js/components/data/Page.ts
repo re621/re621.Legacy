@@ -96,5 +96,6 @@ export const PageDefintion = {
     post: /^\/posts\/\d+\/?$/,
     upload: /\/uploads\/new\/?/,
     forum: /^\/forum_topics\/?.*/,
+    forumPost: /^\/forum_topics\/\d+.*/,
     pool: /^\/pools\/.+/,
 };
