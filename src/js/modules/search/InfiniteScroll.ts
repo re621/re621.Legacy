@@ -8,8 +8,6 @@ import { Post } from "../../components/data/Post";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
 import { ModuleController } from "../../components/ModuleController";
 
-declare const Danbooru;
-
 /**
  * Gets rid of the default pagination and instead appends new posts
  * when you scrolled to the bottom
@@ -18,6 +16,7 @@ export class InfiniteScroll extends RE6Module {
 
     private $postContainer: JQuery<HTMLElement>;
     private $loadingIndicator: JQuery<HTMLElement>;
+    private $nextButton: JQuery<HTMLElement>;
     private currentQuery: string;
     private nextPageToGet: number;
     private isInProgress: boolean;
@@ -49,6 +48,14 @@ export class InfiniteScroll extends RE6Module {
         this.$loadingIndicator.insertAfter(this.$postContainer);
         this.$loadingIndicator.hide();
 
+        this.$nextButton = $("<a>").text("Load next").on("click", () => {
+            this.addMorePosts(true);
+        });
+        this.$nextButton
+            .attr("id", "re-infinite-scroll-next")
+            .addClass("text-center")
+            .insertAfter(this.$postContainer);
+
         this.currentQuery = Page.getQueryParameter("tags") !== null ? Page.getQueryParameter("tags") : "";
         const page = parseInt(Page.getQueryParameter("page"));
         this.nextPageToGet = isNaN(page) ? 2 : page + 1;
@@ -59,17 +66,19 @@ export class InfiniteScroll extends RE6Module {
         //while the layout is still changing
         $(() => {
             $(window).scroll(async () => { await this.addMorePosts(); });
-
-            //If the user has few posts per page, he might already be scrolled to the bottom
-            this.addMorePosts();
         });
+    }
+
+    public destroy(): void {
+        super.destroy();
+        this.$nextButton.remove();
     }
 
     /**
      * Adds more posts to the site, if the user has scrolled down enough
      */
-    private async addMorePosts(): Promise<void> {
-        if (!this.isEnabled() || this.isInProgress || !this.pagesLeft || !this.shouldAddMore()) {
+    private async addMorePosts(override = false): Promise<void> {
+        if (!this.isEnabled() || this.isInProgress || !this.pagesLeft || !this.shouldAddMore(override)) {
             return;
         }
         this.isInProgress = true;
@@ -82,14 +91,14 @@ export class InfiniteScroll extends RE6Module {
             const post = new Post(element);
             //only append the post if it has image data
             //if it does not it is part of the anon blacklist
-            if(post.getImageURL() !== undefined) {
+            if (post.getImageURL() !== undefined) {
                 //Add post to the list of posts currently visible
                 //This is important because InstantSearch relies on it
                 Post.appendPost(post);
-                
+
                 //Apply blacklist before appending, to prevent image loading
                 post.applyBlacklist();
-                
+
                 this.$postContainer.append(element);
             }
         }
@@ -112,7 +121,7 @@ export class InfiniteScroll extends RE6Module {
      * Checks if the user has scrolled down enough, so that more
      * posts should be appended
      */
-    private shouldAddMore(): boolean {
-        return $(window).scrollTop() + $(window).height() > $(document).height() - 50;
+    private shouldAddMore(override: boolean): boolean {
+        return $(window).scrollTop() + $(window).height() > $(document).height() - 50 || override;
     }
 }
