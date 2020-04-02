@@ -24,6 +24,11 @@ const THEME_EXTRA = [
     { value: "space", name: "Space" },
     { value: "stars", name: "Stars" },
 ];
+const NAVBAR_POS = [
+    { value: "top", name: "Top" },
+    { value: "bottom", name: "Bottom" },
+    { value: "none", name: "None" },
+];
 
 /**
  * ThemeCustomizer  
@@ -43,6 +48,7 @@ export class ThemeCustomizer extends RE6Module {
             main: "hexagon",
             extra: "hexagons",
             unscaling: false,
+            nav: "top",
         };
     }
 
@@ -84,7 +90,14 @@ export class ThemeCustomizer extends RE6Module {
                     id: "unscaling",
                     type: "checkbox",
                     label: "Disable Scaling",
-                    value: this.fetchSettings("unscaling")
+                    value: this.fetchSettings("unscaling"),
+                },
+                {
+                    id: "nav",
+                    type: "select",
+                    label: "Post Navbar",
+                    data: NAVBAR_POS,
+                    value: this.fetchSettings("nav"),
                 }
             ]
         );
@@ -101,6 +114,7 @@ export class ThemeCustomizer extends RE6Module {
         this.handleThemeSwitcher("main");
         this.handleThemeSwitcher("extra");
         this.handleScalingToggle();
+        this.handleThemeSwitcher("nav");
     }
 
     /** Listens to the theme selectors and sets the appropriate theming */
