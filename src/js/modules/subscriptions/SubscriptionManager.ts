@@ -57,7 +57,10 @@ export class SubscriptionManager extends RE6Module {
         this.openSubsButton.attr("data-loading", "true");
 
         const lastUpdate = this.fetchSettings("lastUpdate");
-        this.pushSettings("lastUpdate", now);
+        const shouldUpdate = now - lastUpdate - (this.updateInterval * 1000) >= 0;
+        if (shouldUpdate) {
+            this.pushSettings("lastUpdate", now);
+        }
         const panels = modal.getElement().find(".ui-tabs-panel");
         const tabs = modal.getElement().find(".ui-tabs-tab");
         for (const entry of this.subscribers.entries()) {
@@ -67,7 +70,7 @@ export class SubscriptionManager extends RE6Module {
                 tab: tabs.eq(entry[0])
             };
             this.subscribers.set(entry[0], subElements);
-            await this.initSubscriber(subElements, lastUpdate, now);
+            await this.initSubscriber(subElements, shouldUpdate, lastUpdate, now);
         }
 
         this.openSubsButton.attr("data-loading", "false");
@@ -104,7 +107,7 @@ export class SubscriptionManager extends RE6Module {
     /**
      * Starts checking for updates for the passed subscriber
      */
-    public async initSubscriber(sub: SubscriptionElement, lastUpdate: number, currentTime: number): Promise<void> {
+    public async initSubscriber(sub: SubscriptionElement, shouldUpdate: boolean, lastUpdate: number, currentTime: number): Promise<void> {
         const moduleName = sub.instance.constructor.name;
 
         this.addSubscribeButtons(sub.instance);
@@ -112,7 +115,7 @@ export class SubscriptionManager extends RE6Module {
         sub.tab.attr("data-loading", "true");
         //don't update if the last check was pretty recently
         let updates: UpdateData = {};
-        if (currentTime - lastUpdate - (this.updateInterval * 1000) >= 0) {
+        if (shouldUpdate) {
             updates = await sub.instance.getUpdatedEntries(lastUpdate);
         }
 
