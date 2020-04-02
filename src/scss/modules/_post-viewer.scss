@@ -50,3 +50,15 @@ div#c-posts div.parent-children {
         justify-items: center;
     }
 }
+
+#tag-list {
+    font-weight: bold;
+
+    & .general-tag-list, &  .meta-tag-list {
+        font-weight: normal;
+    }
+}
+
+#post-rating-text {
+    font-weight: bold;
+}
