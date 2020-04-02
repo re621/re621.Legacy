@@ -6,6 +6,8 @@ import { Util } from "../../components/structure/Util";
 import { ModuleController } from "../../components/ModuleController";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 
+declare const Danbooru;
+
 export class SubscriptionManager extends RE6Module {
 
     //should notifications be cleared once seen?
@@ -57,7 +59,10 @@ export class SubscriptionManager extends RE6Module {
         this.openSubsButton.attr("data-loading", "true");
 
         const lastUpdate = this.fetchSettings("lastUpdate");
-        this.pushSettings("lastUpdate", now);
+        const shouldUpdate = now - lastUpdate - (this.updateInterval * 1000) >= 0;
+        if (shouldUpdate) {
+            this.pushSettings("lastUpdate", now);
+        }
         const panels = modal.getElement().find(".ui-tabs-panel");
         const tabs = modal.getElement().find(".ui-tabs-tab");
         for (const entry of this.subscribers.entries()) {
@@ -67,7 +72,7 @@ export class SubscriptionManager extends RE6Module {
                 tab: tabs.eq(entry[0])
             };
             this.subscribers.set(entry[0], subElements);
-            await this.initSubscriber(subElements, lastUpdate, now);
+            await this.initSubscriber(subElements, shouldUpdate, lastUpdate, now);
         }
 
         this.openSubsButton.attr("data-loading", "false");
@@ -104,7 +109,7 @@ export class SubscriptionManager extends RE6Module {
     /**
      * Starts checking for updates for the passed subscriber
      */
-    public async initSubscriber(sub: SubscriptionElement, lastUpdate: number, currentTime: number): Promise<void> {
+    public async initSubscriber(sub: SubscriptionElement, shouldUpdate: boolean, lastUpdate: number, currentTime: number): Promise<void> {
         const moduleName = sub.instance.constructor.name;
 
         this.addSubscribeButtons(sub.instance);
@@ -112,7 +117,7 @@ export class SubscriptionManager extends RE6Module {
         sub.tab.attr("data-loading", "true");
         //don't update if the last check was pretty recently
         let updates: UpdateData = {};
-        if (currentTime - lastUpdate - (this.updateInterval * 1000) >= 0) {
+        if (shouldUpdate) {
             updates = await sub.instance.getUpdatedEntries(lastUpdate);
         }
 
@@ -131,7 +136,7 @@ export class SubscriptionManager extends RE6Module {
      * Creates an element through the data and how the subscriber defines it
      * @returns the element to append to a tab
      */
-    private createUpdateEntry(data: UpdateContent, timeStamp: number, definition: UpdateDefinition, customClass?: string): JQuery<HTMLElement> {
+    private createUpdateEntry(data: UpdateContent, timeStamp: number, definition: UpdateDefinition, customClass?: string, toggleSub?: Function): JQuery<HTMLElement> {
         const $content = $("<div>")
             .addClass("subscription-update");
 
@@ -181,10 +186,17 @@ export class SubscriptionManager extends RE6Module {
         const $unsub = $("<div>")
             .addClass("subscription-update-unsub")
             .appendTo($content);
+        const heart = $(`<i class="fas fa-heart"></i>`);
         $("<a>")
-            .html(`<i class="fas fa-heart"></i>`)
+            .append(heart)
             .attr("href", "#")
-            .appendTo($unsub);
+            .appendTo($unsub)
+            .on("click", () => {
+                if (toggleSub) {
+                    toggleSub();
+                    heart.toggleClass("fas far");
+                }
+            });
 
         // Link to all posts page
         const $full = $("<div>")
@@ -267,8 +279,25 @@ export class SubscriptionManager extends RE6Module {
             sub.content.append(this.createCacheDivider(parseInt(timestamps[i])));
             //also sort the individual update entries
             for (const updateTimestamp of Object.keys(cache[timestamps[i]]).sort((a, b) => parseInt(b) - parseInt(a))) {
+                let currentlySubbed = true;
                 const update: UpdateContent = cache[timestamps[i]][updateTimestamp];
-                sub.content.append(this.createUpdateEntry(update, parseInt(updateTimestamp), sub.instance.updateDefinition));
+                const toggleSub = (): void => {
+                    const cache: UpdateCache = sub.instance.fetchSettings("cache", true);
+                    const data = sub.instance.fetchSettings("data", true);
+                    if (currentlySubbed) {
+                        delete cache[timestamps[i]][updateTimestamp];
+                        delete data[update.id];
+                        Danbooru.notice("Successfully unsubbed!");
+                    } else {
+                        cache[timestamps[i]][updateTimestamp] = update;
+                        data[update.id] = {};
+                        Danbooru.notice("Successfully resubbed!");
+                    }
+                    sub.instance.pushSettings("cache", cache);
+                    sub.instance.pushSettings("data", data);
+                    currentlySubbed = !currentlySubbed;
+                };
+                sub.content.append(this.createUpdateEntry(update, parseInt(updateTimestamp), sub.instance.updateDefinition, "", toggleSub));
             }
         }
         return this.getLastCacheTimestamp(cache);

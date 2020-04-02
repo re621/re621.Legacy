@@ -839,18 +839,16 @@ export class SettingsController extends RE6Module {
     }
 
     private async importPoolData(settings: string, $info: JQuery<HTMLElement>): Promise<void> {
-        $info.html("Processing forums . . .");
+        $info.html("Processing pools . . .");
         const poolSubs = PoolSubscriptions.getInstance(),
-            forumData: ExtraInfo = poolSubs.fetchSettings("data", true),
-            postIDs = [];
+            poolData: ExtraInfo = poolSubs.fetchSettings("data", true);
         for (const entry of settings) {
-            postIDs.push(entry["id"]);
+            poolData[entry["id"]] = {
+                md5: entry["thumb"]["url"].substr(6, 32),
+                lastID: entry["last"],
+            };
         }
-        const data = await Api.getJson("/forum_posts.json?search[id]=" + postIDs.join(","));
-        data.forEach((postData) => {
-            forumData[postData["topic_id"]] = {};
-        });
-        poolSubs.pushSettings("data", forumData);
+        poolSubs.pushSettings("data", poolData);
     }
 
     private async importForumData(settings: string, $info: JQuery<HTMLElement>): Promise<void> {
