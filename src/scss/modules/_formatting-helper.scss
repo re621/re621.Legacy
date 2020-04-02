@@ -1,8 +1,9 @@
 /* Styles for the Formatting Helper module */
 
-form.simple_form {
+form.formatting-helper {
 
     padding: 0;
+    background: unset !important;
 
     &.new_forum_post,
     &.edit_forum_post,
@@ -12,6 +13,24 @@ form.simple_form {
         input[type=submit] {
             padding: 0.25rem 0.5rem;
         }
+    }
+
+    div.input.text.optional {
+        margin-bottom: 0;
+
+        &>label[for^="forum_post_body"] {
+            display: none;
+        }
+
+        span.hint {
+            max-width: unset;
+            float: right;
+        }
+    }
+
+    input[type=submit].dtext-submit {
+        //    background: #00000022;
+        margin: 0.5rem 0 0;
     }
 
     div.dtext-previewable {
@@ -29,6 +48,7 @@ form.simple_form {
             padding-top: 0.5rem;
             box-sizing: border-box;
             border-bottom: 0;
+            border-radius: 6px 6px 0 0;
 
             div.comment-tabs {
                 padding-left: 1rem;
@@ -115,6 +135,7 @@ form.simple_form {
             font-size: inherit;
 
             border-top: 0;
+            border-radius: 0 0 6px 6px;
         }
 
         &[data-editing=false] div.comment-buttons,
@@ -134,6 +155,8 @@ form.simple_form {
             margin-left: 1rem;
             text-align: center;
             padding-top: 0.75rem;
+            border-bottom: 0;
+            border-radius: 6px 6px 0 0;
 
             a {
                 display: inline-block;
@@ -156,6 +179,7 @@ form.simple_form {
             min-width: 10rem;
             margin-left: 1rem;
             border-top: 0;
+            border-radius: 0 0 6px 6px;
         }
 
         &[data-drawer=false] div.dtext-button-drawer-title,

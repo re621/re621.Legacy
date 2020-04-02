@@ -182,10 +182,12 @@ class FormattingHelper {
         this.createCharacterCounter();
 
         this.$form.find("input.dtext-preview-button").css("display", "none");
+        this.$form.find("input[type=submit]").addClass("button btn-neutral border-foreground dtext-submit");
 
         // Add Styling
-        this.$textarea.addClass("bg-section border-highlight color-text");
-        this.$preview.addClass("bg-section border-highlight color-text");
+        this.$form.addClass("formatting-helper");
+        this.$textarea.addClass("bg-section border-foreground color-text");
+        this.$preview.addClass("bg-section border-foreground color-text");
 
         // Establish Sorting
         this.$formatButtons.sortable({
@@ -278,7 +280,7 @@ class FormattingHelper {
     private createToolbar(): void {
         const $bar = $("<div>")
             .addClass("comment-header")
-            .addClass("bg-highlight border-highlight")
+            .addClass("bg-highlight border-foreground")
             .prependTo(this.$container);
 
         // - Editing State Tabs
@@ -324,7 +326,7 @@ class FormattingHelper {
 
         $("<div>")
             .addClass("dtext-button-drawer-title")
-            .addClass("bg-highlight color-text")
+            .addClass("bg-highlight border-foreground color-text")
             .append($newFormatButton)
             .appendTo(this.$container);
 
@@ -367,7 +369,7 @@ class FormattingHelper {
         // - Drawer Container Element
         this.$formatButtonsDrawer = $("<div>")
             .addClass("dtext-button-drawer")
-            .addClass("bg-section border-highlight color-text")
+            .addClass("bg-section border-foreground color-text")
             .appendTo(this.$container);
 
         // - Elements themselves are added when the user opens the drawer
