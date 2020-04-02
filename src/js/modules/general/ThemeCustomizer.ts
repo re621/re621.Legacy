@@ -47,7 +47,6 @@ export class ThemeCustomizer extends RE6Module {
             enabled: true,
             main: "hexagon",
             extra: "hexagons",
-            unscaling: false,
             nav: "top",
         };
     }
@@ -87,12 +86,6 @@ export class ThemeCustomizer extends RE6Module {
                     value: this.fetchSettings("extra"),
                 },
                 {
-                    id: "unscaling",
-                    type: "checkbox",
-                    label: "Disable Scaling",
-                    value: this.fetchSettings("unscaling"),
-                },
-                {
                     id: "nav",
                     type: "select",
                     label: "Post Navbar",
@@ -113,7 +106,6 @@ export class ThemeCustomizer extends RE6Module {
         // === Establish Listeners
         this.handleThemeSwitcher("main");
         this.handleThemeSwitcher("extra");
-        this.handleScalingToggle();
         this.handleThemeSwitcher("nav");
     }
 
@@ -129,21 +121,6 @@ export class ThemeCustomizer extends RE6Module {
             const theme = $(element.target).val() + "";
             this.pushSettings(selector, theme);
             $("body").attr("data-th-" + selector, theme);
-        });
-    }
-
-    /** Disables page's min-width scaling */
-    private handleScalingToggle(): void {
-        const unscaling = this.fetchSettings("unscaling");
-
-        if (unscaling) { $("body").css("max-width", "unset"); }
-        $("#theme-scaling").prop("checked", unscaling);
-
-        this.themeCustomizerForm.getInputList().get("unscaling").change(element => {
-            const disableScaling = $(element.target).is(":checked");
-            this.pushSettings("unscaling", disableScaling);
-            if (disableScaling) { $("body").css("max-width", "unset"); }
-            else { $("body").css("max-width", ""); }
         });
     }
 }
