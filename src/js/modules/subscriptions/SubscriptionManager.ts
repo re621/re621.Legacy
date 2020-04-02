@@ -6,6 +6,8 @@ import { Util } from "../../components/structure/Util";
 import { ModuleController } from "../../components/ModuleController";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 
+declare const Danbooru;
+
 export class SubscriptionManager extends RE6Module {
 
     //should notifications be cleared once seen?
@@ -134,7 +136,7 @@ export class SubscriptionManager extends RE6Module {
      * Creates an element through the data and how the subscriber defines it
      * @returns the element to append to a tab
      */
-    private createUpdateEntry(data: UpdateContent, timeStamp: number, definition: UpdateDefinition, customClass?: string): JQuery<HTMLElement> {
+    private createUpdateEntry(data: UpdateContent, timeStamp: number, definition: UpdateDefinition, customClass?: string, onUnsub?: Function): JQuery<HTMLElement> {
         const $content = $("<div>")
             .addClass("subscription-update");
 
@@ -187,7 +189,10 @@ export class SubscriptionManager extends RE6Module {
         $("<a>")
             .html(`<i class="fas fa-heart"></i>`)
             .attr("href", "#")
-            .appendTo($unsub);
+            .appendTo($unsub)
+            .on("click", () => {
+                if (onUnsub) onUnsub();
+            });
 
         // Link to all posts page
         const $full = $("<div>")
@@ -271,7 +276,16 @@ export class SubscriptionManager extends RE6Module {
             //also sort the individual update entries
             for (const updateTimestamp of Object.keys(cache[timestamps[i]]).sort((a, b) => parseInt(b) - parseInt(a))) {
                 const update: UpdateContent = cache[timestamps[i]][updateTimestamp];
-                sub.content.append(this.createUpdateEntry(update, parseInt(updateTimestamp), sub.instance.updateDefinition));
+                const onUnsub = (): void => {
+                    const cache: UpdateCache = sub.instance.fetchSettings("cache", true);
+                    const data = sub.instance.fetchSettings("data", true);
+                    delete cache[timestamps[i]][updateTimestamp];
+                    delete data[update.id];
+                    sub.instance.pushSettings("cache", cache);
+                    sub.instance.pushSettings("data", data);
+                    Danbooru.notice("Successfully unsubscribed!");
+                };
+                sub.content.append(this.createUpdateEntry(update, parseInt(updateTimestamp), sub.instance.updateDefinition, "", onUnsub));
             }
         }
         return this.getLastCacheTimestamp(cache);
