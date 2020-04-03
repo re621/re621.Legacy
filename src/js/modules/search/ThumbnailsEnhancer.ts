@@ -47,7 +47,6 @@ export class ThumbnailEnhancer extends RE6Module {
 
         $("article.post-preview").each((index, element) => {
             const $article = $(element),
-                $picture = $article.find("picture"),
                 $source = $article.find("source[media='(min-width: 800px)']"),
                 $img = $article.find("img"),
                 $imgData = $img.attr("title").split("\n").slice(0, -2);
@@ -55,7 +54,7 @@ export class ThumbnailEnhancer extends RE6Module {
             console.log($imgData);
 
             const $previewBox = $("<div>").addClass("preview-box").prependTo($article);
-            $picture.appendTo($previewBox);
+            $article.find("a").first().appendTo($previewBox);
 
             const $extrasBox = $("<div>").addClass("preview-extras").appendTo($previewBox);
             $("<span>").html(parseRating($imgData[0])).appendTo($extrasBox);
