@@ -11,7 +11,11 @@ export class SubscriptionManager extends RE6Module {
 
     //should notifications be cleared once seen?
     private updateInterval = 60 * 60; //1 hour, in seconds
+    //While updating a setting will be pushed after every interval
+    //to make it possible to detect aborted updates
+    private heartbeatInterval = 10;   //10 seconds
     private historySize = 5;
+    private updateInPorgress = false;
 
     private tabNotificationsCount = 0;
     private subscribers = new Map<number, SubscriptionElement>();
@@ -62,17 +66,17 @@ export class SubscriptionManager extends RE6Module {
             position: { my: "right top", at: "right top" }
         });
 
-        const nowFake = this.fetchSettings("now");
-        const now = nowFake !== undefined ? nowFake : new Date().getTime();
-
         this.$openSubsButton.attr("data-loading", "true");
-
-        const shouldUpdate = now - lastUpdate - (this.updateInterval * 1000) >= 0;
+        const shouldUpdate = this.getShouldUpdate();
+        const now = new Date().getTime();
+        let heartbeatTimer: number;
         if (shouldUpdate) {
-            this.pushSettings("lastUpdate", now);
+            //Update started, contiously set the heartbeat to let other tabs now the update did not abort
+            heartbeatTimer = this.startUpdate();
         }
         const panels = modal.getElement().find(".ui-tabs-panel");
         const tabs = modal.getElement().find(".ui-tabs-tab");
+        this.updateInPorgress = true;
         for (const entry of this.subscribers.entries()) {
             const subElements = {
                 instance: entry[1].instance,
@@ -82,7 +86,12 @@ export class SubscriptionManager extends RE6Module {
             this.subscribers.set(entry[0], subElements);
             await this.initSubscriber(subElements, shouldUpdate, lastUpdate, now);
         }
-
+        //when the update finished, clear the hearbeat interval and set updateInProgress to false
+        //The next update now should only start after the update interval, or on manual action
+        if (shouldUpdate) {
+            this.stopUpdate(heartbeatTimer);
+        }
+        this.updateInPorgress = false;
         this.$openSubsButton.attr("data-loading", "false");
         this.updateNotificationSymbol(0);
 
@@ -97,6 +106,60 @@ export class SubscriptionManager extends RE6Module {
                 this.removeUnopened(tabProperties.newTab.index());
             }
         });
+    }
+
+    private getShouldUpdate(): boolean {
+        const nowFake = this.fetchSettings("now");
+        const now = nowFake !== undefined ? nowFake : new Date().getTime();
+        const lastUpdate = this.fetchSettings("lastUpdate");
+        const lastHeartbeat = this.fetchSettings("heartbeat");
+        const updateInProgress = this.fetchSettings("updateInProgress");
+        //Should an update be made, because the last update was before the interval?
+        //But only if an update is not already in progress
+        const updateIntervalConstraint = this.intervalCheck(now, lastUpdate, updateInProgress);
+        //should an update be made, because the last started 
+        //update did not set the heartbeat and an update is alledegly in progress?
+        const updateHeartbeatConstraint = this.heartbeatCheck(now, lastHeartbeat, updateInProgress);
+        if (updateHeartbeatConstraint) {
+            console.log("Update because of heartbeat");
+        } else if (updateIntervalConstraint) {
+            console.log("Update because of interval");
+        } else {
+            console.log("No update");
+        }
+        return updateIntervalConstraint || updateHeartbeatConstraint;
+    }
+
+    private intervalCheck(now: number, lastUpdate: number, updateInProgress: boolean): boolean {
+        return now - lastUpdate - (this.updateInterval * 1000) >= 0 && !updateInProgress;
+    }
+
+    private heartbeatCheck(now: number, lastHeartbeat: number, updateInProgress: boolean): boolean {
+        return updateInProgress === true && now - lastHeartbeat - (this.heartbeatInterval * 1000 * 2) >= 0;
+    }
+
+    /**
+     * Prepares the settings for a new update
+     */
+    private startUpdate(): number {
+        this.updateInPorgress = true;
+        this.pushSettings("updateInProgress", true);
+        this.pushSettings("heartbeat", new Date().getTime());
+        const heartbeatTimer = window.setInterval(() => {
+            this.pushSettings("heartbeat", new Date().getTime());
+        }, this.heartbeatInterval * 1000);
+        return heartbeatTimer;
+    }
+
+    /**
+     * Stops an update. Stop the heartbeat interval, push the current time to lastUpdate
+     * and sets updateInProgress to false
+     */
+    private stopUpdate(heartbeatTimer: number): void {
+        this.pushSettings("updateInProgress", false);
+        this.pushSettings("lastUpdate", new Date().getTime());
+        window.clearInterval(heartbeatTimer);
+        this.updateInPorgress = false;
     }
 
     private getInfoPage(lastUpdate: number): Form {
@@ -141,23 +204,32 @@ export class SubscriptionManager extends RE6Module {
         const inputList = form.getInputList();
         let allowUpdate = true;
         inputList.get("subscriptions-triggerupdate").on("click", async () => {
+            //If an update was already triggered, do nothing. 
+            const heartbeat = this.fetchSettings("heartbeat", true);
+            const updateInProgress = this.fetchSettings("updateInProgress");
+            if (this.heartbeatCheck(new Date().getTime(), heartbeat, updateInProgress)) {
+                Util.Danbooru.notice("Update is already in progress");
+                return;
+            }
             //Only allow one manuall update per page
             if (!allowUpdate) {
                 Util.Danbooru.notice("You already updated, please reload to update again");
                 return;
             }
+            const hearbeatTimer = this.startUpdate();
             allowUpdate = false;
             const now = new Date().getTime();
-
-            //refresh last/next update label
-            inputList.get("subscriptions-lastupdate-label").html("Last Update: " + Util.timeAgo(now));
-            inputList.get("subscriptions-nextupdate-label").html("Next Update: " + Util.timeAgo(now + this.updateInterval * 1000))
             for (const entry of this.subscribers.entries()) {
                 entry[1].content = $("<div>").addClass("subscriptions-list");
                 await this.initSubscriber(entry[1], true, this.fetchSettings("lastUpdate", true), now);
                 this.$subsTabs.replace(entry[0], entry[1].content);
             }
-            this.pushSettings("lastUpdate", now);
+            this.updateInPorgress = false;
+            //refresh last/next update label
+            inputList.get("subscriptions-lastupdate-label").html("Last Update: " + Util.timeAgo(now));
+            inputList.get("subscriptions-nextupdate-label").html("Next Update: " + Util.timeAgo(now + this.updateInterval * 1000))
+
+            this.stopUpdate(hearbeatTimer);
         });
     }
 
