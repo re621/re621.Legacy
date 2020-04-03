@@ -7,9 +7,7 @@ import { Form, FormElement } from "../../components/structure/Form";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { PoolSubscriptions } from "../subscriptions/PoolSubscriptions";
 import { Util } from "../../components/structure/Util";
-import { User } from "../../components/data/User";
 import { ForumSubscriptions } from "../subscriptions/ForumSubscriptions";
-import { TagSubscriptions } from "../subscriptions/TagSubscriptions";
 import { TitleCustomizer } from "../post/TitleCustomizer";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { PostViewer } from "../post/PostViewer";
@@ -21,6 +19,9 @@ import { ModuleController } from "../../components/ModuleController";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { ExtraInfo } from "../subscriptions/SubscriptionManager";
 import { Api } from "../../components/api/Api";
+import { User } from "../../components/data/User";
+
+declare const GM_setValue;
 
 /**
  * SettingsController  
@@ -730,14 +731,16 @@ export class SettingsController extends RE6Module {
 
         // Import / Export to file
         miscFormInput.get("misc-export-button").on("click", () => {
-            const exportData = {
-                "meta": "re621/" + window["re621"]["version"],
-                "pools": PoolSubscriptions.getInstance().fetchSettings("data"),
-                "forums": ForumSubscriptions.getInstance().fetchSettings("data"),
-                "tags": TagSubscriptions.getInstance().fetchSettings("data"),
-            };
 
-            Util.downloadJSON(exportData, "re621-" + User.getUsername());
+            const storedData = { "meta": "re621/1.0" };
+
+            ModuleController.getAll().forEach((module) => {
+                const data = module.getSavedSettings();
+                storedData[data.name] = data.data;
+                if (storedData[data.name]["cache"]) storedData[data.name]["cache"] = {};
+            });
+
+            Util.downloadJSON(storedData, "re621-" + User.getUsername() + "-userdata");
         });
 
         miscFormInput.get("misc-import-button").on("re621:form:input", (event, data) => {
@@ -748,51 +751,23 @@ export class SettingsController extends RE6Module {
             reader.readAsText(data, "UTF-8");
             reader.onload = function (event): void {
                 const parsedData = JSON.parse(event.target.result.toString());
-                console.log(parsedData);
 
                 if (!parsedData["meta"] || parsedData["meta"] !== "re621/1.0") {
                     $info.html("Invalid file format");
                     return;
                 }
 
-                // parsedData["pools"] : pools
-                if (parsedData["pools"]) {
-                    $info.html("Processing pools . . .");
-                    const poolSubs = PoolSubscriptions.getInstance(),
-                        poolData: ExtraInfo = poolSubs.fetchSettings("data", true);
-                    for (const [key, value] of Object.entries(parsedData["pools"])) {
-                        poolData[key] = value;
-                    }
-                    poolSubs.pushSettings("data", poolData);
-                }
+                delete parsedData.meta;
 
-                // parsedData["forums"] : forums
-                if (parsedData["forums"]) {
-                    $info.html("Processing forums . . .");
-                    const forumSubs = ForumSubscriptions.getInstance(),
-                        forumData: ExtraInfo = forumSubs.fetchSettings("data", true);
-                    for (const [key, value] of Object.entries(parsedData["forums"])) {
-                        forumData[key] = value;
-                    }
-                    forumSubs.pushSettings("data", forumData);
-                }
-
-                // parsedData[3] : tags (???)
-                if (parsedData["tags"]) {
-                    $info.html("Processing tags . . .");
-                    const tagSubs = TagSubscriptions.getInstance(),
-                        tagData: ExtraInfo = tagSubs.fetchSettings("data", true);
-                    for (const [key, value] of Object.entries(parsedData["tags"])) {
-                        tagData[key] = value;
-                    }
-                    tagSubs.pushSettings("data", tagData);
-                }
+                Object.keys(parsedData).forEach((key) => {
+                    $info.html("Importing " + key);
+                    GM_setValue(key, parsedData[key]);
+                });
 
                 //console.log(parsedData);
                 $info.html("Settings imported!");
             };
             reader.onerror = function (): void { $info.html("Error loading file"); };
-
         });
 
         // eSix Legacy

@@ -108,6 +108,14 @@ export class RE6Module {
     }
 
     /**
+     * Retrieves the data that has actually been saved into the settings.  
+     * Used while exporting settings to file, and pretty much nowhere else.
+     */
+    public getSavedSettings(): any {
+        return { name: "re621." + this.constructor.name, data: GM_getValue("re621." + this.constructor.name, {}) };
+    }
+
+    /**
      * Returns a set of default settings values
      * @returns Default settings
      */
