@@ -191,24 +191,3 @@ div#c-favorites div#a-index {
 
     }
 }
-
-// Crop Thumbnails
-div#posts-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 150px);
-    justify-content: space-between;
-
-    &[data-cropped-thumbnails=true] {
-        article.post-preview {
-            margin: 0 0 1rem;
-            height: auto;
-            width: 150px;
-        }
-
-        article.post-preview img {
-            width: 150px;
-            height: 125px;
-            object-fit: cover;
-        }
-    }
-}

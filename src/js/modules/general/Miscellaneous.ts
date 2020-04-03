@@ -3,9 +3,6 @@ import { Page, PageDefintion } from "../../components/data/Page";
 import { Api } from "../../components/api/Api";
 import { ApiForumPost } from "../../components/api/responses/ApiForum";
 
-declare const GM_addStyle;
-declare const GM_getResourceText;
-
 /**
  * Miscellaneous functionality that does not require a separate module
  */
@@ -37,7 +34,6 @@ export class Miscellaneous extends RE6Module {
             removeSearchQueryString: true,
             loadRedesignFixes: true,
             improveTagCount: true,
-            cropThumbnails: true,
             stickySearchbox: true,
         };
     }
@@ -67,10 +63,6 @@ export class Miscellaneous extends RE6Module {
 
         if (Page.matches([PageDefintion.post, PageDefintion.forum])) {
             this.handleQuoteButton();
-        }
-
-        if (Page.matches([PageDefintion.search, PageDefintion.popular, PageDefintion.favorites])) {
-            this.cropThumbnails(this.fetchSettings("cropThumbnails"));
         }
 
         if (Page.matches([PageDefintion.search, PageDefintion.post, PageDefintion.favorites])) {
@@ -112,15 +104,6 @@ export class Miscellaneous extends RE6Module {
             const tag = $(element);
             tag.text(tag.attr(source));
         });
-    }
-
-    /**
-     * Crops the thumbnails to squares to minimize empty space
-     * @param state True to crop, false to restore
-     */
-    public cropThumbnails(state = true): void {
-        if (state) $("div#posts-container").attr("data-cropped-thumbnails", "true");
-        else $("div#posts-container").attr("data-cropped-thumbnails", "false");
     }
 
     /**

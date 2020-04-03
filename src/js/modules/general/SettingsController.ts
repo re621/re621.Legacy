@@ -20,6 +20,7 @@ import { DomUtilities } from "../../components/structure/DomUtilities";
 import { ExtraInfo } from "../subscriptions/SubscriptionManager";
 import { Api } from "../../components/api/Api";
 import { User } from "../../components/data/User";
+import { ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
 
 declare const GM_setValue;
 
@@ -105,12 +106,13 @@ export class SettingsController extends RE6Module {
 
     /** Create the DOM for the Title Customizer page */
     private createTabPostsPage(): Form {
-        const titleCustomizer = ModuleController.get(TitleCustomizer);
-        const downloadCustomizer = ModuleController.get(DownloadCustomizer);
-        const miscellaneous = ModuleController.get(Miscellaneous);
-        const postViewer = ModuleController.get(PostViewer);
-        const formattingManager = ModuleController.get(FormattingManager);
-        const blacklistEnhancer = ModuleController.get(BlacklistEnhancer);
+        const titleCustomizer = ModuleController.get(TitleCustomizer),
+            downloadCustomizer = ModuleController.get(DownloadCustomizer),
+            miscellaneous = ModuleController.get(Miscellaneous),
+            postViewer = ModuleController.get(PostViewer),
+            formattingManager = ModuleController.get(FormattingManager),
+            blacklistEnhancer = ModuleController.get(BlacklistEnhancer),
+            thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer);
 
         const templateIcons = new Form(
             { id: "title-template-icons", columns: 2, },
@@ -194,17 +196,63 @@ export class SettingsController extends RE6Module {
                     label: "Expanded Tag Count",
                 },
                 {
-                    id: "general-crop-thumbnails",
-                    type: "checkbox",
-                    value: miscellaneous.fetchSettings("cropThumbnails"),
-                    label: "Crop Thumbnails",
-                },
-                {
                     id: "general-sticky-searchbox",
                     type: "checkbox",
                     value: miscellaneous.fetchSettings("stickySearchbox"),
                     label: "Fixed Searchbox",
                 },
+                {
+                    id: "general-spacer-2",
+                    type: "div",
+                    value: " ",
+                    stretch: "column",
+                },
+                {
+                    id: "gen-inter-spacer-1",
+                    type: "div",
+                    value: " ",
+                    stretch: "full",
+                },
+
+
+                // Thumbnails
+                {
+                    id: "thumb-header",
+                    type: "div",
+                    value: "<h3>Thumbnails</h3>",
+                    stretch: "full",
+                },
+                {
+                    id: "thumb-crop",
+                    type: "checkbox",
+                    value: thumbnailEnhancer.fetchSettings("crop"),
+                    label: "Crop Thumbnails",
+                },
+                {
+                    id: "thumb-crop-text",
+                    type: "div",
+                    value: "Cut down the thumbnails to fit a 150x150 square, for a more uniform look",
+                    stretch: "mid",
+                },
+                {
+                    id: "thumb-zoom",
+                    type: "checkbox",
+                    value: thumbnailEnhancer.fetchSettings("zoom"),
+                    label: "Enhanced Previews",
+                },
+                {
+                    id: "thumb-zoom",
+                    type: "div",
+                    value: "Improves thumbnail previews. Not recommended for users with a slow commection. Requires a page reload.",
+                    stretch: "mid",
+                },
+                {
+                    id: "gen-inter-spacer-2",
+                    type: "div",
+                    value: " ",
+                    stretch: "full",
+                },
+
 
                 // Actions
                 {
@@ -240,13 +288,13 @@ export class SettingsController extends RE6Module {
                     label: "Submit Comments with Alt+Enter",
                 },
                 {
-                    id: "inter-spacer-4",
+                    id: "action-spacer-1",
                     type: "div",
                     value: " ",
                     stretch: "column",
                 },
                 {
-                    id: "inter-spacer-1",
+                    id: "gen-inter-spacer-3",
                     type: "div",
                     value: " ",
                     stretch: "full",
@@ -265,6 +313,12 @@ export class SettingsController extends RE6Module {
                     value: blacklistEnhancer.fetchSettings("quickaddTags"),
                     label: "Click X to add tag to blacklist",
                 },
+                {
+                    id: "gen-inter-spacer-4",
+                    type: "div",
+                    value: " ",
+                    stretch: "full",
+                },
             ]
         );
 
@@ -282,6 +336,7 @@ export class SettingsController extends RE6Module {
         const postViewer = ModuleController.get(PostViewer);
         const formattingManager = ModuleController.get(FormattingManager);
         const blacklistEnhancer = ModuleController.get(BlacklistEnhancer);
+        const thumbnailEnhancer = ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer);
         const postsPageInput = form.getInputList();
 
         // General
@@ -320,14 +375,19 @@ export class SettingsController extends RE6Module {
             miscellaneous.improveTagCount(data);
         });
 
-        postsPageInput.get("general-crop-thumbnails").on("re621:form:input", (event, data) => {
-            miscellaneous.pushSettings("cropThumbnails", data);
-            miscellaneous.cropThumbnails(data);
-        });
-
         postsPageInput.get("general-sticky-searchbox").on("re621:form:input", (event, data) => {
             miscellaneous.pushSettings("stickySearchbox", data);
             miscellaneous.createStickySearchbox(data);
+        });
+
+        // Thumbnails
+        postsPageInput.get("thumb-crop").on("re621:form:input", (event, data) => {
+            thumbnailEnhancer.pushSettings("crop", data);
+            thumbnailEnhancer.toggleCroppedThumbnails(data);
+        });
+
+        postsPageInput.get("thumb-zoom").on("re621:form:input", (event, data) => {
+            thumbnailEnhancer.pushSettings("upscale", data);
         });
 
         // Actions

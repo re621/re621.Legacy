@@ -22,6 +22,7 @@ import { TitleCustomizer } from "./modules/post/TitleCustomizer";
 import { BlacklistEnhancer } from "./modules/search/BlacklistEnhancer";
 import { InstantSearch } from "./modules/search/InstantSearch";
 import { InfiniteScroll } from "./modules/search/InfiniteScroll";
+import { ThumbnailEnhancer } from "./modules/search/ThumbnailsEnhancer";
 // - upload
 import { TinyAlias } from "./modules/upload/TinyAlias";
 
@@ -49,6 +50,7 @@ const loadOrder = [
     BlacklistEnhancer,
     InfiniteScroll,
     InstantSearch,
+    ThumbnailEnhancer,
 
     TinyAlias,
     SubscriptionManager,

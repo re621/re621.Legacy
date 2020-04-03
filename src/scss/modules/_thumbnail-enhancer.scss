@@ -1,0 +1,72 @@
+/* Thumbnail Enhancer Styles */
+
+// Crop Thumbnails
+div#posts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 150px);
+    justify-content: space-between;
+
+    &[data-thumb-crop=true] {
+        article.post-preview {
+            margin: 0 0 1rem;
+            height: auto;
+            width: 150px;
+        }
+
+        article.post-preview img {
+            width: 150px;
+            height: 125px;
+            object-fit: cover;
+        }
+    }
+
+    &[data-thumb-zoom=true] {
+
+        article.post-preview {
+
+            div.preview-box {
+                display: initial;
+            }
+
+            div.preview-extras {
+                display: none;
+                grid-template-columns: 1fr 1fr 1fr;
+
+                background: #00000099;
+                font-size: 0.25rem;
+                line-height: 0.5rem;
+            }
+
+            &:hover {
+                position: relative;
+                overflow: visible;
+
+                div.preview-box {
+                    transition: transform .05s;
+                    transform: translate(-50%, -50%) scale(2);
+
+                    position: absolute;
+                    left: 50%;
+                    top: 50%;
+                    z-index: 10;
+
+                    img {
+                        object-fit: unset;
+                        width: unset;
+                        height: unset;
+
+                    }
+                }
+
+                div.preview-extras {
+                    display: grid;
+                }
+
+                div.desc {
+                    display: none;
+                }
+            }
+        }
+
+    }
+}
