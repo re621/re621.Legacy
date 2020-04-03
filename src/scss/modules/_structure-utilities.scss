@@ -73,7 +73,7 @@ div#c-posts div#a-show,
 div#c-favorites div#a-index {
     display: grid;
     grid-template-columns: 12rem auto;
-    grid-column-gap: 1rem;
+    grid-column-gap: 1.25rem;
 
     aside#sidebar {
         width: unset;
@@ -124,9 +124,12 @@ div#c-favorites div#a-index {
 #tag-box>ul,
 #tag-list>ul {
 
-    li {
+    margin-right: -1rem;
 
+    li {
         display: flex;
+        line-height: 1rem;
+        margin-bottom: 1px;
 
         a.search-inc-tag,
         a.search-exl-tag {
@@ -140,17 +143,26 @@ div#c-favorites div#a-index {
             text-overflow: ellipsis;
         }
 
-        span.post-count {
-            margin: 0 0.5rem 0 0.5rem;
-            min-width: fit-content;
-        }
-
         div.tag-actions {
             min-width: fit-content;
             margin-left: auto;
+            line-height: 1rem;
 
-            a {
-                visibility: hidden;
+            span {
+                margin: 0 0.125rem;
+                min-width: fit-content;
+
+                &.tag-action-blacklist {
+                    display: none;
+                }
+
+                &.post-count {
+                    display: inline-block;
+                }
+
+                &.tag-action-subscribe a.subscribe {
+                    visibility: hidden;
+                }
             }
         }
 
@@ -161,12 +173,19 @@ div#c-favorites div#a-index {
                 max-width: unset;
             }
 
-            span.post-count {
-                display: none;
-            }
+            div.tag-actions span {
 
-            div.tag-actions a {
-                visibility: visible;
+                &.tag-action-blacklist {
+                    display: inline-block;
+                }
+
+                &.post-count {
+                    display: none;
+                }
+
+                &.tag-action-subscribe a.subscribe {
+                    visibility: visible;
+                }
             }
         }
 

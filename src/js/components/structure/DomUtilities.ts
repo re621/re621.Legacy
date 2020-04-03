@@ -52,21 +52,31 @@ export class DomUtilities {
             const $container = $(element);
 
             const $tagLink = $container.find("a.search-tag").first();
-            $container.find("a.wiki-link").insertBefore($tagLink);
 
-            const $countBox = $container.find(".post-count");
-            $countBox
-                .addClass("re621-post-count")
-                .attr("data-count-short", $countBox.text());
-
-            const $buttonBox = $("<div>")
+            // Container for various actions - subscribe, add to blacklist, etc.
+            const $actionsBox = $("<div>")
                 .addClass("tag-actions")
                 .attr("data-tag", $container.find("a.search-tag").text().replace(/ /g, "_"))
                 .appendTo($container);
+            $container.find("a.wiki-link").first().insertBefore($tagLink);
 
-            // This is an anchor element for the SubscriptionManager to attach its buttons to.
-            // No, I don't know why it does things the way it does. Bother Earlopain about it.
-            $("<span>").addClass("tag-action-dummy").appendTo($buttonBox);
+            //   ELEMENT   - METHOD  - STATE
+            // - blacklist - display - hover
+            // - tag count - display - normal
+            // - subscribe - visibility - always
+
+            // Blacklist button container
+            $("<span>").addClass("tag-action-blacklist").appendTo($actionsBox);
+
+            // Tag counter container
+            const $countBox = $container.find(".post-count").first();
+            $countBox
+                .addClass("re621-post-count")
+                .attr("data-count-short", $countBox.text())
+                .appendTo($actionsBox);
+
+            // Subscribe button container
+            $("<span>").addClass("tag-action-subscribe").appendTo($actionsBox);
         });
     }
 

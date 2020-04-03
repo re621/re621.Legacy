@@ -35,7 +35,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
     }
 
     public getButtonElements(): JQuery<HTMLElement> {
-        return $("#tag-box li span.tag-action-dummy, #tag-list li span.tag-action-dummy");
+        return $("#tag-box li span.tag-action-subscribe, #tag-list li span.tag-action-subscribe");
     }
 
     public createSubscribeButton(): JQuery<HTMLElement> {

@@ -101,7 +101,7 @@ export class BlacklistEnhancer extends RE6Module {
 
         //Add x next to tag names to toggle them from the blacklist
         if (this.fetchSettings("quickaddTags") === true && User.isLoggedIn()) {
-            $(".tag-actions").each((index, element) => {
+            $("div.tag-actions span.tag-action-blacklist").each((index, element) => {
                 const $container = $(element);
 
                 const toggleButton = $("<a>")
@@ -110,7 +110,7 @@ export class BlacklistEnhancer extends RE6Module {
                     .prependTo($container);
 
                 toggleButton.click(() => {
-                    this.toggleBlacklistTag($container.attr("data-tag"));
+                    this.toggleBlacklistTag($container.parent().attr("data-tag"));
                 });
             });
         }
