@@ -145,8 +145,6 @@ export class Post {
      * loading of the image, if it's not already appended
      */
     public hide(): void {
-        const $img = this.element.find("img");
-        $img.attr("src", "/images/blacklisted-preview.png");
         this.element.addClass("filtered");
     }
 
@@ -157,8 +155,6 @@ export class Post {
         if (this.matchesBlacklist()) {
             return;
         }
-        const $img = this.element.find("img");
-        $img.attr("src", this.previewURL);
         this.element.removeClass("filtered");
     }
 

@@ -1,4 +1,4 @@
-declare const Danbooru;
+import { Util } from "../structure/Util";
 
 const validKeys = [
     "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", ".", ",",
@@ -17,7 +17,7 @@ export class Hotkeys {
     private listeners: string[] = [];
 
     private constructor() {
-        Danbooru.Utility.disableShortcuts = true;
+        Util.Danbooru.Utility.disableShortcuts = true;
     }
 
     private static getInstance(): Hotkeys {

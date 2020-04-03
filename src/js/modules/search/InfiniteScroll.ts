@@ -7,6 +7,7 @@ import { InstantSearch } from "./InstantSearch";
 import { Post } from "../../components/data/Post";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
 import { ModuleController } from "../../components/ModuleController";
+import { Util } from "../../components/structure/Util";
 
 /**
  * Gets rid of the default pagination and instead appends new posts
@@ -84,6 +85,13 @@ export class InfiniteScroll extends RE6Module {
         this.isInProgress = true;
         this.$loadingIndicator.show();
         const posts: ApiPost[] = (await Api.getJson(`/posts.json?tags=${this.currentQuery}&page=${this.nextPageToGet}`)).posts;
+        if (posts.length === 0) {
+            this.pagesLeft = false;
+            this.$loadingIndicator.hide();
+            this.$nextButton.hide();
+            Util.Danbooru.notice("No more posts!");
+            return;
+        }
         Page.setQueryParameter("page", this.nextPageToGet.toString());
         this.addPageIndicator();
         for (const json of posts) {
@@ -102,7 +110,6 @@ export class InfiniteScroll extends RE6Module {
                 this.$postContainer.append(element);
             }
         }
-        this.pagesLeft = posts.length !== 0;
         this.isInProgress = false;
         this.$loadingIndicator.hide();
 

@@ -5,6 +5,7 @@
 export class Tabbed {
 
     private config: TabbedConfig;
+    private $container: JQuery<HTMLElement>;
 
     constructor(config: TabbedConfig) {
         this.config = config;
@@ -12,10 +13,10 @@ export class Tabbed {
 
     public create(): JQuery<HTMLElement> {
 
-        const $container = $("<div>");
-        const $tabList = $("<ul>").appendTo($container);
+        this.$container = $("<div>");
+        const $tabList = $("<ul>").appendTo(this.$container);
 
-        this.config.content.forEach(function (entry, index) {
+        this.config.content.forEach((entry, index) => {
             const $tab = $("<a>")
                 .attr("href", "#fragment-" + index)
                 .html(entry.name);
@@ -24,19 +25,28 @@ export class Tabbed {
             $("<div>")
                 .attr("id", "fragment-" + index)
                 .append(entry.page)
-                .appendTo($container);
+                .appendTo(this.$container);
         });
 
-        $container.tabs({
+        this.$container.tabs({
             classes: {
                 "ui-tabs": "color-text",
                 "ui-tabs-tab": "color-text",
             },
         });
 
-        $container.tabs("widget").find('.ui-tabs-nav li').off('keydown');
+        this.$container.tabs("widget").find('.ui-tabs-nav li').off('keydown');
 
-        return $container;
+        return this.$container;
+    }
+
+    /**
+     * Replaces the content of a tab by index with the passed element
+     * @param index Tab index to replace the content from
+     * @param $element Element which will replace the current content
+     */
+    public replace(index: number, $element: JQuery<HTMLElement>): void {
+        this.$container.find("#fragment-" + index).children().replaceWith($element);
     }
 
 }

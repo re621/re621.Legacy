@@ -10,6 +10,7 @@
 // @downloadURL  https://github.com/re621/re621/releases/latest/download/script.user.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js#sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=
 // @require      https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js#sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=
+// @require      https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.2.0/lazysizes.min.js
 // @require      https://cdn.jsdelivr.net/npm/jquery.hotkeys@0.1.0/jquery.hotkeys.min.js
 // @resource     re621_styles https://github.com/re621/re621/releases/download/%VERSION%/style.min.css
 // @resource     re621_dnp https://github.com/re621/re621/releases/download/%VERSION%/avoid-posting.json
@@ -19,6 +20,7 @@
 // @grant        GM_addStyle
 // @grant        GM_download
 // @grant        GM_xmlhttpRequest
+// @icon64       https://re621.github.io/images/logo.png
 // @connect      api.github.com
 // ==/UserScript==
 

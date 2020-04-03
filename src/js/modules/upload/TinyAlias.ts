@@ -5,8 +5,6 @@ import { ApiTag } from "../../components/api/responses/ApiTag";
 import { Modal } from "../../components/structure/Modal";
 import { AvoidPosting } from "../../components/data/AvoidPosting";
 
-declare const Danbooru;
-
 export class TinyAlias extends RE6Module {
 
     private $textarea: JQuery<HTMLElement>;

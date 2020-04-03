@@ -1,10 +1,14 @@
+import { Dabooru } from "../api/Danbooru";
+
 declare const GM_xmlhttpRequest;
+declare const Danbooru;
 
 /**
  * Common utilities used in other modules
  */
 export class Util {
 
+    public static Danbooru: Dabooru = Danbooru;
 
     /**
      * Converts time from absolute format to relative (i.e. "5 minutes ago")
