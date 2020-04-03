@@ -8,7 +8,7 @@ declare const Danbooru;
 
 const IMAGE_SIZES = [
     { value: "sample", name: "Sample" },
-    { value: "fit-vertical", name: "Fit Vertically" },
+    { value: "fit-vertical", name: "Fill Screen" },
     { value: "fit-horizontal", name: "Fit Horizontally" },
     { value: "original", name: "Original" },
 ];
