@@ -27,9 +27,13 @@
     ],
     "overrides": [
         {
-            "files": "src/js/components/api/responses/*.ts",
+            "files": [
+                "src/js/components/api/responses/*.ts",
+                "src/js/components/api/Danbooru.ts"
+            ],
             "rules": {
-                "camelcase": "off"
+                "camelcase": "off",
+                "@typescript-eslint/camelcase": "off"
             }
         }
     ],
@@ -41,8 +45,10 @@
             "error",
             {
                 "allow": [
-                    "^GM_"
-                ]
+                    "^GM_",
+                    "^Danbooru"
+                ],
+                "properties": "never"
             }
         ],
         "@typescript-eslint/consistent-type-assertions": "error",

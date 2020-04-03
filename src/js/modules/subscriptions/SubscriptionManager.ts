@@ -6,8 +6,6 @@ import { Util } from "../../components/structure/Util";
 import { ModuleController } from "../../components/ModuleController";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 
-declare const Danbooru;
-
 export class SubscriptionManager extends RE6Module {
 
     //should notifications be cleared once seen?
@@ -287,11 +285,11 @@ export class SubscriptionManager extends RE6Module {
                     if (currentlySubbed) {
                         delete cache[timestamps[i]][updateTimestamp];
                         delete data[update.id];
-                        Danbooru.notice("Successfully unsubbed!");
+                        Util.Danbooru.notice("Successfully unsubbed!");
                     } else {
                         cache[timestamps[i]][updateTimestamp] = update;
                         data[update.id] = {};
-                        Danbooru.notice("Successfully resubbed!");
+                        Util.Danbooru.notice("Successfully resubbed!");
                     }
                     sub.instance.pushSettings("cache", cache);
                     sub.instance.pushSettings("data", data);

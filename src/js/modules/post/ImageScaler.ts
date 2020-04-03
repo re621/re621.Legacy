@@ -3,8 +3,7 @@ import { Post } from "../../components/data/Post";
 import { Form } from "../../components/structure/Form";
 import { PageDefintion } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
-
-declare const Danbooru;
+import { Util } from "../../components/structure/Util";
 
 const IMAGE_SIZES = [
     { value: "sample", name: "Sample" },
@@ -118,7 +117,7 @@ export class ImageScaler extends RE6Module {
         this.image.parent().addClass("loading");
 
         this.image.on("load", () => {
-            Danbooru.Note.Box.scale_all();
+            Util.Danbooru.Note.Box.scale_all();
             this.image.parent().removeClass("loading");
         });
 
@@ -149,7 +148,7 @@ export class ImageScaler extends RE6Module {
             }
         }
 
-        Danbooru.Note.Box.scale_all();
+        Util.Danbooru.Note.Box.scale_all();
     }
 
 }
