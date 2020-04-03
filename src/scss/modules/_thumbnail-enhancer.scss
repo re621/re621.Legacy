@@ -30,11 +30,19 @@ div#posts-container {
 
             div.preview-extras {
                 display: none;
-                grid-template-columns: 1fr 1fr 1fr;
 
                 background: #00000099;
                 font-size: 0.25rem;
                 line-height: 0.5rem;
+
+                width: stretch;
+                position: absolute;
+                overflow-wrap: break-word;
+
+                span {
+                    margin: 0 0.25rem;
+                    white-space: nowrap;
+                }
             }
 
             &:hover {
@@ -59,7 +67,7 @@ div#posts-container {
                 }
 
                 div.preview-extras {
-                    display: grid;
+                    display: block;
                 }
 
                 div.desc {
