@@ -5,6 +5,7 @@ import { Subscription } from "./Subscription";
 import { Util } from "../../components/structure/Util";
 import { ModuleController } from "../../components/ModuleController";
 import { DomUtilities } from "../../components/structure/DomUtilities";
+import { Form } from "../../components/structure/Form";
 
 export class SubscriptionManager extends RE6Module {
 
@@ -15,7 +16,8 @@ export class SubscriptionManager extends RE6Module {
     private tabNotificationsCount = 0;
     private subscribers = new Map<number, SubscriptionElement>();
 
-    private openSubsButton: JQuery<HTMLElement>;
+    private $openSubsButton: JQuery<HTMLElement>;
+    private $subsTabs: Tabbed;
 
     /**
      * Creates the module's structure.  
@@ -25,7 +27,7 @@ export class SubscriptionManager extends RE6Module {
         if (!this.canInitialize()) return;
         super.create();
         // Create a button in the header
-        this.openSubsButton = DomUtilities.addSettingsButton({
+        this.$openSubsButton = DomUtilities.addSettingsButton({
             name: `<i class="fas fa-bell"></i>`,
         });
 
@@ -36,27 +38,35 @@ export class SubscriptionManager extends RE6Module {
             });
         }
 
-        const $subsTabs = new Tabbed({
+        const lastUpdate = this.fetchSettings("lastUpdate");
+
+        const infoPage = this.getInfoPage(lastUpdate);
+        content.push({
+            name: "Info", page: infoPage.get()
+        });
+
+        this.$subsTabs = new Tabbed({
             name: "settings-tabs",
             content: content
         });
 
+        this.handleInfoPage(infoPage);
+
         // Create the modal
         const modal = new Modal({
             title: "Subscriptions",
-            triggers: [{ element: this.openSubsButton }],
+            triggers: [{ element: this.$openSubsButton }],
             escapable: false,
             reserveHeight: true,
-            content: $subsTabs.create(),
+            content: this.$subsTabs.create(),
             position: { my: "right top", at: "right top" }
         });
 
         const nowFake = this.fetchSettings("now");
         const now = nowFake !== undefined ? nowFake : new Date().getTime();
 
-        this.openSubsButton.attr("data-loading", "true");
+        this.$openSubsButton.attr("data-loading", "true");
 
-        const lastUpdate = this.fetchSettings("lastUpdate");
         const shouldUpdate = now - lastUpdate - (this.updateInterval * 1000) >= 0;
         if (shouldUpdate) {
             this.pushSettings("lastUpdate", now);
@@ -73,7 +83,7 @@ export class SubscriptionManager extends RE6Module {
             await this.initSubscriber(subElements, shouldUpdate, lastUpdate, now);
         }
 
-        this.openSubsButton.attr("data-loading", "false");
+        this.$openSubsButton.attr("data-loading", "false");
         this.updateNotificationSymbol(0);
 
         //clear the notifications if the user opened the tab
@@ -89,9 +99,71 @@ export class SubscriptionManager extends RE6Module {
         });
     }
 
+    private getInfoPage(lastUpdate: number): Form {
+        const form = new Form(
+            {
+                id: "settings-module-status",
+                columns: 2,
+                parent: "div#modal-container",
+            },
+            [
+                {
+                    id: "features-title",
+                    type: "div",
+                    value: "<h3>Stats</h3>",
+                    stretch: "full"
+                },
+
+                {
+                    id: "subscriptions-lastupdate-label",
+                    type: "div",
+                    value: "Last Update: " + Util.timeAgo(lastUpdate),
+                    stretch: "mid"
+                },
+                {
+                    id: "subscriptions-nextupdate-label",
+                    type: "div",
+                    value: "Next Update: " + Util.timeAgo(lastUpdate + this.updateInterval * 1000),
+                    stretch: "mid"
+                },
+                {
+                    id: "subscriptions-triggerupdate",
+                    type: "button",
+                    value: "Manual update",
+                    stretch: "mid"
+                }
+            ]
+        );
+        return form;
+    }
+
+    private handleInfoPage(form: Form): void {
+        const inputList = form.getInputList();
+        let allowUpdate = true;
+        inputList.get("subscriptions-triggerupdate").on("click", async () => {
+            //Only allow one manuall update per page
+            if (!allowUpdate) {
+                Util.Danbooru.notice("You already updated, please reload to update again");
+                return;
+            }
+            allowUpdate = false;
+            const now = new Date().getTime();
+
+            //refresh last/next update label
+            inputList.get("subscriptions-lastupdate-label").html("Last Update: " + Util.timeAgo(now));
+            inputList.get("subscriptions-nextupdate-label").html("Next Update: " + Util.timeAgo(now + this.updateInterval * 1000))
+            for (const entry of this.subscribers.entries()) {
+                entry[1].content = $("<div>").addClass("subscriptions-list");
+                await this.initSubscriber(entry[1], true, this.fetchSettings("lastUpdate", true), now);
+                this.$subsTabs.replace(entry[0], entry[1].content);
+            }
+            this.pushSettings("lastUpdate", now);
+        });
+    }
+
     public updateNotificationSymbol(difference: number): void {
         this.tabNotificationsCount += difference;
-        this.openSubsButton.attr("data-has-notifications", (this.tabNotificationsCount > 0).toString());
+        this.$openSubsButton.attr("data-has-notifications", (this.tabNotificationsCount > 0).toString());
     }
 
     /**
@@ -371,6 +443,9 @@ export class SubscriptionManager extends RE6Module {
 
     protected removeUnopened(index: number): void {
         const sub = this.subscribers.get(index);
+        if (sub === undefined) {
+            return;
+        }
         sub.instance.pushSettings("lastSeen", new Date().getTime());
         if (sub.tab.attr("data-has-notifications") === "true") {
             this.updateNotificationSymbol(-1);
