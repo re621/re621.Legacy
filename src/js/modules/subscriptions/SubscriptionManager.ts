@@ -294,7 +294,8 @@ export class SubscriptionManager extends RE6Module {
             const $a = $("<a>")
                 .attr("href", definition.imageHref(data));
             $("<img>")
-                .attr("src", definition.imageSrc(data))
+                .attr("data-src", definition.imageSrc(data))
+                .addClass("lazyload")
                 .attr("title", definition.updateText(data) + "\n" + timeAgo + "\n" + timeString)
                 .appendTo($a);
             $a.appendTo($imageDiv);

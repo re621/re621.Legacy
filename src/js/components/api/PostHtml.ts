@@ -33,8 +33,9 @@ export class PostHtml {
         const $picture = $("<picture>");
         //TODO title status
         $picture.append($("<img>").
-            attr("class", "has-cropped-false").
-            attr("src", json.preview.url).
+            addClass("has-cropped-false").
+            addClass("lazyload").
+            attr("data-src", json.preview.url).
             attr("title", `Rating: ${json.rating}\nID: ${json.id}\nDate: ${json.created_at}\nScore: ${json.score.total}\n\n ${allTags}`).
             attr("alt", allTags));
 
