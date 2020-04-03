@@ -20,6 +20,7 @@
 // @grant        GM_addStyle
 // @grant        GM_download
 // @grant        GM_xmlhttpRequest
+// @icon64       https://re621.github.io/images/logo.png
 // @connect      api.github.com
 // ==/UserScript==
 
