@@ -105,11 +105,16 @@ export class BlacklistEnhancer extends RE6Module {
                 const $container = $(element);
 
                 const toggleButton = $("<a>")
+                    .attr({
+                        "href": "#",
+                        "title": "Blacklist Tag",
+                    })
                     .addClass("blacklist-tag-toggle")
                     .html(`<i class="fas fa-times"></i>`)
                     .prependTo($container);
 
-                toggleButton.click(() => {
+                toggleButton.click((event) => {
+                    event.preventDefault();
                     this.toggleBlacklistTag($container.parent().attr("data-tag"));
                 });
             });

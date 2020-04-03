@@ -40,14 +40,20 @@ export class TagSubscriptions extends RE6Module implements Subscription {
 
     public createSubscribeButton(): JQuery<HTMLElement> {
         return $("<a>")
-            .attr("href", "#")
+            .attr({
+                "href": "#",
+                "title": "Subscribe",
+            })
             .addClass("tag-subscription-button subscribe")
             .html(`<i class="far fa-heart"></i>`);
     }
 
     public createUnsubscribeButton(): JQuery<HTMLElement> {
         return $("<a>")
-            .attr("href", "#")
+            .attr({
+                "href": "#",
+                "title": "Unsubscribe",
+            })
             .addClass("tag-subscription-button unsubscribe")
             .html(`<i class="fas fa-heart"></i>`);
     }
