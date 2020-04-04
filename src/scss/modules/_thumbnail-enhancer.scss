@@ -34,43 +34,48 @@ div#posts-container {
                     left: -5px;
                     opacity: 0.9;
                 }
-            }
 
-            div.preview-load {
-                position: absolute;
-                left: 0;
-                right: 0;
-                top: 0;
-                bottom: 0;
+                div.preview-load {
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    top: 0;
+                    bottom: 0;
 
-                display: none;
-                justify-content: center;
-                align-items: center;
+                    display: none;
+                    justify-content: center;
+                    align-items: center;
+                }
 
-                &.loading {
+                &.loading div.preview-load {
                     display: flex;
                 }
-            }
 
-            div.preview-extras {
-                display: none;
+                div.preview-extras {
+                    display: none;
 
-                background: #00000099;
-                font-size: 0.25rem;
-                line-height: 0.5rem;
+                    background: #00000099;
+                    font-size: 0.8rem;
+                    line-height: 1rem;
+                    font-weight: bold;
 
-                width: stretch;
-                position: absolute;
-                overflow-wrap: break-word;
-                cursor: default;
+                    width: stretch;
+                    position: absolute;
+                    overflow-wrap: break-word;
+                    cursor: default;
 
-                span {
-                    margin: 0 0.25rem;
-                    white-space: nowrap;
+                    span {
+                        margin: 0 0.25rem;
+                        white-space: nowrap;
 
-                    &>span {
-                        cursor: pointer;
+                        &>span {
+                            cursor: pointer;
+                        }
                     }
+                }
+
+                &.loading div.preview-extras {
+                    display: none;
                 }
             }
 
@@ -79,8 +84,7 @@ div#posts-container {
                 overflow: visible;
 
                 a.preview-box {
-                    transition: scale .05s;
-                    transform: translate(-50%, -50%) scale(2);
+                    transform: translate(-50%, -50%);
 
                     position: absolute;
                     left: 50%;
@@ -96,11 +100,13 @@ div#posts-container {
                         width: unset;
                         height: unset;
 
+                        max-width: 350px;
+                        max-height: 350px;
                     }
-                }
 
-                div.preview-extras {
-                    display: block;
+                    div.preview-extras {
+                        display: block;
+                    }
                 }
 
                 div.desc {

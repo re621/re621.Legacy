@@ -48,7 +48,7 @@ export class ThumbnailEnhancer extends RE6Module {
         const performance = this.fetchSettings("performance");
         this.postContainer.attr("data-thumb-zoom", "true");
 
-        $("article.post-preview").each((index, element) => {
+        $("#posts-container article.post-preview").each((index, element) => {
             ThumbnailEnhancer.modifyThumbnail($(element), performance);
         });
     }
@@ -59,14 +59,13 @@ export class ThumbnailEnhancer extends RE6Module {
             $img = $article.find("img"),
             $imgData = $img.attr("title").split("\n").slice(0, -2);
 
-        const $loadScreen = $("<div>")
+        $("<div>")
             .addClass("preview-load")
             .html(`<i class="fas fa-circle-notch fa-2x fa-spin"></i>`)
             .appendTo($link);
 
         const $extrasBox = $("<div>").addClass("preview-extras").appendTo($link);
         $("<span>").html(parseRating($imgData[0])).appendTo($extrasBox);
-        $("<span>").html(parseStatus($imgData[3])).appendTo($extrasBox);
         $("<span>").html(parseDate($imgData[2])).appendTo($extrasBox);
 
         $img.attr({
@@ -74,22 +73,22 @@ export class ThumbnailEnhancer extends RE6Module {
             "title": "",
         });
 
-        if ($article.attr("data-file-ext") === "swf") return;
+        if ($article.attr("data-file-ext") === "swf" || $article.attr("data-flags") === "deleted") return;
 
         if (performance) {
             $article.on("mouseenter", () => {
                 if ($source.attr("srcset") == $article.attr("data-large-file-url")) return;
 
-                $loadScreen.addClass("loading");
+                $link.addClass("loading");
                 $img.attr("src", $article.attr("data-large-file-url"));
                 $source.attr("srcset", $article.attr("data-large-file-url"));
-                $img.on("load", () => { $loadScreen.removeClass("loading"); });
+                $img.on("load", () => { $link.removeClass("loading"); });
             });
         } else {
-            $loadScreen.addClass("loading");
+            $link.addClass("loading");
             $img.attr("src", $article.attr("data-large-file-url"));
             $source.attr("srcset", $article.attr("data-large-file-url"));
-            $img.on("load", () => { $loadScreen.removeClass("loading"); });
+            $img.on("load", () => { $link.removeClass("loading"); });
         }
 
         function parseRating(input: string): string {
@@ -99,11 +98,6 @@ export class ThumbnailEnhancer extends RE6Module {
                 case "Rating: s": return "Safe";
                 default: return "Unknown";
             }
-        }
-
-        function parseStatus(input: string): string {
-            input = input.split(": ")[1];
-            return input.charAt(0).toUpperCase() + input.slice(1);
         }
 
         function parseDate(input: string): string {
