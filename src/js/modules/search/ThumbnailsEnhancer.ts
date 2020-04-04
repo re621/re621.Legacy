@@ -16,6 +16,8 @@ export class ThumbnailEnhancer extends RE6Module {
 
             crop: true,
             zoom: true,
+
+            performance: true,
         };
     }
 
@@ -43,31 +45,50 @@ export class ThumbnailEnhancer extends RE6Module {
     public toggleHoverZoom(state = true): void {
         if (!state) return;
 
+        const performance = this.fetchSettings("performance");
         this.postContainer.attr("data-thumb-zoom", "true");
 
         $("article.post-preview").each((index, element) => {
-            const $article = $(element),
-                $source = $article.find("source[media='(min-width: 800px)']"),
-                $img = $article.find("img"),
-                $imgData = $img.attr("title").split("\n").slice(0, -2);
-
-            console.log($imgData);
-
-            const $previewBox = $("<div>").addClass("preview-box").prependTo($article);
-            $article.find("a").first().appendTo($previewBox);
-
-            const $extrasBox = $("<div>").addClass("preview-extras").appendTo($previewBox);
-            $("<span>").html(parseRating($imgData[0])).appendTo($extrasBox);
-            $("<span>").html(parseStatus($imgData[3])).appendTo($extrasBox);
-            $("<span>").html(parseDate($imgData[2])).appendTo($extrasBox);
-
-            $img.attr({
-                "alt": "",
-                "title": "",
-            });
-
-            $source.attr("srcset", $article.attr("data-large-file-url"));
+            ThumbnailEnhancer.modifyThumbnail($(element), performance);
         });
+    }
+
+    public static modifyThumbnail($article: JQuery<HTMLElement>, performance = true): void {
+        const $source = $article.find("source[media='(min-width: 800px)']"),
+            $link = $article.find("a").first().addClass("preview-box"),
+            $img = $article.find("img"),
+            $imgData = $img.attr("title").split("\n").slice(0, -2);
+
+        const $loadScreen = $("<div>")
+            .addClass("preview-load")
+            .html(`<i class="fas fa-circle-notch fa-2x fa-spin"></i>`)
+            .appendTo($link);
+
+        const $extrasBox = $("<div>").addClass("preview-extras").appendTo($link);
+        $("<span>").html(parseRating($imgData[0])).appendTo($extrasBox);
+        $("<span>").html(parseStatus($imgData[3])).appendTo($extrasBox);
+        $("<span>").html(parseDate($imgData[2])).appendTo($extrasBox);
+
+        $img.attr({
+            "alt": "",
+            "title": "",
+        });
+
+        if (performance) {
+            $article.on("mouseenter", () => {
+                if ($source.attr("srcset") == $article.attr("data-large-file-url")) return;
+
+                $loadScreen.addClass("loading");
+                $img.attr("src", $article.attr("data-large-file-url"));
+                $source.attr("srcset", $article.attr("data-large-file-url"));
+                $img.on("load", () => { $loadScreen.removeClass("loading"); });
+            });
+        } else {
+            $loadScreen.addClass("loading");
+            $img.attr("src", $article.attr("data-large-file-url"));
+            $source.attr("srcset", $article.attr("data-large-file-url"));
+            $img.on("load", () => { $loadScreen.removeClass("loading"); });
+        }
 
         function parseRating(input: string): string {
             switch (input) {

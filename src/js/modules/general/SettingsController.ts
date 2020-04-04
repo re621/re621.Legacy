@@ -231,7 +231,7 @@ export class SettingsController extends RE6Module {
                 {
                     id: "thumb-crop-text",
                     type: "div",
-                    value: "Cut down the thumbnails to fit a 150x150 square, for a more uniform look",
+                    value: "Cut down the thumbnails to fit a 150x150 square",
                     stretch: "mid",
                 },
                 {
@@ -241,9 +241,21 @@ export class SettingsController extends RE6Module {
                     label: "Enhanced Previews",
                 },
                 {
-                    id: "thumb-zoom",
+                    id: "thumb-zoom-text",
                     type: "div",
-                    value: "Improves thumbnail previews. Not recommended for users with a slow commection. Requires a page reload.",
+                    value: "Improves thumbnail previews. Requires a page reload",
+                    stretch: "mid",
+                },
+                {
+                    id: "thumb-perf",
+                    type: "checkbox",
+                    value: thumbnailEnhancer.fetchSettings("performance"),
+                    label: "Performance Mode",
+                },
+                {
+                    id: "thumb-perf-text",
+                    type: "div",
+                    value: "Only load bigger previews on hover. Requieres a page reload",
                     stretch: "mid",
                 },
                 {
@@ -387,7 +399,11 @@ export class SettingsController extends RE6Module {
         });
 
         postsPageInput.get("thumb-zoom").on("re621:form:input", (event, data) => {
-            thumbnailEnhancer.pushSettings("upscale", data);
+            thumbnailEnhancer.pushSettings("zoom", data);
+        });
+
+        postsPageInput.get("thumb-perf").on("re621:form:input", (event, data) => {
+            thumbnailEnhancer.pushSettings("performance", data);
         });
 
         // Actions
