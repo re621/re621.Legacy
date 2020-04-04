@@ -64,9 +64,9 @@ export class ThumbnailEnhancer extends RE6Module {
 
         /* Create the structure */
         const $link = $article.find("a").first().addClass("preview-box"),
+            postID = parseInt($article.attr("data-id")),
             $img = $article.find("img"),
             $imgData = $img.attr("title").split("\n").slice(0, -2);     // Replace if the post date is added for the data-attributes.
-
 
         $article.find("source").remove();                               // If we ever have to worry about mobile users, this will need to be addressed.
         $img.removeAttr("title").attr("alt", "#" + $article.attr("data-id"));
@@ -78,9 +78,43 @@ export class ThumbnailEnhancer extends RE6Module {
             .appendTo($link);
 
         // Description box that only shows up on hover
-        const $extrasBox = $("<div>").addClass("preview-extras").appendTo($link);
+        const $extrasBox = $("<div>")
+            .addClass("bg-highlight preview-extras")
+            .appendTo($link);
+        $("<span>").html($imgData[4]).appendTo($extrasBox);
         $("<span>").html(parseRating($imgData[0])).appendTo($extrasBox);
         $("<span>").html(parseDate($imgData[2])).appendTo($extrasBox);
+
+        // Voting Buttons
+        const $voteBox = $("<div>")
+            .addClass("preview-voting")
+            .appendTo($link);
+        const $voteUp = $("<button>")        // Upvote
+            .attr("href", "#")
+            .html(`<i class="far fa-thumbs-up"></i>`)
+            .addClass("button score-neutral voteButton post-vote-up-" + postID)
+            .appendTo($voteBox);
+        const $voteDown = $("<button>")        // Downvote
+            .attr("href", "#")
+            .html(`<i class="far fa-thumbs-down"></i>`)
+            .addClass("button score-neutral voteButton post-vote-down-" + postID)
+            .appendTo($voteBox);
+        /*
+        $("<button>")        // Favorite
+            .attr("href", "#")
+            .html(`<i class="far fa-star"></i>`)
+            .addClass("button score-neutral voteButton")
+            .appendTo($voteBox);
+        */
+
+        $voteUp.click((event) => {
+            event.preventDefault();
+            Util.Danbooru.Post.vote(postID, 1);
+        });
+        $voteDown.click((event) => {
+            event.preventDefault();
+            Util.Danbooru.Post.vote(postID, -1);
+        });
 
 
         /* Handle double-click */
@@ -91,10 +125,12 @@ export class ThumbnailEnhancer extends RE6Module {
         //Make it so that the doubleclick prevents the normal click event
         $link.on("click", e => {
             //ignore mouse clicks which are not left clicks
-            if (e.button !== 0) {
-                return;
-            }
+            if (e.button !== 0) { return; }
             e.preventDefault();
+
+            console.log($(event.target));
+            if ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton")) return;
+
             dbclickTimer = window.setTimeout(() => {
                 if (!prevent) {
                     location.href = $link.attr("href");
