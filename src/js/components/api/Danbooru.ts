@@ -1,4 +1,6 @@
-export interface Dabooru {
+/* Type definitions for the Danbooru Javascript methods */
+
+export interface Danbooru {
     notice(input: string): void;
     error(input: string): void;
     Blacklist: DanbooruBlacklist;

@@ -1,4 +1,4 @@
-import { Dabooru } from "../api/Danbooru";
+import { Danbooru } from "../api/Danbooru";
 
 declare const GM_xmlhttpRequest;
 declare const Danbooru;
@@ -8,7 +8,7 @@ declare const Danbooru;
  */
 export class Util {
 
-    public static Danbooru: Dabooru = Danbooru;
+    public static Danbooru: Danbooru = Danbooru;
 
     /**
      * Converts time from absolute format to relative (i.e. "5 minutes ago")
@@ -84,7 +84,7 @@ export class Util {
             GM_xmlhttpRequest({
                 method: "GET",
                 url: url,
-                onload: res => { resolve(res.responseText) }
+                onload: res => { resolve(res.responseText); }
             });
         });
     }
