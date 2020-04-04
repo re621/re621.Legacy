@@ -587,11 +587,9 @@ class FormattingHelper {
             };
 
             content = content.replace(/%selection%/g, currentText.substring(position.start, position.end));
-            const textEl = $("<p>").html(currentText.substring(0, position.start) + content + currentText.substring(position.end, currentText.length));
 
+            this.$textarea.val(currentText.substring(0, position.start) + content + currentText.substring(position.end, currentText.length));
             this.$textarea.focus();
-            document.execCommand('selectAll', false);
-            document.execCommand('insertHTML', false, textEl.html());
 
             this.$textarea.prop("selectionStart", position.start);
             this.$textarea.prop("selectionEnd", position.start + content.length);
