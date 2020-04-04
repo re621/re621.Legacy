@@ -101,7 +101,7 @@ export class ThumbnailEnhancer extends RE6Module {
                         "data-src": sampleURL
                     });
                     $img.on("load", () => { $link.removeClass("loading"); });
-                }, 100);
+                }, 200);
             });
             $article.on("mouseleave", () => {
                 window.clearTimeout(timer);
