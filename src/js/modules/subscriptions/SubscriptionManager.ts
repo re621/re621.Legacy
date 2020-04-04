@@ -160,6 +160,9 @@ export class SubscriptionManager extends RE6Module {
     }
 
     private getInfoPage(lastUpdate: number): Form {
+        const updateInProgress = this.fetchSettings("updateInProgress");
+        const heartbeat = this.fetchSettings("heartbeat", true);
+
         const form = new Form(
             {
                 id: "settings-module-status",
@@ -183,7 +186,7 @@ export class SubscriptionManager extends RE6Module {
                 {
                     id: "subscriptions-nextupdate-label",
                     type: "div",
-                    value: "Next Update: " + Util.timeAgo(lastUpdate + this.updateInterval * 1000),
+                    value: "Next Update: " + this.getNextUpdateText(updateInProgress, lastUpdate, heartbeat),
                     stretch: "mid"
                 },
                 {
@@ -223,10 +226,18 @@ export class SubscriptionManager extends RE6Module {
             }
             //refresh last/next update label
             inputList.get("subscriptions-lastupdate-label").html("Last Update: " + Util.timeAgo(now));
-            inputList.get("subscriptions-nextupdate-label").html("Next Update: " + Util.timeAgo(now + this.updateInterval * 1000))
+            inputList.get("subscriptions-nextupdate-label").html("Next Update: " + this.getNextUpdateText(updateInProgress, now, heartbeat));
 
             this.stopUpdate(hearbeatTimer);
         });
+    }
+
+    private getNextUpdateText(updateInProgress: boolean, lastUpdate: number, heartbeat: number): string {
+        if (updateInProgress && !this.heartbeatCheck(new Date().getTime(), heartbeat, updateInProgress)) {
+            return "In Progress. Check back in a bit";
+        } else {
+            return Util.timeAgo(lastUpdate + this.updateInterval * 1000);
+        }
     }
 
     public updateNotificationSymbol(difference: number): void {
