@@ -95,11 +95,17 @@ export class InfiniteScroll extends RE6Module {
         }
         Page.setQueryParameter("page", this.nextPageToGet.toString());
         this.addPageIndicator();
-        const performanceMode = ModuleController.get(ThumbnailEnhancer).fetchSettings("performance");
+
+        const thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer),
+            enhanceThumbs = thumbnailEnhancer.fetchSettings("zoom"),
+            performanceMode = thumbnailEnhancer.fetchSettings("performance");
 
         for (const json of posts) {
             const element = PostHtml.create(json);
-            ThumbnailEnhancer.modifyThumbnail(element, performanceMode);
+
+            if (enhanceThumbs)
+                ThumbnailEnhancer.modifyThumbnail(element, performanceMode);
+
             const post = new Post(element);
             //only append the post if it has image data
             //if it does not it is part of the anon blacklist
