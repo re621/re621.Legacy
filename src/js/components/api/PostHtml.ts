@@ -5,11 +5,9 @@ export class PostHtml {
     public static create(json: ApiPost): JQuery<HTMLElement> {
         //data-has-sound
         //data-flags
-        //data-uploader
         const tags = json.tags;
-        //this must be possible in another way
-        const allTags = tags.artist.concat(tags.character, tags.copyright, tags.general,
-            tags.invalid, tags.lore, tags.meta, tags.species).join(" ");
+
+        const allTags = [...tags.artist, ...tags.character, ...tags.copyright, ...tags.general, ...tags.invalid, ...tags.lore, ...tags.meta, ...tags.species].join(" ");
         const $article = $("<article>")
             .attr({
                 "id": "post_" + json.id,
@@ -23,54 +21,57 @@ export class PostHtml {
                 "data-large-file-url": json.sample.url,       // yes, even though the name has large in it, sample is correct here
                 "data-preview-file-url": json.preview.url,
                 "data-uploader": json.uploader_id,
-            });
+            })
+            .addClass(this.getArticleClasses(json).join(" "));
 
-        for (const className of this.getArticleClasses(json)) {
-            $article.addClass(className);
-        }
-        const $href = $("<a>").
-            attr("href", "/posts/" + json.id);
-        const $picture = $("<picture>");
-        //TODO title status
-        $picture.append($("<img>").
-            addClass("has-cropped-false").
-            addClass("lazyload").
-            attr("data-src", json.preview.url).
-            attr("title", `Rating: ${json.rating}\nID: ${json.id}\nDate: ${json.created_at}\nScore: ${json.score.total}\n\n ${allTags}`).
-            attr("alt", allTags));
+        const $href = $("<a>").attr("href", "/posts/" + json.id).appendTo($article);
+        const $picture = $("<picture>").appendTo($href);
 
-        $href.append($picture);
-        const $desc = $("<div>").
-            attr("class", "desc");
-        const $postScore = $("<div>").attr("id", "post-score-" + json.id).attr("class", "post-score");
+        $("<img>")
+            .addClass("has-cropped-false")
+            .addClass("lazyload")
+            .attr("data-src", json.preview.url)
+            .attr("title", `Rating: ${json.rating}\nID: ${json.id}\nDate: ${json.created_at}\nScore: ${json.score.total}\n\n ${allTags}`)
+            .attr("alt", allTags)
+            .appendTo($picture);
 
-        //Score
+        const $desc = $("<div>")
+            .attr("class", "desc")
+            .appendTo($article);
+
+        const $postScore = $("<div>")
+            .attr("id", "post-score-" + json.id)
+            .addClass("post-score")
+            .appendTo($desc);
+
+        // Score
         const scoreInfo = this.getScoreInfo(json);
-        $postScore.append($("<span>").
-            addClass("post-score-score ").
-            addClass(scoreInfo.class).
-            text(scoreInfo.modifier + json.score.total));
-        //Favs
-        $postScore.append($("<span>").
-            addClass("post-score-faves").
-            text("\u2665" + json.fav_count));
-        //Comments
-        $postScore.append($("<span>").
-            addClass("post-score-comments").
-            text("C" + json.comment_count));
-        //Rating
-        $postScore.append($("<span>").
-            addClass("post-score-rating").
-            text(json.rating.toUpperCase()));
-        //Extra
-        $postScore.append($("<span>").
-            addClass("post-score-extra").
-            text(this.getExtra(json)));
+        $("<span>")
+            .addClass("post-score-score ")
+            .addClass(scoreInfo.class)
+            .text(scoreInfo.modifier + json.score.total)
+            .appendTo($postScore);
+        // Favs
+        $("<span>")
+            .addClass("post-score-faves")
+            .text("\u2665" + json.fav_count)
+            .appendTo($postScore);
+        // Comments
+        $("<span>")
+            .addClass("post-score-comments")
+            .text("C" + json.comment_count)
+            .appendTo($postScore);
+        // Rating
+        $("<span>")
+            .addClass("post-score-rating")
+            .text(json.rating.toUpperCase())
+            .appendTo($postScore);
+        // Extra
+        $("<span>")
+            .addClass("post-score-extra")
+            .text(this.getExtra(json))
+            .appendTo($postScore);
 
-        //Append to main container
-        $desc.append($postScore);
-        $article.append($href);
-        $article.append($desc);
         return $article;
     }
 

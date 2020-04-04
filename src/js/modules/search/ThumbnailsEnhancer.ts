@@ -53,41 +53,46 @@ export class ThumbnailEnhancer extends RE6Module {
         });
     }
 
+    /**
+     * Converts the thumbnail into an enhancer-ready format
+     * @param $article JQuery element `article.post-preview`
+     * @param performance If false, loads bigger images immediately. Otherwise, waits for hover.
+     */
     public static modifyThumbnail($article: JQuery<HTMLElement>, performance = true): void {
-        const $source = $article.find("source[media='(min-width: 800px)']"),
-            $link = $article.find("a").first().addClass("preview-box"),
-            $img = $article.find("img"),
-            $imgData = $img.attr("title").split("\n").slice(0, -2);
 
+        const $link = $article.find("a").first().addClass("preview-box"),
+            $img = $article.find("img"),
+            $imgData = $img.attr("title").split("\n").slice(0, -2);     // Replace if the post date is added for the data-attributes.
+
+
+        $article.find("source").remove();                               // If we ever have to worry about mobile users, this will need to be addressed.
+        $img.removeAttr("title").attr("alt", "#" + $article.attr("data-id"));
+
+        // Loading icon
         $("<div>")
             .addClass("preview-load")
             .html(`<i class="fas fa-circle-notch fa-2x fa-spin"></i>`)
             .appendTo($link);
 
+        // Description box that only shows up on hover
         const $extrasBox = $("<div>").addClass("preview-extras").appendTo($link);
         $("<span>").html(parseRating($imgData[0])).appendTo($extrasBox);
         $("<span>").html(parseDate($imgData[2])).appendTo($extrasBox);
 
-        $img.attr({
-            "alt": "",
-            "title": "",
-        });
-
+        // Thumbnail types that are not compatible with the enhancer
         if ($article.attr("data-file-ext") === "swf" || $article.attr("data-flags") === "deleted") return;
 
         if (performance) {
             $article.on("mouseenter", () => {
-                if ($source.attr("srcset") == $article.attr("data-large-file-url")) return;
+                if ($img.attr("src") == $article.attr("data-large-file-url")) return;
 
                 $link.addClass("loading");
                 $img.attr("src", $article.attr("data-large-file-url"));
-                $source.attr("srcset", $article.attr("data-large-file-url"));
                 $img.on("load", () => { $link.removeClass("loading"); });
             });
         } else {
             $link.addClass("loading");
             $img.attr("src", $article.attr("data-large-file-url"));
-            $source.attr("srcset", $article.attr("data-large-file-url"));
             $img.on("load", () => { $link.removeClass("loading"); });
         }
 

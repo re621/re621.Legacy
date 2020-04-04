@@ -102,11 +102,8 @@ export class InfiniteScroll extends RE6Module {
 
         for (const json of posts) {
             const element = PostHtml.create(json);
-
-            if (enhanceThumbs)
-                ThumbnailEnhancer.modifyThumbnail(element, performanceMode);
-
             const post = new Post(element);
+
             //only append the post if it has image data
             //if it does not it is part of the anon blacklist
             if (post.getImageURL() !== undefined) {
@@ -118,6 +115,8 @@ export class InfiniteScroll extends RE6Module {
                 post.applyBlacklist();
 
                 this.$postContainer.append(element);
+
+                if (enhanceThumbs) { ThumbnailEnhancer.modifyThumbnail(element, performanceMode); }
             }
         }
         this.isInProgress = false;
