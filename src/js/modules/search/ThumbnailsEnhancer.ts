@@ -74,6 +74,8 @@ export class ThumbnailEnhancer extends RE6Module {
             "title": "",
         });
 
+        if ($article.attr("data-file-ext") === "swf") return;
+
         if (performance) {
             $article.on("mouseenter", () => {
                 if ($source.attr("srcset") == $article.attr("data-large-file-url")) return;
