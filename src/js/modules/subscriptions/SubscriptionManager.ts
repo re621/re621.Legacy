@@ -15,7 +15,7 @@ export class SubscriptionManager extends RE6Module {
     //to make it possible to detect aborted updates
     private heartbeatInterval = 10;   //10 seconds
     private historySize = 5;
-    private updateInPorgress = false;
+    private alreadyUpdated = false;
 
     private tabNotificationsCount = 0;
     private subscribers = new Map<number, SubscriptionElement>();
@@ -76,7 +76,6 @@ export class SubscriptionManager extends RE6Module {
         }
         const panels = modal.getElement().find(".ui-tabs-panel");
         const tabs = modal.getElement().find(".ui-tabs-tab");
-        this.updateInPorgress = true;
         for (const entry of this.subscribers.entries()) {
             const subElements = {
                 instance: entry[1].instance,
@@ -91,7 +90,7 @@ export class SubscriptionManager extends RE6Module {
         if (shouldUpdate) {
             this.stopUpdate(heartbeatTimer);
         }
-        this.updateInPorgress = false;
+        this.alreadyUpdated = true;
         this.$openSubsButton.attr("data-loading", "false");
         this.updateNotificationSymbol(0);
 
@@ -142,7 +141,6 @@ export class SubscriptionManager extends RE6Module {
      * Prepares the settings for a new update
      */
     private startUpdate(): number {
-        this.updateInPorgress = true;
         this.pushSettings("updateInProgress", true);
         this.pushSettings("heartbeat", new Date().getTime());
         const heartbeatTimer = window.setInterval(() => {
@@ -159,7 +157,6 @@ export class SubscriptionManager extends RE6Module {
         this.pushSettings("updateInProgress", false);
         this.pushSettings("lastUpdate", new Date().getTime());
         window.clearInterval(heartbeatTimer);
-        this.updateInPorgress = false;
     }
 
     private getInfoPage(lastUpdate: number): Form {
@@ -224,7 +221,6 @@ export class SubscriptionManager extends RE6Module {
                 await this.initSubscriber(entry[1], true, this.fetchSettings("lastUpdate", true), now);
                 this.$subsTabs.replace(entry[0], entry[1].content);
             }
-            this.updateInPorgress = false;
             //refresh last/next update label
             inputList.get("subscriptions-lastupdate-label").html("Last Update: " + Util.timeAgo(now));
             inputList.get("subscriptions-nextupdate-label").html("Next Update: " + Util.timeAgo(now + this.updateInterval * 1000))
@@ -253,8 +249,10 @@ export class SubscriptionManager extends RE6Module {
      */
     public async initSubscriber(sub: SubscriptionElement, shouldUpdate: boolean, lastUpdate: number, currentTime: number): Promise<void> {
         const moduleName = sub.instance.constructor.name;
-
-        this.addSubscribeButtons(sub.instance);
+        //Don't add buttons if they were already appended
+        if (this.alreadyUpdated === false) {
+            this.addSubscribeButtons(sub.instance);
+        }
         sub.content.attr("data-subscription-class", moduleName);
         sub.tab.attr("data-loading", "true");
         //don't update if the last check was pretty recently
@@ -269,8 +267,12 @@ export class SubscriptionManager extends RE6Module {
         sub.tab.attr("data-loading", "false");
         //show notification if there are new updates or there are updates you didn't click on yet
         if (updateCount !== 0 || lastSeen < lastTimestamp || lastSeen === undefined && !isNaN(lastTimestamp)) {
-            sub.tab.attr("data-has-notifications", "true");
-            this.tabNotificationsCount++;
+            //Dont increment the notification count if there already are some
+            //This can happen when the user triggers a manual update
+            if (sub.tab.attr("data-has-notifications") !== "true") {
+                sub.tab.attr("data-has-notifications", "true");
+                this.tabNotificationsCount++;
+            }
         }
     }
 
