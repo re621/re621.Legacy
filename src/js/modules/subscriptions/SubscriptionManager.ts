@@ -180,7 +180,7 @@ export class SubscriptionManager extends RE6Module {
                 {
                     id: "subscriptions-lastupdate-label",
                     type: "div",
-                    value: "Last Update: " + Util.timeAgo(lastUpdate),
+                    value: "Last Update: " + this.getLastUpdateText(lastUpdate),
                     stretch: "mid"
                 },
                 {
@@ -225,15 +225,25 @@ export class SubscriptionManager extends RE6Module {
                 this.$subsTabs.replace(entry[0], entry[1].content);
             }
             //refresh last/next update label
-            inputList.get("subscriptions-lastupdate-label").html("Last Update: " + Util.timeAgo(now));
+            inputList.get("subscriptions-lastupdate-label").html("Last Update: " + this.getLastUpdateText(now));
             inputList.get("subscriptions-nextupdate-label").html("Next Update: " + this.getNextUpdateText(updateInProgress, now, heartbeat));
 
             this.stopUpdate(hearbeatTimer);
         });
     }
 
+    private getLastUpdateText(lastUpdate: number): string {
+        if (lastUpdate === 0) {
+            return "Never";
+        } else {
+            return Util.timeAgo(lastUpdate);
+        }
+    }
+
     private getNextUpdateText(updateInProgress: boolean, lastUpdate: number, heartbeat: number): string {
-        if (updateInProgress && !this.heartbeatCheck(new Date().getTime(), heartbeat, updateInProgress)) {
+        if (lastUpdate === 0) {
+            return Util.timeAgo(new Date().getTime() + this.updateInterval * 1000);
+        } else if (updateInProgress && !this.heartbeatCheck(new Date().getTime(), heartbeat, updateInProgress)) {
             return "In Progress. Check back in a bit";
         } else {
             return Util.timeAgo(lastUpdate + this.updateInterval * 1000);
