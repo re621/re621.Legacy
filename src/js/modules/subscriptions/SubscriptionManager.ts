@@ -292,6 +292,13 @@ export class SubscriptionManager extends RE6Module {
             .addClass("subscription-update-preview")
             .appendTo($content);
 
+        // Will be executed, if the definition allows it
+        const imageErrorHandler = (): void => {
+            if (definition.imageRemoveOnError === true) {
+                $content.remove();
+            }
+        }
+
         if (definition.imageHref !== undefined) {
             const $a = $("<a>")
                 .attr("href", definition.imageHref(data));
@@ -299,12 +306,14 @@ export class SubscriptionManager extends RE6Module {
                 .attr("data-src", definition.imageSrc(data))
                 .addClass("lazyload")
                 .attr("title", definition.updateText(data) + "\n" + timeAgo + "\n" + timeString)
+                .on("error", imageErrorHandler)
                 .appendTo($a);
             $a.appendTo($imageDiv);
         } else {
             $("<img>")
                 .attr("src", definition.imageSrc(data))
                 .attr("title", definition.updateText(data) + "\n" + timeAgo + "\n" + timeString)
+                .on("error", imageErrorHandler)
                 .appendTo($imageDiv); timeStamp;
         }
 
@@ -567,6 +576,8 @@ export interface UpdateDefinition {
     imageHref?: (data: UpdateContent) => string;
     //image link which should be displayed on the left side of the entry
     imageSrc: (data: UpdateContent) => string;
+    //Should the image be hidden, if it triggers the error event?
+    imageRemoveOnError?: boolean;
     //Link to get to the update
     updateHref?: (data: UpdateContent) => string;
     //Text for the updatelink

@@ -13,6 +13,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         imageHref: (data) => {
             return `https://e621.net/posts/${data.id}`;
         },
+        imageRemoveOnError: true,
         updateText: (data) => {
             return data.name;
         },
