@@ -209,7 +209,7 @@ export class SettingsController extends RE6Module {
                 },
                 {
                     id: "gen-inter-spacer-1",
-                    type: "div",
+                    type: "hr",
                     value: " ",
                     stretch: "full",
                 },
@@ -260,7 +260,7 @@ export class SettingsController extends RE6Module {
                 },
                 {
                     id: "gen-inter-spacer-2",
-                    type: "div",
+                    type: "hr",
                     value: " ",
                     stretch: "full",
                 },
@@ -307,7 +307,7 @@ export class SettingsController extends RE6Module {
                 },
                 {
                     id: "gen-inter-spacer-3",
-                    type: "div",
+                    type: "hr",
                     value: " ",
                     stretch: "full",
                 },
@@ -324,12 +324,6 @@ export class SettingsController extends RE6Module {
                     type: "checkbox",
                     value: blacklistEnhancer.fetchSettings("quickaddTags"),
                     label: "Click X to add tag to blacklist",
-                },
-                {
-                    id: "gen-inter-spacer-4",
-                    type: "div",
-                    value: " ",
-                    stretch: "full",
                 },
             ]
         );
