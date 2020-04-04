@@ -113,6 +113,10 @@ export class Post {
     }
 
     public static createPreviewUrlFromMd5(md5: string): string {
+        //Assume that the post is flash when no md5 is passed
+        if (md5 === "") {
+            return "https://static1.e621.net/images/download-preview.png";
+        }
         return `https://static1.e621.net/data/preview/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`;
     }
 

@@ -87,7 +87,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         return {
             id: value.id,
             name: tagName.replace(/ /g, " "),
-            md5: value.file.md5
+            md5: value.file.ext === "swf" ? "" : value.file.md5
         };
     }
 

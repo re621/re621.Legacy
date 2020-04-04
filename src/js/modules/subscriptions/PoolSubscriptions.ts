@@ -90,7 +90,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
         const poolInfo = subSettings[value.id];
         if (poolInfo.md5 === undefined) {
             const post: ApiPost = (await Api.getJson(`/posts/${value.post_ids[0]}.json`)).post;
-            poolInfo.md5 = post.file.md5;
+            poolInfo.md5 = post.file.ext === "swf" ? "" : post.file.md5;
         }
         return {
             id: value.id,
