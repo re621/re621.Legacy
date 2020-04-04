@@ -160,6 +160,9 @@ export class SubscriptionManager extends RE6Module {
     }
 
     private getInfoPage(lastUpdate: number): Form {
+        const updateInProgress = this.fetchSettings("updateInProgress");
+        const heartbeat = this.fetchSettings("heartbeat", true);
+
         const form = new Form(
             {
                 id: "settings-module-status",
@@ -177,13 +180,13 @@ export class SubscriptionManager extends RE6Module {
                 {
                     id: "subscriptions-lastupdate-label",
                     type: "div",
-                    value: "Last Update: " + Util.timeAgo(lastUpdate),
+                    value: "Last Update: " + this.getLastUpdateText(lastUpdate),
                     stretch: "mid"
                 },
                 {
                     id: "subscriptions-nextupdate-label",
                     type: "div",
-                    value: "Next Update: " + Util.timeAgo(lastUpdate + this.updateInterval * 1000),
+                    value: "Next Update: " + this.getNextUpdateText(updateInProgress, lastUpdate, heartbeat),
                     stretch: "mid"
                 },
                 {
@@ -222,11 +225,29 @@ export class SubscriptionManager extends RE6Module {
                 this.$subsTabs.replace(entry[0], entry[1].content);
             }
             //refresh last/next update label
-            inputList.get("subscriptions-lastupdate-label").html("Last Update: " + Util.timeAgo(now));
-            inputList.get("subscriptions-nextupdate-label").html("Next Update: " + Util.timeAgo(now + this.updateInterval * 1000))
+            inputList.get("subscriptions-lastupdate-label").html("Last Update: " + this.getLastUpdateText(now));
+            inputList.get("subscriptions-nextupdate-label").html("Next Update: " + this.getNextUpdateText(updateInProgress, now, heartbeat));
 
             this.stopUpdate(hearbeatTimer);
         });
+    }
+
+    private getLastUpdateText(lastUpdate: number): string {
+        if (lastUpdate === 0) {
+            return "Never";
+        } else {
+            return Util.timeAgo(lastUpdate);
+        }
+    }
+
+    private getNextUpdateText(updateInProgress: boolean, lastUpdate: number, heartbeat: number): string {
+        if (lastUpdate === 0) {
+            return Util.timeAgo(new Date().getTime() + this.updateInterval * 1000);
+        } else if (updateInProgress && !this.heartbeatCheck(new Date().getTime(), heartbeat, updateInProgress)) {
+            return "In Progress. Check back in a bit";
+        } else {
+            return Util.timeAgo(lastUpdate + this.updateInterval * 1000);
+        }
     }
 
     public updateNotificationSymbol(difference: number): void {
@@ -266,7 +287,7 @@ export class SubscriptionManager extends RE6Module {
         const updateCount = Object.keys(updates).length;
         sub.tab.attr("data-loading", "false");
         //show notification if there are new updates or there are updates you didn't click on yet
-        if (updateCount !== 0 || lastSeen < lastTimestamp || lastSeen === undefined && !isNaN(lastTimestamp)) {
+        if ((updateCount !== 0 || lastSeen < lastTimestamp) && lastSeen !== undefined && !isNaN(lastTimestamp)) {
             //Dont increment the notification count if there already are some
             //This can happen when the user triggers a manual update
             if (sub.tab.attr("data-has-notifications") !== "true") {
