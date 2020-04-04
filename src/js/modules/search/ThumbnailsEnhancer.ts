@@ -2,6 +2,8 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 import { Util } from "../../components/structure/Util";
 
+declare const GM_openInTab;
+
 export class ThumbnailEnhancer extends RE6Module {
 
     private postContainer: JQuery<HTMLElement>;
@@ -112,6 +114,34 @@ export class ThumbnailEnhancer extends RE6Module {
             });
             $img.on("load", () => { $link.removeClass("loading"); });
         }
+
+        let dbclickTimer;
+        const delay = 200;
+        let prevent = false;
+
+        //Make it so that the doubleclick prevents the normal click event
+        $link.on("click", e => {
+            //ignore mouse clicks which are not left clicks
+            if (e.button !== 0) {
+                return;
+            }
+            e.preventDefault();
+            dbclickTimer = window.setTimeout(() => {
+                if (!prevent) {
+                    location.href = $link.attr("href");
+                }
+                prevent = false;
+            }, delay);
+        }).on("dblclick", e => {
+            //ignore mouse clicks which are not left clicks
+            if (e.button !== 0) {
+                return;
+            }
+            e.preventDefault();
+            window.clearTimeout(dbclickTimer);
+            prevent = true;
+            GM_openInTab(window.location.origin + $link.attr("href"));
+        });
 
         function parseRating(input: string): string {
             switch (input) {
