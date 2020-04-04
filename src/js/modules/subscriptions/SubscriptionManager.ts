@@ -287,7 +287,7 @@ export class SubscriptionManager extends RE6Module {
         const updateCount = Object.keys(updates).length;
         sub.tab.attr("data-loading", "false");
         //show notification if there are new updates or there are updates you didn't click on yet
-        if (updateCount !== 0 || lastSeen < lastTimestamp || lastSeen === undefined && !isNaN(lastTimestamp)) {
+        if ((updateCount !== 0 || lastSeen < lastTimestamp) && lastSeen !== undefined && !isNaN(lastTimestamp)) {
             //Dont increment the notification count if there already are some
             //This can happen when the user triggers a manual update
             if (sub.tab.attr("data-has-notifications") !== "true") {
