@@ -18,6 +18,7 @@ export class PostViewer extends RE6Module {
             { keys: "hotkeyDownvote", fnct: this.triggerDownvote },
             { keys: "hotkeyFavorite", fnct: this.toggleFavorite },
             { keys: "hotkeyHideNotes", fnct: this.toggleNotes },
+            { keys: "hotkeyNewNote", fnct: this.switchNewNote },
         );
     }
 
@@ -31,7 +32,9 @@ export class PostViewer extends RE6Module {
             hotkeyUpvote: "w",
             hotkeyDownvote: "s",
             hotkeyFavorite: "f",
+
             hotkeyHideNotes: "o",
+            hotkeyNewNote: "p",
 
             autoOpenParentChild: true,
             upvoteOnFavorite: true,
@@ -132,5 +135,14 @@ export class PostViewer extends RE6Module {
         }
 
         module.pushSettings("hideNotes", !hideNotes);
+    }
+
+    /** Toggles the note editing interface */
+    private switchNewNote(): void {
+        $("div#note-container").attr("data-hidden", "false");
+        $("a#image-note-button").html("Notes: ON");
+        ModuleController.get(PostViewer).pushSettings("hideNotes", false);
+
+        Util.Danbooru.Note.TranslationMode.toggle(new Event("dummy-event"));
     }
 }

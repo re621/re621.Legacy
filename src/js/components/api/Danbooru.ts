@@ -21,10 +21,15 @@ interface DanbooruPost {
 
 interface DanbooruNote {
     Box: DanbooruNoteBox;
+    TranslationMode: DanbooruNoteMode;
 }
 
 interface DanbooruNoteBox {
     scale_all(): void;
+}
+
+interface DanbooruNoteMode {
+    toggle(e: Event): void;
 }
 
 interface DanbooruUtility {

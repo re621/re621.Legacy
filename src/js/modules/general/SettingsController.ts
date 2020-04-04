@@ -475,6 +475,7 @@ export class SettingsController extends RE6Module {
                 createInput(miscellaneous, "hotkeyRandomPost", "", 1),
 
                 // Posts
+                { id: "hotkey-posts-hr", type: "hr", stretch: "full", },
                 {
                     id: "hotkey-posts-title",
                     type: "div",
@@ -510,21 +511,17 @@ export class SettingsController extends RE6Module {
                 createInput(poolNavigator, "hotkeyCycle", "", 0),
                 createInput(poolNavigator, "hotkeyCycle", "", 1),
 
-                // - Notes
-                createLabel("hotkeyHideNotes", "Toggle Notes"),
-                createInput(postViewer, "hotkeyHideNotes", "", 0),
-                createInput(postViewer, "hotkeyHideNotes", "", 1),
-
                 // - Scaling
                 createLabel("hotkeyScale", "Change Scale"),
                 createInput(imageScaler, "hotkeyScale", "", 0),
                 createInput(imageScaler, "hotkeyScale", "", 1),
 
-                // Comments
+                // Actions
+                { id: "hotkey-comments-hr", type: "hr", stretch: "full", },
                 {
                     id: "hotkey-comments-title",
                     type: "div",
-                    value: "<h3>Comments</h3>",
+                    value: "<h3>Actions</h3>",
                     stretch: "full"
                 },
 
@@ -536,7 +533,16 @@ export class SettingsController extends RE6Module {
                 createInput(miscellaneous, "hotkeyEditPost", "", 0),
                 createInput(miscellaneous, "hotkeyEditPost", "", 1),
 
+                createLabel("hotkeyHideNotes", "Toggle Notes"),
+                createInput(postViewer, "hotkeyHideNotes", "", 0),
+                createInput(postViewer, "hotkeyHideNotes", "", 1),
+
+                createLabel("hotkeyNewNote", "Edit Notes"),
+                createInput(postViewer, "hotkeyNewNote", "", 0),
+                createInput(postViewer, "hotkeyNewNote", "", 1),
+
                 // Tabs
+                { id: "hotkey-tabs-hr", type: "hr", stretch: "full", },
                 {
                     id: "hotkey-tabs-title",
                     type: "div",
@@ -633,15 +639,15 @@ export class SettingsController extends RE6Module {
         createListener(poolNavigator, "hotkeyNext");
         createListener(poolNavigator, "hotkeyCycle");
 
-        // - Notes
-        createListener(postViewer, "hotkeyHideNotes");
-
         // - Scaling
         createListener(imageScaler, "hotkeyScale");
 
-        // Comments
+        // Actions
         createListener(miscellaneous, "hotkeyNewComment");
-        createListener(miscellaneous, "hotkeyEditPost");
+        createListener(miscellaneous, "hotkeyNewNote");
+
+        createListener(postViewer, "hotkeyHideNotes");
+        createListener(postViewer, "hotkeyHideNotes");
 
         // Tabs
         createListener(headerCustomizer, "hotkeyTab1");
