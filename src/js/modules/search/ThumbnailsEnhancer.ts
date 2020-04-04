@@ -82,17 +82,25 @@ export class ThumbnailEnhancer extends RE6Module {
         // Thumbnail types that are not compatible with the enhancer
         if ($article.attr("data-file-ext") === "swf" || $article.attr("data-flags") === "deleted") return;
 
+        const sampleURL = $article.attr("data-large-file-url");
+
         if (performance) {
             $article.on("mouseenter", () => {
-                if ($img.attr("src") == $article.attr("data-large-file-url")) return;
+                if ($img.attr("src") == sampleURL) return;
 
                 $link.addClass("loading");
-                $img.attr("src", $article.attr("data-large-file-url"));
+                $img.attr({
+                    "src": sampleURL,
+                    "data-src": sampleURL
+                });
                 $img.on("load", () => { $link.removeClass("loading"); });
             });
         } else {
             $link.addClass("loading");
-            $img.attr("src", $article.attr("data-large-file-url"));
+            $img.attr({
+                "src": sampleURL,
+                "data-src": sampleURL
+            });
             $img.on("load", () => { $link.removeClass("loading"); });
         }
 
