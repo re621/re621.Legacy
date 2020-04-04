@@ -84,16 +84,25 @@ export class ThumbnailEnhancer extends RE6Module {
 
         const sampleURL = $article.attr("data-large-file-url");
 
+
+        let timer;
         if (performance) {
             $article.on("mouseenter", () => {
-                if ($img.attr("src") == sampleURL) return;
+                // only load sample after a bit of waiting
+                // this prevents loading images just by hovering over them to get to another one
+                timer = window.setTimeout(() => {
+                    if ($img.attr("src") == sampleURL) return;
 
-                $link.addClass("loading");
-                $img.attr({
-                    "src": sampleURL,
-                    "data-src": sampleURL
-                });
-                $img.on("load", () => { $link.removeClass("loading"); });
+                    $link.addClass("loading");
+                    $img.attr({
+                        "src": sampleURL,
+                        "data-src": sampleURL
+                    });
+                    $img.on("load", () => { $link.removeClass("loading"); });
+                }, 100);
+            });
+            $article.on("mouseleave", () => {
+                window.clearTimeout(timer);
             });
         } else {
             $link.addClass("loading");
