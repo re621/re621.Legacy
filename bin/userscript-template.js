@@ -25,7 +25,7 @@
 // @connect      api.github.com
 // ==/UserScript==
 
-window.re621 = new function () {
+window.re621 = new function() {
     this.name = "%NAME%";
     this.displayName = "%DISPLAYNAME%";
     this.version = "%VERSION%";
@@ -39,5 +39,5 @@ window.re621 = new function () {
         forum: "https://e621.net/forum_topics/25872",
     };
     this.debug = true;
-    this.toString = function () { return this.name + " v." + this.version + " (" + this.build + ")"; };
+    this.toString = function() { return this.name + " v." + this.version + " (" + this.build + ")"; };
 };
