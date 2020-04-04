@@ -62,6 +62,7 @@ export class ThumbnailEnhancer extends RE6Module {
      */
     public static modifyThumbnail($article: JQuery<HTMLElement>, performance = true): void {
 
+        /* Create the structure */
         const $link = $article.find("a").first().addClass("preview-box"),
             $img = $article.find("img"),
             $imgData = $img.attr("title").split("\n").slice(0, -2);     // Replace if the post date is added for the data-attributes.
@@ -81,40 +82,8 @@ export class ThumbnailEnhancer extends RE6Module {
         $("<span>").html(parseRating($imgData[0])).appendTo($extrasBox);
         $("<span>").html(parseDate($imgData[2])).appendTo($extrasBox);
 
-        // Thumbnail types that are not compatible with the enhancer
-        if ($article.attr("data-file-ext") === "swf" || $article.attr("data-flags") === "deleted") return;
 
-        const sampleURL = $article.attr("data-large-file-url");
-
-
-        let timer;
-        if (performance) {
-            $article.on("mouseenter", () => {
-                // only load sample after a bit of waiting
-                // this prevents loading images just by hovering over them to get to another one
-                timer = window.setTimeout(() => {
-                    if ($img.attr("src") == sampleURL) return;
-
-                    $link.addClass("loading");
-                    $img.attr({
-                        "src": sampleURL,
-                        "data-src": sampleURL
-                    });
-                    $img.on("load", () => { $link.removeClass("loading"); });
-                }, 200);
-            });
-            $article.on("mouseleave", () => {
-                window.clearTimeout(timer);
-            });
-        } else {
-            $link.addClass("loading");
-            $img.attr({
-                "src": sampleURL,
-                "data-src": sampleURL
-            });
-            $img.on("load", () => { $link.removeClass("loading"); });
-        }
-
+        /* Handle double-click */
         let dbclickTimer;
         const delay = 200;
         let prevent = false;
@@ -142,6 +111,41 @@ export class ThumbnailEnhancer extends RE6Module {
             prevent = true;
             GM_openInTab(window.location.origin + $link.attr("href"));
         });
+
+
+        /* Load the larger images */
+        // Thumbnail types that are not compatible with the enhancer
+        if ($article.attr("data-file-ext") === "swf" || $article.attr("data-flags") === "deleted") return;
+
+        const sampleURL = $article.attr("data-large-file-url");
+
+        if (performance) {
+            let timer;
+            $article.on("mouseenter", () => {
+                // only load sample after a bit of waiting
+                // this prevents loading images just by hovering over them to get to another one
+                timer = window.setTimeout(() => {
+                    if ($img.attr("src") == sampleURL) return;
+
+                    $link.addClass("loading");
+                    $img.attr({
+                        "src": sampleURL,
+                        "data-src": sampleURL
+                    });
+                    $img.on("load", () => { $link.removeClass("loading"); });
+                }, 200);
+            });
+            $article.on("mouseleave", () => {
+                window.clearTimeout(timer);
+            });
+        } else {
+            $link.addClass("loading");
+            $img.attr({
+                "src": sampleURL,
+                "data-src": sampleURL
+            });
+            $img.on("load", () => { $link.removeClass("loading"); });
+        }
 
         function parseRating(input: string): string {
             switch (input) {
