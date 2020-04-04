@@ -8,6 +8,7 @@ import { Post } from "../../components/data/Post";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
 import { ModuleController } from "../../components/ModuleController";
 import { Util } from "../../components/structure/Util";
+import { ThumbnailEnhancer } from "./ThumbnailsEnhancer";
 
 /**
  * Gets rid of the default pagination and instead appends new posts
@@ -94,8 +95,11 @@ export class InfiniteScroll extends RE6Module {
         }
         Page.setQueryParameter("page", this.nextPageToGet.toString());
         this.addPageIndicator();
+        const performanceMode = ModuleController.get(ThumbnailEnhancer).fetchSettings("performance");
+
         for (const json of posts) {
             const element = PostHtml.create(json);
+            ThumbnailEnhancer.modifyThumbnail(element, performanceMode);
             const post = new Post(element);
             //only append the post if it has image data
             //if it does not it is part of the anon blacklist
