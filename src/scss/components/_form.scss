@@ -123,6 +123,12 @@ form.grid-form {
             }
         }
 
+        &.keyinput input[type=text] {
+            text-transform: uppercase;
+            font-family: monospace;
+            font-size: 1.3em;
+        }
+
         div.icon-picker {
             display: grid;
             grid-template-columns: repeat(auto-fit, 23px);

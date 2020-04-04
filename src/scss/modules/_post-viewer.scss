@@ -1,7 +1,7 @@
 /* Post Viewer Styles */
 section#image-extra-controls {
     display: inline-grid !important;
-    grid-template-columns: max-content max-content max-content max-content auto;
+    grid-template-columns: max-content max-content max-content max-content max-content auto;
     margin: 0.5rem 0;
     grid-column-gap: 0.5rem;
 
@@ -29,6 +29,7 @@ section#image-extra-controls {
     div.fav-buttons>button::after,
     div#image-download-link a,
     div#image-add-links a,
+    div#image-toggle-notes a,
     div#image-resize-cycle select,
     div#image-resize-cycle a {
         display: inline-flex;
@@ -45,7 +46,8 @@ section#image-extra-controls {
 div#c-posts div.parent-children {
     display: block;
 
-    & #has-children-relationship-preview, & #has-parent-relationship-preview {
+    & #has-children-relationship-preview,
+    & #has-parent-relationship-preview {
         display: grid;
         justify-items: center;
     }
@@ -54,11 +56,16 @@ div#c-posts div.parent-children {
 #tag-list {
     font-weight: bold;
 
-    & .general-tag-list, &  .meta-tag-list {
+    & .general-tag-list,
+    & .meta-tag-list {
         font-weight: normal;
     }
 }
 
 #post-rating-text {
     font-weight: bold;
+}
+
+div#note-container[data-hidden=true] {
+    display: none !important;
 }

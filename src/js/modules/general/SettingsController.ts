@@ -510,6 +510,11 @@ export class SettingsController extends RE6Module {
                 createInput(poolNavigator, "hotkeyCycle", "", 0),
                 createInput(poolNavigator, "hotkeyCycle", "", 1),
 
+                // - Notes
+                createLabel("hotkeyHideNotes", "Toggle Notes"),
+                createInput(postViewer, "hotkeyHideNotes", "", 0),
+                createInput(postViewer, "hotkeyHideNotes", "", 1),
+
                 // - Scaling
                 createLabel("hotkeyScale", "Change Scale"),
                 createInput(imageScaler, "hotkeyScale", "", 0),
@@ -627,6 +632,9 @@ export class SettingsController extends RE6Module {
         createListener(poolNavigator, "hotkeyPrev");
         createListener(poolNavigator, "hotkeyNext");
         createListener(poolNavigator, "hotkeyCycle");
+
+        // - Notes
+        createListener(postViewer, "hotkeyHideNotes");
 
         // - Scaling
         createListener(imageScaler, "hotkeyScale");
