@@ -114,8 +114,8 @@ export class ThumbnailEnhancer extends RE6Module {
         }
 
         function parseDate(input: string): string {
-            input = input.split(": ")[1];
-            return `<span title="` + input + `">` + Util.timeAgo(input) + `</span>`;
+            const date = new Date(input.split(": ").pop().replace(" ", "T").replace(" ", ""));
+            return `<span title="` + date.toLocaleString() + `">` + Util.timeAgo(date) + `</span>`;
         }
     }
 
