@@ -6,6 +6,7 @@ import { Util } from "../../components/structure/Util";
 import { ModuleController } from "../../components/ModuleController";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Form } from "../../components/structure/Form";
+import { Danbooru } from "../../components/api/Danbooru";
 
 export class SubscriptionManager extends RE6Module {
 
@@ -207,12 +208,12 @@ export class SubscriptionManager extends RE6Module {
             const heartbeat = this.fetchSettings("heartbeat", true);
             const updateInProgress = this.fetchSettings("updateInProgress");
             if (this.heartbeatCheck(new Date().getTime(), heartbeat, updateInProgress)) {
-                Util.Danbooru.notice("Update is already in progress");
+                Danbooru.notice("Update is already in progress");
                 return;
             }
             //Only allow one manuall update per page
             if (!allowUpdate) {
-                Util.Danbooru.notice("You already updated, please reload to update again");
+                Danbooru.notice("You already updated, please reload to update again");
                 return;
             }
             const hearbeatTimer = this.startUpdate();
@@ -464,11 +465,11 @@ export class SubscriptionManager extends RE6Module {
                     if (currentlySubbed) {
                         delete cache[timestamps[i]][updateTimestamp];
                         delete data[update.id];
-                        Util.Danbooru.notice("Successfully unsubbed!");
+                        Danbooru.notice("Successfully unsubbed!");
                     } else {
                         cache[timestamps[i]][updateTimestamp] = update;
                         data[update.id] = {};
-                        Util.Danbooru.notice("Successfully resubbed!");
+                        Danbooru.notice("Successfully resubbed!");
                     }
                     sub.instance.pushSettings("cache", cache);
                     sub.instance.pushSettings("data", data);

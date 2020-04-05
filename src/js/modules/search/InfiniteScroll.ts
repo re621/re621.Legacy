@@ -7,8 +7,8 @@ import { InstantSearch } from "./InstantSearch";
 import { Post } from "../../components/data/Post";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
 import { ModuleController } from "../../components/ModuleController";
-import { Util } from "../../components/structure/Util";
 import { ThumbnailEnhancer } from "./ThumbnailsEnhancer";
+import { Danbooru } from "../../components/api/Danbooru";
 
 /**
  * Gets rid of the default pagination and instead appends new posts
@@ -90,7 +90,7 @@ export class InfiniteScroll extends RE6Module {
             this.pagesLeft = false;
             this.$loadingIndicator.hide();
             this.$nextButton.hide();
-            Util.Danbooru.notice("No more posts!");
+            Danbooru.notice("No more posts!");
             return;
         }
         Page.setQueryParameter("page", this.nextPageToGet.toString());

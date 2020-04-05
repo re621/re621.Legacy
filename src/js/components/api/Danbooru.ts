@@ -1,13 +1,34 @@
 /* Type definitions for the Danbooru Javascript methods */
 
-export interface Danbooru {
-    notice(input: string): void;
-    error(input: string): void;
-    Blacklist: DanbooruBlacklist;
-    Post: DanbooruPost;
-    Note: DanbooruNote;
-    Utility: DanbooruUtility;
+declare const unsafeWindow;
+
+export class Danbooru {
+
+    public static Blacklist: DanbooruBlacklist;
+    public static Post: DanbooruPost;
+    public static Note: DanbooruNote;
+    public static Utility: DanbooruUtility;
+
+    public static notice(input: string): void {
+        return this.getValue("notice")(input);
+    }
+    public static error(input: string): void {
+        return this.getValue("error")(input);
+    };
+
+    private static getValue(name: string): any {
+        return unsafeWindow.Danbooru[name];
+    }
+
+    public static _init(): void {
+        this.Blacklist = this.getValue("Blacklist");
+        this.Post = this.getValue("Post");
+        this.Note = this.getValue("Note");
+        this.Utility = this.getValue("Utility");
+    }
 }
+
+Danbooru._init() ;
 
 interface DanbooruBlacklist {
     apply(): void;

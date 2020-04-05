@@ -1,8 +1,8 @@
 import { Post, ViewingPost } from "../../components/data/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
-import { Util } from "../../components/structure/Util";
 import { ModuleController } from "../../components/ModuleController";
+import { Danbooru } from "../../components/api/Danbooru";
 
 /**
  * Add various symbols to the tilebar depending on the posts state
@@ -107,12 +107,12 @@ export class PostViewer extends RE6Module {
 
     /** Emulates a click on the upvote button */
     private triggerUpvote(): void {
-        Util.Danbooru.Post.vote(Post.getViewingPost().getId(), 1);
+        Danbooru.Post.vote(Post.getViewingPost().getId(), 1);
     }
 
     /** Emulates a click on the downvote button */
     private triggerDownvote(): void {
-        Util.Danbooru.Post.vote(Post.getViewingPost().getId(), -1);
+        Danbooru.Post.vote(Post.getViewingPost().getId(), -1);
     }
 
     /** Toggles the favorite state */
@@ -143,6 +143,6 @@ export class PostViewer extends RE6Module {
         $("a#image-note-button").html("Notes: ON");
         ModuleController.get(PostViewer).pushSettings("hideNotes", false);
 
-        Util.Danbooru.Note.TranslationMode.toggle(new Event("dummy-event"));
+        Danbooru.Note.TranslationMode.toggle(new Event("dummy-event"));
     }
 }

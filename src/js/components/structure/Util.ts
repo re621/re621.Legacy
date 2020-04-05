@@ -1,14 +1,9 @@
-import { Danbooru } from "../api/Danbooru";
 import { GM } from "../api/GM";
-
-declare const Danbooru;
 
 /**
  * Common utilities used in other modules
  */
 export class Util {
-
-    public static Danbooru: Danbooru = Danbooru;
 
     /**
      * Converts time from absolute format to relative (i.e. "5 minutes ago")

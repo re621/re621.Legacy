@@ -3,7 +3,7 @@ import { PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
 import { User } from "../../components/data/User";
 import { PostFilter } from "../../components/data/PostFilter";
-import { Util } from "../../components/structure/Util";
+import { Danbooru } from "../../components/api/Danbooru";
 
 /**
  * Blacklist Enhancer  
@@ -40,9 +40,9 @@ export class BlacklistEnhancer extends RE6Module {
         super.create();
 
         //Override default blacklist function
-        Util.Danbooru.Blacklist.apply = (): void => { return; };
-        Util.Danbooru.Blacklist.initialize_anonymous_blacklist = (): void => { return; };
-        Util.Danbooru.Blacklist.initialize_all = (): void => { return; };
+        Danbooru.Blacklist.apply = (): void => { return; };
+        Danbooru.Blacklist.initialize_anonymous_blacklist = (): void => { return; };
+        Danbooru.Blacklist.initialize_all = (): void => { return; };
 
         this.modifyDOM();
 
@@ -122,20 +122,20 @@ export class BlacklistEnhancer extends RE6Module {
      * Removes or adds a tag to the users blacklist
      */
     private async toggleBlacklistTag(tag): Promise<void> {
-        Util.Danbooru.notice("Getting current blacklist");
+        Danbooru.notice("Getting current blacklist");
         let currentBlacklist = (await User.getCurrentSettings()).blacklisted_tags.split("\n");
 
         if (currentBlacklist.indexOf(tag) === -1) {
             currentBlacklist.push(tag);
             User.getInstance().addBlacklistFilter(tag);
-            Util.Danbooru.notice("Adding " + tag + " to blacklist");
+            Danbooru.notice("Adding " + tag + " to blacklist");
         } else {
             currentBlacklist = currentBlacklist.filter(e => e !== tag);
             User.getInstance().removeBlacklistFilter(tag);
-            Util.Danbooru.notice("Removing " + tag + " from blacklist");
+            Danbooru.notice("Removing " + tag + " from blacklist");
         }
         await User.setSettings({ blacklisted_tags: currentBlacklist.join("\n") });
-        Util.Danbooru.notice("Done!");
+        Danbooru.notice("Done!");
         this.applyBlacklist();
     }
 
