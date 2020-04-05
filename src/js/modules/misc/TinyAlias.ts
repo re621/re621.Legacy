@@ -300,7 +300,7 @@ export class TinyAlias extends RE6Module {
         };
 
         // First data query
-        let jsonData: ApiTag = await Api.getJson("/tags/" + tag + ".json", true);
+        let jsonData: ApiTag = await Api.getJson("/tags/" + tag + ".json", 500);
         if (jsonData === null) {
             result.isInvalid = true;
             return result;
@@ -311,13 +311,13 @@ export class TinyAlias extends RE6Module {
         this.$infoText.html(result.count + " posts");
 
         // Checking for aliases
-        const aliasJson: ApiTag = await Api.getJson("/tag_aliases.json?search[antecedent_name]=" + tag, true);
+        const aliasJson: ApiTag = await Api.getJson("/tag_aliases.json?search[antecedent_name]=" + tag, 500);
         if (aliasJson[0] !== undefined) {
             result.isAliased = true;
             const trueTagName = aliasJson[0].consequent_name;
 
             // Getting alias data
-            jsonData = await Api.getJson("/tags/" + encodeURIComponent(trueTagName) + ".json", true);
+            jsonData = await Api.getJson("/tags/" + encodeURIComponent(trueTagName) + ".json", 500);
             result.count = jsonData.post_count;
             result.realName = trueTagName;
         }
@@ -327,7 +327,7 @@ export class TinyAlias extends RE6Module {
             result.isDNP = true;
         }
 
-        const wikiPage: ApiWikiPage = (await Api.getJson(`/wiki_pages.json?search[title]=${encodeURIComponent(result.realName)}`, true))[0];
+        const wikiPage: ApiWikiPage = (await Api.getJson(`/wiki_pages.json?search[title]=${encodeURIComponent(result.realName)}`, 500))[0];
         if (wikiPage !== undefined && wikiPage.title === result.realName) {
             result.wikiPageId = wikiPage.id;
         }

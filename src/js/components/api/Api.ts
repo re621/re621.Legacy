@@ -6,15 +6,15 @@ import { RequestQueue } from "./RequestQueue";
 export class Api {
 
     private static instance: Api;
+    private defaultDelay = 2000;
 
     //needed to authenticate some post requests, for example when you modify user settings
     private authenticityToken: string;
 
-    private queue: RequestQueue;
+    private queue = new Map<number, RequestQueue>();
 
     private constructor() {
         this.authenticityToken = $("head meta[name=csrf-token]").attr("content");
-        this.queue = new RequestQueue(2000);
     }
 
     /**
@@ -51,11 +51,17 @@ export class Api {
         });
     }
 
-    private static async request(url: string, method: string, ignoreQueue: boolean, data?: {}): Promise<string> {
-        if (ignoreQueue === true) {
-            return this.requestFunction(url, method, data);
+    private static async request(url: string, method: string, delay?: number, data?: {}): Promise<string> {
+        const instance = this.getInstance();
+        if (!delay) {
+            delay = instance.defaultDelay;
         }
-        const queue = this.getInstance().queue;
+        let queue = instance.queue.get(delay);
+        if(!queue) {
+            const newQueue = new RequestQueue(delay);
+            instance.queue.set(delay, newQueue);
+            queue = newQueue;
+        }
         const id = queue.getRequestId();
         queue.add(this.requestFunction, id, url, method, data);
         return await queue.getRequestResult(id);
@@ -66,8 +72,8 @@ export class Api {
      * @param url e6 endpoint without the host, => /posts/123456.json
      * @returns the response as a string
      */
-    public static async getUrl(url: string, ignoreQueue = false): Promise<string> {
-        return await this.request(url, "GET", ignoreQueue);
+    public static async getUrl(url: string, delay?: number): Promise<string> {
+        return await this.request(url, "GET", delay);
     }
 
     /**
@@ -75,8 +81,8 @@ export class Api {
      * @param url e6 endpoint without the host, => /posts/123456.json
      * @returns the response as a string
      */
-    public static async getJson(url: string, ignoreQueue = false): Promise<any> {
-        const response = await this.getUrl(url, ignoreQueue);
+    public static async getJson(url: string, delay?: number): Promise<any> {
+        const response = await this.getUrl(url, delay);
         return JSON.parse(response);
     }
 
@@ -85,8 +91,8 @@ export class Api {
      * @param url e6 endpoint without the host, => /posts/123456.json
      * @returns the response as a string
      */
-    public static async postUrl(url: string, json?: {}, ignoreQueue = false): Promise<string> {
-        return await this.request(url, "POST", ignoreQueue, json);
+    public static async postUrl(url: string, json?: {}, delay?: number): Promise<string> {
+        return await this.request(url, "POST", delay, json);
     }
 
     /**

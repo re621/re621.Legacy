@@ -1,6 +1,6 @@
 export class RequestQueue {
     // how long should be waited between each api request, in ms
-    private requestSleepDuration = 2000;
+    private requestSleepDuration: number;
 
     //used to notify the original request function of the requests completion
     private emitter = $({});
@@ -38,7 +38,7 @@ export class RequestQueue {
         //work through everything in the queue up intl now
         for (const entry of this.requestQueue.entries()) {
             entry[1].content = await requestMethod(entry[1].url, entry[1].method, entry[1].data);
-            console.log("Finished " + entry[0]);
+            console.log(`Finished ${entry[0]} on lane ${this.requestSleepDuration}`);
             this.emitter.trigger("request-" + entry[0]);
             //sleep
             await new Promise(resolve => setTimeout(() => resolve(), this.requestSleepDuration));
