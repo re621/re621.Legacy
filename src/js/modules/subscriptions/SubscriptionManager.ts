@@ -14,7 +14,6 @@ export class SubscriptionManager extends RE6Module {
     //While updating a setting will be pushed after every interval
     //to make it possible to detect aborted updates
     private heartbeatInterval = 10;   //10 seconds
-    private historySize = 5;
     private alreadyUpdated = false;
 
     private tabNotificationsCount = 0;
@@ -519,7 +518,7 @@ export class SubscriptionManager extends RE6Module {
         cache[currentTime] = updates;
 
         //if the cache is larger than the limit, remove the entry with the lowest timestamp
-        if (Object.keys(cache).length > this.historySize) {
+        if (Object.keys(cache).length > this.fetchSettings("historySize")) {
             delete cache[Math.min(...Object.keys(cache).map(e => parseInt(e)))];
         }
 
@@ -561,7 +560,8 @@ export class SubscriptionManager extends RE6Module {
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
-            lastUpdate: 0
+            lastUpdate: 0,
+            historySize: 5
         };
     }
 }
