@@ -75,14 +75,14 @@ export class TinyAlias extends RE6Module {
             .appendTo($toolbar);
         const $insertButton = $("<button>")
             .html("Insert")
+            .attr("type", "button")
             .appendTo($toolbar);
 
         const $infoTextBox = $("<div>").appendTo($toolbar);
         this.$infoText = $("<div>").addClass("info-text").appendTo($infoTextBox);
         this.$infoLoad = $("<div>").addClass("info-load").html(`<i class="fas fa-spinner fa-spin"></i>`).appendTo($infoTextBox);
-        const $settingsButton = $("<button>").html("TinyAlias").appendTo($toolbar);
-        const $sortButton = $("<button>").html("Sort").appendTo($toolbar);
-
+        const $settingsButton = $("<button>").attr("type", "button").html("TinyAlias").appendTo($toolbar);
+        const $sortButton = $("<button>").attr("type", "button").html("Sort").appendTo($toolbar);
         // Adding Functionality
         this.tagAlreadyChecked = false;
         let timer: number;
