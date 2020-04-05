@@ -203,7 +203,7 @@ export class TinyAlias extends RE6Module {
             $input.val(tagInfo.realName);
         }
 
-        if(tagInfo.wikiPageId) {
+        if (tagInfo.wikiPageId) {
             this.$infoText.append(` <a href="/wiki_pages/${tagInfo.wikiPageId}">wiki</a>`);
         }
 
@@ -291,7 +291,7 @@ export class TinyAlias extends RE6Module {
         };
 
         // First data query
-        let jsonData: ApiTag = await Api.getJson("/tags/" + tag + ".json");
+        let jsonData: ApiTag = await Api.getJson("/tags/" + tag + ".json", true);
         if (jsonData === null) {
             result.isInvalid = true;
             return result;
@@ -302,13 +302,13 @@ export class TinyAlias extends RE6Module {
         this.$infoText.html(result.count + " posts");
 
         // Checking for aliases
-        const aliasJson: ApiTag = await Api.getJson("/tag_aliases.json?search[antecedent_name]=" + tag);
+        const aliasJson: ApiTag = await Api.getJson("/tag_aliases.json?search[antecedent_name]=" + tag, true);
         if (aliasJson[0] !== undefined) {
             result.isAliased = true;
             const trueTagName = aliasJson[0].consequent_name;
 
             // Getting alias data
-            jsonData = await Api.getJson("/tags/" + encodeURIComponent(trueTagName) + ".json");
+            jsonData = await Api.getJson("/tags/" + encodeURIComponent(trueTagName) + ".json", true);
             result.count = jsonData.post_count;
             result.realName = trueTagName;
         }
@@ -318,8 +318,8 @@ export class TinyAlias extends RE6Module {
             result.isDNP = true;
         }
 
-        const wikiPage: ApiWikiPage = (await Api.getJson(`/wiki_pages.json?search[title]=${encodeURIComponent(result.realName)}`))[0];
-        if(wikiPage !== undefined && wikiPage.title === result.realName) {
+        const wikiPage: ApiWikiPage = (await Api.getJson(`/wiki_pages.json?search[title]=${encodeURIComponent(result.realName)}`, true))[0];
+        if (wikiPage !== undefined && wikiPage.title === result.realName) {
             result.wikiPageId = wikiPage.id;
         }
 

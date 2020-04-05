@@ -51,7 +51,10 @@ export class Api {
         });
     }
 
-    private static async request(url: string, method: string, data?: {}): Promise<string> {
+    private static async request(url: string, method: string, ignoreQueue: boolean, data?: {}): Promise<string> {
+        if (ignoreQueue === true) {
+            return this.requestFunction(url, method, data);
+        }
         const queue = this.getInstance().queue;
         const id = queue.getRequestId();
         queue.add(this.requestFunction, id, url, method, data);
@@ -63,8 +66,8 @@ export class Api {
      * @param url e6 endpoint without the host, => /posts/123456.json
      * @returns the response as a string
      */
-    public static async getUrl(url: string): Promise<string> {
-        return await this.request(url, "GET");
+    public static async getUrl(url: string, ignoreQueue = false): Promise<string> {
+        return await this.request(url, "GET", ignoreQueue);
     }
 
     /**
@@ -72,8 +75,8 @@ export class Api {
      * @param url e6 endpoint without the host, => /posts/123456.json
      * @returns the response as a string
      */
-    public static async getJson(url: string): Promise<any> {
-        const response = await this.getUrl(url);
+    public static async getJson(url: string, ignoreQueue = false): Promise<any> {
+        const response = await this.getUrl(url, ignoreQueue);
         return JSON.parse(response);
     }
 
@@ -82,8 +85,8 @@ export class Api {
      * @param url e6 endpoint without the host, => /posts/123456.json
      * @returns the response as a string
      */
-    public static async postUrl(url: string, json?: {}): Promise<string> {
-        return await this.request(url, "POST", json);
+    public static async postUrl(url: string, json?: {}, ignoreQueue = false): Promise<string> {
+        return await this.request(url, "POST", ignoreQueue, json);
     }
 
     /**
