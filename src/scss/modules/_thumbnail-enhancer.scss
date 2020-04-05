@@ -25,7 +25,7 @@ div#posts-container {
         article.post-preview {
             overflow: visible;
 
-            a.preview-box {
+            &>a.preview-box {
                 display: initial;
                 color: white;
 
@@ -54,7 +54,7 @@ div#posts-container {
                 div.preview-extras {
                     display: none;
 
-                    background: #00000099;
+                    opacity: 0.9;
                     font-size: 0.8rem;
                     line-height: 1rem;
                     font-weight: bold;
@@ -74,6 +74,23 @@ div#posts-container {
                     }
                 }
 
+                div.preview-voting {
+                    display: none;
+                    position: absolute;
+                    left: -2rem;
+                    top: 0;
+                    bottom: 0;
+                    grid-template-rows: repeat(auto-fill, 25%);
+                    margin-top: 0.25rem;
+
+                    button.voteButton {
+                        box-sizing: content-box;
+                        margin: 0.125rem 0;
+                        border-radius: 6px 0 0 6px;
+                        outline: 0;
+                    }
+                }
+
                 &.loading div.preview-extras {
                     display: none;
                 }
@@ -83,7 +100,7 @@ div#posts-container {
                 position: relative;
                 overflow: visible;
 
-                a.preview-box {
+                &>a.preview-box {
                     transform: translate(-50%, -50%);
 
                     position: absolute;
@@ -106,6 +123,10 @@ div#posts-container {
 
                     div.preview-extras {
                         display: block;
+                    }
+
+                    div.preview-voting {
+                        display: grid;
                     }
                 }
 
