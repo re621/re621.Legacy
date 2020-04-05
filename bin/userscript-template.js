@@ -25,6 +25,10 @@
 // @connect      api.github.com
 // ==/UserScript==
 
+/**
+ * This is a minified build. To see the source visit the projects github page
+ */
+
 window.re621 = new function() {
     this.name = "%NAME%";
     this.displayName = "%DISPLAYNAME%";

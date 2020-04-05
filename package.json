@@ -8,13 +8,14 @@
     "main": "./build/script.user.js",
     "scripts": {
         "autoprefixer": "postcss ./build/style.min.css --no-map --use autoprefixer -r",
-        "build": "npm-run-all eslint typescript browserify userscript creatednp sass autoprefixer clean",
-        "build:testing": "npm-run-all typescript browserify userscript sass autoprefixer clean",
+        "build": "npm-run-all eslint typescript browserify minify userscript creatednp sass autoprefixer clean",
+        "build:testing": "npm-run-all eslint typescript browserify userscript sass autoprefixer clean",
         "eslint": "eslint ./**/*.ts",
         "clean": "rimraf ./build/temp/",
         "test": "echo \"Error: no test specified\" && exit 1",
         "typescript": "tsc",
         "browserify": "browserify ./build/temp/js/main.js -o ./build/script.user.js",
+        "minify": "terser ./build/script.user.js --compress -o ./build/script.user.js",
         "userscript": "node ./bin/userscript-format.js",
         "sass": "sass ./src/scss/style.scss ./build/style.min.css --no-source-map --style compressed",
         "creatednp": "node ./bin/create-dnp.js"
@@ -44,6 +45,7 @@
         "postcss-cli": "^7.1.0",
         "rimraf": "^3.0.2",
         "sass": "^1.26.3",
+        "terser": "^4.6.10",
         "typescript": "^3.8.3"
     }
 }
