@@ -1,8 +1,6 @@
 import { Page } from "./data/Page";
 import { Hotkeys } from "./data/Hotkeys";
-
-declare const GM_getValue;
-declare const GM_setValue;
+import { GM } from "./api/GM";
 
 /**
  * Class that other modules extend.  
@@ -112,7 +110,7 @@ export class RE6Module {
      * Used while exporting settings to file, and pretty much nowhere else.
      */
     public getSavedSettings(): any {
-        return { name: "re621." + this.constructor.name, data: GM_getValue("re621." + this.constructor.name, {}) };
+        return { name: "re621." + this.constructor.name, data: GM.getValue("re621." + this.constructor.name, {}) };
     }
 
     /**
@@ -129,7 +127,7 @@ export class RE6Module {
      */
     private loadSettingsData(): void {
         const defaultValues = this.getDefaultSettings();
-        this.settings = GM_getValue("re621." + this.constructor.name, defaultValues);
+        this.settings = GM.getValue("re621." + this.constructor.name, defaultValues);
 
         // If defaultValues has a entry the defaultSettings do not have, add it
         // this might happen if the user saved and a defaultSetting gets added afterwards
@@ -144,7 +142,7 @@ export class RE6Module {
      * Saves the settings to cookies
      */
     private saveSettingsData(): void {
-        GM_setValue("re621." + this.constructor.name, this.settings);
+        GM.setValue("re621." + this.constructor.name, this.settings);
     }
 
     /** Establish the module's hotkeys */

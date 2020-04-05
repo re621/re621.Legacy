@@ -1,6 +1,6 @@
 import { Danbooru } from "../api/Danbooru";
+import { GM } from "../api/GM";
 
-declare const GM_xmlhttpRequest;
 declare const Danbooru;
 
 /**
@@ -81,7 +81,7 @@ export class Util {
 
     public static async userscriptRequest(url: string): Promise<string> {
         return new Promise(resolve => {
-            GM_xmlhttpRequest({
+            GM.xmlhttpRequest({
                 method: "GET",
                 url: url,
                 onload: res => { resolve(res.responseText); }
@@ -101,5 +101,4 @@ export class Util {
             .replace(/\<\/ul\>\r\n\<ul\>/gm, "")
             .replace(/\n(?!<)/gm, "<br />");
     }
-
 }

@@ -1,8 +1,7 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 import { Util } from "../../components/structure/Util";
-
-declare const GM_openInTab;
+import { GM } from "../../components/api/GM";
 
 export class ThumbnailEnhancer extends RE6Module {
 
@@ -140,7 +139,7 @@ export class ThumbnailEnhancer extends RE6Module {
             e.preventDefault();
             window.clearTimeout(dbclickTimer);
             prevent = true;
-            GM_openInTab(window.location.origin + $link.attr("href"));
+            GM.openInTab(window.location.origin + $link.attr("href"));
         });
 
         function parseRating(input: string): string {

@@ -21,8 +21,7 @@ import { ExtraInfo } from "../subscriptions/SubscriptionManager";
 import { Api } from "../../components/api/Api";
 import { User } from "../../components/data/User";
 import { ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
-
-declare const GM_setValue;
+import { GM } from "../../components/api/GM";
 
 /**
  * SettingsController  
@@ -845,7 +844,7 @@ export class SettingsController extends RE6Module {
 
                 Object.keys(parsedData).forEach((key) => {
                     $info.html("Importing " + key);
-                    GM_setValue(key, parsedData[key]);
+                    GM.setValue(key, parsedData[key]);
                 });
 
                 //console.log(parsedData);

@@ -1,7 +1,5 @@
 import { Page, PageDefintion } from "../data/Page";
-
-declare const GM_addStyle;
-declare const GM_getResourceText;
+import { GM } from "../api/GM";
 
 /**
  * StructureUtilities  
@@ -11,7 +9,7 @@ export class DomUtilities {
 
     public static createStructure(): void {
         // Load in the external stylesheet
-        GM_addStyle(GM_getResourceText("re621_styles"));
+        GM.addStyle(GM.getResourceText("re621_styles"));
 
         // Create a modal container
         $("<div>").attr("id", "modal-container").prependTo("div#page");

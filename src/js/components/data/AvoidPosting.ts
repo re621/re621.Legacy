@@ -1,4 +1,4 @@
-declare const GM_getResourceText;
+import { GM } from "../api/GM";
 
 /**
  * Manages the Avoid Posted list
@@ -10,7 +10,7 @@ export class AvoidPosting {
     private data;
 
     private constructor() {
-        this.data = JSON.parse(GM_getResourceText("re621_dnp")).data;
+        this.data = JSON.parse(GM.getResourceText("re621_dnp")).data;
     }
 
     /** Returns a new instance of the current object */
