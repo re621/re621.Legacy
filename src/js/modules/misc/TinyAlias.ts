@@ -113,7 +113,7 @@ export class TinyAlias extends RE6Module {
         // Sort textarea
         $sortButton.on("click", () => {
             const currentText = this.prepareInput(this.$textarea.val());
-            let tags = currentText.split(" ");
+            let tags = currentText.split(" ").map(e => e.trim());
             tags = [...new Set(tags)];
             tags.sort();
             this.$textarea.val(tags.join(" "));
