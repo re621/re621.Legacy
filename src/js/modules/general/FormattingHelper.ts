@@ -173,7 +173,7 @@ class FormattingHelper {
         this.$container.attr("data-editing", "true");
         this.$container.attr("data-drawer", "false");
 
-        this.$form = this.$container.parents("form.simple_form");
+        this.$form = this.$container.parents("form.simple_form").first();
         this.$textarea = this.$container.find("textarea");
         this.$preview = this.$container.find("div.dtext-preview");
 

@@ -76,6 +76,18 @@ export class DomUtilities {
             // Subscribe button container
             $("<span>").addClass("tag-action-subscribe").appendTo($actionsBox);
         });
+
+        /** Wrap the post description textareas in FormattingHelper compatible tags */
+        if (Page.matches(PageDefintion.upload) || Page.matches(PageDefintion.post)) {
+            const $textarea = $("textarea#post_description");
+
+            $("<div>")
+                .addClass("dtext-previewable")
+                .append($(`<div class="dtext-preview">`))
+                .insertBefore($textarea)
+                .append($textarea)
+                .wrap(`<form class="simple_form"></form>`);
+        }
     }
 
     /**
