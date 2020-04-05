@@ -240,10 +240,13 @@ export class SubscriptionManager extends RE6Module {
     }
 
     private getNextUpdateText(updateInProgress: boolean, lastUpdate: number, heartbeat: number): string {
+        const now = new Date().getTime();
         if (lastUpdate === 0) {
-            return Util.timeAgo(new Date().getTime() + this.updateInterval * 1000);
+            return Util.timeAgo(now + this.updateInterval * 1000);
         } else if (updateInProgress && !this.heartbeatCheck(new Date().getTime(), heartbeat, updateInProgress)) {
             return "In Progress. Check back in a bit";
+        } else if (now - lastUpdate > this.updateInterval * 1000) {
+            return "Now";
         } else {
             return Util.timeAgo(lastUpdate + this.updateInterval * 1000);
         }
