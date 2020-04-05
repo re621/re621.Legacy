@@ -23,8 +23,9 @@ import { BlacklistEnhancer } from "./modules/search/BlacklistEnhancer";
 import { InstantSearch } from "./modules/search/InstantSearch";
 import { InfiniteScroll } from "./modules/search/InfiniteScroll";
 import { ThumbnailEnhancer } from "./modules/search/ThumbnailsEnhancer";
-// - upload
+// - misc
 import { TinyAlias } from "./modules/misc/TinyAlias";
+import { WikiEnhancer } from "./modules/misc/WikiEnhancer";
 
 // - subscribers
 import { SubscriptionManager } from "./modules/subscriptions/SubscriptionManager";
@@ -53,6 +54,7 @@ const loadOrder = [
     ThumbnailEnhancer,
 
     TinyAlias,
+    WikiEnhancer,
     SubscriptionManager,
     SettingsController
 ];

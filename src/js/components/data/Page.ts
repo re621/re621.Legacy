@@ -100,4 +100,5 @@ export const PageDefintion = {
     pool: /^\/pools\/.+/,
     popular: /^\/explore\/posts\/popular.?/,
     favorites: /^\/favorites\/?.*/,
+    wiki: /^\/wiki_pages\/[0-9]+/
 };

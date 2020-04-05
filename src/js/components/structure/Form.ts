@@ -1,5 +1,7 @@
 import { Hotkeys } from "../data/Hotkeys";
 
+declare const GM_setClipboard;
+
 /**
  * Removes the hassle of creating HTML elements for a form
  */
@@ -226,8 +228,7 @@ export class Form {
             .appendTo($inputContainer);
 
         $($copybutton).click(function () {
-            $input.select();
-            document.execCommand("copy");
+            GM_setClipboard($input.val());
         });
 
         let timer: number;

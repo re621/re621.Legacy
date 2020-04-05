@@ -21,6 +21,7 @@
 // @grant        GM_download
 // @grant        GM_xmlhttpRequest
 // @grant        GM_openInTab
+// @grant        GM_setClipboard
 // @icon64       https://re621.github.io/images/icon.png
 // @connect      api.github.com
 // ==/UserScript==
