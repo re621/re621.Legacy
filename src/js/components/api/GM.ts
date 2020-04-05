@@ -114,5 +114,8 @@ interface GMOpenInTab {
 }
 
 interface GMSetClipboardInfo {
-    info: { type: string; mimetype: string; } | string;
+    info: {
+        type: string;
+        mimetype: string;
+    } | string;
 }
