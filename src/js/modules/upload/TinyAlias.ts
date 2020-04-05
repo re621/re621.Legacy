@@ -4,6 +4,7 @@ import { Api } from "../../components/api/Api";
 import { ApiTag } from "../../components/api/responses/ApiTag";
 import { Modal } from "../../components/structure/Modal";
 import { AvoidPosting } from "../../components/data/AvoidPosting";
+import { ApiWikiPage } from "../../components/api/responses/ApiWikiPage";
 
 export class TinyAlias extends RE6Module {
 
@@ -202,6 +203,10 @@ export class TinyAlias extends RE6Module {
             $input.val(tagInfo.realName);
         }
 
+        if(tagInfo.wikiPageId) {
+            this.$infoText.append(` <a href="/wiki_pages/${tagInfo.wikiPageId}">wiki</a>`);
+        }
+
         if (tagInfo.isDNP) {
             this.$infoText.append(`: ` + tag + ` is on <a href="/wiki_pages/85">DNP</a> list`);
         }
@@ -282,6 +287,7 @@ export class TinyAlias extends RE6Module {
             isAliased: false,
             isDNP: false,
             realName: undefined,
+            wikiPageId: undefined
         };
 
         // First data query
@@ -292,6 +298,7 @@ export class TinyAlias extends RE6Module {
         }
 
         result.count = jsonData.post_count;
+        result.realName = jsonData.name;
         this.$infoText.html(result.count + " posts");
 
         // Checking for aliases
@@ -309,6 +316,11 @@ export class TinyAlias extends RE6Module {
         // Checking for DNP implications
         if (AvoidPosting.contains(tag) || (result.isAliased && AvoidPosting.contains(result.realName))) {
             result.isDNP = true;
+        }
+
+        const wikiPage: ApiWikiPage = (await Api.getJson(`/wiki_pages.json?search[title]=${encodeURIComponent(result.realName)}`))[0];
+        if(wikiPage !== undefined && wikiPage.title === result.realName) {
+            result.wikiPageId = wikiPage.id;
         }
 
         return result;
@@ -388,4 +400,5 @@ interface TagResult {
     isAliased: boolean;
     realName: string;
     isDNP: boolean;
+    wikiPageId: number;
 }
