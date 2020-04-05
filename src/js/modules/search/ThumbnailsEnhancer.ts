@@ -123,26 +123,22 @@ export class ThumbnailEnhancer extends RE6Module {
         let prevent = false;
 
         //Make it so that the doubleclick prevents the normal click event
-        $link.on("click", e => {
-            //ignore mouse clicks which are not left clicks
-            if (e.button !== 0) { return; }
-            e.preventDefault();
+        $link.on("click.re621.thumbnail", (event) => {
+            if (event.button !== 0) { return; } // Ignore mouse clicks which are not left clicks
+            event.preventDefault();
 
-            console.log($(event.target));
             if ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton")) return;
 
             dbclickTimer = window.setTimeout(() => {
                 if (!prevent) {
-                    location.href = $link.attr("href");
+                    $link.off("click.re621.thumbnail");
+                    $link[0].click();
                 }
                 prevent = false;
             }, delay);
-        }).on("dblclick", e => {
-            //ignore mouse clicks which are not left clicks
-            if (e.button !== 0) {
-                return;
-            }
-            e.preventDefault();
+        }).on("dblclick.re621.thumbnail", (event) => {
+            if (event.button !== 0) { return; } // Ignore mouse clicks which are not left clicks
+            event.preventDefault();
             window.clearTimeout(dbclickTimer);
             prevent = true;
             GM_openInTab(window.location.origin + $link.attr("href"));
