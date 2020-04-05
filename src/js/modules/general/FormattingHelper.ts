@@ -57,6 +57,7 @@ const iconDefinitions = [
 export class FormattingManager extends RE6Module {
 
     private formatters: FormattingHelper[] = [];
+    private index = 0;
 
     /**
      * Returns a set of default settings values
@@ -96,7 +97,7 @@ export class FormattingManager extends RE6Module {
     public create(): void {
         $("div.dtext-previewable:has(textarea)").each((i, element) => {
             const $container = $(element);
-            const newFormatter = new FormattingHelper($container, this);
+            const newFormatter = new FormattingHelper($container, this, this.index);
             this.formatters.push(newFormatter);
 
             $container.on("re621:formatter:update", () => {
@@ -106,6 +107,8 @@ export class FormattingManager extends RE6Module {
                     }
                 });
             });
+
+            this.index++;
         });
     }
 
@@ -123,6 +126,7 @@ export class FormattingManager extends RE6Module {
 class FormattingHelper {
 
     private parent: FormattingManager;
+    private id: number;
 
     private $form: JQuery<HTMLElement>;
     private $container: JQuery<HTMLElement>;
@@ -136,8 +140,10 @@ class FormattingHelper {
 
     private $formatButtonsDrawer: JQuery<HTMLElement>;
 
-    public constructor($targetContainer: JQuery<HTMLElement>, parent: FormattingManager) {
+    public constructor($targetContainer: JQuery<HTMLElement>, parent: FormattingManager, id: number) {
         this.parent = parent;
+        this.id = id;
+
         this.$container = $targetContainer;
 
         this.createDOM();
@@ -214,7 +220,7 @@ class FormattingHelper {
 
         // Create the Button Editing Modal
         const $editButtonsForm = new Form(
-            { id: "dtext-edit-button", parent: "div#modal-container", columns: 2, },
+            { id: "dtext-edit-button-" + this.id, parent: "div#modal-container", columns: 2, },
             [
                 { id: "name", type: "input", label: "Name", stretch: "mid", },
                 { id: "icon", type: "icon", label: "Icon", data: iconDefinitions, stretch: "mid", },
@@ -332,7 +338,7 @@ class FormattingHelper {
 
         // - New Button Process
         const newFormatForm = new Form(
-            { id: "dtext-custom-button", parent: "div#modal-container", columns: 2, },
+            { id: "dtext-custom-button-" + this.id, parent: "div#modal-container", columns: 2, },
             [
                 { id: "name", type: "input", label: "Name", stretch: "mid", },
                 { id: "icon", type: "icon", label: "Icon", data: iconDefinitions, stretch: "mid", },
