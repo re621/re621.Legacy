@@ -40,7 +40,6 @@ export class TinyAlias extends RE6Module {
     public create(): void {
         if (!this.canInitialize()) return;
         super.create();
-
         this.buildDOM();
     }
 
@@ -53,13 +52,22 @@ export class TinyAlias extends RE6Module {
 
     /** Creates the document structure for the module */
     private buildDOM(): void {
+        //rebuild the layout when clicking on the edit button
+        //the event on that modifies the dom and removes the tinyalias container
+        //simply add it back after a small duration
+        $("#post-edit-link").one("click", () => {
+            this.destroy();
+            setTimeout(() => {
+                this.create();
+            }, 100);
+        });
         this.$textarea = $("textarea#post_tags, textarea#post_tag_string");
         this.$container = this.$textarea.parent();
 
         // Building the structure
         const $toolbar = $("<div>")
             .addClass("tiny-alias-container")
-            .insertAfter(this.$container);
+            .appendTo(this.$container);
 
         const $input = $("<input>")
             .attr({ type: "text", required: "", pattern: ".+", })
@@ -103,7 +111,7 @@ export class TinyAlias extends RE6Module {
         });
 
         // Sort textarea
-        $sortButton.click(() => {
+        $sortButton.on("click", () => {
             const currentText = this.prepareInput(this.$textarea.val());
             let tags = currentText.split(" ");
             tags = [...new Set(tags)];
