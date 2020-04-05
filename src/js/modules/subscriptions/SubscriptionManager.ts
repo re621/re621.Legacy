@@ -165,13 +165,13 @@ export class SubscriptionManager extends RE6Module {
 
         const form = new Form(
             {
-                id: "settings-module-status",
+                id: "subscriptions-status",
                 columns: 2,
                 parent: "div#modal-container",
             },
             [
                 {
-                    id: "features-title",
+                    id: "subscriptions-title",
                     type: "div",
                     value: "<h3>Stats</h3>",
                     stretch: "full"
@@ -318,7 +318,7 @@ export class SubscriptionManager extends RE6Module {
             if (definition.imageRemoveOnError === true) {
                 $content.remove();
             }
-        }
+        };
 
         if (definition.imageHref !== undefined) {
             const $a = $("<a>")
