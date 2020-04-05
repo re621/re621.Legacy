@@ -9,6 +9,11 @@ div.tiny-alias-container {
     margin-bottom: 0.5rem;
     margin-top: 0.25rem;
 
+    //Override style from e6
+    #tiny-alias-taginput {
+        max-width: 100%;
+    }
+
     input[type=text] {
         border-radius: 3px;
         grid-area: 1 / 1 / 2 / 3;

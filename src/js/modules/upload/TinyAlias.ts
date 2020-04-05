@@ -18,7 +18,7 @@ export class TinyAlias extends RE6Module {
     private aliasData;
 
     public constructor() {
-        super(PageDefintion.upload);
+        super([PageDefintion.upload, PageDefintion.post]);
     }
 
     /**
@@ -53,16 +53,17 @@ export class TinyAlias extends RE6Module {
 
     /** Creates the document structure for the module */
     private buildDOM(): void {
-        this.$textarea = $("textarea#post_tags");
+        this.$textarea = $("textarea#post_tags, textarea#post_tag_string");
         this.$container = this.$textarea.parent();
 
         // Building the structure
         const $toolbar = $("<div>")
             .addClass("tiny-alias-container")
-            .appendTo(this.$container);
+            .insertAfter(this.$container);
 
         const $input = $("<input>")
             .attr({ type: "text", required: "", pattern: ".+", })
+            .attr("id", "tiny-alias-taginput")
             .appendTo($toolbar);
         const $insertButton = $("<button>")
             .html("Insert")
