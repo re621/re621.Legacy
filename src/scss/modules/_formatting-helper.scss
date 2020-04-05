@@ -141,7 +141,7 @@ form.formatting-helper {
         &[data-editing=false] div.comment-buttons,
         &[data-editing=false] div.settings-buttons,
         &[data-editing=false] textarea {
-            display: none;
+            display: none !important;
         }
 
         &[data-editing=false] div.dtext-preview {
