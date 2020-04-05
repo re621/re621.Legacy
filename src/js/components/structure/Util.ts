@@ -79,7 +79,38 @@ export class Util {
             GM.xmlhttpRequest({
                 method: "GET",
                 url: url,
+                headers: { "User-Agent": window["re621"]["useragent"] },
                 onload: res => { resolve(res.responseText); }
+            });
+        });
+    }
+
+    public static async getImageBlob(url: string): Promise<Blob> {
+        return new Promise((resolve) => {
+            GM.xmlhttpRequest({
+                method: "GET",
+                url: url,
+                headers: { "User-Agent": window["re621"]["useragent"] },
+                responseType: "blob",
+                onload: (result) => { resolve(result.response as Blob); }
+            });
+        });
+    }
+
+    public static async getImageAsBase64(url: string): Promise<string> {
+        return new Promise((resolve) => {
+            GM.xmlhttpRequest({
+                method: "GET",
+                url: url,
+                headers: { "User-Agent": window["re621"]["useragent"] },
+                responseType: "blob",
+                onload: (result) => {
+                    const reader = new FileReader();
+                    reader.onloadend = function (): void {
+                        resolve(reader.result.toString());
+                    };
+                    reader.readAsDataURL(result.response as Blob);
+                }
             });
         });
     }
@@ -96,4 +127,5 @@ export class Util {
             .replace(/\<\/ul\>\r\n\<ul\>/gm, "")
             .replace(/\n(?!<)/gm, "<br />");
     }
+
 }

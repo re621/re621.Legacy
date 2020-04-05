@@ -68,7 +68,7 @@ interface GMDownladErrorTypes {
 interface GMxmlhttpRequestDetails {
     method: "GET" | "HEAD" | "POST";
     url: string;
-    headers?: string;
+    headers?: {} | string;
     data?: string;
     cookie?: string;
     binary?: boolean;
@@ -114,5 +114,5 @@ interface GMOpenInTab {
 }
 
 interface GMSetClipboardInfo {
-    info: { type: string; mimetype: string } | string;
+    info: { type: string; mimetype: string; } | string;
 }
