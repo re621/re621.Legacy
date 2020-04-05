@@ -8,8 +8,8 @@
     "main": "./build/script.user.js",
     "scripts": {
         "autoprefixer": "postcss ./build/style.min.css --no-map --use autoprefixer -r",
-        "build": "npm-run-all eslint typescript browserify minify userscript creatednp sass autoprefixer clean",
-        "build:testing": "npm-run-all eslint typescript browserify userscript sass autoprefixer clean",
+        "build:prod": "npm-run-all eslint typescript browserify minify userscript creatednp sass autoprefixer clean",
+        "build:dev": "npm-run-all eslint typescript browserify userscript sass autoprefixer clean",
         "eslint": "eslint ./**/*.ts",
         "clean": "rimraf ./build/temp/",
         "test": "echo \"Error: no test specified\" && exit 1",

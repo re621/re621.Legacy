@@ -3,7 +3,7 @@
     "tasks": [{
         "label": "build",
         "type": "npm",
-        "script": "build:testing",
+        "script": "build:dev",
         "problemMatcher": [
             "$eslint-stylish"
         ],

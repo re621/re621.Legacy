@@ -21,7 +21,7 @@ jobs:
     - uses: olegtarasov/get-tag@v2
   
     - run: npm ci
-    - run: npm run build
+    - run: npm run build:prod
       
     - name: Create a Release
       uses: ncipollo/release-action@v1
