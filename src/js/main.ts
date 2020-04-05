@@ -24,7 +24,7 @@ import { InstantSearch } from "./modules/search/InstantSearch";
 import { InfiniteScroll } from "./modules/search/InfiniteScroll";
 import { ThumbnailEnhancer } from "./modules/search/ThumbnailsEnhancer";
 // - upload
-import { TinyAlias } from "./modules/upload/TinyAlias";
+import { TinyAlias } from "./modules/misc/TinyAlias";
 
 // - subscribers
 import { SubscriptionManager } from "./modules/subscriptions/SubscriptionManager";
