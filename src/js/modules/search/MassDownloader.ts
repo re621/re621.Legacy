@@ -5,6 +5,7 @@ import { ThumbnailEnhancer } from "./ThumbnailsEnhancer";
 import { Util } from "../../components/structure/Util";
 import { Api } from "../../components/api/Api";
 import { ApiPost } from "../../components/api/responses/ApiPost";
+import { DownloadQueue } from "../../components/api/DownloadQueue";
 
 declare const JSZip, saveAs;
 
@@ -14,9 +15,11 @@ export class MassDownloader extends RE6Module {
 
     private showInterface = false;
 
+    private section: JQuery<HTMLElement>;
     private selectButton: JQuery<HTMLElement>;
     private actButton: JQuery<HTMLElement>;
     private infoText: JQuery<HTMLElement>;
+    private infoFile: JQuery<HTMLElement>;
 
     public constructor() {
         super(PageDefintion.search);
@@ -33,15 +36,16 @@ export class MassDownloader extends RE6Module {
     public create(): void {
 
         /* Create Button */
-        const $section = $("<section>")
+        this.section = $("<section>")
             .attr("id", "downloader-box")
             .appendTo("aside#sidebar");
-        $("<h1>").html("Mass Downloader").appendTo($section);
+        $("<h1>").html("Mass Downloader").appendTo(this.section);
 
         this.selectButton = $("<a>")
             .html("Select")
+            .attr("id", "download-select")
             .addClass("button btn-neutral")
-            .appendTo($section)
+            .appendTo(this.section)
             .on("click", (event) => {
                 event.preventDefault();
                 this.toggleState();
@@ -49,9 +53,9 @@ export class MassDownloader extends RE6Module {
 
         this.actButton = $("<a>")
             .html("Download")
+            .attr("id", "download-act")
             .addClass("button btn-neutral")
-            .css("display", "none")
-            .appendTo($section)
+            .appendTo(this.section)
             .on("click", (event) => {
                 event.preventDefault();
                 this.infoText.html(`<i class="fas fa-spinner fa-spin"></i> Processing . . .`);
@@ -63,7 +67,9 @@ export class MassDownloader extends RE6Module {
                 });
 
                 if (imageList.length === 0) {
-                    this.infoText.html(`<i class="far fa-times-circle"></i> Error: No files selected!`);
+                    this.infoText
+                        .attr("data-state", "error")
+                        .html(`Error: No files selected!`);
                     return;
                 }
 
@@ -74,51 +80,44 @@ export class MassDownloader extends RE6Module {
                     dataQueue.push(Api.getJson("/posts.json?tags=id:" + value.join(",")));
                 });
 
-                this.infoText.html(`<i class="fas fa-spinner fa-spin"></i> Requesting API data . . .`);
-
                 Promise.all(dataQueue).then((dataChunks) => {
                     // 1. Get post data from the API
-                    this.infoText.html(`<i class="fas fa-spinner fa-spin"></i> Downloading images . . .`);
-                    const downloadQueue = [];
+                    this.infoText
+                        .attr("data-state", "loading")
+                        .html(`Downloading images . . .`);
+                    const downloadQueue = new DownloadQueue();
 
                     //    Queue up the file downloads
                     dataChunks.forEach((chunk) => {
                         chunk.posts.forEach((post: ApiPost) => {
-                            downloadQueue.push(new Promise((resolve) => {
-                                resolve({
+                            downloadQueue.add(
+                                {
                                     name: this.parseTemplate(post),
-                                    data: Util.getImageBlob(post.file.url),
-                                });
-                            }));
+                                    path: post.file.url,
+                                    date: new Date(post.updated_at),
+                                    tags: post.tags.general.join(" "),
+                                },
+                                (url: string) => {
+                                    this.infoText.html(`Processing . . . `);
+                                    this.infoFile.html(url.replace("https://static1.e621.net/data/", ""));
+                                }
+                            );
                         });
                     });
 
-                    return Promise.all(downloadQueue);
-                }).then((downloadData) => {
-                    // 2. Compress the downloaded files
-                    this.infoText.html(`<i class="fas fa-spinner fa-spin"></i> Creating an archive . . . `);
+                    this.infoText.html(`Processing . . . `);
 
-                    const zip = new JSZip();
-                    downloadData.forEach((value) => {
-                        zip.file(value.name, value.data, { binary: true });
-                    });
-
-                    this.infoText.html(`<i class="fas fa-spinner fa-spin"></i> Compressing . . . `);
-                    const progress = $("<span>").html("").appendTo(this.infoText);
-                    const progressFile = $("<div>").addClass("progress-file").html("").appendTo(this.infoText);
-
-                    return zip.generateAsync({
-                        type: "blob",
-                        compression: "DEFLATE",
-                        compressionOptions: { level: 9 },
-                        comment: "Downloaded from e621 on " + new Date().toUTCString(),
-                    }, (metadata) => {
-                        progress.html(metadata.percent.toFixed(2) + "%");
-                        if (metadata.currentFile) { progressFile.html(metadata.currentFile); }
-                        else { progressFile.html(""); }
+                    return downloadQueue.process((metadata) => {
+                        this.infoText.html(`Compressing . . . ` + metadata.percent.toFixed(2) + `%`);
+                        if (metadata.currentFile) { this.infoFile.html(metadata.currentFile); }
+                        else { this.infoFile.html(""); }
                     });
                 }).then((zipData) => {
-                    this.infoText.html(`<i class="far fa-check-circle"></i> Done! `);
+                    this.infoText
+                        .attr("data-state", "done")
+                        .html(`Done! `);
+                    this.infoFile.html("");
+
                     // 3. Download the resulting ZIP
                     const $downloadLink = $("<a>")
                         .html("Download Archive")
@@ -130,13 +129,18 @@ export class MassDownloader extends RE6Module {
 
                     if (this.fetchSettings("autoDownloadArchive")) { $downloadLink.get(0).click(); }
                 });
+
             });
 
         this.infoText = $("<div>")
-            .attr("id", "download-info")
+            .addClass("download-info")
             .html("")
-            .css("display", "none")
-            .appendTo($section);
+            .appendTo(this.section);
+
+        this.infoFile = $("<div>")
+            .addClass("download-file")
+            .html("")
+            .appendTo(this.section);
     }
 
     private toggleState(): void {
@@ -146,12 +150,10 @@ export class MassDownloader extends RE6Module {
 
         if (this.showInterface) {
             this.selectButton.html("Cancel");
-            this.actButton.css("display", "");
-            this.infoText.css("display", "");
+            this.section.attr("data-interface", "true");
         } else {
             this.selectButton.html("Select");
-            this.actButton.css("display", "none");
-            this.infoText.css("display", "none");
+            this.section.attr("data-interface", "false");
         }
     }
 

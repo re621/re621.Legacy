@@ -17,11 +17,51 @@ section#downloader-box {
         text-align: center;
     }
 
-    div#download-info {
+    div.download-info {
         grid-column: span 2;
 
-        div.progress-file {
-            font-family: monospace;
+        &[data-state] {
+            padding-left: 1.125rem;
+            position: relative;
+
+            &::before {
+                content: "";
+                font-family: "Font Awesome 5 Free";
+                font-weight: 400;
+
+                position: absolute;
+                left: 0;
+                bottom: 0;
+            }
+
+            &[data-state=done]::before {
+                content: unicode("f058"); // check-circle
+            }
+
+            &[data-state=error]::before {
+                content: unicode("f057"); // times-circle
+            }
+
+            &[data-state=loading]::before {
+                content: unicode("f110"); // spinner
+                font-weight: 700;
+                animation: fa-spin 2s infinite linear;
+            }
+        }
+    }
+
+    div.download-file {
+        grid-column: span 2;
+        font-family: monospace;
+        word-break: break-word;
+    }
+
+    &:not([data-interface=true]) {
+
+        a#download-act,
+        div.download-info,
+        div.download-file {
+            display: none;
         }
     }
 }
