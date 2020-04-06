@@ -116,14 +116,16 @@ export class SettingsController extends RE6Module {
             blacklistEnhancer = ModuleController.get(BlacklistEnhancer),
             thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer);
 
-        const templateIcons = new Form(
-            { id: "title-template-icons", columns: 2, },
+        const templateVars = new Form(
+            { id: "general-template-vars", columns: 2, },
             [
                 { id: "explain", type: "div", stretch: "mid", value: `<div class="notice unmargin">The following variables can be used:</div>` },
                 { id: "postnum", type: "copy", label: "Post ID", value: "%postid%", },
                 { id: "author", type: "copy", label: "Artist", value: "%artist%", },
                 { id: "copyright", type: "copy", label: "Copyright", value: "%copyright%", },
                 { id: "characters", type: "copy", label: "Characters", value: "%character%", },
+                { id: "species", type: "copy", label: "Species", value: "%species%", },
+                { id: "meta", type: "copy", label: "Meta", value: "%meta%", },
             ]
         );
 
@@ -158,7 +160,7 @@ export class SettingsController extends RE6Module {
                     id: "general-title-template-variables",
                     type: "div",
                     label: " ",
-                    value: templateIcons.get(),
+                    value: templateVars.get(),
                     stretch: "full",
                 },
                 {
@@ -414,6 +416,8 @@ export class SettingsController extends RE6Module {
                 { id: "author", type: "copy", label: "Artist", value: "%artist%", },
                 { id: "copyright", type: "copy", label: "Copyright", value: "%copyright%", },
                 { id: "characters", type: "copy", label: "Characters", value: "%character%", },
+                { id: "species", type: "copy", label: "Species", value: "%species%", },
+                { id: "meta", type: "copy", label: "Meta", value: "%meta%", },
             ]
         );
 
