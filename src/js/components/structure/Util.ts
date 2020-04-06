@@ -74,6 +74,12 @@ export class Util {
         downloadAnchorNode.remove();
     }
 
+    /**
+     * Returns the data at the specified location as a string.  
+     * The location's domain MUST be listed in a @connect field in the script header.
+     * @param url Page URL
+     * @returns string Page data
+     */
     public static async userscriptRequest(url: string): Promise<string> {
         return new Promise(resolve => {
             GM.xmlhttpRequest({
@@ -85,6 +91,12 @@ export class Util {
         });
     }
 
+    /**
+     * Returns the image at the specified location as a blob.  
+     * The location's domain MUST be listed in a @connect field in the script header.
+     * @param url Image URL
+     * @returns blob Image data
+     */
     public static async getImageBlob(url: string): Promise<Blob> {
         return new Promise((resolve) => {
             GM.xmlhttpRequest({
@@ -97,7 +109,14 @@ export class Util {
         });
     }
 
-    public static async getImageAsBase64(url: string): Promise<string> {
+    /**
+     * Returns the image at the specified location as a data-url.  
+     * This is used to bypass e621's restrictions on external files.
+     * The location's domain MUST be listed in a @connect field in the script header.
+     * @param url Image URL
+     * @returns string Data-URL
+     */
+    public static async getImageAsDataURL(url: string): Promise<string> {
         return new Promise((resolve) => {
             GM.xmlhttpRequest({
                 method: "GET",
@@ -113,6 +132,32 @@ export class Util {
                 }
             });
         });
+    }
+
+    /**
+     * Returns the current date and time in a compressed format.  
+     * Used to make downloaded file names unique, i.e. download-200405-0350.zip instead of download.zip
+     * @returns String with a date and time in YYMMDD-HHMM format.
+     */
+    public static getDatetimeShort(): string {
+        function twoDigit(n): string { return (n < 10 ? '0' : '') + n; }
+
+        const date = new Date();
+        return (date.getFullYear() + "").substring(2) + twoDigit(date.getMonth() + 1) + twoDigit(date.getDate()) + "-" + twoDigit(date.getHours()) + twoDigit(date.getMinutes());
+    }
+
+    /**
+     * Split the array into chunks of specified size.
+     * @param input Original array
+     * @param size Size of the resulting chunks
+     * @returns Array of smaller arrays of specified size
+     */
+    public static chunkArray(input: any[], size: number): any[] {
+        const result = [];
+        for (let i = 0; i < input.length; i += size) {
+            result.push(input.slice(i, i + size));
+        }
+        return result;
     }
 
     /**

@@ -13,6 +13,7 @@
 // @require      https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.2.0/lazysizes.min.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/jszip/3.3.0/jszip.min.js
 // @require      https://cdn.jsdelivr.net/npm/jquery.hotkeys@0.1.0/jquery.hotkeys.min.js
+// @require      https://cdn.jsdelivr.net/npm/file-saver@2.0.2/dist/FileSaver.min.js
 // @resource     re621_styles https://github.com/re621/re621/releases/download/%VERSION%/style.min.css
 // @resource     re621_dnp https://github.com/re621/re621/releases/download/%VERSION%/avoid-posting.json
 // @grant        GM_setValue

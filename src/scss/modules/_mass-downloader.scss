@@ -12,6 +12,18 @@ section#downloader-box {
     h1 {
         grid-column: span 2;
     }
+
+    a.button {
+        text-align: center;
+    }
+
+    div#download-info {
+        grid-column: span 2;
+
+        div.progress-file {
+            font-family: monospace;
+        }
+    }
 }
 
 div#posts-container[data-downloading=true] {
