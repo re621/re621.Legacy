@@ -662,6 +662,14 @@ export class SettingsController extends RE6Module {
 
     /** Creates the DOM for the miscellaneous settings page */
     private createTabMiscellaneous(): Form {
+        const modules = ModuleController.getAll();
+
+        // "Reset Module" selector
+        const moduleSelector = [{ value: "none", name: "------" }];
+        modules.forEach((module) => {
+            moduleSelector.push({ value: module.constructor.name, name: module.constructor.name });
+        });
+
         // Create the settings form
         const form = new Form(
             {
@@ -825,6 +833,33 @@ export class SettingsController extends RE6Module {
                     value: "Delete settings for all modules. <b>This cannot be undone.</b>",
                     stretch: "mid",
                 },
+                {
+                    id: "misc-reset-specific",
+                    type: "select",
+                    label: "Module",
+                    value: "none",
+                    data: moduleSelector,
+                    stretch: "mid",
+                },
+                {
+                    id: "misc-reset-specific-text-1",
+                    type: "div",
+                    value: "Reset a specific module.",
+                    stretch: "column",
+                },
+                {
+                    id: "misc-reset-specific-action",
+                    type: "button",
+                    label: " ",
+                    value: "Reset",
+                    stretch: "mid",
+                },
+                {
+                    id: "misc-reset-specific-text-2",
+                    type: "div",
+                    value: "<b>This cannot be undone.</b>",
+                    stretch: "column",
+                },
             ]
         );
 
@@ -929,6 +964,12 @@ export class SettingsController extends RE6Module {
             });
             location.reload();
 
+        });
+
+        miscFormInput.get("misc-reset-specific-action").on("click", () => {
+            const moduleName = miscFormInput.get("misc-reset-specific").val().toString();
+            if (moduleName === "none") return;
+            ModuleController.getByName(moduleName).clearSettings();
         });
     }
 
