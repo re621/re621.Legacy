@@ -178,6 +178,7 @@ export class MassDownloader extends RE6Module {
             .replace(/%character%/g, data.tags.character.join("-"))
             .replace(/%species%/g, data.tags.species.join("-"))
             .replace(/%meta%/g, data.tags.meta.join("-"))
+            .slice(0, 128)
             .replace(/-{2,}/g, "-")
             .replace(/-*$/g, "")
             + "." + data.file.ext;
