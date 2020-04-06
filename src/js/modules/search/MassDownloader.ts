@@ -26,6 +26,7 @@ export class MassDownloader extends RE6Module {
         return {
             enabled: true,
             template: "%artist%/%postid%-%copyright%-%character%-%species%",
+            autoDownloadArchive: true,
         };
     }
 
@@ -119,14 +120,15 @@ export class MassDownloader extends RE6Module {
                 }).then((zipData) => {
                     this.infoText.html(`<i class="far fa-check-circle"></i> Done! `);
                     // 3. Download the resulting ZIP
-                    $("<a>")
+                    const $downloadLink = $("<a>")
                         .html("Download Archive")
                         .appendTo(this.infoText)
                         .on("click", (event) => {
                             event.preventDefault();
                             saveAs(zipData, "re621-download-" + Util.getDatetimeShort() + ".zip");
-                        })
-                        .get(0).click();
+                        });
+
+                    if (this.fetchSettings("autoDownloadArchive")) { $downloadLink.get(0).click(); }
                 });
             });
 
