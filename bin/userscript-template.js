@@ -18,6 +18,7 @@
 // @resource     re621_dnp https://github.com/re621/re621/releases/download/%VERSION%/avoid-posting.json
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @grant        GM_deleteValue
 // @grant        GM_getResourceText
 // @grant        GM_addStyle
 // @grant        GM_download
