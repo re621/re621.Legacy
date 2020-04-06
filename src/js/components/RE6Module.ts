@@ -106,6 +106,14 @@ export class RE6Module {
     }
 
     /**
+     * Clears stored settings and resets the configuration to default values.
+     */
+    public clearSettings(): void {
+        GM.deleteValue("re621." + this.constructor.name);
+        this.loadSettingsData();
+    }
+
+    /**
      * Retrieves the data that has actually been saved into the settings.  
      * Used while exporting settings to file, and pretty much nowhere else.
      */
@@ -122,8 +130,8 @@ export class RE6Module {
     }
 
     /**
-     * Loads settings values from cookies if they exist.  
-     * Otherwise, loads the default values
+     * Loads the settings data from Tampermonkey storage.  
+     * If no settings exist, uses default values instead.
      */
     private loadSettingsData(): void {
         const defaultValues = this.getDefaultSettings();
@@ -139,7 +147,7 @@ export class RE6Module {
     }
 
     /**
-     * Saves the settings to cookies
+     * Save the settings to Tampermoknkey storage.  
      */
     private saveSettingsData(): void {
         GM.setValue("re621." + this.constructor.name, this.settings);

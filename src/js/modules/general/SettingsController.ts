@@ -799,6 +799,32 @@ export class SettingsController extends RE6Module {
                     value: "",
                     stretch: "column",
                 },
+                {
+                    id: "misc-esix-hr-1",
+                    type: "hr",
+                    stretch: "full",
+                },
+
+                // Reset Configuration
+                {
+                    id: "misc-reset-modules",
+                    type: "div",
+                    value: "<h3>Reset Modules</h3>",
+                    stretch: "full",
+                },
+                {
+                    id: "misc-reset-everything",
+                    type: "button",
+                    label: "Everything",
+                    value: "Clear",
+                    stretch: "column",
+                },
+                {
+                    id: "misc-reset-everything-text",
+                    type: "div",
+                    value: "Delete settings for all modules. <b>This cannot be undone.</b>",
+                    stretch: "mid",
+                },
             ]
         );
 
@@ -893,6 +919,16 @@ export class SettingsController extends RE6Module {
             }
 
             $info.html("Settings imported!");
+        });
+
+        // Reset Configuration
+        miscFormInput.get("misc-reset-everything").on("click", () => {
+
+            ModuleController.getAll().forEach((module) => {
+                module.clearSettings();
+            });
+            location.reload();
+
         });
     }
 

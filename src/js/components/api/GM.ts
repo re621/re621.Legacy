@@ -5,6 +5,7 @@ declare const GM_addStyle;
 declare const GM_download;
 declare const GM_setValue;
 declare const GM_getValue;
+declare const GM_deleteValue;
 declare const GM_xmlhttpRequest;
 declare const GM_openInTab;
 declare const GM_setClipboard;
@@ -28,6 +29,9 @@ export class GM {
     public static getValue(name: string, defaultValue: any): any {
         return GM_getValue(name, defaultValue);
     };
+    public static deleteValue(name: string): void {
+        GM_deleteValue(name);
+    }
     public static xmlhttpRequest(details: GMxmlhttpRequestDetails): void {
         return GM_xmlhttpRequest(details);
     };
