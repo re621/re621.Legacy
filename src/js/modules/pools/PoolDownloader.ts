@@ -59,6 +59,9 @@ export class PoolDownloader extends RE6Module {
 
     /** Creates the module's structure. */
     public create(): void {
+        if (!this.canInitialize()) return;
+        super.create();
+
         const container = $("div#c-pools")
             .addClass("pool-container");
         const overview = $("div#a-show")
