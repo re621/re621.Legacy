@@ -76,7 +76,7 @@ export class Util {
 
     public static async userscriptRequest(url: string): Promise<string> {
         return new Promise(resolve => {
-            GM.xmlhttpRequest({
+            GM.xmlHttpRequest({
                 method: "GET",
                 url: url,
                 onload: res => { resolve(res.responseText); }

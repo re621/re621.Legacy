@@ -82,7 +82,7 @@ export class ImageScaler extends RE6Module {
         this.resizeSelector.change((event, save) => {
             const size = $(event.target).val() + "";
             this.setImageSize(size);
-            if (save) ImageScaler.getInstance().pushSettings("size", size);
+            if (save !== false) ImageScaler.getInstance().pushSettings("size", size);
         });
 
         this.image.click(() => {
