@@ -958,12 +958,12 @@ export class SettingsController extends RE6Module {
 
         // Reset Configuration
         miscFormInput.get("misc-reset-everything").on("click", () => {
-
-            ModuleController.getAll().forEach((module) => {
-                module.clearSettings();
-            });
-            location.reload();
-
+            if(confirm("Are you absolutely sure?")) {
+                ModuleController.getAll().forEach((module) => {
+                    module.clearSettings();
+                });
+                location.reload();
+            }
         });
 
         miscFormInput.get("misc-reset-specific-action").on("click", () => {
