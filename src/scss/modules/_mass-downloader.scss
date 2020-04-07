@@ -26,24 +26,27 @@ section#downloader-box {
 
             &::before {
                 content: "";
+                display: block;
+                line-height: 1;
+
                 font-family: "Font Awesome 5 Free";
                 font-weight: 400;
 
                 position: absolute;
                 left: 0;
-                bottom: 0;
+                bottom: 0.125rem;
             }
 
             &[data-state=done]::before {
-                content: unicode("f058"); // check-circle
+                content: unicode("f058"); // fa-check-circle
             }
 
             &[data-state=error]::before {
-                content: unicode("f057"); // times-circle
+                content: unicode("f057"); // fa-times-circle
             }
 
             &[data-state=loading]::before {
-                content: unicode("f110"); // spinner
+                content: unicode("f1ce"); // fa-circle-notch
                 font-weight: 700;
                 animation: fa-spin 2s infinite linear;
             }
@@ -87,17 +90,23 @@ div#posts-container[data-downloading=true] {
 
     article.post-preview.download-item {
 
+        a {
+            outline: 0;
+        }
+
         &::after {
-            content: unicode("f058"); // circle-check
+            content: unicode("f358"); // fa-arrow-alt-circle-down
+            display: block;
+            line-height: 1;
 
             position: absolute;
-            top: 1.5rem;
+            top: 0.5rem;
             right: 0.5rem;
 
             font-family: "Font Awesome 5 Free";
             font-weight: 500;
             font-size: 3rem;
-            color: yellow;
+            color: goldenrod;
             text-shadow: 0 0 3px black;
 
             pointer-events: none;
@@ -107,7 +116,7 @@ div#posts-container[data-downloading=true] {
             content: unicode("f111"); // fa-circle
             font-weight: 500;
 
-            color: yellow;
+            color: goldenrod;
         }
 
         &[data-state=loading]::after {
@@ -115,17 +124,17 @@ div#posts-container[data-downloading=true] {
             font-weight: 700;
             animation: fa-spin 2s infinite linear;
 
-            color: orange;
+            color: goldenrod;
         }
 
         &[data-state=error]::after {
-            content: unicode("f057");
-            color: darkred;
+            content: unicode("f057"); // fa-times-circle
+            color: orangered;
         }
 
         &[data-state=done]::after {
-            content: unicode("f058"); // circle-check
-            color: green;
+            content: unicode("f058"); // fa-circle-check
+            color: limegreen;
         }
     }
 

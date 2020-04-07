@@ -11,7 +11,9 @@ declare const saveAs;
 
 export class MassDownloader extends RE6Module {
 
-    private static chunkSize = 40;
+    // Requesting multiple post ID from the API is limited to a specific number.
+    // What that number is... nobody knows. It is currently presumed to be ~100.
+    private static chunkSize = 100;
 
     private showInterface = false;
     private processing = false;
@@ -127,7 +129,9 @@ export class MassDownloader extends RE6Module {
         this.processing = true;
         this.actButton.attr("disabled", "disabled");
 
-        this.infoText.html(`<i class="fas fa-spinner fa-spin"></i> Processing . . .`);
+        this.infoText
+            .attr("data-state", "loading")
+            .html(`Indexing selected files . . .`);
 
         // Get the IDs of all selected images
         const imageList: number[] = [];
@@ -142,21 +146,23 @@ export class MassDownloader extends RE6Module {
             return;
         }
 
-        // Fetch the post data from the API
+        // Create API requests, separated into chunks
+        this.infoText
+            .attr("data-state", "loading")
+            .html(`Fetching API data . . .`);
+
         const dataQueue = [];
-        const requests = Util.chunkArray(imageList, MassDownloader.chunkSize);
-        requests.forEach((value) => {
+        Util.chunkArray(imageList, MassDownloader.chunkSize).forEach((value) => {
             dataQueue.push(Api.getJson("/posts.json?tags=id:" + value.join(",")));
         });
 
+        // Fetch the post data from the API
         Promise.all(dataQueue.reverse()).then((dataChunks) => {
+            // dataQueue needs to be reversed in order to start from top to bottom
+            // downloadQueue will not use the exact order, but it's an improvement
             const downloadQueue = new DownloadQueue();
 
             // Create an interface to output queue status
-            this.infoText
-                .attr("data-state", "loading")
-                .html(`Downloading images . . .`);
-
             const threadInfo: JQuery<HTMLElement>[] = [];
             for (let i = 0; i < downloadQueue.getThreadCount(); i++) {
                 threadInfo.push($("<span>").appendTo(this.infoFile));
