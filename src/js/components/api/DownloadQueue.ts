@@ -4,11 +4,9 @@ declare const JSZip;
 
 export class DownloadQueue {
 
-    /**
-     * Maximum concurrent HTTP connections, per domain. Most modern browsers have this limited to 6.  
-     * If the limit is exceeded, the connections will stall, and the overall throughput will suffer.
-     */
-    private static concurrent = 3;
+    // Maximum concurrent HTTP connections, per domain. Most modern browsers have this limited to 6.  
+    // If the limit is exceeded, the connections will stall, and the overall throughput will suffer.
+    private static concurrent = 6;
 
     private queue: QueuedFile[];
     private zip: any;
