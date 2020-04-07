@@ -52,10 +52,10 @@ export class DownloadQueue {
      * @param onArchiveProgress Callback function that fires every time progress is made on the compression.
      * @returns Promise with a ZIP archive as a blob
      */
-    public run(onArchiveProgress?: Function): Promise<Blob> {
+    public async run(onArchiveProgress?: Function): Promise<Blob> {
         const processes: Promise<any>[] = [];
         for (let i = 0; i < DownloadQueue.concurrent; i++) {
-            processes.push(this.createnewProcess(i));
+            processes.push(this.createNewProcess(i));
         }
         return Promise.all(processes).then(() => {
             return this.zip.generateAsync({
@@ -73,7 +73,7 @@ export class DownloadQueue {
      * If no items remain in the queue, it quietly shuts down.
      * @param thread Thread number that this process belongs to
      */
-    private async createnewProcess(thread: number): Promise<any> {
+    private async createNewProcess(thread: number): Promise<any> {
         return new Promise(async (resolve) => {
 
             while (this.queue.length > 0) {
