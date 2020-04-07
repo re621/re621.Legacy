@@ -136,14 +136,14 @@ export class ThumbnailEnhancer extends RE6Module {
 
         //Make it so that the doubleclick prevents the normal click event
         $link.on("click.re621.thumbnail", (event) => {
-            // Ignore mouse clicks which are not left clicks
-            if (event.button !== 0) { return; }
-
-            // Stop keeping track of double clicks if the zoom is paused
-            if (ThumbnailEnhancer.zoomPaused) { return; }
-
-            // Make sure the click does not get triggered on the voting buttons
-            if ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton")) { return; }
+            if (
+                // Ignore mouse clicks which are not left clicks
+                (event.button !== 0) ||
+                // Stop keeping track of double clicks if the zoom is paused
+                (ThumbnailEnhancer.zoomPaused) ||
+                // Make sure the click does not get triggered on the voting buttons
+                ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton"))
+            ) { return; }
 
             event.preventDefault();
 
@@ -155,8 +155,14 @@ export class ThumbnailEnhancer extends RE6Module {
                 prevent = false;
             }, delay);
         }).on("dblclick.re621.thumbnail", (event) => {
-            // Ignore mouse clicks which are not left clicks
-            if (event.button !== 0) { return; }
+            if (
+                // Ignore mouse clicks which are not left clicks
+                (event.button !== 0) ||
+                // Stop keeping track of double clicks if the zoom is paused
+                (ThumbnailEnhancer.zoomPaused) ||
+                // Make sure the click does not get triggered on the voting buttons
+                ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton"))
+            ) { return; }
 
             event.preventDefault();
             window.clearTimeout(dbclickTimer);
