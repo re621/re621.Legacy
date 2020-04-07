@@ -69,7 +69,8 @@ section#downloader-box {
         span {
             position: relative;
             display: block;
-            word-break: break-all;
+            word-break: keep-all;
+            overflow: hidden;
             padding-left: 1.125rem;
             font-size: 85%;
             counter-increment: number;
