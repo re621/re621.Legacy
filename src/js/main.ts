@@ -35,6 +35,7 @@ import { PoolSubscriptions } from "./modules/subscriptions/PoolSubscriptions";
 import { TagSubscriptions } from "./modules/subscriptions/TagSubscriptions";
 // - settings
 import { SettingsController } from "./modules/general/SettingsController";
+import { PoolDownloader } from "./modules/pools/PoolDownloader";
 
 
 const loadOrder = [
@@ -57,6 +58,8 @@ const loadOrder = [
 
     TinyAlias,
     WikiEnhancer,
+
+    PoolDownloader,
 
     SubscriptionManager,
     SettingsController

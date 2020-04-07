@@ -1,15 +1,14 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { PageDefintion } from "../../components/data/Page";
-import { ThumbnailEnhancer } from "./ThumbnailsEnhancer";
-import { Util } from "../../components/structure/Util";
+import { PageDefintion, Page } from "../../components/data/Page";
 import { Api } from "../../components/api/Api";
-import { ApiPost } from "../../components/api/responses/ApiPost";
+import { ApiPool } from "../../components/api/responses/ApiPool";
+import { Util } from "../../components/structure/Util";
 import { DownloadQueue } from "../../components/api/DownloadQueue";
-import { InfiniteScroll } from "./InfiniteScroll";
+import { ApiPost } from "../../components/api/responses/ApiPost";
 
 declare const saveAs;
 
-export class MassDownloader extends RE6Module {
+export class PoolDownloader extends RE6Module {
 
     // Requesting multiple post ID from the API is limited to a specific number.
     // What that number is... nobody knows. It is currently presumed to be ~100.
@@ -19,7 +18,6 @@ export class MassDownloader extends RE6Module {
     // Different sources cite different numbers. For now, we'll go with 800MB.
     private static maxBlobSize = 838860800;
 
-    private showInterface = false;
     private processing = false;
 
     private downloadOverSize = false;
@@ -31,13 +29,13 @@ export class MassDownloader extends RE6Module {
 
     // Interface elements
     private section: JQuery<HTMLElement>;
-    private selectButton: JQuery<HTMLElement>;
+
     private actButton: JQuery<HTMLElement>;
     private infoText: JQuery<HTMLElement>;
     private infoFile: JQuery<HTMLElement>;
 
     public constructor() {
-        super(PageDefintion.search);
+        super(PageDefintion.pool);
     }
 
     /**
@@ -54,33 +52,34 @@ export class MassDownloader extends RE6Module {
 
     /** Creates the module's structure. */
     public create(): void {
+        const container = $("div#c-pools")
+            .addClass("pool-container");
+        const overview = $("div#a-show")
+            .addClass("pool-overview");
 
-        this.section = $("<section>")
-            .attr("id", "downloader-box")
-            .appendTo("aside#sidebar");
-        $("<h1>").html("Mass Downloader").appendTo(this.section);
-
-        // Toggles the downloader UI
-        this.selectButton = $("<a>")
-            .html("Select")
-            .attr("id", "download-select")
+        // Toggle Button
+        this.actButton = $("<button>")
+            .addClass("pool-download-button")
             .addClass("button btn-neutral")
-            .appendTo(this.section)
-            .on("click", (event) => {
-                event.preventDefault();
-                this.toggleInterface();
-            });
-
-        // Processes selected files
-        this.actButton = $("<a>")
             .html("Download")
-            .attr("id", "download-act")
-            .addClass("button btn-neutral")
-            .appendTo(this.section)
+            .prependTo(overview)
             .on("click", (event) => {
                 event.preventDefault();
+                container.attr("data-interface", "true");
                 this.processFiles();
             });
+
+        // Sidebar
+        const sidebar = $("<aside>")
+            .addClass("pool-sidebar")
+            .appendTo(container);
+
+        this.section = $("<section>")
+            .attr("id", "pool-downloader-box")
+            .appendTo(sidebar);
+        $("<h1>").html("Pool Downloader").appendTo(this.section);
+
+        // Processes selected files
 
         // Contains general info about the download
         this.infoText = $("<div>")
@@ -95,77 +94,43 @@ export class MassDownloader extends RE6Module {
             .appendTo(this.section);
     }
 
-    /**
-     * Toggles the downloader interface.  
-     * Enabling the interface should also disable thumbnail enhancements,
-     * as well as anything else that might interfere with the file selection.
-     */
-    private toggleInterface(): void {
-        this.showInterface = !this.showInterface;
-        ThumbnailEnhancer.pauseHoverZoom(this.showInterface);
-
-        if (this.showInterface) {
-            this.selectButton.html("Cancel");
-            this.section.attr("data-interface", "true");
-
-            $("div#posts-container")
-                .attr("data-downloading", "true")
-                .on("click.re621.mass-dowloader", "a.preview-box", (event) => {
-                    event.preventDefault();
-                    if (this.processing) return;
-
-                    $(event.target).parents("article.post-preview")
-                        .toggleClass("download-item")
-                        .attr("data-state", "ready");
-                });
-        } else {
-            this.selectButton.html("Select");
-            this.section.attr("data-interface", "false");
-
-
-            $("div#posts-container")
-                .attr("data-downloading", "false")
-                .off("click.re621.mass-dowloader");
-        }
-    }
-
     /** Processes and downloads the selected files. */
     private processFiles(): void {
         if (this.processing) return;
         this.processing = true;
         this.actButton.attr("disabled", "disabled");
 
-        InfiniteScroll.pauseScroll(this.showInterface);
-
         this.infoText
             .attr("data-state", "loading")
-            .html(`Indexing selected files . . .`);
+            .html(`Indexing pool files . . .`);
 
         // Get the IDs of all selected images
-        const imageList: number[] = [];
-        $("article.post-preview.download-item[data-state=ready]").each((index, element) => {
-            imageList.push(parseInt($(element).attr("data-id")));
-        });
 
-        if (imageList.length === 0) {
+        Api.getJson("/pools.json?search[id]=" + Page.getPageID()).then((poolData: ApiPool[]) => {
+            if (poolData.length < 1) { return Promise.reject("Pool not found"); };
+            const pool = poolData[0],
+                imageList = pool.post_ids;
+
+            // Get the IDs of all pool images
+            if (imageList.length === 0) {
+                this.infoText
+                    .attr("data-state", "error")
+                    .html(`Error: Pool is empty!`);
+                return Promise.reject("Pool is empty");
+            }
+
+            // Create API requests, separated into chunks
             this.infoText
-                .attr("data-state", "error")
-                .html(`Error: No files selected!`);
-            return;
-        }
+                .attr("data-state", "loading")
+                .html(`Fetching API data . . .`);
 
-        // Create API requests, separated into chunks
-        this.infoText
-            .attr("data-state", "loading")
-            .html(`Fetching API data . . .`);
+            const dataQueue = [];
+            Util.chunkArray(imageList, PoolDownloader.chunkSize).forEach((value) => {
+                dataQueue.push(Api.getJson("/posts.json?tags=id:" + value.join(",")));
+            });
 
-        const dataQueue = [];
-        Util.chunkArray(imageList, MassDownloader.chunkSize).forEach((value) => {
-            dataQueue.push(Api.getJson("/posts.json?tags=id:" + value.join(",")));
-        });
-
-        // Fetch the post data from the API
-        Promise.all(dataQueue.reverse()).then((dataChunks) => {
+            return Promise.all(dataQueue.reverse());
+        }).then((dataChunks) => {
             // dataQueue needs to be reversed in order to start from top to bottom
             // downloadQueue will not use the exact order, but it's an improvement
             const downloadQueue = new DownloadQueue();
@@ -186,7 +151,7 @@ export class MassDownloader extends RE6Module {
 
                 chunk.posts.forEach((post: ApiPost) => {
                     fileSize += post.file.size;
-                    if (fileSize > MassDownloader.maxBlobSize) {
+                    if (fileSize > PoolDownloader.maxBlobSize) {
                         this.batchOverSize = true;
                         this.downloadOverSize = true;
                         return;
