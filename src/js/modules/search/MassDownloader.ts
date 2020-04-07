@@ -15,8 +15,19 @@ export class MassDownloader extends RE6Module {
     // What that number is... nobody knows. It is currently presumed to be ~100.
     private static chunkSize = 100;
 
+    // Maximum Blob size. This value differs depending on the browser.
+    // Different sources cite different numbers. For now, we'll go with 800MB.
+    private static maxBlobSize = 838860800;
+
     private showInterface = false;
     private processing = false;
+
+    private downloadOverSize = false;
+    private batchOverSize = true;
+
+    // Value used to make downloaded file names unique
+    private fileTimestamp: string = Util.getDatetimeShort();
+    private downloadIndex = 1;
 
     private section: JQuery<HTMLElement>;
     private selectButton: JQuery<HTMLElement>;
@@ -112,9 +123,11 @@ export class MassDownloader extends RE6Module {
                 .attr("data-downloading", "true")
                 .on("click.re621.mass-dowloader", "a.preview-box", (event) => {
                     event.preventDefault();
+                    if (this.processing) return;
+
                     $(event.target).parents("article.post-preview")
                         .toggleClass("download-item")
-                        .removeAttr("data-state");
+                        .attr("data-state", "ready");
                 });
         } else {
             $("div#posts-container")
@@ -135,7 +148,7 @@ export class MassDownloader extends RE6Module {
 
         // Get the IDs of all selected images
         const imageList: number[] = [];
-        $("article.post-preview.download-item").each((index, element) => {
+        $("article.post-preview.download-item[data-state=ready]").each((index, element) => {
             imageList.push(parseInt($(element).attr("data-id")));
         });
 
@@ -168,9 +181,22 @@ export class MassDownloader extends RE6Module {
                 threadInfo.push($("<span>").appendTo(this.infoFile));
             }
 
+            let fileSize = 0;
+            this.batchOverSize = false;
+
             // Add post data from the chunks to the queue
             dataChunks.forEach((chunk) => {
+
+                if (this.batchOverSize) return;
+
                 chunk.posts.forEach((post: ApiPost) => {
+                    fileSize += post.file.size;
+                    if (fileSize > MassDownloader.maxBlobSize) {
+                        this.batchOverSize = true;
+                        this.downloadOverSize = true;
+                        return;
+                    }
+
                     $("article.post-preview#post_" + post.id).attr("data-state", "preparing");
                     downloadQueue.add(
                         {
@@ -209,6 +235,9 @@ export class MassDownloader extends RE6Module {
                 else { this.infoFile.html(""); }
             });
         }).then((zipData) => {
+            let filename = "re621-download-" + this.fileTimestamp;
+            filename += this.downloadOverSize ? "-part" + this.downloadIndex + ".zip" : ".zip";
+
             this.infoText
                 .attr("data-state", "done")
                 .html(`Done! `);
@@ -216,18 +245,31 @@ export class MassDownloader extends RE6Module {
 
             // Download the resulting ZIP
             const $downloadLink = $("<a>")
-                .attr("href", "#re621-download.zip")
+                .attr("href", filename)
                 .html("Download Archive")
                 .appendTo(this.infoText)
                 .on("click", (event) => {
                     event.preventDefault();
-                    saveAs(zipData, "re621-download-" + Util.getDatetimeShort() + ".zip");
+                    saveAs(zipData, filename);
                 });
 
             if (this.fetchSettings("autoDownloadArchive")) { $downloadLink.get(0).click(); }
 
+            this.downloadIndex++;
+
             this.actButton.removeAttr("disabled");
             this.processing = false;
+
+            if (this.batchOverSize) {
+                // Start the next download immediately
+                if (this.fetchSettings("autoDownloadArchive")) { this.actButton.get(0).click(); }
+                else {
+                    $("<div>")
+                        .addClass("download-notice")
+                        .html(`Download has exceeded the maximum file size.<br /><br />Click the download button again for the next part.`)
+                        .appendTo(this.infoText);
+                }
+            }
         });
     }
 

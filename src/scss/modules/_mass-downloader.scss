@@ -34,7 +34,7 @@ section#downloader-box {
 
                 position: absolute;
                 left: 0;
-                bottom: 0.125rem;
+                top: 0.125rem;
             }
 
             &[data-state=done]::before {
@@ -50,6 +50,12 @@ section#downloader-box {
                 font-weight: 700;
                 animation: fa-spin 2s infinite linear;
             }
+        }
+
+        div.download-notice {
+            font-weight: bold;
+            margin-top: 0.5rem;
+            margin-left: -1.125rem;
         }
     }
 
@@ -95,7 +101,7 @@ div#posts-container[data-downloading=true] {
         }
 
         &::after {
-            content: unicode("f358"); // fa-arrow-alt-circle-down
+            content: "";
             display: block;
             line-height: 1;
 
@@ -106,16 +112,18 @@ div#posts-container[data-downloading=true] {
             font-family: "Font Awesome 5 Free";
             font-weight: 500;
             font-size: 3rem;
-            color: goldenrod;
             text-shadow: 0 0 3px black;
 
             pointer-events: none;
         }
 
+        &[data-state=ready]::after {
+            content: unicode("f358"); // fa-arrow-alt-circle-down
+            color: goldenrod;
+        }
+
         &[data-state=preparing]::after {
             content: unicode("f111"); // fa-circle
-            font-weight: 500;
-
             color: goldenrod;
         }
 
@@ -123,7 +131,6 @@ div#posts-container[data-downloading=true] {
             content: unicode("f1ce"); // fa-circle-notch
             font-weight: 700;
             animation: fa-spin 2s infinite linear;
-
             color: goldenrod;
         }
 
