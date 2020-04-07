@@ -119,8 +119,6 @@ export class PoolDownloader extends RE6Module {
                 imageList = pool.post_ids.filter(n => !this.poolDownloaded.includes(n));
             this.poolFiles = pool.post_ids;
 
-            console.log(imageList);
-
             // Get the IDs of all pool images
             if (imageList.length === 0) {
                 this.infoText
@@ -138,7 +136,6 @@ export class PoolDownloader extends RE6Module {
 
             const dataQueue = [];
             Util.chunkArray(imageList, PoolDownloader.chunkSize).forEach((value) => {
-                console.log("querrying <" + value.join(",") + ">");
                 dataQueue.push(Api.getJson("/posts.json?tags=id:" + value.join(",")));
             });
 
@@ -169,8 +166,6 @@ export class PoolDownloader extends RE6Module {
                         this.downloadOverSize = true;
                         return;
                     }
-
-                    console.log("adding " + post.id);
 
                     $("article.post-preview#post_" + post.id).attr("data-state", "preparing");
                     downloadQueue.add(

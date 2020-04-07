@@ -23,6 +23,7 @@ import { User } from "../../components/data/User";
 import { ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
 import { GM } from "../../components/api/GM";
 import { MassDownloader } from "../search/MassDownloader";
+import { PoolDownloader } from "../pools/PoolDownloader";
 
 /**
  * SettingsController  
@@ -406,10 +407,11 @@ export class SettingsController extends RE6Module {
 
     private createTabDownloads(): Form {
         const downloadCustomizer = ModuleController.get(DownloadCustomizer),
-            massDownloader = ModuleController.get(MassDownloader);
+            massDownloader = ModuleController.get(MassDownloader),
+            poolDownloader = ModuleController.get(PoolDownloader);
 
         const templateVars = new Form(
-            { id: "title-template-vars-downloads", columns: 2, },
+            { id: "downloads-template-vars", columns: 2, },
             [
                 { id: "explain", type: "div", stretch: "mid", value: `<div class="notice unmargin">The following variables can be used:</div>` },
                 { id: "postnum", type: "copy", label: "Post ID", value: "%postid%", },
@@ -418,6 +420,15 @@ export class SettingsController extends RE6Module {
                 { id: "characters", type: "copy", label: "Characters", value: "%character%", },
                 { id: "species", type: "copy", label: "Species", value: "%species%", },
                 { id: "meta", type: "copy", label: "Meta", value: "%meta%", },
+            ]
+        );
+
+        const poolVars = new Form(
+            { id: "downloads-pool-vars", columns: 2, },
+            [
+                { id: "explain", type: "div", stretch: "mid", value: `<div class="notice unmargin">The following variables can also be used:</div>` },
+                { id: "pool", type: "copy", label: "Pool Name", value: "%pool%", },
+                { id: "index", type: "copy", label: "Index", value: "%index%", },
             ]
         );
 
@@ -497,13 +508,59 @@ export class SettingsController extends RE6Module {
                     value: "The archive will be downloaded automatically after being created",
                     stretch: "mid",
                 },
-                /*
                 {
                     id: "download-mass-template-hr",
                     type: "hr",
                     stretch: "full",
                 },
-                */
+
+                // Pool Downloader
+                {
+                    id: "download-pool-title",
+                    type: "div",
+                    value: "<h3>Pool Downloader</h3>",
+                    stretch: "full",
+                },
+                {
+                    id: "download-pool-desc",
+                    type: "div",
+                    value: "Downloaded files will be automatically renamed according to this template",
+                    stretch: "full",
+                },
+                {
+                    id: "download-pool-template",
+                    type: "input",
+                    value: poolDownloader.fetchSettings("template"),
+                    label: "Download File Name",
+                    stretch: "full",
+                },
+                {
+                    id: "download-pool-template-variables",
+                    type: "div",
+                    label: " ",
+                    value: `<div class="notice unmargin">The same variables as above can be used. Add a forward slash ( / ) to signify a folder.</div>`,
+                    stretch: "full",
+                },
+                {
+                    id: "download-pool-template-variables",
+                    type: "div",
+                    label: " ",
+                    value: poolVars.get(),
+                    stretch: "full",
+                },
+                {
+                    id: "download-pool-autodownload",
+                    type: "checkbox",
+                    label: "Auto Download",
+                    value: poolDownloader.fetchSettings("autoDownloadArchive"),
+                    stretch: "column",
+                },
+                {
+                    id: "download-pool-autodownload-text",
+                    type: "div",
+                    value: "The archive will be downloaded automatically after being created",
+                    stretch: "mid",
+                },
 
             ]);
         return form;
@@ -512,6 +569,7 @@ export class SettingsController extends RE6Module {
     private handleTabDownload(form: Form): void {
         const downloadCustomizer = ModuleController.getWithType<DownloadCustomizer>(DownloadCustomizer);
         const massDownloader = ModuleController.get(MassDownloader);
+        const poolDownloader = ModuleController.get(PoolDownloader);
         const postsPageInput = form.getInputList();
 
         // Download Customizer
@@ -527,6 +585,14 @@ export class SettingsController extends RE6Module {
         });
         postsPageInput.get("download-mass-autodownload").on("re621:form:input", (event, data) => {
             massDownloader.pushSettings("autoDownloadArchive", data);
+        });
+
+        // Pool Downloader
+        postsPageInput.get("download-pool-template").on("re621:form:input", (event, data) => {
+            poolDownloader.pushSettings("template", data);
+        });
+        postsPageInput.get("download-pool-autodownload").on("re621:form:input", (event, data) => {
+            poolDownloader.pushSettings("autoDownloadArchive", data);
         });
     }
 
@@ -1068,7 +1134,7 @@ export class SettingsController extends RE6Module {
 
         // Reset Configuration
         miscFormInput.get("misc-reset-everything").on("click", () => {
-            if(confirm("Are you absolutely sure?")) {
+            if (confirm("Are you absolutely sure?")) {
                 ModuleController.getAll().forEach((module) => {
                     module.clearSettings();
                 });
