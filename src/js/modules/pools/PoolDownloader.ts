@@ -16,7 +16,7 @@ export class PoolDownloader extends RE6Module {
 
     // Maximum Blob size. This value differs depending on the browser.
     // Different sources cite different numbers. For now, we'll go with 800MB.
-    private static maxBlobSize = 838860800;
+    private static maxBlobSize = 1024 * 1024 * 800;
 
     private processing = false;
 
@@ -25,7 +25,14 @@ export class PoolDownloader extends RE6Module {
 
     // Value used to make downloaded file names unique
     private fileTimestamp: string = Util.getDatetimeShort();
+
+    // If there are several batches in the download, a number will be appended to the end
     private downloadIndex = 1;
+
+    // Pool-specific variables used in the templating system
+    private poolName = "";
+    private poolFiles: number[] = [];
+    private poolDownloaded: number[] = [];
 
     // Interface elements
     private section: JQuery<HTMLElement>;
@@ -45,7 +52,7 @@ export class PoolDownloader extends RE6Module {
     public getDefaultSettings(): Settings {
         return {
             enabled: true,
-            template: "%artist%/%postid%-%copyright%-%character%-%species%",
+            template: "%pool%/%index%-%postid%-%artist%-%copyright%-%character%-%species%",
             autoDownloadArchive: true,
         };
     }
@@ -109,7 +116,10 @@ export class PoolDownloader extends RE6Module {
         Api.getJson("/pools.json?search[id]=" + Page.getPageID()).then((poolData: ApiPool[]) => {
             if (poolData.length < 1) { return Promise.reject("Pool not found"); };
             const pool = poolData[0],
-                imageList = pool.post_ids;
+                imageList = pool.post_ids.filter(n => !this.poolDownloaded.includes(n));
+            this.poolFiles = pool.post_ids;
+
+            console.log(imageList);
 
             // Get the IDs of all pool images
             if (imageList.length === 0) {
@@ -119,6 +129,8 @@ export class PoolDownloader extends RE6Module {
                 return Promise.reject("Pool is empty");
             }
 
+            this.poolName = pool.name;
+
             // Create API requests, separated into chunks
             this.infoText
                 .attr("data-state", "loading")
@@ -126,10 +138,11 @@ export class PoolDownloader extends RE6Module {
 
             const dataQueue = [];
             Util.chunkArray(imageList, PoolDownloader.chunkSize).forEach((value) => {
+                console.log("querrying <" + value.join(",") + ">");
                 dataQueue.push(Api.getJson("/posts.json?tags=id:" + value.join(",")));
             });
 
-            return Promise.all(dataQueue.reverse());
+            return Promise.all(dataQueue);
         }).then((dataChunks) => {
             // dataQueue needs to be reversed in order to start from top to bottom
             // downloadQueue will not use the exact order, but it's an improvement
@@ -157,6 +170,8 @@ export class PoolDownloader extends RE6Module {
                         return;
                     }
 
+                    console.log("adding " + post.id);
+
                     $("article.post-preview#post_" + post.id).attr("data-state", "preparing");
                     downloadQueue.add(
                         {
@@ -183,6 +198,8 @@ export class PoolDownloader extends RE6Module {
                             }
                         }
                     );
+
+                    this.poolDownloaded.push(post.id);
                 });
             });
 
@@ -245,6 +262,8 @@ export class PoolDownloader extends RE6Module {
             .replace(/%character%/g, data.tags.character.join("-"))
             .replace(/%species%/g, data.tags.species.join("-"))
             .replace(/%meta%/g, data.tags.meta.join("-"))
+            .replace(/%pool%/g, this.poolName)
+            .replace(/%index%/g, "" + (this.poolFiles.indexOf(data.id) + 1))
             .slice(0, 128)
             .replace(/-{2,}/g, "-")
             .replace(/-*$/g, "")

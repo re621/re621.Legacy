@@ -17,7 +17,7 @@ export class MassDownloader extends RE6Module {
 
     // Maximum Blob size. This value differs depending on the browser.
     // Different sources cite different numbers. For now, we'll go with 800MB.
-    private static maxBlobSize = 838860800;
+    private static maxBlobSize = 1024 * 1024 * 800;
 
     private showInterface = false;
     private processing = false;
