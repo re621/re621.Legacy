@@ -3,6 +3,7 @@ import { PageDefintion } from "../../components/data/Page";
 import { Util } from "../../components/structure/Util";
 import { GM } from "../../components/api/GM";
 import { Danbooru } from "../../components/api/Danbooru";
+import { ModuleController } from "../../components/ModuleController";
 
 export class ThumbnailEnhancer extends RE6Module {
 
@@ -60,9 +61,9 @@ export class ThumbnailEnhancer extends RE6Module {
      * Sets hoverZoom's display state
      * @param state True to hide, false to restore
      */
-    public hideHoverZoom(zoomPaused = true): void {
-        if (zoomPaused) this.postContainer.attr("data-thumb-zoom", "false");
-        else this.postContainer.attr("data-thumb-zoom", this.fetchSettings("zoom"));
+    public static pauseHoverZoom(zoomPaused = true): void {
+        if (zoomPaused) $("div#posts-container").attr("data-thumb-zoom", "false");
+        else $("div#posts-container").attr("data-thumb-zoom", ModuleController.get(ThumbnailEnhancer).fetchSettings("zoom"));
 
         ThumbnailEnhancer.zoomPaused = zoomPaused;
     }

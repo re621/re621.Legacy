@@ -16,6 +16,8 @@ import { Danbooru } from "../../components/api/Danbooru";
  */
 export class InfiniteScroll extends RE6Module {
 
+    private static scrollPaused = false;
+
     private $postContainer: JQuery<HTMLElement>;
     private $loadingIndicator: JQuery<HTMLElement>;
     private $nextButton: JQuery<HTMLElement>;
@@ -80,7 +82,7 @@ export class InfiniteScroll extends RE6Module {
      * Adds more posts to the site, if the user has scrolled down enough
      */
     private async addMorePosts(override = false): Promise<void> {
-        if (!this.isEnabled() || this.isInProgress || !this.pagesLeft || !this.shouldAddMore(override)) {
+        if (!this.isEnabled() || this.isInProgress || !this.pagesLeft || !this.shouldAddMore(override) || InfiniteScroll.scrollPaused) {
             return;
         }
         this.isInProgress = true;
@@ -139,5 +141,14 @@ export class InfiniteScroll extends RE6Module {
      */
     private shouldAddMore(override: boolean): boolean {
         return $(window).scrollTop() + $(window).height() > $(document).height() - 50 || override;
+    }
+
+    /**
+     * Temporarily pauses the infinite scroll.  
+     * This is a hack to improve MassDownloader performance.
+     * @param scrollPaused True to pause the loading, false to unpause
+     */
+    public static pauseScroll(scrollPaused = true): void {
+        InfiniteScroll.scrollPaused = scrollPaused;
     }
 }

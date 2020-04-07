@@ -1,11 +1,11 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
-import { ModuleController } from "../../components/ModuleController";
 import { ThumbnailEnhancer } from "./ThumbnailsEnhancer";
 import { Util } from "../../components/structure/Util";
 import { Api } from "../../components/api/Api";
 import { ApiPost } from "../../components/api/responses/ApiPost";
 import { DownloadQueue } from "../../components/api/DownloadQueue";
+import { InfiniteScroll } from "./InfiniteScroll";
 
 declare const saveAs;
 
@@ -101,24 +101,12 @@ export class MassDownloader extends RE6Module {
      */
     private toggleInterface(): void {
         this.showInterface = !this.showInterface;
-        ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer).hideHoverZoom(this.showInterface);
-        this.listenForClicks(this.showInterface);
+        ThumbnailEnhancer.pauseHoverZoom(this.showInterface);
 
         if (this.showInterface) {
             this.selectButton.html("Cancel");
             this.section.attr("data-interface", "true");
-        } else {
-            this.selectButton.html("Select");
-            this.section.attr("data-interface", "false");
-        }
-    }
 
-    /**
-     * Toggles the listeners attached to the thumbnails to begin selecting files.
-     * @param enabled If true, creates listeners, otherwise removes them.
-     */
-    private listenForClicks(enabled = true): void {
-        if (enabled) {
             $("div#posts-container")
                 .attr("data-downloading", "true")
                 .on("click.re621.mass-dowloader", "a.preview-box", (event) => {
@@ -130,6 +118,10 @@ export class MassDownloader extends RE6Module {
                         .attr("data-state", "ready");
                 });
         } else {
+            this.selectButton.html("Select");
+            this.section.attr("data-interface", "false");
+
+
             $("div#posts-container")
                 .attr("data-downloading", "false")
                 .off("click.re621.mass-dowloader");
@@ -141,6 +133,8 @@ export class MassDownloader extends RE6Module {
         if (this.processing) return;
         this.processing = true;
         this.actButton.attr("disabled", "disabled");
+
+        InfiniteScroll.pauseScroll(this.showInterface);
 
         this.infoText
             .attr("data-state", "loading")
