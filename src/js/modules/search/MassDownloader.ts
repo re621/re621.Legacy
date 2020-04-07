@@ -7,13 +7,14 @@ import { Api } from "../../components/api/Api";
 import { ApiPost } from "../../components/api/responses/ApiPost";
 import { DownloadQueue } from "../../components/api/DownloadQueue";
 
-declare const JSZip, saveAs;
+declare const saveAs;
 
 export class MassDownloader extends RE6Module {
 
     private static chunkSize = 40;
 
     private showInterface = false;
+    private processing = false;
 
     private section: JQuery<HTMLElement>;
     private selectButton: JQuery<HTMLElement>;
@@ -25,6 +26,10 @@ export class MassDownloader extends RE6Module {
         super(PageDefintion.search);
     }
 
+    /**
+     * Returns a set of default settings values
+     * @returns Default settings
+     */
     public getDefaultSettings(): Settings {
         return {
             enabled: true,
@@ -33,14 +38,15 @@ export class MassDownloader extends RE6Module {
         };
     }
 
+    /** Creates the module's structure. */
     public create(): void {
 
-        /* Create Button */
         this.section = $("<section>")
             .attr("id", "downloader-box")
             .appendTo("aside#sidebar");
         $("<h1>").html("Mass Downloader").appendTo(this.section);
 
+        // Toggles the downloader UI
         this.selectButton = $("<a>")
             .html("Select")
             .attr("id", "download-select")
@@ -48,9 +54,10 @@ export class MassDownloader extends RE6Module {
             .appendTo(this.section)
             .on("click", (event) => {
                 event.preventDefault();
-                this.toggleState();
+                this.toggleInterface();
             });
 
+        // Processes selected files
         this.actButton = $("<a>")
             .html("Download")
             .attr("id", "download-act")
@@ -58,111 +65,28 @@ export class MassDownloader extends RE6Module {
             .appendTo(this.section)
             .on("click", (event) => {
                 event.preventDefault();
-                this.infoText.html(`<i class="fas fa-spinner fa-spin"></i> Processing . . .`);
-
-                // Get the IDs of all the downloaded images
-                const imageList: number[] = [];
-                $("article.post-preview.download-item").each((index, element) => {
-                    imageList.push(parseInt($(element).attr("data-id")));
-                });
-
-                if (imageList.length === 0) {
-                    this.infoText
-                        .attr("data-state", "error")
-                        .html(`Error: No files selected!`);
-                    return;
-                }
-
-                // Fetch the post data from the API
-                const dataQueue = [];
-                const requests = Util.chunkArray(imageList, MassDownloader.chunkSize);
-                requests.forEach((value) => {
-                    dataQueue.push(Api.getJson("/posts.json?tags=id:" + value.join(",")));
-                });
-
-                Promise.all(dataQueue.reverse()).then((dataChunks) => {
-                    // 1. Get post data from the API
-                    this.infoText
-                        .attr("data-state", "loading")
-                        .html(`Downloading images . . .`);
-                    const downloadQueue = new DownloadQueue();
-
-                    const threadInfo: JQuery<HTMLElement>[] = [];
-                    for (let i = 0; i < downloadQueue.getThreadCount(); i++) {
-                        threadInfo.push($("<span>").appendTo(this.infoFile));
-                    }
-
-                    //    Queue up the file downloads
-                    dataChunks.forEach((chunk) => {
-                        chunk.posts.forEach((post: ApiPost) => {
-                            $("article.post-preview#post_" + post.id).attr("data-state", "preparing");
-                            downloadQueue.add(
-                                {
-                                    name: this.parseTemplate(post),
-                                    path: post.file.url,
-
-                                    file: post.file.url.replace(/^https:\/\/static1\.e621\.net\/data\/..\/..\//g, ""),
-
-                                    unid: post.id,
-                                    date: new Date(post.updated_at),
-                                    tags: post.tags.general.join(" "),
-                                },
-                                {
-                                    onStart: (item, thread) => {
-                                        this.infoText.html(`Processing . . . `);
-                                        threadInfo[thread].html(item.file);
-                                        $("article.post-preview#post_" + post.id).attr("data-state", "loading");
-                                    },
-                                    onFinish: () => {
-                                        $("article.post-preview#post_" + post.id).attr("data-state", "done");
-                                    },
-                                    onError: () => {
-                                        $("article.post-preview#post_" + post.id).attr("data-state", "error");
-                                    }
-                                }
-                            );
-                        });
-                    });
-
-                    this.infoText.html(`Processing . . . `);
-
-                    return downloadQueue.process((metadata) => {
-                        this.infoText.html(`Compressing . . . ` + metadata.percent.toFixed(2) + `%`);
-                        if (metadata.currentFile) { this.infoFile.html(metadata.currentFile); }
-                        else { this.infoFile.html(""); }
-                    });
-                }).then((zipData) => {
-                    this.infoText
-                        .attr("data-state", "done")
-                        .html(`Done! `);
-                    this.infoFile.html("");
-
-                    // 3. Download the resulting ZIP
-                    const $downloadLink = $("<a>")
-                        .html("Download Archive")
-                        .appendTo(this.infoText)
-                        .on("click", (event) => {
-                            event.preventDefault();
-                            saveAs(zipData, "re621-download-" + Util.getDatetimeShort() + ".zip");
-                        });
-
-                    if (this.fetchSettings("autoDownloadArchive")) { $downloadLink.get(0).click(); }
-                });
-
+                this.processFiles();
             });
 
+        // Contains general info about the download
         this.infoText = $("<div>")
             .addClass("download-info")
             .html("")
             .appendTo(this.section);
 
+        // Contains info about currently downloaded files
         this.infoFile = $("<div>")
             .addClass("download-file")
             .html("")
             .appendTo(this.section);
     }
 
-    private toggleState(): void {
+    /**
+     * Toggles the downloader interface.  
+     * Enabling the interface should also disable thumbnail enhancements,
+     * as well as anything else that might interfere with the file selection.
+     */
+    private toggleInterface(): void {
         this.showInterface = !this.showInterface;
         ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer).hideHoverZoom(this.showInterface);
         this.listenForClicks(this.showInterface);
@@ -176,6 +100,10 @@ export class MassDownloader extends RE6Module {
         }
     }
 
+    /**
+     * Toggles the listeners attached to the thumbnails to begin selecting files.
+     * @param enabled If true, creates listeners, otherwise removes them.
+     */
     private listenForClicks(enabled = true): void {
         if (enabled) {
             $("div#posts-container")
@@ -193,7 +121,115 @@ export class MassDownloader extends RE6Module {
         }
     }
 
-    private parseTemplate(data: ApiPost): string {
+    /** Processes and downloads the selected files. */
+    private processFiles(): void {
+        if (this.processing) return;
+        this.processing = true;
+        this.actButton.attr("disabled", "disabled");
+
+        this.infoText.html(`<i class="fas fa-spinner fa-spin"></i> Processing . . .`);
+
+        // Get the IDs of all selected images
+        const imageList: number[] = [];
+        $("article.post-preview.download-item").each((index, element) => {
+            imageList.push(parseInt($(element).attr("data-id")));
+        });
+
+        if (imageList.length === 0) {
+            this.infoText
+                .attr("data-state", "error")
+                .html(`Error: No files selected!`);
+            return;
+        }
+
+        // Fetch the post data from the API
+        const dataQueue = [];
+        const requests = Util.chunkArray(imageList, MassDownloader.chunkSize);
+        requests.forEach((value) => {
+            dataQueue.push(Api.getJson("/posts.json?tags=id:" + value.join(",")));
+        });
+
+        Promise.all(dataQueue.reverse()).then((dataChunks) => {
+            const downloadQueue = new DownloadQueue();
+
+            // Create an interface to output queue status
+            this.infoText
+                .attr("data-state", "loading")
+                .html(`Downloading images . . .`);
+
+            const threadInfo: JQuery<HTMLElement>[] = [];
+            for (let i = 0; i < downloadQueue.getThreadCount(); i++) {
+                threadInfo.push($("<span>").appendTo(this.infoFile));
+            }
+
+            // Add post data from the chunks to the queue
+            dataChunks.forEach((chunk) => {
+                chunk.posts.forEach((post: ApiPost) => {
+                    $("article.post-preview#post_" + post.id).attr("data-state", "preparing");
+                    downloadQueue.add(
+                        {
+                            name: this.createFilename(post),
+                            path: post.file.url,
+
+                            file: post.file.url.replace(/^https:\/\/static1\.e621\.net\/data\/..\/..\//g, ""),
+
+                            unid: post.id,
+                            date: new Date(post.updated_at),
+                            tags: post.tags.general.join(" "),
+                        },
+                        {
+                            onStart: (item, thread) => {
+                                this.infoText.html(`Processing . . . `);
+                                threadInfo[thread].html(item.file);
+                                $("article.post-preview#post_" + post.id).attr("data-state", "loading");
+                            },
+                            onFinish: () => {
+                                $("article.post-preview#post_" + post.id).attr("data-state", "done");
+                            },
+                            onError: () => {
+                                $("article.post-preview#post_" + post.id).attr("data-state", "error");
+                            }
+                        }
+                    );
+                });
+            });
+
+            // Begin processing the queue
+            this.infoText.html(`Processing . . . `);
+
+            return downloadQueue.run((metadata) => {
+                this.infoText.html(`Compressing . . . ` + metadata.percent.toFixed(2) + `%`);
+                if (metadata.currentFile) { this.infoFile.html(metadata.currentFile); }
+                else { this.infoFile.html(""); }
+            });
+        }).then((zipData) => {
+            this.infoText
+                .attr("data-state", "done")
+                .html(`Done! `);
+            this.infoFile.html("");
+
+            // Download the resulting ZIP
+            const $downloadLink = $("<a>")
+                .attr("href", "#re621-download.zip")
+                .html("Download Archive")
+                .appendTo(this.infoText)
+                .on("click", (event) => {
+                    event.preventDefault();
+                    saveAs(zipData, "re621-download-" + Util.getDatetimeShort() + ".zip");
+                });
+
+            if (this.fetchSettings("autoDownloadArchive")) { $downloadLink.get(0).click(); }
+
+            this.actButton.removeAttr("disabled");
+            this.processing = false;
+        });
+    }
+
+    /**
+     * Creates a filename from the post data based on the current template
+     * @param data Post data
+     */
+    private createFilename(data: ApiPost): string {
         return this.fetchSettings("template")
             .replace(/%postid%/g, data.id)
             .replace(/%artist%/g, data.tags.artist.join("-"))
