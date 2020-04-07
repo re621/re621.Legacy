@@ -80,26 +80,45 @@ export class MassDownloader extends RE6Module {
                     dataQueue.push(Api.getJson("/posts.json?tags=id:" + value.join(",")));
                 });
 
-                Promise.all(dataQueue).then((dataChunks) => {
+                Promise.all(dataQueue.reverse()).then((dataChunks) => {
                     // 1. Get post data from the API
                     this.infoText
                         .attr("data-state", "loading")
                         .html(`Downloading images . . .`);
                     const downloadQueue = new DownloadQueue();
 
+                    const threadInfo: JQuery<HTMLElement>[] = [];
+                    for (let i = 0; i < downloadQueue.getThreadCount(); i++) {
+                        threadInfo.push($("<span>").appendTo(this.infoFile));
+                    }
+
                     //    Queue up the file downloads
                     dataChunks.forEach((chunk) => {
                         chunk.posts.forEach((post: ApiPost) => {
+                            $("article.post-preview#post_" + post.id).attr("data-state", "preparing");
                             downloadQueue.add(
                                 {
                                     name: this.parseTemplate(post),
                                     path: post.file.url,
+
+                                    file: post.file.url.replace(/^https:\/\/static1\.e621\.net\/data\/..\/..\//g, ""),
+
+                                    unid: post.id,
                                     date: new Date(post.updated_at),
                                     tags: post.tags.general.join(" "),
                                 },
-                                (url: string) => {
-                                    this.infoText.html(`Processing . . . `);
-                                    this.infoFile.html(url.replace("https://static1.e621.net/data/", ""));
+                                {
+                                    onStart: (item, thread) => {
+                                        this.infoText.html(`Processing . . . `);
+                                        threadInfo[thread].html(item.file);
+                                        $("article.post-preview#post_" + post.id).attr("data-state", "loading");
+                                    },
+                                    onFinish: () => {
+                                        $("article.post-preview#post_" + post.id).attr("data-state", "done");
+                                    },
+                                    onError: () => {
+                                        $("article.post-preview#post_" + post.id).attr("data-state", "error");
+                                    }
                                 }
                             );
                         });
@@ -163,7 +182,9 @@ export class MassDownloader extends RE6Module {
                 .attr("data-downloading", "true")
                 .on("click.re621.mass-dowloader", "a.preview-box", (event) => {
                     event.preventDefault();
-                    $(event.target).parents("article.post-preview").toggleClass("download-item");
+                    $(event.target).parents("article.post-preview")
+                        .toggleClass("download-item")
+                        .removeAttr("data-state");
                 });
         } else {
             $("div#posts-container")

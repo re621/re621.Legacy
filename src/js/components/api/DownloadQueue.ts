@@ -14,23 +14,47 @@ export class DownloadQueue {
         this.zip = new JSZip();
     }
 
-    public add(file: FileData, progress?: Function): void {
-        if (file.date === undefined) file.date = new Date();
-        else file.date = new Date(file.date);
-        if (file.tags === undefined) file.tags = "";
+    public getThreadCount(): number {
+        return DownloadQueue.concurrent;
+    }
 
-        if (progress === undefined) progress = function (): void { return; };
-
+    /**
+     * Adds a file to the queue.  
+     * The callback function is
+     * @param file File information
+     * @param progress Callback function
+     */
+    public add(file: FileData, listeners?: DownloadListeners): void {
         this.queue.push({
-            file: file,
-            data: this.getDataBlob(file.path, progress)
+            file: this.verifyFileData(file),
+            listeners: this.verifyDownloadListeners(listeners),
         });
+    }
+
+    private verifyFileData(file: FileData): FileData {
+        file.unid = file.unid === undefined ? 0 : file.unid;
+        file.date = file.date === undefined ? new Date() : new Date(file.date);
+        file.tags = file.tags === undefined ? "" : file.tags;
+
+        return file;
+    }
+
+    private verifyDownloadListeners(listeners: DownloadListeners): DownloadListeners {
+        if (listeners === undefined) listeners = {};
+
+        listeners.onStart = listeners.onStart === undefined ? function (): void { return; } : listeners.onStart;
+        listeners.onFinish = listeners.onFinish === undefined ? function (): void { return; } : listeners.onFinish;
+        listeners.onLoadStart = listeners.onLoadStart === undefined ? function (): void { return; } : listeners.onLoadStart;
+        listeners.onLoadFinish = listeners.onLoadFinish === undefined ? function (): void { return; } : listeners.onLoadFinish;
+        listeners.onError = listeners.onError === undefined ? function (): void { return; } : listeners.onError;
+
+        return listeners;
     }
 
     public process(progress?: Function): Promise<any> {
         const processes: Promise<any>[] = [];
         for (let i = 0; i < DownloadQueue.concurrent; i++) {
-            processes.push(this.createnewProcess());
+            processes.push(this.createnewProcess(i));
         }
         return Promise.all(processes).then(() => {
             return this.zip.generateAsync({
@@ -42,25 +66,29 @@ export class DownloadQueue {
         });
     }
 
-    private async createnewProcess(): Promise<any> {
+    private async createnewProcess(thread: number): Promise<any> {
+        console.log("creating thread " + thread);
         return new Promise(async (resolve) => {
 
             while (this.queue.length > 0) {
                 const item = this.queue.pop();
 
-                this.zip.file(
+                item.listeners.onStart(item.file, thread);
+
+                await this.zip.file(
                     item.file.name,
-                    item.data,
+                    await this.getDataBlob(item, thread),
                     {
                         binary: true,
                         date: item.file.date,
                         comment: item.file.tags,
                     }
                 );
+
+                item.listeners.onFinish(item.file, thread);
             }
 
             resolve();
-
         });
     }
 
@@ -70,15 +98,24 @@ export class DownloadQueue {
      * @param url Image URL
      * @returns blob Image data
      */
-    private async getDataBlob(url: string, progress: Function): Promise<Blob> {
-        return new Promise((resolve) => {
+    private async getDataBlob(item: DownloadFile, thread: number): Promise<Blob> {
+        return new Promise((resolve, reject) => {
             GM.xmlhttpRequest({
                 method: "GET",
-                url: url,
+                url: item.file.path,
                 headers: { "User-Agent": window["re621"]["useragent"] },
                 responseType: "blob",
+                onloadstart: () => { item.listeners.onLoadStart(item.file, thread); },
+                onerror: () => {
+                    item.listeners.onError(item.file, thread);
+                    reject(item.file);
+                },
+                ontimeout: () => {
+                    item.listeners.onError(item.file, thread);
+                    reject(item.file);
+                },
                 onload: (result) => {
-                    progress(url);
+                    item.listeners.onLoadFinish(item.file, thread);
                     resolve(result.response as Blob);
                 }
             });
@@ -90,11 +127,25 @@ export class DownloadQueue {
 interface FileData {
     name: string;
     path: string;
+
+    file?: string;
+
+    unid?: number;
     date?: Date;
     tags?: string;
 }
 
 interface DownloadFile {
     file: FileData;
-    data: Promise<Blob>;
+    listeners: DownloadListeners;
+}
+
+interface DownloadListeners {
+    onStart?: Function;
+    onFinish?: Function;
+
+    onLoadStart?: Function;
+    onLoadFinish?: Function;
+
+    onError?: Function;
 }

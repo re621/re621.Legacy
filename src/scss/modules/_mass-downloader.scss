@@ -54,6 +54,23 @@ section#downloader-box {
         grid-column: span 2;
         font-family: monospace;
         word-break: break-word;
+
+        counter-reset: number;
+
+        span {
+            position: relative;
+            display: block;
+            word-break: break-all;
+            padding-left: 1.125rem;
+            font-size: 85%;
+            counter-increment: number;
+
+            &::before {
+                content: "["counter(number)"]";
+                position: absolute;
+                left: 0;
+            }
+        }
     }
 
     &:not([data-interface=true]) {
@@ -68,20 +85,48 @@ section#downloader-box {
 
 div#posts-container[data-downloading=true] {
 
-    article.post-preview.download-item::after {
-        content: unicode("f058");
+    article.post-preview.download-item {
 
-        position: absolute;
-        top: 1.5rem;
-        right: 0.5rem;
+        &::after {
+            content: unicode("f058"); // circle-check
 
-        font-family: "Font Awesome 5 Free";
-        font-weight: 500;
-        font-size: 3rem;
-        color: green;
-        text-shadow: 0 0 3px black;
+            position: absolute;
+            top: 1.5rem;
+            right: 0.5rem;
 
-        pointer-events: none;
+            font-family: "Font Awesome 5 Free";
+            font-weight: 500;
+            font-size: 3rem;
+            color: yellow;
+            text-shadow: 0 0 3px black;
+
+            pointer-events: none;
+        }
+
+        &[data-state=preparing]::after {
+            content: unicode("f111"); // fa-circle
+            font-weight: 500;
+
+            color: yellow;
+        }
+
+        &[data-state=loading]::after {
+            content: unicode("f1ce"); // fa-circle-notch
+            font-weight: 700;
+            animation: fa-spin 2s infinite linear;
+
+            color: orange;
+        }
+
+        &[data-state=error]::after {
+            content: unicode("f057");
+            color: darkred;
+        }
+
+        &[data-state=done]::after {
+            content: unicode("f058"); // circle-check
+            color: green;
+        }
     }
 
 }
