@@ -74,6 +74,19 @@ export class SubscriptionManager extends RE6Module {
             //Update started, contiously set the heartbeat to let other tabs now the update did not abort
             heartbeatTimer = this.startUpdate();
         }
+
+        //clear the notifications if the user opened the tab
+        modal.getElement().on("dialogopen", () => {
+            const index = modal.getElement().tabs("option", "active");
+            this.removeUnopened(index);
+        });
+
+        modal.getElement().tabs({
+            activate: (event, tabProperties) => {
+                this.removeUnopened(tabProperties.newTab.index());
+            }
+        });
+
         const panels = modal.getElement().find(".ui-tabs-panel");
         const tabs = modal.getElement().find(".ui-tabs-tab");
         for (const entry of this.subscribers.entries()) {
@@ -93,18 +106,6 @@ export class SubscriptionManager extends RE6Module {
         this.alreadyUpdated = true;
         this.$openSubsButton.attr("data-loading", "false");
         this.updateNotificationSymbol(0);
-
-        //clear the notifications if the user opened the tab
-        modal.getElement().on("dialogopen", () => {
-            const index = modal.getElement().tabs("option", "active");
-            this.removeUnopened(index);
-        });
-
-        modal.getElement().tabs({
-            activate: (event, tabProperties) => {
-                this.removeUnopened(tabProperties.newTab.index());
-            }
-        });
     }
 
     private getShouldUpdate(): boolean {
