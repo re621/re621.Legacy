@@ -49,7 +49,7 @@ class APIEndpoint {
      * @param query Request query, either as a raw string or an APIQuery
      * @param delay Optional delay override, in milliseconds
      */
-    public async get(query: string | APIQuery, delay?: number): Promise<any> {
+    public async get(query?: string | APIQuery, delay?: number): Promise<any> {
         return this.queue.createRequest(this.getParsedPath(), this.queryToString(query), "GET", "", delay);
     }
 
@@ -58,7 +58,7 @@ class APIEndpoint {
      * @param data Data to be sent with the request
      * @param delay Optional delay override, in milliseconds
      */
-    public async post(data: {}, delay?: number): Promise<any> {
+    public async post(data?: string | APIQuery, delay?: number): Promise<any> {
         return this.queue.createRequest(this.getParsedPath(), "", "POST", this.queryToString(data), delay);
     }
 
@@ -72,6 +72,7 @@ class APIEndpoint {
 
     /** Converts APIQuery into a raw string */
     private queryToString(query: string | APIQuery): string {
+        if (query === undefined) return "";
         if (typeof query === "string") return query;
 
         const keys = Object.keys(query);
