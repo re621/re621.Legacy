@@ -1,4 +1,4 @@
-export interface ApiPost {
+export interface APIPost extends APIResponse {
     id: number;
     created_at: string;
     updated_at: string;

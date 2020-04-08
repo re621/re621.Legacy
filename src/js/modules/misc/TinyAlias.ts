@@ -1,10 +1,10 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 import { Api } from "../../components/api/Api";
-import { ApiTag } from "../../components/api/responses/ApiTag";
+import { APITag } from "../../components/api/responses/APITag";
 import { Modal } from "../../components/structure/Modal";
 import { AvoidPosting } from "../../components/data/AvoidPosting";
-import { ApiWikiPage } from "../../components/api/responses/ApiWikiPage";
+import { APIWikiPage } from "../../components/api/responses/APIWikiPage";
 
 export class TinyAlias extends RE6Module {
 
@@ -300,7 +300,7 @@ export class TinyAlias extends RE6Module {
         };
 
         // First data query
-        let jsonData: ApiTag = await Api.getJson("/tags/" + tag + ".json", 500);
+        let jsonData: APITag = await Api.getJson("/tags/" + tag + ".json", 500);
         if (jsonData === null) {
             result.isInvalid = true;
             return result;
@@ -311,7 +311,7 @@ export class TinyAlias extends RE6Module {
         this.$infoText.html(result.count + " posts");
 
         // Checking for aliases
-        const aliasJson: ApiTag = await Api.getJson("/tag_aliases.json?search[antecedent_name]=" + tag, 500);
+        const aliasJson: APITag = await Api.getJson("/tag_aliases.json?search[antecedent_name]=" + tag, 500);
         if (aliasJson[0] !== undefined) {
             result.isAliased = true;
             const trueTagName = aliasJson[0].consequent_name;
@@ -327,7 +327,7 @@ export class TinyAlias extends RE6Module {
             result.isDNP = true;
         }
 
-        const wikiPage: ApiWikiPage = (await Api.getJson(`/wiki_pages.json?search[title]=${encodeURIComponent(result.realName)}`, 500))[0];
+        const wikiPage: APIWikiPage = (await Api.getJson(`/wiki_pages.json?search[title]=${encodeURIComponent(result.realName)}`, 500))[0];
         if (wikiPage !== undefined && wikiPage.title === result.realName) {
             result.wikiPageId = wikiPage.id;
         }
