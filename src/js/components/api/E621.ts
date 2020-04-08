@@ -2,24 +2,25 @@
 // All endpoints must be registered here.
 // Name is irrelevant, as long as it is unique.
 // Path is the endpoint address, without https://e621.net/
+// Don't forget to update the name in the E621 aliases below
 const ENDPOINT_DEFS: EndpointDefinition[] = [
-    { name: "posts", path: "posts", node: "posts", },
-    { name: "tags", path: "tags" },
-    { name: "tag_aliases", path: "tag_aliases" },
-    { name: "tag_implications", path: "tag_implications" },
+    { name: "posts", path: "posts", node: "posts", altNode: "post", },
+    { name: "tags", path: "tags", },
+    { name: "tag_aliases", path: "tag_aliases", },
+    { name: "tag_implications", path: "tag_implications", },
 
-    { name: "notes", path: "notes" },
-    { name: "favorites", path: "favorites", },
+    { name: "notes", path: "notes", },
+    { name: "favorites", path: "favorites", node: "posts", },
     { name: "pools", path: "pools", },
-    { name: "sets", path: "sets", },
+    { name: "sets", path: "post_sets", },
 
-    { name: "users", path: "users" },
-    { name: "blips", path: "blips" },
-    { name: "wiki_pages", path: "wiki_pages" },
+    { name: "users", path: "users", },
+    { name: "blips", path: "blips", },
+    { name: "wiki_pages", path: "wiki_pages", },
 
-    { name: "comments", path: "comments" },
-    { name: "forum_index", path: "forum_posts" },
-    { name: "forum_topics", path: "forum_topics" },
+    { name: "comments", path: "comments", },
+    { name: "forum_posts", path: "forum_posts", },
+    { name: "forum_topics", path: "forum_topics", },
 ];
 
 class APIEndpoint {
@@ -27,6 +28,7 @@ class APIEndpoint {
     private queue: E621;
     private path: string;
     private node: string;
+    private altNode: string;
 
     private param = "";
 
@@ -34,6 +36,7 @@ class APIEndpoint {
         this.queue = queue;
         this.path = endpoint.path;
         this.node = endpoint.node;
+        this.altNode = endpoint.altNode;
     }
 
     /**
@@ -41,7 +44,7 @@ class APIEndpoint {
      * For example, to GET /users/12345.json, use E621.User.spec("12345").get(...);
      * @param param 
      */
-    public spec(param: string): APIEndpoint {
+    public find(param: string): APIEndpoint {
         this.param = param;
         return this;
     }
@@ -51,14 +54,14 @@ class APIEndpoint {
      * @param query Request query, either as a raw string or an APIQuery
      * @param delay Optional delay override, in milliseconds
      */
-    public async get<T extends APIResponse>(query?: string | APIQuery, delay?: number): Promise<T> {
-        return this.queue.createRequest(this.getParsedPath(), this.queryToString(query), "GET", "", delay).then(
-            (data) => {
-                if (this.node === undefined) return Promise.resolve(data as T);
-                else return Promise.resolve(data[this.node] as T);
+    public async get<T extends APIResponse>(query?: string | APIQuery, delay?: number): Promise<T[]> {
+        return this.queue.createRequest(this.param !== "", this.getParsedPath(), this.queryToString(query), "GET", "", delay).then(
+            (response) => {
+                const result = this.getNode<T>(response[0], response[2]);
+                return Promise.resolve(result);
             },
-            (error) => { return Promise.reject(error); }
-        )
+            (response) => { return Promise.reject(response[0]); }
+        );
     }
 
     /**
@@ -67,15 +70,20 @@ class APIEndpoint {
      * @param delay Optional delay override, in milliseconds
      */
     public async post(data?: string | APIQuery, delay?: number): Promise<any> {
-        return this.queue.createRequest(this.getParsedPath(), "", "POST", this.queryToString(data), delay);
+        return this.queue.createRequest(this.param !== "", this.getParsedPath(), "", "POST", this.queryToString(data), delay).then(
+            (data) => {
+                return Promise.resolve(data);
+            },
+            (error) => { return Promise.reject(error); }
+        );
     }
 
     /** Returns the endpoint path, accounting for the possible parameter */
     private getParsedPath(): string {
         if (this.param === "") return this.path + ".json";
-        const newPath = this.path + "/" + this.param;
+        const newPath = this.path + "/" + this.param + ".json";
         this.param = "";
-        return newPath + ".json";
+        return newPath;
     }
 
     /** Converts APIQuery into a raw string */
@@ -93,6 +101,21 @@ class APIEndpoint {
             queryString.push(encodeURIComponent(key) + "=" + encodeURIComponent(value).replace(/%2B/g, "+"));
         });
         return queryString.join("&");
+    }
+
+    /**
+     * Returns the correct data node depending on the endpoint's definition and parameter
+     * @param data Data to select the node from
+     * @param hasParam Whether or not the endpoint had a parameter
+     */
+    private getNode<T extends APIResponse>(data: any, hasParam: boolean): T[] {
+        let selectedNode = "";
+        if (hasParam && this.altNode !== undefined) selectedNode = this.altNode;
+        else if (this.node !== undefined) selectedNode = this.node;
+
+        if (data[selectedNode] !== undefined) data = data[selectedNode];
+        if (Array.isArray(data)) return data as T[];
+        else return [data as T];
     }
 
 }
@@ -160,13 +183,15 @@ export class E621 {
 
     /**
      * Adds a new request to the queue based on provided data.  
-     * This should only be called from endpoint get() or post() methods.  
+     * This should only be called from endpoint get() or post() methods.
+     * @param hasParam Whether or not the endpoint had a parameter  
      * @param path Endpoint path, i.e. posts.json
      * @param query Raw query string, i.e. ?tags=horse,male,solo
      * @param method Request method, either GET or POST
      * @param data Data to POST
+     * @param delay How quickly the next request can be sent, in ms
      */
-    public async createRequest(path: string, query: string, method: "GET" | "POST", data = "", delay?: number): Promise<any> {
+    public async createRequest(hasParam: boolean, path: string, query: string, method: "GET" | "POST", data: string, delay: number): Promise<any> {
         if (delay === undefined) delay = E621.requestRateLimit;
         else if (delay < 500) delay = 500;
 
@@ -185,20 +210,24 @@ export class E621 {
         const entry = new Request(location.origin + "/" + path + ((query.length > 0) ? "?" : "") + query, requestInfo);
         const index = this.requestIndex++;
         const final = new Promise<any>((resolve, reject) => {
-            this.emitter.one("api.re621.result-" + index, (event, data) => {
-                if (data["error"] === undefined) resolve(data);
-                else reject(data);
+            this.emitter.one("api.re621.result-" + index, (e, data, status, hasParam) => {
+                if (data["error"] === undefined) resolve([data, status, hasParam]);
+                else reject([data, status, hasParam]);
             });
         });
 
-        this.queue.push({ request: entry, index: index, delay: delay });
-        this.run();
+        this.add({ request: entry, index: index, delay: delay, hasParam: hasParam, });
 
         return final;
     }
 
-    /** Starts the queue processing, if it has not happened already */
-    private async run(): Promise<void> {
+    /**
+     * Adds an item to the queue and starts processing it
+     * @param newItem Item to add
+     */
+    private async add(newItem: QueueItem): Promise<void> {
+        this.queue.push(newItem);
+
         if (this.processing) return;
         this.processing = true;
 
@@ -207,9 +236,23 @@ export class E621 {
             const request = await fetch(item.request);
 
             if (request.ok) {
-                this.emitter.trigger("api.re621.result-" + item.index, await request.json());
+                this.emitter.trigger(
+                    "api.re621.result-" + item.index,
+                    [
+                        await request.json(),
+                        request.status,
+                        item.hasParam,
+                    ]
+                );
             } else {
-                this.emitter.trigger("api.re621.result-" + item.index, [{ "error": request.status + " " + request.statusText }]);
+                this.emitter.trigger(
+                    "api.re621.result-" + item.index,
+                    [
+                        { "error": request.status + " " + request.statusText },
+                        request.status,
+                        item.hasParam,
+                    ]
+                );
             }
             await new Promise((resolve) => { setTimeout(() => { resolve(); }, item.delay) });
         }
@@ -235,6 +278,11 @@ interface EndpointDefinition {
      * ex. posts
      */
     node?: string;
+
+    /**
+     * **altNode** - node used when a parameter is specified
+     */
+    altNode?: string;
 }
 
 /**
@@ -255,4 +303,7 @@ interface QueueItem {
 
     /** Delay before the next request is sent */
     delay: number;
+
+    /** Whether or not the endpoint had parameters */
+    hasParam: boolean;
 }

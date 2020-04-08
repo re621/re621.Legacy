@@ -1,4 +1,4 @@
-export interface ApiPool {
+export interface APIPool extends APIResponse {
     id: number;
     name: string;
     created_at: string;

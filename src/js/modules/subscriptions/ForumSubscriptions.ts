@@ -3,7 +3,7 @@ import { Api } from "../../components/api/Api";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Subscription } from "./Subscription";
-import { ApiForumTopic } from "../../components/api/responses/ApiForum";
+import { APIForumTopic } from "../../components/api/responses/APIForumTopic";
 import { User } from "../../components/data/User";
 
 export class ForumSubscriptions extends RE6Module implements Subscription {
@@ -67,7 +67,7 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
             return results;
         }
 
-        const forumsJson: ApiForumTopic[] = await Api.getJson("/forum_topics.json?search[id]=" + Object.keys(forumData).join(","));
+        const forumsJson: APIForumTopic[] = await Api.getJson("/forum_topics.json?search[id]=" + Object.keys(forumData).join(","));
         for (const forumJson of forumsJson) {
             if (new Date(forumJson.updated_at).getTime() > lastUpdate && forumJson.updater_id !== User.getUserID()) {
                 results[new Date(forumJson.updated_at).getTime()] = await this.formatForumUpdate(forumJson);
@@ -77,7 +77,7 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         return results;
     }
 
-    private async formatForumUpdate(value: ApiForumTopic): Promise<UpdateContent> {
+    private async formatForumUpdate(value: APIForumTopic): Promise<UpdateContent> {
         return {
             id: value.id,
             name: value.title,
