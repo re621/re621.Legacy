@@ -80,7 +80,7 @@ class APIEndpoint {
         const queryString = [];
         keys.forEach((key) => {
             let value = query[key];
-            if (Array.isArray(value)) value = (value as string[]).join(",");
+            if (Array.isArray(value)) value = (value as string[]).join("+");
             queryString.push(encodeURIComponent(key) + "=" + encodeURIComponent(value));
         });
         return queryString.join("&");
