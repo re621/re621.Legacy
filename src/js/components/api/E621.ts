@@ -3,7 +3,7 @@
 // Name is irrelevant, as long as it is unique.
 // Path is the endpoint address, without https://e621.net/
 const ENDPOINT_DEFS: EndpointDefinition[] = [
-    { name: "posts", path: "posts", },
+    { name: "posts", path: "posts", node: "posts", },
     { name: "tags", path: "tags" },
     { name: "tag_aliases", path: "tag_aliases" },
     { name: "tag_implications", path: "tag_implications" },
@@ -26,12 +26,14 @@ class APIEndpoint {
 
     private queue: E621;
     private path: string;
+    private node: string;
 
     private param = "";
 
     public constructor(queue: E621, endpoint: EndpointDefinition) {
         this.queue = queue;
         this.path = endpoint.path;
+        this.node = endpoint.node;
     }
 
     /**
@@ -49,8 +51,14 @@ class APIEndpoint {
      * @param query Request query, either as a raw string or an APIQuery
      * @param delay Optional delay override, in milliseconds
      */
-    public async get(query?: string | APIQuery, delay?: number): Promise<any> {
-        return this.queue.createRequest(this.getParsedPath(), this.queryToString(query), "GET", "", delay);
+    public async get<T extends APIResponse>(query?: string | APIQuery, delay?: number): Promise<T> {
+        return this.queue.createRequest(this.getParsedPath(), this.queryToString(query), "GET", "", delay).then(
+            (data) => {
+                if (this.node === undefined) return Promise.resolve(data as T);
+                else return Promise.resolve(data[this.node] as T);
+            },
+            (error) => { return Promise.reject(error); }
+        )
     }
 
     /**
@@ -82,7 +90,7 @@ class APIEndpoint {
         keys.forEach((key) => {
             let value = query[key];
             if (Array.isArray(value)) value = (value as string[]).join("+");
-            queryString.push(encodeURIComponent(key) + "=" + encodeURIComponent(value));
+            queryString.push(encodeURIComponent(key) + "=" + encodeURIComponent(value).replace(/%2B/g, "+"));
         });
         return queryString.join("&");
     }
@@ -100,6 +108,9 @@ export class E621 {
 
     // Needed to authenticate some post requests, for example when you modify user settings
     private authToken: string;
+
+    //used to notify the original request function of the requests completion
+    private emitter = $({});
 
     // Request queue variables
     private queue: QueueItem[];
@@ -173,10 +184,10 @@ export class E621 {
 
         const entry = new Request(location.origin + "/" + path + ((query.length > 0) ? "?" : "") + query, requestInfo);
         const index = this.requestIndex++;
-        const final = new Promise<any>((resolve) => {
-            $(document).on("api.re621.result-" + index, (event, data) => {
-                $(document).off("api.re621.result-" + index);
-                resolve(data);
+        const final = new Promise<any>((resolve, reject) => {
+            this.emitter.one("api.re621.result-" + index, (event, data) => {
+                if (data["error"] === undefined) resolve(data);
+                else reject(data);
             });
         });
 
@@ -193,13 +204,19 @@ export class E621 {
 
         while (this.queue.length > 0) {
             const item = this.queue.shift();
-            const data = await fetch(item.request);
-            $(document).trigger("api.re621.result-" + item.index, await data.json());
+            const request = await fetch(item.request);
+
+            if (request.ok) {
+                this.emitter.trigger("api.re621.result-" + item.index, await request.json());
+            } else {
+                this.emitter.trigger("api.re621.result-" + item.index, [{ "error": request.status + " " + request.statusText }]);
+            }
             await new Promise((resolve) => { setTimeout(() => { resolve(); }, item.delay) });
         }
     }
 }
 
+/** Describes an API endpoint */
 interface EndpointDefinition {
     /**
      * **name** - irrelevant, as long as it's unique  
@@ -212,14 +229,30 @@ interface EndpointDefinition {
      * ex. posts, forum_posts, comments, etc.
      */
     path: string;
+
+    /**
+     * **node** - default node containing the data
+     * ex. posts
+     */
+    node?: string;
 }
 
+/**
+ * Any number of query strings to be passed to the endpoint.
+ * Stringified into "key1=value1A+value1B+value1C&key2=value2A..."
+ */
 type APIQuery = {
     [prop: string]: string | string[];
 };
 
+/** A queueued request, waiting to be processed */
 interface QueueItem {
+    /** Request body */
     request: Request;
+
+    /** Auto-incremented index, used to receive the resulting data */
     index: number;
+
+    /** Delay before the next request is sent */
     delay: number;
 }
