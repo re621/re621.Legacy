@@ -90,6 +90,8 @@ div.pool-container {
                 font-size: 85%;
                 counter-increment: number;
 
+                background: linear-gradient(90deg, #ffffff40 var(--progress), transparent 0%);
+
                 &::before {
                     content: "["counter(number)"]";
                     position: absolute;

@@ -178,7 +178,8 @@ export class MassDownloader extends RE6Module {
                 threadInfo.push($("<span>").appendTo(this.infoFile));
             }
 
-            let fileSize = 0;
+            let totalFileSize = 0,
+                queueSize = 0;
             this.batchOverSize = false;
 
             // Add post data from the chunks to the queue
@@ -187,8 +188,8 @@ export class MassDownloader extends RE6Module {
                 if (this.batchOverSize) return;
 
                 chunk.posts.forEach((post: ApiPost) => {
-                    fileSize += post.file.size;
-                    if (fileSize > MassDownloader.maxBlobSize) {
+                    totalFileSize += post.file.size;
+                    if (totalFileSize > MassDownloader.maxBlobSize) {
                         this.batchOverSize = true;
                         this.downloadOverSize = true;
                         return;
@@ -207,9 +208,11 @@ export class MassDownloader extends RE6Module {
                             tags: post.tags.general.join(" "),
                         },
                         {
-                            onStart: (item, thread) => {
-                                this.infoText.html(`Processing . . . `);
-                                threadInfo[thread].html(item.file);
+                            onStart: (item, thread, index) => {
+                                this.infoText.html(`Downloading . . . ` + (queueSize - index) + " / " + queueSize);
+                                threadInfo[thread]
+                                    .html(item.file)
+                                    .css("--progress", "0%");
                                 $("article.post-preview#post_" + post.id).attr("data-state", "loading");
                             },
                             onFinish: () => {
@@ -217,11 +220,18 @@ export class MassDownloader extends RE6Module {
                             },
                             onError: () => {
                                 $("article.post-preview#post_" + post.id).attr("data-state", "error");
+                            },
+                            onLoadProgress: (item, thread, event) => {
+                                if (event.lengthComputable) {
+                                    threadInfo[thread].css("--progress", Math.round(event.loaded / event.total * 100) + "%");
+                                }
                             }
                         }
                     );
                 });
             });
+
+            queueSize = downloadQueue.getQueueLength();
 
             // Begin processing the queue
             this.infoText.html(`Processing . . . `);

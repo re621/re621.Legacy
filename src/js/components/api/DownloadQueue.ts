@@ -1,4 +1,4 @@
-import { GM } from "./GM";
+import { GM, GMxmlHttpRequestEvent, GMxmlHttpRequestResponse, GMxmlHttpRequestProgressEvent } from "./GM";
 
 declare const JSZip;
 
@@ -21,6 +21,11 @@ export class DownloadQueue {
         return DownloadQueue.concurrent;
     }
 
+    /** Returns the number of items in the queue */
+    public getQueueLength(): number {
+        return this.queue.length;
+    }
+
     /**
      * Adds a file to the queue to be downloaded
      * @param file FileData name and path are required
@@ -35,6 +40,7 @@ export class DownloadQueue {
         listeners.onFinish = listeners.onFinish === undefined ? function (): void { return; } : listeners.onFinish;
         listeners.onLoadStart = listeners.onLoadStart === undefined ? function (): void { return; } : listeners.onLoadStart;
         listeners.onLoadFinish = listeners.onLoadFinish === undefined ? function (): void { return; } : listeners.onLoadFinish;
+        listeners.onLoadProgress = listeners.onLoadProgress === undefined ? function (): void { return; } : listeners.onLoadProgress;
         listeners.onError = listeners.onError === undefined ? function (): void { return; } : listeners.onError;
 
         this.queue.push({
@@ -75,9 +81,10 @@ export class DownloadQueue {
         return new Promise(async (resolve) => {
 
             while (this.queue.length > 0) {
-                const item = this.queue.pop();
+                const index = this.queue.length,
+                    item = this.queue.pop();
 
-                item.listeners.onStart(item.file, thread);
+                item.listeners.onStart(item.file, thread, index);
                 await this.zip.file(
                     item.file.name,
                     await this.getDataBlob(item, thread),
@@ -87,7 +94,7 @@ export class DownloadQueue {
                         comment: item.file.tags,
                     }
                 );
-                item.listeners.onFinish(item.file, thread);
+                item.listeners.onFinish(item.file, thread, index);
             }
 
             resolve();
@@ -101,23 +108,28 @@ export class DownloadQueue {
      */
     private async getDataBlob(item: QueuedFile, thread: number): Promise<Blob> {
         return new Promise((resolve, reject) => {
-            GM.xmlhttpRequest({
+            GM.xmlHttpRequest({
                 method: "GET",
                 url: item.file.path,
                 headers: { "User-Agent": window["re621"]["useragent"] },
                 responseType: "blob",
-                onloadstart: () => { item.listeners.onLoadStart(item.file, thread); },
-                onerror: () => {
-                    item.listeners.onError(item.file, thread);
+                onloadstart: (event) => {
+                    item.listeners.onLoadStart(item.file, thread, event);
+                },
+                onerror: (event) => {
+                    item.listeners.onError(item.file, thread, event);
                     reject(item.file);
                 },
-                ontimeout: () => {
-                    item.listeners.onError(item.file, thread);
+                ontimeout: (event) => {
+                    item.listeners.onError(item.file, thread, event);
                     reject(item.file);
                 },
-                onload: (result) => {
-                    item.listeners.onLoadFinish(item.file, thread);
-                    resolve(result.response as Blob);
+                onprogress: (event) => {
+                    item.listeners.onLoadProgress(item.file, thread, event);
+                },
+                onload: (event) => {
+                    item.listeners.onLoadFinish(item.file, thread, event);
+                    resolve(event.response as Blob);
                 }
             });
         });
@@ -174,22 +186,25 @@ interface DownloadListeners {
      * Fires right before file processing begins.  
      * Note that there is a slight delay before onLoadStart() fires.
      */
-    onStart?: Function;
+    onStart?(file: FileData, thread: number, index: number): void;
 
     /**
      * Fires once all file processing finished.  
      * Note that there is a significant delay after onLoadFinish() fires.  
      */
-    onFinish?: Function;
+    onFinish?(file: FileData, thread: number, index: number): void;
 
 
     /** Fires when the xmlHttpRequest begins loading the file */
-    onLoadStart?: Function;
+    onLoadStart?(file: FileData, thread: number, event: GMxmlHttpRequestEvent): void;
 
     /** Fires when the xmlHttpRequest finishes loading the file */
-    onLoadFinish?: Function;
+    onLoadFinish?(file: FileData, thread: number, event: GMxmlHttpRequestResponse): void;
+
+    /** Fires when the xmlHttpRequest receives a new data batch */
+    onLoadProgress?(file: FileData, thread: number, event: GMxmlHttpRequestProgressEvent): void;
 
 
     /** Fires if the xmlHttpRequest encounters an error or times out. */
-    onError?: Function;
+    onError?(file: FileData, thread: number, event: GMxmlHttpRequestEvent): void;
 }
