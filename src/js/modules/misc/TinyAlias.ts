@@ -1,10 +1,11 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
-import { Api } from "../../components/api/Api";
 import { APITag } from "../../components/api/responses/APITag";
+import { APIWikiPage } from "../../components/api/responses/APIWikiPage";
 import { Modal } from "../../components/structure/Modal";
 import { AvoidPosting } from "../../components/data/AvoidPosting";
-import { APIWikiPage } from "../../components/api/responses/APIWikiPage";
+import { E621 } from "../../components/api/E621";
+import { APITagAlias } from "../../components/api/responses/APITagAlias";
 
 export class TinyAlias extends RE6Module {
 
@@ -135,7 +136,6 @@ export class TinyAlias extends RE6Module {
         }
 
         for (const [index, name] of Object.keys(this.aliasData).entries()) {
-            console.log(index, name);
             this.makeAliasEntry($aliasList, name, this.aliasData[name], index + "");
         }
 
@@ -199,26 +199,34 @@ export class TinyAlias extends RE6Module {
             return;
         }
 
+        this.$infoLoad.addClass("visible");
         const tagInfo = await this.getTagInfo(tag);
         if (tagInfo.isInvalid) {
-            this.$infoText.html("Invalid tagname");
+            this.$infoText.html("Invalid tag name");
             return;
         }
 
-        this.tagAlreadyChecked = true;
+        this.$infoText.html(tagInfo.count + " posts");
 
         if (tagInfo.isAliased) {
             this.$infoText.append(" (~" + tagInfo.realName + ")");
             $input.val(tagInfo.realName);
         }
 
-        if (tagInfo.wikiPageId) {
-            this.$infoText.append(` <a href="/wiki_pages/${tagInfo.wikiPageId}">wiki</a>`);
-        }
-
-        if (tagInfo.isDNP) {
+        // Checking for DNP implications
+        if (AvoidPosting.contains(tag) || (tagInfo.isAliased && AvoidPosting.contains(tagInfo.realName))) {
             this.$infoText.append(`: ` + tag + ` is on <a href="/wiki_pages/85">DNP</a> list`);
         }
+
+        // Tag should be validated beyond this point
+        this.tagAlreadyChecked = true;
+
+        // Looking for the wiki page
+        E621.Wiki.get<APIWikiPage>({ "search[title]": encodeURIComponent(tagInfo.realName) }, 500).then((data) => {
+            const wikiPage = data[0];
+            if (wikiPage !== undefined && wikiPage.title === tagInfo.realName)
+                this.$infoText.append(` <a href="/wiki_pages/${wikiPage.id}">wiki</a>`);
+        });
 
         this.$infoLoad.removeClass("visible");
         return;
@@ -258,12 +266,10 @@ export class TinyAlias extends RE6Module {
      * @returns True if the input had aliases, false otherwise
      */
     private insertAlias(input: string): boolean {
-        console.log("looking up <" + input + ">");
         const aliasList = this.fetchSettings("data");
         input = this.prepareTag(input);
 
         if (aliasList[input]) {
-            console.log("found " + aliasList[input]);
             this.$textarea.val(function (i, text) {
                 if (text.endsWith(" ") || text.length === 0) return text + aliasList[input];
                 else return text + " " + aliasList[input];
@@ -288,48 +294,38 @@ export class TinyAlias extends RE6Module {
      * @param tag Tag to look up
      */
     private async getTagInfo(tag: string): Promise<TagResult> {
-        this.$infoLoad.addClass("visible");
         tag = encodeURIComponent(tag);
         const result: TagResult = {
             count: 0,
             isInvalid: false,
             isAliased: false,
-            isDNP: false,
-            realName: undefined,
-            wikiPageId: undefined
+            realName: undefined
         };
 
         // First data query
-        let jsonData: APITag = await Api.getJson("/tags/" + tag + ".json", 500);
-        if (jsonData === null) {
+        let jsonData = await E621.Tags.find(tag).get<APITag>("", 500);
+        if (jsonData.length == 0 || jsonData[0].name === "invalid_tag") {
             result.isInvalid = true;
             return result;
         }
 
-        result.count = jsonData.post_count;
-        result.realName = jsonData.name;
-        this.$infoText.html(result.count + " posts");
+        result.count = jsonData[0].post_count;
+        result.realName = jsonData[0].name;
 
         // Checking for aliases
-        const aliasJson: APITag = await Api.getJson("/tag_aliases.json?search[antecedent_name]=" + tag, 500);
+        const aliasJson = await E621.TagAliases.get<APITagAlias>({ "search[antecedent_name]": tag }, 500);
         if (aliasJson[0] !== undefined) {
             result.isAliased = true;
-            const trueTagName = aliasJson[0].consequent_name;
+            result.realName = aliasJson[0].consequent_name;
+
+            if (result.realName === "invalid_tag") {
+                result.isInvalid = true;
+                return result;
+            }
 
             // Getting alias data
-            jsonData = await Api.getJson("/tags/" + encodeURIComponent(trueTagName) + ".json", 500);
-            result.count = jsonData.post_count;
-            result.realName = trueTagName;
-        }
-
-        // Checking for DNP implications
-        if (AvoidPosting.contains(tag) || (result.isAliased && AvoidPosting.contains(result.realName))) {
-            result.isDNP = true;
-        }
-
-        const wikiPage: APIWikiPage = (await Api.getJson(`/wiki_pages.json?search[title]=${encodeURIComponent(result.realName)}`, 500))[0];
-        if (wikiPage !== undefined && wikiPage.title === result.realName) {
-            result.wikiPageId = wikiPage.id;
+            jsonData = await E621.Tags.find(encodeURIComponent(result.realName)).get<APITag>("", 500);
+            result.count = jsonData[0].post_count;
         }
 
         return result;
@@ -349,11 +345,6 @@ export class TinyAlias extends RE6Module {
             event.preventDefault();
             const $name = $aliasForm.find("input[type='text']");
             const $data = $aliasForm.find("textarea");
-
-            console.log("pushing " + $name.val() + " with " + $data.val());
-            console.log(this.aliasData[$name.val() + ""]);
-
-            console.log("updating");
 
             this.aliasData[$name.val() + ""] = $data.val() + "";
             this.pushSettings("data", this.aliasData);
@@ -408,6 +399,4 @@ interface TagResult {
     isInvalid: boolean;
     isAliased: boolean;
     realName: string;
-    isDNP: boolean;
-    wikiPageId: number;
 }
