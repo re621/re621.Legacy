@@ -110,25 +110,26 @@ export class MassDownloader extends RE6Module {
             this.selectButton.html("Cancel");
             this.section.attr("data-interface", "true");
 
+            this.infoText.html(`Click on thumbnails to select them, then press "Download"`);
+
             $("div#posts-container")
                 .attr("data-downloading", "true")
-                .on("click.re621.mass-dowloader", "a.preview-box", (event) => {
-                    event.preventDefault();
-                    if (this.processing) return;
-
-                    $(event.target).parents("article.post-preview")
-                        .toggleClass("download-item")
-                        .attr("data-state", "ready");
+                .selectable({
+                    autoRefresh: false,
+                    filter: "article.post-preview",
+                    selected: function (event, ui) {
+                        $(ui.selected)
+                            .toggleClass("download-item")
+                            .attr("data-state", "ready");
+                    }
                 });
-
-            this.infoText.html(`Click on thumbnails to select them, then press "Download"`);
         } else {
             this.selectButton.html("Select");
             this.section.attr("data-interface", "false");
 
             $("div#posts-container")
                 .attr("data-downloading", "false")
-                .off("click.re621.mass-dowloader");
+                .selectable("destroy");
         }
     }
 
