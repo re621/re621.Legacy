@@ -204,7 +204,9 @@ export class MassDownloader extends RE6Module {
                             file: post.file.url.replace(/^https:\/\/static1\.e621\.net\/data\/..\/..\//g, ""),
 
                             unid: post.id,
-                            date: new Date(post.updated_at),
+
+                            // Yes, updated_at can be null sometimes. No, I don't know why or how.
+                            date: post.updated_at === null ? new Date(post.created_at) : new Date(post.updated_at),
                             tags: post.tags.general.join(" "),
                         },
                         {
