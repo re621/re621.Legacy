@@ -1,4 +1,4 @@
-export interface ApiForumTopic {
+export interface APIForumTopic extends APIResponse {
     id: number;
     creator_id: number;
     updater_id: number;
@@ -10,15 +10,4 @@ export interface ApiForumTopic {
     created_at: string;
     updated_at: string;
     category_id: number;
-}
-
-export interface ApiForumPost {
-    id: number;
-    created_at: string;
-    updated_at: string;
-    body: string;
-    creator_id: number;
-    updater_id: number;
-    topic_id: number;
-    is_hidden: boolean;
 }

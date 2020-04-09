@@ -1,4 +1,4 @@
-export interface ApiWikiPage {
+export interface APIWikiPage extends APIResponse {
     id: number;
     created_at: Date;
     updated_at: Date;

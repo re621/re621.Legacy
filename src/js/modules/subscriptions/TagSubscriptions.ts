@@ -1,8 +1,8 @@
 import { UpdateData, UpdateDefinition, SubscriptionSettings, UpdateContent } from "./SubscriptionManager";
-import { Api } from "../../components/api/Api";
+import { E621 } from "../../components/api/E621";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Subscription } from "./Subscription";
-import { ApiPost } from "../../components/api/responses/ApiPost";
+import { APIPost } from "../../components/api/responses/APIPost";
 import { Post } from "../../components/data/Post";
 
 export class TagSubscriptions extends RE6Module implements Subscription {
@@ -72,7 +72,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         }
 
         for (const tagName of Object.keys(tagData)) {
-            const postsJson: ApiPost[] = (await Api.getJson("/posts.json?tags=" + encodeURIComponent(tagName.replace(/ /g, "_")))).posts;
+            const postsJson = await E621.Posts.get<APIPost>({ "tags": encodeURIComponent(tagName.replace(/ /g, "_")) });
             for (const post of postsJson) {
                 if (new Date(post.created_at).getTime() > lastUpdate) {
                     results[new Date(post.created_at).getTime()] = await this.formatPostUpdate(post, tagName);
@@ -83,7 +83,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         return results;
     }
 
-    private async formatPostUpdate(value: ApiPost, tagName: string): Promise<UpdateContent> {
+    private async formatPostUpdate(value: APIPost, tagName: string): Promise<UpdateContent> {
         return {
             id: value.id,
             name: tagName.replace(/ /g, " "),

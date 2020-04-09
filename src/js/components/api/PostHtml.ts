@@ -1,8 +1,8 @@
-import { ApiPost } from "./responses/ApiPost";
+import { APIPost } from "./responses/APIPost";
 
 export class PostHtml {
 
-    public static create(json: ApiPost): JQuery<HTMLElement> {
+    public static create(json: APIPost): JQuery<HTMLElement> {
         //data-has-sound
         //data-flags
         const tags = json.tags;
@@ -78,7 +78,7 @@ export class PostHtml {
         return $article;
     }
 
-    private static getScoreInfo(json: ApiPost): ScoreInfo {
+    private static getScoreInfo(json: APIPost): ScoreInfo {
         if (json.score.total === 0) {
             return {
                 class: "score-neutral",
@@ -97,7 +97,7 @@ export class PostHtml {
         }
     }
 
-    private static getArticleClasses(json: ApiPost): string[] {
+    private static getArticleClasses(json: APIPost): string[] {
         const result = [
             "blacklisted",
             "captioned",
@@ -128,7 +128,7 @@ export class PostHtml {
         return result;
     }
 
-    private static getFlags(json: ApiPost): string[] {
+    private static getFlags(json: APIPost): string[] {
         const result = [];
         if (json.flags.deleted) {
             result.push("deleted");
@@ -140,7 +140,7 @@ export class PostHtml {
         return result;
     }
 
-    private static getExtra(json: ApiPost): string {
+    private static getExtra(json: APIPost): string {
         let result = "";
         if (json.relationships.parent_id !== null) {
             result += "P";

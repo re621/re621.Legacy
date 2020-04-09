@@ -1,7 +1,7 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { Api } from "../../components/api/Api";
-import { ApiForumPost } from "../../components/api/responses/ApiForum";
+import { APIForumPost } from "../../components/api/responses/APIForumPost";
 
 /**
  * Miscellaneous functionality that does not require a separate module
@@ -172,7 +172,7 @@ export class Miscellaneous extends RE6Module {
         const selection = window.getSelection().toString();
 
         if (selection === "") {
-            const jsonData: ApiForumPost = await Api.getJson(requestURL);
+            const jsonData: APIForumPost = await Api.getJson(requestURL);
             strippedBody = jsonData.body.replace(/\[quote\](?:.|\n|\r)+?\[\/quote\][\n\r]*/gm, "");
             strippedBody = `[quote]"` + $parent.data('creator') + `":/user/show/` + $parent.data('creator-id') + ` said:\n` + strippedBody + `\n[/quote]`;
         } else {
