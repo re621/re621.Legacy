@@ -1,13 +1,9 @@
-export interface APISet extends APIResponse {
+import { APIPostGroup } from "./APIPostGroup";
+
+export interface APISet extends APIPostGroup {
     id: number;
-    created_at: string;
-    updated_at: string;
-    creator_id: number;
-    is_public: boolean;
-    name: string;
+
     shortname: string;
-    description: string;
-    post_count: number;
+    is_public: boolean;
     transfer_on_delete: boolean;
-    post_ids: number[];
 }

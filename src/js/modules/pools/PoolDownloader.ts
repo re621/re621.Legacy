@@ -5,6 +5,7 @@ import { APIPool } from "../../components/api/responses/ApiPool";
 import { Util } from "../../components/structure/Util";
 import { DownloadQueue } from "../../components/api/DownloadQueue";
 import { APIPost } from "../../components/api/responses/ApiPost";
+import { APIPostGroup } from "../../components/api/responses/APIPostGroup";
 
 declare const saveAs;
 
@@ -42,7 +43,7 @@ export class PoolDownloader extends RE6Module {
     private infoFile: JQuery<HTMLElement>;
 
     public constructor() {
-        super(PageDefintion.pool);
+        super([PageDefintion.pool, PageDefintion.set]);
     }
 
     /**
@@ -62,7 +63,9 @@ export class PoolDownloader extends RE6Module {
         if (!this.canInitialize()) return;
         super.create();
 
-        const container = $("div#c-pools")
+        const base = Page.matches(PageDefintion.pool) ? "div#c-pools" : "div#c-sets";
+
+        const container = $(base)
             .addClass("pool-container");
         const overview = $("div#a-show")
             .addClass("pool-overview");
@@ -116,7 +119,12 @@ export class PoolDownloader extends RE6Module {
 
         // Get the IDs of all selected images
 
-        E621.Pools.get<APIPool>({ "search[id]": Page.getPageID() }).then((poolData) => {
+        let source: Promise<APIPostGroup[]>;
+
+        if (Page.matches(PageDefintion.pool)) source = E621.Pools.get<APIPool>({ "search[id]": Page.getPageID() });
+        else source = E621.Sets.get<APIPool>({ "search[id]": Page.getPageID() });
+
+        source.then((poolData) => {
             if (poolData.length < 1) { return Promise.reject("Pool not found"); };
             const pool = poolData[0],
                 imageList = pool.post_ids.filter(n => !this.poolDownloaded.includes(n));
