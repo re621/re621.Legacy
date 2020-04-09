@@ -13,7 +13,6 @@ export class TinyAlias extends RE6Module {
     private $container: JQuery<HTMLElement>;
 
     private $infoText: JQuery<HTMLElement>;
-    private $infoLoad: JQuery<HTMLElement>;
 
     private tagAlreadyChecked: boolean;
     private aliasData;
@@ -79,9 +78,7 @@ export class TinyAlias extends RE6Module {
             .attr("type", "button")
             .appendTo($toolbar);
 
-        const $infoTextBox = $("<div>").appendTo($toolbar);
-        this.$infoText = $("<div>").addClass("info-text").appendTo($infoTextBox);
-        this.$infoLoad = $("<div>").addClass("info-load").html(`<i class="fas fa-spinner fa-spin"></i>`).appendTo($infoTextBox);
+        this.$infoText = $("<div>").addClass("info-text").appendTo($toolbar);
         const $settingsButton = $("<button>").attr("type", "button").html("TinyAlias").appendTo($toolbar);
         const $sortButton = $("<button>").attr("type", "button").html("Sort").appendTo($toolbar);
         // Adding Functionality
@@ -90,7 +87,7 @@ export class TinyAlias extends RE6Module {
         $input.on("input", () => {
             this.tagAlreadyChecked = false;
             if ($input.val() === "") {
-                this.$infoText.html("");
+                this.$infoText.html("").removeAttr("data-state");
                 return;
             }
 
@@ -188,21 +185,27 @@ export class TinyAlias extends RE6Module {
     private async handleCheckButton($input: JQuery<HTMLElement>): Promise<void> {
         const tag = this.prepareTag($input.val().toString());
         if (this.tagAlreadyAdded(tag)) {
-            this.$infoText.html("Tag has already been added");
+            this.$infoText
+                .html("Tag has already been added")
+                .attr("data-state", "error");
             return;
         }
 
         this.aliasData = this.fetchSettings("data");
         if (this.aliasData[tag]) {
             this.tagAlreadyChecked = true;
-            this.$infoText.html("Found alias: " + tag);
+            this.$infoText
+                .html("Found alias: " + tag)
+                .attr("data-state", "done");
             return;
         }
 
-        this.$infoLoad.addClass("visible");
+        this.$infoText.attr("data-state", "loading");
         const tagInfo = await this.getTagInfo(tag);
         if (tagInfo.isInvalid) {
-            this.$infoText.html("Invalid tag name");
+            this.$infoText
+                .html("Invalid tag name")
+                .attr("data-state", "error");
             return;
         }
 
@@ -228,7 +231,7 @@ export class TinyAlias extends RE6Module {
                 this.$infoText.append(` <a href="/wiki_pages/${wikiPage.id}">wiki</a>`);
         });
 
-        this.$infoLoad.removeClass("visible");
+        this.$infoText.attr("data-state", "done");
         return;
     }
 
