@@ -73,7 +73,7 @@ export class GM {
      * @returns an object with the following property:
      *  - **abort**: function to be called to cancel this request
      */
-    public static xmlhttpRequest(details: GMxmlhttpRequestDetails): void {
+    public static xmlHttpRequest(details: GMxmlHttpRequestDetails): void {
         return GM_xmlhttpRequest(details);
     };
 
@@ -148,7 +148,7 @@ interface GMDownladErrorTypes {
     not_succeeded: boolean;
 }
 
-interface GMxmlhttpRequestDetails {
+interface GMxmlHttpRequestDetails {
     /** **method** Request method - either GET, HEAD, or POST */
     method: "GET" | "HEAD" | "POST";
 
@@ -192,22 +192,22 @@ interface GMxmlhttpRequestDetails {
     password?: string;
 
     /** **onabort** callback to be executed if the request was aborted */
-    onabort?(): void;
+    onabort?(event: GMxmlHttpRequestEvent): void;
 
     /** **onerror** callback to be executed if the request ended up with an error */
-    onerror?(): void;
+    onerror?(event: GMxmlHttpRequestEvent): void;
 
     /** **onloadstart** callback to be executed if the request started to load */
-    onloadstart?(): void;
+    onloadstart?(event: GMxmlHttpRequestEvent): void;
 
     /** **onprogress** callback to be executed if the request made some progress */
-    onprogress?(): void;
+    onprogress?(event: GMxmlHttpRequestProgressEvent): void;
 
     /** **onreadystatechange** callback to be executed if the request's ready state changed */
-    onreadystatechange?(): void;
+    onreadystatechange?(event: GMxmlHttpRequestEvent): void;
 
     /** **ontimeout** callback to be executed if the request failed due to a timeout */
-    ontimeout?(): void;
+    ontimeout?(event: GMxmlHttpRequestEvent): void;
 
     /**
      * **onload** callback to be executed if the request was loaded.  
@@ -221,32 +221,69 @@ interface GMxmlhttpRequestDetails {
      *   - **responseXML** - the response data as XML document
      *   - **responseText** - the response data as plain string
      */
-    onload?(details: GMxmlhttpRequestLoadDetails): void;
+    onload?(event: GMxmlHttpRequestResponse): void;
 }
 
-interface GMxmlhttpRequestLoadDetails {
+interface GMxmlHttpRequestEvent {
     /** **finalUrl** - the final URL after all redirects from where the data was loaded */
     finalURL: string;
 
-    /** **readyState** - the ready state */
-    readyState: number;
+    /**
+     * **readyState** - returns the state an XMLHttpRequest client is in:  
+     * 0	UNSENT              client has been created, open() not called yet  
+     * 1	OPENED	            open() has been called  
+     * 2	HEADERS_RECEIVED	send() has been called, headers and status available  
+     * 3	LOADING             downloading; responseText holds partial data  
+     * 4	DONE	            the operation is complete  
+     */
+    readyState: 0 | 1 | 2 | 3 | 4;
 
-    /** **status** - the request status */
+    /**
+     * **status** - returns the numberical HTTP status code of the response.  
+     * Before the request completes, the value of **status** is always 0.  
+     * Browsers also report a status of 0 in case of XMLHttpRequest errors.
+     */
     status: number;
 
-    /** **statusText** - the request status text */
+    /**
+     * **statusText** - returns a DOMString containing the response's status message.  
+     * Unlike **status**, this property contains the _text_ of the reponse status, such as "OK" or "Not Found".
+     */
     statusText: string;
+}
 
+interface GMxmlHttpRequestProgressEvent extends GMxmlHttpRequestEvent {
+    /** **lengthComputable** - absolutely no idea when it would be false */
+    lengthComputable: boolean;
+
+    /** **loaded** - size of data loaded, in bytes */
+    loaded: number;
+
+    /** **total** - total size of the download, in bytes */
+    total: number;
+}
+
+interface GMxmlHttpRequestResponse extends GMxmlHttpRequestEvent {
     /** **responseHeaders** - the request response headers */
     responseHeaders: string;
 
-    /** **response** - the response data as object if details.responseType was set */
+    /**
+     * **response** -  returns the response's body content as an ArrayBuffer, Blob, Document, JavaScript Object, or DOMString,
+     * depending on the value of the request's responseType property.
+     */
     response: object;
 
-    /** **responseXML** - the response data as XML document */
-    responseXML: XMLDocument;
+    /**
+     * **responseXML** - returns a Document containing the HTML or XML retrieved by the request;
+     * or null if the request was unsuccessful, has not yet been sent, or if the data can't be parsed as XML or HTML.  
+     * **Note:** The name responseXML is an artifact of this property's history; it works for both HTML and XML.
+     */
+    responseXML: Document;
 
-    /** **responseText** - the response data as plain string */
+    /**
+     * **responseText** - Returns a DOMString that contains the response to the request as text,
+     * or null if the request was unsuccessful or has not yet been sent.
+     */
     responseText: string;
 }
 
