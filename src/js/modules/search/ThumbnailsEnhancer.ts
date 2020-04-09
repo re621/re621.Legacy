@@ -29,6 +29,9 @@ export class ThumbnailEnhancer extends RE6Module {
             crop: true,
             vote: true,
             zoom: true,
+
+            cropSize: "150px",
+            cropRatio: "1.3",
         };
     }
 
@@ -43,6 +46,9 @@ export class ThumbnailEnhancer extends RE6Module {
         this.toggleThumbCrop(this.fetchSettings("crop"));
         this.toggleHoverVote(this.fetchSettings("vote"));
         this.toggleHoverZoom(this.fetchSettings("zoom"));
+
+        this.setThumbSize(this.fetchSettings("cropSize"));
+        this.setThumbRatio(this.fetchSettings("cropRatio"));
     }
 
     /**
@@ -67,6 +73,14 @@ export class ThumbnailEnhancer extends RE6Module {
      */
     public toggleHoverZoom(state = true): void {
         this.postContainer.attr("data-thumb-zoom", state + "");
+    }
+
+    public setThumbSize(size: string): void {
+        this.postContainer.css("--thumbnail-size", size);
+    }
+
+    public setThumbRatio(ratio: string): void {
+        this.postContainer.css("--thumbnail-ratio", ratio);
     }
 
     /**

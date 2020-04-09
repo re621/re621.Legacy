@@ -258,30 +258,7 @@ export class SettingsController extends RE6Module {
                     value: `<div class="unmargin"><b>Requires a page reload</b></div>`,
                     stretch: "mid",
                 },
-                {
-                    id: "thumb-crop",
-                    type: "checkbox",
-                    value: thumbnailEnhancer.fetchSettings("crop"),
-                    label: "Crop to Fit",
-                },
-                {
-                    id: "thumb-crop-text",
-                    type: "div",
-                    value: "Cut down the thumbnais to fit into neat squares",
-                    stretch: "mid",
-                },
-                {
-                    id: "thumb-vote",
-                    type: "checkbox",
-                    value: thumbnailEnhancer.fetchSettings("vote"),
-                    label: "Voting Buttons",
-                },
-                {
-                    id: "thumb-vote-text",
-                    type: "div",
-                    value: "Adds voting buttons when hovering over a thumbnail",
-                    stretch: "mid",
-                },
+
                 {
                     id: "thumb-zoom",
                     type: "checkbox",
@@ -294,6 +271,61 @@ export class SettingsController extends RE6Module {
                     value: "Increases the size of the thumbnail when hovering over it",
                     stretch: "mid",
                 },
+
+                {
+                    id: "thumb-vote",
+                    type: "checkbox",
+                    value: thumbnailEnhancer.fetchSettings("vote"),
+                    label: "Voting Buttons",
+                },
+                {
+                    id: "thumb-vote-text",
+                    type: "div",
+                    value: "Adds voting buttons when hovering over a thumbnail",
+                    stretch: "mid",
+                },
+
+                {
+                    id: "thumb-crop",
+                    type: "checkbox",
+                    value: thumbnailEnhancer.fetchSettings("crop"),
+                    label: "Resize Images",
+                },
+                {
+                    id: "thumb-crop-text",
+                    type: "div",
+                    value: "Resize thumbnail images according to settings below",
+                    stretch: "mid",
+                },
+
+                {
+                    id: "thumb-crop-size",
+                    type: "input",
+                    value: thumbnailEnhancer.fetchSettings("cropSize"),
+                    label: "Thumbnail Size",
+                    pattern: "^\\d{2,3}(px|rem|em)$",
+                },
+                {
+                    id: "thumb-crop-size-text",
+                    type: "div",
+                    value: "Thumbnail width, in px, em, rem...",
+                    stretch: "mid",
+                },
+
+                {
+                    id: "thumb-crop-ratio",
+                    type: "input",
+                    value: thumbnailEnhancer.fetchSettings("cropRatio"),
+                    label: "Image Ratio",
+                    pattern: "^(0|1)?\\.?\\d+$",
+                },
+                {
+                    id: "thumb-crop-ratio-text",
+                    type: "div",
+                    value: "Height to width ratio of the image",
+                    stretch: "mid",
+                },
+
                 {
                     id: "gen-inter-spacer-2",
                     type: "hr",
@@ -412,9 +444,9 @@ export class SettingsController extends RE6Module {
             thumbnailEnhancer.pushSettings("upscale", data);
         });
 
-        postsPageInput.get("thumb-crop").on("re621:form:input", (event, data) => {
-            thumbnailEnhancer.pushSettings("crop", data);
-            thumbnailEnhancer.toggleThumbCrop(data);
+        postsPageInput.get("thumb-zoom").on("re621:form:input", (event, data) => {
+            thumbnailEnhancer.pushSettings("zoom", data);
+            thumbnailEnhancer.toggleHoverZoom(data);
         });
 
         postsPageInput.get("thumb-vote").on("re621:form:input", (event, data) => {
@@ -422,9 +454,21 @@ export class SettingsController extends RE6Module {
             thumbnailEnhancer.toggleHoverVote(data);
         });
 
-        postsPageInput.get("thumb-zoom").on("re621:form:input", (event, data) => {
-            thumbnailEnhancer.pushSettings("zoom", data);
-            thumbnailEnhancer.toggleHoverZoom(data);
+        postsPageInput.get("thumb-crop").on("re621:form:input", (event, data) => {
+            thumbnailEnhancer.pushSettings("crop", data);
+            thumbnailEnhancer.toggleThumbCrop(data);
+        });
+
+        postsPageInput.get("thumb-crop-size").on("re621:form:input", (event, data) => {
+            if (!(event.target as HTMLInputElement).checkValidity()) return;
+            thumbnailEnhancer.pushSettings("cropSize", data);
+            thumbnailEnhancer.setThumbSize(data);
+        });
+
+        postsPageInput.get("thumb-crop-ratio").on("re621:form:input", (event, data) => {
+            if (!(event.target as HTMLInputElement).checkValidity()) return;
+            thumbnailEnhancer.pushSettings("cropRatio", data);
+            thumbnailEnhancer.setThumbRatio(data);
         });
 
         // Actions

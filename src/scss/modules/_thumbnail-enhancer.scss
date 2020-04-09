@@ -7,16 +7,20 @@ div#posts-container {
     justify-content: space-between;
 
     &[data-thumb-crop=true] {
+        grid-template-columns: repeat(auto-fill, var(--thumbnail-size, 150px));
+
         article.post-preview {
             margin: 0 0 1rem;
             height: auto;
-            width: 150px;
+            width: var(--thumbnail-size, 150px);
         }
 
         article.post-preview img {
-            width: 150px;
-            height: 125px;
+            width: var(--thumbnail-size, 150px);
+            height: calc(var(--thumbnail-size, 150px) * var(--thumbnail-ratio, 1.3));
             object-fit: cover;
+            max-width: unset;
+            max-height: unset;
         }
     }
 
