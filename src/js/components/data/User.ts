@@ -27,11 +27,13 @@ export class User {
         this.userid = parseInt($ref.attr("data-user-id")) || 0;
         this.level = $ref.attr("data-user-level-string") || "Guest";
 
-        const filters = JSON.parse($("head meta[name=blacklisted-tags]").attr("content"));
+        const filters = $("head meta[name=blacklisted-tags]").attr("content");
         const blacklistEnabled = $("#disable-all-blacklists").is(":visible");
 
-        for (const filter of filters) {
-            this.addBlacklistFilter(filter, blacklistEnabled);
+        if (filters !== undefined) {
+            for (const filter of JSON.parse(filters)) {
+                this.addBlacklistFilter(filter, blacklistEnabled);
+            }
         }
     }
 
