@@ -24,7 +24,10 @@ export class PostHtml {
             })
             .addClass(this.getArticleClasses(json).join(" "));
 
-        const $href = $("<a>").attr("href", "/posts/" + json.id).appendTo($article);
+        const $href = $("<a>")
+            .addClass("preview-box")
+            .attr("href", "/posts/" + json.id)
+            .appendTo($article);
         const $picture = $("<picture>").appendTo($href);
 
         $("<img>")

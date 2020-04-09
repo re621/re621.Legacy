@@ -1,0 +1,109 @@
+/* Pool Downloader Styles */
+
+div.pool-container {
+    display: grid;
+    grid-template-columns: auto min-content;
+
+    div.pool-overview {
+        display: block;
+
+        button.pool-download-button {
+            float: right;
+            margin: 0 0.5rem;
+            outline: none;
+        }
+    }
+
+    aside.pool-sidebar {
+        display: none;
+        width: 15em;
+        padding-left: 1rem;
+
+        section.pool-downloader-box {
+            display: block;
+            position: sticky;
+            top: 0;
+        }
+
+        h1 {
+            font-size: 1.16667em;
+        }
+
+        a.button {
+            text-align: center;
+            margin: 0.5rem 0;
+        }
+
+        div.download-info {
+
+            &[data-state] {
+                padding-left: 1.125rem;
+                position: relative;
+
+                &::before {
+                    content: "";
+                    display: block;
+                    line-height: 1;
+
+                    font-family: "Font Awesome 5 Free";
+                    font-weight: 400;
+
+                    position: absolute;
+                    left: 0;
+                    top: 0.125rem;
+                }
+
+                &[data-state=done]::before {
+                    content: unicode("f058"); // fa-check-circle
+                }
+
+                &[data-state=error]::before {
+                    content: unicode("f057"); // fa-times-circle
+                }
+
+                &[data-state=loading]::before {
+                    content: unicode("f1ce"); // fa-circle-notch
+                    font-weight: 700;
+                    animation: fa-spin 2s infinite linear;
+                }
+            }
+
+            div.download-notice {
+                font-weight: bold;
+                margin-top: 0.5rem;
+                margin-left: -1.125rem;
+            }
+        }
+
+        div.download-file {
+            font-family: monospace;
+            word-break: break-word;
+
+            counter-reset: number;
+
+            span {
+                position: relative;
+                display: block;
+                word-break: keep-all;
+                overflow: hidden;
+                padding-left: 1.125rem;
+                font-size: 85%;
+                counter-increment: number;
+
+                background: linear-gradient(90deg, #ffffff40 var(--progress), transparent 0%);
+
+                &::before {
+                    content: "["counter(number)"]";
+                    position: absolute;
+                    left: 0;
+                }
+            }
+        }
+    }
+
+    &[data-interface=true] {
+        aside.pool-sidebar {
+            display: block;
+        }
+    }
+}

@@ -3,10 +3,12 @@ import { PageDefintion } from "../../components/data/Page";
 import { Util } from "../../components/structure/Util";
 import { GM } from "../../components/api/GM";
 import { Danbooru } from "../../components/api/Danbooru";
+import { ModuleController } from "../../components/ModuleController";
 
 export class ThumbnailEnhancer extends RE6Module {
 
     private postContainer: JQuery<HTMLElement>;
+    private static zoomPaused = false;
 
     public constructor() {
         super([PageDefintion.search, PageDefintion.popular, PageDefintion.favorites]);
@@ -50,9 +52,20 @@ export class ThumbnailEnhancer extends RE6Module {
         const performance = this.fetchSettings("performance");
         this.postContainer.attr("data-thumb-zoom", "true");
 
-        $("#posts-container article.post-preview").each((index, element) => {
+        $("div#posts-container article.post-preview").each((index, element) => {
             ThumbnailEnhancer.modifyThumbnail($(element), performance);
         });
+    }
+
+    /**
+     * Sets hoverZoom's display state
+     * @param state True to hide, false to restore
+     */
+    public static pauseHoverZoom(zoomPaused = true): void {
+        if (zoomPaused) $("div#posts-container").attr("data-thumb-zoom", "false");
+        else $("div#posts-container").attr("data-thumb-zoom", ModuleController.get(ThumbnailEnhancer).fetchSettings("zoom"));
+
+        ThumbnailEnhancer.zoomPaused = zoomPaused;
     }
 
     /**
@@ -63,7 +76,7 @@ export class ThumbnailEnhancer extends RE6Module {
     public static modifyThumbnail($article: JQuery<HTMLElement>, performance = true): void {
 
         /* Create the structure */
-        const $link = $article.find("a").first().addClass("preview-box"),
+        const $link = $article.find("a.preview-box"),
             postID = parseInt($article.attr("data-id")),
             $img = $article.find("img"),
             $imgData = $img.attr("title").split("\n").slice(0, -2);     // Replace if the post date is added for the data-attributes.
@@ -124,10 +137,16 @@ export class ThumbnailEnhancer extends RE6Module {
 
         //Make it so that the doubleclick prevents the normal click event
         $link.on("click.re621.thumbnail", (event) => {
-            if (event.button !== 0) { return; } // Ignore mouse clicks which are not left clicks
-            event.preventDefault();
+            if (
+                // Ignore mouse clicks which are not left clicks
+                (event.button !== 0) ||
+                // Stop keeping track of double clicks if the zoom is paused
+                (ThumbnailEnhancer.zoomPaused) ||
+                // Make sure the click does not get triggered on the voting buttons
+                ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton"))
+            ) { return; }
 
-            if ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton")) return;
+            event.preventDefault();
 
             dbclickTimer = window.setTimeout(() => {
                 if (!prevent) {
@@ -137,7 +156,15 @@ export class ThumbnailEnhancer extends RE6Module {
                 prevent = false;
             }, delay);
         }).on("dblclick.re621.thumbnail", (event) => {
-            if (event.button !== 0) { return; } // Ignore mouse clicks which are not left clicks
+            if (
+                // Ignore mouse clicks which are not left clicks
+                (event.button !== 0) ||
+                // Stop keeping track of double clicks if the zoom is paused
+                (ThumbnailEnhancer.zoomPaused) ||
+                // Make sure the click does not get triggered on the voting buttons
+                ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton"))
+            ) { return; }
+
             event.preventDefault();
             window.clearTimeout(dbclickTimer);
             prevent = true;
@@ -154,6 +181,8 @@ export class ThumbnailEnhancer extends RE6Module {
         if (performance) {
             let timer;
             $article.on("mouseenter", () => {
+                if (ThumbnailEnhancer.zoomPaused) return;
+
                 // only load sample after a bit of waiting
                 // this prevents loading images just by hovering over them to get to another one
                 timer = window.setTimeout(() => {
