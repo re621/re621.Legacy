@@ -1,10 +1,10 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion, Page } from "../../components/data/Page";
-import { Api } from "../../components/api/Api";
-import { ApiPool } from "../../components/api/responses/ApiPool";
+import { E621 } from "../../components/api/E621";
+import { APIPool } from "../../components/api/responses/ApiPool";
 import { Util } from "../../components/structure/Util";
 import { DownloadQueue } from "../../components/api/DownloadQueue";
-import { ApiPost } from "../../components/api/responses/ApiPost";
+import { APIPost } from "../../components/api/responses/ApiPost";
 
 declare const saveAs;
 
@@ -116,7 +116,7 @@ export class PoolDownloader extends RE6Module {
 
         // Get the IDs of all selected images
 
-        Api.getJson("/pools.json?search[id]=" + Page.getPageID()).then((poolData: ApiPool[]) => {
+        E621.Pools.get<APIPool>({ "search[id]": Page.getPageID() }).then((poolData) => {
             if (poolData.length < 1) { return Promise.reject("Pool not found"); };
             const pool = poolData[0],
                 imageList = pool.post_ids.filter(n => !this.poolDownloaded.includes(n));
@@ -137,9 +137,9 @@ export class PoolDownloader extends RE6Module {
                 .attr("data-state", "loading")
                 .html(`Fetching API data . . .`);
 
-            const dataQueue = [];
+            const dataQueue: Promise<APIPost[]>[] = [];
             Util.chunkArray(imageList, PoolDownloader.chunkSize).forEach((value) => {
-                dataQueue.push(Api.getJson("/posts.json?tags=id:" + value.join(",")));
+                dataQueue.push(E621.Posts.get<APIPost>({ tags: "id:" + value.join(",") }));
             });
 
             return Promise.all(dataQueue);
@@ -163,7 +163,7 @@ export class PoolDownloader extends RE6Module {
 
                 if (this.batchOverSize) return;
 
-                chunk.posts.forEach((post: ApiPost) => {
+                chunk.forEach((post: APIPost) => {
                     totalFileSize += post.file.size;
                     if (totalFileSize > PoolDownloader.maxBlobSize) {
                         this.batchOverSize = true;
@@ -262,7 +262,7 @@ export class PoolDownloader extends RE6Module {
      * Creates a filename from the post data based on the current template
      * @param data Post data
      */
-    private createFilename(data: ApiPost): string {
+    private createFilename(data: APIPost): string {
         return this.fetchSettings("template")
             .replace(/%postid%/g, data.id)
             .replace(/%artist%/g, data.tags.artist.join("-"))

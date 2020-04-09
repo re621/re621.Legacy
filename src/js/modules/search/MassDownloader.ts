@@ -2,8 +2,8 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 import { ThumbnailEnhancer } from "./ThumbnailsEnhancer";
 import { Util } from "../../components/structure/Util";
-import { Api } from "../../components/api/Api";
-import { ApiPost } from "../../components/api/responses/ApiPost";
+import { E621 } from "../../components/api/E621";
+import { APIPost } from "../../components/api/responses/ApiPost";
 import { DownloadQueue } from "../../components/api/DownloadQueue";
 import { InfiniteScroll } from "./InfiniteScroll";
 
@@ -161,9 +161,9 @@ export class MassDownloader extends RE6Module {
             .attr("data-state", "loading")
             .html(`Fetching API data . . .`);
 
-        const dataQueue = [];
+        const dataQueue: Promise<APIPost[]>[] = [];
         Util.chunkArray(imageList, MassDownloader.chunkSize).forEach((value) => {
-            dataQueue.push(Api.getJson("/posts.json?tags=id:" + value.join(",")));
+            dataQueue.push(E621.Posts.get<APIPost>({ tags: "id:" + value.join(",") }));
         });
 
         // Fetch the post data from the API
@@ -187,7 +187,7 @@ export class MassDownloader extends RE6Module {
 
                 if (this.batchOverSize) return;
 
-                chunk.posts.forEach((post: ApiPost) => {
+                chunk.forEach((post: APIPost) => {
                     totalFileSize += post.file.size;
                     if (totalFileSize > MassDownloader.maxBlobSize) {
                         this.batchOverSize = true;
@@ -284,7 +284,7 @@ export class MassDownloader extends RE6Module {
      * Creates a filename from the post data based on the current template
      * @param data Post data
      */
-    private createFilename(data: ApiPost): string {
+    private createFilename(data: APIPost): string {
         return this.fetchSettings("template")
             .replace(/%postid%/g, data.id)
             .replace(/%artist%/g, data.tags.artist.join("-"))
