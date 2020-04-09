@@ -4,13 +4,13 @@
 // Path is the endpoint address, without https://e621.net/
 // Don't forget to update the name in the E621 aliases below
 const ENDPOINT_DEFS: EndpointDefinition[] = [
-    { name: "posts", path: "posts", node: "posts", altNode: "post", },
+    { name: "posts", path: "posts", node: { list: "posts", id: "post" } },
     { name: "tags", path: "tags", },
     { name: "tag_aliases", path: "tag_aliases", },
     { name: "tag_implications", path: "tag_implications", },
 
     { name: "notes", path: "notes", },
-    { name: "favorites", path: "favorites", node: "posts", },
+    { name: "favorites", path: "favorites", node: { list: "posts" } },
     { name: "pools", path: "pools", },
     { name: "sets", path: "post_sets", },
 
@@ -27,16 +27,20 @@ class APIEndpoint {
 
     private queue: E621;
     private path: string;
-    private node: string;
-    private altNode: string;
+
+    private name: string;
+    private nodeDef: NodeDefinition;
+    private nodeCur: NodeType;
 
     private param = "";
 
     public constructor(queue: E621, endpoint: EndpointDefinition) {
         this.queue = queue;
         this.path = endpoint.path;
-        this.node = endpoint.node;
-        this.altNode = endpoint.altNode;
+
+        this.name = endpoint.name;
+        this.nodeDef = endpoint.node === undefined ? {} : endpoint.node;
+        this.nodeCur = "list";
     }
 
     /**
@@ -46,6 +50,7 @@ class APIEndpoint {
      */
     public find(param: string): APIEndpoint {
         this.param = param;
+        this.nodeCur = "id";
         return this;
     }
 
@@ -55,12 +60,14 @@ class APIEndpoint {
      * @param delay Optional delay override, in milliseconds
      */
     public async get<T extends APIResponse>(query?: string | APIQuery, delay?: number): Promise<T[]> {
-        return this.queue.createRequest(this.param !== "", this.getParsedPath(), this.queryToString(query), "GET", "", delay).then(
+        return this.queue.createRequest(this.getParsedPath(), this.queryToString(query), "GET", "", this.name, this.getNode(), delay).then(
             (response) => {
-                const result = this.getNode<T>(response[0], response[2]);
+                const result = this.formatData<T>(response[0], response[2]);
                 return Promise.resolve(result);
             },
-            (response) => { return Promise.reject(response[0]); }
+            (response) => {
+                return Promise.reject(response[0]);
+            }
         );
     }
 
@@ -70,7 +77,7 @@ class APIEndpoint {
      * @param delay Optional delay override, in milliseconds
      */
     public async post(data?: string | APIQuery, delay?: number): Promise<any> {
-        return this.queue.createRequest(this.param !== "", this.getParsedPath(), "", "POST", this.queryToString(data), delay).then(
+        return this.queue.createRequest(this.getParsedPath(), "", "POST", this.queryToString(data), this.name, this.getNode(), delay).then(
             (data) => {
                 return Promise.resolve(data);
             },
@@ -96,6 +103,7 @@ class APIEndpoint {
 
         const queryString = [];
         keys.forEach((key) => {
+            if (key.includes("search")) this.nodeCur = "search";
             let value = query[key];
             if (Array.isArray(value)) value = (value as string[]).join("+");
             queryString.push(encodeURIComponent(key) + "=" + encodeURIComponent(value).replace(/%2B/g, "+"));
@@ -104,16 +112,23 @@ class APIEndpoint {
     }
 
     /**
+     * Returns the current node type, then resets it to the default state, to avoid conflicts.
+     */
+    private getNode(): NodeType {
+        const node = this.nodeCur;
+        this.nodeCur = "list";
+        return node;
+    }
+
+    /**
      * Returns the correct data node depending on the endpoint's definition and parameter
      * @param data Data to select the node from
      * @param hasParam Whether or not the endpoint had a parameter
      */
-    private getNode<T extends APIResponse>(data: any, hasParam: boolean): T[] {
-        let selectedNode = "";
-        if (hasParam && this.altNode !== undefined) selectedNode = this.altNode;
-        else if (this.node !== undefined) selectedNode = this.node;
+    private formatData<T extends APIResponse>(data: any, node: NodeType): T[] {
+        const selectedNode = this.nodeDef[node];
+        if (selectedNode !== undefined && selectedNode !== "") data = data[selectedNode];
 
-        if (data[selectedNode] !== undefined) data = data[selectedNode];
         if (Array.isArray(data)) return data as T[];
         else return [data as T];
     }
@@ -191,7 +206,7 @@ export class E621 {
      * @param data Data to POST
      * @param delay How quickly the next request can be sent, in ms
      */
-    public async createRequest(hasParam: boolean, path: string, query: string, method: "GET" | "POST", data: string, delay: number): Promise<any> {
+    public async createRequest(path: string, query: string, method: "GET" | "POST", data: string, endpoint: string, node: NodeType, delay: number): Promise<any> {
         if (delay === undefined) delay = E621.requestRateLimit;
         else if (delay < 500) delay = 500;
 
@@ -210,13 +225,20 @@ export class E621 {
         const entry = new Request(location.origin + "/" + path + ((query.length > 0) ? "?" : "") + query, requestInfo);
         const index = this.requestIndex++;
         const final = new Promise<any>((resolve, reject) => {
-            this.emitter.one("api.re621.result-" + index, (e, data, status, hasParam) => {
-                if (data["error"] === undefined) resolve([data, status, hasParam]);
-                else reject([data, status, hasParam]);
+            this.emitter.one("api.re621.result-" + index, (e, data, status, endpoint, node) => {
+                // This happens if you use find() on an item that does not exist
+                if (data === null) data = [];
+
+                // This happens if you search for an item that does not exist through a query
+                if (data[endpoint] !== undefined) data = [];
+
+                // "Normal" error handling
+                if (data["error"] === undefined) resolve([data, status, node]);
+                else reject([data, status, node]);
             });
         });
 
-        this.add({ request: entry, index: index, delay: delay, hasParam: hasParam, });
+        this.add({ request: entry, index: index, delay: delay, endpoint: endpoint, node: node, });
 
         return final;
     }
@@ -233,6 +255,7 @@ export class E621 {
 
         while (this.queue.length > 0) {
             const item = this.queue.shift();
+            // console.log("processing " + item.request.url);
             const request = await fetch(item.request);
 
             if (request.ok) {
@@ -241,7 +264,8 @@ export class E621 {
                     [
                         await request.json(),
                         request.status,
-                        item.hasParam,
+                        item.endpoint,
+                        item.node,
                     ]
                 );
             } else {
@@ -250,12 +274,15 @@ export class E621 {
                     [
                         { "error": request.status + " " + request.statusText },
                         request.status,
-                        item.hasParam,
+                        item.endpoint,
+                        item.node,
                     ]
                 );
             }
             await new Promise((resolve) => { setTimeout(() => { resolve(); }, item.delay) });
         }
+
+        this.processing = false;
     }
 }
 
@@ -273,17 +300,22 @@ interface EndpointDefinition {
      */
     path: string;
 
-    /**
-     * **node** - default node containing the data
-     * ex. posts
-     */
-    node?: string;
-
-    /**
-     * **altNode** - node used when a parameter is specified
-     */
-    altNode?: string;
+    node?: NodeDefinition;
 }
+
+/**
+ * Specifies which node to look for in various situations.  
+ * - list: default, normal output
+ * - id: usage of find()
+ * - search: usage of search[] in a query
+ */
+interface NodeDefinition {
+    list?: string;
+    id?: string;
+    search?: string;
+}
+
+type NodeType = "list" | "id" | "search";
 
 /**
  * Any number of query strings to be passed to the endpoint.
@@ -304,6 +336,9 @@ interface QueueItem {
     /** Delay before the next request is sent */
     delay: number;
 
+    /** Endpoint from which the request originated */
+    endpoint: string;
+
     /** Whether or not the endpoint had parameters */
-    hasParam: boolean;
+    node: NodeType;
 }
