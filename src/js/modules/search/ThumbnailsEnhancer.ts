@@ -70,12 +70,18 @@ export class ThumbnailEnhancer extends RE6Module {
     }
 
     /**
-     * Sets hoverZoom's display state
+     * Pauses or unpauses ThumbnailEnhancer's hover actions
      * @param state True to hide, false to restore
      */
-    public static pauseHoverZoom(zoomPaused = true): void {
-        if (zoomPaused) $("div#posts-container").attr("data-thumb-zoom", "false");
-        else $("div#posts-container").attr("data-thumb-zoom", ModuleController.get(ThumbnailEnhancer).fetchSettings("zoom"));
+    public static pauseHoverActions(zoomPaused = true): void {
+        if (zoomPaused) $("div#posts-container").attr({ "data-thumb-zoom": "false", "data-thumb-vote": "false", });
+        else {
+            const module = ModuleController.get(ThumbnailEnhancer);
+            $("div#posts-container").attr({
+                "data-thumb-zoom": module.fetchSettings("zoom"),
+                "data-thumb-vote": module.fetchSettings("vote"),
+            });
+        }
 
         ThumbnailEnhancer.zoomPaused = zoomPaused;
     }

@@ -104,7 +104,7 @@ export class MassDownloader extends RE6Module {
      */
     private toggleInterface(): void {
         this.showInterface = !this.showInterface;
-        ThumbnailEnhancer.pauseHoverZoom(this.showInterface);
+        ThumbnailEnhancer.pauseHoverActions(this.showInterface);
 
         if (this.showInterface) {
             this.selectButton.html("Cancel");
