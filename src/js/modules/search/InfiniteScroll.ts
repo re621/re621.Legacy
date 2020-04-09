@@ -1,6 +1,6 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Page, PageDefintion } from "../../components/data/Page";
-import { Api } from "../../components/api/Api";
+import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { PostHtml } from "../../components/api/PostHtml";
 import { InstantSearch } from "./InstantSearch";
@@ -85,7 +85,7 @@ export class InfiniteScroll extends RE6Module {
         }
         this.isInProgress = true;
         this.$loadingIndicator.show();
-        const posts: APIPost[] = (await Api.getJson(`/posts.json?tags=${this.currentQuery}&page=${this.nextPageToGet}`)).posts;
+        const posts = await E621.Posts.get<APIPost>({ tags: this.currentQuery, page: this.nextPageToGet });
         if (posts.length === 0) {
             this.pagesLeft = false;
             this.$loadingIndicator.hide();

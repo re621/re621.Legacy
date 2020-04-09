@@ -323,7 +323,7 @@ type NodeType = "list" | "id" | "search";
  * Stringified into "key1=value1A+value1B+value1C&key2=value2A..."
  */
 type APIQuery = {
-    [prop: string]: string | string[];
+    [prop: string]: any | any[];
 };
 
 /** A queueued request, waiting to be processed */
