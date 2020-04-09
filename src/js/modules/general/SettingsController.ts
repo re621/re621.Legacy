@@ -273,6 +273,27 @@ export class SettingsController extends RE6Module {
                 },
 
                 {
+                    id: "thumb-zoom-scale",
+                    type: "input",
+                    value: thumbnailEnhancer.fetchSettings("zoomScale"),
+                    label: "Zoom scale",
+                    pattern: "^[1-9](\\.\\d+)?$",
+                },
+                {
+                    id: "thumb-crop-ratio-text",
+                    type: "div",
+                    value: "The ratio of the enlarged thumbnail to its original size",
+                    stretch: "mid",
+                },
+                {
+                    id: "thumb-zoom-spacer",
+                    type: "div",
+                    value: " ",
+                    stretch: "full",
+                },
+
+
+                {
                     id: "thumb-vote",
                     type: "checkbox",
                     value: thumbnailEnhancer.fetchSettings("vote"),
@@ -284,6 +305,13 @@ export class SettingsController extends RE6Module {
                     value: "Adds voting buttons when hovering over a thumbnail",
                     stretch: "mid",
                 },
+                {
+                    id: "thumb-vote-spacer",
+                    type: "div",
+                    value: " ",
+                    stretch: "full",
+                },
+
 
                 {
                     id: "thumb-crop",
@@ -317,7 +345,7 @@ export class SettingsController extends RE6Module {
                     type: "input",
                     value: thumbnailEnhancer.fetchSettings("cropRatio"),
                     label: "Image Ratio",
-                    pattern: "^(0|1)?\\.?\\d+$",
+                    pattern: "^(([01](\\.\\d+)?)|2)$",
                 },
                 {
                     id: "thumb-crop-ratio-text",
@@ -447,6 +475,12 @@ export class SettingsController extends RE6Module {
         postsPageInput.get("thumb-zoom").on("re621:form:input", (event, data) => {
             thumbnailEnhancer.pushSettings("zoom", data);
             thumbnailEnhancer.toggleHoverZoom(data);
+        });
+
+        postsPageInput.get("thumb-zoom-scale").on("re621:form:input", (event, data) => {
+            if (!(event.target as HTMLInputElement).checkValidity()) return;
+            thumbnailEnhancer.pushSettings("zoomScale", data);
+            thumbnailEnhancer.setZoomScale(data);
         });
 
         postsPageInput.get("thumb-vote").on("re621:form:input", (event, data) => {

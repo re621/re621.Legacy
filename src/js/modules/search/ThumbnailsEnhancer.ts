@@ -26,12 +26,14 @@ export class ThumbnailEnhancer extends RE6Module {
 
             upscale: PerformanceMode.Hover,
 
-            crop: true,
-            vote: true,
             zoom: true,
+            zoomScale: "2",
 
+            vote: true,
+
+            crop: true,
             cropSize: "150px",
-            cropRatio: "1.3",
+            cropRatio: "0.9",
         };
     }
 
@@ -43,20 +45,30 @@ export class ThumbnailEnhancer extends RE6Module {
             ThumbnailEnhancer.modifyThumbnail($(element), upscaleMode);
         });
 
-        this.toggleThumbCrop(this.fetchSettings("crop"));
-        this.toggleHoverVote(this.fetchSettings("vote"));
         this.toggleHoverZoom(this.fetchSettings("zoom"));
+        this.setZoomScale(this.fetchSettings("zoomScale"));
 
+        this.toggleHoverVote(this.fetchSettings("vote"));
+
+        this.toggleThumbCrop(this.fetchSettings("crop"));
         this.setThumbSize(this.fetchSettings("cropSize"));
         this.setThumbRatio(this.fetchSettings("cropRatio"));
     }
 
     /**
-     * Crops the thumbnails to squares to minimize empty space
-     * @param state True to crop, false to restore
+     * Enables the zoom-on-hover functionality
+     * @param state True to enable, false to disable
      */
-    public toggleThumbCrop(state = true): void {
-        this.postContainer.attr("data-thumb-crop", state + "");
+    public toggleHoverZoom(state = true): void {
+        this.postContainer.attr("data-thumb-zoom", state + "");
+    }
+
+    /**
+     * Sets the ratio by which the thumbnail is scaled on hover
+     * @param scale Value, above zero, below 10 (?)
+     */
+    public setZoomScale(scale: string): void {
+        this.postContainer.css("--thumbnail-zoom", scale);
     }
 
     /**
@@ -68,17 +80,25 @@ export class ThumbnailEnhancer extends RE6Module {
     }
 
     /**
-     * Enables the zoom-on-hover functionality
-     * @param state True to enable, false to disable
+     * Crops the thumbnails to squares to minimize empty space
+     * @param state True to crop, false to restore
      */
-    public toggleHoverZoom(state = true): void {
-        this.postContainer.attr("data-thumb-zoom", state + "");
+    public toggleThumbCrop(state = true): void {
+        this.postContainer.attr("data-thumb-crop", state + "");
     }
 
+    /**
+     * Sets the thumbnail width. Does not support percent values.
+     * @param size Value, in pixels, em, rem, whatever
+     */
     public setThumbSize(size: string): void {
         this.postContainer.css("--thumbnail-size", size);
     }
 
+    /**
+     * Sets the height to width ratio for the thumbnail
+     * @param ratio Value, from 0 to 2
+     */
     public setThumbRatio(ratio: string): void {
         this.postContainer.css("--thumbnail-ratio", ratio);
     }

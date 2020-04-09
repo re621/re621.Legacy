@@ -128,8 +128,8 @@ div#posts-container {
                 width: unset;
                 height: unset;
 
-                max-width: 350px;
-                max-height: 350px;
+                max-width: calc(var(--thumbnail-size, 150px) * var(--thumbnail-zoom, 2));
+                max-height: calc(calc(var(--thumbnail-size, 150px) * var(--thumbnail-ratio, 1.3)) * var(--thumbnail-zoom, 2));
             }
 
             div.preview-extras {
