@@ -90,7 +90,7 @@ export class PoolDownloader extends RE6Module {
         this.section = $("<section>")
             .attr("id", "pool-downloader-box")
             .appendTo(sidebar);
-        $("<h1>").html("Pool Downloader").appendTo(this.section);
+        $("<h1>").html("Download").appendTo(this.section);
 
         // Processes selected files
 

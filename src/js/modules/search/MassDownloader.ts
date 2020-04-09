@@ -60,7 +60,7 @@ export class MassDownloader extends RE6Module {
         this.section = $("<section>")
             .attr("id", "downloader-box")
             .appendTo("aside#sidebar");
-        $("<h1>").html("Mass Downloader").appendTo(this.section);
+        $("<h1>").html("Download").appendTo(this.section);
 
         // Toggles the downloader UI
         this.selectButton = $("<a>")
@@ -120,10 +120,11 @@ export class MassDownloader extends RE6Module {
                         .toggleClass("download-item")
                         .attr("data-state", "ready");
                 });
+
+            this.infoText.html(`Click on thumbnails to select them, then press "Download"`);
         } else {
             this.selectButton.html("Select");
             this.section.attr("data-interface", "false");
-
 
             $("div#posts-container")
                 .attr("data-downloading", "false")
