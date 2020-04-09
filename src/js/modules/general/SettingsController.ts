@@ -20,7 +20,7 @@ import { DomUtilities } from "../../components/structure/DomUtilities";
 import { ExtraInfo } from "../subscriptions/SubscriptionManager";
 import { Api } from "../../components/api/Api";
 import { User } from "../../components/data/User";
-import { ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
+import { ThumbnailEnhancer, PerformanceMode } from "../search/ThumbnailsEnhancer";
 import { GM } from "../../components/api/GM";
 import { MassDownloader } from "../search/MassDownloader";
 import { PoolDownloader } from "../pools/PoolDownloader";
@@ -130,6 +130,12 @@ export class SettingsController extends RE6Module {
             ]
         );
 
+        const PERFORMANCE_SELECT = [
+            { value: PerformanceMode.Disabled, name: "Disabled" },
+            { value: PerformanceMode.Hover, name: "On Hover" },
+            { value: PerformanceMode.Always, name: "Always" },
+        ];
+
         const form = new Form(
             {
                 id: "general-settings-form",
@@ -228,39 +234,64 @@ export class SettingsController extends RE6Module {
                     stretch: "full",
                 },
                 {
+                    id: "thumb-upscale",
+                    type: "select",
+                    value: thumbnailEnhancer.fetchSettings("upscale"),
+                    label: "Upscale",
+                    data: PERFORMANCE_SELECT,
+                },
+                {
+                    id: "thumb-upscale-text-1",
+                    type: "div",
+                    value: "Replace 150x150 blurry thumbnails with larger versions",
+                    stretch: "mid",
+                },
+                {
+                    id: "thumb-upscale-spacer",
+                    type: "div",
+                    value: " ",
+                    stretch: "column",
+                },
+                {
+                    id: "thumb-upscale-text-2",
+                    type: "div",
+                    value: `<div class="unmargin"><b>Requires a page reload</b></div>`,
+                    stretch: "mid",
+                },
+                {
                     id: "thumb-crop",
                     type: "checkbox",
                     value: thumbnailEnhancer.fetchSettings("crop"),
-                    label: "Crop Thumbnails",
+                    label: "Crop to Fit",
                 },
                 {
                     id: "thumb-crop-text",
                     type: "div",
-                    value: "Cut down the thumbnails to fit a 150x150 square",
+                    value: "Cut down the thumbnais to fit into neat squares",
+                    stretch: "mid",
+                },
+                {
+                    id: "thumb-vote",
+                    type: "checkbox",
+                    value: thumbnailEnhancer.fetchSettings("vote"),
+                    label: "Voting Buttons",
+                },
+                {
+                    id: "thumb-vote-text",
+                    type: "div",
+                    value: "Adds voting buttons when hovering over a thumbnail",
                     stretch: "mid",
                 },
                 {
                     id: "thumb-zoom",
                     type: "checkbox",
                     value: thumbnailEnhancer.fetchSettings("zoom"),
-                    label: "Enhanced Previews",
+                    label: "Enlarge on Hover",
                 },
                 {
                     id: "thumb-zoom-text",
                     type: "div",
-                    value: "Improves thumbnail previews. Requires a page reload",
-                    stretch: "mid",
-                },
-                {
-                    id: "thumb-perf",
-                    type: "checkbox",
-                    value: thumbnailEnhancer.fetchSettings("performance"),
-                    label: "Performance Mode",
-                },
-                {
-                    id: "thumb-perf-text",
-                    type: "div",
-                    value: "Only load bigger previews on hover. Requieres a page reload",
+                    value: "Increases the size of the thumbnail when hovering over it",
                     stretch: "mid",
                 },
                 {
@@ -377,17 +408,23 @@ export class SettingsController extends RE6Module {
         });
 
         // Thumbnails
+        postsPageInput.get("thumb-upscale").on("re621:form:input", (event, data) => {
+            thumbnailEnhancer.pushSettings("upscale", data);
+        });
+
         postsPageInput.get("thumb-crop").on("re621:form:input", (event, data) => {
             thumbnailEnhancer.pushSettings("crop", data);
-            thumbnailEnhancer.toggleCroppedThumbnails(data);
+            thumbnailEnhancer.toggleThumbCrop(data);
+        });
+
+        postsPageInput.get("thumb-vote").on("re621:form:input", (event, data) => {
+            thumbnailEnhancer.pushSettings("vote", data);
+            thumbnailEnhancer.toggleHoverVote(data);
         });
 
         postsPageInput.get("thumb-zoom").on("re621:form:input", (event, data) => {
             thumbnailEnhancer.pushSettings("zoom", data);
-        });
-
-        postsPageInput.get("thumb-perf").on("re621:form:input", (event, data) => {
-            thumbnailEnhancer.pushSettings("performance", data);
+            thumbnailEnhancer.toggleHoverZoom(data);
         });
 
         // Actions

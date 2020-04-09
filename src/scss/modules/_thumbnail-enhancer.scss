@@ -95,6 +95,14 @@ div#posts-container {
         }
     }
 
+    &[data-thumb-vote=true] article.post-preview:hover {
+        &>a.preview-box {
+            div.preview-voting {
+                display: grid;
+            }
+        }
+    }
+
     &[data-thumb-zoom=true] article.post-preview:hover {
         position: relative;
         overflow: visible;
@@ -122,10 +130,6 @@ div#posts-container {
 
             div.preview-extras {
                 display: block;
-            }
-
-            div.preview-voting {
-                display: grid;
             }
         }
 

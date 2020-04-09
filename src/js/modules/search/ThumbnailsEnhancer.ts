@@ -5,6 +5,12 @@ import { GM } from "../../components/api/GM";
 import { Danbooru } from "../../components/api/Danbooru";
 import { ModuleController } from "../../components/ModuleController";
 
+export enum PerformanceMode {
+    Disabled = "disabled",
+    Hover = "hover",
+    Always = "always",
+}
+
 export class ThumbnailEnhancer extends RE6Module {
 
     private postContainer: JQuery<HTMLElement>;
@@ -18,18 +24,24 @@ export class ThumbnailEnhancer extends RE6Module {
         return {
             enabled: true,
 
-            crop: true,
-            zoom: true,
+            upscale: PerformanceMode.Hover,
 
-            performance: true,
+            crop: true,
+            vote: true,
+            zoom: true,
         };
     }
 
     public create(): void {
         this.postContainer = $("div#posts-container");
 
-        this.toggleCroppedThumbnails(this.fetchSettings("crop"));
+        const upscaleMode: PerformanceMode = this.fetchSettings("upscale");
+        $("div#posts-container article.post-preview").each((index, element) => {
+            ThumbnailEnhancer.modifyThumbnail($(element), upscaleMode);
+        });
 
+        this.toggleThumbCrop(this.fetchSettings("crop"));
+        this.toggleHoverVote(this.fetchSettings("vote"));
         this.toggleHoverZoom(this.fetchSettings("zoom"));
     }
 
@@ -37,9 +49,16 @@ export class ThumbnailEnhancer extends RE6Module {
      * Crops the thumbnails to squares to minimize empty space
      * @param state True to crop, false to restore
      */
-    public toggleCroppedThumbnails(state = true): void {
-        if (state) this.postContainer.attr("data-thumb-crop", "true");
-        else this.postContainer.attr("data-thumb-crop", "false");
+    public toggleThumbCrop(state = true): void {
+        this.postContainer.attr("data-thumb-crop", state + "");
+    }
+
+    /**
+     * Enables the zoom-on-hover functionality
+     * @param state True to enable, false to disable
+     */
+    public toggleHoverVote(state = true): void {
+        this.postContainer.attr("data-thumb-vote", state + "");
     }
 
     /**
@@ -47,14 +66,7 @@ export class ThumbnailEnhancer extends RE6Module {
      * @param state True to enable, false to disable
      */
     public toggleHoverZoom(state = true): void {
-        if (!state) return;
-
-        const performance = this.fetchSettings("performance");
-        this.postContainer.attr("data-thumb-zoom", "true");
-
-        $("div#posts-container article.post-preview").each((index, element) => {
-            ThumbnailEnhancer.modifyThumbnail($(element), performance);
-        });
+        this.postContainer.attr("data-thumb-zoom", state + "");
     }
 
     /**
@@ -73,7 +85,7 @@ export class ThumbnailEnhancer extends RE6Module {
      * @param $article JQuery element `article.post-preview`
      * @param performance If false, loads bigger images immediately. Otherwise, waits for hover.
      */
-    public static modifyThumbnail($article: JQuery<HTMLElement>, performance = true): void {
+    public static modifyThumbnail($article: JQuery<HTMLElement>, upscaleMode = PerformanceMode.Hover): void {
 
         /* Create the structure */
         const $link = $article.find("a.preview-box"),
@@ -178,7 +190,7 @@ export class ThumbnailEnhancer extends RE6Module {
 
         const sampleURL = $article.attr("data-large-file-url");
 
-        if (performance) {
+        if (upscaleMode === PerformanceMode.Hover) {
             let timer;
             $article.on("mouseenter", () => {
                 if (ThumbnailEnhancer.zoomPaused) return;
@@ -199,7 +211,7 @@ export class ThumbnailEnhancer extends RE6Module {
             $article.on("mouseleave", () => {
                 window.clearTimeout(timer);
             });
-        } else {
+        } else if (upscaleMode === PerformanceMode.Always) {
             $link.addClass("loading");
             $img.attr({
                 "src": sampleURL,
