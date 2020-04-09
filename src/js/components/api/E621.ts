@@ -48,8 +48,8 @@ class APIEndpoint {
      * For example, to GET /users/12345.json, use E621.User.spec("12345").get(...);
      * @param param 
      */
-    public find(param: string): APIEndpoint {
-        this.param = param;
+    public find(param: any): APIEndpoint {
+        this.param = encodeURIComponent(param);
         this.nodeCur = "id";
         return this;
     }
