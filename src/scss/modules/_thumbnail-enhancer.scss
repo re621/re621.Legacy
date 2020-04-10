@@ -107,7 +107,7 @@ div#posts-container {
         }
     }
 
-    &[data-thumb-zoom=true] article.post-preview:hover {
+    &[data-thumb-zoom=true] article.post-preview.loaded:hover {
         position: relative;
         overflow: visible;
 

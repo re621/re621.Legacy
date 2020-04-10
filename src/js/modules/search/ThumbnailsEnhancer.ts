@@ -231,7 +231,7 @@ export class ThumbnailEnhancer extends RE6Module {
         const sampleURL = $article.attr("data-large-file-url");
 
         if (upscaleMode === PerformanceMode.Hover) {
-            let timer;
+            let timer: number;
             $article.on("mouseenter", () => {
                 if (ThumbnailEnhancer.zoomPaused) return;
 
@@ -245,7 +245,10 @@ export class ThumbnailEnhancer extends RE6Module {
                         "src": sampleURL,
                         "data-src": sampleURL
                     });
-                    $img.on("load", () => { $link.removeClass("loading"); });
+                    $img.on("load", () => {
+                        $link.removeClass("loading");
+                        $article.addClass("loaded");
+                    });
                 }, 200);
             });
             $article.on("mouseleave", () => {
@@ -257,7 +260,10 @@ export class ThumbnailEnhancer extends RE6Module {
                 "src": sampleURL,
                 "data-src": sampleURL
             });
-            $img.on("load", () => { $link.removeClass("loading"); });
+            $img.on("load", () => {
+                $link.removeClass("loading");
+                $article.addClass("loaded");
+            });
         }
 
         function parseRating(input: string): string {
