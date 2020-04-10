@@ -7,7 +7,7 @@ import { InstantSearch } from "./InstantSearch";
 import { Post } from "../../components/data/Post";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
 import { ModuleController } from "../../components/ModuleController";
-import { ThumbnailEnhancer } from "./ThumbnailsEnhancer";
+import { ThumbnailEnhancer, PerformanceMode } from "./ThumbnailsEnhancer";
 import { Danbooru } from "../../components/api/Danbooru";
 
 /**
@@ -15,6 +15,8 @@ import { Danbooru } from "../../components/api/Danbooru";
  * when you scrolled to the bottom
  */
 export class InfiniteScroll extends RE6Module {
+
+    private static scrollPaused = false;
 
     private $postContainer: JQuery<HTMLElement>;
     private $loadingIndicator: JQuery<HTMLElement>;
@@ -80,7 +82,7 @@ export class InfiniteScroll extends RE6Module {
      * Adds more posts to the site, if the user has scrolled down enough
      */
     private async addMorePosts(override = false): Promise<void> {
-        if (!this.isEnabled() || this.isInProgress || !this.pagesLeft || !this.shouldAddMore(override)) {
+        if (!this.isEnabled() || this.isInProgress || !this.pagesLeft || !this.shouldAddMore(override) || InfiniteScroll.scrollPaused) {
             return;
         }
         this.isInProgress = true;
@@ -96,12 +98,10 @@ export class InfiniteScroll extends RE6Module {
         Page.setQueryParameter("page", this.nextPageToGet.toString());
         this.addPageIndicator();
 
-        const thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer),
-            enhanceThumbs = thumbnailEnhancer.fetchSettings("zoom"),
-            performanceMode = thumbnailEnhancer.fetchSettings("performance");
+        const upscaleMode = ModuleController.get(ThumbnailEnhancer).fetchSettings("upscale");
 
         for (const json of posts) {
-            const element = PostHtml.create(json);
+            const element = PostHtml.create(json, upscaleMode === PerformanceMode.Always);
             const post = new Post(element);
 
             //only append the post if it has image data
@@ -116,7 +116,7 @@ export class InfiniteScroll extends RE6Module {
 
                 this.$postContainer.append(element);
 
-                if (enhanceThumbs) { ThumbnailEnhancer.modifyThumbnail(element, performanceMode); }
+                ThumbnailEnhancer.modifyThumbnail(element, upscaleMode);
             }
         }
         this.isInProgress = false;
@@ -139,5 +139,14 @@ export class InfiniteScroll extends RE6Module {
      */
     private shouldAddMore(override: boolean): boolean {
         return $(window).scrollTop() + $(window).height() > $(document).height() - 50 || override;
+    }
+
+    /**
+     * Temporarily pauses the infinite scroll.  
+     * This is a hack to improve MassDownloader performance.
+     * @param scrollPaused True to pause the loading, false to unpause
+     */
+    public static pauseScroll(scrollPaused = true): void {
+        InfiniteScroll.scrollPaused = scrollPaused;
     }
 }

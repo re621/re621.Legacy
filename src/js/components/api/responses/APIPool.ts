@@ -1,14 +1,10 @@
-export interface APIPool extends APIResponse {
+import { APIPostGroup } from "./APIPostGroup";
+
+export interface APIPool extends APIPostGroup {
     id: number;
-    name: string;
-    created_at: string;
-    updated_at: string;
-    creator_id: number;
-    description: string;
+
     is_active: boolean;
-    category: string;
     is_deleted: boolean;
-    post_ids: number[];
+    category: string;
     creator_name: string;
-    post_count: number;
 }

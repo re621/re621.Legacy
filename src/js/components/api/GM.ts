@@ -224,7 +224,7 @@ interface GMxmlHttpRequestDetails {
     onload?(event: GMxmlHttpRequestResponse): void;
 }
 
-interface GMxmlHttpRequestEvent {
+export interface GMxmlHttpRequestEvent {
     /** **finalUrl** - the final URL after all redirects from where the data was loaded */
     finalURL: string;
 
@@ -252,7 +252,7 @@ interface GMxmlHttpRequestEvent {
     statusText: string;
 }
 
-interface GMxmlHttpRequestProgressEvent extends GMxmlHttpRequestEvent {
+export interface GMxmlHttpRequestProgressEvent extends GMxmlHttpRequestEvent {
     /** **lengthComputable** - absolutely no idea when it would be false */
     lengthComputable: boolean;
 
@@ -263,7 +263,7 @@ interface GMxmlHttpRequestProgressEvent extends GMxmlHttpRequestEvent {
     total: number;
 }
 
-interface GMxmlHttpRequestResponse extends GMxmlHttpRequestEvent {
+export interface GMxmlHttpRequestResponse extends GMxmlHttpRequestEvent {
     /** **responseHeaders** - the request response headers */
     responseHeaders: string;
 

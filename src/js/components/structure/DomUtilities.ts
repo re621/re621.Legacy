@@ -88,6 +88,11 @@ export class DomUtilities {
                 .append($textarea)
                 .wrap(`<form class="simple_form"></form>`);
         }
+
+        // Prepare post-preview elements
+        $("div#posts-container article.post-preview").each((index, element) => {
+            $(element).find("a").first().addClass("preview-box");
+        });
     }
 
     /**

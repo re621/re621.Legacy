@@ -20,8 +20,10 @@ import { DomUtilities } from "../../components/structure/DomUtilities";
 import { ExtraInfo } from "../subscriptions/SubscriptionManager";
 import { Api } from "../../components/api/Api";
 import { User } from "../../components/data/User";
-import { ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
+import { ThumbnailEnhancer, PerformanceMode } from "../search/ThumbnailsEnhancer";
 import { GM } from "../../components/api/GM";
+import { MassDownloader } from "../search/MassDownloader";
+import { PoolDownloader } from "../pools/PoolDownloader";
 
 /**
  * SettingsController  
@@ -42,6 +44,7 @@ export class SettingsController extends RE6Module {
         // Establish the settings window contents
         const moduleStatusTab = this.createModuleStatus();
         const postsPageTab = this.createTabPostsPage();
+        const downloadsTab = this.createTabDownloads();
         const hotkeyTab = this.createTabHotkeys();
         const miscSettingsTab = this.createTabMiscellaneous();
         const aboutTab = this.createAboutTab();
@@ -51,6 +54,7 @@ export class SettingsController extends RE6Module {
             content: [
                 { name: "Features", page: moduleStatusTab.get() },
                 { name: "General", page: postsPageTab.get() },
+                { name: "Downloads", page: downloadsTab.get() },
                 { name: "Hotkeys", page: hotkeyTab.get() },
                 { name: "Other", page: miscSettingsTab.get() },
                 { name: "About", page: aboutTab.get() },
@@ -71,6 +75,7 @@ export class SettingsController extends RE6Module {
         // Establish handlers
         this.handleModuleStatus(moduleStatusTab);
         this.handleTabPostsPage(postsPageTab);
+        this.handleTabDownload(downloadsTab);
         this.handleTabHotkeys(hotkeyTab);
         this.handleTabMiscellaneous(miscSettingsTab);
         this.handleAboutTab(aboutTab);
@@ -103,30 +108,37 @@ export class SettingsController extends RE6Module {
         };
     }
 
-    /** Create the DOM for the Title Customizer page */
+    /** Create the DOM for the General Settings page */
     private createTabPostsPage(): Form {
         const titleCustomizer = ModuleController.get(TitleCustomizer),
-            downloadCustomizer = ModuleController.get(DownloadCustomizer),
             miscellaneous = ModuleController.get(Miscellaneous),
             postViewer = ModuleController.get(PostViewer),
             formattingManager = ModuleController.get(FormattingManager),
             blacklistEnhancer = ModuleController.get(BlacklistEnhancer),
             thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer);
 
-        const templateIcons = new Form(
-            { id: "title-template-icons", columns: 2, },
+        const templateVars = new Form(
+            { id: "general-template-vars", columns: 2, },
             [
                 { id: "explain", type: "div", stretch: "mid", value: `<div class="notice unmargin">The following variables can be used:</div>` },
                 { id: "postnum", type: "copy", label: "Post ID", value: "%postid%", },
                 { id: "author", type: "copy", label: "Artist", value: "%artist%", },
                 { id: "copyright", type: "copy", label: "Copyright", value: "%copyright%", },
                 { id: "characters", type: "copy", label: "Characters", value: "%character%", },
+                { id: "species", type: "copy", label: "Species", value: "%species%", },
+                { id: "meta", type: "copy", label: "Meta", value: "%meta%", },
             ]
         );
 
+        const PERFORMANCE_SELECT = [
+            { value: PerformanceMode.Disabled, name: "Disabled" },
+            { value: PerformanceMode.Hover, name: "On Hover" },
+            { value: PerformanceMode.Always, name: "Always" },
+        ];
+
         const form = new Form(
             {
-                id: "title-customizer-misc",
+                id: "general-settings-form",
                 columns: 3,
                 parent: "div#modal-container",
             },
@@ -155,7 +167,7 @@ export class SettingsController extends RE6Module {
                     id: "general-title-template-variables",
                     type: "div",
                     label: " ",
-                    value: templateIcons.get(),
+                    value: templateVars.get(),
                     stretch: "full",
                 },
                 {
@@ -222,41 +234,126 @@ export class SettingsController extends RE6Module {
                     stretch: "full",
                 },
                 {
-                    id: "thumb-crop",
-                    type: "checkbox",
-                    value: thumbnailEnhancer.fetchSettings("crop"),
-                    label: "Crop Thumbnails",
+                    id: "thumb-upscale",
+                    type: "select",
+                    value: thumbnailEnhancer.fetchSettings("upscale"),
+                    label: "Upscale",
+                    data: PERFORMANCE_SELECT,
                 },
                 {
-                    id: "thumb-crop-text",
+                    id: "thumb-upscale-text-1",
                     type: "div",
-                    value: "Cut down the thumbnails to fit a 150x150 square",
+                    value: "Replace 150x150 blurry thumbnails with larger versions",
                     stretch: "mid",
                 },
+                {
+                    id: "thumb-upscale-spacer",
+                    type: "div",
+                    value: " ",
+                    stretch: "column",
+                },
+                {
+                    id: "thumb-upscale-text-2",
+                    type: "div",
+                    value: `<div class="unmargin"><b>Requires a page reload</b></div>`,
+                    stretch: "mid",
+                },
+
                 {
                     id: "thumb-zoom",
                     type: "checkbox",
                     value: thumbnailEnhancer.fetchSettings("zoom"),
-                    label: "Enhanced Previews",
+                    label: "Enlarge on Hover",
                 },
                 {
                     id: "thumb-zoom-text",
                     type: "div",
-                    value: "Improves thumbnail previews. Requires a page reload",
+                    value: "Increases the size of the thumbnail when hovering over it",
                     stretch: "mid",
                 },
+
                 {
-                    id: "thumb-perf",
-                    type: "checkbox",
-                    value: thumbnailEnhancer.fetchSettings("performance"),
-                    label: "Performance Mode",
+                    id: "thumb-zoom-scale",
+                    type: "input",
+                    value: thumbnailEnhancer.fetchSettings("zoomScale"),
+                    label: "Zoom scale",
+                    pattern: "^[1-9](\\.\\d+)?$",
                 },
                 {
-                    id: "thumb-perf-text",
+                    id: "thumb-crop-ratio-text",
                     type: "div",
-                    value: "Only load bigger previews on hover. Requieres a page reload",
+                    value: "The ratio of the enlarged thumbnail to its original size",
                     stretch: "mid",
                 },
+                {
+                    id: "thumb-zoom-spacer",
+                    type: "div",
+                    value: " ",
+                    stretch: "full",
+                },
+
+
+                {
+                    id: "thumb-vote",
+                    type: "checkbox",
+                    value: thumbnailEnhancer.fetchSettings("vote"),
+                    label: "Voting Buttons",
+                },
+                {
+                    id: "thumb-vote-text",
+                    type: "div",
+                    value: "Adds voting buttons when hovering over a thumbnail",
+                    stretch: "mid",
+                },
+                {
+                    id: "thumb-vote-spacer",
+                    type: "div",
+                    value: " ",
+                    stretch: "full",
+                },
+
+
+                {
+                    id: "thumb-crop",
+                    type: "checkbox",
+                    value: thumbnailEnhancer.fetchSettings("crop"),
+                    label: "Resize Images",
+                },
+                {
+                    id: "thumb-crop-text",
+                    type: "div",
+                    value: "Resize thumbnail images according to settings below",
+                    stretch: "mid",
+                },
+
+                {
+                    id: "thumb-crop-size",
+                    type: "input",
+                    value: thumbnailEnhancer.fetchSettings("cropSize"),
+                    label: "Thumbnail Size",
+                    pattern: "^\\d{2,3}(px|rem|em)$",
+                },
+                {
+                    id: "thumb-crop-size-text",
+                    type: "div",
+                    value: "Thumbnail width, in px, em, rem...",
+                    stretch: "mid",
+                },
+
+                {
+                    id: "thumb-crop-ratio",
+                    type: "input",
+                    value: thumbnailEnhancer.fetchSettings("cropRatio"),
+                    label: "Image Ratio",
+                    pattern: "^(([01](\\.\\d+)?)|2)$",
+                },
+                {
+                    id: "thumb-crop-ratio-text",
+                    type: "div",
+                    value: "Height to width ratio of the image",
+                    stretch: "mid",
+                },
+
                 {
                     id: "gen-inter-spacer-2",
                     type: "hr",
@@ -271,20 +368,6 @@ export class SettingsController extends RE6Module {
                     type: "div",
                     value: "<h3>Actions</h3>",
                     stretch: "full",
-                },
-                {
-                    id: "action-download-template",
-                    type: "input",
-                    value: downloadCustomizer.fetchSettings("template"),
-                    label: "Download File Name",
-                    stretch: "full",
-                },
-                {
-                    id: "action-download-explain",
-                    type: "div",
-                    stretch: "full",
-                    label: " ",
-                    value: `<div class="notice unmargin">Same variables as above can be used. A file extension is appended automatically.</div>`
                 },
                 {
                     id: "actions-votefavorite",
@@ -336,7 +419,6 @@ export class SettingsController extends RE6Module {
      */
     private handleTabPostsPage(form: Form): void {
         const titleCustomizer = ModuleController.getWithType<TitleCustomizer>(TitleCustomizer);
-        const downloadCustomizer = ModuleController.getWithType<DownloadCustomizer>(DownloadCustomizer);
         const miscellaneous = ModuleController.getWithType<Miscellaneous>(Miscellaneous);
         const postViewer = ModuleController.get(PostViewer);
         const formattingManager = ModuleController.get(FormattingManager);
@@ -386,26 +468,44 @@ export class SettingsController extends RE6Module {
         });
 
         // Thumbnails
-        postsPageInput.get("thumb-crop").on("re621:form:input", (event, data) => {
-            thumbnailEnhancer.pushSettings("crop", data);
-            thumbnailEnhancer.toggleCroppedThumbnails(data);
+        postsPageInput.get("thumb-upscale").on("re621:form:input", (event, data) => {
+            thumbnailEnhancer.pushSettings("upscale", data);
         });
 
         postsPageInput.get("thumb-zoom").on("re621:form:input", (event, data) => {
             thumbnailEnhancer.pushSettings("zoom", data);
+            thumbnailEnhancer.toggleHoverZoom(data);
         });
 
-        postsPageInput.get("thumb-perf").on("re621:form:input", (event, data) => {
-            thumbnailEnhancer.pushSettings("performance", data);
+        postsPageInput.get("thumb-zoom-scale").on("re621:form:input", (event, data) => {
+            if (!(event.target as HTMLInputElement).checkValidity()) return;
+            thumbnailEnhancer.pushSettings("zoomScale", data);
+            thumbnailEnhancer.setZoomScale(data);
+        });
+
+        postsPageInput.get("thumb-vote").on("re621:form:input", (event, data) => {
+            thumbnailEnhancer.pushSettings("vote", data);
+            thumbnailEnhancer.toggleHoverVote(data);
+        });
+
+        postsPageInput.get("thumb-crop").on("re621:form:input", (event, data) => {
+            thumbnailEnhancer.pushSettings("crop", data);
+            thumbnailEnhancer.toggleThumbCrop(data);
+        });
+
+        postsPageInput.get("thumb-crop-size").on("re621:form:input", (event, data) => {
+            if (!(event.target as HTMLInputElement).checkValidity()) return;
+            thumbnailEnhancer.pushSettings("cropSize", data);
+            thumbnailEnhancer.setThumbSize(data);
+        });
+
+        postsPageInput.get("thumb-crop-ratio").on("re621:form:input", (event, data) => {
+            if (!(event.target as HTMLInputElement).checkValidity()) return;
+            thumbnailEnhancer.pushSettings("cropRatio", data);
+            thumbnailEnhancer.setThumbRatio(data);
         });
 
         // Actions
-        postsPageInput.get("action-download-template").on("re621:form:input", (event, data) => {
-            downloadCustomizer.pushSettings("template", data);
-            if (downloadCustomizer.isInitialized())
-                downloadCustomizer.refreshDownloadLink();
-        });
-
         postsPageInput.get("actions-votefavorite").on("re621:form:input", (event, data) => {
             postViewer.pushSettings("upvoteOnFavorite", data);
         });
@@ -417,6 +517,197 @@ export class SettingsController extends RE6Module {
         // Blacklist
         postsPageInput.get("blacklist-quickadd").on("re621:form:input", (event, data) => {
             blacklistEnhancer.pushSettings("quickaddTags", data);
+        });
+    }
+
+    private createTabDownloads(): Form {
+        const downloadCustomizer = ModuleController.get(DownloadCustomizer),
+            massDownloader = ModuleController.get(MassDownloader),
+            poolDownloader = ModuleController.get(PoolDownloader);
+
+        const templateVars = new Form(
+            { id: "downloads-template-vars", columns: 2, },
+            [
+                { id: "explain", type: "div", stretch: "mid", value: `<div class="notice unmargin">The following variables can be used:</div>` },
+                { id: "postnum", type: "copy", label: "Post ID", value: "%postid%", },
+                { id: "author", type: "copy", label: "Artist", value: "%artist%", },
+                { id: "copyright", type: "copy", label: "Copyright", value: "%copyright%", },
+                { id: "characters", type: "copy", label: "Characters", value: "%character%", },
+                { id: "species", type: "copy", label: "Species", value: "%species%", },
+                { id: "meta", type: "copy", label: "Meta", value: "%meta%", },
+            ]
+        );
+
+        const poolVars = new Form(
+            { id: "downloads-pool-vars", columns: 2, },
+            [
+                { id: "explain", type: "div", stretch: "mid", value: `<div class="notice unmargin">The following variables can also be used:</div>` },
+                { id: "pool", type: "copy", label: "Pool Name", value: "%pool%", },
+                { id: "index", type: "copy", label: "Index", value: "%index%", },
+            ]
+        );
+
+        const form = new Form(
+            { id: "download-settings-form", columns: 3, },
+            [
+                // Download Customizer
+                {
+                    id: "download-cust-title",
+                    type: "div",
+                    value: "<h3>Download Customizer</h3>",
+                    stretch: "full",
+                },
+                {
+                    id: "download-cust-desc",
+                    type: "div",
+                    value: `This format is used by the "download" button on the post page`,
+                    stretch: "full",
+                },
+                {
+                    id: "download-cust-template",
+                    type: "input",
+                    value: downloadCustomizer.fetchSettings("template"),
+                    label: "Download File Name",
+                    stretch: "full",
+                },
+                {
+                    id: "download-cust-template-variables",
+                    type: "div",
+                    label: " ",
+                    value: templateVars.get(),
+                    stretch: "full",
+                },
+                {
+                    id: "download-cust-template-hr",
+                    type: "hr",
+                    stretch: "full",
+                },
+
+                // Mass Downloader
+                {
+                    id: "download-mass-title",
+                    type: "div",
+                    value: "<h3>Mass Downloader</h3>",
+                    stretch: "full",
+                },
+                {
+                    id: "download-mass-desc",
+                    type: "div",
+                    value: "Downloaded files will be automatically renamed according to this template",
+                    stretch: "full",
+                },
+                {
+                    id: "download-mass-template",
+                    type: "input",
+                    value: massDownloader.fetchSettings("template"),
+                    label: "Download File Name",
+                    stretch: "full",
+                },
+                {
+                    id: "download-mass-template-variables",
+                    type: "div",
+                    label: " ",
+                    value: `<div class="notice unmargin">The same variables as above can be used. Add a forward slash ( / ) to signify a folder.</div>`,
+                    stretch: "full",
+                },
+                {
+                    id: "download-mass-autodownload",
+                    type: "checkbox",
+                    label: "Auto Download",
+                    value: massDownloader.fetchSettings("autoDownloadArchive"),
+                    stretch: "column",
+                },
+                {
+                    id: "download-mass-autodownload-text",
+                    type: "div",
+                    value: "The archive will be downloaded automatically after being created",
+                    stretch: "mid",
+                },
+                {
+                    id: "download-mass-template-hr",
+                    type: "hr",
+                    stretch: "full",
+                },
+
+                // Pool Downloader
+                {
+                    id: "download-pool-title",
+                    type: "div",
+                    value: "<h3>Pool Downloader</h3>",
+                    stretch: "full",
+                },
+                {
+                    id: "download-pool-desc",
+                    type: "div",
+                    value: "Downloaded files will be automatically renamed according to this template",
+                    stretch: "full",
+                },
+                {
+                    id: "download-pool-template",
+                    type: "input",
+                    value: poolDownloader.fetchSettings("template"),
+                    label: "Download File Name",
+                    stretch: "full",
+                },
+                {
+                    id: "download-pool-template-variables",
+                    type: "div",
+                    label: " ",
+                    value: `<div class="notice unmargin">The same variables as above can be used. Add a forward slash ( / ) to signify a folder.</div>`,
+                    stretch: "full",
+                },
+                {
+                    id: "download-pool-template-variables",
+                    type: "div",
+                    label: " ",
+                    value: poolVars.get(),
+                    stretch: "full",
+                },
+                {
+                    id: "download-pool-autodownload",
+                    type: "checkbox",
+                    label: "Auto Download",
+                    value: poolDownloader.fetchSettings("autoDownloadArchive"),
+                    stretch: "column",
+                },
+                {
+                    id: "download-pool-autodownload-text",
+                    type: "div",
+                    value: "The archive will be downloaded automatically after being created",
+                    stretch: "mid",
+                },
+
+            ]);
+        return form;
+    }
+
+    private handleTabDownload(form: Form): void {
+        const downloadCustomizer = ModuleController.getWithType<DownloadCustomizer>(DownloadCustomizer);
+        const massDownloader = ModuleController.get(MassDownloader);
+        const poolDownloader = ModuleController.get(PoolDownloader);
+        const postsPageInput = form.getInputList();
+
+        // Download Customizer
+        postsPageInput.get("download-cust-template").on("re621:form:input", (event, data) => {
+            downloadCustomizer.pushSettings("template", data);
+            if (downloadCustomizer.isInitialized())
+                downloadCustomizer.refreshDownloadLink();
+        });
+
+        // Mass Downloader
+        postsPageInput.get("download-mass-template").on("re621:form:input", (event, data) => {
+            massDownloader.pushSettings("template", data);
+        });
+        postsPageInput.get("download-mass-autodownload").on("re621:form:input", (event, data) => {
+            massDownloader.pushSettings("autoDownloadArchive", data);
+        });
+
+        // Pool Downloader
+        postsPageInput.get("download-pool-template").on("re621:form:input", (event, data) => {
+            poolDownloader.pushSettings("template", data);
+        });
+        postsPageInput.get("download-pool-autodownload").on("re621:form:input", (event, data) => {
+            poolDownloader.pushSettings("autoDownloadArchive", data);
         });
     }
 
@@ -958,7 +1249,7 @@ export class SettingsController extends RE6Module {
 
         // Reset Configuration
         miscFormInput.get("misc-reset-everything").on("click", () => {
-            if(confirm("Are you absolutely sure?")) {
+            if (confirm("Are you absolutely sure?")) {
                 ModuleController.getAll().forEach((module) => {
                     module.clearSettings();
                 });

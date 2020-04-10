@@ -191,6 +191,7 @@ class FormattingHelper {
         this.$form.find("input[type=submit]").addClass("button btn-neutral border-foreground dtext-submit");
 
         // Add Styling
+        this.$container.addClass("bg-section color-text");
         this.$form.addClass("formatting-helper");
         this.$textarea.addClass("bg-section border-foreground color-text");
         this.$preview.addClass("bg-section border-foreground color-text");
@@ -594,8 +595,14 @@ class FormattingHelper {
 
             content = content.replace(/%selection%/g, currentText.substring(position.start, position.end));
 
-            this.$textarea.val(currentText.substring(0, position.start) + content + currentText.substring(position.end, currentText.length));
             this.$textarea.focus();
+
+            // This is a workaround for a Firefox bug, which existed since 2015
+            // Check https://bugzilla.mozilla.org/show_bug.cgi?id=1220696 for more information
+            // For the time being, we'll just have to nuke the undo history on Firefox.
+            if (!document.execCommand("insertText", false, content)) {
+                this.$textarea.val(currentText.substring(0, position.start) + content + currentText.substring(position.end, currentText.length));
+            }
 
             this.$textarea.prop("selectionStart", position.start);
             this.$textarea.prop("selectionEnd", position.start + content.length);
