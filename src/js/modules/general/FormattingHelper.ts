@@ -191,6 +191,7 @@ class FormattingHelper {
         this.$form.find("input[type=submit]").addClass("button btn-neutral border-foreground dtext-submit");
 
         // Add Styling
+        this.$container.addClass("bg-section color-text");
         this.$form.addClass("formatting-helper");
         this.$textarea.addClass("bg-section border-foreground color-text");
         this.$preview.addClass("bg-section border-foreground color-text");
