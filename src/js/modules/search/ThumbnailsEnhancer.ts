@@ -123,7 +123,7 @@ export class ThumbnailEnhancer extends RE6Module {
     /**
      * Converts the thumbnail into an enhancer-ready format
      * @param $article JQuery element `article.post-preview`
-     * @param performance If false, loads bigger images immediately. Otherwise, waits for hover.
+     * @param upscaleMode If / when to load upscaled versions of the image
      */
     public static modifyThumbnail($article: JQuery<HTMLElement>, upscaleMode = PerformanceMode.Hover): void {
 
@@ -183,7 +183,7 @@ export class ThumbnailEnhancer extends RE6Module {
 
 
         /* Handle double-click */
-        let dbclickTimer;
+        let dbclickTimer: number;
         const delay = 200;
         let prevent = false;
 
