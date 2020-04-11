@@ -125,9 +125,10 @@ export namespace APIPost {
 
     export function fromDomElement($element: JQuery<HTMLElement>): APIPost {
         let md5: string;
+        const deletedUrl = "/images/deleted-preview.png";
         if ($element.attr("data-md5")) {
             md5 = $element.attr("data-md5");
-        } else {
+        } else if ($element.attr("data-file-url")) {
             md5 = $element.attr("data-file-url").substring(36, 68);
         }
         const ext = $element.attr("data-file-ext");
@@ -152,7 +153,7 @@ export namespace APIPost {
                 width: -1,
                 md5: md5,
                 size: -1,
-                url: `https://static1.e621.net/data/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.${ext}`
+                url: md5 === undefined ? deletedUrl : `https://static1.e621.net/data/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.${ext}`
             },
             flags: {
                 deleted: false,
@@ -167,7 +168,7 @@ export namespace APIPost {
             preview: {
                 height: -1,
                 width: -1,
-                url: `https://static1.e621.net/data/preview/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`
+                url: md5 === undefined ? deletedUrl : `https://static1.e621.net/data/preview/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`
             },
             rating: PostRating.fromValue($element.attr("data-rating")),
             relationships: {
@@ -179,7 +180,7 @@ export namespace APIPost {
                 has: true,
                 height: -1,
                 width: -1,
-                url: `https://static1.e621.net/data/sample/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`
+                url: md5 === undefined ? deletedUrl : `https://static1.e621.net/data/sample/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`
             },
             score: {
                 down: 0,
@@ -199,8 +200,6 @@ export namespace APIPost {
             },
             updated_at: "",
             uploader_id: parseInt($element.attr("data-uploader-id")),
-
-
         }
         return result;
     }
