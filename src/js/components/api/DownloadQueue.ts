@@ -111,6 +111,7 @@ export class DownloadQueue {
      */
     private async getDataBlob(item: QueuedFile, thread: number): Promise<Blob> {
         return new Promise((resolve, reject) => {
+            let timer: number;
             GM.xmlHttpRequest({
                 method: "GET",
                 url: item.file.path,
@@ -128,7 +129,8 @@ export class DownloadQueue {
                     reject(item.file);
                 },
                 onprogress: (event) => {
-                    item.listeners.onLoadProgress(item.file, thread, event);
+                    if (timer) clearTimeout(timer);
+                    timer = window.setTimeout(() => { item.listeners.onLoadProgress(item.file, thread, event) }, 500);
                 },
                 onload: (event) => {
                     item.listeners.onLoadFinish(item.file, thread, event);
