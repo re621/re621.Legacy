@@ -82,7 +82,7 @@ export class PostFilter {
                     break;
                 case PostFilterType.Uploader:
                     const uploader = content;
-                    result = post.getUploaderID() === parseInt(uploader) || post.getUploaderName() === uploader;
+                    result = post.getUploaderID() === parseInt(uploader);
                     break;
             }
             //invert the result, depending on if the filter started with a -

@@ -5,9 +5,7 @@ export class PostHtml {
     public static create(json: APIPost, loadLargeImage = true): JQuery<HTMLElement> {
         //data-has-sound
         //data-flags
-        const tags = json.tags;
-
-        const allTags = [...tags.artist, ...tags.character, ...tags.copyright, ...tags.general, ...tags.invalid, ...tags.lore, ...tags.meta, ...tags.species].join(" ");
+        const allTags = APIPost.getTagString(json);
         const $article = $("<article>")
             .attr({
                 "id": "post_" + json.id,
