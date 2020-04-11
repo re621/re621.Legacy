@@ -16,10 +16,7 @@ export class ErrorHandler {
             .append(`<p>Please, report this message, including the error log below, through the <a href="` + window["re621"]["links"]["issues"] + `">issue tracker</a>, or in the <a href="` + window["re621"]["links"]["forum"] + `">forum thread</a>.</p>`);
 
         this.feedback = $("<textarea>")
-            .css({
-                "width": "100%",
-                "min-height": "5rem",
-            })
+            .addClass("error-feedback bg-section color-text")
             .appendTo($contentWrapper);
 
         this.trigger = $("<a>");

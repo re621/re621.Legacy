@@ -191,3 +191,13 @@ div#c-favorites div#a-index {
 
     }
 }
+
+/* Error Handling Styles */
+textarea.error-feedback {
+    width: 100%;
+    min-height: 25vh;
+    overflow-x: hidden;
+    white-space: pre;
+
+    @include scrollbars;
+}
