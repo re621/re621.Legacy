@@ -71,6 +71,6 @@ export class TitleCustomizer extends RE6Module {
             .replace(/%meta%/g, this.post.getTagsFromType(TagTypes.Meta).join(", "))
             .replace(/\(\)|( - )$/g, "")
             .replace(/[ ]{2,}|^ | $/g, "")
-            + " - " + Page.getSiteName;
+            + " - " + Page.getSiteName();
     }
 }
