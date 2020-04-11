@@ -115,6 +115,7 @@ export class SettingsController extends RE6Module {
             postViewer = ModuleController.get(PostViewer),
             formattingManager = ModuleController.get(FormattingManager),
             blacklistEnhancer = ModuleController.get(BlacklistEnhancer),
+            imageScaler = ModuleController.get(ImageScaler),
             thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer);
 
         const templateVars = new Form(
@@ -373,19 +374,19 @@ export class SettingsController extends RE6Module {
                     id: "actions-votefavorite",
                     type: "checkbox",
                     value: postViewer.fetchSettings("upvoteOnFavorite"),
-                    label: "Upvote Favorites",
+                    label: "Auto-upvote favorites",
                 },
                 {
                     id: "actions-submit-hotkey",
                     type: "checkbox",
                     value: formattingManager.fetchSettings("hotkeySubmitActive"),
-                    label: "Submit Comments with Alt+Enter",
+                    label: "Comment with Alt+Enter",
                 },
                 {
-                    id: "action-spacer-1",
-                    type: "div",
-                    value: " ",
-                    stretch: "column",
+                    id: "actions-click-scale",
+                    type: "checkbox",
+                    value: imageScaler.fetchSettings("clickScale"),
+                    label: "Click images to resize them",
                 },
                 {
                     id: "gen-inter-spacer-3",
@@ -423,6 +424,7 @@ export class SettingsController extends RE6Module {
         const postViewer = ModuleController.get(PostViewer);
         const formattingManager = ModuleController.get(FormattingManager);
         const blacklistEnhancer = ModuleController.get(BlacklistEnhancer);
+        const imageScaler = ModuleController.get(ImageScaler);
         const thumbnailEnhancer = ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer);
         const postsPageInput = form.getInputList();
 
@@ -512,6 +514,10 @@ export class SettingsController extends RE6Module {
 
         postsPageInput.get("actions-submit-hotkey").on("re621:form:input", (event, data) => {
             formattingManager.pushSettings("hotkeySubmitActive", data);
+        });
+
+        postsPageInput.get("actions-click-scale").on("re621:form:input", (event, data) => {
+            imageScaler.pushSettings("clickScale", data);
         });
 
         // Blacklist

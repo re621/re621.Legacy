@@ -27,15 +27,15 @@ import { ThumbnailEnhancer } from "./modules/search/ThumbnailsEnhancer";
 // - misc
 import { TinyAlias } from "./modules/misc/TinyAlias";
 import { WikiEnhancer } from "./modules/misc/WikiEnhancer";
-
-// - subscribers
+// - pools
+import { PoolDownloader } from "./modules/pools/PoolDownloader";
+// - subscriptions
 import { SubscriptionManager } from "./modules/subscriptions/SubscriptionManager";
 import { ForumSubscriptions } from "./modules/subscriptions/ForumSubscriptions";
 import { PoolSubscriptions } from "./modules/subscriptions/PoolSubscriptions";
 import { TagSubscriptions } from "./modules/subscriptions/TagSubscriptions";
 // - settings
 import { SettingsController } from "./modules/general/SettingsController";
-import { PoolDownloader } from "./modules/pools/PoolDownloader";
 
 
 const loadOrder = [

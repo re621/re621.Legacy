@@ -36,8 +36,10 @@ export class ImageScaler extends RE6Module {
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
-            size: "sample",
             hotkeyScale: "v|0",
+            clickScale: true,
+
+            size: "sample",
         };
     }
 
@@ -82,10 +84,11 @@ export class ImageScaler extends RE6Module {
         this.resizeSelector.change((event, save) => {
             const size = $(event.target).val() + "";
             this.setImageSize(size);
-            if (save !== false) ImageScaler.getInstance().pushSettings("size", size);
+            if (save !== false) this.pushSettings("size", size);
         });
 
         this.image.click(() => {
+            if (!this.fetchSettings("clickScale") || Danbooru.Note.TranslationMode.active) return;
             this.setScale("", false);
         });
 
