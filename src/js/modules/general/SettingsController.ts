@@ -20,7 +20,7 @@ import { DomUtilities } from "../../components/structure/DomUtilities";
 import { ExtraInfo } from "../subscriptions/SubscriptionManager";
 import { Api } from "../../components/api/Api";
 import { User } from "../../components/data/User";
-import { ThumbnailEnhancer, PerformanceMode } from "../search/ThumbnailsEnhancer";
+import { ThumbnailEnhancer, ThumbnailPerformanceMode, ThumbnailClickAction } from "../search/ThumbnailsEnhancer";
 import { GM } from "../../components/api/GM";
 import { MassDownloader } from "../search/MassDownloader";
 import { PoolDownloader } from "../pools/PoolDownloader";
@@ -132,10 +132,16 @@ export class SettingsController extends RE6Module {
         );
 
         const PERFORMANCE_SELECT = [
-            { value: PerformanceMode.Disabled, name: "Disabled" },
-            { value: PerformanceMode.Hover, name: "On Hover" },
-            { value: PerformanceMode.Always, name: "Always" },
+            { value: ThumbnailPerformanceMode.Disabled, name: "Disabled" },
+            { value: ThumbnailPerformanceMode.Hover, name: "On Hover" },
+            { value: ThumbnailPerformanceMode.Always, name: "Always" },
         ];
+
+        const DOUBLE_CLICK_SELECT = [
+            { value: ThumbnailClickAction.Disabled, name: "Disabled" },
+            { value: ThumbnailClickAction.NewTab, name: "Open New Tab" },
+            { value: ThumbnailClickAction.CopyID, name: "Copy Post ID" },
+        ]
 
         const form = new Form(
             {
@@ -354,6 +360,38 @@ export class SettingsController extends RE6Module {
                     value: "Height to width ratio of the image",
                     stretch: "mid",
                 },
+                {
+                    id: "thumb-crop-spacer",
+                    type: "div",
+                    value: " ",
+                    stretch: "full",
+                },
+
+                {
+                    id: "thumb-click-action",
+                    type: "select",
+                    value: thumbnailEnhancer.fetchSettings("clickAction"),
+                    label: "Double Click Action",
+                    data: DOUBLE_CLICK_SELECT,
+                },
+                {
+                    id: "thumb-click-action-text-1",
+                    type: "div",
+                    value: "Action taken when a thumbnail is double-clicked",
+                    stretch: "mid",
+                },
+                {
+                    id: "thumb-click-action-spacer",
+                    type: "div",
+                    value: " ",
+                    stretch: "column",
+                },
+                {
+                    id: "thumb-click-action-text-2",
+                    type: "div",
+                    value: `<div class="unmargin"><b>Requires a page reload</b></div>`,
+                    stretch: "mid",
+                },
 
                 {
                     id: "gen-inter-spacer-2",
@@ -505,6 +543,10 @@ export class SettingsController extends RE6Module {
             if (!(event.target as HTMLInputElement).checkValidity()) return;
             thumbnailEnhancer.pushSettings("cropRatio", data);
             thumbnailEnhancer.setThumbRatio(data);
+        });
+
+        postsPageInput.get("thumb-click-action").on("re621:form:input", (event, data) => {
+            thumbnailEnhancer.pushSettings("clickAction", data);
         });
 
         // Actions

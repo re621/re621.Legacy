@@ -5,10 +5,16 @@ import { GM } from "../../components/api/GM";
 import { Danbooru } from "../../components/api/Danbooru";
 import { ModuleController } from "../../components/ModuleController";
 
-export enum PerformanceMode {
+export enum ThumbnailPerformanceMode {
     Disabled = "disabled",
     Hover = "hover",
     Always = "always",
+}
+
+export enum ThumbnailClickAction {
+    Disabled = "disabled",
+    NewTab = "newtab",
+    CopyID = "copyid",
 }
 
 export class ThumbnailEnhancer extends RE6Module {
@@ -24,7 +30,7 @@ export class ThumbnailEnhancer extends RE6Module {
         return {
             enabled: true,
 
-            upscale: PerformanceMode.Hover,
+            upscale: ThumbnailPerformanceMode.Hover,
 
             zoom: true,
             zoomScale: "2",
@@ -34,15 +40,18 @@ export class ThumbnailEnhancer extends RE6Module {
             crop: true,
             cropSize: "150px",
             cropRatio: "0.9",
+
+            clickAction: ThumbnailClickAction.NewTab,
         };
     }
 
     public create(): void {
         this.postContainer = $("div#posts-container");
 
-        const upscaleMode: PerformanceMode = this.fetchSettings("upscale");
+        const upscaleMode: ThumbnailPerformanceMode = this.fetchSettings("upscale"),
+            clickAction: ThumbnailClickAction = this.fetchSettings("clickAction");
         $("div#posts-container article.post-preview").each((index, element) => {
-            ThumbnailEnhancer.modifyThumbnail($(element), upscaleMode);
+            ThumbnailEnhancer.modifyThumbnail($(element), upscaleMode, clickAction);
         });
 
         this.toggleHoverZoom(this.fetchSettings("zoom"));
@@ -125,7 +134,7 @@ export class ThumbnailEnhancer extends RE6Module {
      * @param $article JQuery element `article.post-preview`
      * @param upscaleMode If / when to load upscaled versions of the image
      */
-    public static modifyThumbnail($article: JQuery<HTMLElement>, upscaleMode = PerformanceMode.Hover): void {
+    public static modifyThumbnail($article: JQuery<HTMLElement>, upscaleMode = ThumbnailPerformanceMode.Hover, clickAction = ThumbnailClickAction.NewTab): void {
 
         /* Create the structure */
         const $link = $article.find("a.preview-box"),
@@ -220,7 +229,13 @@ export class ThumbnailEnhancer extends RE6Module {
             event.preventDefault();
             window.clearTimeout(dbclickTimer);
             prevent = true;
-            GM.openInTab(window.location.origin + $link.attr("href"));
+
+            if (clickAction === ThumbnailClickAction.NewTab) GM.openInTab(window.location.origin + $link.attr("href"));
+            else if (clickAction === ThumbnailClickAction.CopyID) GM.setClipboard($article.attr("data-id"), "text");
+            else {
+                $link.off("click.re621.thumbnail");
+                $link[0].click();
+            }
         });
 
 
@@ -230,7 +245,7 @@ export class ThumbnailEnhancer extends RE6Module {
 
         const sampleURL = $article.attr("data-large-file-url");
 
-        if (upscaleMode === PerformanceMode.Hover) {
+        if (upscaleMode === ThumbnailPerformanceMode.Hover) {
             let timer: number;
             $article.on("mouseenter", () => {
                 if (ThumbnailEnhancer.zoomPaused) return;
@@ -254,7 +269,7 @@ export class ThumbnailEnhancer extends RE6Module {
             $article.on("mouseleave", () => {
                 window.clearTimeout(timer);
             });
-        } else if (upscaleMode === PerformanceMode.Always) {
+        } else if (upscaleMode === ThumbnailPerformanceMode.Always) {
             $link.addClass("loading");
             $img.attr({
                 "src": sampleURL,

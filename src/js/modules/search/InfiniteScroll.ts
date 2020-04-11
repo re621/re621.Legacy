@@ -7,7 +7,7 @@ import { InstantSearch } from "./InstantSearch";
 import { Post } from "../../components/data/Post";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
 import { ModuleController } from "../../components/ModuleController";
-import { ThumbnailEnhancer, PerformanceMode } from "./ThumbnailsEnhancer";
+import { ThumbnailEnhancer, ThumbnailPerformanceMode, ThumbnailClickAction } from "./ThumbnailsEnhancer";
 import { Danbooru } from "../../components/api/Danbooru";
 
 /**
@@ -98,10 +98,12 @@ export class InfiniteScroll extends RE6Module {
         Page.setQueryParameter("page", this.nextPageToGet.toString());
         this.addPageIndicator();
 
-        const upscaleMode = ModuleController.get(ThumbnailEnhancer).fetchSettings("upscale");
+        const thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer),
+            upscaleMode: ThumbnailPerformanceMode = thumbnailEnhancer.fetchSettings("upscale"),
+            clickAction: ThumbnailClickAction = thumbnailEnhancer.fetchSettings("clickAction");
 
         for (const json of posts) {
-            const element = PostHtml.create(json, upscaleMode === PerformanceMode.Always);
+            const element = PostHtml.create(json, upscaleMode === ThumbnailPerformanceMode.Always);
             const post = new Post(element);
 
             //only append the post if it has image data
@@ -116,7 +118,7 @@ export class InfiniteScroll extends RE6Module {
 
                 this.$postContainer.append(element);
 
-                ThumbnailEnhancer.modifyThumbnail(element, upscaleMode);
+                ThumbnailEnhancer.modifyThumbnail(element, upscaleMode, clickAction);
             }
         }
         this.isInProgress = false;

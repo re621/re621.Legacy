@@ -3,7 +3,7 @@ import { User } from "./User";
 import { APIPost, PostRating } from "../api/responses/APIPost";
 import { PostHtml } from "../api/PostHtml";
 import { ModuleController } from "../ModuleController";
-import { ThumbnailEnhancer, PerformanceMode } from "../../modules/search/ThumbnailsEnhancer";
+import { ThumbnailEnhancer, ThumbnailPerformanceMode } from "../../modules/search/ThumbnailsEnhancer";
 
 /**
  * Collects basic info for a post.
@@ -33,7 +33,7 @@ export class Post {
             element = element as APIPost;
             this.apiElement = element;
             const upscaleMode = ModuleController.get(ThumbnailEnhancer).fetchSettings("upscale");
-            this.htmlElement = PostHtml.create(element, upscaleMode === PerformanceMode.Always);
+            this.htmlElement = PostHtml.create(element, upscaleMode === ThumbnailPerformanceMode.Always);
         }
 
         for (const filter of User.getBlacklist().values()) {

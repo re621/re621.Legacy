@@ -92,7 +92,7 @@ export class GM {
      * @param data Data to be copied
      * @param info object like "{ type: 'text', mimetype: 'text/plain'}" or a string expressing the type ("text" or "html")
      */
-    public static setClipboard(data: any, info?: GMSetClipboardInfo): void {
+    public static setClipboard(data: any, info?: { type: string; mimetype: string } | string): void {
         return GM_setClipboard(data, info);
     };
 }
@@ -310,11 +310,4 @@ interface GMOpenInTab {
 
     /** Tab's current state */
     closed: boolean;
-}
-
-interface GMSetClipboardInfo {
-    info: {
-        type: string;
-        mimetype: string;
-    } | string;
 }
