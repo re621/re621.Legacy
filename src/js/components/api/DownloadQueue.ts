@@ -79,9 +79,11 @@ export class DownloadQueue {
     private async createNewProcess(thread: number): Promise<any> {
         return new Promise(async (resolve) => {
 
+            let index: number,
+                item: QueuedFile;
             while (this.queue.length > 0) {
-                const index = this.queue.length,
-                    item = this.queue.pop();
+                index = this.queue.length;
+                item = this.queue.pop();
 
                 item.listeners.onStart(item.file, thread, index);
                 await this.zip.file(
@@ -95,6 +97,8 @@ export class DownloadQueue {
                 );
                 item.listeners.onFinish(item.file, thread, index);
             }
+
+            if (item !== undefined) item.listeners.onWorkerFinish(item.file, thread);
 
             resolve();
         });
@@ -206,4 +210,7 @@ interface DownloadListeners {
 
     /** Fires if the xmlHttpRequest encounters an error or times out. */
     onError?(file: FileData, thread: number, event: GMxmlHttpRequestEvent): void;
+
+    /** Fires when the worker finishes processing the queue */
+    onWorkerFinish?(file: FileData, thread: number): void;
 }

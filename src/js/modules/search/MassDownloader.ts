@@ -229,7 +229,10 @@ export class MassDownloader extends RE6Module {
                                 if (event.lengthComputable) {
                                     threadInfo[thread].css("--progress", Math.round(event.loaded / event.total * 100) + "%");
                                 }
-                            }
+                            },
+                            onWorkerFinish: (item, thread) => {
+                                threadInfo[thread].remove();
+                            },
                         }
                     );
                 });
