@@ -31,6 +31,14 @@ div#posts-container {
             display: initial;
             color: white;
 
+            outline: 0;
+            box-shadow: none;
+            transition: box-shadow 0.5s linear;
+
+            &.highlight {
+                box-shadow: 0px 0px 0px 10px #ffffff60;
+            }
+
             &::before {
                 padding: 1px 2px 0;
                 left: -5px;
