@@ -28,7 +28,7 @@ export class Danbooru {
     }
 }
 
-Danbooru._init() ;
+Danbooru._init();
 
 interface DanbooruBlacklist {
     apply(): void;
@@ -50,6 +50,7 @@ interface DanbooruNoteBox {
 }
 
 interface DanbooruNoteMode {
+    active: boolean;
     toggle(e: Event): void;
 }
 
