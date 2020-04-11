@@ -64,8 +64,7 @@ export class DownloadQueue {
         return Promise.all(processes).then(() => {
             return this.zip.generateAsync({
                 type: "blob",
-                compression: "DEFLATE",
-                compressionOptions: { level: 9 },
+                compression: "STORE",
                 comment: "Downloaded from e621 on " + new Date().toUTCString(),
             }, onArchiveProgress);
         });
