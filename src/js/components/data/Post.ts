@@ -18,6 +18,11 @@ export class Post {
     protected htmlElement: JQuery<HTMLElement>;
     protected apiElement: APIPost;
 
+    /**
+     * 
+     * @param element The element to create the post from. Can either be dom element or api element
+     *                Depending on what was passed the other one gets created from the other elemenet
+     */
     public constructor(element: JQuery<HTMLElement> | APIPost) {
         if (element instanceof jQuery) {
             element = element as JQuery<HTMLElement>;
@@ -34,8 +39,6 @@ export class Post {
         for (const filter of User.getBlacklist().values()) {
             filter.addPost(this, false);
         }
-
-        //Remove blacklist class, this gets custom handling from the script
     }
 
     /**
@@ -104,7 +107,7 @@ export class Post {
     /**
      * Checks if the post is found in an activated blacklist filter
      */
-    private matchesBlacklist(): boolean {
+    public matchesBlacklist(): boolean {
         for (const filter of User.getBlacklist().values()) {
             if (filter.matchesPost(this)) {
                 return true;
