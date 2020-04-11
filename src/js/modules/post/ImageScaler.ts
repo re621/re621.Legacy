@@ -86,6 +86,7 @@ export class ImageScaler extends RE6Module {
         });
 
         this.image.click(() => {
+            if (Danbooru.Note.TranslationMode.active) return;
             this.setScale("", false);
         });
 
