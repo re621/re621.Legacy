@@ -3,7 +3,7 @@ import { PageDefintion } from "../../components/data/Page";
 import { ThumbnailEnhancer } from "./ThumbnailsEnhancer";
 import { Util } from "../../components/structure/Util";
 import { E621 } from "../../components/api/E621";
-import { APIPost } from "../../components/api/responses/ApiPost";
+import { APIPost } from "../../components/api/responses/APIPost";
 import { DownloadQueue } from "../../components/api/DownloadQueue";
 import { InfiniteScroll } from "./InfiniteScroll";
 

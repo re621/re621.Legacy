@@ -1,10 +1,10 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion, Page } from "../../components/data/Page";
 import { E621 } from "../../components/api/E621";
-import { APIPool } from "../../components/api/responses/ApiPool";
+import { APIPool } from "../../components/api/responses/APIPool";
 import { Util } from "../../components/structure/Util";
 import { DownloadQueue } from "../../components/api/DownloadQueue";
-import { APIPost } from "../../components/api/responses/ApiPost";
+import { APIPost } from "../../components/api/responses/APIPost";
 import { APIPostGroup } from "../../components/api/responses/APIPostGroup";
 
 declare const saveAs;
