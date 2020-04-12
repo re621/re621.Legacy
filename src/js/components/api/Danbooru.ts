@@ -34,6 +34,7 @@ interface DanbooruBlacklist {
     apply(): void;
     initialize_anonymous_blacklist(): void;
     initialize_all(): void;
+    initialize_disable_all_blacklists(): void;
 }
 
 interface DanbooruPost {

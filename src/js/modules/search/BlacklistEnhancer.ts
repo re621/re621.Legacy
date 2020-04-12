@@ -43,6 +43,8 @@ export class BlacklistEnhancer extends RE6Module {
         Danbooru.Blacklist.apply = (): void => { return; };
         Danbooru.Blacklist.initialize_anonymous_blacklist = (): void => { return; };
         Danbooru.Blacklist.initialize_all = (): void => { return; };
+        Danbooru.Blacklist.initialize_disable_all_blacklists();
+        $("#blacklisted-hider").remove();
 
         this.modifyDOM();
 
@@ -60,19 +62,23 @@ export class BlacklistEnhancer extends RE6Module {
         const $enableAllbutton = $("#re-enable-all-blacklists").text("Enable all filters");
 
         //catch when the user toggles the blacklist
-        $disableAllButton.on("click", () => {
-            for (const filter of User.getBlacklist().values()) {
-                filter.setEnabled(false);
-            }
-            this.applyBlacklist();
-            this.showFilterList();
-        });
-        $enableAllbutton.on("click", () => {
-            for (const filter of User.getBlacklist().values()) {
-                filter.setEnabled(true);
-            }
-            this.applyBlacklist();
-        });
+        $disableAllButton
+            .off("click.danbooru")
+            .on("click.re621", () => {
+                for (const filter of User.getBlacklist().values()) {
+                    filter.setEnabled(false);
+                }
+                this.applyBlacklist();
+                this.showFilterList();
+            });
+        $enableAllbutton
+            .off("click.danbooru")
+            .on("click.re621", () => {
+                for (const filter of User.getBlacklist().values()) {
+                    filter.setEnabled(true);
+                }
+                this.applyBlacklist();
+            });
 
 
 
