@@ -11,15 +11,22 @@ export class Form {
 
     private config: FormConfig;
     private elements: FormElement[] = [];
+    private formID: string;
 
     private index = 0;
     private $form: JQuery<HTMLElement>;
     private $inputList: Map<string, JQuery<HTMLElement>> = new Map();
 
-    public constructor(config: FormConfig, elements: FormElement[]) {
+    public constructor(config: FormConfig, elements: FormElement[], parent?: string) {
+        if (config.name === undefined) config.name = config.id;
         if (config.columns === undefined) config.columns = 1;
         if (config.parent === undefined) config.parent = "body";
+        if (config.collapse === undefined) config.collapse = false;
+        if (config.collapseState === undefined) config.collapseState = true;
         this.config = config;
+
+        this.formID = (parent === undefined) ? config.id : config.id + "-" + parent;
+
         elements.forEach((element: FormElement | FormElement[]) => {
             if (Array.isArray(element)) {
                 element.forEach((subElement) => { this.addElement(subElement); });
@@ -59,7 +66,7 @@ export class Form {
         if (this.$form !== undefined && !force) { return this.$form; }
 
         this.$form = $("<form>")
-            .attr("id", this.config.id)
+            .attr("id", this.formID)
             .addClass("grid-form");
 
         if (this.config.columns > 1) { this.$form.addClass("columns-" + this.config.columns); }
@@ -82,12 +89,27 @@ export class Form {
             }
         }
 
-        $(this.config.parent).on("submit", "form#" + this.config.id, event => {
+        $(this.config.parent).on("submit", "form#" + this.formID, event => {
             event.preventDefault();
             this.$form.trigger("re621:form:submit", this.getInputValues());
         });
 
         this.$form.trigger("re621:form:create");
+
+        if (this.config.collapse) {
+            const section = $("<div>")
+                .addClass(this.formID + "-collapse form-collapse")
+                .append($("<h3>").addClass("form-collapse-header").html(this.config.name))
+                .append($("<div>").addClass("form-collapse-content").append(this.$form));
+            section.accordion({
+                active: this.config.collapseState,
+                animate: false,
+                collapsible: true,
+                header: "h3",
+            });
+            return section;
+        }
+
         return this.$form;
     }
 
@@ -128,7 +150,7 @@ export class Form {
     public reset(): void {
         if (this.$form === undefined) return;
         for (const element of this.elements) {
-            const $input = this.$form.find("#" + this.config.id + "-" + element.id);
+            const $input = this.$form.find("#" + this.formID + "-" + element.id);
             switch (element.type) {
                 case "input":
                 case "textarea":
@@ -202,7 +224,7 @@ export class Form {
         let labeled = false;
         if (element.label) {
             $("<label>")
-                .attr("for", this.config.id + "-" + element.id)
+                .attr("for", this.formID + "-" + element.id)
                 .html(element.label)
                 .appendTo($form);
             labeled = true;
@@ -218,7 +240,7 @@ export class Form {
             .attr({
                 "type": "text",
                 "data-type": element.type,
-                "id": this.config.id + "-" + element.id,
+                "id": this.formID + "-" + element.id,
             })
             .addClass("bg-section color-text")
             .val(element.value)
@@ -262,7 +284,7 @@ export class Form {
         let labeled = false;
         if (element.label) {
             $("<label>")
-                .attr("for", this.config.id + "-" + element.id)
+                .attr("for", this.formID + "-" + element.id)
                 .html(element.label)
                 .appendTo($form);
             labeled = true;
@@ -279,7 +301,7 @@ export class Form {
             .attr({
                 "type": "text",
                 "data-type": element.type,
-                "id": this.config.id + "-" + element.id,
+                "id": this.formID + "-" + element.id,
                 "readonly": "",
             })
             .addClass("bg-section color-text")
@@ -288,7 +310,7 @@ export class Form {
 
         const $copybutton = $("<button>")
             .attr("type", "button")
-            .attr("id", this.config.id + "-" + element.id + "-copy")
+            .attr("id", this.formID + "-" + element.id + "-copy")
             .addClass("button btn-neutral border-highlight border-left")
             .html(`<i class="far fa-copy"></i>`)
             .appendTo($inputContainer);
@@ -330,7 +352,7 @@ export class Form {
         let labeled = false;
         if (element.label) {
             $("<label>")
-                .attr("for", this.config.id + "-" + element.id)
+                .attr("for", this.formID + "-" + element.id)
                 .html(element.label)
                 .appendTo($form);
             labeled = true;
@@ -347,7 +369,7 @@ export class Form {
             .attr({
                 "type": "text",
                 "data-type": element.type,
-                "id": this.config.id + "-" + element.id,
+                "id": this.formID + "-" + element.id,
                 "readonly": "",
             })
             .addClass("bg-section color-text")
@@ -356,7 +378,7 @@ export class Form {
 
         const $recordbutton = $("<button>")
             .attr("type", "button")
-            .attr("id", this.config.id + "-" + element.id + "-copy")
+            .attr("id", this.formID + "-" + element.id + "-copy")
             .addClass("button btn-neutral border-highlight border-left")
             .html(`<i class="far fa-keyboard"></i>`)
             .appendTo($inputContainer);
@@ -423,7 +445,7 @@ export class Form {
         let labeled = false;
         if (element.label) {
             $("<label>")
-                .attr("for", this.config.id + "-" + element.id)
+                .attr("for", this.formID + "-" + element.id)
                 .html(element.label)
                 .appendTo($form);
             labeled = true;
@@ -440,7 +462,7 @@ export class Form {
                 "type": "file",
                 "accept": element.value,
                 "data-type": element.type,
-                "id": this.config.id + "-" + element.id,
+                "id": this.formID + "-" + element.id,
             })
             .addClass("bg-section color-text")
             .appendTo($inputContainer);
@@ -479,7 +501,7 @@ export class Form {
         let labeled = false;
         if (element.label) {
             $("<label>")
-                .attr("for", this.config.id + "-" + element.id)
+                .attr("for", this.formID + "-" + element.id)
                 .html(element.label)
                 .appendTo($form);
             labeled = true;
@@ -495,7 +517,7 @@ export class Form {
             .attr({
                 "type": "text",
                 "data-type": element.type,
-                "id": this.config.id + "-" + element.id,
+                "id": this.formID + "-" + element.id,
             })
             .css("display", "none")
             .val(element.value)
@@ -568,20 +590,20 @@ export class Form {
             .attr({
                 "type": "checkbox",
                 "data-type": element.type,
-                "id": this.config.id + "-" + element.id,
+                "id": this.formID + "-" + element.id,
             })
             .addClass("switch")
             .attr("checked", element.value)
             .appendTo($inputContainer);
 
         $("<label>")
-            .attr("for", this.config.id + "-" + element.id)
+            .attr("for", this.formID + "-" + element.id)
             .addClass("switch")
             .appendTo($inputContainer);
 
         if (element.label) {
             $("<label>")
-                .attr("for", this.config.id + "-" + element.id)
+                .attr("for", this.formID + "-" + element.id)
                 .html(element.label)
                 .appendTo($inputContainer);
         }
@@ -607,6 +629,87 @@ export class Form {
     }
 
     /**
+     * Builds and appends a radio element
+     * @param $form Form to append the element to
+     * @param element Element configuration data
+     */
+    private buildRadio($form: JQuery<HTMLElement>, element: FormElement): FormInput {
+        let labeled = false;
+        if (element.label) {
+            $("<label>")
+                .attr("for", this.formID + "-" + element.id)
+                .html(element.label)
+                .appendTo($form);
+            labeled = true;
+        } else if (element.stretch === "default") { element.stretch = "column"; }
+
+        const $inputContainer = $("<div>")
+            .addClass("input-container")
+            .addClass("radio-switch")
+            .toggleClass("labeled", labeled)
+            .addClass("stretch-" + element.stretch)
+            .appendTo($form);
+
+        const $input = $("<input>")
+            .addClass("display-hidden")
+            .attr("id", this.formID + "-" + element.id + "-input")
+            .val(element.value)
+            .appendTo($inputContainer);
+
+        let $radioContainer: JQuery<HTMLElement>,
+            checked: boolean;
+        element.data.forEach((entry, index) => {
+            checked = (element.value === entry.value);
+            $radioContainer = $("<div>")
+                .addClass("radio-element")
+                .toggleClass("bg-section", !checked)
+                .toggleClass("bg-highlight", checked)
+                .attr("id", this.formID + "-" + element.id + "-" + index + "-cont")
+                .appendTo($inputContainer);
+            $("<input>")
+                .attr({
+                    "type": "radio",
+                    "name": this.formID + "-" + element.id,
+                    "id": this.formID + "-" + element.id + "-" + index,
+                })
+                .prop("checked", checked)
+                .val(entry.value)
+                .appendTo($radioContainer)
+                .on("click", function () {
+                    $input.val($(this).val()).trigger("change");
+                    $inputContainer.find("div.radio-element.bg-highlight").toggleClass("bg-section bg-highlight");
+                    $(this).parent().toggleClass("bg-section bg-highlight");
+                });
+            $("<label>")
+                .attr("for", this.formID + "-" + element.id + "-" + index)
+                .html(entry.name)
+                .appendTo($radioContainer);
+        });
+
+        if (element.required) { $input.attr("required", ''); }
+
+        $input.on("change", () => {
+            $input.trigger("re621:form:input", $input.val());
+        });
+
+        return { id: element.id, el: $input };
+    }
+
+    /**
+     * Creates a select FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param id Unique element ID
+     * @param value Element value
+     * @param label Form label
+     * @param data Extra data
+     * @param stretch Column span
+     * @param onChange Input change callback
+     */
+    public static radio(id: string, value = "", label?: string, data?: FormExtraData[], stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
+        return this.make("radio", id, label, value, stretch, undefined, undefined, data, onChange);
+    }
+
+    /**
      * Builds and appends a button element
      * @param $form Form to append the element to
      * @param element Element configuration data
@@ -615,7 +718,7 @@ export class Form {
         let labeled = false;
         if (element.label) {
             $("<label>")
-                .attr("for", this.config.id + "-" + element.id)
+                .attr("for", this.formID + "-" + element.id)
                 .html(element.label)
                 .appendTo($form);
             labeled = true;
@@ -631,7 +734,7 @@ export class Form {
             .attr({
                 "type": "button",
                 "data-type": element.type,
-                "id": this.config.id + "-" + element.id,
+                "id": this.formID + "-" + element.id,
             })
             .addClass("button btn-neutral")
             .html(element.value)
@@ -665,7 +768,7 @@ export class Form {
         let labeled = false;
         if (element.label) {
             $("<label>")
-                .attr("for", this.config.id + "-" + element.id)
+                .attr("for", this.formID + "-" + element.id)
                 .html(element.label)
                 .appendTo($form);
             labeled = true;
@@ -681,7 +784,7 @@ export class Form {
             .attr({
                 "type": "submit",
                 "data-type": element.type,
-                "id": this.config.id + "-" + element.id,
+                "id": this.formID + "-" + element.id,
             })
             .addClass("button btn-neutral")
             .html(element.value)
@@ -715,7 +818,7 @@ export class Form {
         let labeled = false;
         if (element.label) {
             $("<label>")
-                .attr("for", this.config.id + "-" + element.id)
+                .attr("for", this.formID + "-" + element.id)
                 .html(element.label)
                 .appendTo($form);
             labeled = true;
@@ -730,7 +833,7 @@ export class Form {
         const $input = $("<textarea>")
             .attr({
                 "data-type": element.type,
-                "id": this.config.id + "-" + element.id
+                "id": this.formID + "-" + element.id
             })
             .addClass("bg-section color-text")
             .val(element.value)
@@ -774,7 +877,7 @@ export class Form {
         let labeled = false;
         if (element.label) {
             $("<label>")
-                .attr("for", this.config.id + "-" + element.id)
+                .attr("for", this.formID + "-" + element.id)
                 .html(element.label)
                 .appendTo($form);
             labeled = true;
@@ -789,7 +892,7 @@ export class Form {
         const $input = $("<select>")
             .attr({
                 "data-type": element.type,
-                "id": this.config.id + "-" + element.id
+                "id": this.formID + "-" + element.id
             })
             .addClass("button btn-neutral")
             .appendTo($inputContainer);
@@ -831,7 +934,7 @@ export class Form {
         let labeled = false;
         if (element.label) {
             $("<label>")
-                .attr("for", this.config.id + "-" + element.id)
+                .attr("for", this.formID + "-" + element.id)
                 .html(element.label)
                 .appendTo($form);
             labeled = true;
@@ -847,7 +950,7 @@ export class Form {
             .addClass("input-div")
             .attr({
                 "data-type": element.type,
-                "id": this.config.id + "-" + element.id,
+                "id": this.formID + "-" + element.id,
             })
             .append(element.value)
             .appendTo($inputContainer);
@@ -914,7 +1017,7 @@ export class Form {
         let labeled = false;
         if (element.label) {
             $("<label>")
-                .attr("for", this.config.id + "-" + element.id)
+                .attr("for", this.formID + "-" + element.id)
                 .html(element.label)
                 .appendTo($form);
             labeled = true;
@@ -929,7 +1032,7 @@ export class Form {
         const $input = $("<hr>")
             .attr({
                 "data-type": element.type,
-                "id": this.config.id + "-" + element.id
+                "id": this.formID + "-" + element.id
             })
             .addClass("color-text-muted")
             .appendTo($inputContainer);
@@ -957,7 +1060,7 @@ export class Form {
         let labeled = false;
         if (element.label) {
             $("<label>")
-                .attr("for", this.config.id + "-" + element.id)
+                .attr("for", this.formID + "-" + element.id)
                 .html(element.label)
                 .appendTo($form);
             labeled = true;
@@ -986,8 +1089,8 @@ export class Form {
     /**
      * Creates a form section FormElement based on the provided parameters  
      * Alias for the more generic make() function with a specific type  
-     * @param id Unique element ID
-     * @param value Element value
+     * @param config Form configuratino
+     * @param elements Form elements
      * @param label Form label
      * @param stretch Column span
      */
@@ -995,15 +1098,36 @@ export class Form {
         return this.make("form", config.id, label, new Form(config, elements), stretch);
     }
 
+    /**
+     * Creates a collapsable subsection FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param config Form configuratino
+     * @param name Collapsable section title
+     * @param elements Form elements
+     * @param label Form label
+     * @param stretch Column span
+     */
+    public static subsection(config: FormConfig, name: string, elements: FormElement[], label?: string, stretch: FormElementWidth = "full"): FormElement {
+        config.collapse = true;
+        config.name = name;
+        config.collapseState = false;
+        return this.make("form", config.id, label, new Form(config, elements), stretch);
+    }
 }
 
 interface FormConfig {
     /** Unique ID for the form */
     id: string;
+    /** Optional name for the form */
+    name?: string;
     /** Number of columns that the form should take up */
     columns?: number;
     /** Nearest static parent, for improved performance */
     parent?: string;
+    /** If true, the form will be wrapped in an accordeon */
+    collapse?: boolean;
+    /** Whether the collapsable should be open by default */
+    collapseState?: boolean;
 }
 
 interface FormEntry {
@@ -1028,7 +1152,6 @@ interface FormEntryRequirements {
     pattern?: string;
 }
 
-// TODO Get rid of the export later
 export interface FormElement extends FormEntry, FormEntryRequirements {
     /** Supported input type */
     type: FormElementType;
@@ -1040,7 +1163,7 @@ export interface FormElement extends FormEntry, FormEntryRequirements {
     onChange?: FormChangeEvent;
 }
 
-type FormElementType = "input" | "copy" | "key" | "file" | "icon" | "checkbox" | "button" | "submit" | "textarea" | "select" | "div" | "hr" | "form";
+type FormElementType = "input" | "copy" | "key" | "file" | "icon" | "checkbox" | "radio" | "button" | "submit" | "textarea" | "select" | "div" | "hr" | "form";
 type FormElementWidth = "default" | "column" | "mid" | "full";
 type FormExtraData = { name: string; value: string };
 type FormChangeEvent = (event: Event, data: any) => void;

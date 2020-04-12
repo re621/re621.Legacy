@@ -228,65 +228,64 @@ export class SettingsController extends RE6Module {
                 Form.spacer(),
                 Form.div(`<div class="unmargin"><b>Requires a page reload</b></div>`, "mid"),
 
+                Form.subsection({ id: "advanced", columns: 3 }, "Advanced", [
+                    Form.checkbox("zoom", thumbnailEnhancer.fetchSettings("zoom"), "Enlarge on Hover", "column",
+                        (event, data) => {
+                            thumbnailEnhancer.pushSettings("zoom", data);
+                            thumbnailEnhancer.toggleHoverZoom(data);
+                        }
+                    ),
+                    Form.div("Increases the size of the thumbnail when hovering over it", "mid"),
 
-                Form.checkbox("zoom", thumbnailEnhancer.fetchSettings("zoom"), "Enlarge on Hover", "column",
-                    (event, data) => {
-                        thumbnailEnhancer.pushSettings("zoom", data);
-                        thumbnailEnhancer.toggleHoverZoom(data);
-                    }
-                ),
-                Form.div("Increases the size of the thumbnail when hovering over it", "mid"),
+                    Form.input("zoom-scale", thumbnailEnhancer.fetchSettings("zoomScale"), "Zoom scale", "column", { pattern: "^[1-9](\\.\\d+)?$" },
+                        (event, data) => {
+                            if (!(event.target as HTMLInputElement).checkValidity()) return;
+                            thumbnailEnhancer.pushSettings("zoomScale", data);
+                            thumbnailEnhancer.setZoomScale(data);
+                        }
+                    ),
+                    Form.div("The ratio of the enlarged thumbnail to its original size", "mid"),
 
-                Form.input("zoom-scale", thumbnailEnhancer.fetchSettings("zoomScale"), "Zoom scale", "column", { pattern: "^[1-9](\\.\\d+)?$" },
-                    (event, data) => {
-                        if (!(event.target as HTMLInputElement).checkValidity()) return;
-                        thumbnailEnhancer.pushSettings("zoomScale", data);
-                        thumbnailEnhancer.setZoomScale(data);
-                    }
-                ),
-                Form.div("The ratio of the enlarged thumbnail to its original size", "mid"),
-
-                Form.spacer("full"),
-
-
-                Form.checkbox("vote", thumbnailEnhancer.fetchSettings("vote"), "Voting Buttons", "column",
-                    (event, data) => {
-                        thumbnailEnhancer.pushSettings("vote", data);
-                        thumbnailEnhancer.toggleHoverVote(data);
-                    }
-                ),
-                Form.div("Adds voting buttons when hovering over a thumbnail", "mid"),
-
-                Form.spacer("full"),
+                    Form.spacer("full"),
 
 
-                Form.checkbox("crop", thumbnailEnhancer.fetchSettings("crop"), "Resize Images", "column",
-                    (event, data) => {
-                        thumbnailEnhancer.pushSettings("crop", data);
-                        thumbnailEnhancer.toggleThumbCrop(data);
-                    }
-                ),
-                Form.div("Resize thumbnail images according to settings below", "mid"),
+                    Form.checkbox("vote", thumbnailEnhancer.fetchSettings("vote"), "Voting Buttons", "column",
+                        (event, data) => {
+                            thumbnailEnhancer.pushSettings("vote", data);
+                            thumbnailEnhancer.toggleHoverVote(data);
+                        }
+                    ),
+                    Form.div("Adds voting buttons when hovering over a thumbnail", "mid"),
 
-                Form.input("crop-size", thumbnailEnhancer.fetchSettings("cropSize"), "Thumbnail Size", "column", { pattern: "^\\d{2,3}(px|rem|em)$" },
-                    (event, data) => {
-                        if (!(event.target as HTMLInputElement).checkValidity()) return;
-                        thumbnailEnhancer.pushSettings("cropSize", data);
-                        thumbnailEnhancer.setThumbSize(data);
-                    }
-                ),
-                Form.div("Thumbnail width, in px, em, or rem", "mid"),
+                    Form.spacer("full"),
 
-                Form.input("crop-ratio", thumbnailEnhancer.fetchSettings("cropRatio"), "Image Ratio", "column", { pattern: "^(([01](\\.\\d+)?)|2)$" },
-                    (event, data) => {
-                        if (!(event.target as HTMLInputElement).checkValidity()) return;
-                        thumbnailEnhancer.pushSettings("cropRatio", data);
-                        thumbnailEnhancer.setThumbRatio(data);
-                    }
-                ),
-                Form.div("Height to width ratio of the image", "mid"),
 
-                Form.spacer("full"),
+                    Form.checkbox("crop", thumbnailEnhancer.fetchSettings("crop"), "Resize Images", "column",
+                        (event, data) => {
+                            thumbnailEnhancer.pushSettings("crop", data);
+                            thumbnailEnhancer.toggleThumbCrop(data);
+                        }
+                    ),
+                    Form.div("Resize thumbnail images according to settings below", "mid"),
+
+                    Form.input("crop-size", thumbnailEnhancer.fetchSettings("cropSize"), "Thumbnail Size", "column", { pattern: "^\\d{2,3}(px|rem|em)$" },
+                        (event, data) => {
+                            if (!(event.target as HTMLInputElement).checkValidity()) return;
+                            thumbnailEnhancer.pushSettings("cropSize", data);
+                            thumbnailEnhancer.setThumbSize(data);
+                        }
+                    ),
+                    Form.div("Thumbnail width, in px, em, or rem", "mid"),
+
+                    Form.input("crop-ratio", thumbnailEnhancer.fetchSettings("cropRatio"), "Image Ratio", "column", { pattern: "^(([01](\\.\\d+)?)|2)$" },
+                        (event, data) => {
+                            if (!(event.target as HTMLInputElement).checkValidity()) return;
+                            thumbnailEnhancer.pushSettings("cropRatio", data);
+                            thumbnailEnhancer.setThumbRatio(data);
+                        }
+                    ),
+                    Form.div("Height to width ratio of the image", "mid"),
+                ]),
 
 
                 Form.select(
