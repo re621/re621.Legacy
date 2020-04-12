@@ -192,6 +192,11 @@ div#c-favorites div#a-index {
     }
 }
 
+/* Quick-add Tags Override */
+div#c-posts div#quick-edit-div textarea {
+    width: 100%;
+}
+
 /* Error Handling Styles */
 textarea.error-feedback {
     width: 100%;

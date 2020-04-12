@@ -18,7 +18,7 @@ export class TinyAlias extends RE6Module {
     private aliasData;
 
     public constructor() {
-        super([PageDefintion.upload, PageDefintion.post]);
+        super([PageDefintion.upload, PageDefintion.post, PageDefintion.search]);
     }
 
     /**
