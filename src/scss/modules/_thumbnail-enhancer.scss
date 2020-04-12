@@ -1,28 +1,11 @@
 /* Thumbnail Enhancer Styles */
 
-// Crop Thumbnails
-div#posts-container {
+// Restyling post-previews
+div#page div#posts-container {
+
     display: grid;
     grid-template-columns: repeat(auto-fill, 150px);
     justify-content: space-between;
-
-    &[data-thumb-crop=true] {
-        grid-template-columns: repeat(auto-fill, var(--thumbnail-size, 150px));
-
-        article.post-preview {
-            margin: 0 0 1rem;
-            height: auto;
-            width: var(--thumbnail-size, 150px);
-        }
-
-        article.post-preview img {
-            width: var(--thumbnail-size, 150px);
-            height: calc(var(--thumbnail-size, 150px) * var(--thumbnail-ratio, 1.3));
-            object-fit: cover;
-            max-width: unset;
-            max-height: unset;
-        }
-    }
 
     article.post-preview {
         overflow: visible;
@@ -112,6 +95,32 @@ div#posts-container {
             }
         }
     }
+}
+
+// Resize Thumbnails
+div#page div#posts-container {
+
+    &[data-thumb-crop=true] {
+        grid-template-columns: repeat(auto-fill, var(--thumbnail-size, 150px));
+
+        article.post-preview {
+            margin: 0 0 1rem;
+            height: auto;
+            width: var(--thumbnail-size, 150px);
+        }
+
+        article.post-preview img {
+            width: var(--thumbnail-size, 150px);
+            height: calc(var(--thumbnail-size, 150px) * var(--thumbnail-ratio, 1.3));
+            object-fit: cover;
+            max-width: unset;
+            max-height: unset;
+        }
+    }
+}
+
+// Voting Buttons
+div#page div#posts-container {
 
     &[data-thumb-vote=true] article.post-preview:hover {
         &>a.preview-box {
@@ -120,6 +129,10 @@ div#posts-container {
             }
         }
     }
+}
+
+// Zoom on Hover
+div#page.mode-view div#posts-container {
 
     &[data-thumb-zoom=true] article.post-preview.loaded:hover {
         position: relative;
