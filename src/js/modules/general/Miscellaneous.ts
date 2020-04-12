@@ -31,10 +31,13 @@ export class Miscellaneous extends RE6Module {
             hotkeyRandomPost: "r",
             hotkeyNewComment: "n",
             hotkeyEditPost: "e",
+
             removeSearchQueryString: true,
-            loadRedesignFixes: true,
-            improveTagCount: true,
             stickySearchbox: true,
+
+            improveTagCount: true,
+            collapseCategories: true,
+            categoryData: [],
         };
     }
 
@@ -54,6 +57,11 @@ export class Miscellaneous extends RE6Module {
         // Replaces the tag count estimate with the real number
         if (this.fetchSettings("improveTagCount") === true && Page.matches([PageDefintion.search, PageDefintion.post])) {
             this.improveTagCount();
+        }
+
+        // Restore the collapsed categories
+        if (this.fetchSettings("collapseCategories") === true && Page.matches(PageDefintion.post)) {
+            this.collapseTagCategories();
         }
 
         // Auto-focus on the searchbar
@@ -104,6 +112,30 @@ export class Miscellaneous extends RE6Module {
             const tag = $(element);
             tag.text(tag.attr(source));
         });
+    }
+
+    /**
+     * Records which tag categories the user has collapsed.
+     */
+    private collapseTagCategories(): void {
+        let storedCats: string[] = this.fetchSettings("categoryData", true);
+        $("section#tag-list .tag-list-header").each((index, element) => {
+            const $header = $(element),
+                cat = $header.attr("data-category");
+            if (storedCats.indexOf(cat) !== -1) $header.get(0).click();
+
+            $header.on("click.danbooru", () => {
+                storedCats = this.fetchSettings("categoryData", true);
+                if ($header.hasClass("hidden-category")) {
+                    storedCats.push(cat);
+                } else {
+                    const index = storedCats.indexOf(cat);
+                    if (index !== -1) storedCats.splice(index, 1);
+                }
+                this.pushSettings("categoryData", storedCats, true);
+            });
+        });
+
     }
 
     /**

@@ -322,6 +322,10 @@ export class SettingsController extends RE6Module {
                 Form.checkbox(
                     "click-scale", imageScaler.fetchSettings("clickScale"), "Click images to resize them", "column",
                     (event, data) => { imageScaler.pushSettings("clickScale", data); }),
+                Form.checkbox(
+                    "collapse-tag-cats", miscellaneous.fetchSettings("collapseCategories"), "Collapse tag categories", "column",
+                    (event, data) => { miscellaneous.pushSettings("collapseCategories", data); }
+                ),
 
                 Form.hr(),
             ]),
