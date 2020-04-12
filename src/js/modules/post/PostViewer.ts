@@ -86,6 +86,12 @@ export class PostViewer extends RE6Module {
         const $bottomNotices = $(".parent-children");
         $bottomNotices.insertAfter($("#search-box"));
 
+        // Listen to favorites button click
+        $("button#add-fav-button").on("click", () => {
+            if (!this.fetchSettings("upvoteOnFavorite")) return;
+            Danbooru.Post.vote(Post.getViewingPost().getId(), 1, true);
+        })
+
         this.registerHotkeys();
     }
 
