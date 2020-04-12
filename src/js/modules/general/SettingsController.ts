@@ -42,22 +42,15 @@ export class SettingsController extends RE6Module {
         });
 
         // Establish the settings window contents
-        const moduleStatusTab = this.createModuleStatus();
-        const postsPageTab = this.createTabPostsPage();
-        const downloadsTab = this.createTabDownloads();
-        const hotkeyTab = this.createTabHotkeys();
-        const miscSettingsTab = this.createTabMiscellaneous();
-        const aboutTab = this.createAboutTab();
-
         const $settings = new Tabbed({
             name: "settings-tabs",
             content: [
-                { name: "Features", page: moduleStatusTab.get() },
-                { name: "General", page: postsPageTab.get() },
-                { name: "Downloads", page: downloadsTab.get() },
-                { name: "Hotkeys", page: hotkeyTab.get() },
-                { name: "Other", page: miscSettingsTab.get() },
-                { name: "About", page: aboutTab.get() },
+                { name: "Features", page: this.createFeaturesTab().get() },
+                { name: "General", page: this.createGeneralTab().get() },
+                { name: "Downloads", page: this.createDownloadsTab().get() },
+                { name: "Hotkeys", page: this.createHotkeysTab().get() },
+                { name: "Other", page: this.createMiscTab().get() },
+                { name: "About", page: this.createAboutTab().get() },
             ]
         });
 
@@ -72,14 +65,6 @@ export class SettingsController extends RE6Module {
             position: { my: "center", at: "center" }
         });
 
-        // Establish handlers
-        this.handleModuleStatus(moduleStatusTab);
-        this.handleTabPostsPage(postsPageTab);
-        this.handleTabDownload(downloadsTab);
-        this.handleTabHotkeys(hotkeyTab);
-        this.handleTabMiscellaneous(miscSettingsTab);
-        this.handleAboutTab(aboutTab);
-
         // Start up the version checker
         if (new Date().getTime() - (1000 * 60 * 60) > this.fetchSettings("lastVersionCheck")) {
 
@@ -90,10 +75,9 @@ export class SettingsController extends RE6Module {
                 this.pushSettings("newVersionAvailable", releases.latest.name !== releases.current.name);
                 this.pushSettings("lastVersionCheck", new Date().getTime());
                 this.pushSettings("changelog", releases.current.body);
-                this.modal.getElement().trigger("re621:settings:update", {
-                    changelog: releases.current.body,
-                    newVersion: releases.latest.name !== releases.current.name
-                });
+
+                $("div#changelog-list").html(Util.quickParseMarkdown(releases.current.body));
+                $("#project-update-button").attr("data-available", (releases.latest.name !== releases.current.name) + "");
             })();
         }
     }
@@ -108,899 +92,404 @@ export class SettingsController extends RE6Module {
         };
     }
 
-    /** Create the DOM for the General Settings page */
-    private createTabPostsPage(): Form {
-        const titleCustomizer = ModuleController.get(TitleCustomizer),
-            miscellaneous = ModuleController.get(Miscellaneous),
-            postViewer = ModuleController.get(PostViewer),
-            formattingManager = ModuleController.get(FormattingManager),
-            blacklistEnhancer = ModuleController.get(BlacklistEnhancer),
-            imageScaler = ModuleController.get(ImageScaler),
-            thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer);
+    /** Creates the script features tab */
+    private createFeaturesTab(): Form {
+        const modules = ModuleController.getAll();
 
-        const templateVars = new Form(
-            { id: "general-template-vars", columns: 2, },
-            [
-                { id: "explain", type: "div", stretch: "mid", value: `<div class="notice unmargin">The following variables can be used:</div>` },
-                { id: "postnum", type: "copy", label: "Post ID", value: "%postid%", },
-                { id: "author", type: "copy", label: "Artist", value: "%artist%", },
-                { id: "copyright", type: "copy", label: "Copyright", value: "%copyright%", },
-                { id: "characters", type: "copy", label: "Characters", value: "%character%", },
-                { id: "species", type: "copy", label: "Species", value: "%species%", },
-                { id: "meta", type: "copy", label: "Meta", value: "%meta%", },
-            ]
-        );
-
-        const PERFORMANCE_SELECT = [
-            { value: ThumbnailPerformanceMode.Disabled, name: "Disabled" },
-            { value: ThumbnailPerformanceMode.Hover, name: "On Hover" },
-            { value: ThumbnailPerformanceMode.Always, name: "Always" },
-        ];
-
-        const DOUBLE_CLICK_SELECT = [
-            { value: ThumbnailClickAction.Disabled, name: "Disabled" },
-            { value: ThumbnailClickAction.NewTab, name: "Open New Tab" },
-            { value: ThumbnailClickAction.CopyID, name: "Copy Post ID" },
-        ]
-
-        const form = new Form(
-            {
-                id: "general-settings-form",
-                columns: 3,
-                parent: "div#modal-container",
-            },
-            [
-                // General
-                {
-                    id: "general-header",
-                    type: "div",
-                    value: "<h3>General</h3>",
-                    stretch: "column",
-                },
-                {
-                    id: "general-help",
-                    type: "div",
-                    value: `<div class="notice text-right">Settings are saved and applied automatically.</div>`,
-                    stretch: "mid"
-                },
-                {
-                    id: "general-title-template",
-                    type: "input",
-                    value: titleCustomizer.fetchSettings("template"),
-                    label: "Page Title",
-                    stretch: "full",
-                },
-                {
-                    id: "general-title-template-variables",
-                    type: "div",
-                    label: " ",
-                    value: templateVars.get(),
-                    stretch: "full",
-                },
-                {
-                    id: "general-title-symbol-enabled",
-                    type: "checkbox",
-                    value: titleCustomizer.fetchSettings("symbolsEnabled"),
-                    label: "Vote / Favorite Icons",
-                },
-                {
-                    id: "general-title-spacer-1",
-                    type: "div",
-                    value: "",
-                    stretch: "mid"
-                },
-                {
-                    id: "general-title-symbol-fav",
-                    type: "input",
-                    value: titleCustomizer.fetchSettings("symbolFav"),
-                    label: "Favorite",
-                },
-                {
-                    id: "general-title-symbol-voteup",
-                    type: "input",
-                    value: titleCustomizer.fetchSettings("symbolVoteUp"),
-                    label: "Upvote",
-                },
-                {
-                    id: "general-title-symbol-votedown",
-                    type: "input",
-                    value: titleCustomizer.fetchSettings("symbolVoteDown"),
-                    label: "Downvote",
-                },
-                {
-                    id: "general-improved-tagcount",
-                    type: "checkbox",
-                    value: miscellaneous.fetchSettings("improveTagCount"),
-                    label: "Expanded Tag Count",
-                },
-                {
-                    id: "general-sticky-searchbox",
-                    type: "checkbox",
-                    value: miscellaneous.fetchSettings("stickySearchbox"),
-                    label: "Fixed Searchbox",
-                },
-                {
-                    id: "general-spacer-2",
-                    type: "div",
-                    value: " ",
-                    stretch: "column",
-                },
-                {
-                    id: "gen-inter-spacer-1",
-                    type: "hr",
-                    value: " ",
-                    stretch: "full",
-                },
-
-
-                // Thumbnails
-                {
-                    id: "thumb-header",
-                    type: "div",
-                    value: "<h3>Thumbnails</h3>",
-                    stretch: "full",
-                },
-                {
-                    id: "thumb-upscale",
-                    type: "select",
-                    value: thumbnailEnhancer.fetchSettings("upscale"),
-                    label: "Upscale",
-                    data: PERFORMANCE_SELECT,
-                },
-                {
-                    id: "thumb-upscale-text-1",
-                    type: "div",
-                    value: "Replace 150x150 blurry thumbnails with larger versions",
-                    stretch: "mid",
-                },
-                {
-                    id: "thumb-upscale-spacer",
-                    type: "div",
-                    value: " ",
-                    stretch: "column",
-                },
-                {
-                    id: "thumb-upscale-text-2",
-                    type: "div",
-                    value: `<div class="unmargin"><b>Requires a page reload</b></div>`,
-                    stretch: "mid",
-                },
-
-                {
-                    id: "thumb-zoom",
-                    type: "checkbox",
-                    value: thumbnailEnhancer.fetchSettings("zoom"),
-                    label: "Enlarge on Hover",
-                },
-                {
-                    id: "thumb-zoom-text",
-                    type: "div",
-                    value: "Increases the size of the thumbnail when hovering over it",
-                    stretch: "mid",
-                },
-
-                {
-                    id: "thumb-zoom-scale",
-                    type: "input",
-                    value: thumbnailEnhancer.fetchSettings("zoomScale"),
-                    label: "Zoom scale",
-                    pattern: "^[1-9](\\.\\d+)?$",
-                },
-                {
-                    id: "thumb-crop-ratio-text",
-                    type: "div",
-                    value: "The ratio of the enlarged thumbnail to its original size",
-                    stretch: "mid",
-                },
-                {
-                    id: "thumb-zoom-spacer",
-                    type: "div",
-                    value: " ",
-                    stretch: "full",
-                },
-
-
-                {
-                    id: "thumb-vote",
-                    type: "checkbox",
-                    value: thumbnailEnhancer.fetchSettings("vote"),
-                    label: "Voting Buttons",
-                },
-                {
-                    id: "thumb-vote-text",
-                    type: "div",
-                    value: "Adds voting buttons when hovering over a thumbnail",
-                    stretch: "mid",
-                },
-                {
-                    id: "thumb-vote-spacer",
-                    type: "div",
-                    value: " ",
-                    stretch: "full",
-                },
-
-
-                {
-                    id: "thumb-crop",
-                    type: "checkbox",
-                    value: thumbnailEnhancer.fetchSettings("crop"),
-                    label: "Resize Images",
-                },
-                {
-                    id: "thumb-crop-text",
-                    type: "div",
-                    value: "Resize thumbnail images according to settings below",
-                    stretch: "mid",
-                },
-
-                {
-                    id: "thumb-crop-size",
-                    type: "input",
-                    value: thumbnailEnhancer.fetchSettings("cropSize"),
-                    label: "Thumbnail Size",
-                    pattern: "^\\d{2,3}(px|rem|em)$",
-                },
-                {
-                    id: "thumb-crop-size-text",
-                    type: "div",
-                    value: "Thumbnail width, in px, em, rem...",
-                    stretch: "mid",
-                },
-
-                {
-                    id: "thumb-crop-ratio",
-                    type: "input",
-                    value: thumbnailEnhancer.fetchSettings("cropRatio"),
-                    label: "Image Ratio",
-                    pattern: "^(([01](\\.\\d+)?)|2)$",
-                },
-                {
-                    id: "thumb-crop-ratio-text",
-                    type: "div",
-                    value: "Height to width ratio of the image",
-                    stretch: "mid",
-                },
-                {
-                    id: "thumb-crop-spacer",
-                    type: "div",
-                    value: " ",
-                    stretch: "full",
-                },
-
-                {
-                    id: "thumb-click-action",
-                    type: "select",
-                    value: thumbnailEnhancer.fetchSettings("clickAction"),
-                    label: "Double Click Action",
-                    data: DOUBLE_CLICK_SELECT,
-                },
-                {
-                    id: "thumb-click-action-text-1",
-                    type: "div",
-                    value: "Action taken when a thumbnail is double-clicked",
-                    stretch: "mid",
-                },
-                {
-                    id: "thumb-click-action-spacer",
-                    type: "div",
-                    value: " ",
-                    stretch: "column",
-                },
-                {
-                    id: "thumb-click-action-text-2",
-                    type: "div",
-                    value: `<div class="unmargin"><b>Requires a page reload</b></div>`,
-                    stretch: "mid",
-                },
-
-                {
-                    id: "gen-inter-spacer-2",
-                    type: "hr",
-                    value: " ",
-                    stretch: "full",
-                },
-
-
-                // Actions
-                {
-                    id: "action-header",
-                    type: "div",
-                    value: "<h3>Actions</h3>",
-                    stretch: "full",
-                },
-                {
-                    id: "actions-votefavorite",
-                    type: "checkbox",
-                    value: postViewer.fetchSettings("upvoteOnFavorite"),
-                    label: "Auto-upvote favorites",
-                },
-                {
-                    id: "actions-submit-hotkey",
-                    type: "checkbox",
-                    value: formattingManager.fetchSettings("hotkeySubmitActive"),
-                    label: "Comment with Alt+Enter",
-                },
-                {
-                    id: "actions-click-scale",
-                    type: "checkbox",
-                    value: imageScaler.fetchSettings("clickScale"),
-                    label: "Click images to resize them",
-                },
-                {
-                    id: "gen-inter-spacer-3",
-                    type: "hr",
-                    value: " ",
-                    stretch: "full",
-                },
-
-                // Blacklist
-                {
-                    id: "blacklist-title",
-                    type: "div",
-                    value: "<h3>Blacklist</h3>",
-                    stretch: "full"
-                },
-                {
-                    id: "blacklist-quickadd",
-                    type: "checkbox",
-                    value: blacklistEnhancer.fetchSettings("quickaddTags"),
-                    label: "Click X to add tag to blacklist",
-                },
-            ]
-        );
-
-        return form;
-    }
-
-    /**
-     * Event handlers for the title customizer settings page
-     * @param form Miscellaneous settings form
-     */
-    private handleTabPostsPage(form: Form): void {
-        const titleCustomizer = ModuleController.getWithType<TitleCustomizer>(TitleCustomizer);
-        const miscellaneous = ModuleController.getWithType<Miscellaneous>(Miscellaneous);
-        const postViewer = ModuleController.get(PostViewer);
-        const formattingManager = ModuleController.get(FormattingManager);
-        const blacklistEnhancer = ModuleController.get(BlacklistEnhancer);
-        const imageScaler = ModuleController.get(ImageScaler);
-        const thumbnailEnhancer = ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer);
-        const postsPageInput = form.getInputList();
-
-        // General
-        postsPageInput.get("general-title-template").on("re621:form:input", (event, data) => {
-            titleCustomizer.pushSettings("template", data);
-            if (titleCustomizer.isInitialized())
-                titleCustomizer.refreshPageTitle();
-        });
-
-        postsPageInput.get("general-title-symbol-enabled").on("re621:form:input", (event, data) => {
-            titleCustomizer.pushSettings("symbolsEnabled", data);
-            if (titleCustomizer.isInitialized())
-                titleCustomizer.refreshPageTitle();
-        });
-
-        postsPageInput.get("general-title-symbol-fav").on("re621:form:input", (event, data) => {
-            titleCustomizer.pushSettings("symbolFav", data);
-            if (titleCustomizer.isInitialized())
-                titleCustomizer.refreshPageTitle();
-        });
-
-        postsPageInput.get("general-title-symbol-voteup").on("re621:form:input", (event, data) => {
-            titleCustomizer.pushSettings("symbolVoteUp", data);
-            if (titleCustomizer.isInitialized())
-                titleCustomizer.refreshPageTitle();
-        });
-
-        postsPageInput.get("general-title-symbol-votedown").on("re621:form:input", (event, data) => {
-            titleCustomizer.pushSettings("symbolVoteDown", data);
-            if (titleCustomizer.isInitialized())
-                titleCustomizer.refreshPageTitle();
-        });
-
-        postsPageInput.get("general-improved-tagcount").on("re621:form:input", (event, data) => {
-            miscellaneous.pushSettings("improveTagCount", data);
-            miscellaneous.improveTagCount(data);
-        });
-
-        postsPageInput.get("general-sticky-searchbox").on("re621:form:input", (event, data) => {
-            miscellaneous.pushSettings("stickySearchbox", data);
-            miscellaneous.createStickySearchbox(data);
-        });
-
-        // Thumbnails
-        postsPageInput.get("thumb-upscale").on("re621:form:input", (event, data) => {
-            thumbnailEnhancer.pushSettings("upscale", data);
-        });
-
-        postsPageInput.get("thumb-zoom").on("re621:form:input", (event, data) => {
-            thumbnailEnhancer.pushSettings("zoom", data);
-            thumbnailEnhancer.toggleHoverZoom(data);
-        });
-
-        postsPageInput.get("thumb-zoom-scale").on("re621:form:input", (event, data) => {
-            if (!(event.target as HTMLInputElement).checkValidity()) return;
-            thumbnailEnhancer.pushSettings("zoomScale", data);
-            thumbnailEnhancer.setZoomScale(data);
-        });
-
-        postsPageInput.get("thumb-vote").on("re621:form:input", (event, data) => {
-            thumbnailEnhancer.pushSettings("vote", data);
-            thumbnailEnhancer.toggleHoverVote(data);
-        });
-
-        postsPageInput.get("thumb-crop").on("re621:form:input", (event, data) => {
-            thumbnailEnhancer.pushSettings("crop", data);
-            thumbnailEnhancer.toggleThumbCrop(data);
-        });
-
-        postsPageInput.get("thumb-crop-size").on("re621:form:input", (event, data) => {
-            if (!(event.target as HTMLInputElement).checkValidity()) return;
-            thumbnailEnhancer.pushSettings("cropSize", data);
-            thumbnailEnhancer.setThumbSize(data);
-        });
-
-        postsPageInput.get("thumb-crop-ratio").on("re621:form:input", (event, data) => {
-            if (!(event.target as HTMLInputElement).checkValidity()) return;
-            thumbnailEnhancer.pushSettings("cropRatio", data);
-            thumbnailEnhancer.setThumbRatio(data);
-        });
-
-        postsPageInput.get("thumb-click-action").on("re621:form:input", (event, data) => {
-            thumbnailEnhancer.pushSettings("clickAction", data);
-        });
-
-        // Actions
-        postsPageInput.get("actions-votefavorite").on("re621:form:input", (event, data) => {
-            postViewer.pushSettings("upvoteOnFavorite", data);
-        });
-
-        postsPageInput.get("actions-submit-hotkey").on("re621:form:input", (event, data) => {
-            formattingManager.pushSettings("hotkeySubmitActive", data);
-        });
-
-        postsPageInput.get("actions-click-scale").on("re621:form:input", (event, data) => {
-            imageScaler.pushSettings("clickScale", data);
-        });
-
-        // Blacklist
-        postsPageInput.get("blacklist-quickadd").on("re621:form:input", (event, data) => {
-            blacklistEnhancer.pushSettings("quickaddTags", data);
-        });
-    }
-
-    private createTabDownloads(): Form {
-        const downloadCustomizer = ModuleController.get(DownloadCustomizer),
-            massDownloader = ModuleController.get(MassDownloader),
-            poolDownloader = ModuleController.get(PoolDownloader);
-
-        const templateVars = new Form(
-            { id: "downloads-template-vars", columns: 2, },
-            [
-                { id: "explain", type: "div", stretch: "mid", value: `<div class="notice unmargin">The following variables can be used:</div>` },
-                { id: "postnum", type: "copy", label: "Post ID", value: "%postid%", },
-                { id: "author", type: "copy", label: "Artist", value: "%artist%", },
-                { id: "copyright", type: "copy", label: "Copyright", value: "%copyright%", },
-                { id: "characters", type: "copy", label: "Characters", value: "%character%", },
-                { id: "species", type: "copy", label: "Species", value: "%species%", },
-                { id: "meta", type: "copy", label: "Meta", value: "%meta%", },
-            ]
-        );
-
-        const poolVars = new Form(
-            { id: "downloads-pool-vars", columns: 2, },
-            [
-                { id: "explain", type: "div", stretch: "mid", value: `<div class="notice unmargin">The following variables can also be used:</div>` },
-                { id: "pool", type: "copy", label: "Pool Name", value: "%pool%", },
-                { id: "index", type: "copy", label: "Index", value: "%index%", },
-            ]
-        );
-
-        const form = new Form(
-            { id: "download-settings-form", columns: 3, },
-            [
-                // Download Customizer
-                {
-                    id: "download-cust-title",
-                    type: "div",
-                    value: "<h3>Download Customizer</h3>",
-                    stretch: "full",
-                },
-                {
-                    id: "download-cust-desc",
-                    type: "div",
-                    value: `This format is used by the "download" button on the post page`,
-                    stretch: "full",
-                },
-                {
-                    id: "download-cust-template",
-                    type: "input",
-                    value: downloadCustomizer.fetchSettings("template"),
-                    label: "Download File Name",
-                    stretch: "full",
-                },
-                {
-                    id: "download-cust-template-variables",
-                    type: "div",
-                    label: " ",
-                    value: templateVars.get(),
-                    stretch: "full",
-                },
-                {
-                    id: "download-cust-template-hr",
-                    type: "hr",
-                    stretch: "full",
-                },
-
-                // Mass Downloader
-                {
-                    id: "download-mass-title",
-                    type: "div",
-                    value: "<h3>Mass Downloader</h3>",
-                    stretch: "full",
-                },
-                {
-                    id: "download-mass-desc",
-                    type: "div",
-                    value: "Downloaded files will be automatically renamed according to this template",
-                    stretch: "full",
-                },
-                {
-                    id: "download-mass-template",
-                    type: "input",
-                    value: massDownloader.fetchSettings("template"),
-                    label: "Download File Name",
-                    stretch: "full",
-                },
-                {
-                    id: "download-mass-template-variables",
-                    type: "div",
-                    label: " ",
-                    value: `<div class="notice unmargin">The same variables as above can be used. Add a forward slash ( / ) to signify a folder.</div>`,
-                    stretch: "full",
-                },
-                {
-                    id: "download-mass-autodownload",
-                    type: "checkbox",
-                    label: "Auto Download",
-                    value: massDownloader.fetchSettings("autoDownloadArchive"),
-                    stretch: "column",
-                },
-                {
-                    id: "download-mass-autodownload-text",
-                    type: "div",
-                    value: "The archive will be downloaded automatically after being created",
-                    stretch: "mid",
-                },
-                {
-                    id: "download-mass-template-hr",
-                    type: "hr",
-                    stretch: "full",
-                },
-
-                // Pool Downloader
-                {
-                    id: "download-pool-title",
-                    type: "div",
-                    value: "<h3>Pool Downloader</h3>",
-                    stretch: "full",
-                },
-                {
-                    id: "download-pool-desc",
-                    type: "div",
-                    value: "Downloaded files will be automatically renamed according to this template",
-                    stretch: "full",
-                },
-                {
-                    id: "download-pool-template",
-                    type: "input",
-                    value: poolDownloader.fetchSettings("template"),
-                    label: "Download File Name",
-                    stretch: "full",
-                },
-                {
-                    id: "download-pool-template-variables",
-                    type: "div",
-                    label: " ",
-                    value: `<div class="notice unmargin">The same variables as above can be used. Add a forward slash ( / ) to signify a folder.</div>`,
-                    stretch: "full",
-                },
-                {
-                    id: "download-pool-template-variables",
-                    type: "div",
-                    label: " ",
-                    value: poolVars.get(),
-                    stretch: "full",
-                },
-                {
-                    id: "download-pool-autodownload",
-                    type: "checkbox",
-                    label: "Auto Download",
-                    value: poolDownloader.fetchSettings("autoDownloadArchive"),
-                    stretch: "column",
-                },
-                {
-                    id: "download-pool-autodownload-text",
-                    type: "div",
-                    value: "The archive will be downloaded automatically after being created",
-                    stretch: "mid",
-                },
-
-            ]);
-        return form;
-    }
-
-    private handleTabDownload(form: Form): void {
-        const downloadCustomizer = ModuleController.getWithType<DownloadCustomizer>(DownloadCustomizer);
-        const massDownloader = ModuleController.get(MassDownloader);
-        const poolDownloader = ModuleController.get(PoolDownloader);
-        const postsPageInput = form.getInputList();
-
-        // Download Customizer
-        postsPageInput.get("download-cust-template").on("re621:form:input", (event, data) => {
-            downloadCustomizer.pushSettings("template", data);
-            if (downloadCustomizer.isInitialized())
-                downloadCustomizer.refreshDownloadLink();
-        });
-
-        // Mass Downloader
-        postsPageInput.get("download-mass-template").on("re621:form:input", (event, data) => {
-            massDownloader.pushSettings("template", data);
-        });
-        postsPageInput.get("download-mass-autodownload").on("re621:form:input", (event, data) => {
-            massDownloader.pushSettings("autoDownloadArchive", data);
-        });
-
-        // Pool Downloader
-        postsPageInput.get("download-pool-template").on("re621:form:input", (event, data) => {
-            poolDownloader.pushSettings("template", data);
-        });
-        postsPageInput.get("download-pool-autodownload").on("re621:form:input", (event, data) => {
-            poolDownloader.pushSettings("autoDownloadArchive", data);
-        });
-    }
-
-    /** Creates the DOM for the hotkey settings page */
-    private createTabHotkeys(): Form {
-        const postViewer = ModuleController.get(PostViewer);
-        const poolNavigator = ModuleController.get(PoolNavigator);
-        const imageScaler = ModuleController.get(ImageScaler);
-        const miscellaneous = ModuleController.get(Miscellaneous);
-        const headerCustomizer = ModuleController.get(HeaderCustomizer);
-
-        function createLabel(settingsKey: string, label: string): FormElement {
-            return {
-                id: settingsKey + "-label",
-                type: "div",
-                value: label,
-                stretch: "column"
-            };
+        function createInput(moduleName: string, label: string): FormElement {
+            const module = modules.get(moduleName);
+            return Form.checkbox(
+                moduleName + "-enabled", module.fetchSettings("enabled"), label, "column",
+                (event, data) => {
+                    module.pushSettings("enabled", data);
+                    module.setEnabled(data);
+                    if (data === true) {
+                        if (module.canInitialize()) module.create();
+                    } else module.destroy();
+                }
+            );
         }
 
-        function createInput(module: RE6Module, settingsKey: string, label: string, suffix = 0): FormElement {
-            const values = module.fetchSettings(settingsKey).split("|");
-            let binding = "";
-            if (values[suffix] !== undefined) binding = values[suffix];
+        return new Form({ id: "settings-module-status", columns: 3, parent: "div#modal-container", }, [
+            Form.header("Features"),
 
-            return {
-                id: settingsKey + "-input-" + suffix,
-                type: "key",
-                label: label,
-                value: binding
-            };
-        }
+            createInput("HeaderCustomizer", "Header Customizer"),
+            Form.div("Add, delete, and customize header links to your heart's content", "mid"),
 
-        const form = new Form(
-            {
-                "id": "settings-hotkeys",
-                columns: 3,
-                parent: "div#modal-container"
-            },
-            [
-                // Listing
-                {
-                    id: "hotkey-listing-title",
-                    type: "div",
-                    value: "<h3>Listing</h3>",
-                    stretch: "full",
-                },
+            createInput("InfiniteScroll", "Infinite Scroll"),
+            Form.div("New posts are automatically loaded. No need to turn pages", "mid"),
 
-                createLabel("hotkeyFocusSearch", "Search"),
-                createInput(miscellaneous, "hotkeyFocusSearch", "", 0),
-                createInput(miscellaneous, "hotkeyFocusSearch", "", 1),
+            createInput("InstantSearch", "Instant Filters"),
+            Form.div("Quickly add filters to your current search, with no need for a page reload", "mid"),
 
-                createLabel("hotkeyRandomPost", "Random Post"),
-                createInput(miscellaneous, "hotkeyRandomPost", "", 0),
-                createInput(miscellaneous, "hotkeyRandomPost", "", 1),
+            createInput("FormattingManager", "Formatting Helper"),
+            Form.div("Fully customizable toolbar for easy DText formatting and post templates", "mid"),
 
-                // Posts
-                { id: "hotkey-posts-hr", type: "hr", stretch: "full", },
-                {
-                    id: "hotkey-posts-title",
-                    type: "div",
-                    value: "<h3>Posts</h3>",
-                    stretch: "full",
-                },
-
-                // - Voting
-                createLabel("hotkeyUpvote", "Upvote"),
-                createInput(postViewer, "hotkeyUpvote", "", 0),
-                createInput(postViewer, "hotkeyUpvote", "", 1),
-
-                createLabel("hotkeyDownvote", "Downvote"),
-                createInput(postViewer, "hotkeyDownvote", "", 0),
-                createInput(postViewer, "hotkeyDownvote", "", 1),
-
-                createLabel("hotkeyFavorite", "Favorite"),
-                createInput(postViewer, "hotkeyFavorite", "", 0),
-                createInput(postViewer, "hotkeyFavorite", "", 1),
-
-                // - Navigation
-                createLabel("hotkeyPrev", "Previous Post"),
-                createInput(poolNavigator, "hotkeyPrev", "", 0),
-                createInput(poolNavigator, "hotkeyPrev", "", 1),
-
-
-                createLabel("hotkeyNext", "Next Post"),
-                createInput(poolNavigator, "hotkeyNext", "", 0),
-                createInput(poolNavigator, "hotkeyNext", "", 1),
-
-
-                createLabel("hotkeyCycle", "Cycle Navigation"),
-                createInput(poolNavigator, "hotkeyCycle", "", 0),
-                createInput(poolNavigator, "hotkeyCycle", "", 1),
-
-                // - Scaling
-                createLabel("hotkeyScale", "Change Scale"),
-                createInput(imageScaler, "hotkeyScale", "", 0),
-                createInput(imageScaler, "hotkeyScale", "", 1),
-
-                // Actions
-                { id: "hotkey-comments-hr", type: "hr", stretch: "full", },
-                {
-                    id: "hotkey-comments-title",
-                    type: "div",
-                    value: "<h3>Actions</h3>",
-                    stretch: "full"
-                },
-
-                createLabel("hotkeyNewComment", "New Comment"),
-                createInput(miscellaneous, "hotkeyNewComment", "", 0),
-                createInput(miscellaneous, "hotkeyNewComment", "", 1),
-
-                createLabel("hotkeyEditPost", "Edit Post"),
-                createInput(miscellaneous, "hotkeyEditPost", "", 0),
-                createInput(miscellaneous, "hotkeyEditPost", "", 1),
-
-                createLabel("hotkeyHideNotes", "Toggle Notes"),
-                createInput(postViewer, "hotkeyHideNotes", "", 0),
-                createInput(postViewer, "hotkeyHideNotes", "", 1),
-
-                createLabel("hotkeyNewNote", "Edit Notes"),
-                createInput(postViewer, "hotkeyNewNote", "", 0),
-                createInput(postViewer, "hotkeyNewNote", "", 1),
-
-                // Tabs
-                { id: "hotkey-tabs-hr", type: "hr", stretch: "full", },
-                {
-                    id: "hotkey-tabs-title",
-                    type: "div",
-                    value: "<h3>Header Tabs</h3>",
-                    stretch: "full",
-                },
-
-                createLabel("hotkeyTab1", "Tab #1"),
-                createInput(headerCustomizer, "hotkeyTab1", "", 0),
-                createInput(headerCustomizer, "hotkeyTab1", "", 1),
-
-                createLabel("hotkeyTab2", "Tab #2"),
-                createInput(headerCustomizer, "hotkeyTab2", "", 0),
-                createInput(headerCustomizer, "hotkeyTab2", "", 1),
-
-                createLabel("hotkeyTab3", "Tab #3"),
-                createInput(headerCustomizer, "hotkeyTab3", "", 0),
-                createInput(headerCustomizer, "hotkeyTab3", "", 1),
-
-                createLabel("hotkeyTab4", "Tab #4"),
-                createInput(headerCustomizer, "hotkeyTab4", "", 0),
-                createInput(headerCustomizer, "hotkeyTab4", "", 1),
-
-                createLabel("hotkeyTab5", "Tab #5"),
-                createInput(headerCustomizer, "hotkeyTab5", "", 0),
-                createInput(headerCustomizer, "hotkeyTab5", "", 1),
-
-                createLabel("hotkeyTab6", "Tab #6"),
-                createInput(headerCustomizer, "hotkeyTab6", "", 0),
-                createInput(headerCustomizer, "hotkeyTab6", "", 1),
-
-                createLabel("hotkeyTab7", "Tab #7"),
-                createInput(headerCustomizer, "hotkeyTab7", "", 0),
-                createInput(headerCustomizer, "hotkeyTab7", "", 1),
-
-                createLabel("hotkeyTab8", "Tab #8"),
-                createInput(headerCustomizer, "hotkeyTab8", "", 0),
-                createInput(headerCustomizer, "hotkeyTab8", "", 1),
-
-                createLabel("hotkeyTab9", "Tab #9"),
-                createInput(headerCustomizer, "hotkeyTab9", "", 0),
-                createInput(headerCustomizer, "hotkeyTab9", "", 1),
-            ]
-        );
-
-        return form;
+            createInput("TinyAlias", "Tiny Alias"),
+            Form.div("A more intelligent way to quickly fill out post tags", "mid"),
+        ]);
     }
 
-    /**
-     * Event handlers for the hotkey settings page
-     * @param form Miscellaneous settings form
-     */
-    private handleTabHotkeys(form: Form): void {
-        const hotkeyFormInput = form.getInputList();
-        const postViewer = ModuleController.get(PostViewer);
-        const poolNavigator = ModuleController.get(PoolNavigator);
-        const imageScaler = ModuleController.get(ImageScaler);
-        const miscellaneous = ModuleController.get(Miscellaneous);
-        const headerCustomizer = ModuleController.get(HeaderCustomizer);
+    /** Creates the general settings tab */
+    private createGeneralTab(): Form {
+        const titleCustomizer = ModuleController.getWithType<TitleCustomizer>(TitleCustomizer),
+            miscellaneous = ModuleController.getWithType<Miscellaneous>(Miscellaneous),
+            postViewer = ModuleController.getWithType<PostViewer>(PostViewer),
+            formattingManager = ModuleController.getWithType<FormattingManager>(FormattingManager),
+            blacklistEnhancer = ModuleController.getWithType<BlacklistEnhancer>(BlacklistEnhancer),
+            imageScaler = ModuleController.getWithType<ImageScaler>(ImageScaler),
+            thumbnailEnhancer = ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer);
 
-        /** Creates a listener for the hotkey input */
-        function createListener(module: RE6Module, settingsKey: string, bindings = 2): void {
-            for (let i = 0; i < bindings; i++) {
-                hotkeyFormInput.get(settingsKey + "-input-" + i).on("re621:form:input", (event, newKey, oldKey) => {
-                    if (i === 0) {
-                        const bindingData = [];
-                        for (let j = 0; j < bindings; j++) {
-                            bindingData.push(hotkeyFormInput.get(settingsKey + "-input-" + j).val());
+        return new Form({ id: "settings-general", columns: 3, parent: "div#modal-container" }, [
+
+            // General
+            Form.section({ id: "general", columns: 3 }, [
+                Form.header("General", "column"),
+                Form.div(`<div class="notice text-right">Settings are saved and applied automatically.</div>`, "mid"),
+
+                // TitleCustomizer
+                Form.section({ id: "title", columns: 3 }, [
+                    Form.input(
+                        "template", titleCustomizer.fetchSettings("template"), "Page Title", "full", undefined,
+                        (event, data) => {
+                            titleCustomizer.pushSettings("template", data);
+                            if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
                         }
-                        module.pushSettings(settingsKey, bindingData.filter(n => n).join("|"));
+                    ),
+                    Form.section({ id: "template-vars-title", columns: 2, }, [
+                        Form.div(`<div class="notice unmargin">The following variables can be used:</div>`, "mid"),
+                        Form.copy("postnum", "%postid%", "Post ID"),
+                        Form.copy("author", "%artist%", "Artist"),
+                        Form.copy("copyright", "%copyright%", "Copyright"),
+                        Form.copy("characters", "%character%", "Characters"),
+                        Form.copy("species", "%species%", "Species"),
+                        Form.copy("meta", "%meta%", "Meta"),
+                    ], " "),
 
-                        Hotkeys.unregister(oldKey);
-                        module.resetHotkeys();
-                    } else {
-                        Hotkeys.unregister(oldKey);
-                        hotkeyFormInput.get(settingsKey + "-input-0").trigger("re621:form:input");
+                    Form.checkbox(
+                        "symbol-enabled", titleCustomizer.fetchSettings("symbolsEnabled"), "Vote / Favorite Icons", "column",
+                        (event, data) => {
+                            titleCustomizer.pushSettings("symbolsEnabled", data);
+                            if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
+                        }
+                    ),
+                    Form.spacer("mid"),
+                    Form.input("symbol-fav", titleCustomizer.fetchSettings("symbolFav"), "Favorite", "column", undefined,
+                        (event, data) => {
+                            titleCustomizer.pushSettings("symbolFav", data);
+                            if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
+                        }
+                    ),
+                    Form.input("symbol-voteup", titleCustomizer.fetchSettings("symbolVoteUp"), "Upvoted", "column", undefined,
+                        (event, data) => {
+                            titleCustomizer.pushSettings("symbolVoteUp", data);
+                            if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
+                        }
+                    ),
+                    Form.input("symbol-votedown", titleCustomizer.fetchSettings("symbolVoteDown"), "Downvoted", "column", undefined,
+                        (event, data) => {
+                            titleCustomizer.pushSettings("symbolVoteDown", data);
+                            if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
+                        }
+                    ),
+                ]),
+
+                Form.checkbox("improved-tagcount", miscellaneous.fetchSettings("improveTagCount"), "Expanded Tag Count", "column",
+                    (event, data) => {
+                        miscellaneous.pushSettings("improveTagCount", data);
+                        miscellaneous.improveTagCount(data);
                     }
-                });
+                ),
+                Form.checkbox("sticky-searchbox", miscellaneous.fetchSettings("stickySearchbox"), "Fixed Searchbox", "column",
+                    (event, data) => {
+                        miscellaneous.pushSettings("stickySearchbox", data);
+                        miscellaneous.createStickySearchbox(data);
+                    }
+                ),
+                Form.spacer(),
+
+                Form.hr(),
+            ]),
+
+            // ThumbnailEnhancer
+            Form.section({ id: "thumb", columns: 3 }, [
+                Form.header("Thumbnails"),
+                Form.select(
+                    "upscale", thumbnailEnhancer.fetchSettings("upscale"), "Upscale",
+                    [
+                        { value: ThumbnailPerformanceMode.Disabled, name: "Disabled" },
+                        { value: ThumbnailPerformanceMode.Hover, name: "On Hover" },
+                        { value: ThumbnailPerformanceMode.Always, name: "Always" },
+                    ],
+                    "column",
+                    (event, data) => { thumbnailEnhancer.pushSettings("upscale", data); }
+                ),
+                Form.div("Replace 150x150 blurry thumbnails with larger versions", "mid"),
+                Form.spacer(),
+                Form.div(`<div class="unmargin"><b>Requires a page reload</b></div>`, "mid"),
+
+
+                Form.checkbox("zoom", thumbnailEnhancer.fetchSettings("zoom"), "Enlarge on Hover", "column",
+                    (event, data) => {
+                        thumbnailEnhancer.pushSettings("zoom", data);
+                        thumbnailEnhancer.toggleHoverZoom(data);
+                    }
+                ),
+                Form.div("Increases the size of the thumbnail when hovering over it", "mid"),
+
+                Form.input("zoom-scale", thumbnailEnhancer.fetchSettings("zoomScale"), "Zoom scale", "column", { pattern: "^[1-9](\\.\\d+)?$" },
+                    (event, data) => {
+                        if (!(event.target as HTMLInputElement).checkValidity()) return;
+                        thumbnailEnhancer.pushSettings("zoomScale", data);
+                        thumbnailEnhancer.setZoomScale(data);
+                    }
+                ),
+                Form.div("The ratio of the enlarged thumbnail to its original size", "mid"),
+
+                Form.spacer("full"),
+
+
+                Form.checkbox("vote", thumbnailEnhancer.fetchSettings("vote"), "Voting Buttons", "column",
+                    (event, data) => {
+                        thumbnailEnhancer.pushSettings("vote", data);
+                        thumbnailEnhancer.toggleHoverVote(data);
+                    }
+                ),
+                Form.div("Adds voting buttons when hovering over a thumbnail", "mid"),
+
+                Form.spacer("full"),
+
+
+                Form.checkbox("crop", thumbnailEnhancer.fetchSettings("crop"), "Resize Images", "column",
+                    (event, data) => {
+                        thumbnailEnhancer.pushSettings("crop", data);
+                        thumbnailEnhancer.toggleThumbCrop(data);
+                    }
+                ),
+                Form.div("Resize thumbnail images according to settings below", "mid"),
+
+                Form.input("crop-size", thumbnailEnhancer.fetchSettings("cropSize"), "Thumbnail Size", "column", { pattern: "^\\d{2,3}(px|rem|em)$" },
+                    (event, data) => {
+                        if (!(event.target as HTMLInputElement).checkValidity()) return;
+                        thumbnailEnhancer.pushSettings("cropSize", data);
+                        thumbnailEnhancer.setThumbSize(data);
+                    }
+                ),
+                Form.div("Thumbnail width, in px, em, or rem", "mid"),
+
+                Form.input("crop-ratio", thumbnailEnhancer.fetchSettings("cropRatio"), "Image Ratio", "column", { pattern: "^(([01](\\.\\d+)?)|2)$" },
+                    (event, data) => {
+                        if (!(event.target as HTMLInputElement).checkValidity()) return;
+                        thumbnailEnhancer.pushSettings("cropRatio", data);
+                        thumbnailEnhancer.setThumbRatio(data);
+                    }
+                ),
+                Form.div("Height to width ratio of the image", "mid"),
+
+                Form.spacer("full"),
+
+
+                Form.select(
+                    "click-action", thumbnailEnhancer.fetchSettings("clickAction"), "Double Click Action",
+                    [
+                        { value: ThumbnailClickAction.Disabled, name: "Disabled" },
+                        { value: ThumbnailClickAction.NewTab, name: "Open New Tab" },
+                        { value: ThumbnailClickAction.CopyID, name: "Copy Post ID" },
+                    ],
+                    "column",
+                    (event, data) => { thumbnailEnhancer.pushSettings("clickAction", data); }
+                ),
+                Form.div("Action taken when a thumbnail is double-clicked", "mid"),
+                Form.spacer(),
+                Form.div(`<div class="unmargin"><b>Requires a page reload</b></div>`, "mid"),
+
+
+                Form.hr(),
+            ]),
+
+            // Actions
+            Form.section({ id: "actions", columns: 3 }, [
+                Form.header("Actions"),
+
+                Form.checkbox(
+                    "votefavorite", postViewer.fetchSettings("upvoteOnFavorite"), "Auto-upvote favorites", "column",
+                    (event, data) => { postViewer.pushSettings("upvoteOnFavorite", data); }
+                ),
+                Form.checkbox(
+                    "submit-hotkey", formattingManager.fetchSettings("hotkeySubmitActive"), "Comment with Alt+Enter", "column",
+                    (event, data) => { formattingManager.pushSettings("hotkeySubmitActive", data); }
+                ),
+                Form.checkbox(
+                    "click-scale", imageScaler.fetchSettings("clickScale"), "Click images to resize them", "column",
+                    (event, data) => { imageScaler.pushSettings("clickScale", data); }),
+
+                Form.hr(),
+            ]),
+
+            // Blacklist
+            Form.section({ id: "blacklist", columns: 3 }, [
+                Form.header("Blacklist"),
+                Form.checkbox(
+                    "quickadd", blacklistEnhancer.fetchSettings("quickaddTags"), "Click X to add tag to blacklist", "column",
+                    (event, data) => { blacklistEnhancer.pushSettings("quickaddTags", data); }),
+            ]),
+
+        ]);
+    }
+
+    /** Creates the downloads settings tab */
+    private createDownloadsTab(): Form {
+        const downloadCustomizer = ModuleController.getWithType<DownloadCustomizer>(DownloadCustomizer),
+            massDownloader = ModuleController.getWithType<MassDownloader>(MassDownloader),
+            poolDownloader = ModuleController.getWithType<PoolDownloader>(PoolDownloader);
+
+        return new Form({ id: "settings-download", columns: 3, parent: "div#modal-container" }, [
+
+            // Download Customizer
+            Form.section({ id: "customizer", columns: 3 }, [
+                Form.header("Download Customizer", "column"),
+                Form.div(`<div class="notice float-right">Download individual files</div>`, "mid"),
+                Form.input(
+                    "template", downloadCustomizer.fetchSettings("template"), "Download File Name", "full", undefined,
+                    (event, data) => {
+                        downloadCustomizer.pushSettings("template", data);
+                        if (downloadCustomizer.isInitialized()) downloadCustomizer.refreshDownloadLink();
+                    }
+                ),
+                Form.section({ id: "template-vars-cust", columns: 2 }, [
+                    Form.div(`<div class="notice unmargin">The following variables can be used:</div>`, "mid"),
+                    Form.copy("postid", "%postid%", "Post ID"),
+                    Form.copy("artist", "%artist%", "Artist"),
+                    Form.copy("copyright", "%copyright%", "Copyright"),
+                    Form.copy("character", "%character%", "Characters"),
+                    Form.copy("species", "%species%", "Species"),
+                    Form.copy("meta", "%meta%", "Meta"),
+                ], " "),
+                Form.hr(),
+            ]),
+
+            // Mass Downloader
+            Form.section({ id: "mass", columns: 3 }, [
+                Form.header("Image Downloader", "column"),
+                Form.div(`<div class="notice float-right">Download files from the search page</div>`, "mid"),
+                Form.input(
+                    "template", massDownloader.fetchSettings("template"), "Download File Name", "full", undefined,
+                    (event, data) => { massDownloader.pushSettings("template", data); }
+                ),
+                Form.section({ id: "template-vars-mass", columns: 2 }, [
+                    Form.div(`<div class="notice unmargin">The same variables as above can be used. Add a forward slash ( / ) to signify a folder.</div>`, "mid"),
+                ], " "),
+
+                Form.checkbox(
+                    "autodownload", massDownloader.fetchSettings("autoDownloadArchive"), "Auto Download", "column",
+                    (event, data) => { massDownloader.pushSettings("autoDownloadArchive", data); }
+                ),
+                Form.div("The archive will be downloaded automatically after being created", "mid"),
+                Form.hr(),
+            ]),
+
+            // Pool Downloader
+            Form.section({ id: "pool", columns: 3 }, [
+                Form.header("Pool Downloader", "column"),
+                Form.div(`<div class="notice float-right">Download image pools or sets</div>`, "mid"),
+                Form.input(
+                    "template", poolDownloader.fetchSettings("template"), "Download File Name", "full", undefined,
+                    (event, data) => { poolDownloader.pushSettings("template", data); }
+                ),
+                Form.section({ id: "template-vars-pool", columns: 2 }, [
+                    Form.div(`<div class="notice unmargin">The same variables as above can be used. Add a forward slash ( / ) to signify a folder.</div>`, "mid"),
+                    Form.div(`<div class="notice unmargin">The following variables can also be used:</div>`, "mid"),
+                    Form.copy("pool", "%pool%", "Pool Name"),
+                    Form.copy("index", "%index%", "Index"),
+                ], " "),
+
+                Form.checkbox(
+                    "autodownload", poolDownloader.fetchSettings("autoDownloadArchive"), "Auto Download", "column",
+                    (event, data) => { poolDownloader.pushSettings("autoDownloadArchive", data); }
+                ),
+                Form.div("The archive will be downloaded automatically after being created", "mid"),
+            ]),
+
+        ]);
+    }
+
+    /** Creates the hotkeys tab */
+    private createHotkeysTab(): Form {
+        const postViewer = ModuleController.getWithType<PostViewer>(PostViewer),
+            poolNavigator = ModuleController.getWithType<PoolNavigator>(PoolNavigator),
+            imageScaler = ModuleController.getWithType<ImageScaler>(ImageScaler),
+            miscellaneous = ModuleController.getWithType<Miscellaneous>(Miscellaneous),
+            headerCustomizer = ModuleController.getWithType<HeaderCustomizer>(HeaderCustomizer);
+
+        function createInputs(module: RE6Module, label: string, settingsKey: string): FormElement[] {
+            const values = module.fetchSettings(settingsKey).split("|");
+            const bindings: string[] = [
+                values[0] === undefined ? "" : values[0],
+                values[1] === undefined ? "" : values[1],
+            ];
+
+            return [
+                Form.label(label),
+                Form.key(
+                    settingsKey + "-input-0", bindings[0], undefined, "column",
+                    (event, data) => { handleRebinding(data, 0); }
+                ),
+                Form.key(
+                    settingsKey + "-input-1", bindings[1], undefined, "column",
+                    (event, data) => { handleRebinding(data, 1); }
+                ),
+            ];
+
+            function handleRebinding(data: string[], index: 0 | 1): void {
+                bindings[index] = data[0];
+                module.pushSettings(settingsKey, bindings.join("|"));
+                Hotkeys.unregister(data[1]);
+                module.resetHotkeys();
             }
         }
 
-        // Listing
-        createListener(miscellaneous, "hotkeyFocusSearch");
+        return new Form({ "id": "settings-hotkeys", columns: 3, parent: "div#modal-container" }, [
+            // Listing
+            Form.header("Listing"),
+            ...createInputs(miscellaneous, "Search", "hotkeyFocusSearch"),
+            ...createInputs(miscellaneous, "Random Post", "hotkeyRandomPost"),
+            Form.hr(),
 
-        // Posts
-        // - Voting
-        createListener(postViewer, "hotkeyUpvote");
+            // Posts
+            Form.header("Posts"),
+            ...createInputs(postViewer, "Upvote", "hotkeyUpvote"),
+            ...createInputs(postViewer, "Downvote", "hotkeyDownvote"),
+            ...createInputs(postViewer, "Favorite", "hotkeyFavorite"),
+            ...createInputs(poolNavigator, "Previous Post", "hotkeyPrev"),
+            ...createInputs(poolNavigator, "Next Post", "hotkeyNext"),
+            ...createInputs(poolNavigator, "Cycle Navigation", "hotkeyCycle"),
+            ...createInputs(imageScaler, "Change Scale", "hotkeyScale"),
+            Form.hr(),
 
-        createListener(postViewer, "hotkeyDownvote");
-        createListener(postViewer, "hotkeyFavorite");
+            // Actions
+            Form.header("Actions"),
+            ...createInputs(miscellaneous, "New Comment", "hotkeyNewComment"),
+            ...createInputs(miscellaneous, "Edit Post", "hotkeyEditPost"),
+            ...createInputs(postViewer, "Toggle Notes", "hotkeyHideNotes"),
+            ...createInputs(postViewer, "Edit Notes", "hotkeyNewNote"),
+            Form.hr(),
 
-        // - Navigation
-        createListener(poolNavigator, "hotkeyPrev");
-        createListener(poolNavigator, "hotkeyNext");
-        createListener(poolNavigator, "hotkeyCycle");
-
-        // - Scaling
-        createListener(imageScaler, "hotkeyScale");
-
-        // Actions
-        createListener(miscellaneous, "hotkeyNewComment");
-        createListener(miscellaneous, "hotkeyNewNote");
-
-        createListener(postViewer, "hotkeyHideNotes");
-        createListener(postViewer, "hotkeyHideNotes");
-
-        // Tabs
-        createListener(headerCustomizer, "hotkeyTab1");
-        createListener(headerCustomizer, "hotkeyTab2");
-        createListener(headerCustomizer, "hotkeyTab3");
-        createListener(headerCustomizer, "hotkeyTab4");
-        createListener(headerCustomizer, "hotkeyTab5");
-        createListener(headerCustomizer, "hotkeyTab6");
-        createListener(headerCustomizer, "hotkeyTab7");
-        createListener(headerCustomizer, "hotkeyTab8");
-        createListener(headerCustomizer, "hotkeyTab9");
+            // Tabs
+            Form.header("Header Tabs"),
+            ...createInputs(headerCustomizer, "Tab #1", "hotkeyTab1"),
+            ...createInputs(headerCustomizer, "Tab #2", "hotkeyTab2"),
+            ...createInputs(headerCustomizer, "Tab #3", "hotkeyTab3"),
+            ...createInputs(headerCustomizer, "Tab #4", "hotkeyTab4"),
+            ...createInputs(headerCustomizer, "Tab #5", "hotkeyTab5"),
+            ...createInputs(headerCustomizer, "Tab #6", "hotkeyTab6"),
+            ...createInputs(headerCustomizer, "Tab #7", "hotkeyTab7"),
+            ...createInputs(headerCustomizer, "Tab #8", "hotkeyTab8"),
+            ...createInputs(headerCustomizer, "Tab #9", "hotkeyTab9"),
+        ]);
     }
 
-    /** Creates the DOM for the miscellaneous settings page */
-    private createTabMiscellaneous(): Form {
+    /** Creates the miscellaneous settings tab */
+    private createMiscTab(): Form {
         const modules = ModuleController.getAll();
 
         // "Reset Module" selector
@@ -1008,213 +497,79 @@ export class SettingsController extends RE6Module {
         modules.forEach((module) => {
             moduleSelector.push({ value: module.constructor.name, name: module.constructor.name });
         });
+        let selectedModule = "none";
 
         // Create the settings form
-        const form = new Form(
-            {
-                id: "settings-misc",
-                columns: 3,
-                parent: "div#modal-container",
-            },
-            [
-                {
-                    id: "misc-title",
-                    type: "div",
-                    value: "<h3>Miscellaneous</h3>",
-                    stretch: "full",
-                },
+        return new Form({ id: "settings-misc", columns: 3, parent: "div#modal-container" }, [
+            Form.header("Miscellaneous"),
 
-                // Import from File
-                {
-                    id: "misc-import-title",
-                    type: "div",
-                    value: "<h3>Import / Export from file</h3>",
-                    stretch: "full",
-                },
-                {
-                    id: "misc-import-info",
-                    type: "div",
-                    value: `<div class="notice unmargin">Import subscription data from file</div>`,
-                    stretch: "full",
-                },
-                {
-                    id: "misc-export-button",
-                    type: "button",
-                    label: "Export to file",
-                    value: "Export",
-                    stretch: "mid",
-                },
-                {
-                    id: "misc-export-spacer-1",
-                    type: "div",
-                    value: "",
-                    stretch: "column",
-                },
-                {
-                    id: "misc-import-button",
-                    type: "file",
-                    label: "Import from file",
-                    value: "json",
-                    stretch: "mid",
-                },
-                {
-                    id: "misc-export-spacer-2",
-                    type: "div",
-                    value: "",
-                    stretch: "column",
-                },
-                {
-                    id: "misc-import-status",
-                    type: "div",
-                    label: " ",
-                    value: `<div id="file-import-status" class="unmargin"></div>`,
-                    stretch: "mid",
-                },
-                {
-                    id: "misc-export-spacer-3",
-                    type: "div",
-                    value: "",
-                    stretch: "column",
-                },
+            // Import from File
+            Form.header("Import / Export from file", "column"),
+            Form.div(`<div class="notice unmargin float-right">Import subscription data from file</div>`, "mid"),
 
-                // eSix Extended
-                {
-                    id: "misc-esix-title",
-                    type: "div",
-                    value: "<h3>eSix Extended</h3>",
-                    stretch: "full",
-                },
-                {
-                    id: "misc-esix-info",
-                    type: "div",
-                    value: `<div class="notice unmargin">Import the settings from eSix Extended (Legacy)</div>`,
-                    stretch: "full",
-                },
+            Form.button(
+                "export-button", "Export", "Export to file", "mid",
+                () => { exportToFile(); }
+            ),
+            Form.spacer(),
 
-                // From File
-                {
-                    id: "misc-esix-button",
-                    type: "file",
-                    label: "Select file",
-                    value: "json",
-                    stretch: "mid",
-                },
-                {
-                    id: "misc-esix-spacer-1",
-                    type: "div",
-                    value: "",
-                    stretch: "column",
-                },
-                {
-                    id: "misc-esix-status",
-                    type: "div",
-                    label: " ",
-                    value: `<div id="file-esix-status" class="unmargin"></div>`,
-                    stretch: "mid",
-                },
-                {
-                    id: "misc-esix-spacer-2",
-                    type: "div",
-                    value: "",
-                    stretch: "column",
-                },
+            Form.file(
+                "import-file", "json", "Import from file", "mid", undefined,
+                (event, data) => { importFromFile(data); }
+            ),
+            Form.spacer(),
+            Form.status(`<div id="file-import-status" class="unmargin"></div>`),
 
-                // From LocalStorage
-                {
-                    id: "misc-esix-localstorage",
-                    type: "button",
-                    label: "From LocalStorage",
-                    value: "Load",
-                    stretch: "mid",
-                },
-                {
-                    id: "misc-esix-spacer-3",
-                    type: "div",
-                    value: "",
-                    stretch: "column",
-                },
-                {
-                    id: "misc-esix-localstorage-status",
-                    type: "div",
-                    label: " ",
-                    value: `<div id="localstorage-esix-status" class="unmargin"></div>`,
-                    stretch: "mid",
-                },
-                {
-                    id: "misc-esix-spacer-4",
-                    type: "div",
-                    value: "",
-                    stretch: "column",
-                },
-                {
-                    id: "misc-esix-hr-1",
-                    type: "hr",
-                    stretch: "full",
-                },
+            // eSix Extended
+            Form.header("eSix Extended", "column"),
+            Form.div(`<div class="notice unmargin float-right">Import the settings from eSix Extended (Legacy)</div>`, "mid"),
 
-                // Reset Configuration
-                {
-                    id: "misc-reset-modules",
-                    type: "div",
-                    value: "<h3>Reset Modules</h3>",
-                    stretch: "full",
-                },
-                {
-                    id: "misc-reset-everything",
-                    type: "button",
-                    label: "Everything",
-                    value: "Clear",
-                    stretch: "column",
-                },
-                {
-                    id: "misc-reset-everything-text",
-                    type: "div",
-                    value: "Delete settings for all modules. <b>This cannot be undone.</b>",
-                    stretch: "mid",
-                },
-                {
-                    id: "misc-reset-specific",
-                    type: "select",
-                    label: "Module",
-                    value: "none",
-                    data: moduleSelector,
-                    stretch: "mid",
-                },
-                {
-                    id: "misc-reset-specific-text-1",
-                    type: "div",
-                    value: "Reset a specific module.",
-                    stretch: "column",
-                },
-                {
-                    id: "misc-reset-specific-action",
-                    type: "button",
-                    label: " ",
-                    value: "Reset",
-                    stretch: "mid",
-                },
-                {
-                    id: "misc-reset-specific-text-2",
-                    type: "div",
-                    value: "<b>This cannot be undone.</b>",
-                    stretch: "column",
-                },
-            ]
-        );
+            // From File
+            Form.file(
+                "esix-file", "json", "Select file", "mid", undefined,
+                (event, data) => { importE6FromFile(data); }
+            ),
+            Form.spacer(),
+            Form.status(`<div id="file-esix-status" class="unmargin"></div>`),
 
-        return form;
-    }
+            // From LocalStorage
+            Form.button(
+                "esix-localstorage", "Load", "From LocalStorage", "mid",
+                () => { importE6FromLocalStorage(); }
+            ),
+            Form.spacer(),
+            Form.status(`<div id="localstorage-esix-status" class="unmargin"></div>`),
+            Form.hr(),
 
-    /**
-     * Event handlers for the miscellaneous settings page
-     * @param form Miscellaneous settings form
-     */
-    private handleTabMiscellaneous(form: Form): void {
-        const miscFormInput = form.getInputList();
+            // Reset Configuration
+            Form.header("<h3>Reset Modules</h3>"),
+            Form.button(
+                "reset-everything", "Clear", "Everything", "column",
+                () => {
+                    if (confirm("Are you absolutely sure?")) {
+                        ModuleController.getAll().forEach((module) => { module.clearSettings(); });
+                        location.reload();
+                    }
+                }
+            ),
+            Form.div("Delete settings for all modules. <b>This cannot be undone.</b>", "mid"),
+            Form.select(
+                "reset-specific", "none", "Module", moduleSelector, "mid",
+                (event, data) => { selectedModule = data; }
+            ),
+            Form.div("Reset a specific module", "column"),
+            Form.button(
+                "reset-specific-action", "Reset", " ", "mid",
+                () => {
+                    if (selectedModule === "none") return;
+                    ModuleController.getByName(selectedModule).clearSettings();
+                }
+            ),
+            Form.div("<b>This cannot be undone.</b>", "column"),
+        ]);
 
-        // Import / Export to file
-        miscFormInput.get("misc-export-button").on("click", () => {
-
+        /** Export the currnt module settings to file */
+        function exportToFile(): void {
             const storedData = { "meta": "re621/1.0" };
 
             ModuleController.getAll().forEach((module) => {
@@ -1224,9 +579,10 @@ export class SettingsController extends RE6Module {
             });
 
             Util.downloadJSON(storedData, "re621-" + User.getUsername() + "-userdata");
-        });
+        }
 
-        miscFormInput.get("misc-import-button").on("re621:form:input", (event, data) => {
+        /** Import module settings from file */
+        function importFromFile(data: any): void {
             if (!data) return;
             const $info = $("div#file-import-status").html("Loading . . .");
 
@@ -1251,11 +607,10 @@ export class SettingsController extends RE6Module {
                 $info.html("Settings imported!");
             };
             reader.onerror = function (): void { $info.html("Error loading file"); };
-        });
+        }
 
-        // eSix Legacy
-        // - From File
-        miscFormInput.get("misc-esix-button").on("re621:form:input", (event, data) => {
+        /** Import eSix Extended Settings from File */
+        function importE6FromFile(data): void {
             if (!data) return;
             const $info = $("div#file-esix-status").html("Loading . . .");
 
@@ -1270,18 +625,49 @@ export class SettingsController extends RE6Module {
                 });
 
                 // parsedData[2] : pools
-                await this.importPoolData(parsedData[2], $info);
+                await importPoolData(parsedData[2], $info);
 
                 // parsedData[3] : forums
-                await this.importForumData(parsedData[3], $info);
+                await importForumData(parsedData[3], $info);
 
                 $info.html("Settings imported!");
             };
             reader.onerror = function (): void { $info.html("Error loading file"); };
-        });
 
-        // From LocalStorage
-        miscFormInput.get("misc-esix-localstorage").on("click", async () => {
+            /** Import the pool data from string */
+            async function importPoolData(settings: string, $info: JQuery<HTMLElement>): Promise<void> {
+                $info.html("Processing pools . . .");
+                const poolSubs = PoolSubscriptions.getInstance(),
+                    poolData: ExtraInfo = poolSubs.fetchSettings("data", true);
+                for (const entry of settings) {
+                    poolData[entry["id"]] = {
+                        md5: entry["thumb"]["url"].substr(6, 32),
+                        lastID: entry["last"],
+                    };
+                }
+                poolSubs.pushSettings("data", poolData);
+            }
+
+            /** Import the forum data from string */
+            async function importForumData(settings: string, $info: JQuery<HTMLElement>): Promise<void> {
+                $info.html("Processing forums . . .");
+                const forumSubs = ForumSubscriptions.getInstance(),
+                    forumData: ExtraInfo = forumSubs.fetchSettings("data", true),
+                    postIDs = [];
+                for (const entry of settings) {
+                    postIDs.push(entry["id"]);
+                }
+                const data = await Api.getJson("/forum_posts.json?search[id]=" + postIDs.join(","));
+                data.forEach((postData) => {
+                    forumData[postData["topic_id"]] = {};
+                });
+                forumSubs.pushSettings("data", forumData);
+
+            }
+        }
+
+        /** Import eSix Extended Settings from LocalStorage */
+        async function importE6FromLocalStorage(): Promise<void> {
             const $info = $("div#localstorage-esix-status").html("Loading . . .");
 
             if (localStorage.getItem("poolSubscriptions") !== null) {
@@ -1293,193 +679,40 @@ export class SettingsController extends RE6Module {
             }
 
             $info.html("Settings imported!");
-        });
-
-        // Reset Configuration
-        miscFormInput.get("misc-reset-everything").on("click", () => {
-            if (confirm("Are you absolutely sure?")) {
-                ModuleController.getAll().forEach((module) => {
-                    module.clearSettings();
-                });
-                location.reload();
-            }
-        });
-
-        miscFormInput.get("misc-reset-specific-action").on("click", () => {
-            const moduleName = miscFormInput.get("misc-reset-specific").val().toString();
-            if (moduleName === "none") return;
-            ModuleController.getByName(moduleName).clearSettings();
-        });
-    }
-
-    private async importPoolData(settings: string, $info: JQuery<HTMLElement>): Promise<void> {
-        $info.html("Processing pools . . .");
-        const poolSubs = PoolSubscriptions.getInstance(),
-            poolData: ExtraInfo = poolSubs.fetchSettings("data", true);
-        for (const entry of settings) {
-            poolData[entry["id"]] = {
-                md5: entry["thumb"]["url"].substr(6, 32),
-                lastID: entry["last"],
-            };
-        }
-        poolSubs.pushSettings("data", poolData);
-    }
-
-    private async importForumData(settings: string, $info: JQuery<HTMLElement>): Promise<void> {
-        $info.html("Processing forums . . .");
-        const forumSubs = ForumSubscriptions.getInstance(),
-            forumData: ExtraInfo = forumSubs.fetchSettings("data", true),
-            postIDs = [];
-        for (const entry of settings) {
-            postIDs.push(entry["id"]);
-        }
-        const data = await Api.getJson("/forum_posts.json?search[id]=" + postIDs.join(","));
-        data.forEach((postData) => {
-            forumData[postData["topic_id"]] = {};
-        });
-        forumSubs.pushSettings("data", forumData);
-
-    }
-
-    private createModuleStatus(): Form {
-        const modules = ModuleController.getAll();
-
-        function createInput(moduleName: string, label: string): FormElement {
-            const module = modules.get(moduleName);
-            return {
-                id: moduleName + "-enabled",
-                type: "checkbox",
-                value: module.fetchSettings("enabled"),
-                label: label,
-            };
-        }
-
-        function createLabel(moduleName: string, label: string): FormElement {
-            return {
-                id: moduleName + "-label",
-                type: "div",
-                value: label,
-                stretch: "mid",
-            };
-        }
-
-        const form = new Form(
-            {
-                id: "settings-module-status",
-                columns: 3,
-                parent: "div#modal-container",
-            },
-            [
-                {
-                    id: "features-title",
-                    type: "div",
-                    value: "<h3>Features</h3>",
-                    stretch: "full"
-                },
-
-                createInput("HeaderCustomizer", "Header Customizer"),
-                createLabel("HeaderCustomizer", "Add, delete, and customize header links to your heart's content"),
-
-                createInput("InfiniteScroll", "Infinite Scroll"),
-                createLabel("InfiniteScroll", "New posts are automatically loaded. No need to turn pages"),
-
-                createInput("InstantSearch", "Instant Filters"),
-                createLabel("InstantSearch", "Quickly add filters to your current search, with no need for a page reload"),
-
-                createInput("FormattingManager", "Formatting Helper"),
-                createLabel("FormattingManager", "Fully customizable toolbar for easy DText formatting and post templates"),
-
-                createInput("TinyAlias", "Tiny Alias"),
-                createLabel("TinyAlias", "A more intelligent way to quickly fill out post tags"),
-            ]
-        );
-
-        return form;
-    }
-
-    private handleModuleStatus(form: Form): void {
-        const inputs = form.getInputList("checkbox");
-
-        for (const formName of inputs.keys()) {
-            const module = ModuleController.getByName(formName.split("-")[0]);
-
-            inputs.get(formName).on("re621:form:input", (event, data) => {
-                module.pushSettings("enabled", data);
-                module.setEnabled(data);
-                if (data === true) {
-                    if (module.canInitialize()) module.create();
-                } else module.destroy();
-            });
         }
     }
 
+    /** Creates the about tab */
     private createAboutTab(): Form {
+        return new Form({ "id": "about-form", "columns": 3, parent: "div#modal-container" }, [
+            // About
+            Form.div(
+                `<h3 class="display-inline"><a href="` + window["re621"]["links"]["website"] + `">` + window["re621"]["name"] + ` v.` + window["re621"]["version"] + `</a></h3>` +
+                `<span class="display-inline">(build ` + window["re621"]["build"] + `)</span>`,
+                "mid"
+            ),
+            Form.div(
+                `<span class="float-right" id="project-update-button" data-available="` + this.fetchSettings("newVersionAvailable") + `">
+                    <a href="` + window["re621"]["links"]["releases"] + `">Update Available</a>
+                </span>`,
+                "column"
+            ),
+            Form.div(
+                `<b>` + window["re621"]["name"] + `</b> is a comprehensive set of tools designed to enhance the website for both casual and power users.` +
+                `It is created and maintained by unpaid volunteers, with the hope that it will be useful for the community.`
+            ),
+            Form.div(
+                `Keeping the script - and the website - fully functional is our highest priority.` +
+                `If you are experiencing bugs or issues, do not hesitate to create a new ticket on <a href="` + window["re621"]["links"]["issues"] + `">github</a>,` +
+                `or leave us a message in the <a href="` + window["re621"]["links"]["forum"] + `">forum thread</a>. Feature requests, comments, and overall feedback are also appreciated.`
+            ),
+            Form.div(`Thank you for downloading and using this script. We hope that you enjoy the experience.`),
+            Form.spacer("full"),
 
-        const form = new Form(
-            {
-                "id": "about-form",
-                "columns": 3,
-            },
-            [
-                // About
-                {
-                    id: "about-version",
-                    type: "div",
-                    value: `<h3 class="display-inline"><a href="` + window["re621"]["links"]["website"] + `">` + window["re621"]["name"] + ` v.` + window["re621"]["version"] + `</a></h3> 
-                            <span class="display-inline">(build ` + window["re621"]["build"] + `)</span>
-                            <span class="float-right" id="project-update-button" data-available="` + this.fetchSettings("newVersionAvailable") + `"><a href="` + window["re621"]["links"]["releases"] + `">Update Available</a></span>`,
-                    stretch: "full",
-                },
-                {
-                    id: "about-text",
-                    type: "div",
-                    value: `<b>` + window["re621"]["name"] + `</b> is a comprehensive set of tools designed to enhance the website for both casual and power users. It is created and maintained by unpaid volunteers, with the hope that it will be useful for the community.`,
-                    stretch: "full",
-                },
-                {
-                    id: "about-issues",
-                    type: "div",
-                    value: `Keeping the script - and the website - fully functional is our highest priority. If you are experiencing bugs or issues, do not hesitate to create a new ticket on <a href="` + window["re621"]["links"]["issues"] + `">github</a>, or leave us a message in the <a href="` + window["re621"]["links"]["forum"] + `">forum thread</a>. Feature requests, comments, and overall feedback are also appreciated.`,
-                    stretch: "full",
-                },
-                {
-                    id: "about-thanks",
-                    type: "div",
-                    value: `Thank you for downloading and using this script. We hope that you enjoy the experience.`,
-                    stretch: "full",
-                },
-                {
-                    id: "about-spacer-1",
-                    type: "div",
-                    value: " ",
-                    stretch: "full",
-                },
-
-                // Changelog
-                {
-                    id: "about-changelog",
-                    type: "div",
-                    value: `<h3><a href="` + window["re621"]["links"]["releases"] + `" class="unmargin">What's new?</a></h3>`,
-                    stretch: "full",
-                },
-                {
-                    id: "about-changelog-changes",
-                    type: "div",
-                    value: `<div class="changelog-list">` + Util.quickParseMarkdown(this.fetchSettings("changelog")) + `</div>`,
-                    stretch: "full",
-                },
-            ]
-        );
-
-        return form;
+            // Changelog
+            Form.header(`<a href="` + window["re621"]["links"]["releases"] + `" class="unmargin">What's new?</a>`),
+            Form.div(`<div id="changelog-list">` + Util.quickParseMarkdown(this.fetchSettings("changelog")) + `</div>`)
+        ]);
     }
 
-    private handleAboutTab(form: Form): void {
-        const inputList = form.getInputList();
-
-        this.modal.getElement().on("re621:settings:update", (event, data) => {
-            inputList.get("about-changelog-changes").html(`<div class="changelog-list">` + Util.quickParseMarkdown(data.changelog) + `</div>`);
-            $("#project-update-button").attr("data-available", data.newVersion);
-        });
-    }
 }

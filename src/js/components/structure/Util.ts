@@ -173,4 +173,18 @@ export class Util {
             .replace(/\n(?!<)/gm, "<br />");
     }
 
+    /**
+     * Creates a random string of letters, to be used as an ID.  
+     * Don't rely on this for anything important.
+     * @param length String length
+     */
+    public static makeID(length = 8): string {
+        let result = '';
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', charLength = chars.length;
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * charLength));
+        }
+        return result;
+    }
+
 }

@@ -1,5 +1,6 @@
 import { Hotkeys } from "../data/Hotkeys";
 import { GM } from "../api/GM";
+import { Util } from "./Util";
 
 /**
  * Removes the hassle of creating HTML elements for a form
@@ -19,7 +20,11 @@ export class Form {
         if (config.columns === undefined) config.columns = 1;
         if (config.parent === undefined) config.parent = "body";
         this.config = config;
-        elements.forEach(element => { this.addElement(element); });
+        elements.forEach((element: FormElement | FormElement[]) => {
+            if (Array.isArray(element)) {
+                element.forEach((subElement) => { this.addElement(subElement); });
+            } else this.addElement(element);
+        });
     }
 
     /**
@@ -40,6 +45,8 @@ export class Form {
 
         if (element.data === undefined) element.data = [];
 
+        if (element.onChange === undefined) element.onChange = ((): void => { return; });
+
         this.elements.push(element);
         this.index++;
     }
@@ -57,9 +64,22 @@ export class Form {
 
         if (this.config.columns > 1) { this.$form.addClass("columns-" + this.config.columns); }
 
+        let curInput;
         for (const element of this.elements) {
-            const $input = this.build(this.$form, element);
-            this.$inputList.set(element.id, $input);
+            curInput = this.build(this.$form, element);
+            if (Array.isArray(curInput)) {
+                (curInput as FormInput[]).forEach((input) => {
+                    this.$inputList.set(input.id, input.el);
+                });
+            }
+            else {
+                this.$inputList.set(curInput.id, curInput.el);
+                curInput.el.on("re621:form:input", (event: Event, ...data: any[]) => {
+                    if (data.length === 0) data = null;
+                    else if (data.length === 1) data = data[0];
+                    element.onChange(event, data);
+                });
+            }
         }
 
         $(this.config.parent).on("submit", "form#" + this.config.id, event => {
@@ -136,9 +156,41 @@ export class Form {
      * @param $form Form to append the element to
      * @param element Element configuration data
      */
-    private build($form: JQuery<HTMLElement>, element: FormElement): JQuery<HTMLElement> {
+    private build($form: JQuery<HTMLElement>, element: FormElement): FormInput | FormInput[] {
         const fn = "build" + element.type.charAt(0).toUpperCase() + element.type.slice(1);
         return this[fn](this.$form, element);
+    }
+
+    /**
+     * Creates an input FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param type Element type
+     * @param id Unique element ID
+     * @param label Form label
+     * @param value Element value
+     * @param stretch Column span
+     * @param required Required state
+     * @param pattern Pattern to match
+     * @param data Extra data
+     * @param onChange Change callback
+     */
+    private static make(type: FormElementType, id: string, label?: string, value?: any, stretch: FormElementWidth = "column", required?: boolean, pattern?: string, data?: FormExtraData[], onChange?: FormChangeEvent): FormElement {
+        return {
+            id: id,
+            type: type,
+
+            stretch: stretch,
+
+            label: label,
+            value: value,
+
+            required: required,
+            pattern: pattern,
+
+            data: data,
+
+            onChange: onChange,
+        };
     }
 
     /**
@@ -146,7 +198,7 @@ export class Form {
      * @param $form Form to append the element to
      * @param element Element configuration data
      */
-    private buildInput($form: JQuery<HTMLElement>, element: FormElement): JQuery<HTMLElement> {
+    private buildInput($form: JQuery<HTMLElement>, element: FormElement): FormInput {
         let labeled = false;
         if (element.label) {
             $("<label>")
@@ -183,7 +235,22 @@ export class Form {
             }, Form.timeout);
         });
 
-        return $input;
+        return { id: element.id, el: $input };
+    }
+
+    /**
+     * Creates an input FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param id Unique element ID
+     * @param value Element value
+     * @param label Form label
+     * @param stretch Column span
+     * @param reqs Input requirements
+     * @param onChange Input change callback
+     */
+    public static input(id: string, value?: string, label?: string, stretch?: FormElementWidth, reqs?: FormEntryRequirements, onChange?: FormChangeEvent): FormElement {
+        if (reqs === undefined) reqs = { required: undefined, pattern: undefined, };
+        return this.make("input", id, label, value, stretch, reqs.required, reqs.pattern, undefined, onChange);
     }
 
     /**
@@ -191,7 +258,7 @@ export class Form {
      * @param $form Form to append the element to
      * @param element Element configuration data
      */
-    private buildCopy($form: JQuery<HTMLElement>, element: FormElement): JQuery<HTMLElement> {
+    private buildCopy($form: JQuery<HTMLElement>, element: FormElement): FormInput {
         let labeled = false;
         if (element.label) {
             $("<label>")
@@ -238,7 +305,20 @@ export class Form {
             }, Form.timeout);
         });
 
-        return $input;
+        return { id: element.id, el: $input };
+    }
+
+    /**
+     * Creates a copy input FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param id Unique element ID
+     * @param value Element value
+     * @param label Form label
+     * @param stretch Column span
+     * @param onChange Input change callback
+     */
+    public static copy(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
+        return this.make("copy", id, label, value, stretch, undefined, undefined, undefined, onChange);
     }
 
     /**
@@ -246,7 +326,7 @@ export class Form {
      * @param $form Form to append the element to
      * @param element Element configuration data
      */
-    private buildKey($form: JQuery<HTMLElement>, element: FormElement): JQuery<HTMLElement> {
+    private buildKey($form: JQuery<HTMLElement>, element: FormElement): FormInput {
         let labeled = false;
         if (element.label) {
             $("<label>")
@@ -318,7 +398,20 @@ export class Form {
             });
         });
 
-        return $input;
+        return { id: element.id, el: $input };
+    }
+
+    /**
+     * Creates a key input FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param id Unique element ID
+     * @param value Element value
+     * @param label Form label
+     * @param stretch Column span
+     * @param onChange Input change callback
+     */
+    public static key(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
+        return this.make("key", id, label, value, stretch, undefined, undefined, undefined, onChange);
     }
 
     /**
@@ -326,7 +419,7 @@ export class Form {
      * @param $form Form to append the element to
      * @param element Element configuration data
      */
-    private buildFile($form: JQuery<HTMLElement>, element: FormElement): JQuery<HTMLElement> {
+    private buildFile($form: JQuery<HTMLElement>, element: FormElement): FormInput {
         let labeled = false;
         if (element.label) {
             $("<label>")
@@ -359,7 +452,22 @@ export class Form {
             $input.trigger("re621:form:input", $input.prop("files"));
         });
 
-        return $input;
+        return { id: element.id, el: $input };
+    }
+
+    /**
+     * Creates a file input FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param id Unique element ID
+     * @param value Element value
+     * @param label Form label
+     * @param stretch Column span
+     * @param reqs Input requirements
+     * @param onChange Input change callback
+     */
+    public static file(id: string, value = "", label?: string, stretch: FormElementWidth = "column", reqs?: FormEntryRequirements, onChange?: FormChangeEvent): FormElement {
+        if (reqs === undefined) reqs = { required: undefined, pattern: undefined, };
+        return this.make("file", id, label, value, stretch, reqs.required, reqs.pattern, undefined, onChange);
     }
 
     /**
@@ -367,7 +475,7 @@ export class Form {
      * @param $form Form to append the element to
      * @param element Element configuration data
      */
-    private buildIcon($form: JQuery<HTMLElement>, element: FormElement): JQuery<HTMLElement> {
+    private buildIcon($form: JQuery<HTMLElement>, element: FormElement): FormInput {
         let labeled = false;
         if (element.label) {
             $("<label>")
@@ -426,7 +534,20 @@ export class Form {
         if (element.pattern) { $input.attr("pattern", element.pattern); }
         if (element.required) { $input.attr("required", ""); }
 
-        return $input;
+        return { id: element.id, el: $input };
+    }
+
+    /**
+     * Creates an icon input FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param id Unique element ID
+     * @param value Element value
+     * @param label Form label
+     * @param stretch Column span
+     * @param onChange Input change callback
+     */
+    public static icon(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
+        return this.make("icon", id, label, value, stretch, undefined, undefined, undefined, onChange);
     }
 
     /**
@@ -434,7 +555,7 @@ export class Form {
      * @param $form Form to append the element to
      * @param element Element configuration data
      */
-    private buildCheckbox($form: JQuery<HTMLElement>, element: FormElement): JQuery<HTMLElement> {
+    private buildCheckbox($form: JQuery<HTMLElement>, element: FormElement): FormInput {
         if (element.stretch === "default") { element.stretch = "column"; }
 
         const $inputContainer = $("<div>")
@@ -458,8 +579,6 @@ export class Form {
             .addClass("switch")
             .appendTo($inputContainer);
 
-
-
         if (element.label) {
             $("<label>")
                 .attr("for", this.config.id + "-" + element.id)
@@ -471,7 +590,20 @@ export class Form {
             $input.trigger("re621:form:input", $input.is(":checked"));
         });
 
-        return $input;
+        return { id: element.id, el: $input };
+    }
+
+    /**
+     * Creates a checkbox FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param id Unique element ID
+     * @param value Element value
+     * @param label Form label
+     * @param stretch Column span
+     * @param onChange Input change callback
+     */
+    public static checkbox(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
+        return this.make("checkbox", id, label, value, stretch, undefined, undefined, undefined, onChange);
     }
 
     /**
@@ -479,7 +611,7 @@ export class Form {
      * @param $form Form to append the element to
      * @param element Element configuration data
      */
-    private buildButton($form: JQuery<HTMLElement>, element: FormElement): JQuery<HTMLElement> {
+    private buildButton($form: JQuery<HTMLElement>, element: FormElement): FormInput {
         let labeled = false;
         if (element.label) {
             $("<label>")
@@ -508,7 +640,20 @@ export class Form {
         if (element.pattern) { $input.attr("pattern", element.pattern); }
         if (element.required) { $input.attr("required", ''); }
 
-        return $input;
+        return { id: element.id, el: $input };
+    }
+
+    /**
+     * Creates a button FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param id Unique element ID
+     * @param value Element value
+     * @param label Form label
+     * @param stretch Column span
+     * @param onChange Input change callback
+     */
+    public static button(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
+        return this.make("button", id, label, value, stretch, undefined, undefined, undefined, onChange);
     }
 
     /**
@@ -516,7 +661,7 @@ export class Form {
      * @param $form Form to append the element to
      * @param element Element configuration data
      */
-    private buildSubmit($form: JQuery<HTMLElement>, element: FormElement): JQuery<HTMLElement> {
+    private buildSubmit($form: JQuery<HTMLElement>, element: FormElement): FormInput {
         let labeled = false;
         if (element.label) {
             $("<label>")
@@ -545,7 +690,20 @@ export class Form {
         if (element.pattern) { $input.attr("pattern", element.pattern); }
         if (element.required) { $input.attr("required", ''); }
 
-        return $input;
+        return { id: element.id, el: $input };
+    }
+
+    /**
+     * Creates a submit button FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param id Unique element ID
+     * @param value Element value
+     * @param label Form label
+     * @param stretch Column span
+     * @param onChange Input change callback
+     */
+    public static submit(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
+        return this.make("submit", id, label, value, stretch, undefined, undefined, undefined, onChange);
     }
 
     /**
@@ -553,7 +711,7 @@ export class Form {
      * @param $form Form to append the element to
      * @param element Element configuration data
      */
-    private buildTextarea($form: JQuery<HTMLElement>, element: FormElement): JQuery<HTMLElement> {
+    private buildTextarea($form: JQuery<HTMLElement>, element: FormElement): FormInput {
         let labeled = false;
         if (element.label) {
             $("<label>")
@@ -589,7 +747,22 @@ export class Form {
             }, Form.timeout);
         });
 
-        return $input;
+        return { id: element.id, el: $input };
+    }
+
+    /**
+     * Creates a textarea FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param id Unique element ID
+     * @param value Element value
+     * @param label Form label
+     * @param stretch Column span
+     * @param reqs Input requirements
+     * @param onChange Input change callback
+     */
+    public static textarea(id: string, value = "", label?: string, stretch: FormElementWidth = "column", reqs?: FormEntryRequirements, onChange?: FormChangeEvent): FormElement {
+        if (reqs === undefined) reqs = { required: undefined, pattern: undefined, };
+        return this.make("textarea", id, label, value, stretch, reqs.required, reqs.pattern, undefined, onChange);
     }
 
     /**
@@ -597,7 +770,7 @@ export class Form {
      * @param $form Form to append the element to
      * @param element Element configuration data
      */
-    private buildSelect($form: JQuery<HTMLElement>, element: FormElement): JQuery<HTMLElement> {
+    private buildSelect($form: JQuery<HTMLElement>, element: FormElement): FormInput {
         let labeled = false;
         if (element.label) {
             $("<label>")
@@ -632,7 +805,21 @@ export class Form {
             $input.trigger("re621:form:input", $input.val());
         });
 
-        return $input;
+        return { id: element.id, el: $input };
+    }
+
+    /**
+     * Creates a select FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param id Unique element ID
+     * @param value Element value
+     * @param label Form label
+     * @param data Extra data
+     * @param stretch Column span
+     * @param onChange Input change callback
+     */
+    public static select(id: string, value = "", label?: string, data?: FormExtraData[], stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
+        return this.make("select", id, label, value, stretch, undefined, undefined, data, onChange);
     }
 
     /**
@@ -640,7 +827,7 @@ export class Form {
      * @param $form Form to append the element to
      * @param element Element configuration data
      */
-    private buildDiv($form: JQuery<HTMLElement>, element: FormElement): JQuery<HTMLElement> {
+    private buildDiv($form: JQuery<HTMLElement>, element: FormElement): FormInput {
         let labeled = false;
         if (element.label) {
             $("<label>")
@@ -665,7 +852,57 @@ export class Form {
             .append(element.value)
             .appendTo($inputContainer);
 
-        return $input;
+        return { id: element.id, el: $input };
+    }
+
+    /**
+     * Creates a div FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param value Element value
+     * @param label Form label
+     * @param stretch Column span
+     */
+    public static div(value = "", stretch: FormElementWidth = "full"): FormElement {
+        return this.make("div", Util.makeID(), undefined, value, stretch);
+    }
+
+    /**
+     * Creates a header FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param value Element value
+     * @param stretch Column span
+     */
+    public static header(value = "", stretch: FormElementWidth = "full"): FormElement {
+        return this.make("div", Util.makeID(), undefined, $("<h3>").html(value), stretch);
+    }
+
+    /**
+     * Creates a header FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param value Element value
+     * @param stretch Column span
+     */
+    public static label(value = "", stretch: FormElementWidth = "column"): FormElement {
+        return this.make("div", Util.makeID(), undefined, value, stretch);
+    }
+
+    /**
+     * Creates a status FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param value Element value
+     * @param stretch Column span
+     */
+    public static status(value = "", stretch: FormElementWidth = "full"): FormElement {
+        return this.make("div", Util.makeID(), " ", value, stretch);
+    }
+
+    /**
+     * Creates a spacer FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param stretch Column span
+     */
+    public static spacer(stretch: FormElementWidth = "column"): FormElement {
+        return this.make("div", Util.makeID(), undefined, " ", stretch);
     }
 
     /**
@@ -673,7 +910,7 @@ export class Form {
      * @param $form Form to append the element to
      * @param element Element configuration data
      */
-    private buildHr($form: JQuery<HTMLElement>, element: FormElement): JQuery<HTMLElement> {
+    private buildHr($form: JQuery<HTMLElement>, element: FormElement): FormInput {
         let labeled = false;
         if (element.label) {
             $("<label>")
@@ -697,7 +934,65 @@ export class Form {
             .addClass("color-text-muted")
             .appendTo($inputContainer);
 
-        return $input;
+        return { id: element.id, el: $input };
+    }
+
+    /**
+     * Creates an hr FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param value Element value
+     * @param label Form label
+     * @param stretch Column span
+     */
+    public static hr(stretch: FormElementWidth = "full"): FormElement {
+        return this.make("hr", Util.makeID(), undefined, undefined, stretch);
+    }
+
+    /**
+     * Builds and appends another Form element
+     * @param $form Form to append the element to
+     * @param element Element configuration data
+     */
+    private buildForm($form: JQuery<HTMLElement>, element: FormElement): FormInput[] {
+        let labeled = false;
+        if (element.label) {
+            $("<label>")
+                .attr("for", this.config.id + "-" + element.id)
+                .html(element.label)
+                .appendTo($form);
+            labeled = true;
+        } else if (element.stretch === "default") { element.stretch = "column"; }
+
+        const $inputContainer = $("<div>")
+            .addClass("input-container")
+            .toggleClass("labeled", labeled)
+            .addClass("stretch-" + element.stretch)
+            .appendTo($form);
+
+        const $innerForm = (element.value as Form);
+        $innerForm.get().appendTo($inputContainer);
+
+        const inputs: FormInput[] = [];
+        $innerForm.$inputList.forEach((value, key) => {
+            inputs.push({
+                id: $innerForm.config.id + "-" + key,
+                el: value,
+            });
+        });
+
+        return inputs;
+    }
+
+    /**
+     * Creates a form section FormElement based on the provided parameters  
+     * Alias for the more generic make() function with a specific type  
+     * @param id Unique element ID
+     * @param value Element value
+     * @param label Form label
+     * @param stretch Column span
+     */
+    public static section(config: FormConfig, elements: FormElement[], label?: string, stretch: FormElementWidth = "full"): FormElement {
+        return this.make("form", config.id, label, new Form(config, elements), stretch);
     }
 
 }
@@ -711,27 +1006,46 @@ interface FormConfig {
     parent?: string;
 }
 
-export interface FormElement {
+interface FormEntry {
     /** Unique ID for the element. Actual ID becomes formID_elementID */
-    id?: string;
-    /** Supported input type */
-    type: "input" | "copy" | "key" | "file" | "icon" | "checkbox" | "button" | "submit" | "textarea" | "select" | "div" | "hr";
-
-    stretch?: "default" | "column" | "mid" | "full";
+    id: string;
 
     /** Input label */
     label?: string;
+
     /** Default value for the input */
     value?: any;
 
+    /** How many columns should the element span */
+    stretch?: FormElementWidth;
+}
+
+interface FormEntryRequirements {
     /** If true, the field is required to submit the form */
     required?: boolean;
+
     /** Pattern that the input value must match */
     pattern?: string;
+}
+
+// TODO Get rid of the export later
+export interface FormElement extends FormEntry, FormEntryRequirements {
+    /** Supported input type */
+    type: FormElementType;
 
     /** Value-name pairs for the select */
-    data?: {
-        value: string;
-        name: string;
-    }[];
+    data?: FormExtraData[];
+
+    /** Fired when the value of the input changes */
+    onChange?: FormChangeEvent;
+}
+
+type FormElementType = "input" | "copy" | "key" | "file" | "icon" | "checkbox" | "button" | "submit" | "textarea" | "select" | "div" | "hr" | "form";
+type FormElementWidth = "default" | "column" | "mid" | "full";
+type FormExtraData = { name: string; value: string };
+type FormChangeEvent = (event: Event, data: any) => void;
+
+type FormInput = {
+    id: string;
+    el: JQuery<HTMLElement>;
 }
