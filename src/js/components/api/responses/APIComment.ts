@@ -1,4 +1,4 @@
-export interface ApiComment {
+export interface APIComment extends APIResponse {
     id: number;
     created_at: string;
     post_id: number;

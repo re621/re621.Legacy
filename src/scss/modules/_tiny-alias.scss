@@ -26,15 +26,40 @@ div.tiny-alias-container {
     }
 
     div.info-text {
-        display: inline;
-    }
+        word-break: keep-all;
+        text-overflow: ellipsis;
+        overflow: hidden;
 
-    div.info-load {
-        float: right;
-        display: none;
+        &[data-state] {
+            padding-left: 1.125rem;
+            position: relative;
 
-        &.visible {
-            display: inline;
+            &::before {
+                content: "";
+                display: block;
+                line-height: 1;
+
+                font-family: "Font Awesome 5 Free";
+                font-weight: 400;
+
+                position: absolute;
+                left: 0;
+                top: 0.165rem;
+            }
+
+            &[data-state=done]::before {
+                content: unicode("f058"); // fa-check-circle
+            }
+
+            &[data-state=error]::before {
+                content: unicode("f057"); // fa-times-circle
+            }
+
+            &[data-state=loading]::before {
+                content: unicode("f1ce"); // fa-circle-notch
+                font-weight: 700;
+                animation: fa-spin 2s infinite linear;
+            }
         }
     }
 

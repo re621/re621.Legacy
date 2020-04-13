@@ -1,5 +1,9 @@
 import { TagTypes } from "./Tag";
 import { User } from "./User";
+import { APIPost, PostRating } from "../api/responses/APIPost";
+import { PostHtml } from "../api/PostHtml";
+import { ModuleController } from "../ModuleController";
+import { ThumbnailEnhancer, ThumbnailPerformanceMode } from "../../modules/search/ThumbnailsEnhancer";
 
 /**
  * Collects basic info for a post.
@@ -11,62 +15,30 @@ export class Post {
     private static addedPosts: Post[] = [];
     private static postThumbnails: Post[] = [];
 
-    protected element: JQuery<HTMLElement>;
+    protected htmlElement: JQuery<HTMLElement>;
+    protected apiElement: APIPost;
 
-    protected id: number;
-    protected tags: string;
-    protected rating: PostRating;
-    protected favorites?: number;
-    protected score?: number;
-
-    protected fileURL?: string;
-    protected sampleURL?: string;
-    protected previewURL: string;
-    protected fileExtension: string;
-
-    protected uploaderID: number;
-    protected uploaderName: string;
-
-    protected sound: boolean;
-    protected flags: string;
-
-    public constructor($image: JQuery<HTMLElement>) {
-        this.id = parseInt($image.attr("data-id"));
-        this.tags = $image.attr("data-tags");
-        this.rating = PostRating.fromValue($image.attr("data-rating"));
-
-        if ($image.attr("data-fav-count")) {
-            this.favorites = parseInt($image.attr("data-fav-count"));
+    /**
+     * 
+     * @param element The element to create the post from. Can either be dom element or api element
+     *                Depending on what was passed the other one gets created from the other elemenet
+     */
+    public constructor(element: JQuery<HTMLElement> | APIPost) {
+        if (element instanceof jQuery) {
+            element = element as JQuery<HTMLElement>;
+            element.removeClass("blacklisted-active");
+            this.apiElement = APIPost.fromDomElement(element);
+            this.htmlElement = element;
+        } else {
+            element = element as APIPost;
+            this.apiElement = element;
+            const upscaleMode = ModuleController.get(ThumbnailEnhancer).fetchSettings("upscale");
+            this.htmlElement = PostHtml.create(element, upscaleMode === ThumbnailPerformanceMode.Always);
         }
-        else if ($image.find(".post-score-faves").length !== 0) {
-            this.favorites = parseInt($image.find(".post-score-faves").first().html().substring(1));
-        }
-
-        if ($image.attr("data-score")) {
-            this.score = parseInt($image.attr("data-score"));
-        }
-        else if ($image.find(".post-score-score").length !== 0) {
-            this.score = parseInt($image.find(".post-score-score").first().html().substring(1));
-        }
-
-        this.fileURL = $image.attr("data-file-url");
-        this.sampleURL = $image.attr("data-large-file-url");
-        this.previewURL = $image.attr("data-preview-file-url") || $image.attr("data-preview-url");
-        this.fileExtension = $image.attr("data-file-ext");
-
-        this.uploaderID = parseInt($image.attr("data-uploader-id"));
-        this.uploaderName = $image.attr("data-uploader");
-        this.sound = $image.attr("data-has-sound") === "true";
-        this.flags = $image.attr("data-flags");
-
-        this.element = $image;
 
         for (const filter of User.getBlacklist().values()) {
             filter.addPost(this, false);
         }
-
-        //Remove blacklist class, this gets custom handling from the script
-        $image.removeClass("blacklisted-active");
     }
 
     /**
@@ -135,7 +107,7 @@ export class Post {
     /**
      * Checks if the post is found in an activated blacklist filter
      */
-    private matchesBlacklist(): boolean {
+    public matchesBlacklist(): boolean {
         for (const filter of User.getBlacklist().values()) {
             if (filter.matchesPost(this)) {
                 return true;
@@ -149,7 +121,7 @@ export class Post {
      * loading of the image, if it's not already appended
      */
     public hide(): void {
-        this.element.addClass("filtered");
+        this.htmlElement.addClass("filtered");
     }
 
     /**
@@ -159,7 +131,7 @@ export class Post {
         if (this.matchesBlacklist()) {
             return;
         }
-        this.element.removeClass("filtered");
+        this.htmlElement.removeClass("filtered");
     }
 
     /**
@@ -167,26 +139,25 @@ export class Post {
      * @returns JQuery<HTMLElement> DOM Element
      */
     public getDomElement(): JQuery<HTMLElement> {
-        return this.element;
+        return this.htmlElement;
     }
 
-    public getId(): number { return this.id; }
-    public getTags(): string { return this.tags; }
-    public getRating(): PostRating { return this.rating; }
-    public getFavCount(): number { return this.favorites; }
-    public getScoreCount(): number { return this.score; }
+    public getId(): number { return this.apiElement.id; }
+    public getTags(): string { return APIPost.getTagString(this.apiElement) }
+    public getRating(): PostRating { return this.apiElement.rating; }
+    public getFavCount(): number { return this.apiElement.fav_count; }
+    public getScoreCount(): number { return this.apiElement.score.total; }
 
-    public getImageURL(): string { return this.fileURL; }
-    public getSampleURL(): string { return this.sampleURL; }
-    public getPreviewURL(): string { return this.previewURL; }
+    public getImageURL(): string { return this.apiElement.file.url; }
+    public getSampleURL(): string { return this.apiElement.sample.url; }
+    public getPreviewURL(): string { return this.apiElement.preview.url; }
 
-    public getFileExtension(): string { return this.fileExtension; }
+    public getFileExtension(): string { return this.apiElement.file.ext; }
 
-    public getUploaderID(): number { return this.uploaderID; }
-    public getUploaderName(): string { return this.uploaderName; }
+    public getUploaderID(): number { return this.apiElement.uploader_id; }
 
-    public hasSound(): boolean { return this.sound; }
-    public getFlags(): string { return this.flags; }
+    public hasSound(): boolean { return this.getTags().indexOf("sound") !== -1 }
+    public getFlags(): string { return APIPost.getFlagString(this.apiElement); }
 }
 
 
@@ -210,8 +181,8 @@ export class ViewingPost extends Post {
         super($image);
 
         this.isFaved = $("#add-to-favorites").css("display") === "none";
-        this.isUpvoted = $(".post-vote-up-" + this.id).first().hasClass("score-positive");
-        this.isDownvoted = $(".post-vote-down-" + this.id).first().hasClass("score-negative");
+        this.isUpvoted = $(".post-vote-up-" + this.apiElement.id).first().hasClass("score-positive");
+        this.isDownvoted = $(".post-vote-down-" + this.apiElement.id).first().hasClass("score-negative");
 
         this.artistTags = this.getAllFromTaggroup("artist");
         this.characterTags = this.getAllFromTaggroup("character");
@@ -255,31 +226,5 @@ export class ViewingPost extends Post {
      */
     public getTagsFromType(tagType: TagTypes): string[] {
         return this[tagType + "Tags"];
-    }
-}
-
-export enum PostRating {
-    Safe = "s",
-    Questionable = "q",
-    Explicit = "e"
-}
-
-export namespace PostRating {
-    export function fromValue(value: string): PostRating {
-        for (const key of Object.keys(PostRating)) {
-            if (PostRating[key] === value) {
-                return PostRating[key];
-            }
-        }
-        return undefined;
-    }
-
-    export function toString(postRating: PostRating): string {
-        for (const key of Object.keys(PostRating)) {
-            if (PostRating[key] === postRating) {
-                return key;
-            }
-        }
-        return undefined;
     }
 }

@@ -160,6 +160,7 @@ export class RE6Module {
 
             const keys = this.fetchSettings(value.keys, true) as string;
             keys.split("|").forEach((key) => {
+                if (key === "") return;
                 if (enabled) Hotkeys.register(key, value.fnct);
                 else Hotkeys.register(key, () => { return; });
             });

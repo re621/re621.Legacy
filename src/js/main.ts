@@ -22,12 +22,14 @@ import { TitleCustomizer } from "./modules/post/TitleCustomizer";
 import { BlacklistEnhancer } from "./modules/search/BlacklistEnhancer";
 import { InstantSearch } from "./modules/search/InstantSearch";
 import { InfiniteScroll } from "./modules/search/InfiniteScroll";
+import { MassDownloader } from "./modules/search/MassDownloader";
 import { ThumbnailEnhancer } from "./modules/search/ThumbnailsEnhancer";
 // - misc
 import { TinyAlias } from "./modules/misc/TinyAlias";
 import { WikiEnhancer } from "./modules/misc/WikiEnhancer";
-
-// - subscribers
+// - pools
+import { PoolDownloader } from "./modules/pools/PoolDownloader";
+// - subscriptions
 import { SubscriptionManager } from "./modules/subscriptions/SubscriptionManager";
 import { ForumSubscriptions } from "./modules/subscriptions/ForumSubscriptions";
 import { PoolSubscriptions } from "./modules/subscriptions/PoolSubscriptions";
@@ -51,10 +53,14 @@ const loadOrder = [
     BlacklistEnhancer,
     InfiniteScroll,
     InstantSearch,
+    MassDownloader,
     ThumbnailEnhancer,
 
     TinyAlias,
     WikiEnhancer,
+
+    PoolDownloader,
+
     SubscriptionManager,
     SettingsController
 ];

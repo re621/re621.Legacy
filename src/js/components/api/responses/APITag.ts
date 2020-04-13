@@ -1,4 +1,4 @@
-export interface ApiTag {
+export interface APITag extends APIResponse {
     id: number;
     name: string;
     post_count: number;

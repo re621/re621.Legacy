@@ -1,4 +1,5 @@
 import { RE6Module } from "./RE6Module";
+import { ErrorHandler } from "./ErrorHandler";
 
 export class ModuleController {
 
@@ -11,9 +12,11 @@ export class ModuleController {
      *  { new(): RE6Module } works to access constructor name but not static methods
      */
     public static register(moduleClass: any): void {
-        const moduleInstance = moduleClass.getInstance();
-        moduleInstance.create();
-        this.modules.set(moduleClass.prototype.constructor.name, moduleInstance);
+        try {
+            const moduleInstance = moduleClass.getInstance();
+            moduleInstance.create();
+            this.modules.set(moduleClass.prototype.constructor.name, moduleInstance);
+        } catch (error) { ErrorHandler.error(moduleClass, error.stack, "init"); }
     }
 
     /**

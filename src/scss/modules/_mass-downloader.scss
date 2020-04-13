@@ -1,0 +1,166 @@
+/* Mass Downloader Styles */
+
+section#downloader-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: 0.5rem;
+    grid-row-gap: 0.5rem;
+
+    position: sticky;
+    top: 10rem;
+
+    h1 {
+        grid-column: span 2;
+    }
+
+    a.button {
+        text-align: center;
+    }
+
+    div.download-info {
+        grid-column: span 2;
+
+        &[data-state] {
+            padding-left: 1.125rem;
+            position: relative;
+
+            &::before {
+                content: "";
+                display: block;
+                line-height: 1;
+
+                font-family: "Font Awesome 5 Free";
+                font-weight: 400;
+
+                position: absolute;
+                left: 0;
+                top: 0.125rem;
+            }
+
+            &[data-state=done]::before {
+                content: unicode("f058"); // fa-check-circle
+            }
+
+            &[data-state=error]::before {
+                content: unicode("f057"); // fa-times-circle
+            }
+
+            &[data-state=loading]::before {
+                content: unicode("f1ce"); // fa-circle-notch
+                font-weight: 700;
+                animation: fa-spin 2s infinite linear;
+            }
+        }
+
+        div.download-notice {
+            font-weight: bold;
+            margin-top: 0.5rem;
+            margin-left: -1.125rem;
+        }
+    }
+
+    div.download-file {
+        grid-column: span 2;
+        font-family: monospace;
+        word-break: break-word;
+
+        counter-reset: number;
+
+        span {
+            position: relative;
+            display: block;
+            word-break: keep-all;
+            overflow: hidden;
+            padding-left: 1.125rem;
+            margin: 0 -0.25rem 1px -0.125rem;
+            font-size: 85%;
+            counter-increment: number;
+
+            background: linear-gradient(90deg, #ffffff40 var(--progress), transparent 0%);
+
+            &::before {
+                content: "["counter(number)"]";
+                position: absolute;
+                left: 0;
+            }
+        }
+    }
+
+    &:not([data-interface=true]) {
+
+        a#download-act,
+        div.download-info,
+        div.download-file {
+            display: none;
+        }
+    }
+}
+
+div#posts-container[data-downloading=true] {
+
+    article.post-preview.download-item {
+
+        a {
+            outline: 0;
+        }
+
+        &::before {
+            content: "";
+            display: block;
+            line-height: 1;
+
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+
+            font-family: "Font Awesome 5 Free";
+            font-weight: 500;
+            font-size: 3rem;
+            text-shadow: 0 0 3px black;
+
+            pointer-events: none;
+        }
+
+        &[data-state=ready]::before {
+            content: unicode("f358"); // fa-arrow-alt-circle-down
+            color: goldenrod;
+        }
+
+        &[data-state=preparing]::before {
+            content: unicode("f111"); // fa-circle
+            color: goldenrod;
+        }
+
+        &[data-state=loading]::before {
+            content: unicode("f1ce"); // fa-circle-notch
+            font-weight: 700;
+            animation: fa-spin 2s infinite linear;
+            color: goldenrod;
+        }
+
+        &[data-state=error]::before {
+            content: unicode("f057"); // fa-times-circle
+            color: orangered;
+        }
+
+        &[data-state=done]::before {
+            content: unicode("f058"); // fa-circle-check
+            color: limegreen;
+        }
+    }
+
+    article.post-preview.ui-selecting {
+        &::after {
+            content: "";
+
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+
+            background: #ffffff44;
+        }
+    }
+
+}

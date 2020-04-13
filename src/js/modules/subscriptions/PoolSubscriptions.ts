@@ -1,10 +1,10 @@
 import { UpdateData, UpdateDefinition, SubscriptionSettings, UpdateContent } from "./SubscriptionManager";
-import { ApiPool } from "../../components/api/responses/ApiPool";
-import { Api } from "../../components/api/Api";
+import { APIPool } from "../../components/api/responses/APIPool";
+import { E621 } from "../../components/api/E621";
 import { Page } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Subscription } from "./Subscription";
-import { ApiPost } from "../../components/api/responses/ApiPost";
+import { APIPost } from "../../components/api/responses/APIPost";
 import { Post } from "../../components/data/Post";
 
 export class PoolSubscriptions extends RE6Module implements Subscription {
@@ -69,7 +69,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             return results;
         }
 
-        const poolsJson: ApiPool[] = await Api.getJson("/pools.json?search[id]=" + Object.keys(poolData).join(","));
+        const poolsJson: APIPool[] = await E621.Pools.get<APIPool>({ "search[id]": Object.keys(poolData).join(",") });
         for (const poolJson of poolsJson) {
             if (poolData[poolJson.id].lastId === undefined || !poolJson.post_ids.includes(poolData[poolJson.id].lastId)) {
                 poolData[poolJson.id].lastId = poolJson.post_ids[poolJson.post_ids.length - 1];
@@ -86,10 +86,10 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
         return results;
     }
 
-    private async formatPoolUpdate(value: ApiPool, subSettings: SubscriptionSettings): Promise<UpdateContent> {
+    private async formatPoolUpdate(value: APIPool, subSettings: SubscriptionSettings): Promise<UpdateContent> {
         const poolInfo = subSettings[value.id];
         if (poolInfo.md5 === undefined) {
-            const post: ApiPost = (await Api.getJson(`/posts/${value.post_ids[0]}.json`)).post;
+            const post = (await E621.Posts.find(value.post_ids[0]).get<APIPost>())[0];
             poolInfo.md5 = post.file.ext === "swf" ? "" : post.file.md5;
         }
         return {

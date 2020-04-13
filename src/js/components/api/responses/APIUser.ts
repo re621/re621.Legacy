@@ -1,4 +1,20 @@
-export interface ApiUserSettings {
+export interface APIUser extends APIResponse {
+    id: number;
+    created_at: string;
+    name: string;
+    level: number;
+    base_upload_limit: number;
+    post_upload_count: number;
+    post_update_count: number;
+    note_update_count: number;
+    is_banned: boolean;
+    can_approve_posts: boolean;
+    can_upload_free: boolean;
+    level_string: string;
+}
+
+export interface APICurrentUser extends APIUser {
+    id: number;
     wiki_page_version_count: number;
     artist_version_count: number;
     pool_version_count: number;
@@ -10,18 +26,6 @@ export interface ApiUserSettings {
     neutral_feedback_count: number;
     negative_feedback_count: number;
     upload_limit: number;
-    id: number;
-    created_at: Date;
-    name: string;
-    level: number;
-    base_upload_limit: number;
-    post_upload_count: number;
-    post_update_count: number;
-    note_update_count: number;
-    is_banned: boolean;
-    can_approve_posts: boolean;
-    can_upload_free: boolean;
-    level_string: string;
     show_avatars: boolean;
     blacklist_avatars: boolean;
     blacklist_users: boolean;

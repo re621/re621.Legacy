@@ -1,13 +1,11 @@
-import { ApiPost } from "./responses/ApiPost";
+import { APIPost } from "./responses/APIPost";
 
 export class PostHtml {
 
-    public static create(json: ApiPost): JQuery<HTMLElement> {
+    public static create(json: APIPost, loadLargeImage = true): JQuery<HTMLElement> {
         //data-has-sound
         //data-flags
-        const tags = json.tags;
-
-        const allTags = [...tags.artist, ...tags.character, ...tags.copyright, ...tags.general, ...tags.invalid, ...tags.lore, ...tags.meta, ...tags.species].join(" ");
+        const allTags = APIPost.getTagString(json);
         const $article = $("<article>")
             .attr({
                 "id": "post_" + json.id,
@@ -24,16 +22,21 @@ export class PostHtml {
             })
             .addClass(this.getArticleClasses(json).join(" "));
 
-        const $href = $("<a>").attr("href", "/posts/" + json.id).appendTo($article);
+        const $href = $("<a>")
+            .addClass("preview-box")
+            .attr("href", "/posts/" + json.id)
+            .appendTo($article);
         const $picture = $("<picture>").appendTo($href);
 
-        $("<img>")
+        const $img = $("<img>")
             .addClass("has-cropped-false")
             .addClass("lazyload")
-            .attr("data-src", json.preview.url)
             .attr("title", `Rating: ${json.rating}\nID: ${json.id}\nDate: ${json.created_at}\nScore: ${json.score.total}\n\n ${allTags}`)
             .attr("alt", allTags)
             .appendTo($picture);
+
+        if (loadLargeImage) $img.attr("data-src", json.file.url);
+        else $img.attr("data-src", json.preview.url);
 
         const $desc = $("<div>")
             .attr("class", "desc")
@@ -75,7 +78,7 @@ export class PostHtml {
         return $article;
     }
 
-    private static getScoreInfo(json: ApiPost): ScoreInfo {
+    private static getScoreInfo(json: APIPost): ScoreInfo {
         if (json.score.total === 0) {
             return {
                 class: "score-neutral",
@@ -94,7 +97,7 @@ export class PostHtml {
         }
     }
 
-    private static getArticleClasses(json: ApiPost): string[] {
+    private static getArticleClasses(json: APIPost): string[] {
         const result = [
             "blacklisted",
             "captioned",
@@ -125,7 +128,7 @@ export class PostHtml {
         return result;
     }
 
-    private static getFlags(json: ApiPost): string[] {
+    private static getFlags(json: APIPost): string[] {
         const result = [];
         if (json.flags.deleted) {
             result.push("deleted");
@@ -137,7 +140,7 @@ export class PostHtml {
         return result;
     }
 
-    private static getExtra(json: ApiPost): string {
+    private static getExtra(json: APIPost): string {
         let result = "";
         if (json.relationships.parent_id !== null) {
             result += "P";
