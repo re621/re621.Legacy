@@ -66,6 +66,10 @@ div#c-posts div.parent-children {
     font-weight: bold;
 }
 
-div#note-container[data-hidden=true] {
-    display: none !important;
+div#note-container {
+    visibility: visible !important;
+
+    &[data-hidden=true] {
+        display: none !important;
+    }
 }

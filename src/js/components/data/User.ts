@@ -1,7 +1,7 @@
 import { Api } from "../api/Api";
 import { PostFilter } from "./PostFilter";
 import { Post } from "./Post";
-import { ApiUserSettings } from "../api/responses/ApiUserSettings";
+import { APICurrentUser } from "../api/responses/APIUser";
 
 /**
  * User  
@@ -102,7 +102,7 @@ export class User {
     /**
      * @returns the users e6 site settings
      */
-    public static async getCurrentSettings(): Promise<ApiUserSettings> {
+    public static async getCurrentSettings(): Promise<APICurrentUser> {
         return Api.getJson("/users/" + this.getUserID() + ".json");
     }
 

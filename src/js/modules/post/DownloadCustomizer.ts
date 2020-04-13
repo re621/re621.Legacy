@@ -67,7 +67,11 @@ export class DownloadCustomizer extends RE6Module {
             .replace(/%artist%/g, this.post.getTagsFromType(TagTypes.Artist).join("-"))
             .replace(/%copyright%/g, this.post.getTagsFromType(TagTypes.Copyright).join("-"))
             .replace(/%character%/g, this.post.getTagsFromType(TagTypes.Character).join("-"))
-            .replace(/-{2,}|-$/g, "")
+            .replace(/%species%/g, this.post.getTagsFromType(TagTypes.Species).join("-"))
+            .replace(/%meta%/g, this.post.getTagsFromType(TagTypes.Meta).join("-"))
+            .slice(0, 128)
+            .replace(/-{2,}/g, "-")
+            .replace(/-*$/g, "")
             + "." + this.post.getFileExtension();
     }
 

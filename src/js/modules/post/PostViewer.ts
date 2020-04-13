@@ -36,7 +36,6 @@ export class PostViewer extends RE6Module {
             hotkeyHideNotes: "o",
             hotkeyNewNote: "p",
 
-            autoOpenParentChild: true,
             upvoteOnFavorite: true,
             hideNotes: false,
         };
@@ -86,21 +85,12 @@ export class PostViewer extends RE6Module {
         // Move child/parent indicator, leave others as is, like marked for deleteion
         const $bottomNotices = $(".parent-children");
         $bottomNotices.insertAfter($("#search-box"));
-        // Expand child/parent container
-        const $parentRel = $("#has-parent-relationship-preview-link");
-        const $childRel = $("#has-children-relationship-preview-link");
 
-        const autoOpen = this.fetchSettings("autoOpenParentChild");
-        // Only click on one container, because both open with one click. Clicking both results in them open and the closing
-        if ($parentRel.length !== 0 && !$parentRel.is(":visible") && autoOpen) {
-            $parentRel.click();
-        } else if ($childRel.length !== 0 && !$childRel.is(":visible") && autoOpen) {
-            $childRel.click();
-        }
-        // Remeber toggle state
-        $parentRel.add($childRel).on("click", () => {
-            this.pushSettings("autoOpenParentChild", !autoOpen);
-        });
+        // Listen to favorites button click
+        $("button#add-fav-button").on("click", () => {
+            if (!this.fetchSettings("upvoteOnFavorite")) return;
+            Danbooru.Post.vote(Post.getViewingPost().getId(), 1, true);
+        })
 
         this.registerHotkeys();
     }

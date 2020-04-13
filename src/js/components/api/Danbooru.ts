@@ -38,7 +38,7 @@ interface DanbooruBlacklist {
 }
 
 interface DanbooruPost {
-    vote(postid: number, scoreDifference: number): void;
+    vote(postid: number, scoreDifference: number, preventUnvote?: boolean): void;
 }
 
 interface DanbooruNote {

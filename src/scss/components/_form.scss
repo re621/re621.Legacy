@@ -44,6 +44,7 @@ form.grid-form {
 
     label {
         font-weight: 500;
+        align-self: center;
     }
 
     .input-container {
@@ -174,6 +175,36 @@ form.grid-form {
             input[type=checkbox]:checked+label:before {
                 content: "\f14a";
             }
+
+            label {
+                cursor: pointer;
+            }
+        }
+
+        // Radio Switch
+        &.radio-switch {
+            justify-content: unset;
+
+            div.radio-element {
+                display: inline-flex;
+                margin-right: 0.25rem;
+                border-radius: 4px;
+
+                &:last-child {
+                    margin-right: 0;
+                }
+
+                input[type=radio] {
+                    display: none;
+                }
+
+                label {
+                    padding: 0.25rem 0.5rem;
+                    min-width: 3rem;
+                    text-align: center;
+                    cursor: pointer;
+                }
+            }
         }
 
         // DIV
@@ -196,6 +227,35 @@ form.grid-form {
         }
 
         // End of Input Container
+    }
+
+}
+
+/* Collapsable section */
+div.form-collapse {
+    margin: 0 -0.75rem 0 -0.75rem;
+    width: stretch;
+
+    h3.form-collapse-header {
+        border: unset;
+        background: unset;
+        color: unset;
+        font-weight: unset;
+        outline: 0;
+        padding: 0.25rem 0.5rem;
+        cursor: pointer;
+
+        &.ui-state-active {
+            background: #ffffff05;
+        }
+    }
+
+    div.form-collapse-content {
+        height: unset !important;
+        background: #ffffff05;
+        color: unset;
+        border: 0;
+        padding: 0.25rem 0.75rem;
     }
 
 }

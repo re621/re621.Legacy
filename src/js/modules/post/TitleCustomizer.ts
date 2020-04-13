@@ -1,7 +1,7 @@
 import { Post, ViewingPost } from "../../components/data/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { TagTypes, Tag } from "../../components/data/Tag";
-import { PageDefintion } from "../../components/data/Page";
+import { PageDefintion, Page } from "../../components/data/Page";
 
 
 /**
@@ -67,8 +67,10 @@ export class TitleCustomizer extends RE6Module {
             .replace(/%artist%/g, this.post.getTagsFromType(TagTypes.Artist).filter(tag => Tag.isArist(tag)).join(", "))
             .replace(/%copyright%/g, this.post.getTagsFromType(TagTypes.Copyright).join(", "))
             .replace(/%character%/g, this.post.getTagsFromType(TagTypes.Character).join(", "))
+            .replace(/%species%/g, this.post.getTagsFromType(TagTypes.Species).join(", "))
+            .replace(/%meta%/g, this.post.getTagsFromType(TagTypes.Meta).join(", "))
             .replace(/\(\)|( - )$/g, "")
             .replace(/[ ]{2,}|^ | $/g, "")
-            + " - e621";
+            + " - " + Page.getSiteName();
     }
 }
