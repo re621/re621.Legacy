@@ -32,7 +32,7 @@ export class ThumbnailEnhancer extends RE6Module {
 
             upscale: ThumbnailPerformanceMode.Hover,
 
-            zoom: true,
+            zoom: false,
             zoomScale: "2",
 
             vote: true,

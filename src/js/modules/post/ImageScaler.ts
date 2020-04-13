@@ -39,7 +39,7 @@ export class ImageScaler extends RE6Module {
             hotkeyScale: "v|0",
             clickScale: true,
 
-            size: "sample",
+            size: "fit-vertical",
         };
     }
 
