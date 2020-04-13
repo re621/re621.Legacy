@@ -14,7 +14,7 @@ div#page div#posts-container {
         transition: box-shadow 0.25s linear;
 
         &.highlight {
-            box-shadow: 0px 0px 0px 10px #ffffff60;
+            box-shadow: 0px 0px 0px 5px #ffffff60;
         }
 
         &>a.preview-box {
