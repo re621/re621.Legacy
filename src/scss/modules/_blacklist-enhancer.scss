@@ -6,29 +6,6 @@
     }
 }
 
-/* Styles for the Blacklist Toggler */
-section#blacklist-box {
-
-    &>h1>a::before {
-        content: unicode("f105");
-        font-family: 'Font Awesome 5 Free';
-        font-weight: 900;
-        padding-right: 0.25rem;
-    }
-
-    &[data-filters-hidden=true] {
-        ul#blacklist-list {
-            display: none;
-        }
-    }
-
-    &[data-filters-hidden=false] {
-        &>h1>a::before {
-            content: unicode("f107");
-        }
-
-        ul#blacklist-list {
-            display: block;
-        }
-    }
+#blacklist-collapse {
+    display: block;
 }

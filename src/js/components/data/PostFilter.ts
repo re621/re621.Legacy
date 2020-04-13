@@ -140,6 +140,13 @@ export class PostFilter {
     }
 
     /**
+     * Returns which posts are affected by this filter
+     */
+    public getMatchesIds(): Set<number> {
+        return this.matchesIds;
+    }
+
+    /**
      * Enables/Disables the filter
      */
     public toggleEnabled(): void {
