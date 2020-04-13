@@ -34,6 +34,7 @@ export class ThumbnailEnhancer extends RE6Module {
 
             zoom: false,
             zoomScale: "2",
+            zoomContextual: true,
 
             vote: true,
 
@@ -56,6 +57,7 @@ export class ThumbnailEnhancer extends RE6Module {
 
         this.toggleHoverZoom(this.fetchSettings("zoom"));
         this.setZoomScale(this.fetchSettings("zoomScale"));
+        this.toggleZoomContextual(this.fetchSettings("zoomContextual"));
 
         this.toggleHoverVote(this.fetchSettings("vote"));
 
@@ -78,6 +80,14 @@ export class ThumbnailEnhancer extends RE6Module {
      */
     public setZoomScale(scale: string): void {
         this.postContainer.css("--thumbnail-zoom", scale);
+    }
+
+    /**
+     * Toggles the contextual zoom
+     * @param state True to enable, false to suppress
+     */
+    public toggleZoomContextual(state = true): void {
+        this.postContainer.attr("data-thumb-zoom-context", state + "");
     }
 
     /**

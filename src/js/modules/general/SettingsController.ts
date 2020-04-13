@@ -246,6 +246,14 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.div("The ratio of the enlarged thumbnail to its original size", "mid"),
 
+                    Form.checkbox("zoom-contextual", thumbnailEnhancer.fetchSettings("zoomContextual"), "Contextual Scaling", "column",
+                        (event, data) => {
+                            thumbnailEnhancer.pushSettings("zoomContextual", data);
+                            thumbnailEnhancer.toggleZoomContextual(data);
+                        }
+                    ),
+                    Form.div("Only enable thumbnail scaling in the viewing mode", "mid"),
+
                     Form.spacer("full"),
 
 
