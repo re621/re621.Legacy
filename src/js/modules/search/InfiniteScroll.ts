@@ -127,6 +127,8 @@ export class InfiniteScroll extends RE6Module {
         ModuleController.getWithType<BlacklistEnhancer>(BlacklistEnhancer).updateSidebar();
         ModuleController.getWithType<InstantSearch>(InstantSearch).applyFilter();
 
+        this.$postContainer.trigger("re621.infiniteScroll.pageLoad");
+
         this.nextPageToGet++;
     }
 
