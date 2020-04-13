@@ -10,7 +10,7 @@
 // @downloadURL  https://github.com/re621/re621/releases/latest/download/script.user.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js#sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=
 // @require      https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js#sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=
-// @require      https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.2.0/lazysizes.min.js
+// @require      https://raw.githubusercontent.com/aFarkas/lazysizes/5.2.0/lazysizes.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/jszip/3.3.0/jszip.min.js
 // @require      https://cdn.jsdelivr.net/npm/jquery.hotkeys@0.1.0/jquery.hotkeys.min.js
 // @require      https://cdn.jsdelivr.net/npm/file-saver@2.0.2/dist/FileSaver.min.js
