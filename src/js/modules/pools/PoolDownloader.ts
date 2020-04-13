@@ -35,6 +35,9 @@ export class PoolDownloader extends RE6Module {
     private poolFiles: number[] = [];
     private poolDownloaded: number[] = [];
 
+    // Files skipped because of blacklist
+    private blacklistSkipped = 0;
+
     // Interface elements
     private section: JQuery<HTMLElement>;
 
@@ -165,6 +168,7 @@ export class PoolDownloader extends RE6Module {
             let totalFileSize = 0,
                 queueSize = 0;
             this.batchOverSize = false;
+            this.blacklistSkipped = 0;
 
             // Add post data from the chunks to the queue
             dataChunks.forEach((chunk) => {
@@ -176,6 +180,11 @@ export class PoolDownloader extends RE6Module {
                     if (totalFileSize > PoolDownloader.maxBlobSize) {
                         this.batchOverSize = true;
                         this.downloadOverSize = true;
+                        return;
+                    }
+
+                    if (post.file.url === null) {
+                        this.blacklistSkipped++;
                         return;
                     }
 
@@ -267,6 +276,13 @@ export class PoolDownloader extends RE6Module {
                         .html(`Download has exceeded the maximum file size.<br /><br />Click the download button again for the next part.`)
                         .appendTo(this.infoText);
                 }
+            }
+
+            if (this.blacklistSkipped > 0) {
+                $("<div>")
+                    .addClass("download-notice")
+                    .html(`Some files could not be downloaded due to the <a href="/help/global_blacklist">global blacklist</a>.`)
+                    .appendTo(this.infoText);
             }
         });
     }
