@@ -77,6 +77,16 @@ export class User {
         return this.getInstance().blacklist;
     }
 
+    public static getTotalBlacklistMatches(): number {
+        const filtered = new Set<number>();
+        for (const filter of this.getBlacklist().values()) {
+            for (const id of filter.getMatchesIds()) {
+                filtered.add(id);    
+            }
+        }
+        return filtered.size;
+    }
+
     /**
      * Saves the passed blacklist to the users e6 account
      * and refreshes the currently visible posts

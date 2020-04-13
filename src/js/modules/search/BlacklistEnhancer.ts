@@ -26,8 +26,7 @@ export class BlacklistEnhancer extends RE6Module {
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
-            quickaddTags: true,
-            hideFilterList: true,
+            quickaddTags: true
         };
     }
 
@@ -69,7 +68,8 @@ export class BlacklistEnhancer extends RE6Module {
                     filter.setEnabled(false);
                 }
                 this.applyBlacklist();
-                this.showFilterList();
+                $disableAllButton.hide();
+                $enableAllbutton.show();
             });
         $enableAllbutton
             .off("click.danbooru")
@@ -78,29 +78,9 @@ export class BlacklistEnhancer extends RE6Module {
                     filter.setEnabled(true);
                 }
                 this.applyBlacklist();
+                $disableAllButton.show();
+                $enableAllbutton.hide();
             });
-
-
-
-        // Create blacklis toggle dom
-
-        const $toggleContainer = $("section#blacklist-box h1").empty();
-        this.$toggle = $(`<a href="">Blacklisted</a>`)
-            .attr("id", "blacklist-toggle")
-            .appendTo($toggleContainer);
-        $("<span>")
-            .addClass("blacklist-help")
-            .html(`<a href="/help/blacklist" data-ytta-id="-">(filter help)</a>`)
-            .appendTo($toggleContainer);
-
-        this.$box.attr("data-filters-hidden", this.fetchSettings("hideFilterList"));
-
-        // Toggle the filter list when clicking the header
-        $("a#blacklist-toggle").click(e => {
-            e.preventDefault();
-            //Togle display state
-            this.toggleFilterList();
-        });
 
         //Add x next to tag names to toggle them from the blacklist
         if (this.fetchSettings("quickaddTags") === true && User.isLoggedIn()) {
@@ -145,29 +125,6 @@ export class BlacklistEnhancer extends RE6Module {
         this.applyBlacklist();
     }
 
-    /** Toggles the filter list state */
-    private toggleFilterList(): void {
-        if (this.filterListVisible()) { this.hideFilterList(); }
-        else { this.showFilterList(); }
-    }
-
-    /** Returns true if the filter list is visible, false otherwise */
-    private filterListVisible(): boolean {
-        return this.$box.attr("data-filters-hidden") == "false";
-    }
-
-    /** Hides the filter list */
-    private hideFilterList(): void {
-        this.pushSettings("hideFilterList", true);
-        this.$box.attr("data-filters-hidden", "true");
-    }
-
-    /** Shows the filter list */
-    private showFilterList(): void {
-        this.pushSettings("hideFilterList", false);
-        this.$box.attr("data-filters-hidden", "false");
-    }
-
     /**
      * Hides posts, if they are blacklisted and blacklist is active, show otherwise
      * @param hide 
@@ -208,6 +165,9 @@ export class BlacklistEnhancer extends RE6Module {
         } else {
             this.$box.show();
         }
+
+        //update total count
+        $("#blacklisted-count").text(`(${User.getTotalBlacklistMatches()})`);
     }
 
     private addSidebarEntry(filterString, filter: PostFilter): void {
