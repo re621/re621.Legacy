@@ -14,7 +14,7 @@ div#page div#posts-container {
         transition: box-shadow 0.25s linear;
 
         &.highlight {
-            box-shadow: 0px 0px 0px 10px #ffffff60;
+            box-shadow: 0px 0px 0px 5px #ffffff60;
         }
 
         &>a.preview-box {
@@ -119,6 +119,114 @@ div#page div#posts-container {
     }
 }
 
+// Ribbons
+div#page div#posts-container {
+
+    picture.picture-container {
+        position: relative;
+        display: inline-block;
+
+    }
+
+    & div.thumb-ribbon {
+        display: none;
+    }
+
+    &[data-thumb-ribbons=true] {
+
+        div.thumb-ribbon {
+            position: absolute;
+            top: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+
+            width: 0.75rem;
+            height: 0.75rem;
+
+            span {
+                display: flex;
+
+                min-width: 150%;
+                height: 0.5rem;
+
+                transform-origin: center;
+
+                background: purple;
+                box-shadow: 0 0 10px -3px black;
+                border: 1px solid #00000060;
+            }
+
+            $status-flagged: orangered;
+            $status-pending: blue;
+            $rel-children: forestgreen;
+            $rel-parent: yellow;
+
+            &.thumb-ribbon-flagged span {
+                background: $status-flagged;
+            }
+
+            &.thumb-ribbon-pending span {
+                background: $status-pending;
+            }
+
+            &.thumb-ribbon-flagged.thumb-ribbon-pending span {
+                background: linear-gradient(90deg, $status-flagged 50%, $status-pending 50%);
+            }
+
+            &.thumb-ribbon-has-children span {
+                background: $rel-children;
+            }
+
+            &.thumb-ribbon-has-parent span {
+                background: $rel-parent;
+            }
+
+            &.thumb-ribbon-has-children.thumb-ribbon-has-parent span {
+                background: linear-gradient(90deg, $rel-parent 50%, $rel-children 50%);
+            }
+
+            &.right {
+                right: 0;
+
+                span {
+                    transform: rotate(45deg);
+                    margin-left: 0.5rem;
+                    margin-bottom: 0.5rem;
+                }
+            }
+
+            &.left {
+                left: 0;
+
+                span {
+                    transform: rotate(-45deg);
+                    margin-right: 0.5rem;
+                    margin-bottom: 0.5rem;
+                }
+            }
+        }
+
+        // disable vanilla borders
+        article.post-preview.post-status-flagged img,
+        article.post-preview.post-status-pending img,
+        article.post-preview.post-status-deleted img,
+        article.post-preview.post-status-has-parent img,
+        article.post-preview.post-status-has-children img {
+            border: 0;
+        }
+    }
+
+    &:not([data-thumb-rel-ribbons=true]) {
+        div.thumb-ribbon.rel-ribbon {
+            display: none;
+        }
+    }
+
+}
+
 // Voting Buttons
 div#page div#posts-container {
 
@@ -132,7 +240,8 @@ div#page div#posts-container {
 }
 
 // Zoom on Hover
-div#page.mode-view div#posts-container {
+div#page.mode-view div#posts-container,
+div#page div#posts-container[data-thumb-zoom-context=false] {
 
     &[data-thumb-zoom=true] article.post-preview.loaded:hover {
         position: relative;

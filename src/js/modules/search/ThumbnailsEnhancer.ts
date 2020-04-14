@@ -34,12 +34,16 @@ export class ThumbnailEnhancer extends RE6Module {
 
             zoom: false,
             zoomScale: "2",
+            zoomContextual: true,
 
             vote: true,
 
             crop: true,
             cropSize: "150px",
             cropRatio: "0.9",
+
+            ribbons: true,
+            relRibbons: true,
 
             clickAction: ThumbnailClickAction.NewTab,
         };
@@ -56,12 +60,16 @@ export class ThumbnailEnhancer extends RE6Module {
 
         this.toggleHoverZoom(this.fetchSettings("zoom"));
         this.setZoomScale(this.fetchSettings("zoomScale"));
+        this.toggleZoomContextual(this.fetchSettings("zoomContextual"));
 
         this.toggleHoverVote(this.fetchSettings("vote"));
 
         this.toggleThumbCrop(this.fetchSettings("crop"));
         this.setThumbSize(this.fetchSettings("cropSize"));
         this.setThumbRatio(this.fetchSettings("cropRatio"));
+
+        this.toggleStatusRibbons(this.fetchSettings("ribbons"));
+        this.toggleRelationRibbons(this.fetchSettings("relRibbons"));
     }
 
     /**
@@ -78,6 +86,14 @@ export class ThumbnailEnhancer extends RE6Module {
      */
     public setZoomScale(scale: string): void {
         this.postContainer.css("--thumbnail-zoom", scale);
+    }
+
+    /**
+     * Toggles the contextual zoom
+     * @param state True to enable, false to suppress
+     */
+    public toggleZoomContextual(state = true): void {
+        this.postContainer.attr("data-thumb-zoom-context", state + "");
     }
 
     /**
@@ -113,6 +129,22 @@ export class ThumbnailEnhancer extends RE6Module {
     }
 
     /**
+     * Toggles the post flag ribbons
+     * @param state True to enable, false to disable
+     */
+    public toggleStatusRibbons(state = true): void {
+        this.postContainer.attr("data-thumb-ribbons", state + "");
+    }
+
+    /**
+     * Toggles the post relation ribbons
+     * @param state True to enable, false to disable
+     */
+    public toggleRelationRibbons(state = true): void {
+        this.postContainer.attr("data-thumb-rel-ribbons", state + "");
+    }
+
+    /**
      * Pauses or unpauses ThumbnailEnhancer's hover actions
      * @param state True to hide, false to restore
      */
@@ -139,6 +171,7 @@ export class ThumbnailEnhancer extends RE6Module {
         /* Create the structure */
         const $link = $article.find("a.preview-box"),
             postID = parseInt($article.attr("data-id")),
+            $picture = $article.find("picture"),
             $img = $article.find("img"),
             $imgData = $img.attr("title").split("\n").slice(0, -2);     // Replace if the post date is added for the data-attributes.
 
@@ -150,6 +183,47 @@ export class ThumbnailEnhancer extends RE6Module {
             .addClass("preview-load")
             .html(`<i class="fas fa-circle-notch fa-2x fa-spin"></i>`)
             .appendTo($link);
+
+        // States and Ribbons
+        $picture.addClass("picture-container");
+
+        // States
+        const state = $("<div>")
+            .addClass("rel-ribbon")
+            .append($("<span>"))
+            .appendTo($picture);
+        let stateText = "";
+
+        if ($article.hasClass("post-status-has-children")) {
+            state.addClass("thumb-ribbon thumb-ribbon-has-children");
+            stateText += "Child posts\n"
+        }
+        if ($article.hasClass("post-status-has-parent")) {
+            state.addClass("thumb-ribbon thumb-ribbon-has-parent");
+            stateText += "Parent posts\n"
+        }
+
+        if (state.hasClass("thumb-ribbon")) { state.addClass("left").attr("title", stateText); }
+        else { state.remove(); }
+
+        // Ribbons
+        const ribbon = $("<div>")
+            .addClass("flag-ribbon")
+            .append($("<span>"))
+            .appendTo($picture);
+        let ribbonText = "";
+
+        if ($article.hasClass("post-status-flagged")) {
+            ribbon.addClass("thumb-ribbon thumb-ribbon-flagged");
+            ribbonText += "Flagged\n"
+        }
+        if ($article.hasClass("post-status-pending")) {
+            ribbon.addClass("thumb-ribbon thumb-ribbon-pending");
+            ribbonText += "Pending\n"
+        }
+
+        if (ribbon.hasClass("thumb-ribbon")) { ribbon.addClass("right").attr("title", ribbonText); }
+        else { ribbon.remove(); }
 
         // Description box that only shows up on hover
         const $extrasBox = $("<div>")
@@ -297,6 +371,7 @@ export class ThumbnailEnhancer extends RE6Module {
             const date = new Date(input.split(": ").pop().replace(" ", "T").replace(" ", ""));
             return `<span title="` + date.toLocaleString() + `">` + Util.timeAgo(date) + `</span>`;
         }
+
     }
 
 }

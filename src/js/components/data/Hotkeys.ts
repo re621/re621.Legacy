@@ -1,4 +1,5 @@
 import { Danbooru } from "../api/Danbooru";
+import { Page, PageDefintion } from "./Page";
 
 const validKeys = [
     "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", ".", ",",
@@ -16,8 +17,14 @@ export class Hotkeys {
     private static instance: Hotkeys;
     private listeners: string[] = [];
 
+    private static enabled = true;
+
     private constructor() {
         Danbooru.Utility.disableShortcuts = true;
+
+        if (Page.matches(PageDefintion.post)
+            && $("section#image-container").attr("data-file-ext") === "swf")
+            Hotkeys.enabled = false;
     }
 
     private static getInstance(): Hotkeys {
@@ -67,7 +74,7 @@ export class Hotkeys {
     public static register(key: string, fn: Function): boolean {
         this.unregister(key);
         $(document).bind("keydown.re621.hotkey-" + key, key, function (event) {
-            if ($("body").attr("data-recording-hotkey") === "true") return false;
+            if (!Hotkeys.enabled || $("body").attr("data-recording-hotkey") === "true") return false;
             fn(event, key);
         });
         this.getListeners().push(key);
@@ -95,7 +102,7 @@ export class Hotkeys {
     public static registerInput(key: string, element: JQuery<HTMLElement>, fn: Function): boolean {
         this.unregisterInput(key, element);
         $(element).bind("keydown.re621.hotkey-" + key, key, function (event) {
-            if ($("body").attr("data-recording-hotkey") === "true") return false;
+            if (!Hotkeys.enabled || $("body").attr("data-recording-hotkey") === "true") return false;
             fn(event, key);
         });
         this.getListeners().push(key);

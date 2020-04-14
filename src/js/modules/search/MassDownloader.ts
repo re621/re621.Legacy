@@ -30,6 +30,8 @@ export class MassDownloader extends RE6Module {
     private downloadIndex = 1;
 
     // Interface elements
+    private container: JQuery<HTMLElement>;
+
     private section: JQuery<HTMLElement>;
     private selectButton: JQuery<HTMLElement>;
     private actButton: JQuery<HTMLElement>;
@@ -95,6 +97,21 @@ export class MassDownloader extends RE6Module {
             .addClass("download-file")
             .html("")
             .appendTo(this.section);
+
+
+        this.container = $("div#posts-container")
+            .selectable({
+                autoRefresh: false,
+                filter: "article.post-preview",
+                selected: function (event, ui) {
+                    $(ui.selected)
+                        .toggleClass("download-item")
+                        .attr("data-state", "ready");
+                }
+            });
+        this.container.on("re621.infiniteScroll.pageLoad", () => {
+            this.container.selectable("refresh");
+        });
     }
 
     /**
@@ -112,24 +129,17 @@ export class MassDownloader extends RE6Module {
 
             this.infoText.html(`Click on thumbnails to select them, then press "Download"`);
 
-            $("div#posts-container")
+            this.container
                 .attr("data-downloading", "true")
-                .selectable({
-                    autoRefresh: false,
-                    filter: "article.post-preview",
-                    selected: function (event, ui) {
-                        $(ui.selected)
-                            .toggleClass("download-item")
-                            .attr("data-state", "ready");
-                    }
-                });
+                .selectable("refresh")
+                .selectable("enable");
         } else {
             this.selectButton.html("Select");
             this.section.attr("data-interface", "false");
 
-            $("div#posts-container")
+            this.container
                 .attr("data-downloading", "false")
-                .selectable("destroy");
+                .selectable("disable");
         }
     }
 

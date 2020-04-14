@@ -246,6 +246,14 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.div("The ratio of the enlarged thumbnail to its original size", "mid"),
 
+                    Form.checkbox("zoom-contextual", thumbnailEnhancer.fetchSettings("zoomContextual"), "Contextual Scaling", "column",
+                        (event, data) => {
+                            thumbnailEnhancer.pushSettings("zoomContextual", data);
+                            thumbnailEnhancer.toggleZoomContextual(data);
+                        }
+                    ),
+                    Form.div("Only enable thumbnail scaling in the viewing mode", "mid"),
+
                     Form.spacer("full"),
 
 
@@ -285,6 +293,25 @@ export class SettingsController extends RE6Module {
                         }
                     ),
                     Form.div("Height to width ratio of the image", "mid"),
+
+                    Form.spacer("full"),
+
+
+                    Form.checkbox("state-ribbons", thumbnailEnhancer.fetchSettings("ribbons"), "Status Ribbons", "column",
+                        (event, data) => {
+                            thumbnailEnhancer.pushSettings("ribbons", data);
+                            thumbnailEnhancer.toggleStatusRibbons(data);
+                        }
+                    ),
+                    Form.div("Use corner ribbons instead of colored borders for flags", "mid"),
+
+                    Form.checkbox("state-relations", thumbnailEnhancer.fetchSettings("relRibbons"), "Relations Ribbons", "column",
+                        (event, data) => {
+                            thumbnailEnhancer.pushSettings("relRibbons", data);
+                            thumbnailEnhancer.toggleRelationRibbons(data);
+                        }
+                    ),
+                    Form.div("Display ribbons for parent/child relationships", "mid"),
                 ]),
 
 
