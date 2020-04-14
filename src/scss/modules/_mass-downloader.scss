@@ -116,6 +116,7 @@ div#posts-container[data-downloading=true] {
             position: absolute;
             top: 0.5rem;
             right: 0.5rem;
+            z-index: 100;
 
             font-family: "Font Awesome 5 Free";
             font-weight: 500;
