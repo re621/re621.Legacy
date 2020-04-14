@@ -330,17 +330,15 @@ export class ThumbnailEnhancer extends RE6Module {
                 // only load sample after a bit of waiting
                 // this prevents loading images just by hovering over them to get to another one
                 timer = window.setTimeout(() => {
-                    if ($img.attr("src") == sampleURL) return;
+                    if ($img.attr("data-src") == sampleURL) return;
 
                     $link.addClass("loading");
-                    $img.attr({
-                        "src": sampleURL,
-                        "data-src": sampleURL
-                    });
-                    $img.on("load", () => {
-                        $link.removeClass("loading");
-                        $article.addClass("loaded");
-                    });
+                    $img.attr("data-src", sampleURL)
+                        .addClass("lazyload")
+                        .one("lazyloaded", () => {
+                            $link.removeClass("loading");
+                            $article.addClass("loaded");
+                        });
                 }, 200);
             });
             $article.on("mouseleave", () => {
@@ -348,14 +346,12 @@ export class ThumbnailEnhancer extends RE6Module {
             });
         } else if (upscaleMode === ThumbnailPerformanceMode.Always) {
             $link.addClass("loading");
-            $img.attr({
-                "src": sampleURL,
-                "data-src": sampleURL
-            });
-            $img.on("load", () => {
-                $link.removeClass("loading");
-                $article.addClass("loaded");
-            });
+            $img.attr("data-src", sampleURL)
+                .addClass("lazyload")
+                .one("lazyloaded", () => {
+                    $link.removeClass("loading");
+                    $article.addClass("loaded");
+                });
         }
 
         function parseRating(input: string): string {

@@ -31,8 +31,11 @@ export class PostHtml {
         const $img = $("<img>")
             .addClass("has-cropped-false")
             .addClass("lazyload")
-            .attr("title", `Rating: ${json.rating}\nID: ${json.id}\nDate: ${json.created_at}\nScore: ${json.score.total}\n\n ${allTags}`)
-            .attr("alt", allTags)
+            .attr({
+                "title": `Rating: ${json.rating}\nID: ${json.id}\nDate: ${json.created_at}\nScore: ${json.score.total}\n\n ${allTags}`,
+                "alt": allTags,
+                "src": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
+            })
             .appendTo($picture);
 
         if (loadLargeImage) $img.attr("data-src", json.file.url);
