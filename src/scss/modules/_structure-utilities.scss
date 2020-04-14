@@ -18,51 +18,69 @@ body {
 }
 
 // Gridify the header
-@media (min-width: 800px) {
-    header#top {
-        h1 {
-            display: none !important;
+header#top {
+    h1 {
+        display: none !important;
+    }
+
+    nav#nav {
+        display: grid !important;
+        grid-template-columns: auto 1fr auto;
+
+        menu.logo:not(.main) {
+            background: unset;
+            margin: 0 0 0 0.5rem;
+            padding: 0.25rem 0;
+            font-weight: 700;
         }
 
-        nav#nav {
-            display: grid !important;
-            grid-template-columns: auto 1fr auto;
+        menu.logo a {
+            padding: 6px 10px;
+        }
 
-            menu.logo:not(.main) {
-                background: unset;
-                margin: 0 0 0 0.5rem;
-                padding: 0.25rem 0;
-                font-weight: 700;
-            }
+        menu.main {
+            overflow: hidden;
+            white-space: nowrap;
+            padding-left: 0;
+            padding-right: 0;
+        }
 
-            menu.logo a {
-                padding: 6px 10px;
-            }
+        menu.extra:not(.main) {
+            background: unset;
+            margin: 0 0.5rem 0 0;
+            padding: 0.25rem 0;
+            font-weight: 700;
+        }
 
-            menu.main {
-                overflow: hidden;
-                white-space: nowrap;
-                padding-left: 0;
-                padding-right: 0;
-            }
+        menu.extra a {
+            padding: 6px 10px;
+        }
 
-            menu.extra:not(.main) {
-                background: unset;
-                margin: 0 0.5rem 0 0;
-                padding: 0.25rem 0;
-                font-weight: 700;
-            }
+        menu.submenu {
+            grid-row: 2;
+            grid-column: 1;
+            grid-area: 2 / 1 / 2 / 4;
+            height: 1.125rem;
+        }
+    }
+}
 
-            menu.extra a {
-                padding: 6px 10px;
-            }
+// Stickify the header
+body[data-sticky-header=true] {
+    header#top {
+        position: sticky;
+        z-index: 9000;
+        top: -1px;
+    }
 
-            menu.submenu {
-                grid-row: 2;
-                grid-column: 1;
-                grid-area: 2 / 1 / 2 / 4;
-                height: 1.125rem;
-            }
+    div#re621-search {
+
+        // This is necessary to make the transition smooth
+        margin-top: -3.5rem !important;
+        padding-top: 3.5rem !important;
+
+        &.re621-search-sticky {
+            padding-top: 3.5rem !important;
         }
     }
 }

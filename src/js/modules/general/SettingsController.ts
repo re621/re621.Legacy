@@ -200,13 +200,18 @@ export class SettingsController extends RE6Module {
                         miscellaneous.improveTagCount(data);
                     }
                 ),
+                Form.checkbox("sticky-header", miscellaneous.fetchSettings("stickyHeader"), "Fixed Header", "column",
+                    (event, data) => {
+                        miscellaneous.pushSettings("stickyHeader", data);
+                        miscellaneous.createStickyHeader(data);
+                    }
+                ),
                 Form.checkbox("sticky-searchbox", miscellaneous.fetchSettings("stickySearchbox"), "Fixed Searchbox", "column",
                     (event, data) => {
                         miscellaneous.pushSettings("stickySearchbox", data);
                         miscellaneous.createStickySearchbox(data);
                     }
                 ),
-                Form.spacer(),
 
                 Form.hr(),
             ]),

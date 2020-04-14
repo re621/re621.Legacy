@@ -37,7 +37,9 @@ export class DomUtilities {
             $("aside#sidebar section#mode-box").appendTo($searchContainer);
 
             const observer = new IntersectionObserver(
-                ([e]) => e.target.classList.toggle('bg-foreground', e.intersectionRatio < 1),
+                ([event]) => {
+                    $(event.target).toggleClass("re621-search-sticky bg-foreground", event.intersectionRatio < 1)
+                },
                 { threshold: [1] }
             );
 

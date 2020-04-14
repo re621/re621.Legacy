@@ -8,8 +8,6 @@ import { APIForumPost } from "../../components/api/responses/APIForumPost";
  */
 export class Miscellaneous extends RE6Module {
 
-    private redesignStylesheet: JQuery<HTMLElement>;
-
     public constructor() {
         super();
         this.registerHotkeys(
@@ -34,6 +32,7 @@ export class Miscellaneous extends RE6Module {
 
             removeSearchQueryString: true,
             stickySearchbox: true,
+            stickyHeader: false,
 
             improveTagCount: true,
             collapseCategories: true,
@@ -76,6 +75,8 @@ export class Miscellaneous extends RE6Module {
         if (Page.matches([PageDefintion.search, PageDefintion.post, PageDefintion.favorites])) {
             this.createStickySearchbox(this.fetchSettings("stickySearchbox"));
         }
+
+        this.createStickyHeader(this.fetchSettings("stickyHeader"));
 
         this.registerHotkeys();
     }
@@ -140,11 +141,18 @@ export class Miscellaneous extends RE6Module {
 
     /**
      * Makes the searchbox stick to the page when scrolling down
-     * @param state True to stick, false to unsetick
+     * @param state True to stick, false to unstick
      */
     public createStickySearchbox(state = true): void {
-        if (state) $("div#re621-search").attr("data-sticky", "true");
-        else $("div#re621-search").attr("data-sticky", "false");
+        $("div#re621-search").attr("data-sticky", state + "");
+    }
+
+    /**
+     * Makes the header navbar stick to the page when scrolling down
+     * @param state True to stick, false to unstick
+     */
+    public createStickyHeader(state = true): void {
+        $("body").attr("data-sticky-header", state + "");
     }
 
     /** If the searchbar is empty, focuses on it. */

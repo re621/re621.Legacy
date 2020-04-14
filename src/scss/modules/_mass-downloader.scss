@@ -96,6 +96,10 @@ section#downloader-box {
     }
 }
 
+body[data-sticky-header=true] section#downloader-box {
+    top: 12.5rem;
+}
+
 div#posts-container[data-downloading=true] {
 
     article.post-preview.download-item {
