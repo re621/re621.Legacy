@@ -2,3 +2,8 @@
     display: inline-block;
     width: 100%;
 }
+
+#posts-container .instantsearch-seperator {
+    grid-column: 1/-1;
+    margin: 0 0 -2rem -10rem;
+}

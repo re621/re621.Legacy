@@ -1,14 +1,10 @@
 /* Instant Search Styles */
-article.post-preview, .post-thumbnail {
+article.post-preview,
+.post-thumbnail {
 
     &.filtered {
         display: none;
     }
-}
-
-#posts-container .instantsearch-seperator {
-    grid-column: 1/-1;
-    margin-top: 0.5em;
 }
 
 section#re-instantsearch {
