@@ -4,7 +4,11 @@
     "namespace": "re621.github.io",
     "version": "1.1.0",
     "description": "Increases the amount of customization on e621",
-    "author": "bitWolfy",
+    "author": "re621 team",
+    "contributors": [
+        "bitWolfy <@bitWolfy#7932>",
+        "Earlopain <@Earlopain#9703>"
+    ],
     "main": "./build/script.user.js",
     "scripts": {
         "autoprefixer": "postcss ./build/style.min.css --no-map --use autoprefixer -r",
@@ -28,7 +32,8 @@
     "bugs": {
         "url": "https://github.com/re621/re621/issues"
     },
-    "homepage": "https://re621.github.io/",
+    "homepage": "https://re621.github.io",
+    "github": "https://github.com/re621/re621",
     "dependencies": {
         "jquery": "^3.4.1",
         "jquery-ui": "^1.12.1"
