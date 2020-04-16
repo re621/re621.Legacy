@@ -95,6 +95,8 @@ export class FormattingManager extends RE6Module {
 
     /** Creates the Formatting Helpers for appropriate textareas */
     public create(): void {
+        super.create();
+
         $("div.dtext-previewable:has(textarea)").each((i, element) => {
             const $container = $(element);
             const newFormatter = new FormattingHelper($container, this, this.index);
@@ -401,20 +403,24 @@ class FormattingHelper {
     public loadButtons(): void {
         this.$formatButtons.empty();
 
-        this.parent.fetchSettings("buttonsActive", true).forEach((data: ButtonDefinition) => {
-            const buttonElement = this.createButton(data);
-            buttonElement.box.appendTo(this.$formatButtons);
+        this.parent.fetchSettings("buttonsActive", true).then((response) => {
+            response.forEach((data: ButtonDefinition) => {
+                const buttonElement = this.createButton(data);
+                buttonElement.box.appendTo(this.$formatButtons);
 
-            if (buttonElement.box.attr("data-text") === "") {
-                buttonElement.button.addClass("disabled");
-                buttonElement.button.removeAttr("title");
-            }
+                if (buttonElement.box.attr("data-text") === "") {
+                    buttonElement.button.addClass("disabled");
+                    buttonElement.button.removeAttr("title");
+                }
+            });
         });
 
         this.$formatButtonsDrawer.empty();
-        this.parent.fetchSettings("buttonInactive", true).forEach((data: ButtonDefinition) => {
-            const buttonData = this.createButton(data);
-            buttonData.box.appendTo(this.$formatButtonsDrawer);
+        this.parent.fetchSettings("buttonInactive", true).then((response) => {
+            response.forEach((data: ButtonDefinition) => {
+                const buttonData = this.createButton(data);
+                buttonData.box.appendTo(this.$formatButtonsDrawer);
+            });
         });
     }
 

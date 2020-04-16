@@ -50,6 +50,8 @@ export class ThumbnailEnhancer extends RE6Module {
     }
 
     public create(): void {
+        super.create();
+
         this.postContainer = $("div#posts-container");
 
         const upscaleMode: ThumbnailPerformanceMode = this.fetchSettings("upscale"),

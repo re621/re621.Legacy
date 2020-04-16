@@ -76,7 +76,6 @@ export class HeaderCustomizer extends RE6Module {
      * Should be run immediately after the constructor finishes.
      */
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
 
         this.$menu = $("menu.main");

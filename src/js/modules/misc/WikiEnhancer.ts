@@ -18,7 +18,6 @@ export class WikiEnhancer extends RE6Module {
     }
 
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
         const $title = $("#wiki-page-title");
         const removeThis = ["Artist: ", "Copyright: ", "Character: ", "Species: ", "Meta: ", "Lore: "];

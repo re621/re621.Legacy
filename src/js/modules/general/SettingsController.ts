@@ -605,15 +605,23 @@ export class SettingsController extends RE6Module {
 
         /** Export the currnt module settings to file */
         function exportToFile(): void {
-            const storedData = { "meta": "re621/1.0" };
 
+            const promises: Promise<any>[] = [];
             ModuleController.getAll().forEach((module) => {
-                const data = module.getSavedSettings();
-                storedData[data.name] = data.data;
-                if (storedData[data.name]["cache"]) storedData[data.name]["cache"] = {};
+                promises.push(module.getSavedSettings());
             });
 
-            Util.downloadJSON(storedData, "re621-" + User.getUsername() + "-userdata");
+            Promise.all(promises).then((response) => {
+                console.log(response);
+
+                const storedData = { "meta": "re621/1.0" };
+                response.forEach((data) => {
+                    storedData[data.name] = data.data;
+                    if (storedData[data.name]["cache"]) storedData[data.name]["cache"] = {};
+                });
+
+                Util.downloadJSON(storedData, "re621-" + User.getUsername() + "-userdata");
+            })
         }
 
         /** Import module settings from file */
@@ -673,7 +681,7 @@ export class SettingsController extends RE6Module {
             async function importPoolData(settings: string, $info: JQuery<HTMLElement>): Promise<void> {
                 $info.html("Processing pools . . .");
                 const poolSubs = PoolSubscriptions.getInstance(),
-                    poolData: ExtraInfo = poolSubs.fetchSettings("data", true);
+                    poolData: ExtraInfo = poolSubs.fetchSettings("data");
                 for (const entry of settings) {
                     poolData[entry["id"]] = {
                         md5: entry["thumb"]["url"].substr(6, 32),
@@ -687,7 +695,7 @@ export class SettingsController extends RE6Module {
             async function importForumData(settings: string, $info: JQuery<HTMLElement>): Promise<void> {
                 $info.html("Processing forums . . .");
                 const forumSubs = ForumSubscriptions.getInstance(),
-                    forumData: ExtraInfo = forumSubs.fetchSettings("data", true),
+                    forumData: ExtraInfo = forumSubs.fetchSettings("data"),
                     postIDs = [];
                 for (const entry of settings) {
                     postIDs.push(entry["id"]);

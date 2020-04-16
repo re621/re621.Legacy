@@ -56,7 +56,6 @@ export class MassDownloader extends RE6Module {
 
     /** Creates the module's structure. */
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
 
         this.section = $("<section>")

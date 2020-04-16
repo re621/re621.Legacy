@@ -66,7 +66,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
     public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData> {
         const results: UpdateData = {};
 
-        const tagData: SubscriptionSettings = this.fetchSettings("data", true);
+        const tagData: SubscriptionSettings = await this.fetchSettings("data", true);
         if (Object.keys(tagData).length === 0) {
             return results;
         }

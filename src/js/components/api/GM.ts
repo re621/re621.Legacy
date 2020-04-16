@@ -25,8 +25,11 @@ export class GM {
      * @param name Name of the data entry
      * @param value Data value
      */
-    public static setValue(name: string, value: any): void {
-        return GM_setValue(name, value);
+    public static async setValue(name: string, value: any): Promise<void> {
+        return new Promise(async (resolve) => {
+            await GM_setValue(name, value);
+            resolve();
+        });
     };
 
     /**
@@ -35,16 +38,21 @@ export class GM {
      * @param name Name of the data entry
      * @param defaultValue Default value
      */
-    public static getValue(name: string, defaultValue: any): any {
-        return GM_getValue(name, defaultValue);
+    public static async getValue(name: string, defaultValue: any): Promise<any> {
+        return new Promise(async (resolve) => {
+            resolve(GM_getValue(name, defaultValue));
+        });
     };
 
     /**
      * Deletes the entry with the specified name from storage
      * @param name Name of the data entry
      */
-    public static deleteValue(name: string): void {
-        GM_deleteValue(name);
+    public static async deleteValue(name: string): Promise<void> {
+        return new Promise(async (resolve) => {
+            await GM_deleteValue(name);
+            resolve();
+        });
     }
 
     /**

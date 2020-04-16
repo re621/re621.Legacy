@@ -22,13 +22,11 @@ export class RE6Module {
         if (constraint === undefined) this.constraint = [];
         else if (constraint instanceof RegExp) this.constraint.push(constraint);
         else this.constraint = constraint;
+    }
 
-        this.loadSettingsData();
-
-        // Save if the module is active or not
-        // If no enabled settings is found, assume the module is active
-        const status = this.fetchSettings("enabled");
-        this.enabled = status === undefined ? true : status;
+    public async prepare(): Promise<void> {
+        await this.loadSettingsCache();
+        this.enabled = this.fetchSettings("enabled");
     }
 
     /** Returns true if the module has already been initialized */
@@ -87,9 +85,15 @@ export class RE6Module {
      * @param fresh Fetches some freshly baked cookies
      * @returns Property value
      */
-    public fetchSettings(property?: string, fresh?: boolean): any {
-        if (fresh) this.loadSettingsData();
-        if (property === undefined) return this.settings;
+    public fetchSettings(property: string): any;
+    public async fetchSettings(property: string, fresh: boolean): Promise<any>;
+    public fetchSettings(property: string, fresh?: boolean): any {
+        if (fresh) {
+            return new Promise(async (resolve) => {
+                await this.loadSettingsCache();
+                resolve(this.settings[property]);
+            })
+        }
         return this.settings[property];
     }
 
@@ -99,10 +103,10 @@ export class RE6Module {
      * @param value Property value
      * @param preserve Ensures that all other values are preserved
      */
-    public pushSettings(property: string, value: any, preserve?: boolean): void {
-        if (preserve) { this.loadSettingsData(); }
+    public async pushSettings(property: string, value: any): Promise<void> {
+        await this.loadSettingsCache();
         this.settings[property] = value;
-        this.saveSettingsData();
+        this.saveSettingsCache();
     }
 
     /**
@@ -110,15 +114,7 @@ export class RE6Module {
      */
     public clearSettings(): void {
         GM.deleteValue("re621." + this.constructor.name);
-        this.loadSettingsData();
-    }
-
-    /**
-     * Retrieves the data that has actually been saved into the settings.  
-     * Used while exporting settings to file, and pretty much nowhere else.
-     */
-    public getSavedSettings(): any {
-        return { name: "re621." + this.constructor.name, data: GM.getValue("re621." + this.constructor.name, {}) };
+        this.loadSettingsCache();
     }
 
     /**
@@ -133,9 +129,9 @@ export class RE6Module {
      * Loads the settings data from Tampermonkey storage.  
      * If no settings exist, uses default values instead.
      */
-    private loadSettingsData(): void {
+    private async loadSettingsCache(): Promise<void> {
         const defaultValues = this.getDefaultSettings();
-        this.settings = GM.getValue("re621." + this.constructor.name, defaultValues);
+        this.settings = await GM.getValue("re621." + this.constructor.name, defaultValues);
 
         // If defaultValues has a entry the defaultSettings do not have, add it
         // this might happen if the user saved and a defaultSetting gets added afterwards
@@ -149,21 +145,41 @@ export class RE6Module {
     /**
      * Save the settings to Tampermoknkey storage.  
      */
-    private saveSettingsData(): void {
-        GM.setValue("re621." + this.constructor.name, this.settings);
+    private async saveSettingsCache(): Promise<void> {
+        await GM.setValue("re621." + this.constructor.name, this.settings);
+        return Promise.resolve();
+    }
+
+    /**
+     * Reloads the settings cache from file
+     */
+    public async refreshSettings(): Promise<void> {
+        await this.loadSettingsCache();
+    }
+
+    /**
+     * Retrieves the data that has actually been saved into the settings.  
+     * Used while exporting settings to file, and pretty much nowhere else.
+     */
+    public async getSavedSettings(): Promise<{ name: string; data: any }> {
+        return {
+            name: "re621." + this.constructor.name,
+            data: await GM.getValue("re621." + this.constructor.name, {})
+        };
     }
 
     /** Establish the module's hotkeys */
-    public resetHotkeys(): void {
+    public async resetHotkeys(): Promise<void> {
+        await this.loadSettingsCache();
+
         const enabled = this.pageMatchesFilter();
         this.hotkeys.forEach((value) => {
-
-            const keys = this.fetchSettings(value.keys, true) as string;
-            keys.split("|").forEach((key) => {
+            this.fetchSettings(value.keys).split("|").forEach((key) => {
                 if (key === "") return;
                 if (enabled) Hotkeys.register(key, value.fnct);
                 else Hotkeys.register(key, () => { return; });
             });
+
         });
     }
 

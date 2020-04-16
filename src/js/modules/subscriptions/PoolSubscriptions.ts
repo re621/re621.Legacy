@@ -64,7 +64,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
     public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData> {
         const results: UpdateData = {};
 
-        const poolData: SubscriptionSettings = this.fetchSettings("data", true);
+        const poolData: SubscriptionSettings = await this.fetchSettings("data", true);
         if (Object.keys(poolData).length === 0) {
             return results;
         }

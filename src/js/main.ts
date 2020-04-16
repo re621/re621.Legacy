@@ -78,6 +78,4 @@ subscriptions.forEach(module => {
     SubscriptionManager.register(module);
 });
 
-loadOrder.forEach(module => {
-    ModuleController.register(module);
-});
+ModuleController.register(loadOrder);

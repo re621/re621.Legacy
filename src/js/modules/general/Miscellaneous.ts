@@ -45,7 +45,6 @@ export class Miscellaneous extends RE6Module {
      * Should be run immediately after the constructor finishes.
      */
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
 
         // Remove the query string on posts
@@ -118,22 +117,22 @@ export class Miscellaneous extends RE6Module {
     /**
      * Records which tag categories the user has collapsed.
      */
-    private collapseTagCategories(): void {
-        let storedCats: string[] = this.fetchSettings("categoryData", true);
+    private async collapseTagCategories(): Promise<void> {
+        let storedCats: string[] = await this.fetchSettings("categoryData", true);
         $("section#tag-list .tag-list-header").each((index, element) => {
             const $header = $(element),
                 cat = $header.attr("data-category");
             if (storedCats.indexOf(cat) !== -1) $header.get(0).click();
 
-            $header.on("click.danbooru", () => {
-                storedCats = this.fetchSettings("categoryData", true);
+            $header.on("click.danbooru", async () => {
+                storedCats = await this.fetchSettings("categoryData", true);
                 if ($header.hasClass("hidden-category")) {
                     storedCats.push(cat);
                 } else {
                     const index = storedCats.indexOf(cat);
                     if (index !== -1) storedCats.splice(index, 1);
                 }
-                this.pushSettings("categoryData", storedCats, true);
+                this.pushSettings("categoryData", storedCats);
             });
         });
 

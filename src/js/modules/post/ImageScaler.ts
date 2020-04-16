@@ -48,7 +48,6 @@ export class ImageScaler extends RE6Module {
      * Should be run immediately after the constructor finishes.
      */
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
 
         this.post = Post.getViewingPost();
