@@ -328,16 +328,21 @@ export class SubscriptionManager extends RE6Module {
             const $a = $("<a>")
                 .attr("href", definition.imageHref(data));
             $("<img>")
-                .attr("data-src", definition.imageSrc(data))
+                .attr({
+                    "src": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
+                    "data-src": definition.imageSrc(data),
+                    "title": definition.updateText(data) + "\n" + timeAgo + "\n" + timeString
+                })
                 .addClass("lazyload")
-                .attr("title", definition.updateText(data) + "\n" + timeAgo + "\n" + timeString)
                 .on("error", imageErrorHandler)
                 .appendTo($a);
             $a.appendTo($imageDiv);
         } else {
             $("<img>")
-                .attr("src", definition.imageSrc(data))
-                .attr("title", definition.updateText(data) + "\n" + timeAgo + "\n" + timeString)
+                .attr({
+                    "src": definition.imageSrc(data),
+                    "title": definition.updateText(data) + "\n" + timeAgo + "\n" + timeString
+                })
                 .on("error", imageErrorHandler)
                 .appendTo($imageDiv); timeStamp;
         }
