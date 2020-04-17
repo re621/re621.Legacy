@@ -1,5 +1,5 @@
 import { Page, PageDefintion } from "../data/Page";
-import { GM } from "../api/GM";
+import { TM } from "../api/TM";
 
 /**
  * StructureUtilities  
@@ -7,12 +7,10 @@ import { GM } from "../api/GM";
  */
 export class DomUtilities {
 
-    public static createStructure(): void {
+    public static async createStructure(): Promise<void> {
 
         // Load in the external stylesheet
-        GM.getResourceText("re621_styles").then((css) => {
-            GM.addStyle(css);
-        });
+        await TM.attachStylesheet("re621_styles");
 
         // Create a modal container
         $("<div>").attr("id", "modal-container").prependTo("div#page");

@@ -23,14 +23,16 @@
         "re621_dnp": "%GITHUB%/releases/download/%VERSION%/avoid-posting.json"
     },
     "grant": [
-        "GM_setValue",
-        "GM_getValue",
-        "GM_deleteValue",
+        "GM.setValue",
+        "GM.getValue",
+        "GM.deleteValue",
+        "GM.openInTab",
+        "GM.setClipboard",
+
+        "GM.getResourceUrl",
         "GM_getResourceURL",
-        "GM_download",
-        "GM_xmlhttpRequest",
-        "GM_openInTab",
-        "GM_setClipboard"
+        "GM.xmlhttpRequest",
+        "GM_xmlhttpRequest"
     ],
     "icon64": "https://re621.github.io/images/icon.png",
     "connect": [

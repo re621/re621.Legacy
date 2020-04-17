@@ -43,7 +43,7 @@ export class ErrorHandler {
      * @param message Error message, preferably the stack trace
      * @param context Error context. ex. API Lookup
      */
-    public static log(module: "ModuleController" | { new(): RE6Module }, message: string, context?: string): void {
+    public static log(module: "ModuleController" | "DOM" | { new(): RE6Module }, message: string, context?: string): void {
         const instance = this.getInstance();
 
         if (typeof module !== "string") module = module.prototype.constructor.name;
@@ -62,7 +62,7 @@ export class ErrorHandler {
      * @param message Error message, preferably the stack trace
      * @param context Error context. ex. API Lookup
      */
-    public static error(module: "ModuleController" | { new(): RE6Module }, message: string, context?: string): void {
+    public static error(module: "ModuleController" | "DOM" | { new(): RE6Module }, message: string, context?: string): void {
         const instance = this.getInstance();
         if (!instance.modal.isOpen()) instance.trigger.get(0).click();
         this.log(module, message, context);

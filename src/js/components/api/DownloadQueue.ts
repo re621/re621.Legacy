@@ -1,4 +1,4 @@
-import { GM, GMxmlHttpRequestEvent, GMxmlHttpRequestResponse, GMxmlHttpRequestProgressEvent } from "./GM";
+import { TM, GMxmlHttpRequestEvent, GMxmlHttpRequestResponse, GMxmlHttpRequestProgressEvent } from "./TM";
 
 declare const JSZip;
 
@@ -112,7 +112,7 @@ export class DownloadQueue {
     private async getDataBlob(item: QueuedFile, thread: number): Promise<Blob> {
         return new Promise((resolve, reject) => {
             let timer: number;
-            GM.xmlHttpRequest({
+            TM.xmlHttpRequest({
                 method: "GET",
                 url: item.file.path,
                 headers: { "User-Agent": window["re621"]["useragent"] },

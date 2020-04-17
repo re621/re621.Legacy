@@ -21,7 +21,7 @@ import { ExtraInfo } from "../subscriptions/SubscriptionManager";
 import { Api } from "../../components/api/Api";
 import { User } from "../../components/data/User";
 import { ThumbnailEnhancer, ThumbnailPerformanceMode, ThumbnailClickAction } from "../search/ThumbnailsEnhancer";
-import { GM } from "../../components/api/GM";
+import { TM } from "../../components/api/TM";
 import { MassDownloader } from "../search/MassDownloader";
 import { PoolDownloader } from "../pools/PoolDownloader";
 
@@ -643,7 +643,7 @@ export class SettingsController extends RE6Module {
 
                 Object.keys(parsedData).forEach((key) => {
                     $info.html("Importing " + key);
-                    GM.setValue(key, parsedData[key]);
+                    TM.setValue(key, parsedData[key]);
                 });
 
                 //console.log(parsedData);

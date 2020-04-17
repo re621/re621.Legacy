@@ -1,6 +1,6 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion, Page } from "../../components/data/Page";
-import { GM } from "../../components/api/GM";
+import { TM } from "../../components/api/TM";
 
 /**
  * Adds the wiki page name into the url and adds a button to copy the wiki page name to clipboard
@@ -31,7 +31,7 @@ export class WikiEnhancer extends RE6Module {
             .attr("id", "wiki-page-copy-tag")
             .addClass("button btn-neutral border-highlight border-left")
             .on("click", () => {
-                GM.setClipboard(tagName);
+                TM.setClipboard(tagName);
             });
         $("<i>")
             .addClass("far fa-copy")

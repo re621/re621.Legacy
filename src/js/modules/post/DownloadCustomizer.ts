@@ -2,7 +2,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 import { Post, ViewingPost } from "../../components/data/Post";
 import { TagTypes } from "../../components/data/Tag";
 import { PageDefintion } from "../../components/data/Page";
-import { GM } from "../../components/api/GM";
+import { TM } from "../../components/api/TM";
 
 /**
  * Renames the files to a user-readable scheme for download
@@ -42,7 +42,7 @@ export class DownloadCustomizer extends RE6Module {
         this.link.click(event => {
             event.preventDefault();
             event.stopImmediatePropagation();
-            GM.download(this.link.attr("href"), this.link.attr("download"));
+            TM.download(this.link.attr("href"), this.link.attr("download"));
         });
     }
 

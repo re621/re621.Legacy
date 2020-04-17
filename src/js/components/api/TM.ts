@@ -4,16 +4,16 @@ declare const saveAs;
 
 import { Util } from "../structure/Util";
 
+declare const GM;
 declare const GM_getResourceURL;
-declare const GM_download;
-declare const GM_setValue;
-declare const GM_getValue;
-declare const GM_deleteValue;
 declare const GM_xmlhttpRequest;
-declare const GM_openInTab;
-declare const GM_setClipboard;
 
-export class GM {
+export enum ScriptManager {
+    GM = "Greasemonkey",
+    TM = "Tampermonkey",
+}
+
+export class TM {
 
     /**
      * Adds the given style to the document and returns the injected style element
@@ -37,13 +37,32 @@ export class GM {
     };
 
     /**
+     * Attaches the specified @resource as a stylesheet
+     * @param name Resource name
+     */
+    public static async attachStylesheet(name: string): Promise<void> {
+        const css = await TM.getResourceURL(name);
+
+        if (css.startsWith("blob")) {
+            // Greasemonkey mode
+            $("<link>").attr({
+                "rel": "stylesheet",
+                "href": css
+            }).appendTo("head");
+        } else {
+            // Tampermonkey mode
+            TM.addStyle(atob(css.replace(/^data:(.*);base64,/g, "")));
+        }
+    }
+
+    /**
      * Saves the specified data to the storage
      * @param name Name of the data entry
      * @param value Data value
      */
     public static async setValue(name: string, value: any): Promise<void> {
         return new Promise(async (resolve) => {
-            await GM_setValue(name, value);
+            await GM.setValue(name, value);
             resolve();
         });
     };
@@ -56,7 +75,7 @@ export class GM {
      */
     public static async getValue(name: string, defaultValue: any): Promise<any> {
         return new Promise(async (resolve) => {
-            resolve(GM_getValue(name, defaultValue));
+            resolve(GM.getValue(name, defaultValue));
         });
     };
 
@@ -66,9 +85,39 @@ export class GM {
      */
     public static async deleteValue(name: string): Promise<void> {
         return new Promise(async (resolve) => {
-            await GM_deleteValue(name);
+            await GM.deleteValue(name);
             resolve();
         });
+    }
+
+    /**
+     * Open a new tab with this url.
+     * @param url Page URL
+     * @param options Tab options
+     */
+    public static openInTab(url: string, options?: GMOpenInTabOptions): GMOpenInTab;
+    public static openInTab(url: string, loadInBackground?: boolean): GMOpenInTab;
+    public static openInTab(a: any, b?: any): GMOpenInTab {
+        return GM.openInTab(a, b);
+    }
+
+    /**
+     * Copies data into the clipboard
+     * @param data Data to be copied
+     * @param info object like "{ type: 'text', mimetype: 'text/plain'}" or a string expressing the type ("text" or "html")
+     */
+    public static setClipboard(data: any, info?: { type: string; mimetype: string } | string): void {
+        return GM.setClipboard(data, info);
+    };
+
+    /**
+     * Get contents of the resource as a base64-encoded data URL
+     * Note that the name must be defined in a @resource tag in the script header.
+     * @param name Resource name
+     */
+    public static async getResourceURL(name: string): Promise<string> {
+        if (typeof GM.getResourceUrl === "function") { return GM.getResourceUrl(name); }
+        else { return GM_getResourceURL(name); }
     }
 
     /**
@@ -77,7 +126,7 @@ export class GM {
      * @param name Resource name
      */
     public static async getResourceText(name: string): Promise<string> {
-        return GM.getResourceURL(name).then(
+        return TM.getResourceURL(name).then(
             (resolved) => { return Promise.resolve(atob(resolved.replace(/^data:(.*);base64,/g, ""))); },
             (rejected) => { return Promise.reject(rejected); }
         );
@@ -89,30 +138,10 @@ export class GM {
      * @param name Resource name
      */
     public static async getResourceJSON<T>(name: string): Promise<T> {
-        return GM.getResourceText(name).then(
+        return TM.getResourceText(name).then(
             (resolved) => { return Promise.resolve(JSON.parse(resolved) as T); },
             (rejected) => { return Promise.reject(rejected); }
         )
-    }
-
-    /**
-     * Get contents of the resource as a base64-encoded data URL
-     * Note that the name must be defined in a @resource tag in the script header.
-     * @param name Resource name
-     */
-    public static async getResourceURL(name: string): Promise<string> {
-        return GM_getResourceURL(name);
-    }
-
-    /**
-     * Open a new tab with this url.
-     * @param url Page URL
-     * @param options Tab options
-     */
-    public static openInTab(url: string, options?: GMOpenInTabOptions): GMOpenInTab;
-    public static openInTab(url: string, loadInBackground?: boolean): GMOpenInTab;
-    public static openInTab(a: any, b?: any): GMOpenInTab {
-        return GM_openInTab(a, b);
     }
 
     /**
@@ -127,7 +156,8 @@ export class GM {
         if (details.headers["User-Agent"] === undefined)
             details.headers["User-Agent"] = window["re621"]["useragent"];
 
-        return GM_xmlhttpRequest(details);
+        if (typeof GM.xmlHttpRequest === "function") return GM.xmlHttpRequest(details);
+        else return GM_xmlhttpRequest(details);
     };
 
     /**
@@ -152,7 +182,7 @@ export class GM {
         if (a.ontimeout === undefined) a.ontimeout = (): void => { return; }
 
         let timer: number;
-        GM.xmlHttpRequest({
+        TM.xmlHttpRequest({
             url: a.url,
             method: "GET",
             headers: a.headers,
@@ -168,15 +198,6 @@ export class GM {
                 saveAs(event.response as Blob, a.name);
             }
         });
-    };
-
-    /**
-     * Copies data into the clipboard
-     * @param data Data to be copied
-     * @param info object like "{ type: 'text', mimetype: 'text/plain'}" or a string expressing the type ("text" or "html")
-     */
-    public static setClipboard(data: any, info?: { type: string; mimetype: string } | string): void {
-        return GM_setClipboard(data, info);
     };
 }
 

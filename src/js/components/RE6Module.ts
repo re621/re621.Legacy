@@ -1,6 +1,6 @@
 import { Page } from "./data/Page";
 import { Hotkeys } from "./data/Hotkeys";
-import { GM } from "./api/GM";
+import { TM } from "./api/TM";
 
 /**
  * Class that other modules extend.  
@@ -113,7 +113,7 @@ export class RE6Module {
      * Clears stored settings and resets the configuration to default values.
      */
     public clearSettings(): void {
-        GM.deleteValue("re621." + this.constructor.name);
+        TM.deleteValue("re621." + this.constructor.name);
         this.loadSettingsCache();
     }
 
@@ -131,7 +131,7 @@ export class RE6Module {
      */
     private async loadSettingsCache(): Promise<void> {
         const defaultValues = this.getDefaultSettings();
-        this.settings = await GM.getValue("re621." + this.constructor.name, defaultValues);
+        this.settings = await TM.getValue("re621." + this.constructor.name, defaultValues);
 
         // If defaultValues has a entry the defaultSettings do not have, add it
         // this might happen if the user saved and a defaultSetting gets added afterwards
@@ -146,7 +146,7 @@ export class RE6Module {
      * Save the settings to Tampermoknkey storage.  
      */
     private async saveSettingsCache(): Promise<void> {
-        await GM.setValue("re621." + this.constructor.name, this.settings);
+        await TM.setValue("re621." + this.constructor.name, this.settings);
         return Promise.resolve();
     }
 
@@ -164,7 +164,7 @@ export class RE6Module {
     public async getSavedSettings(): Promise<{ name: string; data: any }> {
         return {
             name: "re621." + this.constructor.name,
-            data: await GM.getValue("re621." + this.constructor.name, {})
+            data: await TM.getValue("re621." + this.constructor.name, {})
         };
     }
 

@@ -1,4 +1,4 @@
-import { GM } from "../api/GM";
+import { TM } from "../api/TM";
 
 /**
  * Common utilities used in other modules
@@ -82,7 +82,7 @@ export class Util {
      */
     public static async userscriptRequest(url: string): Promise<string> {
         return new Promise(resolve => {
-            GM.xmlHttpRequest({
+            TM.xmlHttpRequest({
                 method: "GET",
                 url: url,
                 headers: { "User-Agent": window["re621"]["useragent"] },
@@ -99,7 +99,7 @@ export class Util {
      */
     public static async getImageBlob(url: string): Promise<Blob> {
         return new Promise((resolve) => {
-            GM.xmlHttpRequest({
+            TM.xmlHttpRequest({
                 method: "GET",
                 url: url,
                 headers: { "User-Agent": window["re621"]["useragent"] },
@@ -118,7 +118,7 @@ export class Util {
      */
     public static async getImageAsDataURL(url: string): Promise<string> {
         return new Promise((resolve) => {
-            GM.xmlHttpRequest({
+            TM.xmlHttpRequest({
                 method: "GET",
                 url: url,
                 headers: { "User-Agent": window["re621"]["useragent"] },

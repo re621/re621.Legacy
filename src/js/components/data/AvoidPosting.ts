@@ -1,4 +1,4 @@
-import { GM } from "../api/GM";
+import { TM } from "../api/TM";
 
 /**
  * Manages the Avoid Posted list
@@ -9,7 +9,7 @@ export class AvoidPosting {
 
     /** Returns the cached DNP data. */
     private static async getData(): Promise<DNPData> {
-        if (this.cache === undefined) this.cache = await GM.getResourceJSON<DNPList>("re621_dnp");
+        if (this.cache === undefined) this.cache = await TM.getResourceJSON<DNPList>("re621_dnp");
         return Promise.resolve(this.cache.data);
     }
 

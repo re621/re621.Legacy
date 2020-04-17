@@ -36,6 +36,7 @@ import { PoolSubscriptions } from "./modules/subscriptions/PoolSubscriptions";
 import { TagSubscriptions } from "./modules/subscriptions/TagSubscriptions";
 // - settings
 import { SettingsController } from "./modules/general/SettingsController";
+import { ErrorHandler } from "./components/ErrorHandler";
 
 
 const loadOrder = [
@@ -71,11 +72,16 @@ const subscriptions = [
     TagSubscriptions
 ];
 
-DomUtilities.createStructure();
+(function (): void {
 
-subscriptions.forEach(module => {
-    ModuleController.register(module);
-    SubscriptionManager.register(module);
-});
+    try { DomUtilities.createStructure(); }
+    catch (error) { ErrorHandler.error("DOM", error.stack, "init"); }
 
-ModuleController.register(loadOrder);
+    subscriptions.forEach(module => {
+        ModuleController.register(module);
+        SubscriptionManager.register(module);
+    });
+
+    ModuleController.register(loadOrder);
+
+})();
