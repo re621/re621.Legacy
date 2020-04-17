@@ -1,7 +1,8 @@
 /* Type definitions for the Tampermonkey methods */
 
-declare const GM_getResourceText;
-declare const GM_addStyle;
+import { Util } from "../structure/Util";
+
+declare const GM_getResourceURL;
 declare const GM_download;
 declare const GM_setValue;
 declare const GM_getValue;
@@ -16,8 +17,21 @@ export class GM {
      * Adds the given style to the document and returns the injected style element
      * @param css string CSS styles
      */
-    public static addStyle(css: string): HTMLStyleElement {
-        return GM_addStyle(css);
+    public static addStyle(css: string): JQuery<HTMLElement> {
+        return $("<style>")
+            .attr({
+                "id": getID(),
+                "type": "text/css"
+            })
+            .html(css)
+            .appendTo("head");
+
+        function getID(): string {
+            let id: string;
+            do { id = Util.makeID(); }
+            while ($("style#" + id).length > 0);
+            return id;
+        }
     };
 
     /**
@@ -59,9 +73,23 @@ export class GM {
      * Get the content of a predefined @resource tag at the script header
      * @param name Resource name
      */
-    public static getResourceText(name: string): string {
-        return GM_getResourceText(name);
+    public static async getResourceText(name: string): Promise<string> {
+        return GM.getResourceURL(name).then(
+            (resolved) => { return Promise.resolve(atob(resolved.replace(/^data:(.*);base64,/g, ""))); },
+            (rejected) => { return Promise.reject(rejected); }
+        );
     };
+
+    public static async getResourceJSON<T>(name: string): Promise<T> {
+        return GM.getResourceText(name).then(
+            (resolved) => { return Promise.resolve(JSON.parse(resolved) as T); },
+            (rejected) => { return Promise.reject(rejected); }
+        )
+    }
+
+    public static async getResourceURL(name: string): Promise<string> {
+        return GM_getResourceURL(name);
+    }
 
     /**
      * Open a new tab with this url.

@@ -8,8 +8,11 @@ import { GM } from "../api/GM";
 export class DomUtilities {
 
     public static createStructure(): void {
+
         // Load in the external stylesheet
-        GM.addStyle(GM.getResourceText("re621_styles"));
+        GM.getResourceText("re621_styles").then((css) => {
+            GM.addStyle(css);
+        });
 
         // Create a modal container
         $("<div>").attr("id", "modal-container").prependTo("div#page");

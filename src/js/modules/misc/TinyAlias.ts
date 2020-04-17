@@ -216,7 +216,7 @@ export class TinyAlias extends RE6Module {
         }
 
         // Checking for DNP implications
-        if (AvoidPosting.contains(tag) || (tagInfo.isAliased && AvoidPosting.contains(tagInfo.realName))) {
+        if (await AvoidPosting.contains(tag) || (tagInfo.isAliased && await AvoidPosting.contains(tagInfo.realName))) {
             this.$infoText.append(`: ` + tag + ` is on <a href="/wiki_pages/85">DNP</a> list`);
         }
 
