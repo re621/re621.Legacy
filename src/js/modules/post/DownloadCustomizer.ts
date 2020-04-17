@@ -41,11 +41,8 @@ export class DownloadCustomizer extends RE6Module {
 
         this.link.click(event => {
             event.preventDefault();
-            GM.download({
-                url: this.link.attr("href"),
-                name: this.link.attr("download"),
-                saveAs: true,
-            });
+            event.stopImmediatePropagation();
+            GM.download(this.link.attr("href"), this.link.attr("download"));
         });
     }
 

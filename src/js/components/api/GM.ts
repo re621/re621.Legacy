@@ -1,5 +1,7 @@
 /* Type definitions for the Tampermonkey methods */
 
+declare const saveAs;
+
 import { Util } from "../structure/Util";
 
 declare const GM_getResourceURL;
@@ -121,6 +123,10 @@ export class GM {
      *  - **abort**: function to be called to cancel this request
      */
     public static xmlHttpRequest(details: GMxmlHttpRequestDetails): void {
+        if (details.headers === undefined) details.headers = {};
+        if (details.headers["User-Agent"] === undefined)
+            details.headers["User-Agent"] = window["re621"]["useragent"];
+
         return GM_xmlhttpRequest(details);
     };
 
@@ -128,10 +134,40 @@ export class GM {
      * Downloads a given URL to the local disk.  
      * @param details Download details
      */
-    public static download(url: string, name: string): Function;
-    public static download(defaults: GMDownloadDetails): Function;
-    public static download(a: any, b?: any): Function {
-        return GM_download(a, b);
+    public static download(url: string, name: string): void;
+    public static download(defaults: GMDownloadDetails): void;
+    public static download(a: any, b?: any): void {
+        if (typeof a === "string") {
+            a = {
+                url: a,
+                name: b,
+            };
+        }
+
+        if (a.headers === undefined) a.headers = { "User-Agent": window["re621"]["useragent"] };
+
+        if (a.onerror === undefined) a.onerror = (): void => { return; }
+        if (a.onload === undefined) a.onload = (): void => { return; }
+        if (a.onprogress === undefined) a.onprogress = (): void => { return; }
+        if (a.ontimeout === undefined) a.ontimeout = (): void => { return; }
+
+        let timer: number;
+        GM.xmlHttpRequest({
+            url: a.url,
+            method: "GET",
+            headers: a.headers,
+            responseType: "blob",
+            onerror: (event) => { a.onerror(event); },
+            ontimeout: (event) => { a.ontimeout(event); },
+            onprogress: (event) => {
+                if (timer) clearTimeout(timer);
+                timer = window.setTimeout(() => { a.onprogress(event) }, 500);
+            },
+            onload: (event) => {
+                a.onload(event);
+                saveAs(event.response as Blob, a.name);
+            }
+        });
     };
 
     /**
@@ -154,45 +190,17 @@ interface GMDownloadDetails {
     /** **headers** - see GM_xmlhttpRequest for more details */
     headers?: string;
 
-    /** **saveAs** - boolean value, show a saveAs dialog */
-    saveAs?: boolean;
-
     /** **onerror** callback to be executed if this download ended up with an error */
-    onerror?(error: GMDownloadError): void;
-
-    /** **onload** callback to be executed if this download finished */
-    onload?(): void;
+    onerror?(event: GMxmlHttpRequestEvent): void;
 
     /** **onprogress** callback to be executed if this download made some progress */
-    onprogress?(): void;
+    onprogress?(event: GMxmlHttpRequestProgressEvent): void;
 
     /** **ontimeout** callback to be executed if this download failed due to a timeout */
-    ontimeout?(): void;
-}
+    ontimeout?(event: GMxmlHttpRequestEvent): void;
 
-interface GMDownloadError {
-    /** **error** - error reason */
-    error: GMDownladErrorTypes;
-
-    /** **details** - detail about that error */
-    details: string;
-}
-
-interface GMDownladErrorTypes {
-    /** **not_enabled** - the download feature isn't enabled by the user */
-    not_enabled: boolean;
-
-    /** **not_whitelisted** - the requested file extension is not whitelisted */
-    not_whitelisted: boolean;
-
-    /** **not_permitted** - the user enabled the download feature, but did not give the downloads permission */
-    not_permitted: boolean;
-
-    /** **not_supported** - the download feature isn't supported by the browser/version */
-    not_supported: boolean;
-
-    /** **not_succeeded** - the download wasn't started or failed, the details attribute may provide more information */
-    not_succeeded: boolean;
+    /** **onload** callback to be executed if this download finished */
+    onload?(event: GMxmlHttpRequestResponse): void;
 }
 
 interface GMxmlHttpRequestDetails {
