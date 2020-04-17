@@ -1,5 +1,6 @@
 import { Modal } from "./structure/Modal";
 import { RE6Module } from "./RE6Module";
+import { TM } from "./api/TM";
 
 export class ErrorHandler {
 
@@ -17,6 +18,10 @@ export class ErrorHandler {
 
         this.feedback = $("<textarea>")
             .addClass("error-feedback bg-section color-text")
+            .val(
+                window["re621"]["name"] + ` v.` + window["re621"]["version"] + `-` + window["re621"]["build"] + ` for ` + TM.info().scriptHandler + ` v.` + TM.info().version + `\n` +
+                window.navigator.userAgent + `\n`
+            )
             .appendTo($contentWrapper);
 
         this.trigger = $("<a>");
@@ -27,12 +32,13 @@ export class ErrorHandler {
             triggers: [{ element: this.trigger }],
 
             fixed: true,
-            //    position: { my: "right top", at: "right top", },
         });
+
+        this.modal.getElement().dialog("open");
     }
 
     private static getInstance(): ErrorHandler {
-        if (this.instance === undefined) this.instance = new ErrorHandler;
+        if (this.instance === undefined) this.instance = new ErrorHandler();
         return this.instance;
     }
 
@@ -50,7 +56,7 @@ export class ErrorHandler {
         if (context !== undefined) module += "/" + context;
 
         instance.feedback.val((index, value) => {
-            const entry = (value === "") ? module + "\n" + message : value + "\n\n" + module + "\n" + message;
+            const entry = (value === "") ? module + "\n" + message + "\n" : value + "\n" + module + "\n" + message + "\n";
             console.log(entry);
             return entry;
         });

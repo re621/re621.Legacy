@@ -16,6 +16,13 @@ export enum ScriptManager {
 export class TM {
 
     /**
+     * Returns the information provided by the script manager
+     */
+    public static info(): GMInfo {
+        return GM.info;
+    }
+
+    /**
      * Adds the given style to the document and returns the injected style element
      * @param css string CSS styles
      */
@@ -199,6 +206,43 @@ export class TM {
             }
         });
     };
+}
+
+interface GMInfo {
+    /** Detailed script information */
+    script: GMScript;
+
+    /** Metadata block, as a raw string */
+    scriptMetaStr: string;
+
+    /** Script manager - Greasemonkey, Tampermonkey, etc */
+    scriptHandler: string;
+
+    /** Script manager version */
+    version: string;
+}
+
+interface GMScript {
+    /** Script "unique" id, i.e. 2c4772b3-431f-442b-bdc9-67c5b65fbb9c */
+    uuid: string;
+
+    /** Script name, i.e. re621 Injector */
+    name: string;
+
+    /** Script version, i.e. 1.0.3 */
+    version: string;
+
+    /** Script namespace, i.e. re621.github.io */
+    namespace: string;
+
+    /** Script description, i.e. "Injects re621 local files into the page" */
+    description: string;
+
+    /** Exclusions block, as an array of strings */
+    excludes: string[];
+
+    /** Inclusions block, as an array of strings */
+    includes: string[];
 }
 
 interface GMDownloadDetails {
