@@ -70,7 +70,8 @@ export class GM {
     }
 
     /**
-     * Get the content of a predefined @resource tag at the script header
+     * Get contents of the resource as plain text.  
+     * Note that the name must be defined in a @resource tag in the script header.
      * @param name Resource name
      */
     public static async getResourceText(name: string): Promise<string> {
@@ -80,6 +81,11 @@ export class GM {
         );
     };
 
+    /**
+     * Get contents of the resource as JSON
+     * Note that the name must be defined in a @resource tag in the script header.
+     * @param name Resource name
+     */
     public static async getResourceJSON<T>(name: string): Promise<T> {
         return GM.getResourceText(name).then(
             (resolved) => { return Promise.resolve(JSON.parse(resolved) as T); },
@@ -87,6 +93,11 @@ export class GM {
         )
     }
 
+    /**
+     * Get contents of the resource as a base64-encoded data URL
+     * Note that the name must be defined in a @resource tag in the script header.
+     * @param name Resource name
+     */
     public static async getResourceURL(name: string): Promise<string> {
         return GM_getResourceURL(name);
     }
