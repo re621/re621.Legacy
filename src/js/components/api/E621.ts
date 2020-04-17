@@ -214,7 +214,7 @@ export class E621 {
             credentials: "include",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
-                "Header": "re621/1.0 userscript re621.github.io"
+                "User-Agent": window["re621"]["useragent"],
             },
             method: method,
             mode: "cors"
