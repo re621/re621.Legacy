@@ -140,6 +140,8 @@ export class RE6Module {
                 this.settings[key] = defaultValues[key];
             }
         }
+
+        return Promise.resolve();
     }
 
     /**
@@ -151,10 +153,11 @@ export class RE6Module {
     }
 
     /**
-     * Reloads the settings cache from file
+     * Returns a promise that gets fulfilled when the saved settings get loaded.  
+     * If no settings are saved, returns the default values.  
      */
     public async refreshSettings(): Promise<void> {
-        await this.loadSettingsCache();
+        return this.loadSettingsCache();
     }
 
     /**
