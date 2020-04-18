@@ -425,18 +425,18 @@ class FormattingHelper {
     }
 
     /** Re-indexes and saves the toolbar configuration */
-    private saveButtons(): void {
+    private async saveButtons(): Promise<void> {
         let buttonData: ButtonDefinition[] = [];
         this.$formatButtons.find("li").each(function (i, element) {
             buttonData.push(fetchData(element));
         });
-        this.parent.pushSettings("buttonsActive", buttonData);
+        await this.parent.pushSettings("buttonsActive", buttonData);
 
         buttonData = [];
         this.$formatButtonsDrawer.find("li").each(function (i, element) {
             buttonData.push(fetchData(element));
         });
-        this.parent.pushSettings("buttonInactive", buttonData);
+        await this.parent.pushSettings("buttonInactive", buttonData);
 
         this.$container.trigger("re621:formatter:update", [this]);
 

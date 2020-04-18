@@ -61,8 +61,8 @@ export class ThemeCustomizer extends RE6Module {
                     { value: "hotdog", name: "Hotdog" },
                 ],
                 undefined,
-                (event, data) => {
-                    this.pushSettings("main", data);
+                async (event, data) => {
+                    await this.pushSettings("main", data);
                     XM.getWindow().localStorage.setItem("theme", data);
                     $("body").attr("data-th-main", data);
                 }
@@ -80,8 +80,8 @@ export class ThemeCustomizer extends RE6Module {
                     { value: "stars", name: "Stars" },
                 ],
                 undefined,
-                (event, data) => {
-                    this.pushSettings("extra", data);
+                async (event, data) => {
+                    await this.pushSettings("extra", data);
                     XM.getWindow().localStorage.setItem("theme-extra", data);
                     $("body").attr("data-th-extra", data);
                 }
@@ -94,8 +94,8 @@ export class ThemeCustomizer extends RE6Module {
                     { value: "none", name: "None" },
                 ],
                 undefined,
-                (event, data) => {
-                    this.pushSettings("nav", data);
+                async (event, data) => {
+                    await this.pushSettings("nav", data);
                     XM.getWindow().localStorage.setItem("theme-nav", data);
                     $("body").attr("data-th-nav", data);
                 }

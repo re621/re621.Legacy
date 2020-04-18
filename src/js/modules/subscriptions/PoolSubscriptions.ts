@@ -82,7 +82,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             }
             poolData[poolJson.id].lastId = poolJson.post_ids[poolJson.post_ids.length - 1];
         }
-        this.pushSettings("data", poolData);
+        await this.pushSettings("data", poolData);
         return results;
     }
 

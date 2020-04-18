@@ -151,8 +151,8 @@ export class SettingsController extends RE6Module {
                 Form.section({ id: "title", columns: 3 }, [
                     Form.input(
                         "template", titleCustomizer.fetchSettings("template"), "Page Title", "full", undefined,
-                        (event, data) => {
-                            titleCustomizer.pushSettings("template", data);
+                        async (event, data) => {
+                            await titleCustomizer.pushSettings("template", data);
                             if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
                         }
                     ),
@@ -168,47 +168,47 @@ export class SettingsController extends RE6Module {
 
                     Form.checkbox(
                         "symbol-enabled", titleCustomizer.fetchSettings("symbolsEnabled"), "Vote / Favorite Icons", "column",
-                        (event, data) => {
-                            titleCustomizer.pushSettings("symbolsEnabled", data);
+                        async (event, data) => {
+                            await titleCustomizer.pushSettings("symbolsEnabled", data);
                             if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
                         }
                     ),
                     Form.spacer("mid"),
                     Form.input("symbol-fav", titleCustomizer.fetchSettings("symbolFav"), "Favorite", "column", undefined,
-                        (event, data) => {
-                            titleCustomizer.pushSettings("symbolFav", data);
+                        async (event, data) => {
+                            await titleCustomizer.pushSettings("symbolFav", data);
                             if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
                         }
                     ),
                     Form.input("symbol-voteup", titleCustomizer.fetchSettings("symbolVoteUp"), "Upvoted", "column", undefined,
-                        (event, data) => {
-                            titleCustomizer.pushSettings("symbolVoteUp", data);
+                        async (event, data) => {
+                            await titleCustomizer.pushSettings("symbolVoteUp", data);
                             if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
                         }
                     ),
                     Form.input("symbol-votedown", titleCustomizer.fetchSettings("symbolVoteDown"), "Downvoted", "column", undefined,
-                        (event, data) => {
-                            titleCustomizer.pushSettings("symbolVoteDown", data);
+                        async (event, data) => {
+                            await titleCustomizer.pushSettings("symbolVoteDown", data);
                             if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
                         }
                     ),
                 ]),
 
                 Form.checkbox("improved-tagcount", miscellaneous.fetchSettings("improveTagCount"), "Expanded Tag Count", "column",
-                    (event, data) => {
-                        miscellaneous.pushSettings("improveTagCount", data);
+                    async (event, data) => {
+                        await miscellaneous.pushSettings("improveTagCount", data);
                         miscellaneous.improveTagCount(data);
                     }
                 ),
                 Form.checkbox("sticky-header", miscellaneous.fetchSettings("stickyHeader"), "Fixed Header", "column",
-                    (event, data) => {
-                        miscellaneous.pushSettings("stickyHeader", data);
+                    async (event, data) => {
+                        await miscellaneous.pushSettings("stickyHeader", data);
                         miscellaneous.createStickyHeader(data);
                     }
                 ),
                 Form.checkbox("sticky-searchbox", miscellaneous.fetchSettings("stickySearchbox"), "Fixed Searchbox", "column",
-                    (event, data) => {
-                        miscellaneous.pushSettings("stickySearchbox", data);
+                    async (event, data) => {
+                        await miscellaneous.pushSettings("stickySearchbox", data);
                         miscellaneous.createStickySearchbox(data);
                     }
                 ),
@@ -227,7 +227,9 @@ export class SettingsController extends RE6Module {
                         { value: ThumbnailPerformanceMode.Always, name: "Always" },
                     ],
                     "column",
-                    (event, data) => { thumbnailEnhancer.pushSettings("upscale", data); }
+                    async (event, data) => {
+                        await thumbnailEnhancer.pushSettings("upscale", data);
+                    }
                 ),
                 Form.div("Replace 150x150 blurry thumbnails with larger versions", "mid"),
                 Form.spacer(),
@@ -235,25 +237,25 @@ export class SettingsController extends RE6Module {
 
                 Form.subsection({ id: "advanced", columns: 3 }, "Advanced", [
                     Form.checkbox("zoom", thumbnailEnhancer.fetchSettings("zoom"), "Enlarge on Hover", "column",
-                        (event, data) => {
-                            thumbnailEnhancer.pushSettings("zoom", data);
+                        async (event, data) => {
+                            await thumbnailEnhancer.pushSettings("zoom", data);
                             thumbnailEnhancer.toggleHoverZoom(data);
                         }
                     ),
                     Form.div("Increases the size of the thumbnail when hovering over it", "mid"),
 
                     Form.input("zoom-scale", thumbnailEnhancer.fetchSettings("zoomScale"), "Zoom scale", "column", { pattern: "^[1-9](\\.\\d+)?$" },
-                        (event, data) => {
+                        async (event, data) => {
                             if (!(event.target as HTMLInputElement).checkValidity()) return;
-                            thumbnailEnhancer.pushSettings("zoomScale", data);
+                            await thumbnailEnhancer.pushSettings("zoomScale", data);
                             thumbnailEnhancer.setZoomScale(data);
                         }
                     ),
                     Form.div("The ratio of the enlarged thumbnail to its original size", "mid"),
 
                     Form.checkbox("zoom-contextual", thumbnailEnhancer.fetchSettings("zoomContextual"), "Contextual Scaling", "column",
-                        (event, data) => {
-                            thumbnailEnhancer.pushSettings("zoomContextual", data);
+                        async (event, data) => {
+                            await thumbnailEnhancer.pushSettings("zoomContextual", data);
                             thumbnailEnhancer.toggleZoomContextual(data);
                         }
                     ),
@@ -263,8 +265,8 @@ export class SettingsController extends RE6Module {
 
 
                     Form.checkbox("vote", thumbnailEnhancer.fetchSettings("vote"), "Voting Buttons", "column",
-                        (event, data) => {
-                            thumbnailEnhancer.pushSettings("vote", data);
+                        async (event, data) => {
+                            await thumbnailEnhancer.pushSettings("vote", data);
                             thumbnailEnhancer.toggleHoverVote(data);
                         }
                     ),
@@ -274,26 +276,26 @@ export class SettingsController extends RE6Module {
 
 
                     Form.checkbox("crop", thumbnailEnhancer.fetchSettings("crop"), "Resize Images", "column",
-                        (event, data) => {
-                            thumbnailEnhancer.pushSettings("crop", data);
+                        async (event, data) => {
+                            await thumbnailEnhancer.pushSettings("crop", data);
                             thumbnailEnhancer.toggleThumbCrop(data);
                         }
                     ),
                     Form.div("Resize thumbnail images according to settings below", "mid"),
 
                     Form.input("crop-size", thumbnailEnhancer.fetchSettings("cropSize"), "Thumbnail Size", "column", { pattern: "^\\d{2,3}(px|rem|em)$" },
-                        (event, data) => {
+                        async (event, data) => {
                             if (!(event.target as HTMLInputElement).checkValidity()) return;
-                            thumbnailEnhancer.pushSettings("cropSize", data);
+                            await thumbnailEnhancer.pushSettings("cropSize", data);
                             thumbnailEnhancer.setThumbSize(data);
                         }
                     ),
                     Form.div("Thumbnail width, in px, em, or rem", "mid"),
 
                     Form.input("crop-ratio", thumbnailEnhancer.fetchSettings("cropRatio"), "Image Ratio", "column", { pattern: "^(([01](\\.\\d+)?)|2)$" },
-                        (event, data) => {
+                        async (event, data) => {
                             if (!(event.target as HTMLInputElement).checkValidity()) return;
-                            thumbnailEnhancer.pushSettings("cropRatio", data);
+                            await thumbnailEnhancer.pushSettings("cropRatio", data);
                             thumbnailEnhancer.setThumbRatio(data);
                         }
                     ),
@@ -303,16 +305,16 @@ export class SettingsController extends RE6Module {
 
 
                     Form.checkbox("state-ribbons", thumbnailEnhancer.fetchSettings("ribbons"), "Status Ribbons", "column",
-                        (event, data) => {
-                            thumbnailEnhancer.pushSettings("ribbons", data);
+                        async (event, data) => {
+                            await thumbnailEnhancer.pushSettings("ribbons", data);
                             thumbnailEnhancer.toggleStatusRibbons(data);
                         }
                     ),
                     Form.div("Use corner ribbons instead of colored borders for flags", "mid"),
 
                     Form.checkbox("state-relations", thumbnailEnhancer.fetchSettings("relRibbons"), "Relations Ribbons", "column",
-                        (event, data) => {
-                            thumbnailEnhancer.pushSettings("relRibbons", data);
+                        async (event, data) => {
+                            await thumbnailEnhancer.pushSettings("relRibbons", data);
                             thumbnailEnhancer.toggleRelationRibbons(data);
                         }
                     ),
@@ -328,7 +330,9 @@ export class SettingsController extends RE6Module {
                         { value: ThumbnailClickAction.CopyID, name: "Copy Post ID" },
                     ],
                     "column",
-                    (event, data) => { thumbnailEnhancer.pushSettings("clickAction", data); }
+                    async (event, data) => {
+                        await thumbnailEnhancer.pushSettings("clickAction", data);
+                    }
                 ),
                 Form.div("Action taken when a thumbnail is double-clicked", "mid"),
                 Form.spacer(),
@@ -344,18 +348,18 @@ export class SettingsController extends RE6Module {
 
                 Form.checkbox(
                     "votefavorite", postViewer.fetchSettings("upvoteOnFavorite"), "Auto-upvote favorites", "column",
-                    (event, data) => { postViewer.pushSettings("upvoteOnFavorite", data); }
+                    async (event, data) => { await postViewer.pushSettings("upvoteOnFavorite", data); }
                 ),
                 Form.checkbox(
                     "submit-hotkey", formattingManager.fetchSettings("hotkeySubmitActive"), "Comment with Alt+Enter", "column",
-                    (event, data) => { formattingManager.pushSettings("hotkeySubmitActive", data); }
+                    async (event, data) => { await formattingManager.pushSettings("hotkeySubmitActive", data); }
                 ),
                 Form.checkbox(
                     "click-scale", imageScaler.fetchSettings("clickScale"), "Click images to resize them", "column",
-                    (event, data) => { imageScaler.pushSettings("clickScale", data); }),
+                    async (event, data) => { await imageScaler.pushSettings("clickScale", data); }),
                 Form.checkbox(
                     "collapse-tag-cats", miscellaneous.fetchSettings("collapseCategories"), "Collapse tag categories", "column",
-                    (event, data) => { miscellaneous.pushSettings("collapseCategories", data); }
+                    async (event, data) => { await miscellaneous.pushSettings("collapseCategories", data); }
                 ),
 
                 Form.hr(),
@@ -366,7 +370,7 @@ export class SettingsController extends RE6Module {
                 Form.header("Blacklist"),
                 Form.checkbox(
                     "quickadd", blacklistEnhancer.fetchSettings("quickaddTags"), "Click X to add tag to blacklist", "column",
-                    (event, data) => { blacklistEnhancer.pushSettings("quickaddTags", data); }),
+                    async (event, data) => { await blacklistEnhancer.pushSettings("quickaddTags", data); }),
             ]),
 
         ]);
@@ -386,8 +390,8 @@ export class SettingsController extends RE6Module {
                 Form.div(`<div class="notice float-right">Download individual files</div>`, "mid"),
                 Form.input(
                     "template", downloadCustomizer.fetchSettings("template"), "Download File Name", "full", undefined,
-                    (event, data) => {
-                        downloadCustomizer.pushSettings("template", data);
+                    async (event, data) => {
+                        await downloadCustomizer.pushSettings("template", data);
                         if (downloadCustomizer.isInitialized()) downloadCustomizer.refreshDownloadLink();
                     }
                 ),
@@ -409,7 +413,7 @@ export class SettingsController extends RE6Module {
                 Form.div(`<div class="notice float-right">Download files from the search page</div>`, "mid"),
                 Form.input(
                     "template", massDownloader.fetchSettings("template"), "Download File Name", "full", undefined,
-                    (event, data) => { massDownloader.pushSettings("template", data); }
+                    async (event, data) => { await massDownloader.pushSettings("template", data); }
                 ),
                 Form.section({ id: "template-vars-mass", columns: 2 }, [
                     Form.div(`<div class="notice unmargin">The same variables as above can be used. Add a forward slash ( / ) to signify a folder.</div>`, "mid"),
@@ -417,7 +421,7 @@ export class SettingsController extends RE6Module {
 
                 Form.checkbox(
                     "autodownload", massDownloader.fetchSettings("autoDownloadArchive"), "Auto Download", "column",
-                    (event, data) => { massDownloader.pushSettings("autoDownloadArchive", data); }
+                    async (event, data) => { await massDownloader.pushSettings("autoDownloadArchive", data); }
                 ),
                 Form.div("The archive will be downloaded automatically after being created", "mid"),
                 Form.hr(),
@@ -429,7 +433,7 @@ export class SettingsController extends RE6Module {
                 Form.div(`<div class="notice float-right">Download image pools or sets</div>`, "mid"),
                 Form.input(
                     "template", poolDownloader.fetchSettings("template"), "Download File Name", "full", undefined,
-                    (event, data) => { poolDownloader.pushSettings("template", data); }
+                    async (event, data) => { await poolDownloader.pushSettings("template", data); }
                 ),
                 Form.section({ id: "template-vars-pool", columns: 2 }, [
                     Form.div(`<div class="notice unmargin">The same variables as above can be used. Add a forward slash ( / ) to signify a folder.</div>`, "mid"),
@@ -440,7 +444,7 @@ export class SettingsController extends RE6Module {
 
                 Form.checkbox(
                     "autodownload", poolDownloader.fetchSettings("autoDownloadArchive"), "Auto Download", "column",
-                    (event, data) => { poolDownloader.pushSettings("autoDownloadArchive", data); }
+                    async (event, data) => { await poolDownloader.pushSettings("autoDownloadArchive", data); }
                 ),
                 Form.div("The archive will be downloaded automatically after being created", "mid"),
             ]),
@@ -467,19 +471,19 @@ export class SettingsController extends RE6Module {
                 Form.label(label),
                 Form.key(
                     settingsKey + "-input-0", bindings[0], undefined, "column",
-                    (event, data) => { handleRebinding(data, 0); }
+                    async (event, data) => { await handleRebinding(data, 0); }
                 ),
                 Form.key(
                     settingsKey + "-input-1", bindings[1], undefined, "column",
-                    (event, data) => { handleRebinding(data, 1); }
+                    async (event, data) => { await handleRebinding(data, 1); }
                 ),
             ];
 
-            function handleRebinding(data: string[], index: 0 | 1): void {
+            async function handleRebinding(data: string[], index: 0 | 1): Promise<void> {
                 bindings[index] = data[0];
-                module.pushSettings(settingsKey, bindings.join("|"));
+                await module.pushSettings(settingsKey, bindings.join("|"));
                 Hotkeys.unregister(data[1]);
-                module.resetHotkeys();
+                await module.resetHotkeys();
             }
         }
 

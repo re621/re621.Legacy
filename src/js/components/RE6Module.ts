@@ -104,17 +104,19 @@ export class RE6Module {
      * @param preserve Ensures that all other values are preserved
      */
     public async pushSettings(property: string, value: any): Promise<void> {
-        await this.loadSettingsCache();
-        this.settings[property] = value;
-        this.saveSettingsCache();
+        return this.loadSettingsCache().then(() => {
+            this.settings[property] = value;
+            return this.saveSettingsCache();
+        });
     }
 
     /**
      * Clears stored settings and resets the configuration to default values.
      */
-    public clearSettings(): void {
-        XM.deleteValue("re621." + this.constructor.name);
-        this.loadSettingsCache();
+    public async clearSettings(): Promise<void> {
+        return XM.deleteValue("re621." + this.constructor.name).then(() => {
+            return this.loadSettingsCache();
+        });
     }
 
     /**

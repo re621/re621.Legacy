@@ -342,7 +342,7 @@ export class HeaderCustomizer extends RE6Module {
     /**
      * Iterates over the header menu and saves the data to cookies
      */
-    private saveNavbarSettings(): void {
+    private async saveNavbarSettings(): Promise<void> {
         const tabData = [];
         this.$menu.find("li").each(function (i, element) {
             const $tab = $(element);
@@ -352,7 +352,7 @@ export class HeaderCustomizer extends RE6Module {
                 href: $tab.attr("data-href"),
             });
         });
-        this.pushSettings("tabs", tabData);
+        await this.pushSettings("tabs", tabData);
     }
 
     private openTabNum(event, key: string): void {

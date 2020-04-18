@@ -80,7 +80,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
                 }
             }
         }
-        this.pushSettings("data", tagData);
+        await this.pushSettings("data", tagData);
         return results;
     }
 

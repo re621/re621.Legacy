@@ -111,7 +111,7 @@ export class PostViewer extends RE6Module {
     }
 
     /** Switches the notes container to its opposite state */
-    private toggleNotes(): void {
+    private async toggleNotes(): Promise<void> {
         const module = ModuleController.get(PostViewer),
             hideNotes = module.fetchSettings("hideNotes");
 
@@ -123,14 +123,14 @@ export class PostViewer extends RE6Module {
             $("a#image-note-button").html("Notes: OFF");
         }
 
-        module.pushSettings("hideNotes", !hideNotes);
+        await module.pushSettings("hideNotes", !hideNotes);
     }
 
     /** Toggles the note editing interface */
-    private switchNewNote(): void {
+    private async switchNewNote(): Promise<void> {
         $("div#note-container").attr("data-hidden", "false");
         $("a#image-note-button").html("Notes: ON");
-        ModuleController.get(PostViewer).pushSettings("hideNotes", false);
+        await ModuleController.get(PostViewer).pushSettings("hideNotes", false);
 
         Danbooru.Note.TranslationMode.toggle(new Event("dummy-event"));
     }

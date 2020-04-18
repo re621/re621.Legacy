@@ -132,7 +132,7 @@ export class Miscellaneous extends RE6Module {
                     const index = storedCats.indexOf(cat);
                     if (index !== -1) storedCats.splice(index, 1);
                 }
-                this.pushSettings("categoryData", storedCats);
+                await this.pushSettings("categoryData", storedCats);
             });
         });
 

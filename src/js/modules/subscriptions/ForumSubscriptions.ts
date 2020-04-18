@@ -73,7 +73,7 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
                 results[new Date(forumJson.updated_at).getTime()] = await this.formatForumUpdate(forumJson);
             }
         }
-        this.pushSettings("data", forumData);
+        await this.pushSettings("data", forumData);
         return results;
     }
 
