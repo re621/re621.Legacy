@@ -18,8 +18,10 @@ export class AvoidPosting {
      * If the tag is not on the list, returns undefined.
      * @param name Tag name
      */
-    public static get(name: string): {} {
-        return this.getData()[name];
+    public static async get(name: string): Promise<DNPDataEntry> {
+        return this.getData().then((data) => {
+            return Promise.resolve(data[name]);
+        });
     }
 
     /**
@@ -27,7 +29,9 @@ export class AvoidPosting {
      * @param name Tag name
      */
     public static async contains(name: string): Promise<boolean> {
-        return this.get(name) !== undefined;
+        return this.get(name).then((data) => {
+            return Promise.resolve(data !== undefined);
+        });
     }
 
 }
@@ -41,5 +45,9 @@ interface DNPList {
 }
 
 type DNPData = {
-    [prop: string]: { reason: string };
+    [prop: string]: DNPDataEntry;
+}
+
+interface DNPDataEntry {
+    reason: string;
 }

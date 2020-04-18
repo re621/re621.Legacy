@@ -58,27 +58,11 @@ export class DomUtilities {
     /**
      * Attaches the script's stylesheets to the document
      */
-    private static async addStylesheets(): Promise<void> {
-        const css = await XM.getResourceURL("re621_css");
-
-        if (css.startsWith("blob")) {
-            // Greasemonkey mode
-            const link = $("<link>").attr({
-                "rel": "stylesheet",
-                "href": css
-            }).appendTo("head");
-
-            $(() => {
-                while (link.next("link").length > 0) {
-                    link.next("link").insertBefore(link);
-                }
-            });
-        } else {
-            // Tampermonkey mode
-            XM.addStyle(atob(css.replace(/^data:(.*);base64,/g, "")));
-        }
-
-        return Promise.resolve();
+    private static async addStylesheets(): Promise<any> {
+        return XM.getResourceText("re621_css").then(
+            (css) => { return Promise.resolve(XM.addStyle(css)); },
+            () => { return Promise.reject(); }
+        )
     }
 
     /**

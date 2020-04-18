@@ -5,6 +5,7 @@ declare const saveAs;
 import { Util } from "../structure/Util";
 
 declare const GM: any;
+declare const GM_getResourceText: Function;
 declare const GM_getResourceURL: Function;
 declare const GM_xmlhttpRequest: Function;
 
@@ -124,10 +125,27 @@ export class XM {
      * @param name Resource name
      */
     public static async getResourceText(name: string): Promise<string> {
-        return XM.getResourceURL(name).then(
-            (resolved) => { return Promise.resolve(atob(resolved.replace(/^data:(.*);base64,/g, ""))); },
-            (rejected) => { return Promise.reject(rejected); }
-        );
+        if (typeof GM_getResourceText === "function") return Promise.resolve(GM_getResourceText(name));
+
+        const resource = await XM.getResourceURL(name);
+        if (resource.startsWith("data:")) {
+            return Promise.resolve(atob(resource.replace(/^data:(.*);base64,/g, "")));
+        } else if (resource.startsWith("blob:")) {
+            return new Promise(async (resolve, reject) => {
+                const request = await fetch(resource, {
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "User-Agent": window["re621"]["useragent"],
+                    },
+                    method: "GET",
+                    mode: "cors"
+                });
+
+                if (request.ok) { resolve(await request.text()); }
+                else { reject(); }
+            });
+        } else { return Promise.reject(); }
     }
 
     /**
