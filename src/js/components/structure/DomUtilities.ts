@@ -60,7 +60,6 @@ export class DomUtilities {
      */
     private static async addStylesheets(): Promise<void> {
         const css = await TM.getResourceURL("re621_css");
-        console.log(css);
 
         if (css.startsWith("blob")) {
             // Greasemonkey mode
