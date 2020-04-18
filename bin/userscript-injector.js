@@ -4,8 +4,8 @@
 const fs = require("fs");
 
 const headerData = JSON.parse(fs.readFileSync("./bin/userscript-header.json")),
-    templateData = fs.readFileSync("./bin/userscript-template.js").toString(),
-    package = JSON.parse(fs.readFileSync("./package.json"));
+    package = JSON.parse(fs.readFileSync("./package.json")),
+    browser = process.argv[2] ? process.argv[2] : "chrome";
 
 // Create the userscript header
 let header = "// ==UserScript==\n";
@@ -20,10 +20,19 @@ for (let [key, value] of Object.entries(headerData)) {
         header += formateHeaderLine(key, value);
     }
 }
+
+header = header
+    .replace(/(\/\/ @name[ ]+)(.+)/, "$1re621 Injector")
+    .replace(/\/\/ @updateURL.*\n/, "")
+    .replace(/\/\/ @downloadURL.*\n/, "")
+    .replace(/(\/\/ @resource[ ]+re621_css )(.+)/, browser == "chrome" ? "$1file://" + __dirname + "\\..\\build\\style.min.css" : "$1http://localhost:7000/style.min.css")
+    .replace(/(\/\/ @resource[ ]+re621_dnp )(.+)/, browser == "chrome" ? "$1file://" + __dirname + "\\..\\build\\avoid-posting.json" : "$1http://localhost:7000/avoid-posting.json");
+header += formateHeaderLine("require", browser == "chrome" ? "file://" + __dirname + "\\..\\build\\script.user.js" : "http://localhost:7000/script.user.js");
+
 header += "// ==/UserScript==\n"
 
 // Write to file
-fs.writeFileSync("./build/script.user.js", parseTemplate(header) + "\n\n" + parseTemplate(templateData) + "\n\n" + fs.readFileSync("./build/script.user.js"));
+fs.writeFileSync("./build/injector.user.js", parseTemplate(header));
 
 /**
  * Replaces the variables in the provided string with those from the package.json
