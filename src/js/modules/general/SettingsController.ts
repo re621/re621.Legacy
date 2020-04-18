@@ -731,7 +731,7 @@ export class SettingsController extends RE6Module {
             // About
             Form.div(
                 `<h3 class="display-inline"><a href="` + window["re621"]["links"]["website"] + `">` + window["re621"]["name"] + ` v.` + window["re621"]["version"] + `</a></h3>` +
-                `<span class="display-inline">(build ` + window["re621"]["build"] + `)</span>`,
+                ` <span class="display-inline">build ` + window["re621"]["build"] + `</span>`,
                 "mid"
             ),
             Form.div(
@@ -741,13 +741,14 @@ export class SettingsController extends RE6Module {
                 "column"
             ),
             Form.div(
-                `<b>` + window["re621"]["name"] + `</b> is a comprehensive set of tools designed to enhance the website for both casual and power users.` +
+                `<b>` + window["re621"]["name"] + `</b> is a comprehensive set of tools designed to enhance the website for both casual and power users. ` +
                 `It is created and maintained by unpaid volunteers, with the hope that it will be useful for the community.`
             ),
             Form.div(
-                `Keeping the script - and the website - fully functional is our highest priority.` +
-                `If you are experiencing bugs or issues, do not hesitate to create a new ticket on <a href="` + window["re621"]["links"]["issues"] + `">github</a>,` +
-                `or leave us a message in the <a href="` + window["re621"]["links"]["forum"] + `">forum thread</a>. Feature requests, comments, and overall feedback are also appreciated.`
+                `Keeping the script - and the website - fully functional is our highest priority. ` +
+                `If you are experiencing bugs or issues, do not hesitate to create a new ticket on <a href="` + window["re621"]["links"]["issues"] + `">github</a>, ` +
+                `or leave us a message in the <a href="` + window["re621"]["links"]["forum"] + `">forum thread</a>. ` +
+                `Feature requests, comments, and overall feedback are also appreciated.`
             ),
             Form.div(`Thank you for downloading and using this script. We hope that you enjoy the experience.`),
             Form.spacer("full"),
