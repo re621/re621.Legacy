@@ -5,8 +5,8 @@
     "description": "%DESCRIPTION%",
     "author": "%AUTHOR%",
     "match": [
-        "https://e621.net/",
-        "https://e926.net/"
+        "https://e621.net/*",
+        "https://e926.net/*"
     ],
     "updateURL": "%GITHUB%/releases/latest/download/script.user.js",
     "downloadURL": "%GITHUB%/releases/latest/download/script.user.js",
