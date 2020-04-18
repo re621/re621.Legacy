@@ -165,7 +165,7 @@ form.grid-form {
 
             /* to hide the checkbox itself */
             input[type=checkbox]+label:before {
-                content: "\f0c8";
+                content: unicode("f0c8");
                 font-family: "Font Awesome 5 Free";
                 display: inline-block;
                 letter-spacing: 10px;
@@ -173,7 +173,7 @@ form.grid-form {
             }
 
             input[type=checkbox]:checked+label:before {
-                content: "\f14a";
+                content: unicode("f14a");
             }
 
             label {
