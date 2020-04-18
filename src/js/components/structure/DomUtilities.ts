@@ -211,11 +211,8 @@ export class DomUtilities {
     private static async elementReady(element: string, callback: Function): Promise<void> {
         return new Promise(async (resolve, reject) => {
             let timeout = 0;
-            while ($(element).length == 0 && timeout < (250 * 4 * 10)) {
-                console.log("looking for " + element);
-                await new Promise((resolve) => {
-                    window.setTimeout(() => { resolve(); }, 100)
-                });
+            while ($(element).length == 0 && timeout < (1000 * 10)) {
+                await new Promise((resolve) => { window.setTimeout(() => { resolve(); }, 100) });
                 timeout += 100;
             }
 
