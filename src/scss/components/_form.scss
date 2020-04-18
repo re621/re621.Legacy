@@ -8,6 +8,7 @@ form.grid-form {
     width: 15rem;
 
     &.columns-2 {
+        -ms-grid-columns: 1fr 2fr 1fr 2fr;
         grid-template-columns: repeat(2, 1fr 2fr);
         width: 31.5rem;
 
@@ -22,6 +23,7 @@ form.grid-form {
     }
 
     &.columns-3 {
+        -ms-grid-columns: 1fr 2fr 1fr 2fr 1fr 2fr;
         grid-template-columns: repeat(3, 1fr 2fr);
         width: 48rem;
 

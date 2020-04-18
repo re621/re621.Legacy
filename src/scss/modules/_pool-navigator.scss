@@ -11,7 +11,6 @@ div#nav-links {
                 display: none;
             }
 
-            /* to hide the checkbox itself */
             input[type=radio]+label:before {
                 content: unicode("f0c8");
                 font-family: "Font Awesome 5 Free";

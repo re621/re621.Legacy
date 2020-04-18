@@ -16,7 +16,8 @@ div.tiny-alias-container {
 
     input[type=text] {
         border-radius: 3px;
-        grid-area: 1 / 1 / 2 / 3;
+        grid-column: 1 / 3;
+        grid-row: 1 / 2;
         padding: 0.25rem;
     }
 
