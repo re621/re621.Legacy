@@ -21,7 +21,7 @@ export class DomUtilities {
      * They should be loaded as soon as their parent element exists.
      */
     private static async prepareStructure(): Promise<any> {
-        try { await DomUtilities.addStylesheets(); }
+        try { await DomUtilities.elementReady("head", DomUtilities.addStylesheets); }
         catch (error) { ErrorHandler.error("DOM", error.stack, "styles"); }
 
         // This is terrible for performance, so keep the number of these to a minimum
@@ -60,6 +60,7 @@ export class DomUtilities {
      */
     private static async addStylesheets(): Promise<void> {
         const css = await TM.getResourceURL("re621_css");
+        console.log(css);
 
         if (css.startsWith("blob")) {
             // Greasemonkey mode
