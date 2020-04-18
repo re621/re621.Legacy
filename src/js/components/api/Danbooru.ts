@@ -1,6 +1,6 @@
 /* Type definitions for the Danbooru Javascript methods */
 
-declare const unsafeWindow;
+import { TM } from "./TM";
 
 export class Danbooru {
 
@@ -17,18 +17,16 @@ export class Danbooru {
     };
 
     private static getValue(name: string): any {
-        return unsafeWindow.Danbooru[name];
+        return TM.getWindow()["Danbooru"][name];
     }
 
-    public static _init(): void {
+    public static init(): void {
         this.Blacklist = this.getValue("Blacklist");
         this.Post = this.getValue("Post");
         this.Note = this.getValue("Note");
         this.Utility = this.getValue("Utility");
     }
 }
-
-Danbooru._init();
 
 interface DanbooruBlacklist {
     apply(): void;

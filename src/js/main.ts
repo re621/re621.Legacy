@@ -36,7 +36,7 @@ import { PoolSubscriptions } from "./modules/subscriptions/PoolSubscriptions";
 import { TagSubscriptions } from "./modules/subscriptions/TagSubscriptions";
 // - settings
 import { SettingsController } from "./modules/general/SettingsController";
-import { ErrorHandler } from "./components/ErrorHandler";
+import { Danbooru } from "./components/api/Danbooru";
 
 
 const loadOrder = [
@@ -72,10 +72,13 @@ const subscriptions = [
     TagSubscriptions
 ];
 
-(function (): void {
+// This makes sure that the appropriate document structure exists before modules can load
+DomUtilities.createStructure().then(() => {
 
-    try { DomUtilities.createStructure(); }
-    catch (error) { ErrorHandler.error("DOM", error.stack, "init"); }
+    // This is dependent on the previous step, which runs when the document fully loads
+    // If that changes, this will need to be wrapped in `$(() => { ... });`
+
+    Danbooru.init();
 
     subscriptions.forEach(module => {
         ModuleController.register(module);
@@ -83,5 +86,4 @@ const subscriptions = [
     });
 
     ModuleController.register(loadOrder);
-
-})();
+});

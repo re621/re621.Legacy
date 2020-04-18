@@ -14,23 +14,13 @@ export class ModuleController {
     public static register(moduleList: any | any[]): void {
         if (!Array.isArray(moduleList)) moduleList = [moduleList];
 
-        const promises: Promise<any>[] = [];
-        moduleList.forEach((moduleClass) => {
+        moduleList.forEach(async (moduleClass: any) => {
             try {
                 const moduleInstance = moduleClass.getInstance();
                 this.modules.set(moduleClass.prototype.constructor.name, moduleInstance);
-                promises.push(moduleInstance.prepare().then(() => {
-                    if (moduleInstance.canInitialize()) return Promise.resolve(moduleInstance);
-                    else return Promise.resolve({ status: "disabled" });
-                }));
+                await moduleInstance.prepare();
+                if (moduleInstance.canInitialize()) moduleInstance.create();
             } catch (error) { ErrorHandler.error(moduleClass, error.stack, "init"); }
-        });
-
-        Promise.all(promises).then((resolved) => {
-            resolved.forEach((module) => {
-                if (module.status === "disabled") return;
-                module.create();
-            });
         });
     }
 

@@ -1,5 +1,6 @@
 import { Page, PageDefintion } from "../data/Page";
 import { TM } from "../api/TM";
+import { ErrorHandler } from "../ErrorHandler";
 
 /**
  * StructureUtilities  
@@ -7,15 +8,100 @@ import { TM } from "../api/TM";
  */
 export class DomUtilities {
 
+    /**
+     * Builds the structures used by several modules.  
+     * Returns a promise that is fulfilled when all DOM is created
+     */
     public static async createStructure(): Promise<void> {
+        return this.prepareStructure().then(this.buildStructure);
+    }
 
-        // Load in the external stylesheet
-        await TM.attachStylesheet("re621_styles");
+    /**
+     * Builds elements that would make the page jump around.  
+     * They should be loaded as soon as their parent element exists.
+     */
+    private static async prepareStructure(): Promise<any> {
+        try { await DomUtilities.addStylesheets(); }
+        catch (error) { ErrorHandler.error("DOM", error.stack, "styles"); }
 
-        // Create a modal container
+        // This is terrible for performance, so keep the number of these to a minimum
+        try {
+            const promises: Promise<any>[] = [];
+            promises.push(DomUtilities.elementReady("body", DomUtilities.createThemes));
+            promises.push(DomUtilities.elementReady("div#page", DomUtilities.createModalContainer));
+            promises.push(DomUtilities.elementReady("menu.main", DomUtilities.createHeader));
+            return Promise.all(promises);
+        } catch (error) {
+            ErrorHandler.error("DOM", error.stack, "prepare");
+            return Promise.reject();
+        }
+    }
+
+    /**
+     * Build the less important elements that can wait until the page fully loads.  
+     * This function mainly exists for the sake of performance issues caused by prepareStructure()
+     */
+    private static async buildStructure(): Promise<void> {
+        return new Promise((resolve) => {
+            $(() => {
+                try {
+                    DomUtilities.createSearchbox();
+                    DomUtilities.createTagList();
+                    DomUtilities.createFormattedTextareas();
+                    DomUtilities.createPostPreviews();
+                } catch (error) { ErrorHandler.error("DOM", error.stack, "build"); }
+                resolve();
+            });
+        });
+    }
+
+    /**
+     * Attaches the script's stylesheets to the document
+     */
+    private static async addStylesheets(): Promise<void> {
+        const css = await TM.getResourceURL("re621_styles");
+
+        if (css.startsWith("blob")) {
+            // Greasemonkey mode
+            $("<link>").attr({
+                "rel": "stylesheet",
+                "href": css
+            }).appendTo("head");
+        } else {
+            // Tampermonkey mode
+            TM.addStyle(atob(css.replace(/^data:(.*);base64,/g, "")));
+        }
+
+        return Promise.resolve();
+    }
+
+    /**
+     * Sets the saved theme before the ThemeCustomizer module loads.
+     * This is a huge hack, but it's necessary to avoid having the page switch colors when the themes pop in.  
+     * Prone to breaking if the ThemeCustomizer settings names get changed.  
+     */
+    private static createThemes(): void {
+        const theme = TM.getWindow().localStorage.getItem("theme")
+        if (theme == null) {
+            TM.getValue("re621.ThemeCustomizer", { "main": "hexagon" }).then((data) => {
+                console.log("setting theme " + data.main);
+                TM.getWindow().localStorage.setItem("theme", data.main);
+                $("body").attr("data-th-main", data.main);
+            });
+        } else $("body").attr("data-th-main", theme);
+    }
+
+    /**
+     * Creates the container that all modals attach themselves to
+     */
+    private static createModalContainer(): void {
         $("<div>").attr("id", "modal-container").prependTo("div#page");
+    }
 
-        // Create a more sensible header structure
+    /**
+     * Creates a gridified header structure
+     */
+    private static createHeader(): void {
         const $menuContainer = $("nav#nav");
         const $menuMain = $("menu.main");
 
@@ -31,7 +117,13 @@ export class DomUtilities {
 
         $("menu:last-child").addClass("submenu");
 
-        // Create a sticky searchbox container
+        $menuContainer.addClass("grid");
+    }
+
+    /**
+     * Creates a sticky searchbox container
+     */
+    private static createSearchbox(): void {
         if (Page.matches([PageDefintion.search, PageDefintion.post, PageDefintion.favorites])) {
             const $searchContainer = $("<div>").attr("id", "re621-search").prependTo("aside#sidebar");
             $("aside#sidebar section#search-box").appendTo($searchContainer);
@@ -46,10 +138,13 @@ export class DomUtilities {
 
             observer.observe($searchContainer[0]);
         }
+    }
 
-        // Tweak the tag lists
-        const $tags = $("#tag-box > ul > li, #tag-list > ul > li");
-        $tags.each((index, element) => {
+    /**
+     * Re-structures the tag lists
+     */
+    private static createTagList(): void {
+        $("#tag-box > ul > li, #tag-list > ul > li").each((index, element) => {
             const $container = $(element);
 
             const $tagLink = $container.find("a.search-tag").first();
@@ -79,7 +174,12 @@ export class DomUtilities {
             // Subscribe button container
             $("<span>").addClass("tag-action-subscribe").appendTo($actionsBox);
         });
+    }
 
+    /**
+     * Wraps all appropriate textareas in FormattingHelper-readable structures
+     */
+    private static createFormattedTextareas(): void {
         /** Wrap the post description textareas in FormattingHelper compatible tags */
         if (Page.matches(PageDefintion.upload) || Page.matches(PageDefintion.post)) {
             const $textarea = $("textarea#post_description");
@@ -91,10 +191,36 @@ export class DomUtilities {
                 .append($textarea)
                 .wrap(`<form class="simple_form"></form>`);
         }
+    }
 
-        // Prepare post-preview elements
+    /**
+     * Wraps all post-previews in ThumbnailEnhancer-readable structures
+     */
+    private static createPostPreviews(): void {
         $("div#posts-container article.post-preview").each((index, element) => {
             $(element).find("a").first().addClass("preview-box");
+        });
+    }
+
+    /**
+     * Fires the callback as soon as the specified element exists.  
+     * Runs every 250ms, and gives up after 10 seconds
+     * @param element Selector to search for
+     * @param callback Callback function
+     */
+    private static async elementReady(element: string, callback: Function): Promise<void> {
+        return new Promise(async (resolve, reject) => {
+            let timeout = 0;
+            while ($(element).length == 0 && timeout < (250 * 4 * 10)) {
+                console.log("looking for " + element);
+                await new Promise((resolve) => {
+                    window.setTimeout(() => { resolve(); }, 100)
+                });
+                timeout += 100;
+            }
+
+            if ($(element).length > 0) { callback(); resolve(); }
+            else reject();
         });
     }
 

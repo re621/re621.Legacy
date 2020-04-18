@@ -32,11 +32,14 @@
         "GM.getResourceUrl",
         "GM_getResourceURL",
         "GM.xmlhttpRequest",
-        "GM_xmlhttpRequest"
+        "GM_xmlhttpRequest",
+
+        "unsafeWindow"
     ],
     "icon64": "https://re621.github.io/images/icon.png",
     "connect": [
         "api.github.com",
         "static1.e621.net"
-    ]
+    ],
+    "run-at": "document-start"
 }

@@ -6,29 +6,7 @@ import { Modal } from "../../components/structure/Modal";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
 import { DomUtilities } from "../../components/structure/DomUtilities";
-
-const THEME_MAIN = [
-    { value: "hexagon", name: "Hexagon" },
-    { value: "pony", name: "Pony" },
-    { value: "bloodlust", name: "Bloodlust" },
-    { value: "serpent", name: "Serpent" },
-    { value: "hotdog", name: "Hotdog" },
-];
-const THEME_EXTRA = [
-    { value: "none", name: "None" },
-    { value: "autumn", name: "Autumn" },
-    { value: "winter", name: "Winter" },
-    { value: "spring", name: "Spring" },
-    { value: "aurora", name: "Aurora" },
-    { value: "hexagons", name: "Hexagons" },
-    { value: "space", name: "Space" },
-    { value: "stars", name: "Stars" },
-];
-const NAVBAR_POS = [
-    { value: "top", name: "Top" },
-    { value: "bottom", name: "Bottom" },
-    { value: "none", name: "None" },
-];
+import { TM } from "../../components/api/TM";
 
 /**
  * ThemeCustomizer  
@@ -45,6 +23,9 @@ export class ThemeCustomizer extends RE6Module {
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
+
+            // Don't forget to update DomUtilities.createThemes()
+            // It'll break without the correct settings names
             main: "hexagon",
             extra: "hexagons",
             nav: "top",
@@ -58,41 +39,68 @@ export class ThemeCustomizer extends RE6Module {
     public create(): void {
         super.create();
 
+        // === Set the saved themes
+        $("body").attr("data-th-main", this.fetchSettings("main"));
+        $("body").attr("data-th-extra", this.fetchSettings("extra"));
+        $("body").attr("data-th-nav", this.fetchSettings("nav"));
+
         // === Create a button in the header
         const openCustomizerButton = DomUtilities.addSettingsButton({
             name: `<i class="fas fa-paint-brush"></i>`,
         });
 
         // === Establish the settings window contents
-        this.themeCustomizerForm = new Form(
-            {
-                "id": "theme-customizer",
-                "parent": "div#modal-container"
-            },
-            [
-                {
-                    id: "main",
-                    type: "select",
-                    label: "Theme",
-                    data: THEME_MAIN,
-                    value: this.fetchSettings("main"),
-                },
-                {
-                    id: "extra",
-                    type: "select",
-                    label: "Extras",
-                    data: THEME_EXTRA,
-                    value: this.fetchSettings("extra"),
-                },
-                {
-                    id: "nav",
-                    type: "select",
-                    label: "Post Navbar",
-                    data: NAVBAR_POS,
-                    value: this.fetchSettings("nav"),
+        this.themeCustomizerForm = new Form({ "id": "theme-customizer", "parent": "div#modal-container" }, [
+            Form.select(
+                "main", this.fetchSettings("main"), "Theme",
+                [
+                    { value: "hexagon", name: "Hexagon" },
+                    { value: "pony", name: "Pony" },
+                    { value: "bloodlust", name: "Bloodlust" },
+                    { value: "serpent", name: "Serpent" },
+                    { value: "hotdog", name: "Hotdog" },
+                ],
+                undefined,
+                (event, data) => {
+                    this.pushSettings("main", data);
+                    TM.getWindow().localStorage.setItem("theme", data);
+                    $("body").attr("data-th-main", data);
                 }
-            ]
-        );
+            ),
+            Form.select(
+                "extra", this.fetchSettings("extra"), "Extras",
+                [
+                    { value: "none", name: "None" },
+                    { value: "autumn", name: "Autumn" },
+                    { value: "winter", name: "Winter" },
+                    { value: "spring", name: "Spring" },
+                    { value: "aurora", name: "Aurora" },
+                    { value: "hexagons", name: "Hexagons" },
+                    { value: "space", name: "Space" },
+                    { value: "stars", name: "Stars" },
+                ],
+                undefined,
+                (event, data) => {
+                    this.pushSettings("extra", data);
+                    TM.getWindow().localStorage.setItem("theme-extra", data);
+                    $("body").attr("data-th-extra", data);
+                }
+            ),
+            Form.select(
+                "nav", this.fetchSettings("nav"), "Post Navbar",
+                [
+                    { value: "top", name: "Top" },
+                    { value: "bottom", name: "Bottom" },
+                    { value: "none", name: "None" },
+                ],
+                undefined,
+                (event, data) => {
+                    this.pushSettings("nav", data);
+                    TM.getWindow().localStorage.setItem("theme-nav", data);
+                    $("body").attr("data-th-nav", data);
+                }
+            ),
+        ]);
 
         // === Create the modal
         new Modal({
@@ -100,26 +108,6 @@ export class ThemeCustomizer extends RE6Module {
             triggers: [{ element: openCustomizerButton }],
             content: this.themeCustomizerForm.get(),
             position: { my: "right top", at: "right top" }
-        });
-
-        // === Establish Listeners
-        this.handleThemeSwitcher("main");
-        this.handleThemeSwitcher("extra");
-        this.handleThemeSwitcher("nav");
-    }
-
-    /** Listens to the theme selectors and sets the appropriate theming */
-    private handleThemeSwitcher(selector: string): void {
-        const theme = this.fetchSettings(selector),
-            input = this.themeCustomizerForm.getInputList().get(selector);
-
-        $("body").attr("data-th-" + selector, theme);
-        input.val(theme);
-
-        input.change(element => {
-            const theme = $(element.target).val() + "";
-            this.pushSettings(selector, theme);
-            $("body").attr("data-th-" + selector, theme);
         });
     }
 }

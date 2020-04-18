@@ -4,9 +4,11 @@ declare const saveAs;
 
 import { Util } from "../structure/Util";
 
-declare const GM;
-declare const GM_getResourceURL;
-declare const GM_xmlhttpRequest;
+declare const GM: any;
+declare const GM_getResourceURL: Function;
+declare const GM_xmlhttpRequest: Function;
+
+declare const unsafeWindow: Window;
 
 export enum ScriptManager {
     GM = "Greasemonkey",
@@ -20,6 +22,14 @@ export class TM {
      */
     public static info(): GMInfo {
         return GM.info;
+    }
+
+    /**
+     * Returns the unsafeWindow instance.  
+     * Should be avoided as much as possible.
+     */
+    public static getWindow(): Window {
+        return unsafeWindow;
     }
 
     /**
@@ -42,25 +52,6 @@ export class TM {
             return id;
         }
     };
-
-    /**
-     * Attaches the specified @resource as a stylesheet
-     * @param name Resource name
-     */
-    public static async attachStylesheet(name: string): Promise<void> {
-        const css = await TM.getResourceURL(name);
-
-        if (css.startsWith("blob")) {
-            // Greasemonkey mode
-            $("<link>").attr({
-                "rel": "stylesheet",
-                "href": css
-            }).appendTo("head");
-        } else {
-            // Tampermonkey mode
-            TM.addStyle(atob(css.replace(/^data:(.*);base64,/g, "")));
-        }
-    }
 
     /**
      * Saves the specified data to the storage
@@ -137,7 +128,7 @@ export class TM {
             (resolved) => { return Promise.resolve(atob(resolved.replace(/^data:(.*);base64,/g, ""))); },
             (rejected) => { return Promise.reject(rejected); }
         );
-    };
+    }
 
     /**
      * Get contents of the resource as JSON
