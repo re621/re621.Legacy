@@ -63,10 +63,16 @@ export class DomUtilities {
 
         if (css.startsWith("blob")) {
             // Greasemonkey mode
-            $("<link>").attr({
+            const link = $("<link>").attr({
                 "rel": "stylesheet",
                 "href": css
             }).appendTo("head");
+
+            $(() => {
+                while (link.next("link").length > 0) {
+                    link.next("link").insertBefore(link);
+                }
+            });
         } else {
             // Tampermonkey mode
             XM.addStyle(atob(css.replace(/^data:(.*);base64,/g, "")));
