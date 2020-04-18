@@ -1,6 +1,3 @@
-/* eslint-disable prefer-const */
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 const fs = require("fs");
 
 const headerData = JSON.parse(fs.readFileSync("./bin/userscript-header.json")),
