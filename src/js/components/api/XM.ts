@@ -15,7 +15,7 @@ export enum ScriptManager {
     TM = "Tampermonkey",
 }
 
-export class TM {
+export class XM {
 
     /**
      * Returns the information provided by the script manager
@@ -124,7 +124,7 @@ export class TM {
      * @param name Resource name
      */
     public static async getResourceText(name: string): Promise<string> {
-        return TM.getResourceURL(name).then(
+        return XM.getResourceURL(name).then(
             (resolved) => { return Promise.resolve(atob(resolved.replace(/^data:(.*);base64,/g, ""))); },
             (rejected) => { return Promise.reject(rejected); }
         );
@@ -136,7 +136,7 @@ export class TM {
      * @param name Resource name
      */
     public static async getResourceJSON<T>(name: string): Promise<T> {
-        return TM.getResourceText(name).then(
+        return XM.getResourceText(name).then(
             (resolved) => { return Promise.resolve(JSON.parse(resolved) as T); },
             (rejected) => { return Promise.reject(rejected); }
         )
@@ -180,7 +180,7 @@ export class TM {
         if (a.ontimeout === undefined) a.ontimeout = (): void => { return; }
 
         let timer: number;
-        TM.xmlHttpRequest({
+        XM.xmlHttpRequest({
             url: a.url,
             method: "GET",
             headers: a.headers,

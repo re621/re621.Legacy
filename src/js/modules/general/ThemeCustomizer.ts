@@ -6,7 +6,7 @@ import { Modal } from "../../components/structure/Modal";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
 import { DomUtilities } from "../../components/structure/DomUtilities";
-import { TM } from "../../components/api/TM";
+import { XM } from "../../components/api/XM";
 
 /**
  * ThemeCustomizer  
@@ -63,7 +63,7 @@ export class ThemeCustomizer extends RE6Module {
                 undefined,
                 (event, data) => {
                     this.pushSettings("main", data);
-                    TM.getWindow().localStorage.setItem("theme", data);
+                    XM.getWindow().localStorage.setItem("theme", data);
                     $("body").attr("data-th-main", data);
                 }
             ),
@@ -82,7 +82,7 @@ export class ThemeCustomizer extends RE6Module {
                 undefined,
                 (event, data) => {
                     this.pushSettings("extra", data);
-                    TM.getWindow().localStorage.setItem("theme-extra", data);
+                    XM.getWindow().localStorage.setItem("theme-extra", data);
                     $("body").attr("data-th-extra", data);
                 }
             ),
@@ -96,7 +96,7 @@ export class ThemeCustomizer extends RE6Module {
                 undefined,
                 (event, data) => {
                     this.pushSettings("nav", data);
-                    TM.getWindow().localStorage.setItem("theme-nav", data);
+                    XM.getWindow().localStorage.setItem("theme-nav", data);
                     $("body").attr("data-th-nav", data);
                 }
             ),

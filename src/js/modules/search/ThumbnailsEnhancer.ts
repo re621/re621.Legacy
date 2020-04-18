@@ -1,7 +1,7 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 import { Util } from "../../components/structure/Util";
-import { TM } from "../../components/api/TM";
+import { XM } from "../../components/api/XM";
 import { Danbooru } from "../../components/api/Danbooru";
 import { ModuleController } from "../../components/ModuleController";
 
@@ -309,8 +309,8 @@ export class ThumbnailEnhancer extends RE6Module {
             $article.addClass("highlight");
             window.setTimeout(() => $article.removeClass("highlight"), 250);
 
-            if (clickAction === ThumbnailClickAction.NewTab) TM.openInTab(window.location.origin + $link.attr("href"));
-            else if (clickAction === ThumbnailClickAction.CopyID) TM.setClipboard($article.attr("data-id"), "text");
+            if (clickAction === ThumbnailClickAction.NewTab) XM.openInTab(window.location.origin + $link.attr("href"));
+            else if (clickAction === ThumbnailClickAction.CopyID) XM.setClipboard($article.attr("data-id"), "text");
             else {
                 $link.off("click.re621.thumbnail");
                 $link[0].click();

@@ -1,6 +1,6 @@
 /* Type definitions for the Danbooru Javascript methods */
 
-import { TM } from "./TM";
+import { XM } from "./XM";
 
 export class Danbooru {
 
@@ -17,7 +17,7 @@ export class Danbooru {
     };
 
     private static getValue(name: string): any {
-        return TM.getWindow()["Danbooru"][name];
+        return XM.getWindow()["Danbooru"][name];
     }
 
     public static init(): void {

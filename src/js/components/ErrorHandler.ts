@@ -1,6 +1,6 @@
 import { Modal } from "./structure/Modal";
 import { RE6Module } from "./RE6Module";
-import { TM } from "./api/TM";
+import { XM } from "./api/XM";
 
 export class ErrorHandler {
 
@@ -19,7 +19,7 @@ export class ErrorHandler {
         this.feedback = $("<textarea>")
             .addClass("error-feedback bg-section color-text")
             .val(
-                window["re621"]["name"] + ` v.` + window["re621"]["version"] + `-` + window["re621"]["build"] + ` for ` + TM.info().scriptHandler + ` v.` + TM.info().version + `\n` +
+                window["re621"]["name"] + ` v.` + window["re621"]["version"] + `-` + window["re621"]["build"] + ` for ` + XM.info().scriptHandler + ` v.` + XM.info().version + `\n` +
                 window.navigator.userAgent + `\n`
             )
             .appendTo($contentWrapper);

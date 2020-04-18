@@ -1,5 +1,5 @@
 import { Page, PageDefintion } from "../data/Page";
-import { TM } from "../api/TM";
+import { XM } from "../api/XM";
 import { ErrorHandler } from "../ErrorHandler";
 
 /**
@@ -59,7 +59,7 @@ export class DomUtilities {
      * Attaches the script's stylesheets to the document
      */
     private static async addStylesheets(): Promise<void> {
-        const css = await TM.getResourceURL("re621_css");
+        const css = await XM.getResourceURL("re621_css");
 
         if (css.startsWith("blob")) {
             // Greasemonkey mode
@@ -69,7 +69,7 @@ export class DomUtilities {
             }).appendTo("head");
         } else {
             // Tampermonkey mode
-            TM.addStyle(atob(css.replace(/^data:(.*);base64,/g, "")));
+            XM.addStyle(atob(css.replace(/^data:(.*);base64,/g, "")));
         }
 
         return Promise.resolve();
@@ -81,11 +81,11 @@ export class DomUtilities {
      * Prone to breaking if the ThemeCustomizer settings names get changed.  
      */
     private static createThemes(): void {
-        const theme = TM.getWindow().localStorage.getItem("theme")
+        const theme = XM.getWindow().localStorage.getItem("theme")
         if (theme == null) {
-            TM.getValue("re621.ThemeCustomizer", { "main": "hexagon" }).then((data) => {
+            XM.getValue("re621.ThemeCustomizer", { "main": "hexagon" }).then((data) => {
                 console.log("setting theme " + data.main);
-                TM.getWindow().localStorage.setItem("theme", data.main);
+                XM.getWindow().localStorage.setItem("theme", data.main);
                 $("body").attr("data-th-main", data.main);
             });
         } else $("body").attr("data-th-main", theme);
