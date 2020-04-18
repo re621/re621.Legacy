@@ -19,7 +19,7 @@
         "https://cdn.jsdelivr.net/npm/jquery.hotkeys@0.1.0/jquery.hotkeys.min.js"
     ],
     "resource": {
-        "re621_styles": "%GITHUB%/releases/download/%VERSION%/style.min.css",
+        "re621_css": "%GITHUB%/releases/download/%VERSION%/style.min.css",
         "re621_dnp": "%GITHUB%/releases/download/%VERSION%/avoid-posting.json"
     },
     "grant": [

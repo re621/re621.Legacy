@@ -59,7 +59,7 @@ export class DomUtilities {
      * Attaches the script's stylesheets to the document
      */
     private static async addStylesheets(): Promise<void> {
-        const css = await TM.getResourceURL("re621_styles");
+        const css = await TM.getResourceURL("re621_css");
 
         if (css.startsWith("blob")) {
             // Greasemonkey mode
