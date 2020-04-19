@@ -26,9 +26,9 @@ export class ThemeCustomizer extends RE6Module {
 
             // Don't forget to update DomUtilities.createThemes()
             // It'll break without the correct settings names
-            main: "hexagon",
-            extra: "hexagons",
-            nav: "top",
+            main: window.localStorage.getItem("theme") || "hexagon",
+            extra: window.localStorage.getItem("theme-extra") || "hexagons",
+            nav: window.localStorage.getItem("theme-nav") || "top",
         };
     }
 
@@ -63,7 +63,7 @@ export class ThemeCustomizer extends RE6Module {
                 undefined,
                 async (event, data) => {
                     await this.pushSettings("main", data);
-                    XM.getWindow().localStorage.setItem("theme", data);
+                    window.localStorage.setItem("theme", data);
                     $("body").attr("data-th-main", data);
                 }
             ),
@@ -82,7 +82,7 @@ export class ThemeCustomizer extends RE6Module {
                 undefined,
                 async (event, data) => {
                     await this.pushSettings("extra", data);
-                    XM.getWindow().localStorage.setItem("theme-extra", data);
+                    window.localStorage.setItem("theme-extra", data);
                     $("body").attr("data-th-extra", data);
                 }
             ),
@@ -96,7 +96,7 @@ export class ThemeCustomizer extends RE6Module {
                 undefined,
                 async (event, data) => {
                     await this.pushSettings("nav", data);
-                    XM.getWindow().localStorage.setItem("theme-nav", data);
+                    window.localStorage.setItem("theme-nav", data);
                     $("body").attr("data-th-nav", data);
                 }
             ),
