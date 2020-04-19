@@ -6,7 +6,6 @@ import { Modal } from "../../components/structure/Modal";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
 import { DomUtilities } from "../../components/structure/DomUtilities";
-import { XM } from "../../components/api/XM";
 
 /**
  * ThemeCustomizer  
