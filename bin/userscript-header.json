@@ -8,7 +8,7 @@
         "https://e621.net/*",
         "https://e926.net/*"
     ],
-    "updateURL": "%GITHUB%/releases/latest/download/script.user.js",
+    "updateURL": "%GITHUB%/releases/latest/download/script.meta.js",
     "downloadURL": "%GITHUB%/releases/latest/download/script.user.js",
     "require": [
         "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js",
