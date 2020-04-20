@@ -21,7 +21,6 @@
         "browserify": "browserify ./build/temp/js/main.js -o ./build/script.user.js",
         "minify": "terser ./build/script.user.js --compress -o ./build/script.user.js",
         "sass": "sass ./src/scss/style.scss ./build/style.min.css --no-source-map --style compressed",
-        "creatednp": "node ./bin/create-dnp.js",
         "userscript:prod": "node ./bin/userscript-format.js prod",
         "userscript:dev": "node ./bin/userscript-format.js",
         "injector:chrome": "node ./bin/userscript-format.js injector chrome",
