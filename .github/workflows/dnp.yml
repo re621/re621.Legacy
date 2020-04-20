@@ -1,5 +1,6 @@
 name: build-dnp
 on:
+  commit_comment: '@updateDNP'
   # everyday at 3 am
   schedule:
     - cron:  '0 3 * * *'
