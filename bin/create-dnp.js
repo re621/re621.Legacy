@@ -13,9 +13,12 @@ const https = require('https');
 
     const dnp = await getDnp();
     dnp.forEach((entry) => {
-        parsedData["data"][entry["antecedent_name"]] = { reason: entry["reason"] }
+        parsedData["data"][entry["antecedent_name"]] = {
+            text: entry["reason"],
+            date: entry["created_at"],
+        }
     });
-    fs.writeFileSync("./build/avoid-posting.json", JSON.stringify(parsedData, null, 2));
+    fs.writeFileSync("./dist/avoid-posting.json", JSON.stringify(parsedData, null, 4) + "\n");
 
 })();
 
@@ -29,7 +32,7 @@ async function getDnp() {
             response = await loadJSON(url + page);
         } catch (error) {
             console.error(error);
-            process.exit(1);    //exit non-null to abort build process
+            process.exit(1); //exit non-null to abort build process
         }
         result = result.concat(response);
         page++;
@@ -40,9 +43,7 @@ async function getDnp() {
 function loadJSON(url) {
     const options = {
         hostname: "e621.net",
-        headers: {
-            "User-Agent": "re621/1.0 buildscript re621.github.io"
-        },
+        headers: { "User-Agent": "re621/1.0 dnp-crawler re621.github.io" },
         port: 443,
         path: url,
         method: "GET"
