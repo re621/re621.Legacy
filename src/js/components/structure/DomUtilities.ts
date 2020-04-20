@@ -66,18 +66,13 @@ export class DomUtilities {
     }
 
     /**
-     * Sets the saved theme before the ThemeCustomizer module loads.
-     * This is a huge hack, but it's necessary to avoid having the page switch colors when the themes pop in.  
-     * Prone to breaking if the ThemeCustomizer settings names get changed.  
+     * Sets the saved theme as soon as possible.
+     * E621's theme switched does it later, making the background briefly flash blue
      */
     private static createThemes(): void {
-        const theme = window.localStorage.getItem("theme")
-        if (theme == null) {
-            XM.getValue("re621.ThemeCustomizer", { "main": "hexagon" }).then((data) => {
-                window.localStorage.setItem("theme", data.main);
-                $("body").attr("data-th-main", data.main);
-            });
-        } else $("body").attr("data-th-main", theme);
+        $("body").attr("data-th-main", window.localStorage.getItem("theme"));
+        $("body").attr("data-th-extra", window.localStorage.getItem("theme-extra"));
+        $("body").attr("data-th-nav", window.localStorage.getItem("theme-nav"));
     }
 
     /**

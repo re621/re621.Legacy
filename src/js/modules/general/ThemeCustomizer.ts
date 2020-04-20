@@ -22,12 +22,6 @@ export class ThemeCustomizer extends RE6Module {
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
-
-            // Don't forget to update DomUtilities.createThemes()
-            // It'll break without the correct settings names
-            main: window.localStorage.getItem("theme") || "hexagon",
-            extra: window.localStorage.getItem("theme-extra") || "hexagons",
-            nav: window.localStorage.getItem("theme-nav") || "top",
         };
     }
 
@@ -39,9 +33,7 @@ export class ThemeCustomizer extends RE6Module {
         super.create();
 
         // === Set the saved themes
-        $("body").attr("data-th-main", this.fetchSettings("main"));
-        $("body").attr("data-th-extra", this.fetchSettings("extra"));
-        $("body").attr("data-th-nav", this.fetchSettings("nav"));
+        // Done by the site itself, as well as in the DomUtilities
 
         // === Create a button in the header
         const openCustomizerButton = DomUtilities.addSettingsButton({
@@ -51,7 +43,7 @@ export class ThemeCustomizer extends RE6Module {
         // === Establish the settings window contents
         this.themeCustomizerForm = new Form({ "id": "theme-customizer", "parent": "div#modal-container" }, [
             Form.select(
-                "main", this.fetchSettings("main"), "Theme",
+                "main", window.localStorage.getItem("theme"), "Theme",
                 [
                     { value: "hexagon", name: "Hexagon" },
                     { value: "pony", name: "Pony" },
@@ -61,13 +53,12 @@ export class ThemeCustomizer extends RE6Module {
                 ],
                 undefined,
                 async (event, data) => {
-                    await this.pushSettings("main", data);
                     window.localStorage.setItem("theme", data);
                     $("body").attr("data-th-main", data);
                 }
             ),
             Form.select(
-                "extra", this.fetchSettings("extra"), "Extras",
+                "extra", window.localStorage.getItem("theme-extra"), "Extras",
                 [
                     { value: "none", name: "None" },
                     { value: "autumn", name: "Autumn" },
@@ -80,13 +71,12 @@ export class ThemeCustomizer extends RE6Module {
                 ],
                 undefined,
                 async (event, data) => {
-                    await this.pushSettings("extra", data);
                     window.localStorage.setItem("theme-extra", data);
                     $("body").attr("data-th-extra", data);
                 }
             ),
             Form.select(
-                "nav", this.fetchSettings("nav"), "Post Navbar",
+                "nav", window.localStorage.getItem("theme-nav"), "Post Navbar",
                 [
                     { value: "top", name: "Top" },
                     { value: "bottom", name: "Bottom" },
@@ -94,7 +84,6 @@ export class ThemeCustomizer extends RE6Module {
                 ],
                 undefined,
                 async (event, data) => {
-                    await this.pushSettings("nav", data);
                     window.localStorage.setItem("theme-nav", data);
                     $("body").attr("data-th-nav", data);
                 }
