@@ -3,9 +3,10 @@ import { PageDefintion } from "../../components/data/Page";
 import { APITag } from "../../components/api/responses/APITag";
 import { APIWikiPage } from "../../components/api/responses/APIWikiPage";
 import { Modal } from "../../components/structure/Modal";
-import { AvoidPosting } from "../../components/data/AvoidPosting";
 import { E621 } from "../../components/api/E621";
 import { APITagAlias } from "../../components/api/responses/APITagAlias";
+
+declare const AvoidPosting;
 
 export class TinyAlias extends RE6Module {
 
