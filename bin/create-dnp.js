@@ -1,12 +1,13 @@
 const fs = require("fs");
 const https = require('https');
+const core = require("@actions/core");
 
 (async () => {
     const package = JSON.parse(fs.readFileSync("./package.json"));
     let parsedData = {
         meta: {
             package: package.name + "/dnp",
-            version: process.env.GIT_TAG_NAME === undefined ? package.version : process.env.GIT_TAG_NAME
+            version: getBuildTime()
         },
         data: {}
     };
@@ -18,6 +19,21 @@ const https = require('https');
             date: entry["created_at"],
         }
     });
+
+    if (fs.existsSync("./dist/avoid-posting.json")) {
+        let oldList = Object.keys(JSON.parse(fs.readFileSync("./dist/avoid-posting.json")).data),
+            newList = Object.keys(parsedData.data);
+
+        let added = newList.filter(n => !oldList.includes(n)),
+            removed = oldList.filter(n => !newList.includes(n));
+
+        let changelog = "";
+        if (added.length > 0) changelog += "Added " + added.join(", ") + "\n";
+        if (removed.length > 0) changelog += "Removed " + removed.join(", ") + "\n";
+
+        if (changelog != "") core.setOutput("changelog", changelog);
+    }
+
     fs.writeFileSync("./dist/avoid-posting.json", JSON.stringify(parsedData, null, 4) + "\n");
 
 })();
@@ -69,4 +85,14 @@ function loadJSON(url) {
 
         request.end()
     });
+}
+
+/**
+ * Returns the current time, in YYMMDD:HHMM format
+ */
+function getBuildTime() {
+    function twoDigit(n) { return (n < 10 ? '0' : '') + n; }
+
+    const date = new Date();
+    return (date.getFullYear() + "").substring(2) + twoDigit(date.getMonth() + 1) + twoDigit(date.getDate()) + ":" + twoDigit(date.getHours()) + twoDigit(date.getMinutes());
 }
