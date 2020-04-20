@@ -15,12 +15,12 @@
         "https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.3.0/jszip.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js",
-        "https://cdn.jsdelivr.net/gh/re621/re621-lib/lazysizes/lazysizes.min.js",
-        "https://cdn.jsdelivr.net/npm/jquery.hotkeys@0.1.0/jquery.hotkeys.min.js"
+        "https://cdn.jsdelivr.net/npm/jquery.hotkeys@0.1.0/jquery.hotkeys.min.js",
+        "https://cdn.jsdelivr.net/gh/re621/re621-lib@1.0.0/lazysizes/lazysizes.min.js"
     ],
     "resource": {
         "re621_css": "%GITHUB%/releases/download/%VERSION%/style.min.css",
-        "re621_dnp": "%GITHUB%/releases/download/%VERSION%/avoid-posting.json"
+        "re621_dnp": "https://cdn.jsdelivr.net/gh/re621/re621@master/dist/avoid-posting.json"
     },
     "grant": [
         "GM.info",
