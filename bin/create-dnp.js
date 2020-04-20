@@ -1,21 +1,40 @@
 const fs = require("fs");
 const https = require('https');
+const core = require("@actions/core");
 
 (async () => {
     const package = JSON.parse(fs.readFileSync("./package.json"));
     let parsedData = {
         meta: {
             package: package.name + "/dnp",
-            version: process.env.GIT_TAG_NAME === undefined ? package.version : process.env.GIT_TAG_NAME
+            version: getBuildTime()
         },
         data: {}
     };
 
     const dnp = await getDnp();
     dnp.forEach((entry) => {
-        parsedData["data"][entry["antecedent_name"]] = { reason: entry["reason"] }
+        parsedData["data"][entry["antecedent_name"]] = {
+            text: entry["reason"],
+            date: entry["created_at"],
+        }
     });
-    fs.writeFileSync("./build/avoid-posting.json", JSON.stringify(parsedData, null, 2));
+
+    if (fs.existsSync("./dist/avoid-posting.json")) {
+        let oldList = Object.keys(JSON.parse(fs.readFileSync("./dist/avoid-posting.json")).data),
+            newList = Object.keys(parsedData.data);
+
+        let added = newList.filter(n => !oldList.includes(n)),
+            removed = oldList.filter(n => !newList.includes(n));
+
+        let changelog = "";
+        if (added.length > 0) changelog += "Added " + added.join(", ") + "\n";
+        if (removed.length > 0) changelog += "Removed " + removed.join(", ") + "\n";
+
+        if (changelog != "") core.setOutput("changelog", changelog);
+    }
+
+    fs.writeFileSync("./dist/avoid-posting.json", JSON.stringify(parsedData, null, 4) + "\n");
 
 })();
 
@@ -29,7 +48,7 @@ async function getDnp() {
             response = await loadJSON(url + page);
         } catch (error) {
             console.error(error);
-            process.exit(1);    //exit non-null to abort build process
+            process.exit(1); //exit non-null to abort build process
         }
         result = result.concat(response);
         page++;
@@ -40,9 +59,7 @@ async function getDnp() {
 function loadJSON(url) {
     const options = {
         hostname: "e621.net",
-        headers: {
-            "User-Agent": "re621/1.0 buildscript re621.github.io"
-        },
+        headers: { "User-Agent": "re621/1.0 dnp-crawler re621.github.io" },
         port: 443,
         path: url,
         method: "GET"
@@ -68,4 +85,14 @@ function loadJSON(url) {
 
         request.end()
     });
+}
+
+/**
+ * Returns the current time, in YYMMDD:HHMM format
+ */
+function getBuildTime() {
+    function twoDigit(n) { return (n < 10 ? '0' : '') + n; }
+
+    const date = new Date();
+    return (date.getFullYear() + "").substring(2) + twoDigit(date.getMonth() + 1) + twoDigit(date.getDate()) + ":" + twoDigit(date.getHours()) + twoDigit(date.getMinutes());
 }

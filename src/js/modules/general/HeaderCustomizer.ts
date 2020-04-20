@@ -76,7 +76,6 @@ export class HeaderCustomizer extends RE6Module {
      * Should be run immediately after the constructor finishes.
      */
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
 
         this.$menu = $("menu.main");
@@ -343,7 +342,7 @@ export class HeaderCustomizer extends RE6Module {
     /**
      * Iterates over the header menu and saves the data to cookies
      */
-    private saveNavbarSettings(): void {
+    private async saveNavbarSettings(): Promise<void> {
         const tabData = [];
         this.$menu.find("li").each(function (i, element) {
             const $tab = $(element);
@@ -353,7 +352,7 @@ export class HeaderCustomizer extends RE6Module {
                 href: $tab.attr("data-href"),
             });
         });
-        this.pushSettings("tabs", tabData);
+        await this.pushSettings("tabs", tabData);
     }
 
     private openTabNum(event, key: string): void {

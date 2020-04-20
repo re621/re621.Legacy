@@ -62,7 +62,7 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
     public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData> {
         const results: UpdateData = {};
 
-        const forumData: SubscriptionSettings = this.fetchSettings("data", true);
+        const forumData: SubscriptionSettings = await this.fetchSettings("data", true);
         if (Object.keys(forumData).length === 0) {
             return results;
         }
@@ -73,7 +73,7 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
                 results[new Date(forumJson.updated_at).getTime()] = await this.formatForumUpdate(forumJson);
             }
         }
-        this.pushSettings("data", forumData);
+        await this.pushSettings("data", forumData);
         return results;
     }
 

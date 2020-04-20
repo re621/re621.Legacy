@@ -23,7 +23,7 @@ header#top {
         display: none !important;
     }
 
-    nav#nav {
+    nav#nav.grid {
         display: grid !important;
         grid-template-columns: auto 1fr auto;
 

@@ -38,7 +38,6 @@ export class TinyAlias extends RE6Module {
      * Should be run immediately after the constructor finishes.
      */
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
         this.buildDOM();
     }
@@ -136,7 +135,7 @@ export class TinyAlias extends RE6Module {
             this.makeAliasEntry($aliasList, name, this.aliasData[name], index + "");
         }
 
-        $newAliasForm.submit((event) => {
+        $newAliasForm.submit(async (event) => {
             event.preventDefault();
             const $name = $newAliasForm.find("input[type='text']");
             const $data = $newAliasForm.find("textarea");
@@ -156,7 +155,7 @@ export class TinyAlias extends RE6Module {
             }
 
             this.aliasData[$name.val() + ""] = $data.val() + "";
-            this.pushSettings("data", this.aliasData);
+            await this.pushSettings("data", this.aliasData);
             this.makeAliasEntry($aliasList, $name.val() + "", $data.val() + "", this.aliasData.length + "");
 
             $name.val("");
@@ -217,7 +216,7 @@ export class TinyAlias extends RE6Module {
         }
 
         // Checking for DNP implications
-        if (AvoidPosting.contains(tag) || (tagInfo.isAliased && AvoidPosting.contains(tagInfo.realName))) {
+        if (await AvoidPosting.contains(tag) || (tagInfo.isAliased && await AvoidPosting.contains(tagInfo.realName))) {
             this.$infoText.append(`: ` + tag + ` is on <a href="/wiki_pages/85">DNP</a> list`);
         }
 
@@ -344,19 +343,19 @@ export class TinyAlias extends RE6Module {
     private makeAliasEntry($aliasList: JQuery<HTMLElement>, name: string, data: string, id: string): void {
         const $aliasForm = this.buildAliasForm($aliasList, name, data, "alias-form-" + id);
         $aliasForm.appendTo($aliasList);
-        $aliasForm.submit((event) => {
+        $aliasForm.submit(async (event) => {
             event.preventDefault();
             const $name = $aliasForm.find("input[type='text']");
             const $data = $aliasForm.find("textarea");
 
             this.aliasData[$name.val() + ""] = $data.val() + "";
-            this.pushSettings("data", this.aliasData);
+            await this.pushSettings("data", this.aliasData);
         });
-        $aliasForm.find("button[type='button']").click((event) => {
+        $aliasForm.find("button[type='button']").click(async (event) => {
             event.preventDefault();
             const $name = $aliasForm.find("input[type='text']");
             this.aliasData[$name.val() + ""] = undefined;
-            this.pushSettings("data", this.aliasData);
+            await this.pushSettings("data", this.aliasData);
             $aliasForm.remove();
         });
     }

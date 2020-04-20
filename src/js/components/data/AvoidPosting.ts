@@ -1,30 +1,53 @@
-import { GM } from "../api/GM";
+import { XM } from "../api/XM";
 
 /**
  * Manages the Avoid Posted list
  */
 export class AvoidPosting {
 
-    private static instance: AvoidPosting;
+    private static cache: DNPList;
 
-    private data;
-
-    private constructor() {
-        this.data = JSON.parse(GM.getResourceText("re621_dnp")).data;
+    /** Returns the cached DNP data. */
+    private static async getData(): Promise<DNPData> {
+        if (this.cache === undefined) this.cache = await XM.getResourceJSON<DNPList>("re621_dnp");
+        return Promise.resolve(this.cache.data);
     }
 
-    /** Returns a new instance of the current object */
-    private static getInstance(): AvoidPosting {
-        if (this.instance === undefined) this.instance = new AvoidPosting();
-        return this.instance;
+    /**
+     * Returns the DNP entry for the specified tag name.  
+     * If the tag is not on the list, returns undefined.
+     * @param name Tag name
+     */
+    public static async get(name: string): Promise<DNPDataEntry> {
+        return this.getData().then((data) => {
+            return Promise.resolve(data[name]);
+        });
     }
 
-    public static contains(name: string): boolean {
-        return this.getInstance().data[name] !== undefined;
+    /**
+     * Returns true if the provided tag name is on the DNP list, false otherwise
+     * @param name Tag name
+     */
+    public static async contains(name: string): Promise<boolean> {
+        return this.get(name).then((data) => {
+            return Promise.resolve(data !== undefined);
+        });
     }
 
-    public static get(name: string): {} {
-        return this.getInstance().data[name];
-    }
+}
 
+interface DNPList {
+    meta: {
+        package: string;
+        version: string;
+    };
+    data: DNPData;
+}
+
+type DNPData = {
+    [prop: string]: DNPDataEntry;
+}
+
+interface DNPDataEntry {
+    reason: string;
 }

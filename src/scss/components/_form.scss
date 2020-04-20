@@ -8,6 +8,7 @@ form.grid-form {
     width: 15rem;
 
     &.columns-2 {
+        -ms-grid-columns: 1fr 2fr 1fr 2fr;
         grid-template-columns: repeat(2, 1fr 2fr);
         width: 31.5rem;
 
@@ -22,6 +23,7 @@ form.grid-form {
     }
 
     &.columns-3 {
+        -ms-grid-columns: 1fr 2fr 1fr 2fr 1fr 2fr;
         grid-template-columns: repeat(3, 1fr 2fr);
         width: 48rem;
 
@@ -165,7 +167,7 @@ form.grid-form {
 
             /* to hide the checkbox itself */
             input[type=checkbox]+label:before {
-                content: "\f0c8";
+                content: unicode("f0c8");
                 font-family: "Font Awesome 5 Free";
                 display: inline-block;
                 letter-spacing: 10px;
@@ -173,7 +175,7 @@ form.grid-form {
             }
 
             input[type=checkbox]:checked+label:before {
-                content: "\f14a";
+                content: unicode("f14a");
             }
 
             label {

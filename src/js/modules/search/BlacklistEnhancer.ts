@@ -35,7 +35,6 @@ export class BlacklistEnhancer extends RE6Module {
      * Should be run immediately after the constructor finishes.
      */
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
 
         //Override default blacklist function

@@ -27,6 +27,6 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         allowUpdates: true
-        artifacts: "./build/style.min.css,./build/avoid-posting.json,./build/script.user.js"
+        artifacts: "./build/style.min.css,./build/script.meta.js,./build/script.user.js"
         replacesArtifacts: true
         token: ${{ secrets.GITHUB_TOKEN }}

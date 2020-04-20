@@ -1,5 +1,6 @@
 import { Page, PageDefintion } from "../data/Page";
-import { GM } from "../api/GM";
+import { XM } from "../api/XM";
+import { ErrorHandler } from "../ErrorHandler";
 
 /**
  * StructureUtilities  
@@ -7,14 +8,89 @@ import { GM } from "../api/GM";
  */
 export class DomUtilities {
 
-    public static createStructure(): void {
-        // Load in the external stylesheet
-        GM.addStyle(GM.getResourceText("re621_styles"));
+    /**
+     * Builds the structures used by several modules.  
+     * Returns a promise that is fulfilled when all DOM is created
+     */
+    public static async createStructure(): Promise<void> {
+        return this.prepareStructure().then(this.buildStructure);
+    }
 
-        // Create a modal container
+    /**
+     * Builds elements that would make the page jump around.  
+     * They should be loaded as soon as their parent element exists.
+     */
+    private static async prepareStructure(): Promise<any> {
+        try { await DomUtilities.elementReady("head", DomUtilities.addStylesheets); }
+        catch (error) { ErrorHandler.error("DOM", error.stack, "styles"); }
+
+        // This is terrible for performance, so keep the number of these to a minimum
+        try {
+            const promises: Promise<any>[] = [];
+            promises.push(DomUtilities.elementReady("body", DomUtilities.createThemes));
+            promises.push(DomUtilities.elementReady("div#page", DomUtilities.createModalContainer));
+            promises.push(DomUtilities.elementReady("menu.main", DomUtilities.createHeader));
+            return Promise.all(promises);
+        } catch (error) {
+            ErrorHandler.error("DOM", error.stack, "prepare");
+            return Promise.reject();
+        }
+    }
+
+    /**
+     * Build the less important elements that can wait until the page fully loads.  
+     * This function mainly exists for the sake of performance issues caused by prepareStructure()
+     */
+    private static async buildStructure(): Promise<void> {
+        return new Promise((resolve) => {
+            $(() => {
+                try {
+                    DomUtilities.createSearchbox();
+                    DomUtilities.createTagList();
+                    DomUtilities.createFormattedTextareas();
+                    DomUtilities.createPostPreviews();
+                } catch (error) { ErrorHandler.error("DOM", error.stack, "build"); }
+                resolve();
+            });
+        });
+    }
+
+    /**
+     * Attaches the script's stylesheets to the document
+     */
+    private static async addStylesheets(): Promise<any> {
+        return XM.getResourceText("re621_css").then(
+            (css) => { return Promise.resolve(XM.addStyle(css)); },
+            () => { return Promise.reject(); }
+        )
+    }
+
+    /**
+     * Sets the saved theme before the ThemeCustomizer module loads.
+     * This is a huge hack, but it's necessary to avoid having the page switch colors when the themes pop in.  
+     * Prone to breaking if the ThemeCustomizer settings names get changed.  
+     */
+    private static createThemes(): void {
+        const theme = window.localStorage.getItem("theme")
+        if (theme == null) {
+            XM.getValue("re621.ThemeCustomizer", { "main": "hexagon" }).then((data) => {
+                window.localStorage.setItem("theme", data.main);
+                $("body").attr("data-th-main", data.main);
+            });
+        } else $("body").attr("data-th-main", theme);
+    }
+
+    /**
+     * Creates the container that all modals attach themselves to
+     */
+    private static createModalContainer(): void {
         $("<div>").attr("id", "modal-container").prependTo("div#page");
+    }
 
-        // Create a more sensible header structure
+    /**
+     * Creates a gridified header structure
+     */
+    private static createHeader(): void {
         const $menuContainer = $("nav#nav");
         const $menuMain = $("menu.main");
 
@@ -30,7 +106,13 @@ export class DomUtilities {
 
         $("menu:last-child").addClass("submenu");
 
-        // Create a sticky searchbox container
+        $menuContainer.addClass("grid");
+    }
+
+    /**
+     * Creates a sticky searchbox container
+     */
+    private static createSearchbox(): void {
         if (Page.matches([PageDefintion.search, PageDefintion.post, PageDefintion.favorites])) {
             const $searchContainer = $("<div>").attr("id", "re621-search").prependTo("aside#sidebar");
             $("aside#sidebar section#search-box").appendTo($searchContainer);
@@ -45,10 +127,13 @@ export class DomUtilities {
 
             observer.observe($searchContainer[0]);
         }
+    }
 
-        // Tweak the tag lists
-        const $tags = $("#tag-box > ul > li, #tag-list > ul > li");
-        $tags.each((index, element) => {
+    /**
+     * Re-structures the tag lists
+     */
+    private static createTagList(): void {
+        $("#tag-box > ul > li, #tag-list > ul > li").each((index, element) => {
             const $container = $(element);
 
             const $tagLink = $container.find("a.search-tag").first();
@@ -78,7 +163,12 @@ export class DomUtilities {
             // Subscribe button container
             $("<span>").addClass("tag-action-subscribe").appendTo($actionsBox);
         });
+    }
 
+    /**
+     * Wraps all appropriate textareas in FormattingHelper-readable structures
+     */
+    private static createFormattedTextareas(): void {
         /** Wrap the post description textareas in FormattingHelper compatible tags */
         if (Page.matches(PageDefintion.upload) || Page.matches(PageDefintion.post)) {
             const $textarea = $("textarea#post_description");
@@ -90,10 +180,33 @@ export class DomUtilities {
                 .append($textarea)
                 .wrap(`<form class="simple_form"></form>`);
         }
+    }
 
-        // Prepare post-preview elements
+    /**
+     * Wraps all post-previews in ThumbnailEnhancer-readable structures
+     */
+    private static createPostPreviews(): void {
         $("div#posts-container article.post-preview").each((index, element) => {
             $(element).find("a").first().addClass("preview-box");
+        });
+    }
+
+    /**
+     * Fires the callback as soon as the specified element exists.  
+     * Runs every 250ms, and gives up after 10 seconds
+     * @param element Selector to search for
+     * @param callback Callback function
+     */
+    private static async elementReady(element: string, callback: Function): Promise<void> {
+        return new Promise(async (resolve, reject) => {
+            let timeout = 0;
+            while ($(element).length == 0 && timeout < (1000 * 10)) {
+                await new Promise((resolve) => { window.setTimeout(() => { resolve(); }, 100) });
+                timeout += 100;
+            }
+
+            if ($(element).length > 0) { callback(); resolve(); }
+            else reject();
         });
     }
 

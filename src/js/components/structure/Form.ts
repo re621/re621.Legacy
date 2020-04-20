@@ -1,5 +1,5 @@
 import { Hotkeys } from "../data/Hotkeys";
-import { GM } from "../api/GM";
+import { XM } from "../api/XM";
 import { Util } from "./Util";
 
 /**
@@ -316,7 +316,7 @@ export class Form {
             .appendTo($inputContainer);
 
         $($copybutton).click(function () {
-            GM.setClipboard($input.val());
+            XM.setClipboard($input.val());
         });
 
         let timer: number;

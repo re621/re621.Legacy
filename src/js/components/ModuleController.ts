@@ -6,17 +6,22 @@ export class ModuleController {
     private static modules: Map<string, RE6Module> = new Map();
 
     /**
-     * Registers the module so that its settings could be changed
-     * @param module Module to register
+     * Registers the module list
+     * @param module Modules to register
      * @todo any parameter is not correct here but I couldn't figure the right types out
      *  { new(): RE6Module } works to access constructor name but not static methods
      */
-    public static register(moduleClass: any): void {
-        try {
-            const moduleInstance = moduleClass.getInstance();
-            moduleInstance.create();
-            this.modules.set(moduleClass.prototype.constructor.name, moduleInstance);
-        } catch (error) { ErrorHandler.error(moduleClass, error.stack, "init"); }
+    public static register(moduleList: any | any[]): void {
+        if (!Array.isArray(moduleList)) moduleList = [moduleList];
+
+        moduleList.forEach(async (moduleClass: any) => {
+            try {
+                const moduleInstance = moduleClass.getInstance();
+                this.modules.set(moduleClass.prototype.constructor.name, moduleInstance);
+                await moduleInstance.prepare();
+                if (moduleInstance.canInitialize()) moduleInstance.create();
+            } catch (error) { ErrorHandler.error(moduleClass, error.stack, "init"); }
+        });
     }
 
     /**

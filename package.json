@@ -12,17 +12,20 @@
     "main": "./build/script.user.js",
     "scripts": {
         "autoprefixer": "postcss ./build/style.min.css --no-map --use autoprefixer -r",
-        "build:prod": "npm-run-all eslint typescript browserify minify userscript creatednp sass autoprefixer clean",
-        "build:dev": "npm-run-all eslint typescript browserify userscript sass autoprefixer clean",
+        "build:prod": "npm-run-all eslint typescript browserify minify userscript:prod sass autoprefixer clean",
+        "build:dev": "npm-run-all eslint typescript browserify userscript:dev sass autoprefixer clean",
         "eslint": "eslint ./**/*.ts",
         "clean": "rimraf ./build/temp/",
         "test": "echo \"Error: no test specified\" && exit 1",
         "typescript": "tsc",
         "browserify": "browserify ./build/temp/js/main.js -o ./build/script.user.js",
         "minify": "terser ./build/script.user.js --compress -o ./build/script.user.js",
-        "userscript": "node ./bin/userscript-format.js",
         "sass": "sass ./src/scss/style.scss ./build/style.min.css --no-source-map --style compressed",
-        "creatednp": "node ./bin/create-dnp.js"
+        "creatednp": "node ./bin/create-dnp.js",
+        "userscript:prod": "node ./bin/userscript-format.js prod",
+        "userscript:dev": "node ./bin/userscript-format.js",
+        "injector:chrome": "node ./bin/userscript-format.js injector chrome",
+        "injector:firefox": "node ./bin/userscript-format.js injector firefox"
     },
     "repository": {
         "type": "git",
@@ -39,6 +42,7 @@
         "jquery-ui": "^1.12.1"
     },
     "devDependencies": {
+        "@actions/core": "^1.2.3",
         "@types/jquery": "^3.3.33",
         "@types/jqueryui": "^1.12.10",
         "@typescript-eslint/eslint-plugin": "^2.25.0",

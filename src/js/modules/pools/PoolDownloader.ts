@@ -63,7 +63,6 @@ export class PoolDownloader extends RE6Module {
 
     /** Creates the module's structure. */
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
 
         const base = Page.matches(PageDefintion.pool) ? "div#c-pools" : "div#c-sets";

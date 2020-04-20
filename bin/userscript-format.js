@@ -1,29 +1,55 @@
-/* eslint-disable prefer-const */
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 const fs = require("fs");
 
 const headerData = JSON.parse(fs.readFileSync("./bin/userscript-header.json")),
     templateData = fs.readFileSync("./bin/userscript-template.js").toString(),
-    package = JSON.parse(fs.readFileSync("./package.json"));
+    package = JSON.parse(fs.readFileSync("./package.json")),
+    mode = process.argv[2] ? process.argv[2] : "build",
+    browser = process.argv[3] ? process.argv[3] : "chrome";
 
 // Create the userscript header
-let header = "// ==UserScript==\n";
+let header = "";
 for (let [key, value] of Object.entries(headerData)) {
     if (Array.isArray(value)) {
-        value.forEach((subValue) => { header += "// @" + key + " " + subValue + "\n"; });
+        value.forEach((subValue) => { header += formateHeaderLine(key, subValue);; });
     } else if (typeof value === "object" && value !== null) {
         for (let [subKey, subValue] of Object.entries(value))
-            header += "// @" + key + " " + subKey + " " + subValue + "\n";
+            header += formateHeaderLine(key, subKey, subValue);
     } else {
         // assume string
-        header += "// @" + key + " " + value + "\n";
+        header += formateHeaderLine(key, value);
     }
 }
-header += "// ==/UserScript==\n"
 
-// Write to file
-fs.writeFileSync("./build/script.user.js", parseTemplate(header) + "\n\n" + parseTemplate(templateData) + "\n\n" + fs.readFileSync("./build/script.user.js"));
+switch (mode) {
+    case "injector": {
+        // Injector script
+        header = header
+            .replace(/(\/\/ @name[ ]+)(.+)/, "$1re621 Injector")
+            .replace(/\/\/ @updateURL.*\n/, "")
+            .replace(/\/\/ @downloadURL.*\n/, "")
+            .replace(/(\/\/ @resource[ ]+re621_css )(.+)/, browser == "chrome" ? "$1file://" + __dirname + "\\..\\build\\style.min.css" : "$1http://localhost:7000/style.min.css")
+            .replace(/(\/\/ @resource[ ]+re621_dnp )(.+)/, browser == "chrome" ? "$1file://" + __dirname + "\\..\\build\\avoid-posting.json" : "$1http://localhost:7000/avoid-posting.json");
+        header += formateHeaderLine("require", browser == "chrome" ? "file://" + __dirname + "\\..\\build\\script.user.js" : "http://localhost:7000/script.user.js");
+        fs.writeFileSync("./build/injector.user.js", parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n"));
+        break;
+    }
+    case "prod": {
+        // Metadata file
+        fs.writeFileSync(
+            "./build/script.meta.js",
+            parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n")
+        );
+    }
+    default: {
+        // Normal mode
+        fs.writeFileSync(
+            "./build/script.user.js",
+            parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n") + "\n\n" +
+            parseTemplate(templateData) + "\n\n" +
+            fs.readFileSync("./build/script.user.js")
+        );
+    }
+}
 
 /**
  * Replaces the variables in the provided string with those from the package.json
@@ -50,4 +76,13 @@ function getBuildTime() {
 
     const date = new Date();
     return (date.getFullYear() + "").substring(2) + twoDigit(date.getMonth() + 1) + twoDigit(date.getDate()) + ":" + twoDigit(date.getHours()) + twoDigit(date.getMinutes());
+}
+
+function formateHeaderLine(a, b, c) {
+    let output = "// @";
+    while (a.length < 15) a += " ";
+    output += a + " " + b;
+    if (c !== undefined) output += " " + c;
+    output += "\n";
+    return output;
 }

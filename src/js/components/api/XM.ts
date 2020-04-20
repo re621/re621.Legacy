@@ -1,23 +1,57 @@
 /* Type definitions for the Tampermonkey methods */
 
-declare const GM_getResourceText;
-declare const GM_addStyle;
-declare const GM_download;
-declare const GM_setValue;
-declare const GM_getValue;
-declare const GM_deleteValue;
-declare const GM_xmlhttpRequest;
-declare const GM_openInTab;
-declare const GM_setClipboard;
+declare const saveAs;
 
-export class GM {
+import { Util } from "../structure/Util";
+
+declare const GM: any;
+declare const GM_getResourceText: Function;
+declare const GM_getResourceURL: Function;
+declare const GM_xmlhttpRequest: Function;
+
+declare const unsafeWindow: Window;
+
+export enum ScriptManager {
+    GM = "Greasemonkey",
+    TM = "Tampermonkey",
+}
+
+export class XM {
+
+    /**
+     * Returns the information provided by the script manager
+     */
+    public static info(): GMInfo {
+        return GM.info;
+    }
+
+    /**
+     * Returns the unsafeWindow instance.  
+     * Should be avoided as much as possible.
+     */
+    public static getWindow(): Window {
+        return unsafeWindow;
+    }
 
     /**
      * Adds the given style to the document and returns the injected style element
      * @param css string CSS styles
      */
-    public static addStyle(css: string): HTMLStyleElement {
-        return GM_addStyle(css);
+    public static addStyle(css: string): JQuery<HTMLElement> {
+        return $("<style>")
+            .attr({
+                "id": getID(),
+                "type": "text/css"
+            })
+            .html(css)
+            .appendTo("head");
+
+        function getID(): string {
+            let id: string;
+            do { id = Util.makeID(); }
+            while ($("style#" + id).length > 0);
+            return id;
+        }
     };
 
     /**
@@ -25,8 +59,11 @@ export class GM {
      * @param name Name of the data entry
      * @param value Data value
      */
-    public static setValue(name: string, value: any): void {
-        return GM_setValue(name, value);
+    public static async setValue(name: string, value: any): Promise<void> {
+        return new Promise(async (resolve) => {
+            await GM.setValue(name, value);
+            resolve();
+        });
     };
 
     /**
@@ -35,25 +72,22 @@ export class GM {
      * @param name Name of the data entry
      * @param defaultValue Default value
      */
-    public static getValue(name: string, defaultValue: any): any {
-        return GM_getValue(name, defaultValue);
+    public static async getValue(name: string, defaultValue: any): Promise<any> {
+        return new Promise(async (resolve) => {
+            resolve(GM.getValue(name, defaultValue));
+        });
     };
 
     /**
      * Deletes the entry with the specified name from storage
      * @param name Name of the data entry
      */
-    public static deleteValue(name: string): void {
-        GM_deleteValue(name);
+    public static async deleteValue(name: string): Promise<void> {
+        return new Promise(async (resolve) => {
+            await GM.deleteValue(name);
+            resolve();
+        });
     }
-
-    /**
-     * Get the content of a predefined @resource tag at the script header
-     * @param name Resource name
-     */
-    public static getResourceText(name: string): string {
-        return GM_getResourceText(name);
-    };
 
     /**
      * Open a new tab with this url.
@@ -63,7 +97,67 @@ export class GM {
     public static openInTab(url: string, options?: GMOpenInTabOptions): GMOpenInTab;
     public static openInTab(url: string, loadInBackground?: boolean): GMOpenInTab;
     public static openInTab(a: any, b?: any): GMOpenInTab {
-        return GM_openInTab(a, b);
+        return GM.openInTab(a, b);
+    }
+
+    /**
+     * Copies data into the clipboard
+     * @param data Data to be copied
+     * @param info object like "{ type: 'text', mimetype: 'text/plain'}" or a string expressing the type ("text" or "html")
+     */
+    public static setClipboard(data: any, info?: { type: string; mimetype: string } | string): void {
+        return GM.setClipboard(data, info);
+    };
+
+    /**
+     * Get contents of the resource as a base64-encoded data URL
+     * Note that the name must be defined in a @resource tag in the script header.
+     * @param name Resource name
+     */
+    public static async getResourceURL(name: string): Promise<string> {
+        if (typeof GM.getResourceUrl === "function") { return GM.getResourceUrl(name); }
+        else { return GM_getResourceURL(name); }
+    }
+
+    /**
+     * Get contents of the resource as plain text.  
+     * Note that the name must be defined in a @resource tag in the script header.
+     * @param name Resource name
+     */
+    public static async getResourceText(name: string): Promise<string> {
+        if (typeof GM_getResourceText === "function") return Promise.resolve(GM_getResourceText(name));
+
+        const resource = await XM.getResourceURL(name);
+        if (resource.startsWith("data:")) {
+            return Promise.resolve(atob(resource.replace(/^data:(.*);base64,/g, "")));
+        } else if (resource.startsWith("blob:")) {
+            return new Promise(async (resolve, reject) => {
+                const request = await fetch(resource, {
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "User-Agent": window["re621"]["useragent"],
+                    },
+                    method: "GET",
+                    mode: "cors"
+                });
+
+                if (request.ok) { resolve(await request.text()); }
+                else { reject(); }
+            });
+        } else { return Promise.reject(); }
+    }
+
+    /**
+     * Get contents of the resource as JSON
+     * Note that the name must be defined in a @resource tag in the script header.
+     * @param name Resource name
+     */
+    public static async getResourceJSON<T>(name: string): Promise<T> {
+        return XM.getResourceText(name).then(
+            (resolved) => { return Promise.resolve(JSON.parse(resolved) as T); },
+            (rejected) => { return Promise.reject(rejected); }
+        )
     }
 
     /**
@@ -74,27 +168,90 @@ export class GM {
      *  - **abort**: function to be called to cancel this request
      */
     public static xmlHttpRequest(details: GMxmlHttpRequestDetails): void {
-        return GM_xmlhttpRequest(details);
+        if (details.headers === undefined) details.headers = {};
+        if (details.headers["User-Agent"] === undefined)
+            details.headers["User-Agent"] = window["re621"]["useragent"];
+
+        if (typeof GM.xmlHttpRequest === "function") return GM.xmlHttpRequest(details);
+        else return GM_xmlhttpRequest(details);
     };
 
     /**
      * Downloads a given URL to the local disk.  
      * @param details Download details
      */
-    public static download(url: string, name: string): Function;
-    public static download(defaults: GMDownloadDetails): Function;
-    public static download(a: any, b?: any): Function {
-        return GM_download(a, b);
-    };
+    public static download(url: string, name: string): void;
+    public static download(defaults: GMDownloadDetails): void;
+    public static download(a: any, b?: any): void {
+        if (typeof a === "string") {
+            a = {
+                url: a,
+                name: b,
+            };
+        }
 
-    /**
-     * Copies data into the clipboard
-     * @param data Data to be copied
-     * @param info object like "{ type: 'text', mimetype: 'text/plain'}" or a string expressing the type ("text" or "html")
-     */
-    public static setClipboard(data: any, info?: { type: string; mimetype: string } | string): void {
-        return GM_setClipboard(data, info);
+        if (a.headers === undefined) a.headers = { "User-Agent": window["re621"]["useragent"] };
+
+        if (a.onerror === undefined) a.onerror = (): void => { return; }
+        if (a.onload === undefined) a.onload = (): void => { return; }
+        if (a.onprogress === undefined) a.onprogress = (): void => { return; }
+        if (a.ontimeout === undefined) a.ontimeout = (): void => { return; }
+
+        let timer: number;
+        XM.xmlHttpRequest({
+            url: a.url,
+            method: "GET",
+            headers: a.headers,
+            responseType: "blob",
+            onerror: (event) => { a.onerror(event); },
+            ontimeout: (event) => { a.ontimeout(event); },
+            onprogress: (event) => {
+                if (timer) clearTimeout(timer);
+                timer = window.setTimeout(() => { a.onprogress(event) }, 500);
+            },
+            onload: (event) => {
+                a.onload(event);
+                saveAs(event.response as Blob, a.name);
+            }
+        });
     };
+}
+
+interface GMInfo {
+    /** Detailed script information */
+    script: GMScript;
+
+    /** Metadata block, as a raw string */
+    scriptMetaStr: string;
+
+    /** Script manager - Greasemonkey, Tampermonkey, etc */
+    scriptHandler: string;
+
+    /** Script manager version */
+    version: string;
+}
+
+interface GMScript {
+    /** Script "unique" id, i.e. 2c4772b3-431f-442b-bdc9-67c5b65fbb9c */
+    uuid: string;
+
+    /** Script name, i.e. re621 Injector */
+    name: string;
+
+    /** Script version, i.e. 1.0.3 */
+    version: string;
+
+    /** Script namespace, i.e. re621.github.io */
+    namespace: string;
+
+    /** Script description, i.e. "Injects re621 local files into the page" */
+    description: string;
+
+    /** Exclusions block, as an array of strings */
+    excludes: string[];
+
+    /** Inclusions block, as an array of strings */
+    includes: string[];
 }
 
 interface GMDownloadDetails {
@@ -107,45 +264,17 @@ interface GMDownloadDetails {
     /** **headers** - see GM_xmlhttpRequest for more details */
     headers?: string;
 
-    /** **saveAs** - boolean value, show a saveAs dialog */
-    saveAs?: boolean;
-
     /** **onerror** callback to be executed if this download ended up with an error */
-    onerror?(error: GMDownloadError): void;
-
-    /** **onload** callback to be executed if this download finished */
-    onload?(): void;
+    onerror?(event: GMxmlHttpRequestEvent): void;
 
     /** **onprogress** callback to be executed if this download made some progress */
-    onprogress?(): void;
+    onprogress?(event: GMxmlHttpRequestProgressEvent): void;
 
     /** **ontimeout** callback to be executed if this download failed due to a timeout */
-    ontimeout?(): void;
-}
+    ontimeout?(event: GMxmlHttpRequestEvent): void;
 
-interface GMDownloadError {
-    /** **error** - error reason */
-    error: GMDownladErrorTypes;
-
-    /** **details** - detail about that error */
-    details: string;
-}
-
-interface GMDownladErrorTypes {
-    /** **not_enabled** - the download feature isn't enabled by the user */
-    not_enabled: boolean;
-
-    /** **not_whitelisted** - the requested file extension is not whitelisted */
-    not_whitelisted: boolean;
-
-    /** **not_permitted** - the user enabled the download feature, but did not give the downloads permission */
-    not_permitted: boolean;
-
-    /** **not_supported** - the download feature isn't supported by the browser/version */
-    not_supported: boolean;
-
-    /** **not_succeeded** - the download wasn't started or failed, the details attribute may provide more information */
-    not_succeeded: boolean;
+    /** **onload** callback to be executed if this download finished */
+    onload?(event: GMxmlHttpRequestResponse): void;
 }
 
 interface GMxmlHttpRequestDetails {

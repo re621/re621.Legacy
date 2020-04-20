@@ -48,7 +48,6 @@ export class ImageScaler extends RE6Module {
      * Should be run immediately after the constructor finishes.
      */
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
 
         this.post = Post.getViewingPost();
@@ -81,10 +80,10 @@ export class ImageScaler extends RE6Module {
         resizeButtonContainer.append(resizeForm.get());
         this.resizeSelector = resizeForm.getInputList().get("scale");
 
-        this.resizeSelector.change((event, save) => {
+        this.resizeSelector.change(async (event, save) => {
             const size = $(event.target).val() + "";
             this.setImageSize(size);
-            if (save !== false) this.pushSettings("size", size);
+            if (save !== false) await this.pushSettings("size", size);
         });
 
         this.image.click(() => {

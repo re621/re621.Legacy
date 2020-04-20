@@ -1,0 +1,36 @@
+name: dnp
+on:
+  push:
+  # everyday at 3 am
+  schedule:
+    - cron:  '0 3 * * *'
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
+        ref: 'master'
+      
+    - name: Set up node
+      uses: actions/setup-node@v1
+  
+    - run: npm ci
+
+    - name: Create DNP list
+      run: npm run creatednp
+      id: createDNP
+      
+    - name: Configure git
+      run: |
+        git config --global user.name 'bitWolfy'
+        git config --global user.email 'bitWolfy@users.noreply.github.com'
+        
+    - uses: stefanzweifel/git-auto-commit-action@v4.1.3
+      if: ${{ steps.createDNP.outputs.changelog }}
+      with:
+        commit_message: "Updated the DNP list\n${{ steps.createDNP.outputs.changelog }}"

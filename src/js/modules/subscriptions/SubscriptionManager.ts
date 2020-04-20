@@ -28,8 +28,8 @@ export class SubscriptionManager extends RE6Module {
      * Should be run immediately after the constructor finishes.
      */
     public async create(): Promise<void> {
-        if (!this.canInitialize()) return;
         super.create();
+
         // Create a button in the header
         this.$openSubsButton = DomUtilities.addSettingsButton({
             name: `<i class="fas fa-bell"></i>`,
@@ -44,17 +44,14 @@ export class SubscriptionManager extends RE6Module {
 
         const lastUpdate = this.fetchSettings("lastUpdate");
 
-        const infoPage = this.getInfoPage(lastUpdate);
         content.push({
-            name: "Info", page: infoPage.get()
+            name: "Info", page: this.getInfoPage(lastUpdate).get()
         });
 
         this.$subsTabs = new Tabbed({
             name: "settings-tabs",
             content: content
         });
-
-        this.handleInfoPage(infoPage);
 
         // Create the modal
         const modal = new Modal({
@@ -162,75 +159,46 @@ export class SubscriptionManager extends RE6Module {
 
     private getInfoPage(lastUpdate: number): Form {
         const updateInProgress = this.fetchSettings("updateInProgress");
-        const heartbeat = this.fetchSettings("heartbeat", true);
+        let heartbeat = this.fetchSettings("heartbeat");
 
-        const form = new Form(
-            {
-                id: "subscriptions-status",
-                columns: 2,
-                parent: "div#modal-container",
-            },
-            [
-                {
-                    id: "subscriptions-title",
-                    type: "div",
-                    value: "<h3>Stats</h3>",
-                    stretch: "full"
-                },
-
-                {
-                    id: "subscriptions-lastupdate-label",
-                    type: "div",
-                    value: "Last Update: " + this.getLastUpdateText(lastUpdate),
-                    stretch: "mid"
-                },
-                {
-                    id: "subscriptions-nextupdate-label",
-                    type: "div",
-                    value: "Next Update: " + this.getNextUpdateText(updateInProgress, lastUpdate, heartbeat),
-                    stretch: "mid"
-                },
-                {
-                    id: "subscriptions-triggerupdate",
-                    type: "button",
-                    value: "Manual update",
-                    stretch: "mid"
-                }
-            ]
-        );
-        return form;
-    }
-
-    private handleInfoPage(form: Form): void {
-        const inputList = form.getInputList();
         let allowUpdate = true;
-        inputList.get("subscriptions-triggerupdate").on("click", async () => {
-            //If an update was already triggered, do nothing. 
-            const heartbeat = this.fetchSettings("heartbeat", true);
-            const updateInProgress = this.fetchSettings("updateInProgress");
-            if (this.heartbeatCheck(new Date().getTime(), heartbeat, updateInProgress)) {
-                Danbooru.notice("Update is already in progress");
-                return;
-            }
-            //Only allow one manuall update per page
-            if (!allowUpdate) {
-                Danbooru.notice("You already updated, please reload to update again");
-                return;
-            }
-            const hearbeatTimer = this.startUpdate();
-            allowUpdate = false;
-            const now = new Date().getTime();
-            for (const entry of this.subscribers.entries()) {
-                entry[1].content = $("<div>").addClass("subscriptions-list");
-                await this.initSubscriber(entry[1], true, this.fetchSettings("lastUpdate", true), now);
-                this.$subsTabs.replace(entry[0], entry[1].content);
-            }
-            //refresh last/next update label
-            inputList.get("subscriptions-lastupdate-label").html("Last Update: " + this.getLastUpdateText(now));
-            inputList.get("subscriptions-nextupdate-label").html("Next Update: " + this.getNextUpdateText(updateInProgress, now, heartbeat));
+        const form = new Form({ id: "subscriptions-status", columns: 2, parent: "div#modal-container" }, [
+            Form.header("Stats"),
+            Form.div(`Last Update: <span id="subscriptions-lastupdate">` + this.getLastUpdateText(lastUpdate) + `</span>`, "mid"),
+            Form.div(`Next Update: <span id="subscriptions-nextupdate">` + this.getNextUpdateText(updateInProgress, lastUpdate, heartbeat) + `</span>`, "mid"),
+            Form.button(
+                "triggerupdate", "Manual Update", undefined, "mid", async () => {
 
-            this.stopUpdate(hearbeatTimer);
-        });
+                    //If an update was already triggered, do nothing. 
+                    heartbeat = await this.fetchSettings("heartbeat", true);
+                    const updateInProgress = this.fetchSettings("updateInProgress");
+                    if (this.heartbeatCheck(new Date().getTime(), heartbeat, updateInProgress)) {
+                        Danbooru.notice("Update is already in progress");
+                        return;
+                    }
+                    //Only allow one manuall update per page
+                    if (!allowUpdate) {
+                        Danbooru.notice("You already updated, please reload to update again");
+                        return;
+                    }
+                    const hearbeatTimer = this.startUpdate();
+                    allowUpdate = false;
+                    const now = new Date().getTime();
+                    for (const entry of this.subscribers.entries()) {
+                        entry[1].content = $("<div>").addClass("subscriptions-list");
+                        await this.initSubscriber(entry[1], true, await this.fetchSettings("lastUpdate", true), now);
+                        this.$subsTabs.replace(entry[0], entry[1].content);
+                    }
+                    //refresh last/next update label
+                    $("span#subscriptions-lastupdate").html("Last Update: " + this.getLastUpdateText(now));
+                    $("span#subscriptions-nextupdate").html("Next Update: " + this.getNextUpdateText(updateInProgress, now, heartbeat));
+
+                    this.stopUpdate(hearbeatTimer);
+
+                }
+            ),
+        ]);
+        return form;
     }
 
     private getLastUpdateText(lastUpdate: number): string {
@@ -411,7 +379,7 @@ export class SubscriptionManager extends RE6Module {
     }
 
     public addSubscribeButtons(instance: Subscription): void {
-        let subscriptionData: SubscriptionSettings = instance.fetchSettings("data", true);
+        let subscriptionData: SubscriptionSettings = instance.fetchSettings("data");
         instance.getButtonElements().each((index, element) => {
             const $element = $(element);
 
@@ -424,19 +392,19 @@ export class SubscriptionManager extends RE6Module {
                 $unsubscribeButton.addClass("hidden");
             } else { $subscribeButton.addClass("hidden"); }
 
-            $subscribeButton.click((e) => {
-                e.preventDefault();
+            $subscribeButton.click(async (event) => {
+                event.preventDefault();
                 $subscribeButton.toggleClass("hidden");
                 $unsubscribeButton.toggleClass("hidden");
-                subscriptionData = instance.fetchSettings("data", true);
+                subscriptionData = await instance.fetchSettings("data", true);
                 subscriptionData[id] = {};
                 instance.pushSettings("data", subscriptionData);
             });
-            $unsubscribeButton.click((e) => {
-                e.preventDefault();
+            $unsubscribeButton.click(async (event) => {
+                event.preventDefault();
                 $subscribeButton.toggleClass("hidden");
                 $unsubscribeButton.toggleClass("hidden");
-                subscriptionData = instance.fetchSettings("data", true);
+                subscriptionData = await instance.fetchSettings("data", true);
 
                 delete subscriptionData[id];
                 instance.pushSettings("data", subscriptionData);
@@ -465,8 +433,8 @@ export class SubscriptionManager extends RE6Module {
             for (const updateTimestamp of Object.keys(cache[timestamps[i]]).sort((a, b) => parseInt(b) - parseInt(a))) {
                 let currentlySubbed = true;
                 const update: UpdateContent = cache[timestamps[i]][updateTimestamp];
-                const toggleSub = (): void => {
-                    const cache: UpdateCache = sub.instance.fetchSettings("cache", true);
+                const toggleSub = async (): Promise<void> => {
+                    const cache: UpdateCache = await sub.instance.fetchSettings("cache", true);
                     const data = sub.instance.fetchSettings("data", true);
                     if (currentlySubbed) {
                         delete cache[timestamps[i]][updateTimestamp];

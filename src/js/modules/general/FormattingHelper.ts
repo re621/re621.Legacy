@@ -95,6 +95,8 @@ export class FormattingManager extends RE6Module {
 
     /** Creates the Formatting Helpers for appropriate textareas */
     public create(): void {
+        super.create();
+
         $("div.dtext-previewable:has(textarea)").each((i, element) => {
             const $container = $(element);
             const newFormatter = new FormattingHelper($container, this, this.index);
@@ -147,13 +149,6 @@ class FormattingHelper {
         this.$container = $targetContainer;
 
         this.createDOM();
-
-        this.$form.submit((event) => {
-            if (this.$textarea.val() === "") {
-                event.preventDefault();
-                this.$container.addClass("invalid");
-            }
-        });
 
         this.registerHotkeys();
     }
@@ -401,36 +396,40 @@ class FormattingHelper {
     public loadButtons(): void {
         this.$formatButtons.empty();
 
-        this.parent.fetchSettings("buttonsActive", true).forEach((data: ButtonDefinition) => {
-            const buttonElement = this.createButton(data);
-            buttonElement.box.appendTo(this.$formatButtons);
+        this.parent.fetchSettings("buttonsActive", true).then((response) => {
+            response.forEach((data: ButtonDefinition) => {
+                const buttonElement = this.createButton(data);
+                buttonElement.box.appendTo(this.$formatButtons);
 
-            if (buttonElement.box.attr("data-text") === "") {
-                buttonElement.button.addClass("disabled");
-                buttonElement.button.removeAttr("title");
-            }
+                if (buttonElement.box.attr("data-text") === "") {
+                    buttonElement.button.addClass("disabled");
+                    buttonElement.button.removeAttr("title");
+                }
+            });
         });
 
         this.$formatButtonsDrawer.empty();
-        this.parent.fetchSettings("buttonInactive", true).forEach((data: ButtonDefinition) => {
-            const buttonData = this.createButton(data);
-            buttonData.box.appendTo(this.$formatButtonsDrawer);
+        this.parent.fetchSettings("buttonInactive", true).then((response) => {
+            response.forEach((data: ButtonDefinition) => {
+                const buttonData = this.createButton(data);
+                buttonData.box.appendTo(this.$formatButtonsDrawer);
+            });
         });
     }
 
     /** Re-indexes and saves the toolbar configuration */
-    private saveButtons(): void {
+    private async saveButtons(): Promise<void> {
         let buttonData: ButtonDefinition[] = [];
         this.$formatButtons.find("li").each(function (i, element) {
             buttonData.push(fetchData(element));
         });
-        this.parent.pushSettings("buttonsActive", buttonData);
+        await this.parent.pushSettings("buttonsActive", buttonData);
 
         buttonData = [];
         this.$formatButtonsDrawer.find("li").each(function (i, element) {
             buttonData.push(fetchData(element));
         });
-        this.parent.pushSettings("buttonInactive", buttonData);
+        await this.parent.pushSettings("buttonInactive", buttonData);
 
         this.$container.trigger("re621:formatter:update", [this]);
 
