@@ -150,13 +150,6 @@ class FormattingHelper {
 
         this.createDOM();
 
-        this.$form.submit((event) => {
-            if (this.$textarea.val() === "") {
-                event.preventDefault();
-                this.$container.addClass("invalid");
-            }
-        });
-
         this.registerHotkeys();
     }
 
