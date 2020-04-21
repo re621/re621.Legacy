@@ -63,7 +63,9 @@ export class PoolNavigator extends RE6Module {
         const navbars = poolNavigator.navbars,
             active = poolNavigator.activeNav;
         if (navbars.length == 0) return;
-        navbars[active].element.find("a.next").first()[0].click();
+        const button = navbars[active].element.find("a.next").first()[0];
+        if (button === undefined) return;
+        button.click();
     }
 
     /** Emulates a click on the "prev" button */
@@ -72,7 +74,9 @@ export class PoolNavigator extends RE6Module {
         const navbars = poolNavigator.navbars,
             active = poolNavigator.activeNav;
         if (navbars.length == 0) return;
-        navbars[active].element.find("a.prev").first()[0].click();
+        const button = navbars[active].element.find("a.prev").first()[0];
+        if (button === undefined) return;
+        button.click();
     }
 
     /** Creates the module structure */
