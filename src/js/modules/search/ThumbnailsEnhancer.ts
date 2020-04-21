@@ -319,41 +319,52 @@ export class ThumbnailEnhancer extends RE6Module {
 
 
         /* Load the larger images */
-        // Thumbnail types that are not compatible with the enhancer
-        if ($article.attr("data-file-ext") === "swf" || $article.attr("data-flags") === "deleted") return;
+        if ($article.attr("data-file-ext") === "swf" || $article.attr("data-flags") === "deleted") {
+            // Replace placeholder images with CSS-styled ones
 
-        const sampleURL = $article.attr("data-large-file-url");
+            $img.attr("src", "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==");
+            $picture.addClass("color-text post-placeholder")
 
-        if (upscaleMode === ThumbnailPerformanceMode.Hover) {
-            let timer: number;
-            $article.on("mouseenter", () => {
-                if (ThumbnailEnhancer.zoomPaused) return;
+            if ($article.attr("data-file-ext") === "swf") $picture.addClass("flash");
+            if ($article.attr("data-flags") === "deleted") $picture.addClass("deleted");
 
-                // only load sample after a bit of waiting
-                // this prevents loading images just by hovering over them to get to another one
-                timer = window.setTimeout(() => {
-                    if ($img.attr("data-src") == sampleURL) return;
+        } else {
+            // Add dynamically-loaded highres thumbnails
 
-                    $link.addClass("loading");
-                    $img.attr("data-src", sampleURL)
-                        .addClass("lazyload")
-                        .one("lazyloaded", () => {
-                            $link.removeClass("loading");
-                            $article.addClass("loaded");
-                        });
-                }, 200);
-            });
-            $article.on("mouseleave", () => {
-                window.clearTimeout(timer);
-            });
-        } else if (upscaleMode === ThumbnailPerformanceMode.Always) {
-            $link.addClass("loading");
-            $img.attr("data-src", sampleURL)
-                .addClass("lazyload")
-                .one("lazyloaded", () => {
-                    $link.removeClass("loading");
-                    $article.addClass("loaded");
+            const sampleURL = $article.attr("data-large-file-url");
+
+            if (upscaleMode === ThumbnailPerformanceMode.Hover) {
+                let timer: number;
+                $article.on("mouseenter", () => {
+                    if (ThumbnailEnhancer.zoomPaused) return;
+
+                    // only load sample after a bit of waiting
+                    // this prevents loading images just by hovering over them to get to another one
+                    timer = window.setTimeout(() => {
+                        if ($img.attr("data-src") == sampleURL) return;
+
+                        $link.addClass("loading");
+                        $img.attr("data-src", sampleURL)
+                            .addClass("lazyload")
+                            .one("lazyloaded", () => {
+                                $link.removeClass("loading");
+                                $article.addClass("loaded");
+                            });
+                    }, 200);
                 });
+                $article.on("mouseleave", () => {
+                    window.clearTimeout(timer);
+                });
+            } else if (upscaleMode === ThumbnailPerformanceMode.Always) {
+                $link.addClass("loading");
+                $img.attr("data-src", sampleURL)
+                    .addClass("lazyload")
+                    .one("lazyloaded", () => {
+                        $link.removeClass("loading");
+                        $article.addClass("loaded");
+                    });
+            }
+
         }
 
         function parseRating(input: string): string {
