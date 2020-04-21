@@ -2,6 +2,9 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { Api } from "../../components/api/Api";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
+import { ModuleController } from "../../components/ModuleController";
+import { ThumbnailEnhancer, ThumbnailClickAction } from "../search/ThumbnailsEnhancer";
+import { XM } from "../../components/api/XM";
 
 /**
  * Miscellaneous functionality that does not require a separate module
@@ -37,6 +40,8 @@ export class Miscellaneous extends RE6Module {
             improveTagCount: true,
             collapseCategories: true,
             categoryData: [],
+
+            avatarClick: true,
         };
     }
 
@@ -67,15 +72,20 @@ export class Miscellaneous extends RE6Module {
             this.autoFocusSearchBar();
         }
 
+        // Enhanced quoting button
         if (Page.matches([PageDefintion.post, PageDefintion.forum])) {
             this.handleQuoteButton();
         }
 
+        // Sticky elements
         if (Page.matches([PageDefintion.search, PageDefintion.post, PageDefintion.favorites])) {
             this.createStickySearchbox(this.fetchSettings("stickySearchbox"));
         }
 
         this.createStickyHeader(this.fetchSettings("stickyHeader"));
+
+        // Double-clicking avatars
+        this.handleAvatarClick(this.fetchSettings("avatarClick"));
 
         this.registerHotkeys();
     }
@@ -225,6 +235,52 @@ export class Miscellaneous extends RE6Module {
 
         const newVal = $textarea.val() + strippedBody;
         $textarea.focus().val("").val(newVal);
+    }
+
+    /**
+     * Handles the double-clicking actions on the avatars
+     * @param state True to enable, false to disable
+     */
+    private handleAvatarClick(state = true): void {
+        $("div.avatar > div.active > a")
+            .off("click.re621.thumbnail")
+            .off("dblclick.re621.thumbnail");
+
+        if (!state) return;
+
+        /* Handle double-click */
+        const clickAction = ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer).fetchSettings("clickAction");
+
+        $("div.avatar > div > a").each((index, element) => {
+            const $link = $(element);
+            let dbclickTimer: number;
+            let prevent = false;
+
+            $link.on("click.re621.thumbnail", (event) => {
+                if (event.button !== 0) { return; }
+                event.preventDefault();
+
+                dbclickTimer = window.setTimeout(() => {
+                    if (!prevent) {
+                        $link.off("click.re621.thumbnail");
+                        $link[0].click();
+                    }
+                    prevent = false;
+                }, 200);
+            }).on("dblclick.re621.thumbnail", (event) => {
+                if (event.button !== 0) { return; }
+
+                event.preventDefault();
+                window.clearTimeout(dbclickTimer);
+                prevent = true;
+
+                if (clickAction === ThumbnailClickAction.NewTab) XM.openInTab(window.location.origin + $link.attr("href"));
+                else {
+                    $link.off("click.re621.thumbnail");
+                    $link[0].click();
+                }
+            });
+        });
     }
 
 }
