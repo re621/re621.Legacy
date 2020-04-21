@@ -20,6 +20,8 @@ for (let [key, value] of Object.entries(headerData)) {
     }
 }
 
+fs.createReadStream("./build/style.min.css").pipe(fs.createWriteStream("./build/userscript/style.min.css"));
+
 switch (mode) {
     case "injector": {
         // Injector script
@@ -27,26 +29,25 @@ switch (mode) {
             .replace(/(\/\/ @name[ ]+)(.+)/, "$1re621 Injector")
             .replace(/\/\/ @updateURL.*\n/, "")
             .replace(/\/\/ @downloadURL.*\n/, "")
-            .replace(/(\/\/ @resource[ ]+re621_css )(.+)/, browser == "chrome" ? "$1file://" + __dirname + "\\..\\build\\style.min.css" : "$1http://localhost:7000/style.min.css")
-            .replace(/(\/\/ @resource[ ]+re621_dnp )(.+)/, browser == "chrome" ? "$1file://" + __dirname + "\\..\\build\\avoid-posting.json" : "$1http://localhost:7000/avoid-posting.json");
-        header += formateHeaderLine("require", browser == "chrome" ? "file://" + __dirname + "\\..\\build\\script.user.js" : "http://localhost:7000/script.user.js");
-        fs.writeFileSync("./build/injector.user.js", parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n"));
+            .replace(/(\/\/ @resource[ ]+re621_css )(.+)/, browser == "chrome" ? "$1file://" + __dirname + "\\..\\build\\userscript\\style.min.css" : "$1http://localhost:7000/style.min.css");
+        header += formateHeaderLine("require", browser == "chrome" ? "file://" + __dirname + "\\..\\build\\userscript\\script.user.js" : "http://localhost:7000/script.user.js");
+        fs.writeFileSync("./build/userscript/injector.user.js", parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n"));
         break;
     }
     case "prod": {
         // Metadata file
         fs.writeFileSync(
-            "./build/script.meta.js",
+            "./build/userscript/script.meta.js",
             parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n")
         );
     }
     default: {
         // Normal mode
         fs.writeFileSync(
-            "./build/script.user.js",
+            "./build/userscript/script.user.js",
             parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n") + "\n\n" +
             parseTemplate(templateData) + "\n\n" +
-            fs.readFileSync("./build/script.user.js")
+            fs.readFileSync("./build/script.js")
         );
     }
 }
