@@ -68,7 +68,10 @@ export class InfiniteScroll extends RE6Module {
         this.isInProgress = false;
         this.pagesLeft = true;
 
+        // Wait until all images are loaded, to prevent fetching posts 
+        // while the layout is still changing
         $(async () => {
+            // Load previous result pages on document load
             let processingPage = 2;
             while (processingPage <= this.currentPage) {
                 await this.loadPage(processingPage);
@@ -78,11 +81,15 @@ export class InfiniteScroll extends RE6Module {
                 processingPage++;
             }
 
-            // Wait until all images are loaded, to prevent fetching posts 
-            // while the layout is still changing
-            $(window).scroll(async () => {
-                // TODO Throttle this shit
-                await this.addMorePosts();
+            // Load the next result page when scrolled to the bottom
+            let timer: number;
+            $(window).scroll(() => {
+                if (timer) return;
+                timer = window.setTimeout(async () => {
+                    console.log("scroll");
+                    await this.addMorePosts();
+                    timer = null;
+                }, 1000);
             });
         });
     }
