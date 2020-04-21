@@ -357,20 +357,16 @@ export class SettingsController extends RE6Module {
                 Form.checkbox(
                     "click-scale", imageScaler.fetchSettings("clickScale"), "Click images to resize them", "column",
                     async (event, data) => { await imageScaler.pushSettings("clickScale", data); }),
+
                 Form.checkbox(
                     "collapse-tag-cats", miscellaneous.fetchSettings("collapseCategories"), "Collapse tag categories", "column",
                     async (event, data) => { await miscellaneous.pushSettings("collapseCategories", data); }
                 ),
-
-                Form.hr(),
-            ]),
-
-            // Blacklist
-            Form.section({ id: "blacklist", columns: 3 }, [
-                Form.header("Blacklist"),
                 Form.checkbox(
                     "quickadd", blacklistEnhancer.fetchSettings("quickaddTags"), "Click X to add tag to blacklist", "column",
                     async (event, data) => { await blacklistEnhancer.pushSettings("quickaddTags", data); }),
+                Form.spacer("column"),
+
             ]),
 
         ]);
