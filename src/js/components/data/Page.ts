@@ -92,8 +92,8 @@ export class Page {
 }
 
 export const PageDefintion = {
-    search: /^$|^\/posts\/?$/,
-    post: /^\/posts\/\d+\/?$/,
+    search: /^\/posts\/?$/,
+    post: /^\/posts\/\d+\/?(show_seq)?$/,
     upload: /\/uploads\/new\/?/,
     forum: /^\/forum_topics\/?.*/,
     forumPost: /^\/forum_topics\/\d+.*/,
