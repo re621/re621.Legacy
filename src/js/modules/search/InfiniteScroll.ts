@@ -22,7 +22,8 @@ export class InfiniteScroll extends RE6Module {
     private $loadingIndicator: JQuery<HTMLElement>;
     private $nextButton: JQuery<HTMLElement>;
     private currentQuery: string;
-    private nextPageToGet: number;
+
+    private currentPage: number;
     private isInProgress: boolean;
     private pagesLeft: boolean;
 
@@ -47,8 +48,10 @@ export class InfiniteScroll extends RE6Module {
 
         this.$postContainer = $("#posts-container");
 
-        this.$loadingIndicator = $("<div>").attr("id", "re-infinite-scroll-loading").addClass("lds-dual-ring");
-        this.$loadingIndicator.insertAfter(this.$postContainer);
+        this.$loadingIndicator = $("<div>")
+            .attr("id", "re-infinite-scroll-loading")
+            .html(`<i class="fas fa-circle-notch fa-5x fa-spin"></i>`)
+            .insertAfter(this.$postContainer);
         this.$loadingIndicator.hide();
 
         this.$nextButton = $("<a>").text("Load next").on("click", () => {
@@ -60,15 +63,27 @@ export class InfiniteScroll extends RE6Module {
             .insertAfter(this.$postContainer);
 
         this.currentQuery = Page.getQueryParameter("tags") !== null ? Page.getQueryParameter("tags") : "";
-        const page = parseInt(Page.getQueryParameter("page"));
-        this.nextPageToGet = isNaN(page) ? 2 : page + 1;
+
+        this.currentPage = parseInt(Page.getQueryParameter("xpage")) || 1;
         this.isInProgress = false;
         this.pagesLeft = true;
 
-        //Wait until all images are loaded, to prevent fetching posts 
-        //while the layout is still changing
-        $(() => {
-            $(window).scroll(async () => { await this.addMorePosts(); });
+        $(async () => {
+            let processingPage = 2;
+            while (processingPage <= this.currentPage) {
+                await this.loadPage(processingPage);
+                $([document.documentElement, document.body]).animate({
+                    scrollTop: $("a#xpage-link-" + processingPage).offset().top
+                }, 'fast');
+                processingPage++;
+            }
+
+            // Wait until all images are loaded, to prevent fetching posts 
+            // while the layout is still changing
+            $(window).scroll(async () => {
+                // TODO Throttle this shit
+                await this.addMorePosts();
+            });
         });
     }
 
@@ -80,29 +95,48 @@ export class InfiniteScroll extends RE6Module {
     /**
      * Adds more posts to the site, if the user has scrolled down enough
      */
-    private async addMorePosts(override = false): Promise<void> {
+    private async addMorePosts(override = false): Promise<boolean> {
         if (!this.isEnabled() || this.isInProgress || !this.pagesLeft || !this.shouldAddMore(override) || InfiniteScroll.scrollPaused) {
-            return;
+            return Promise.resolve(false);
         }
+
+        const pageLoaded = await this.loadPage(this.currentPage + 1);
+        if (pageLoaded) {
+            Page.setQueryParameter("xpage", (this.currentPage + 1).toString());
+            this.currentPage++;
+            this.$postContainer.trigger("re621.infiniteScroll.pageLoad");
+        }
+        return Promise.resolve(pageLoaded);
+    }
+
+    private async loadPage(page: number): Promise<boolean> {
         this.isInProgress = true;
         this.$loadingIndicator.show();
-        const posts = await E621.Posts.get<APIPost>({ tags: this.currentQuery, page: this.nextPageToGet });
+
+        const posts = await E621.Posts.get<APIPost>({ tags: this.currentQuery, page: page });
         if (posts.length === 0) {
             this.pagesLeft = false;
             this.$loadingIndicator.hide();
             this.$nextButton.hide();
             Danbooru.notice("No more posts!");
-            return;
+            return Promise.resolve(false);
         }
-        Page.setQueryParameter("page", this.nextPageToGet.toString());
-        this.addPageIndicator();
+
+        $("<a>")
+            .attr({
+                "href": document.location.href,
+                "id": "xpage-link-" + page
+            })
+            .addClass("instantsearch-seperator")
+            .html("<h2>Page: " + page + "</h2>")
+            .appendTo(this.$postContainer);
 
         const thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer),
             upscaleMode: ThumbnailPerformanceMode = thumbnailEnhancer.fetchSettings("upscale"),
             clickAction: ThumbnailClickAction = thumbnailEnhancer.fetchSettings("clickAction");
 
         for (const json of posts) {
-            const element = PostHtml.create(json, upscaleMode === ThumbnailPerformanceMode.Always);
+            const element = PostHtml.create(json);
             const post = new Post(element);
 
             //only append the post if it has image data
@@ -126,14 +160,7 @@ export class InfiniteScroll extends RE6Module {
         ModuleController.getWithType<BlacklistEnhancer>(BlacklistEnhancer).updateSidebar();
         ModuleController.getWithType<InstantSearch>(InstantSearch).applyFilter();
 
-        this.$postContainer.trigger("re621.infiniteScroll.pageLoad");
-
-        this.nextPageToGet++;
-    }
-
-    private addPageIndicator(): void {
-        const url = document.location.href;
-        this.$postContainer.append($("<a>").attr("href", url).addClass("instantsearch-seperator").html(`<h2>Page: ${this.nextPageToGet}</h2>`));
+        return Promise.resolve(true);
     }
 
     /**
