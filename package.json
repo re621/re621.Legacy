@@ -14,12 +14,13 @@
         "build:prod": "npm-run-all compile-typescript:prod compile-sass userscript:prod",
         "build:dev": "npm-run-all compile-typescript:dev compile-sass userscript:dev",
 
-        "compile-typescript:prod": "npm-run-all eslint typescript browserify minify clean",
-        "compile-typescript:dev": "npm-run-all eslint typescript browserify clean",
+        "compile-typescript:prod": "npm-run-all eslint typescript browserify minify template clean",
+        "compile-typescript:dev": "npm-run-all eslint typescript browserify template clean",
         "eslint": "eslint ./**/*.ts",
         "typescript": "tsc",
         "browserify": "browserify ./build/tsc-temp/js/main.js -o ./build/script.js",
         "minify": "terser ./build/script.js --compress -o ./build/script.js",
+        "template": "node ./bin/common-format.js",
         "clean": "rimraf ./build/tsc-temp/",
 
         "compile-sass": "npm-run-all sass autoprefixer",
