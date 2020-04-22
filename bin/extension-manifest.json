@@ -25,5 +25,11 @@
                 "./lib/re621.lazysizes@1.0.0/lazysizes.min.js"
             ]
         }
-    ]
+    ],
+
+    "permissions": [
+        "storage"
+    ],
+
+    "web_accessible_resources": ["injector.js"]
 }

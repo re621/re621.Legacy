@@ -36,14 +36,12 @@ import { PoolSubscriptions } from "./modules/subscriptions/PoolSubscriptions";
 import { TagSubscriptions } from "./modules/subscriptions/TagSubscriptions";
 // - settings
 import { SettingsController } from "./modules/general/SettingsController";
-import { Danbooru } from "./components/api/Danbooru";
 
 
 const loadOrder = [
     FormattingManager,
     HeaderCustomizer,
     ThemeCustomizer,
-    Miscellaneous,
 
     DownloadCustomizer,
     ImageScaler,
@@ -56,6 +54,7 @@ const loadOrder = [
     InstantSearch,
     MassDownloader,
     ThumbnailEnhancer,
+    Miscellaneous,
 
     TinyAlias,
     WikiEnhancer,
@@ -77,8 +76,6 @@ DomUtilities.createStructure().then(() => {
 
     // This is dependent on the previous step, which runs when the document fully loads
     // If that changes, this will need to be wrapped in `$(() => { ... });`
-
-    Danbooru.init();
 
     subscriptions.forEach(module => {
         ModuleController.register(module);

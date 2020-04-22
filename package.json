@@ -11,8 +11,8 @@
     ],
     "main": "./build/script.user.js",
     "scripts": {
-        "build:prod": "npm-run-all compile-typescript:prod compile-sass userscript:prod",
-        "build:dev": "npm-run-all compile-typescript:dev compile-sass userscript:dev",
+        "build:prod": "npm-run-all compile-typescript:prod compile-sass userscript:prod extension",
+        "build:dev": "npm-run-all compile-typescript:dev compile-sass userscript:dev extension",
 
         "compile-typescript:prod": "npm-run-all eslint typescript browserify minify template clean",
         "compile-typescript:dev": "npm-run-all eslint typescript browserify template clean",

@@ -38,9 +38,7 @@ export class BlacklistEnhancer extends RE6Module {
         super.create();
 
         //Override default blacklist function
-        Danbooru.Blacklist.apply = (): void => { return; };
-        Danbooru.Blacklist.initialize_anonymous_blacklist = (): void => { return; };
-        Danbooru.Blacklist.initialize_all = (): void => { return; };
+        Danbooru.Blacklist.stub_vanilla_functions();
         Danbooru.Blacklist.initialize_disable_all_blacklists();
         $("#blacklisted-hider").remove();
 

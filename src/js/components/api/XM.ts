@@ -11,6 +11,8 @@ declare const GM_xmlhttpRequest: Function;
 
 declare const unsafeWindow: Window;
 
+declare const chrome: any;
+
 export enum ScriptManager {
     GM = "Greasemonkey",
     TM = "Tampermonkey",
@@ -22,7 +24,14 @@ export class XM {
      * Returns the information provided by the script manager
      */
     public static info(): GMInfo {
-        return GM.info;
+        if (typeof GM === "undefined") {
+            return {
+                script: null,
+                scriptMetaStr: null,
+                scriptHandler: "chrome/ext",
+                version: "1.0",
+            }
+        } else return GM.info;
     }
 
     /**
@@ -30,7 +39,8 @@ export class XM {
      * Should be avoided as much as possible.
      */
     public static getWindow(): Window {
-        return unsafeWindow;
+        if (typeof unsafeWindow === "undefined") return window;
+        else return unsafeWindow;
     }
 
     /**
@@ -61,7 +71,13 @@ export class XM {
      */
     public static async setValue(name: string, value: any): Promise<void> {
         return new Promise(async (resolve) => {
-            await GM.setValue(name, value);
+            if (typeof GM === "undefined") {
+                await new Promise((resolve) => {
+                    chrome.storage.sync.set({ name: value }, () => {
+                        resolve();
+                    });
+                });
+            } else await GM.setValue(name, value);
             resolve();
         });
     };
@@ -74,7 +90,12 @@ export class XM {
      */
     public static async getValue(name: string, defaultValue: any): Promise<any> {
         return new Promise(async (resolve) => {
-            resolve(GM.getValue(name, defaultValue));
+            if (typeof GM === "undefined") {
+                chrome.storage.sync.get([name], (result: any) => {
+                    if (result["name"] === undefined) resolve(defaultValue);
+                    else resolve(result["name"]);
+                });
+            } else resolve(GM.getValue(name, defaultValue));
         });
     };
 
@@ -84,7 +105,13 @@ export class XM {
      */
     public static async deleteValue(name: string): Promise<void> {
         return new Promise(async (resolve) => {
-            await GM.deleteValue(name);
+            if (typeof GM === "undefined") {
+                await new Promise((resolve) => {
+                    chrome.storage.sync.set({ name: undefined }, () => {
+                        resolve();
+                    });
+                });
+            } else await GM.deleteValue(name);
             resolve();
         });
     }
@@ -97,7 +124,8 @@ export class XM {
     public static openInTab(url: string, options?: GMOpenInTabOptions): GMOpenInTab;
     public static openInTab(url: string, loadInBackground?: boolean): GMOpenInTab;
     public static openInTab(a: any, b?: any): GMOpenInTab {
-        return GM.openInTab(a, b);
+        if (typeof GM === "undefined") return null; // TODO Chrome function
+        else return GM.openInTab(a, b);
     }
 
     /**
@@ -106,18 +134,9 @@ export class XM {
      * @param info object like "{ type: 'text', mimetype: 'text/plain'}" or a string expressing the type ("text" or "html")
      */
     public static setClipboard(data: any, info?: { type: string; mimetype: string } | string): void {
-        return GM.setClipboard(data, info);
+        if (typeof GM === "undefined") return null; // TODO Chrome function
+        else return GM.setClipboard(data, info);
     };
-
-    /**
-     * Get contents of the resource as a base64-encoded data URL
-     * Note that the name must be defined in a @resource tag in the script header.
-     * @param name Resource name
-     */
-    public static async getResourceURL(name: string): Promise<string> {
-        if (typeof GM.getResourceUrl === "function") { return GM.getResourceUrl(name); }
-        else { return GM_getResourceURL(name); }
-    }
 
     /**
      * Get contents of the resource as plain text.  
@@ -125,9 +144,24 @@ export class XM {
      * @param name Resource name
      */
     public static async getResourceText(name: string): Promise<string> {
+        // Tampermonkey
         if (typeof GM_getResourceText === "function") return Promise.resolve(GM_getResourceText(name));
 
-        const resource = await XM.getResourceURL(name);
+        // Greasemonkey / Violentmonkey
+        if (typeof GM !== "undefined") return XM.getResourceTextGM(name);
+
+        // Extensions
+    }
+
+    /**
+     * Gets the contents of the resource as plain text.  
+     * This function presumes Greasemonkey is used.  
+     * Note that the name must be defined in a @resource tag in the script header.
+     * @param name Resource name
+     */
+    private static async getResourceTextGM(name: string): Promise<string> {
+        const resource = (typeof GM.getResourceUrl === "function") ? await GM.getResourceUrl(name) : GM_getResourceURL(name);
+
         if (resource.startsWith("data:")) {
             return Promise.resolve(atob(resource.replace(/^data:(.*);base64,/g, "")));
         } else if (resource.startsWith("blob:")) {
@@ -172,9 +206,34 @@ export class XM {
         if (details.headers["User-Agent"] === undefined)
             details.headers["User-Agent"] = window["re621"]["useragent"];
 
-        if (typeof GM.xmlHttpRequest === "function") return GM.xmlHttpRequest(details);
-        else return GM_xmlhttpRequest(details);
+        if (typeof GM !== "undefined" && typeof GM.xmlHttpRequest === "function") GM.xmlHttpRequest(details);
+        else if (typeof GM_xmlhttpRequest === "function") GM_xmlhttpRequest(details);
+        else XM.xmlHttpNative(details);
     };
+
+    public static xmlHttpNative(details: GMxmlHttpRequestDetails): Promise<any> {
+        const request = new XMLHttpRequest();
+
+        return new Promise(function (resolve, reject) {
+            request.onreadystatechange = (): void => {
+                if (request.readyState !== 4) return;
+                if (request.status >= 200 && request.status < 300) {
+                    resolve(request);
+                } else {
+                    reject({
+                        status: request.status,
+                        statusText: request.statusText
+                    });
+                }
+            };
+
+            // Setup our HTTP request
+            request.open(details.method, details.url, true);
+
+            // Send the request
+            request.send();
+        });
+    }
 
     /**
      * Downloads a given URL to the local disk.  

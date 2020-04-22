@@ -20,7 +20,7 @@ export class Hotkeys {
     private static enabled = true;
 
     private constructor() {
-        Danbooru.Utility.disableShortcuts = true;
+        Danbooru.Utility.disableShortcuts(true);
 
         if (Page.matches(PageDefintion.post)
             && $("section#image-container").attr("data-file-ext") === "swf")
