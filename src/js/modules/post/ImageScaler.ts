@@ -86,8 +86,8 @@ export class ImageScaler extends RE6Module {
             if (save !== false) await this.pushSettings("size", size);
         });
 
-        this.image.click(() => {
-            if (!this.fetchSettings("clickScale") || Danbooru.Note.TranslationMode.isActive()) return;
+        this.image.click(async () => {
+            if (!this.fetchSettings("clickScale") || await Danbooru.Note.TranslationMode.active()) return;
             this.setScale("", false);
         });
 

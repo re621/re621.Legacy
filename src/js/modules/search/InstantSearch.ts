@@ -9,7 +9,6 @@ import { PostFilter } from "../../components/data/PostFilter";
  */
 export class InstantSearch extends RE6Module {
 
-    // TODO: this can be of type HTMLInputElememnt, but I don't know how to do that
     private $searchbox: JQuery<HTMLElement>;
 
     public constructor() {

@@ -30,6 +30,7 @@ export class DomUtilities {
         // This is terrible for performance, so keep the number of these to a minimum
         try {
             const promises: Promise<any>[] = [];
+            promises.push(DomUtilities.elementReady("head", DomUtilities.injectChromeScript));
             promises.push(DomUtilities.elementReady("body", DomUtilities.createThemes));
             promises.push(DomUtilities.elementReady("div#page", DomUtilities.createModalContainer));
             promises.push(DomUtilities.elementReady("menu.main", DomUtilities.createHeader));
@@ -59,7 +60,19 @@ export class DomUtilities {
     }
 
     /**
-     * Attaches the script's stylesheets to the document
+     * Attaches Chrome extension's injector script to the header.  
+     * Does nothing in the userscript version.  
+     */
+    private static async injectChromeScript(): Promise<any> {
+        if (typeof GM !== "undefined") return Promise.resolve();
+
+        $("<script>").attr("src", XM.Chrome.getResourceURL("injector.js")).appendTo("head");
+        return Promise.resolve();
+    }
+
+    /**
+     * Attaches the script's stylesheets to the document.  
+     * This is handled throught the manifest in the extension version.  
      */
     private static async addStylesheets(): Promise<any> {
         if (typeof GM === "undefined") return Promise.resolve();

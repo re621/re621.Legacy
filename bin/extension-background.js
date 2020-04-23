@@ -1,8 +1,3 @@
-function handleMessage(request, sender, sendResponse) {
-    if (request.fn == "xmlHttpRequest") xmlHttpNative(request.args).then((data) => { sendResponse(data); });
-    return true;
-}
-
 function xmlHttpNative(details) {
     const request = new XMLHttpRequest();
 
@@ -95,4 +90,34 @@ function xmlHttpNative(details) {
     });
 }
 
-chrome.runtime.onMessage.addListener(handleMessage);
+const fn = {
+    "XMConnect": {
+        "XHR": { "connect": xmlHttpNative, }
+    }
+}
+
+async function handleMessage(request, sender, sendResponse) {
+
+    if (fn[request.component] === undefined ||
+        fn[request.component][request.module] === undefined ||
+        fn[request.component][request.module][request.method] === undefined) {
+
+        sendResponse({
+            eventID: request.eventID,
+            data: "RE6 Background - Invalid Request",
+        });
+        return;
+    }
+
+    sendResponse({
+        eventID: request.eventID,
+        data: await fn[request.component][request.module][request.method](...request.args),
+    });
+
+    return;
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    handleMessage(request, sender, sendResponse);
+    return true;
+});

@@ -8,33 +8,33 @@ export class Danbooru {
 
     public static Blacklist: DanbooruBlacklist = {
         apply(): void {
-            if (Danbooru.modules === undefined) {
-                // TODO injector function
-            } else Danbooru.modules["Blacklist"].apply();
+            if (Danbooru.modules === undefined)
+                XM.Chrome.execInjectorRequest("Danbooru", "Blacklist", "apply");
+            else Danbooru.modules["Blacklist"].apply();
         },
 
         initialize_anonymous_blacklist(): void {
-            if (Danbooru.modules === undefined) {
-                // TODO injector function
-            } else Danbooru.modules["Blacklist"].initialize_anonymous_blacklist();
+            if (Danbooru.modules === undefined)
+                XM.Chrome.execInjectorRequest("Danbooru", "Blacklist", "initialize_anonymous_blacklist");
+            else Danbooru.modules["Blacklist"].initialize_anonymous_blacklist();
         },
 
         initialize_all(): void {
-            if (Danbooru.modules === undefined) {
-                // TODO injector function
-            } else Danbooru.modules["Blacklist"].initialize_all();
+            if (Danbooru.modules === undefined)
+                XM.Chrome.execInjectorRequest("Danbooru", "Blacklist", "initialize_all");
+            else Danbooru.modules["Blacklist"].initialize_all();
         },
 
         initialize_disable_all_blacklists(): void {
-            if (Danbooru.modules === undefined) {
-                // TODO injector function
-            } else Danbooru.modules["Blacklist"].initialize_disable_all_blacklists();
+            if (Danbooru.modules === undefined)
+                XM.Chrome.execInjectorRequest("Danbooru", "Blacklist", "initialize_disable_all_blacklists");
+            else Danbooru.modules["Blacklist"].initialize_disable_all_blacklists();
         },
 
         stub_vanilla_functions(): void {
-            if (Danbooru.modules === undefined) {
-                // TODO injector function
-            } else {
+            if (Danbooru.modules === undefined)
+                XM.Chrome.execInjectorRequest("Danbooru", "Blacklist", "stub_vanilla_functions");
+            else {
                 Danbooru.modules["Blacklist"].apply = (): void => { return; };
                 Danbooru.modules["Blacklist"].initialize_disable_all_blacklists = (): void => { return; };
                 Danbooru.modules["Blacklist"].initialize_all = (): void => { return; };
@@ -44,67 +44,62 @@ export class Danbooru {
 
     public static Post: DanbooruPost = {
         vote(postid: number, scoreDifference: number, preventUnvote?: boolean): void {
-            if (Danbooru.modules === undefined) {
-                // TODO injector function
-            } else Danbooru.modules["Post"].vote(postid, scoreDifference, preventUnvote);
+            if (Danbooru.modules === undefined)
+                XM.Chrome.execInjectorRequest("Danbooru", "Post", "vote", [postid, scoreDifference, preventUnvote]);
+            else Danbooru.modules["Post"].vote(postid, scoreDifference, preventUnvote);
         }
     };
 
     public static Note: DanbooruNote = {
         Box: {
             scale_all(): void {
-                if (Danbooru.modules === undefined) {
-                    // TODO injector function
-                } else Danbooru.modules["Note"]["Box"].scale_all();
+                if (Danbooru.modules === undefined)
+                    XM.Chrome.execInjectorRequest("Danbooru", "Note.Box", "scale_all");
+                else Danbooru.modules["Note"]["Box"].scale_all();
             }
         },
 
         TranslationMode: {
-            isActive(): boolean {
-                if (Danbooru.modules === undefined) {
-                    // TODO injector function
-                    return false;
-                } else return Danbooru.modules["Note"]["TranslationMode"].active;
+            active(state?: boolean): Promise<boolean> {
+                if (Danbooru.modules === undefined)
+                    return XM.Chrome.execInjectorRequest("Danbooru", "Note.TranslationMode", "active", [state]);
+                else {
+                    if (state !== undefined) Danbooru.modules["Note"]["TranslationMode"].active = state;
+                    return Promise.resolve(Danbooru.modules["Note"]["TranslationMode"].active);
+                }
             },
 
-            setActive(state: boolean): void {
-                if (Danbooru.modules === undefined) {
-                    // TODO injector function
-                } else Danbooru.modules["Note"]["TranslationMode"].active = state;
-            },
-
-            toggle(e: Event): void {
-                if (Danbooru.modules === undefined) {
-                    // TODO injector function
-                } else Danbooru.modules["Note"]["TranslationMode"].toggle(e);
+            toggle(): void {
+                if (Danbooru.modules === undefined)
+                    XM.Chrome.execInjectorRequest("Danbooru", "Note.TranslationMode", "toggle");
+                else Danbooru.modules["Note"]["TranslationMode"].toggle(new CustomEvent("re621.dummy-event"));
             },
         }
     };
 
     public static Utility: DanbooruUtility = {
 
-        disableShortcuts(state?: boolean): boolean {
-            if (Danbooru.modules === undefined) {
-                // TODO injector function
-                return false;
-            } else {
+        disableShortcuts(state?: boolean): Promise<boolean> {
+            if (Danbooru.modules === undefined)
+                return XM.Chrome.execInjectorRequest("Danbooru", "Utility", "disableShortcuts", [state]);
+            else {
                 if (state !== undefined) Danbooru.modules["Utility"].disableShortcuts = state;
-                return Danbooru.modules["Utility"].disableShortcuts;
+                return Promise.resolve(Danbooru.modules["Utility"].disableShortcuts);
             }
         },
 
     };
 
     public static notice(input: string): void {
-        if (Danbooru.modules === undefined) {
-            // TODO injector function
-        } else Danbooru.modules.notice(input);
+        if (Danbooru.modules === undefined)
+            XM.Chrome.execInjectorRequest("Danbooru", "Notice", "notice", [input]);
+        else Danbooru.modules.notice(input);
     }
 
     public static error(input: string): void {
-        if (Danbooru.modules === undefined) {
-            // TODO injector function
-        } else Danbooru.modules.error(input);
+        if (Danbooru.modules === undefined)
+            XM.Chrome.execInjectorRequest("Danbooru", "Notice", "error", [input]);
+        else Danbooru.modules.error(input);
     }
 }
 
@@ -131,11 +126,10 @@ interface DanbooruNoteBox {
 }
 
 interface DanbooruNoteMode {
-    isActive(): boolean;
-    setActive(state: boolean): void;
+    active(): Promise<boolean>;
     toggle(e: Event): void;
 }
 
 interface DanbooruUtility {
-    disableShortcuts(state?: boolean): boolean;
+    disableShortcuts(state?: boolean): Promise<boolean>;
 }

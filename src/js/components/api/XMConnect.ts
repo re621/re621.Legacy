@@ -1,3 +1,5 @@
+import { XM } from "./XM";
+
 declare const GM: any;
 declare const GM_getResourceText: Function;
 declare const GM_getResourceURL: Function;
@@ -19,10 +21,8 @@ export class XMConnect {
         const validDetails = XMConnect.validateXHRDetails(details);
         if (typeof GM !== "undefined" && typeof GM.xmlHttpRequest === "function") GM.xmlHttpRequest(validDetails);
         else if (typeof GM_xmlhttpRequest === "function") GM_xmlhttpRequest(validDetails);
-        else chrome.runtime.sendMessage(
-            { fn: "xmlHttpRequest", args: validDetails },
-            (response: GMxmlHttpRequestChromeEvent) => { details[response.event](response); }
-        );
+        else XM.Chrome.execBackgroundRequest("XMConnect", "XHR", "connect", [validDetails])
+            .then((response: GMxmlHttpRequestChromeEvent) => { details[response.event](response); });
     };
 
     /**
@@ -50,6 +50,14 @@ export class XMConnect {
         if (details.headers === undefined) details.headers = {};
         if (details.headers["User-Agent"] === undefined)
             details.headers["User-Agent"] = window["re621"]["useragent"];
+
+        if (details.onabort === undefined) details.onabort = (): void => { return; };
+        if (details.onerror === undefined) details.onerror = (): void => { return; };
+        if (details.onload === undefined) details.onload = (): void => { return; };
+        if (details.onloadstart === undefined) details.onloadstart = (): void => { return; };
+        if (details.onprogress === undefined) details.onprogress = (): void => { return; };
+        if (details.onreadystatechange === undefined) details.onreadystatechange = (): void => { return; };
+        if (details.ontimeout === undefined) details.ontimeout = (): void => { return; };
 
         return details;
     };
