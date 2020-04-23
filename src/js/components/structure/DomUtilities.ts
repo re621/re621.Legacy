@@ -2,6 +2,8 @@ import { Page, PageDefintion } from "../data/Page";
 import { XM } from "../api/XM";
 import { ErrorHandler } from "../ErrorHandler";
 
+declare const GM;
+
 /**
  * StructureUtilities  
  * DOM changes that don't belong to any specific project
@@ -59,6 +61,8 @@ export class DomUtilities {
      * Attaches the script's stylesheets to the document
      */
     private static async addStylesheets(): Promise<any> {
+        if (typeof GM === "undefined") return Promise.resolve();
+
         return XM.getResourceText("re621_css").then(
             (css) => { return Promise.resolve(XM.addStyle(css)); },
             () => { return Promise.reject(); }

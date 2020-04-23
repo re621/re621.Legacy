@@ -151,6 +151,13 @@ export class XM {
         if (typeof GM !== "undefined") return XM.getResourceTextGM(name);
 
         // Extensions
+        return new Promise((resolve) => {
+            XM.xmlHttpRequest({
+                "url": window["resources"][name],
+                method: "GET",
+                onload: (event) => { resolve(event.responseText); }
+            })
+        });
     }
 
     /**
@@ -198,8 +205,6 @@ export class XM {
      * Make an xmlHttpRequest  
      * Important: requests can only be made to domains specified by the @connect tags in the script header.  
      * @param details Request details
-     * @returns an object with the following property:
-     *  - **abort**: function to be called to cancel this request
      */
     public static xmlHttpRequest(details: GMxmlHttpRequestDetails): void {
         if (details.headers === undefined) details.headers = {};
@@ -208,31 +213,18 @@ export class XM {
 
         if (typeof GM !== "undefined" && typeof GM.xmlHttpRequest === "function") GM.xmlHttpRequest(details);
         else if (typeof GM_xmlhttpRequest === "function") GM_xmlhttpRequest(details);
-        else XM.xmlHttpNative(details);
+        else XM.xmlHttpChrome(details);
     };
 
-    public static xmlHttpNative(details: GMxmlHttpRequestDetails): Promise<any> {
-        const request = new XMLHttpRequest();
-
-        return new Promise(function (resolve, reject) {
-            request.onreadystatechange = (): void => {
-                if (request.readyState !== 4) return;
-                if (request.status >= 200 && request.status < 300) {
-                    resolve(request);
-                } else {
-                    reject({
-                        status: request.status,
-                        statusText: request.statusText
-                    });
-                }
-            };
-
-            // Setup our HTTP request
-            request.open(details.method, details.url, true);
-
-            // Send the request
-            request.send();
-        });
+    /**
+     * Makes an xmlHttpRequest via chrome's background page. 
+     * @param details Request details
+     */
+    public static xmlHttpChrome(details: GMxmlHttpRequestDetails): void {
+        chrome.runtime.sendMessage(
+            { fn: "xmlHttpRequest", args: details },
+            (response: GMxmlHttpRequestChromeEvent) => { details[response.event](response); }
+        );
     }
 
     /**
@@ -438,6 +430,11 @@ export interface GMxmlHttpRequestEvent {
      * Unlike **status**, this property contains the _text_ of the reponse status, such as "OK" or "Not Found".
      */
     statusText: string;
+}
+
+export interface GMxmlHttpRequestChromeEvent extends GMxmlHttpRequestEvent {
+    /** **event** which event caused the provided feedback */
+    event: string;
 }
 
 export interface GMxmlHttpRequestProgressEvent extends GMxmlHttpRequestEvent {

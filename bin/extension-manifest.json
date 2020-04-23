@@ -8,6 +8,11 @@
 
     "icons": {},
 
+    "background": {
+        "scripts": ["background.js"],
+        "persistent": false
+    },
+
     "content_scripts": [
         {
             "matches": [
@@ -28,8 +33,16 @@
     ],
 
     "permissions": [
-        "storage"
+        "storage",
+        "https://api.github.com/*",
+        "https://static1.e621.net/*",
+        "https://cdn.jsdelivr.net/gh/re621/re621@master/dist/avoid-posting.json"
     ],
+
+    "resources": {
+        "re621_css": "style.min.css",
+        "re621_dnp": "https://cdn.jsdelivr.net/gh/re621/re621@master/dist/avoid-posting.json"
+    },
 
     "web_accessible_resources": ["injector.js"]
 }
