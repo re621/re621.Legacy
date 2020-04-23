@@ -51,6 +51,15 @@ a {
     display: block;
 }
 
+// Visibility
+.vis-hidden {
+    visibility: hidden;
+}
+
+.vis-shown {
+    visibility: visible;
+}
+
 // Border
 .border-left {
     border-width: 0px !important;
