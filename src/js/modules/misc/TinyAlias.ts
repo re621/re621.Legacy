@@ -70,7 +70,7 @@ export class TinyAlias extends RE6Module {
             .appendTo(this.$container);
 
         const $input = $("<input>")
-            .attr({ type: "text", required: "", pattern: ".+", })
+            .attr({ type: "text" })
             .attr("id", "tiny-alias-taginput")
             .appendTo($toolbar);
         const $insertButton = $("<button>")
@@ -86,7 +86,7 @@ export class TinyAlias extends RE6Module {
         let timer: number;
         $input.on("input", () => {
             this.tagAlreadyChecked = false;
-            if ($input.val() === "") {
+            if ($input.val().toString().trim() === "") {
                 this.$infoText.html("").removeAttr("data-state");
                 return;
             }
@@ -183,7 +183,7 @@ export class TinyAlias extends RE6Module {
 
     /** Handles the tag checking */
     private async handleCheckButton($input: JQuery<HTMLElement>): Promise<void> {
-        const tag = this.prepareTag($input.val().toString());
+        const tag = this.prepareTag($input.val().toString().trim());
         if (this.tagAlreadyAdded(tag)) {
             this.$infoText
                 .html("Tag has already been added")
