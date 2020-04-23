@@ -112,6 +112,11 @@ export class PoolNavigator extends RE6Module {
                 .attr("for", "post-nav-switch-" + index)
                 .appendTo($radioBox);
         });
+
+        // Hide the checkbox if there is only one navbar
+        if (this.navbars.length == 1) {
+            this.navbars[0].checkbox.parent().addClass("vis-hidden");
+        }
     }
 }
 
