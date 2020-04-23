@@ -738,7 +738,10 @@ export class Form {
             })
             .addClass("button btn-neutral")
             .html(element.value)
-            .appendTo($inputContainer);
+            .appendTo($inputContainer)
+            .on("click", () => {
+                $input.trigger("re621:form:input", true);
+            });
 
         if (element.pattern) { $input.attr("pattern", element.pattern); }
         if (element.required) { $input.attr("required", ''); }
@@ -788,7 +791,10 @@ export class Form {
             })
             .addClass("button btn-neutral")
             .html(element.value)
-            .appendTo($inputContainer);
+            .appendTo($inputContainer)
+            .on("click", () => {
+                $input.trigger("re621:form:input", true);
+            });
 
         if (element.pattern) { $input.attr("pattern", element.pattern); }
         if (element.required) { $input.attr("required", ''); }
