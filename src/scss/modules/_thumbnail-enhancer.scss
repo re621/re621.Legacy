@@ -241,7 +241,8 @@ div#page div#posts-container {
 
 // Zoom on Hover
 div#page.mode-view div#posts-container,
-div#page div#posts-container[data-thumb-zoom-context=false] {
+div#page div#posts-container[data-thumb-zoom-context=false],
+div#page div#a-popular div#posts-container {
 
     &[data-thumb-zoom=true] article.post-preview.loaded:hover {
         position: relative;
