@@ -1,6 +1,7 @@
 import { Page, PageDefintion } from "../data/Page";
 import { XM } from "../api/XM";
 import { ErrorHandler } from "../ErrorHandler";
+import { Util } from "./Util";
 
 declare const GM;
 
@@ -63,8 +64,8 @@ export class DomUtilities {
     private static async addStylesheets(): Promise<any> {
         if (typeof GM === "undefined") return Promise.resolve();
 
-        return XM.getResourceText("re621_css").then(
-            (css) => { return Promise.resolve(XM.addStyle(css)); },
+        return XM.Connect.getResourceText("re621_css").then(
+            (css) => { return Promise.resolve(DomUtilities.addStyle(css)); },
             () => { return Promise.reject(); }
         )
     }
@@ -230,6 +231,27 @@ export class DomUtilities {
 
         return $link;
     }
+
+    /**
+     * Adds the given style to the document and returns the injected style element
+     * @param css string CSS styles
+     */
+    public static addStyle(css: string): JQuery<HTMLElement> {
+        return $("<style>")
+            .attr({
+                "id": getID(),
+                "type": "text/css"
+            })
+            .html(css)
+            .appendTo("head");
+
+        function getID(): string {
+            let id: string;
+            do { id = Util.makeID(); }
+            while ($("style#" + id).length > 0);
+            return id;
+        }
+    };
 
 }
 

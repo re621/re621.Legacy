@@ -114,7 +114,7 @@ export class RE6Module {
      * Clears stored settings and resets the configuration to default values.
      */
     public async clearSettings(): Promise<void> {
-        return XM.deleteValue("re621." + this.constructor.name).then(() => {
+        return XM.Storage.deleteValue("re621." + this.constructor.name).then(() => {
             return this.loadSettingsCache();
         });
     }
@@ -133,7 +133,7 @@ export class RE6Module {
      */
     private async loadSettingsCache(): Promise<void> {
         const defaultValues = this.getDefaultSettings();
-        this.settings = await XM.getValue("re621." + this.constructor.name, defaultValues);
+        this.settings = await XM.Storage.getValue("re621." + this.constructor.name, defaultValues);
 
         // If defaultValues has a entry the defaultSettings do not have, add it
         // this might happen if the user saved and a defaultSetting gets added afterwards
@@ -150,7 +150,7 @@ export class RE6Module {
      * Save the settings to Tampermoknkey storage.  
      */
     private async saveSettingsCache(): Promise<void> {
-        await XM.setValue("re621." + this.constructor.name, this.settings);
+        await XM.Storage.setValue("re621." + this.constructor.name, this.settings);
         return Promise.resolve();
     }
 
@@ -169,7 +169,7 @@ export class RE6Module {
     public async getSavedSettings(): Promise<{ name: string; data: any }> {
         return {
             name: "re621." + this.constructor.name,
-            data: await XM.getValue("re621." + this.constructor.name, {})
+            data: await XM.Storage.getValue("re621." + this.constructor.name, {})
         };
     }
 

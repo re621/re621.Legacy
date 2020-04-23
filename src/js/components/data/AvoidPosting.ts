@@ -9,7 +9,7 @@ export class AvoidPosting {
 
     /** Returns the cached DNP data. */
     private static async getData(): Promise<DNPData> {
-        if (this.cache === undefined) this.cache = await XM.getResourceJSON<DNPList>("re621_dnp");
+        if (this.cache === undefined) this.cache = await XM.Connect.getResourceJSON<DNPList>("re621_dnp");
         return Promise.resolve(this.cache.data);
     }
 

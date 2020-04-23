@@ -643,7 +643,7 @@ export class SettingsController extends RE6Module {
 
                 Object.keys(parsedData).forEach((key) => {
                     $info.html("Importing " + key);
-                    XM.setValue(key, parsedData[key]);
+                    XM.Storage.setValue(key, parsedData[key]);
                 });
 
                 //console.log(parsedData);

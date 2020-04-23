@@ -316,7 +316,7 @@ export class Form {
             .appendTo($inputContainer);
 
         $($copybutton).click(function () {
-            XM.setClipboard($input.val());
+            XM.Util.setClipboard($input.val());
         });
 
         let timer: number;

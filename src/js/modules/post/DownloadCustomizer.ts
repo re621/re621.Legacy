@@ -42,7 +42,7 @@ export class DownloadCustomizer extends RE6Module {
         this.link.click(event => {
             event.preventDefault();
             event.stopImmediatePropagation();
-            XM.download(this.link.attr("href"), this.link.attr("download"));
+            XM.Connect.download(this.link.attr("href"), this.link.attr("download"));
         });
     }
 

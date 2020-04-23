@@ -31,7 +31,7 @@ export class WikiEnhancer extends RE6Module {
             .attr("id", "wiki-page-copy-tag")
             .addClass("button btn-neutral border-highlight border-left")
             .on("click", () => {
-                XM.setClipboard(tagName);
+                XM.Util.setClipboard(tagName);
             });
         $("<i>")
             .addClass("far fa-copy")

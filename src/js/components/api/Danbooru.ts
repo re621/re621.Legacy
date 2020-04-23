@@ -4,7 +4,7 @@ import { XM } from "./XM";
 
 export class Danbooru {
 
-    private static modules = XM.getWindow()["Danbooru"];
+    private static modules = XM.Window["Danbooru"];
 
     public static Blacklist: DanbooruBlacklist = {
         apply(): void {

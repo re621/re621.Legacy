@@ -77,12 +77,13 @@ export class Util {
     /**
      * Returns the data at the specified location as a string.  
      * The location's domain MUST be listed in a @connect field in the script header.
+     * @deprecated Should be replaced with XM.Connect.xmlHttpPromise
      * @param url Page URL
      * @returns string Page data
      */
     public static async userscriptRequest(url: string): Promise<string> {
         return new Promise(resolve => {
-            XM.xmlHttpRequest({
+            XM.Connect.xmlHttpRequest({
                 method: "GET",
                 url: url,
                 headers: { "User-Agent": window["re621"]["useragent"] },
@@ -94,12 +95,13 @@ export class Util {
     /**
      * Returns the image at the specified location as a blob.  
      * The location's domain MUST be listed in a @connect field in the script header.
+     * @deprecated Should be replaced with XM.Connect.xmlHttpPromise
      * @param url Image URL
      * @returns blob Image data
      */
     public static async getImageBlob(url: string): Promise<Blob> {
         return new Promise((resolve) => {
-            XM.xmlHttpRequest({
+            XM.Connect.xmlHttpRequest({
                 method: "GET",
                 url: url,
                 headers: { "User-Agent": window["re621"]["useragent"] },
@@ -113,12 +115,13 @@ export class Util {
      * Returns the image at the specified location as a data-url.  
      * This is used to bypass e621's restrictions on external files.
      * The location's domain MUST be listed in a @connect field in the script header.
+     * @deprecated Should be replaced with XM.Connect.xmlHttpPromise
      * @param url Image URL
      * @returns string Data-URL
      */
     public static async getImageAsDataURL(url: string): Promise<string> {
         return new Promise((resolve) => {
-            XM.xmlHttpRequest({
+            XM.Connect.xmlHttpRequest({
                 method: "GET",
                 url: url,
                 headers: { "User-Agent": window["re621"]["useragent"] },

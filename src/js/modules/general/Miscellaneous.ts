@@ -274,7 +274,7 @@ export class Miscellaneous extends RE6Module {
                 window.clearTimeout(dbclickTimer);
                 prevent = true;
 
-                if (clickAction === ThumbnailClickAction.NewTab) XM.openInTab(window.location.origin + $link.attr("href"));
+                if (clickAction === ThumbnailClickAction.NewTab) XM.Util.openInTab(window.location.origin + $link.attr("href"));
                 else {
                     $link.off("click.re621.thumbnail");
                     $link[0].click();
