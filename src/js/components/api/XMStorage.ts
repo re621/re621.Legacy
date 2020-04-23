@@ -12,9 +12,7 @@ export class XMStorage {
         return new Promise(async (resolve) => {
             if (typeof GM === "undefined") {
                 await new Promise((resolve) => {
-                    chrome.storage.sync.set({ name: value }, () => {
-                        resolve();
-                    });
+                    chrome.storage.sync.set({ [name]: value }, () => { resolve(); });
                 });
             } else await GM.setValue(name, value);
             resolve();
@@ -30,9 +28,9 @@ export class XMStorage {
     public static async getValue(name: string, defaultValue: any): Promise<any> {
         return new Promise(async (resolve) => {
             if (typeof GM === "undefined") {
-                chrome.storage.sync.get([name], (result: any) => {
-                    if (result["name"] === undefined) resolve(defaultValue);
-                    else resolve(result["name"]);
+                chrome.storage.sync.get(name, (result: any) => {
+                    if (typeof result[name] === "undefined") resolve(Promise.resolve(defaultValue));
+                    else resolve(Promise.resolve(result[name]));
                 });
             } else resolve(GM.getValue(name, defaultValue));
         });
