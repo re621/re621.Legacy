@@ -20,19 +20,19 @@
         "typescript": "tsc",
         "browserify": "browserify ./build/tsc-temp/js/main.js -o ./build/script.js",
         "minify": "terser ./build/script.js --compress -o ./build/script.js",
-        "template": "node ./bin/common-format.js",
+        "template": "node ./bin/common.js",
         "clean": "rimraf ./build/tsc-temp/",
 
         "compile-sass": "npm-run-all sass autoprefixer",
         "sass": "sass ./src/scss/style.scss ./build/style.min.css --no-source-map --style compressed",
         "autoprefixer": "postcss ./build/style.min.css --no-map --use autoprefixer -r",
 
-        "userscript:prod": "node ./bin/userscript-format.js prod",
-        "userscript:dev": "node ./bin/userscript-format.js",
-        "injector:chrome": "node ./bin/userscript-format.js injector chrome",
-        "injector:firefox": "node ./bin/userscript-format.js injector firefox",
+        "userscript:prod": "node ./bin/userscript.js prod",
+        "userscript:dev": "node ./bin/userscript.js",
+        "injector:chrome": "node ./bin/userscript.js injector chrome",
+        "injector:firefox": "node ./bin/userscript.js injector firefox",
 
-        "extension": "node ./bin/extension-format.js",
+        "extension": "node ./bin/extension.js",
 
         "creatednp": "node ./bin/create-dnp.js",
         "test": "echo \"Error: no test specified\" && exit 1"
