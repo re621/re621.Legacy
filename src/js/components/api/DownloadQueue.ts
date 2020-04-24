@@ -116,8 +116,11 @@ export class DownloadQueue {
             XM.Connect.xmlHttpRequest({
                 method: "GET",
                 url: item.file.path,
-                headers: { "User-Agent": window["re621"]["useragent"] },
-                responseType: "arraybuffer",
+                headers: {
+                    "User-Agent": window["re621"]["useragent"],
+                    "X-User-Agent": window["re621"]["useragent"],
+                },
+                responseType: "blob",
                 onloadstart: (event) => {
                     item.listeners.onLoadStart(item.file, thread, event);
                 },

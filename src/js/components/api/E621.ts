@@ -215,14 +215,16 @@ export class E621 {
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "User-Agent": window["re621"]["useragent"],
+                "X-User-Agent": window["re621"]["useragent"],
             },
             method: method,
             mode: "cors"
         };
 
         if (method === "POST") requestInfo.body = data + ((data.length > 0) ? "&" : "") + "authenticity_token=" + this.authToken;
+        query = query + (query.length > 0 ? "&" : "") + "_client=" + encodeURIComponent(window["re621"]["useragent"]);
 
-        const entry = new Request(location.origin + "/" + path + ((query.length > 0) ? "?" : "") + query, requestInfo);
+        const entry = new Request(location.origin + "/" + path + "?" + query, requestInfo);
         const index = this.requestIndex++;
         const final = new Promise<any>((resolve, reject) => {
             this.emitter.one("api.re621.result-" + index, (e, data, status, endpoint, node) => {
