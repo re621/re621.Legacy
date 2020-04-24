@@ -47,7 +47,7 @@ window.re621 = new function() {
         releases: "https://github.com/" + this.repo + "/releases",
         forum: "https://e621.net/forum_topics/25872",
     };
-    this.useragent = "%NAME%/1.0 userscript " + this.links.website;
+    this.useragent = "%NAME%/%VERSHORT% userscript";
     this.debug = true;
     this.toString = function() { return this.name + " v." + this.version + " (" + this.build + ")"; };
 };

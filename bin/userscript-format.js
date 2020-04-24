@@ -10,6 +10,7 @@ var templateReplaced = template
     .replace(/%DESCRIPTION%/g, package.description)
     .replace(/%AUTHOR%/g, package.author)
     .replace(/%VERSION%/g, process.env.GIT_TAG_NAME === undefined ? package.version : process.env.GIT_TAG_NAME)
+    .replace(/%VERSHORT%/g, package.version.replace(/\.\d+$/g, ""))
     .replace(/%BUILD%/g, getBuildTime());
 
 fs.writeFileSync("./build/script.user.js", templateReplaced + "\n" + fs.readFileSync("./build/script.user.js"));
