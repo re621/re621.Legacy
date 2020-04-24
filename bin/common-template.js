@@ -10,7 +10,7 @@ window.re621 = new function() {
         releases: "%GITHUB%/releases",
         forum: "https://e621.net/forum_topics/25872",
     };
-    this.useragent = "%NAME%/1.0 userscript %NAMESPACE%";
+    this.useragent = "%NAME%/%VERSHORT% userscript";
     this.debug = true;
 };
 
