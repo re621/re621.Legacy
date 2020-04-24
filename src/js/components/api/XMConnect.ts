@@ -46,8 +46,10 @@ export class XMConnect {
      */
     private static validateXHRDetails(details: XMConnectRequestFull): XMConnectRequestFull {
         if (details.headers === undefined) details.headers = {};
-        if (details.headers["User-Agent"] === undefined)
+        if (details.headers["User-Agent"] === undefined) {
             details.headers["User-Agent"] = window["re621"]["useragent"];
+            details.headers["X-User-Agent"] = window["re621"]["useragent"];
+        }
 
         if (details.onabort === undefined) details.onabort = (): void => { return; };
         if (details.onerror === undefined) details.onerror = (): void => { return; };
@@ -100,6 +102,7 @@ export class XMConnect {
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded",
                         "User-Agent": window["re621"]["useragent"],
+                        "X-User-Agent": window["re621"]["useragent"],
                     },
                     method: "GET",
                     mode: "cors"
@@ -137,7 +140,10 @@ export class XMConnect {
             };
         }
 
-        if (a.headers === undefined) a.headers = { "User-Agent": window["re621"]["useragent"] };
+        if (a.headers === undefined) a.headers = {
+            "User-Agent": window["re621"]["useragent"],
+            "X-User-Agent": window["re621"]["useragent"],
+        };
 
         if (a.onerror === undefined) a.onerror = (): void => { return; }
         if (a.onload === undefined) a.onload = (): void => { return; }

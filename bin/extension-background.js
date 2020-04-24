@@ -77,6 +77,7 @@ function xmlHttpNative(details) {
         }
 
         request.open(details.method, details.url, true, details.username, details.password);
+        delete details.headers["User-Agent"];
         Object.keys(details.headers).forEach((header) => {
             request.setRequestHeader(header, details.headers[header]);
         });
