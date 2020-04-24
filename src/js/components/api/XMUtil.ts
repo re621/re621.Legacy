@@ -20,7 +20,7 @@ export class XMUtil {
      * @param info object like "{ type: 'text', mimetype: 'text/plain'}" or a string expressing the type ("text" or "html")
      */
     public static setClipboard(data: any, info?: { type: string; mimetype: string } | string): void {
-        if (typeof GM === "undefined") return null; // TODO Chrome function
-        else return GM.setClipboard(data, info);
+        if (typeof GM === "undefined") XM.Chrome.execBackgroundRequest("XM", "Util", "setClipboard", [data]);
+        else GM.setClipboard(data, info);
     };
 }

@@ -105,6 +105,15 @@ const fn = {
                     })
                 });
             },
+            "setClipboard": (data) => {
+                var copyFrom = document.createElement("textarea");
+                copyFrom.textContent = data;
+                document.body.appendChild(copyFrom);
+                copyFrom.select();
+                document.execCommand('copy');
+                copyFrom.blur();
+                document.body.removeChild(copyFrom);
+            }
         },
     },
 }
