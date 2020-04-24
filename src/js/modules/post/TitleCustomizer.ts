@@ -1,8 +1,7 @@
+import { Page, PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
+import { Tag, TagTypes } from "../../components/data/Tag";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { TagTypes, Tag } from "../../components/data/Tag";
-import { PageDefintion, Page } from "../../components/data/Page";
-
 
 /**
  * Add various symbols to the tilebar depending on the posts state

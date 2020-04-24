@@ -1,9 +1,9 @@
-import { UpdateData, UpdateDefinition, SubscriptionSettings, UpdateContent } from "./SubscriptionManager";
 import { E621 } from "../../components/api/E621";
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { Subscription } from "./Subscription";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { Post } from "../../components/data/Post";
+import { RE6Module, Settings } from "../../components/RE6Module";
+import { Subscription } from "./Subscription";
+import { SubscriptionSettings, UpdateContent, UpdateData, UpdateDefinition } from "./SubscriptionManager";
 
 export class TagSubscriptions extends RE6Module implements Subscription {
     updateDefinition: UpdateDefinition = {

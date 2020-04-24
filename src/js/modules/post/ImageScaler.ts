@@ -1,9 +1,9 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { Post } from "../../components/data/Post";
-import { Form } from "../../components/structure/Form";
-import { PageDefintion } from "../../components/data/Page";
-import { ModuleController } from "../../components/ModuleController";
 import { Danbooru } from "../../components/api/Danbooru";
+import { PageDefintion } from "../../components/data/Page";
+import { Post } from "../../components/data/Post";
+import { ModuleController } from "../../components/ModuleController";
+import { RE6Module, Settings } from "../../components/RE6Module";
+import { Form } from "../../components/structure/Form";
 
 const IMAGE_SIZES = [
     { value: "sample", name: "Sample" },

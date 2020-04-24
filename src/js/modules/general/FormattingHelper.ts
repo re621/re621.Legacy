@@ -1,9 +1,9 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { Prompt } from "../../components/structure/Prompt";
-import { Modal } from "../../components/structure/Modal";
-import { Form } from "../../components/structure/Form";
-import { Hotkeys } from "../../components/data/Hotkeys";
 import { Api } from "../../components/api/Api";
+import { Hotkeys } from "../../components/data/Hotkeys";
+import { RE6Module, Settings } from "../../components/RE6Module";
+import { Form } from "../../components/structure/Form";
+import { Modal } from "../../components/structure/Modal";
+import { Prompt } from "../../components/structure/Prompt";
 
 // Avaliable icons for formatting buttons
 const iconDefinitions = [

@@ -1,10 +1,10 @@
-import { UpdateData, UpdateDefinition, SubscriptionSettings, UpdateContent } from "./SubscriptionManager";
 import { E621 } from "../../components/api/E621";
+import { APIForumTopic } from "../../components/api/responses/APIForumTopic";
 import { Page, PageDefintion } from "../../components/data/Page";
+import { User } from "../../components/data/User";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Subscription } from "./Subscription";
-import { APIForumTopic } from "../../components/api/responses/APIForumTopic";
-import { User } from "../../components/data/User";
+import { SubscriptionSettings, UpdateContent, UpdateData, UpdateDefinition } from "./SubscriptionManager";
 
 export class ForumSubscriptions extends RE6Module implements Subscription {
 

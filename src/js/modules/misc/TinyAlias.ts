@@ -1,11 +1,11 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { PageDefintion } from "../../components/data/Page";
-import { APITag } from "../../components/api/responses/APITag";
-import { APIWikiPage } from "../../components/api/responses/APIWikiPage";
-import { Modal } from "../../components/structure/Modal";
-import { AvoidPosting } from "../../components/data/AvoidPosting";
 import { E621 } from "../../components/api/E621";
+import { APITag } from "../../components/api/responses/APITag";
 import { APITagAlias } from "../../components/api/responses/APITagAlias";
+import { APIWikiPage } from "../../components/api/responses/APIWikiPage";
+import { AvoidPosting } from "../../components/data/AvoidPosting";
+import { PageDefintion } from "../../components/data/Page";
+import { RE6Module, Settings } from "../../components/RE6Module";
+import { Modal } from "../../components/structure/Modal";
 
 export class TinyAlias extends RE6Module {
 

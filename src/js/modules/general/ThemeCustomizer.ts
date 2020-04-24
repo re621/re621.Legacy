@@ -1,11 +1,7 @@
-/* Theme Customizer
- * Creates and manages a more customizable theme manager
- */
-
-import { Modal } from "../../components/structure/Modal";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { Form } from "../../components/structure/Form";
 import { DomUtilities } from "../../components/structure/DomUtilities";
+import { Form } from "../../components/structure/Form";
+import { Modal } from "../../components/structure/Modal";
 
 /**
  * ThemeCustomizer  

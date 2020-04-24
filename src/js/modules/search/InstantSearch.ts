@@ -1,7 +1,7 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
 import { PostFilter } from "../../components/data/PostFilter";
+import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
  * Adds a extra search input below the current one where 

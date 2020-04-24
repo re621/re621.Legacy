@@ -1,11 +1,11 @@
-import { UpdateData, UpdateDefinition, SubscriptionSettings, UpdateContent } from "./SubscriptionManager";
-import { APIPool } from "../../components/api/responses/APIPool";
 import { E621 } from "../../components/api/E621";
+import { APIPool } from "../../components/api/responses/APIPool";
+import { APIPost } from "../../components/api/responses/APIPost";
 import { Page } from "../../components/data/Page";
+import { Post } from "../../components/data/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Subscription } from "./Subscription";
-import { APIPost } from "../../components/api/responses/APIPost";
-import { Post } from "../../components/data/Post";
+import { SubscriptionSettings, UpdateContent, UpdateData, UpdateDefinition } from "./SubscriptionManager";
 
 export class PoolSubscriptions extends RE6Module implements Subscription {
     updateDefinition: UpdateDefinition = {

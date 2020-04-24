@@ -1,5 +1,4 @@
 import { XM } from "./XM";
-import { Util } from "../structure/Util";
 
 declare const GM: any;
 declare const GM_getResourceText: Function;

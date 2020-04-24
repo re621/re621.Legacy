@@ -1,11 +1,11 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { PageDefintion } from "../../components/data/Page";
-import { ThumbnailEnhancer } from "./ThumbnailsEnhancer";
-import { Util } from "../../components/structure/Util";
+import { DownloadQueue } from "../../components/api/DownloadQueue";
 import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
-import { DownloadQueue } from "../../components/api/DownloadQueue";
+import { PageDefintion } from "../../components/data/Page";
+import { RE6Module, Settings } from "../../components/RE6Module";
+import { Util } from "../../components/structure/Util";
 import { InfiniteScroll } from "./InfiniteScroll";
+import { ThumbnailEnhancer } from "./ThumbnailsEnhancer";
 
 declare const saveAs;
 

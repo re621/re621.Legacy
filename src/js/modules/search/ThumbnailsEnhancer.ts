@@ -1,9 +1,9 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { PageDefintion } from "../../components/data/Page";
-import { Util } from "../../components/structure/Util";
-import { XM } from "../../components/api/XM";
 import { Danbooru } from "../../components/api/Danbooru";
+import { XM } from "../../components/api/XM";
+import { PageDefintion } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
+import { RE6Module, Settings } from "../../components/RE6Module";
+import { Util } from "../../components/structure/Util";
 
 export enum ThumbnailPerformanceMode {
     Disabled = "disabled",

@@ -1,10 +1,10 @@
-import { Modal } from "../../components/structure/Modal";
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { User } from "../../components/data/User";
-import { Form } from "../../components/structure/Form";
 import { Page } from "../../components/data/Page";
+import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
+import { Form } from "../../components/structure/Form";
+import { Modal } from "../../components/structure/Modal";
 
 /**
  * HeaderCustomizer  

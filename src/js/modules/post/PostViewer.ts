@@ -1,8 +1,8 @@
-import { Post, ViewingPost } from "../../components/data/Post";
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { PageDefintion } from "../../components/data/Page";
-import { ModuleController } from "../../components/ModuleController";
 import { Danbooru } from "../../components/api/Danbooru";
+import { PageDefintion } from "../../components/data/Page";
+import { Post, ViewingPost } from "../../components/data/Post";
+import { ModuleController } from "../../components/ModuleController";
+import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
  * Add various symbols to the tilebar depending on the posts state

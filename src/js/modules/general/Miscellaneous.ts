@@ -1,10 +1,10 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { Page, PageDefintion } from "../../components/data/Page";
 import { Api } from "../../components/api/Api";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
-import { ModuleController } from "../../components/ModuleController";
-import { ThumbnailEnhancer, ThumbnailClickAction } from "../search/ThumbnailsEnhancer";
 import { XM } from "../../components/api/XM";
+import { Page, PageDefintion } from "../../components/data/Page";
+import { ModuleController } from "../../components/ModuleController";
+import { RE6Module, Settings } from "../../components/RE6Module";
+import { ThumbnailClickAction, ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
 
 /**
  * Miscellaneous functionality that does not require a separate module

@@ -1,8 +1,8 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
+import { XM } from "../../components/api/XM";
+import { PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
 import { TagTypes } from "../../components/data/Tag";
-import { PageDefintion } from "../../components/data/Page";
-import { XM } from "../../components/api/XM";
+import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
  * Renames the files to a user-readable scheme for download

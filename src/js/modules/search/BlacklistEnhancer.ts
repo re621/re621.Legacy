@@ -1,9 +1,9 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
+import { Danbooru } from "../../components/api/Danbooru";
 import { PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
-import { User } from "../../components/data/User";
 import { PostFilter } from "../../components/data/PostFilter";
-import { Danbooru } from "../../components/api/Danbooru";
+import { User } from "../../components/data/User";
+import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
  * Blacklist Enhancer  

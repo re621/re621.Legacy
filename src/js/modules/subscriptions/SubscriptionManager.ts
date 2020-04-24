@@ -1,12 +1,12 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { Tabbed } from "../../components/structure/Tabbed";
-import { Modal } from "../../components/structure/Modal";
-import { Subscription } from "./Subscription";
-import { Util } from "../../components/structure/Util";
+import { Danbooru } from "../../components/api/Danbooru";
 import { ModuleController } from "../../components/ModuleController";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Form } from "../../components/structure/Form";
-import { Danbooru } from "../../components/api/Danbooru";
+import { Modal } from "../../components/structure/Modal";
+import { Tabbed } from "../../components/structure/Tabbed";
+import { Util } from "../../components/structure/Util";
+import { Subscription } from "./Subscription";
 
 export class SubscriptionManager extends RE6Module {
 

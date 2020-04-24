@@ -1,6 +1,6 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { PageDefintion, Page } from "../../components/data/Page";
 import { XM } from "../../components/api/XM";
+import { Page, PageDefintion } from "../../components/data/Page";
+import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
  * Adds the wiki page name into the url and adds a button to copy the wiki page name to clipboard
