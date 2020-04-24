@@ -1,11 +1,20 @@
 const fs = require("fs"),
+    https = require("https"),
     rimraf = require("rimraf"),
     util = require("./util");
+
+// Get the build mode
+const prodMode = process.argv[2] === "prod";
 
 // Prepare the directory
 rimraf.sync("./build/extension");
 fs.mkdirSync("./build/extension");
 fs.mkdirSync("./build/extension/lib");
+
+if (prodMode) {
+    rimraf.sync("./lib");
+    fs.mkdirSync("./lib");
+}
 
 const manifest = JSON.parse(util.parseTemplate(
     fs.readFileSync("./bin/extension-manifest.json").toString(),
@@ -14,8 +23,9 @@ const manifest = JSON.parse(util.parseTemplate(
 
 // Copy required libraries
 manifest["content_scripts"][0]["js-lib"].forEach((file, index) => {
-    const fileName = file.replace(/^.*[\\\/]/, '');
-    fs.createReadStream(file).pipe(fs.createWriteStream("./build/extension/lib/" + fileName));
+    const fileName = file[1].replace(/^.*[\\\/]/, '');
+    if (prodMode) { fetchFile(file[0], file[1]); }
+    fs.createReadStream(file[1]).pipe(fs.createWriteStream("./build/extension/lib/" + fileName));
     manifest["content_scripts"][0]["js"].push("lib/" + fileName);
 });
 delete manifest["content_scripts"][0]["js-lib"];
@@ -46,3 +56,8 @@ fs.createReadStream("./bin/extension-injector.js").pipe(fs.createWriteStream("./
 
 // Write the manifest file
 fs.writeFileSync("./build/extension/manifest.json", JSON.stringify(manifest, null, 4) + "\n");
+
+function fetchFile(url, fileName) {
+    const file = fs.createWriteStream(fileName);
+    https.get(url, function(response) { response.pipe(file); });
+}

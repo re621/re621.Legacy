@@ -22,12 +22,30 @@
             "css": [],
             "js": [],
             "js-lib": [
-                "./lib/jquery@3.5.0/jquery.min.js",
-                "./lib/jqueryui@1.12.1/jquery-ui.min.js",
-                "./lib/jquery.hotkeys@0.1.0/jquery.hotkeys.min.js",
-                "./lib/filesaver.js@1.3.8/FileSaver.min.js",
-                "./lib/jszip@3.3.0/jszip.min.js",
-                "./lib/re621.lazysizes@1.0.0/lazysizes.min.js"
+                [
+                    "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js",
+                    "./lib/jquery.min.js"
+                ],
+                [
+                    "https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js",
+                    "./lib/jquery-ui.min.js"
+                ],
+                [
+                    "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.3.0/jszip.min.js",
+                    "./lib/jszip.min.js"
+                ],
+                [
+                    "https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js",
+                    "./lib/FileSaver.min.js"
+                ],
+                [
+                    "https://cdn.jsdelivr.net/npm/jquery.hotkeys@0.1.0/jquery.hotkeys.min.js",
+                    "./lib/jquery.hotkeys.min.js"
+                ],
+                [
+                    "https://cdn.jsdelivr.net/gh/re621/re621-lib@1.0.0/lazysizes/lazysizes.min.js",
+                    "./lib/lazysizes.min.js"
+                ]
             ]
         }
     ],

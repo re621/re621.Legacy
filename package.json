@@ -11,8 +11,8 @@
     ],
     "main": "./build/script.user.js",
     "scripts": {
-        "build:prod": "npm-run-all compile-typescript:prod compile-sass userscript:prod extension",
-        "build:dev": "npm-run-all compile-typescript:dev compile-sass userscript:dev extension",
+        "build:prod": "npm-run-all compile-typescript:prod compile-sass userscript:prod extension:prod",
+        "build:dev": "npm-run-all compile-typescript:dev compile-sass userscript:dev extension:dev",
 
         "compile-typescript:prod": "npm-run-all eslint typescript browserify minify template clean",
         "compile-typescript:dev": "npm-run-all eslint typescript browserify template clean",
@@ -32,7 +32,8 @@
         "injector:chrome": "node ./bin/userscript.js injector chrome",
         "injector:firefox": "node ./bin/userscript.js injector firefox",
 
-        "extension": "node ./bin/extension.js",
+        "extension:prod": "node ./bin/extension.js prod",
+        "extension:dev": "node ./bin/extension.js",
 
         "creatednp": "node ./bin/create-dnp.js",
         "test": "echo \"Error: no test specified\" && exit 1"

@@ -34,7 +34,7 @@ jobs:
       run: npm run userscript:prod
 
     - name: Build Extension Archive
-      run: npm run extension
+      run: npm run extension:prod
       
     - name: Create a Release
       uses: ncipollo/release-action@v1
