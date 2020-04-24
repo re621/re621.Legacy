@@ -86,7 +86,6 @@ export class InfiniteScroll extends RE6Module {
             $(window).scroll(() => {
                 if (timer) return;
                 timer = window.setTimeout(async () => {
-                    console.log("scroll");
                     await this.addMorePosts();
                     timer = null;
                 }, 1000);
