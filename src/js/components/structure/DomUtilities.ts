@@ -111,6 +111,7 @@ export class DomUtilities {
 
         const $menuLogo = $("<menu>").addClass("logo desktop-only").html(`<a href="/" data-ytta-id="-">` + Page.getSiteName() + `</a>`);
         $menuContainer.prepend($menuLogo);
+        $menuMain.find("a[href='/']").remove();
 
         const $menuExtra = $("<menu>").addClass("extra");
         $menuMain.after($menuExtra);
