@@ -1,4 +1,5 @@
 import { XM } from "./XM";
+import { Util } from "../structure/Util";
 
 declare const GM: any;
 declare const GM_getResourceText: Function;
@@ -20,7 +21,11 @@ export class XMConnect {
         if (typeof GM !== "undefined" && typeof GM.xmlHttpRequest === "function") GM.xmlHttpRequest(validDetails);
         else if (typeof GM_xmlhttpRequest === "function") GM_xmlhttpRequest(validDetails);
         else XM.Chrome.execBackgroundRequest("XM", "Connect", "xmlHttpRequest", [validDetails])
-            .then((response: GMxmlHttpRequestChromeEvent) => { details[response.event](response); });
+            .then((response: GMxmlHttpRequestChromeEvent) => {
+                if (details.responseType === "arraybuffer")
+                    response.response = new Uint8Array(Object.values(response.response)).buffer;
+                details[response.event](response);
+            });
     };
 
     /**
@@ -278,7 +283,7 @@ export interface GMxmlHttpRequestEvent {
     statusText: string;
 }
 
-export interface GMxmlHttpRequestChromeEvent extends GMxmlHttpRequestEvent {
+export interface GMxmlHttpRequestChromeEvent extends GMxmlHttpRequestResponse {
     /** **event** which event caused the provided feedback */
     event: string;
 }

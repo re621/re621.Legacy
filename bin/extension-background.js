@@ -36,28 +36,7 @@ function xmlHttpNative(details) {
 
         /** **onreadystatechange** callback to be executed if the request's ready state changed */
         request.onreadystatechange = () => {
-            if (request.readyState !== 4) return;
-            if (request.status >= 200 && request.status < 300) {
-                resolve({
-                    event: "onload",
-                    finalURL: request.finalURL,
-                    state: request.readyState,
-                    status: request.status,
-                    statusText: request.statusText,
-                    responseHeaders: request.getAllResponseHeaders(),
-                    response: request.response,
-                    responseXML: (request.responseType === "" || request.responseType === "document") ? request.responseXML : null,
-                    responseText: (request.responseType === "" || request.responseType === "document") ? request.responseText : null,
-                });
-            } else {
-                resolve({
-                    event: "onerror",
-                    finalURL: request.finalURL,
-                    state: request.readyState,
-                    status: request.status,
-                    statusText: request.statusText,
-                });
-            }
+            // N/A
         };
 
         /** **ontimeout** callback to be executed if the request failed due to a timeout */
@@ -73,7 +52,28 @@ function xmlHttpNative(details) {
 
         /** **onload** callback to be executed if the request was loaded. */
         request.onload = () => {
-            // N/A
+            if (request.readyState !== 4) return;
+            if (request.status >= 200 && request.status < 300) {
+                resolve({
+                    event: "onload",
+                    finalURL: request.finalURL,
+                    state: request.readyState,
+                    status: request.status,
+                    statusText: request.statusText,
+                    responseHeaders: request.getAllResponseHeaders(),
+                    response: (details.responseType === "arraybuffer") ? new Uint8Array(request.response) : request.response,
+                    responseXML: (request.responseType === "" || request.responseType === "document") ? request.responseXML : null,
+                    responseText: (request.responseType === "" || request.responseType === "document") ? request.responseText : null,
+                });
+            } else {
+                resolve({
+                    event: "onerror",
+                    finalURL: request.finalURL,
+                    state: request.readyState,
+                    status: request.status,
+                    statusText: request.statusText,
+                });
+            }
         }
 
         request.open(details.method, details.url, true, details.username, details.password);
@@ -111,7 +111,7 @@ const fn = {
                 copyFrom.textContent = data;
                 document.body.appendChild(copyFrom);
                 copyFrom.select();
-                document.execCommand('copy');
+                document.execCommand("copy");
                 copyFrom.blur();
                 document.body.removeChild(copyFrom);
             }

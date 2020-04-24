@@ -120,7 +120,7 @@ export class DownloadQueue {
                     "User-Agent": window["re621"]["useragent"],
                     "X-User-Agent": window["re621"]["useragent"],
                 },
-                responseType: "blob",
+                responseType: "arraybuffer",
                 onloadstart: (event) => {
                     item.listeners.onLoadStart(item.file, thread, event);
                 },
