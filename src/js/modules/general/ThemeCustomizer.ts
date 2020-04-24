@@ -38,6 +38,7 @@ export class ThemeCustomizer extends RE6Module {
         // === Create a button in the header
         const openCustomizerButton = DomUtilities.addSettingsButton({
             name: `<i class="fas fa-paint-brush"></i>`,
+            title: "Change Theme",
         });
 
         // === Establish the settings window contents

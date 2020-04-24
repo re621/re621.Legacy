@@ -38,6 +38,7 @@ export class SettingsController extends RE6Module {
         // Create a button in the header
         const openSettingsButton = DomUtilities.addSettingsButton({
             name: `<i class="fas fa-wrench"></i>`,
+            title: "Settings",
             class: "float-right",
         });
 

@@ -160,6 +160,7 @@ export class HeaderCustomizer extends RE6Module {
         // === Tab Configuration Interface
         this.addTabButton = DomUtilities.addSettingsButton({
             name: `<i class="fas fa-tasks"></i>`,
+            title: "Edit Header Tabs",
             class: "float-left",
         });
 

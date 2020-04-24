@@ -33,6 +33,7 @@ export class SubscriptionManager extends RE6Module {
         // Create a button in the header
         this.$openSubsButton = DomUtilities.addSettingsButton({
             name: `<i class="fas fa-bell"></i>`,
+            title: "Notifications",
         });
 
         const content = [];
