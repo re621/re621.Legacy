@@ -40,7 +40,7 @@ export class ThemeCustomizer extends RE6Module {
         // === Establish the settings window contents
         this.themeCustomizerForm = new Form({ "id": "theme-customizer", "parent": "div#modal-container" }, [
             Form.select(
-                "main", window.localStorage.getItem("theme"), "Theme",
+                "main", window.localStorage.getItem("theme") || "hexagon", "Theme",
                 [
                     { value: "hexagon", name: "Hexagon" },
                     { value: "pony", name: "Pony" },
@@ -55,7 +55,7 @@ export class ThemeCustomizer extends RE6Module {
                 }
             ),
             Form.select(
-                "extra", window.localStorage.getItem("theme-extra"), "Extras",
+                "extra", window.localStorage.getItem("theme-extra") || "hexagons", "Extras",
                 [
                     { value: "none", name: "None" },
                     { value: "autumn", name: "Autumn" },
@@ -73,7 +73,7 @@ export class ThemeCustomizer extends RE6Module {
                 }
             ),
             Form.select(
-                "nav", window.localStorage.getItem("theme-nav"), "Post Navbar",
+                "nav", window.localStorage.getItem("theme-nav") || "top", "Post Navbar",
                 [
                     { value: "top", name: "Top" },
                     { value: "bottom", name: "Bottom" },
