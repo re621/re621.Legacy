@@ -37,7 +37,6 @@ manifest["content_scripts"][0]["js"].push("script.js");
 
 // Copy the stylesheet
 fs.createReadStream("./build/style.min.css").pipe(fs.createWriteStream("./build/extension/style.min.css"));
-manifest["content_scripts"][0]["css"].push("style.min.css");
 
 // Copy the background page
 fs.createReadStream("./bin/extension-background.js").pipe(fs.createWriteStream("./build/extension/background.js"));

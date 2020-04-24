@@ -45,5 +45,8 @@
         "re621_dnp": "https://cdn.jsdelivr.net/gh/re621/re621@master/dist/avoid-posting.json"
     },
 
-    "web_accessible_resources": ["injector.js"]
+    "web_accessible_resources": [
+        "style.min.css",
+        "injector.js"
+    ]
 }

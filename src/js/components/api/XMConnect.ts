@@ -74,7 +74,7 @@ export class XMConnect {
 
         // Extensions
         return XMConnect.xmlHttpPromise({
-            "url": window["resources"][name],
+            url: window["resources"][name].startsWith("http") ? window["resources"][name] : XM.Chrome.getResourceURL(window["resources"][name]),
             method: "GET",
         }).then(
             (data: GMxmlHttpRequestResponse) => { return Promise.resolve(data.responseText); },

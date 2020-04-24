@@ -75,8 +75,6 @@ export class DomUtilities {
      * This is handled throught the manifest in the extension version.  
      */
     private static async addStylesheets(): Promise<any> {
-        if (typeof GM === "undefined") return Promise.resolve();
-
         return XM.Connect.getResourceText("re621_css").then(
             (css) => { return Promise.resolve(DomUtilities.addStyle(css)); },
             () => { return Promise.reject(); }
