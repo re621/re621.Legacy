@@ -1,6 +1,6 @@
 name: dnp
 on:
-  push:
+  # push:
   # everyday at 3 am
   schedule:
     - cron:  '0 3 * * *'
