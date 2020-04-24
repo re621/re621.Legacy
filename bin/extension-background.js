@@ -46,8 +46,8 @@ function xmlHttpNative(details) {
                     statusText: request.statusText,
                     responseHeaders: request.getAllResponseHeaders(),
                     response: request.response,
-                    responseXML: request.responseXML,
-                    responseText: request.responseText,
+                    responseXML: (request.responseType === "" || request.responseType === "document") ? request.responseXML : null,
+                    responseText: (request.responseType === "" || request.responseType === "document") ? request.responseText : null,
                 });
             } else {
                 resolve({
