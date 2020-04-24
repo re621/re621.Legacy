@@ -7,26 +7,39 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build:
-    if: "!github.event.release.prerelease"
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Check out the Repository
+      uses: actions/checkout@v2
       with:
         fetch-depth: '0'
+  
+    - name: Fetch the latest Git tag
+      uses: olegtarasov/get-tag@v2
       
-    - name: Set up node
+    - name: Set up Node
       uses: actions/setup-node@v1
   
-    - uses: olegtarasov/get-tag@v2
-  
-    - run: npm ci
-    - run: npm run build:prod
+    - name: Install Project Dependencies
+      run: npm ci
+
+    - name: Compile Typescript
+      run: npm run compile-typescript:prod
+
+    - name: Compile SASS
+      run: npm run compile-sass
+
+    - name: Build Userscript Files
+      run: npm run userscript:prod
+
+    - name: Build Extension Archive
+      run: npm run extension
       
     - name: Create a Release
       uses: ncipollo/release-action@v1
       with:
         allowUpdates: true
-        artifacts: "./build/style.min.css,./build/script.meta.js,./build/script.user.js"
+        artifacts: "./build/script.user.js,./build/script.meta.js,./build/style.min.css"
         replacesArtifacts: true
         token: ${{ secrets.GITHUB_TOKEN }}
