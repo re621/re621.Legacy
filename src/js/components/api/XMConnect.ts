@@ -5,8 +5,6 @@ declare const GM_getResourceText: Function;
 declare const GM_getResourceURL: Function;
 declare const GM_xmlhttpRequest: Function;
 
-declare const chrome;
-
 declare const saveAs;
 
 export class XMConnect {
@@ -21,7 +19,7 @@ export class XMConnect {
         const validDetails = XMConnect.validateXHRDetails(details);
         if (typeof GM !== "undefined" && typeof GM.xmlHttpRequest === "function") GM.xmlHttpRequest(validDetails);
         else if (typeof GM_xmlhttpRequest === "function") GM_xmlhttpRequest(validDetails);
-        else XM.Chrome.execBackgroundRequest("XMConnect", "XHR", "connect", [validDetails])
+        else XM.Chrome.execBackgroundRequest("XM", "Connect", "xmlHttpRequest", [validDetails])
             .then((response: GMxmlHttpRequestChromeEvent) => { details[response.event](response); });
     };
 

@@ -34,6 +34,7 @@
 
     "permissions": [
         "storage",
+        "tabs",
         "https://api.github.com/*",
         "https://static1.e621.net/*",
         "https://cdn.jsdelivr.net/gh/re621/re621@master/dist/avoid-posting.json"

@@ -91,9 +91,22 @@ function xmlHttpNative(details) {
 }
 
 const fn = {
-    "XMConnect": {
-        "XHR": { "connect": xmlHttpNative, }
-    }
+    "XM": {
+        "Connect": { "xmlHttpRequest": xmlHttpNative, },
+        "Util": {
+            "openInTab": (path, loadInBackground) => {
+                return new Promise((resolve) => {
+                    chrome.tabs.query({ active: true, windowType: "normal", currentWindow: true }, function(data) {
+                        chrome.tabs.create({
+                            url: path,
+                            active: loadInBackground,
+                            index: typeof data[0] === "undefined" ? undefined : data[0].index + 1,
+                        }, () => { resolve(true); });
+                    })
+                });
+            },
+        },
+    },
 }
 
 async function handleMessage(request, sender, sendResponse) {
