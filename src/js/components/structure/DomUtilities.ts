@@ -1,5 +1,5 @@
-import { Page, PageDefintion } from "../data/Page";
 import { XM } from "../api/XM";
+import { Page, PageDefintion } from "../data/Page";
 import { ErrorHandler } from "../ErrorHandler";
 import { Util } from "./Util";
 
@@ -189,8 +189,7 @@ export class DomUtilities {
                 .addClass("dtext-previewable")
                 .append($(`<div class="dtext-preview">`))
                 .insertBefore($textarea)
-                .append($textarea)
-                .wrap(`<form class="simple_form"></form>`);
+                .append($textarea);
         }
     }
 
