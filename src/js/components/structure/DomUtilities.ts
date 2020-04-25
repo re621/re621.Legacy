@@ -1,5 +1,5 @@
-import { Page, PageDefintion } from "../data/Page";
 import { GM } from "../api/GM";
+import { Page, PageDefintion } from "../data/Page";
 
 /**
  * StructureUtilities  
@@ -87,8 +87,7 @@ export class DomUtilities {
                 .addClass("dtext-previewable")
                 .append($(`<div class="dtext-preview">`))
                 .insertBefore($textarea)
-                .append($textarea)
-                .wrap(`<form class="simple_form"></form>`);
+                .append($textarea);
         }
 
         // Prepare post-preview elements
