@@ -27,6 +27,14 @@ export class XMChrome {
     }
 
     /**
+     * Establishes a connection to the background script
+     * @returns Promise containing the port object
+     */
+    public static async execBackgroundConnection(component: string): Promise<ChromePort> {
+        return Promise.resolve(chrome.runtime.connect({ name: component }));
+    }
+
+    /**
      * Executes the specified function in the injector script
      * @param component Component to run the script on, ex. Danbooru
      * @param module Component module, ex. Blacklist
@@ -98,4 +106,32 @@ interface MessageRequest {
 interface MessageResponse {
     eventID: string;
     data: any;
+}
+
+interface ChromePort {
+    /** The name of the port, as specified in the call to runtime.connect */
+    name: string;
+
+    /**
+     * Immediately disconnect the port. Calling disconnect() on an already-disconnected port has no effect.  
+     * When a port is disconnected, no new events will be dispatched to this port.
+     */
+    disconnect(): void;
+
+    /**
+     * Fired when the port is disconnected from the other end(s).runtime.lastError may be set if the port was disconnected by an error.  
+     * If the port is closed via disconnect, then this event is only fired on the other end.  
+     * This event is fired at most once(see also Port lifetime). The first and only parameter to the event handler is this disconnected port.
+     */
+    onDisconnect: any;
+
+    /**
+     * This event is fired when postMessage is called by the other end of the port.  
+     * The first parameter is the message, the second parameter is the port that received the message.
+     */
+    onMessage: any;
+
+    /** Send a message to the other end of the port.If the port is disconnected, an error is thrown. */
+    postMessage(message: any): void;
+
 }

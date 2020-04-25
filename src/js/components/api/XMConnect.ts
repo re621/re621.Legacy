@@ -15,16 +15,25 @@ export class XMConnect {
      * For extensions, the domain name MUST be listed in the permissions.
      * @param details Request details
      */
-    public static xmlHttpRequest(details: XMConnectRequestFull): void {
+    public static xmlHttpRequest(details: XMConnectRequest): void {
         const validDetails = XMConnect.validateXHRDetails(details);
         if (typeof GM !== "undefined" && typeof GM.xmlHttpRequest === "function") GM.xmlHttpRequest(validDetails);
         else if (typeof GM_xmlhttpRequest === "function") GM_xmlhttpRequest(validDetails);
-        else XM.Chrome.execBackgroundRequest("XM", "Connect", "xmlHttpRequest", [validDetails])
-            .then((response: GMxmlHttpRequestChromeEvent) => {
-                if (details.responseType === "arraybuffer")
-                    response.response = new Uint8Array(Object.values(response.response)).buffer;
-                details[response.event](response);
+        else XM.Chrome.execBackgroundConnection("XHR")
+            .then((port) => {
+                console.log("connected");
+                port.postMessage(validDetails);
+                port.onMessage.addListener(function (response: GMxmlHttpRequestChromeEvent) {
+                    console.log(response);
+                    details[response.event](response);
+                });
             });
+        /*
+        .then((response: GMxmlHttpRequestChromeEvent) => {
+            if (details.responseType === "arraybuffer")
+                response.response = new Uint8Array(Object.values(response.response)).buffer;
+            details[response.event](response);
+        }); */
     };
 
     /**
@@ -36,10 +45,16 @@ export class XMConnect {
     public static xmlHttpPromise(details: XMConnectRequest): Promise<any> {
         const validDetails = XMConnect.validateXHRDetails(details);
         return new Promise((resolve, reject) => {
-            validDetails.onabort = (event): void => { reject(event); }
-            validDetails.onerror = (event): void => { reject(event); }
-            validDetails.ontimeout = (event): void => { reject(event); }
-            validDetails.onload = (event): void => { resolve(event); }
+            const callbacks = validDetails;
+
+            details.onabort = (event): void => { callbacks.onabort(event); reject(event); };
+            details.onerror = (event): void => { callbacks.onerror(event); reject(event); };
+            details.onload = (event): void => { callbacks.onload(event); resolve(event); };
+            details.onloadstart = (event): void => { callbacks.onloadstart(event); };
+            details.onprogress = (event): void => { callbacks.onprogress(event); };
+            details.onreadystatechange = (event): void => { callbacks.onreadystatechange(event); };
+            details.ontimeout = (event): void => { callbacks.ontimeout(event); reject(event); };
+
             XMConnect.xmlHttpRequest(validDetails);
         });
     }
@@ -48,7 +63,7 @@ export class XMConnect {
      * Validates the xmlHttpRequest details, returning a valid set
      * @param details Request details
      */
-    private static validateXHRDetails(details: XMConnectRequestFull): XMConnectRequestFull {
+    private static validateXHRDetails(details: XMConnectRequest): XMConnectRequest {
         if (details.headers === undefined) details.headers = {};
         if (details.headers["User-Agent"] === undefined) {
             details.headers["User-Agent"] = window["re621"]["useragent"];
@@ -175,7 +190,7 @@ export class XMConnect {
 
 }
 
-export interface XMConnectRequest {
+interface XMConnectDetails {
     /** **method** Request method - either GET, HEAD, or POST */
     method: "GET" | "HEAD" | "POST";
 
@@ -219,7 +234,7 @@ export interface XMConnectRequest {
     password?: string;
 }
 
-export interface XMConnectRequestFull extends XMConnectRequest {
+interface XMConnectRequestCallbacks {
 
     /** **onabort** callback to be executed if the request was aborted */
     onabort?(event: GMxmlHttpRequestEvent): void;
@@ -253,6 +268,8 @@ export interface XMConnectRequestFull extends XMConnectRequest {
      */
     onload?(event: GMxmlHttpRequestResponse): void;
 }
+
+interface XMConnectRequest extends XMConnectDetails, XMConnectRequestCallbacks { }
 
 export interface GMxmlHttpRequestEvent {
     /** **finalUrl** - the final URL after all redirects from where the data was loaded */
@@ -288,7 +305,7 @@ export interface GMxmlHttpRequestChromeEvent extends GMxmlHttpRequestResponse {
 }
 
 export interface GMxmlHttpRequestProgressEvent extends GMxmlHttpRequestEvent {
-    /** **lengthComputable** - absolutely no idea when it would be false */
+    /** **lengthComputable** - sometimes, total is 0. No idea why, but if it is, this is false. */
     lengthComputable: boolean;
 
     /** **loaded** - size of data loaded, in bytes */

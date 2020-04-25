@@ -1,99 +1,77 @@
-function xmlHttpNative(details) {
+function xmlHttpNative(port, details) {
     const request = new XMLHttpRequest();
 
-    return new Promise(function(resolve) {
-        /** **onabort** callback to be executed if the request was aborted */
-        request.onabort = () => {
-            resolve({
-                event: "onabort",
-                finalURL: request.finalURL,
-                state: request.readyState,
-                status: request.status,
-                statusText: request.statusText,
-            });
-        }
+    /** **onabort** callback to be executed if the request was aborted */
+    request.onabort = () => { port.postMessage(createResponse("onabort", request)); }
 
-        /** **onerror** callback to be executed if the request ended up with an error */
-        request.onerror = () => {
-            resolve({
-                event: "onerror",
-                finalURL: request.finalURL,
-                state: request.readyState,
-                status: request.status,
-                statusText: request.statusText,
-            });
-        }
+    /** **onerror** callback to be executed if the request ended up with an error */
+    request.onerror = () => { port.postMessage(createResponse("onerror", request)); }
 
-        /** **onloadstart** callback to be executed if the request started to load */
-        request.onloadstart = () => {
-            // N/A
-        }
+    /** **onloadstart** callback to be executed if the request started to load */
+    request.onloadstart = () => { port.postMessage(createResponse("onloadstart", request)); }
 
-        /** **onprogress** callback to be executed if the request made some progress */
-        request.onprogress = () => {
-            // N/A
-        }
+    /** **onprogress** callback to be executed if the request made some progress */
+    request.onprogress = (event) => {
+        port.postMessage(createResponse("onprogress", request, {
+            // Sometimes, total is 0. If it is, the length cannot be computed.
+            lengthComputable: event.total > 0,
+            loaded: event.loaded,
+            total: event.total,
+        }));
+    }
 
-        /** **onreadystatechange** callback to be executed if the request's ready state changed */
-        request.onreadystatechange = () => {
-            // N/A
+    /** **onreadystatechange** callback to be executed if the request's ready state changed */
+    request.onreadystatechange = () => { port.postMessage(createResponse("onreadystatechange", request)); };
+
+    /** **ontimeout** callback to be executed if the request failed due to a timeout */
+    request.ontimeout = () => { port.postMessage(createResponse("ontimeout", request)); }
+
+    /** **onload** callback to be executed if the request was loaded. */
+    request.onload = () => {
+        if (request.readyState !== 4) return;
+        if (request.status >= 200 && request.status < 300) {
+            port.postMessage(createResponse("onload", request, {
+                responseHeaders: request.getAllResponseHeaders(),
+                response: (details.responseType === "arraybuffer") ? new Uint8Array(request.response) : request.response,
+                responseXML: (request.responseType === "" || request.responseType === "document") ? request.responseXML : null,
+                responseText: (request.responseType === "" || request.responseType === "document") ? request.responseText : null,
+            }));
+        } else {
+            port.postMessage(createResponse("onerror", request));
+        }
+    }
+
+    request.open(details.method, details.url, true, details.username, details.password);
+    delete details.headers["User-Agent"];
+    Object.keys(details.headers).forEach((header) => {
+        request.setRequestHeader(header, details.headers[header]);
+    });
+
+    if (details.responseType) request.responseType = details.responseType;
+
+    if (details.overrideMimeType) request.overrideMimeType();
+
+    if (details.binary) request.sendAsBinary();
+    else request.send();
+
+    function createResponse(event, request, data) {
+        let result = {
+            event: event,
+            finalURL: request.finalURL,
+            state: request.readyState,
+            status: request.status,
+            statusText: request.statusText,
         };
 
-        /** **ontimeout** callback to be executed if the request failed due to a timeout */
-        request.ontimeout = () => {
-            details.ontimeout({
-                event: "ontimeout",
-                finalURL: request.finalURL,
-                state: request.readyState,
-                status: request.status,
-                statusText: request.statusText,
-            });
-        }
+        if (data !== undefined)
+            Object.keys(data).forEach((key) => { result[key] = data[key]; });
 
-        /** **onload** callback to be executed if the request was loaded. */
-        request.onload = () => {
-            if (request.readyState !== 4) return;
-            if (request.status >= 200 && request.status < 300) {
-                resolve({
-                    event: "onload",
-                    finalURL: request.finalURL,
-                    state: request.readyState,
-                    status: request.status,
-                    statusText: request.statusText,
-                    responseHeaders: request.getAllResponseHeaders(),
-                    response: (details.responseType === "arraybuffer") ? new Uint8Array(request.response) : request.response,
-                    responseXML: (request.responseType === "" || request.responseType === "document") ? request.responseXML : null,
-                    responseText: (request.responseType === "" || request.responseType === "document") ? request.responseText : null,
-                });
-            } else {
-                resolve({
-                    event: "onerror",
-                    finalURL: request.finalURL,
-                    state: request.readyState,
-                    status: request.status,
-                    statusText: request.statusText,
-                });
-            }
-        }
-
-        request.open(details.method, details.url, true, details.username, details.password);
-        delete details.headers["User-Agent"];
-        Object.keys(details.headers).forEach((header) => {
-            request.setRequestHeader(header, details.headers[header]);
-        });
-
-        if (details.responseType) request.responseType = details.responseType;
-
-        if (details.overrideMimeType) request.overrideMimeType();
-
-        if (details.binary) request.sendAsBinary();
-        else request.send();
-    });
+        return result;
+    }
 }
 
 const fn = {
     "XM": {
-        "Connect": { "xmlHttpRequest": xmlHttpNative, },
         "Util": {
             "openInTab": (path, loadInBackground) => {
                 return new Promise((resolve) => {
@@ -143,4 +121,18 @@ async function handleMessage(request, sender, sendResponse) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     handleMessage(request, sender, sendResponse);
     return true;
+});
+
+chrome.runtime.onConnect.addListener((port) => {
+
+    if (port.name === "XHR") {
+        port.onMessage.addListener((message) => { xmlHttpNative(port, message) });
+        return;
+    }
+
+    sendResponse({
+        eventID: request.eventID,
+        data: "RE6 Background - Invalid Request",
+    });
+
 });
