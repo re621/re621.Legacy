@@ -32,7 +32,7 @@ function xmlHttpNative(port, details) {
         if (request.status >= 200 && request.status < 300) {
             port.postMessage(createResponse("onload", request, {
                 responseHeaders: request.getAllResponseHeaders(),
-                response: (details.responseType === "arraybuffer") ? new Uint8Array(request.response) : request.response,
+                response: (request.responseType === "blob") ? URL.createObjectURL(request.response) : request.response,
                 responseXML: (request.responseType === "" || request.responseType === "document") ? request.responseXML : null,
                 responseText: (request.responseType === "" || request.responseType === "document") ? request.responseText : null,
             }));
@@ -47,7 +47,8 @@ function xmlHttpNative(port, details) {
         request.setRequestHeader(header, details.headers[header]);
     });
 
-    if (details.responseType) request.responseType = details.responseType;
+    if (details.responseType) // ArrayBuffer gets fetched as a blob, for the sake of converting to ObjectURL
+        request.responseType = (details.responseType === "arraybuffer") ? "blob" : details.responseType;
 
     if (details.overrideMimeType) request.overrideMimeType();
 

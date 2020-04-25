@@ -1,5 +1,5 @@
 import { XM } from "./XM";
-import { GMxmlHttpRequestEvent, GMxmlHttpRequestResponse, GMxmlHttpRequestProgressEvent } from "./XMConnect";
+import { GMxmlHttpRequestEvent, GMxmlHttpRequestProgressEvent, GMxmlHttpRequestResponse } from "./XMConnect";
 
 declare const JSZip;
 

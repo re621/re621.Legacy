@@ -21,10 +21,17 @@ export class XMConnect {
         else if (typeof GM_xmlhttpRequest === "function") GM_xmlhttpRequest(validDetails);
         else XM.Chrome.execBackgroundConnection("XHR")
             .then((port) => {
-                console.log("connected");
                 port.postMessage(validDetails);
-                port.onMessage.addListener(function (response: GMxmlHttpRequestChromeEvent) {
-                    console.log(response);
+                port.onMessage.addListener(async (response: GMxmlHttpRequestChromeEvent) => {
+                    if (response.event === "onload") {
+                        if (details.responseType === "blob")
+                            response.response = await fetch(response.response).then(r => r.blob());
+                        else if (details.responseType === "arraybuffer")
+                            response.response = await fetch(response.response).then(r => r.arrayBuffer());
+
+                        URL.revokeObjectURL(response["responseURL"]);
+                    }
+                    // console.log(response);
                     details[response.event](response);
                 });
             });
@@ -331,7 +338,7 @@ export interface GMxmlHttpRequestResponse extends GMxmlHttpRequestEvent {
      * **response** -  returns the response's body content as an ArrayBuffer, Blob, Document, JavaScript Object, or DOMString,
      * depending on the value of the request's responseType property.
      */
-    response: object;
+    response: any;
 
     /**
      * **responseXML** - returns a Document containing the HTML or XML retrieved by the request;
