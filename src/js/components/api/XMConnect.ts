@@ -45,7 +45,15 @@ export class XMConnect {
     public static xmlHttpPromise(details: XMConnectRequest): Promise<any> {
         const validDetails = XMConnect.validateXHRDetails(details);
         return new Promise((resolve, reject) => {
-            const callbacks = validDetails;
+            const callbacks = {
+                onabort: validDetails.onabort,
+                onerror: validDetails.onerror,
+                onload: validDetails.onload,
+                onloadstart: validDetails.onloadstart,
+                onprogress: validDetails.onprogress,
+                onreadystatechange: validDetails.onreadystatechange,
+                ontimeout: validDetails.ontimeout,
+            };
 
             details.onabort = (event): void => { callbacks.onabort(event); reject(event); };
             details.onerror = (event): void => { callbacks.onerror(event); reject(event); };
