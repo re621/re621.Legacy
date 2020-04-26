@@ -231,9 +231,15 @@ export class ThumbnailEnhancer extends RE6Module {
         const $extrasBox = $("<div>")
             .addClass("bg-highlight preview-extras")
             .appendTo($link);
-        $("<span>").html($imgData[4]).appendTo($extrasBox);
-        $("<span>").html(parseRating($imgData[0])).appendTo($extrasBox);
-        $("<span>").html(parseDate($imgData[2])).appendTo($extrasBox);
+
+        if ($imgData[4] === undefined) $("<span>").html("Score: ?").appendTo($extrasBox);
+        else $("<span>").html($imgData[4]).appendTo($extrasBox);
+
+        if ($imgData[0] === undefined) $("<span>").html("unknown").appendTo($extrasBox);
+        else $("<span>").html(parseRating($imgData[0])).appendTo($extrasBox);
+
+        if ($imgData[2] === undefined) $("<span>").html("unknown").appendTo($extrasBox);
+        else $("<span>").html(parseDate($imgData[2])).appendTo($extrasBox);
 
         // Voting Buttons
         const $voteBox = $("<div>")

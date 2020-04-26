@@ -163,8 +163,10 @@ export class InfiniteScroll extends RE6Module {
         this.isInProgress = false;
         this.$loadingIndicator.hide();
 
-        ModuleController.getWithType<BlacklistEnhancer>(BlacklistEnhancer).updateSidebar();
-        ModuleController.getWithType<InstantSearch>(InstantSearch).applyFilter();
+        const blacklistEnhancer = ModuleController.getWithType<BlacklistEnhancer>(BlacklistEnhancer),
+            instantSearch = ModuleController.getWithType<InstantSearch>(InstantSearch);
+        if (blacklistEnhancer.isInitialized()) blacklistEnhancer.updateSidebar();
+        if (instantSearch.isInitialized()) instantSearch.applyFilter();
 
         return Promise.resolve(true);
     }
