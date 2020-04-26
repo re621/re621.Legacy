@@ -203,7 +203,7 @@ export class PoolDownloader extends RE6Module {
                         },
                         {
                             onStart: (item, thread, index) => {
-                                this.infoText.html(`Downloading . . . ` + (queueSize - index) + " / " + queueSize);
+                                this.infoText.html(`Downloading ... <span class="float-right">` + (queueSize - index) + ` / ` + queueSize + `</span>`);
                                 threadInfo[thread]
                                     .html(item.file)
                                     .css("--progress", "0%");
