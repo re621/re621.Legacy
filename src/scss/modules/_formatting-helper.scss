@@ -2,9 +2,6 @@
 
 form.formatting-helper {
 
-    padding: 0;
-    background: unset !important;
-
     &.new_forum_post,
     &.edit_forum_post,
     &.edit_comment {
@@ -44,6 +41,8 @@ div.dtext-previewable {
 
         display: inline-grid;
         grid-template-columns: max-content auto min-content;
+
+        background: #00000020;
 
         width: 100%;
         padding-top: 0.5rem;
@@ -128,6 +127,8 @@ div.dtext-previewable {
         box-sizing: border-box;
         outline: 0;
 
+        // background: #ffffff10;
+
         box-shadow: unset;
         padding: 0.25rem;
         margin-bottom: 0 !important;
@@ -140,8 +141,8 @@ div.dtext-previewable {
     }
 
     textarea:focus {
-        background: inherit;
-        color: inherit;
+        // background: #ffffff10;
+        // color: inherit;
     }
 
     &[data-editing=false] div.comment-buttons,
@@ -157,6 +158,8 @@ div.dtext-previewable {
     div.dtext-button-drawer-title {
         grid-row: 1;
         grid-column: 2;
+
+        background: #00000020;
 
         margin-left: 1rem;
         text-align: center;
@@ -181,6 +184,8 @@ div.dtext-previewable {
         grid-template-columns: repeat(auto-fill, minmax(2.5rem, 1fr));
         grid-template-rows: repeat(auto-fill, minmax(2.5rem, 1fr));
         align-items: center;
+
+        background: #ffffff10;
 
         min-width: 10rem;
         margin-left: 1rem;
