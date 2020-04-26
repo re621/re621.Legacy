@@ -1,5 +1,5 @@
-import { Hotkeys } from "../data/Hotkeys";
 import { GM } from "../api/GM";
+import { Hotkeys } from "../data/Hotkeys";
 import { Util } from "./Util";
 
 /**
@@ -398,7 +398,7 @@ export class Form {
                     $input
                         .removeClass("input-info")
                         .val("")
-                        .trigger("re621:form:input", [key, $oldKey]);
+                        .trigger("re621:form:input", ["", $oldKey]);
                     occupied = false;
                 }
                 else if (Hotkeys.isRegistered(key)) {
