@@ -325,8 +325,9 @@ export class ThumbnailEnhancer extends RE6Module {
 
 
         /* Load the larger images */
-        if ($article.attr("data-file-ext") === "swf" || $article.attr("data-flags") === "deleted") {
+        if ($article.attr("data-file-ext") === "swf" || $article.attr("data-flags").includes("deleted")) {
             // Replace placeholder images with CSS-styled ones
+            // Don't forget to update PostHtml.create() accordingly
 
             $img.attr("src", "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==");
             $picture.addClass("color-text post-placeholder")

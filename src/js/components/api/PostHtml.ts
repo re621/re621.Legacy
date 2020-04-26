@@ -30,7 +30,6 @@ export class PostHtml {
 
         const $img = $("<img>")
             .addClass("has-cropped-false")
-            .addClass(lazyload ? "lazyload" : "later-lazyload")
             .attr({
                 "title": `Rating: ${json.rating}\nID: ${json.id}\nDate: ${json.created_at}\nScore: ${json.score.total}\n\n ${allTags}`,
                 "alt": allTags,
@@ -38,8 +37,13 @@ export class PostHtml {
             })
             .appendTo($picture);
 
-        if (loadlarge) $img.attr("data-src", json.sample.url);
-        else $img.attr("data-src", json.preview.url);
+        if (!(json.file.ext === "swf" || $article.attr("data-flags").includes("deleted"))) {
+            // Don't forget to update ThumbnailEnhancer accordingly
+            $img.addClass(lazyload ? "lazyload" : "later-lazyload");
+
+            if (loadlarge) $img.attr("data-src", json.sample.url);
+            else $img.attr("data-src", json.preview.url);
+        }
 
         const $desc = $("<div>")
             .attr("class", "desc")
