@@ -1,3 +1,75 @@
+/**
+ * ===== Single-response functions =====
+ * Executed upon being called, send a response, then terminate.  
+ * Must be called from XM.Chrome.execBackgroundRequest()
+ */
+
+/** Function index */
+const sRespFn = {
+    "XM": {
+        "Util": {
+            "openInTab": (path, loadInBackground) => {
+                return new Promise((resolve) => {
+                    chrome.tabs.query({ active: true, windowType: "normal", currentWindow: true }, function(data) {
+                        chrome.tabs.create({
+                            url: path,
+                            active: loadInBackground,
+                            index: typeof data[0] === "undefined" ? undefined : data[0].index + 1,
+                        }, () => { resolve(true); });
+                    })
+                });
+            },
+            "setClipboard": (data) => {
+                var copyFrom = document.createElement("textarea");
+                copyFrom.textContent = data;
+                document.body.appendChild(copyFrom);
+                copyFrom.select();
+                document.execCommand("copy");
+                copyFrom.blur();
+                document.body.removeChild(copyFrom);
+            }
+        },
+    },
+}
+
+async function handleMessage(request, sender, sendResponse) {
+
+    if (sRespFn[request.component] === undefined ||
+        sRespFn[request.component][request.module] === undefined ||
+        sRespFn[request.component][request.module][request.method] === undefined) {
+
+        sendResponse({
+            eventID: request.eventID,
+            data: "RE6 Background - Invalid Request",
+        });
+        return;
+    }
+
+    sendResponse({
+        eventID: request.eventID,
+        data: await sRespFn[request.component][request.module][request.method](...request.args),
+    });
+
+    return;
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    // This has to be in a separate function because otherwise the port closes prematurely
+    handleMessage(request, sender, sendResponse);
+    return true;
+});
+
+/**
+ * ===== Multi-response functions =====
+ * Establish a connection upon being called, then send multiple responses before terminating.
+ * Must be called from XM.Chrome.execBackgroundConnection()
+ */
+
+/**
+ * Process an xmlHttpRequest
+ * @param {string} port 
+ * @param {object} details 
+ */
 function xmlHttpNative(port, details) {
     const request = new XMLHttpRequest();
 
@@ -70,59 +142,6 @@ function xmlHttpNative(port, details) {
         return result;
     }
 }
-
-const fn = {
-    "XM": {
-        "Util": {
-            "openInTab": (path, loadInBackground) => {
-                return new Promise((resolve) => {
-                    chrome.tabs.query({ active: true, windowType: "normal", currentWindow: true }, function(data) {
-                        chrome.tabs.create({
-                            url: path,
-                            active: loadInBackground,
-                            index: typeof data[0] === "undefined" ? undefined : data[0].index + 1,
-                        }, () => { resolve(true); });
-                    })
-                });
-            },
-            "setClipboard": (data) => {
-                var copyFrom = document.createElement("textarea");
-                copyFrom.textContent = data;
-                document.body.appendChild(copyFrom);
-                copyFrom.select();
-                document.execCommand("copy");
-                copyFrom.blur();
-                document.body.removeChild(copyFrom);
-            }
-        },
-    },
-}
-
-async function handleMessage(request, sender, sendResponse) {
-
-    if (fn[request.component] === undefined ||
-        fn[request.component][request.module] === undefined ||
-        fn[request.component][request.module][request.method] === undefined) {
-
-        sendResponse({
-            eventID: request.eventID,
-            data: "RE6 Background - Invalid Request",
-        });
-        return;
-    }
-
-    sendResponse({
-        eventID: request.eventID,
-        data: await fn[request.component][request.module][request.method](...request.args),
-    });
-
-    return;
-}
-
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    handleMessage(request, sender, sendResponse);
-    return true;
-});
 
 chrome.runtime.onConnect.addListener((port) => {
 

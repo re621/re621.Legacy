@@ -1,3 +1,10 @@
+/**
+ * ===== Injected Functions =====
+ * Functions that cannot be called from the content script.  
+ * Must be called from XM.Chrome.execInjectorRequest()
+ */
+
+/** Function index */
 const fn_Danbooru = {
     "Blacklist": {
         "apply": () => { Danbooru.Blacklist.apply(); },
