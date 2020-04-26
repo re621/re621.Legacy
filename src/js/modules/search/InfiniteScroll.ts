@@ -1,14 +1,14 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { Page, PageDefintion } from "../../components/data/Page";
-import { E621 } from "../../components/api/E621";
-import { APIPost } from "../../components/api/responses/APIPost";
-import { PostHtml } from "../../components/api/PostHtml";
-import { InstantSearch } from "./InstantSearch";
-import { Post } from "../../components/data/Post";
-import { BlacklistEnhancer } from "./BlacklistEnhancer";
-import { ModuleController } from "../../components/ModuleController";
-import { ThumbnailEnhancer, ThumbnailPerformanceMode, ThumbnailClickAction } from "./ThumbnailsEnhancer";
 import { Danbooru } from "../../components/api/Danbooru";
+import { E621 } from "../../components/api/E621";
+import { PostHtml } from "../../components/api/PostHtml";
+import { APIPost } from "../../components/api/responses/APIPost";
+import { Page, PageDefintion } from "../../components/data/Page";
+import { Post } from "../../components/data/Post";
+import { ModuleController } from "../../components/ModuleController";
+import { RE6Module, Settings } from "../../components/RE6Module";
+import { BlacklistEnhancer } from "./BlacklistEnhancer";
+import { InstantSearch } from "./InstantSearch";
+import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } from "./ThumbnailsEnhancer";
 
 /**
  * Gets rid of the default pagination and instead appends new posts
@@ -124,8 +124,10 @@ export class InfiniteScroll extends RE6Module {
         this.isInProgress = false;
         this.$loadingIndicator.hide();
 
-        ModuleController.getWithType<BlacklistEnhancer>(BlacklistEnhancer).updateSidebar();
-        ModuleController.getWithType<InstantSearch>(InstantSearch).applyFilter();
+        const blacklistEnhancer = ModuleController.getWithType<BlacklistEnhancer>(BlacklistEnhancer),
+            instantSearch = ModuleController.getWithType<InstantSearch>(InstantSearch);
+        if (blacklistEnhancer.isInitialized()) blacklistEnhancer.updateSidebar();
+        if (instantSearch.isInitialized()) instantSearch.applyFilter();
 
         this.$postContainer.trigger("re621.infiniteScroll.pageLoad");
 
