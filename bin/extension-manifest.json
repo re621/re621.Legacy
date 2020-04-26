@@ -62,6 +62,10 @@
                 [
                     "https://cdn.jsdelivr.net/gh/re621/re621-lib@1.0.0/lazysizes/lazysizes.min.js",
                     "./build/cache/lazysizes.min.js"
+                ],
+                [
+                    "https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.2.0/plugins/unload/ls.unload.min.js",
+                    "./build/cache/ls.unload.min.js"
                 ]
             ]
         }
