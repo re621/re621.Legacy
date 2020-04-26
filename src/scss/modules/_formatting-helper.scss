@@ -140,11 +140,6 @@ div.dtext-previewable {
         border-radius: 0 0 6px 6px;
     }
 
-    textarea:focus {
-        // background: #ffffff10;
-        // color: inherit;
-    }
-
     &[data-editing=false] div.comment-buttons,
     &[data-editing=false] div.settings-buttons,
     &[data-editing=false] textarea {
@@ -208,6 +203,8 @@ div.dtext-previewable {
         margin-bottom: -1.25rem;
         text-align: right;
         pointer-events: none;
+
+        color: black;
 
         span.char-counter {
             padding: 0.25rem 2rem;
