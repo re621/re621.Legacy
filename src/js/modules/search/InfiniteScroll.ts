@@ -74,12 +74,14 @@ export class InfiniteScroll extends RE6Module {
             // Load previous result pages on document load
             let processingPage = 2;
             while (processingPage <= this.currentPage) {
-                await this.loadPage(processingPage);
-                $([document.documentElement, document.body]).animate({
-                    scrollTop: $("a#xpage-link-" + processingPage).offset().top
-                }, 'fast');
+                await this.loadPage(processingPage, {
+                    scrollToPage: true,
+                    lazyload: false,
+                });
                 processingPage++;
             }
+
+            $("img.later-lazyload").toggleClass("later-lazyload lazyload");
 
             // Load the next result page when scrolled to the bottom
             let timer: number;
@@ -115,11 +117,11 @@ export class InfiniteScroll extends RE6Module {
         return Promise.resolve(pageLoaded);
     }
 
-    private async loadPage(page: number): Promise<boolean> {
+    private async loadPage(page: number, options = { scrollToPage: false, lazyload: true }): Promise<boolean> {
         this.isInProgress = true;
         this.$loadingIndicator.show();
 
-        const posts = await E621.Posts.get<APIPost>({ tags: this.currentQuery, page: page });
+        const posts = await E621.Posts.get<APIPost>({ tags: this.currentQuery, page: page }, 500);
         if (posts.length === 0) {
             this.pagesLeft = false;
             this.$loadingIndicator.hide();
@@ -137,36 +139,50 @@ export class InfiniteScroll extends RE6Module {
             .html("<h2>Page: " + page + "</h2>")
             .appendTo(this.$postContainer);
 
+        if (options.scrollToPage) {
+            $([document.documentElement, document.body]).animate({
+                scrollTop: $("a#xpage-link-" + page).offset().top
+            }, '0');
+        }
+
         const thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer),
             upscaleMode: ThumbnailPerformanceMode = thumbnailEnhancer.fetchSettings("upscale"),
             clickAction: ThumbnailClickAction = thumbnailEnhancer.fetchSettings("clickAction");
 
+        const promises: Promise<void>[] = [];
         for (const json of posts) {
-            const element = PostHtml.create(json);
-            const post = new Post(element);
+            promises.push(new Promise((resolve) => {
+                const element = PostHtml.create(json, options.lazyload);
+                const post = new Post(element);
 
-            //only append the post if it has image data
-            //if it does not it is part of the anon blacklist
-            if (post.getImageURL() !== undefined) {
-                //Add post to the list of posts currently visible
-                //This is important because InstantSearch relies on it
-                Post.appendPost(post);
+                //only append the post if it has image data
+                //if it does not it is part of the anon blacklist
+                if (post.getImageURL() !== undefined) {
+                    //Add post to the list of posts currently visible
+                    //This is important because InstantSearch relies on it
+                    Post.appendPost(post);
 
-                //Apply blacklist before appending, to prevent image loading
-                post.applyBlacklist();
+                    //Apply blacklist before appending, to prevent image loading
+                    post.applyBlacklist();
 
-                this.$postContainer.append(element);
+                    this.$postContainer.append(element);
 
-                ThumbnailEnhancer.modifyThumbnail(element, upscaleMode, clickAction);
-            }
+                    ThumbnailEnhancer.modifyThumbnail(element, upscaleMode, clickAction);
+                }
+
+                resolve();
+            }));
         }
-        this.isInProgress = false;
-        this.$loadingIndicator.hide();
 
-        const blacklistEnhancer = ModuleController.getWithType<BlacklistEnhancer>(BlacklistEnhancer),
-            instantSearch = ModuleController.getWithType<InstantSearch>(InstantSearch);
-        if (blacklistEnhancer.isInitialized()) blacklistEnhancer.updateSidebar();
-        if (instantSearch.isInitialized()) instantSearch.applyFilter();
+        Promise.all(promises).then(() => {
+            this.isInProgress = false;
+            this.$loadingIndicator.hide();
+
+            const blacklistEnhancer = ModuleController.getWithType<BlacklistEnhancer>(BlacklistEnhancer),
+                instantSearch = ModuleController.getWithType<InstantSearch>(InstantSearch);
+            if (blacklistEnhancer.isInitialized()) blacklistEnhancer.updateSidebar();
+            if (instantSearch.isInitialized()) instantSearch.applyFilter();
+        });
 
         return Promise.resolve(true);
     }

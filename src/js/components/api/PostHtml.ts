@@ -2,7 +2,7 @@ import { APIPost } from "./responses/APIPost";
 
 export class PostHtml {
 
-    public static create(json: APIPost, loadLargeImage = true): JQuery<HTMLElement> {
+    public static create(json: APIPost, lazyload = true): JQuery<HTMLElement> {
         //data-has-sound
         //data-flags
         const allTags = APIPost.getTagString(json);
@@ -30,7 +30,7 @@ export class PostHtml {
 
         const $img = $("<img>")
             .addClass("has-cropped-false")
-            .addClass("lazyload")
+            .addClass(lazyload ? "lazyload" : "later-lazyload")
             .attr({
                 "title": `Rating: ${json.rating}\nID: ${json.id}\nDate: ${json.created_at}\nScore: ${json.score.total}\n\n ${allTags}`,
                 "alt": allTags,
@@ -38,8 +38,7 @@ export class PostHtml {
             })
             .appendTo($picture);
 
-        if (loadLargeImage) $img.attr("data-src", json.file.url);
-        else $img.attr("data-src", json.preview.url);
+        $img.attr("data-src", json.file.url);
 
         const $desc = $("<div>")
             .attr("class", "desc")

@@ -168,7 +168,7 @@ export class ThumbnailEnhancer extends RE6Module {
      * @param $article JQuery element `article.post-preview`
      * @param upscaleMode If / when to load upscaled versions of the image
      */
-    public static modifyThumbnail($article: JQuery<HTMLElement>, upscaleMode = ThumbnailPerformanceMode.Hover, clickAction = ThumbnailClickAction.NewTab): void {
+    public static async modifyThumbnail($article: JQuery<HTMLElement>, upscaleMode = ThumbnailPerformanceMode.Hover, clickAction = ThumbnailClickAction.NewTab): Promise<void> {
 
         /* Create the structure */
         const $link = $article.find("a.preview-box"),
@@ -364,7 +364,7 @@ export class ThumbnailEnhancer extends RE6Module {
             } else if (upscaleMode === ThumbnailPerformanceMode.Always) {
                 $link.addClass("loading");
                 $img.attr("data-src", sampleURL)
-                    .addClass("lazyload")
+                    .addClass($img.hasClass("later-lazyload") ? "" : "lazyload")
                     .one("lazyloaded", () => {
                         $link.removeClass("loading");
                         $article.addClass("loaded");

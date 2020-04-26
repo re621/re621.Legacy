@@ -1,9 +1,7 @@
+import { PostHtml } from "../api/PostHtml";
+import { APIPost, PostRating } from "../api/responses/APIPost";
 import { TagTypes } from "./Tag";
 import { User } from "./User";
-import { APIPost, PostRating } from "../api/responses/APIPost";
-import { PostHtml } from "../api/PostHtml";
-import { ModuleController } from "../ModuleController";
-import { ThumbnailEnhancer, ThumbnailPerformanceMode } from "../../modules/search/ThumbnailsEnhancer";
 
 /**
  * Collects basic info for a post.
@@ -32,8 +30,7 @@ export class Post {
         } else {
             element = element as APIPost;
             this.apiElement = element;
-            const upscaleMode = ModuleController.get(ThumbnailEnhancer).fetchSettings("upscale");
-            this.htmlElement = PostHtml.create(element, upscaleMode === ThumbnailPerformanceMode.Always);
+            this.htmlElement = PostHtml.create(element);
         }
 
         for (const filter of User.getBlacklist().values()) {
