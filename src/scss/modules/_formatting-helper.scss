@@ -31,7 +31,8 @@ form.formatting-helper {
     }
 }
 
-div.dtext-previewable {
+div#c-uploads div#a-new div.dtext-previewable,
+div.input>div.dtext-previewable {
     display: grid;
     grid-template-columns: auto min-content;
     min-height: 12rem;
