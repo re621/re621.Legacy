@@ -421,6 +421,16 @@ export class SettingsController extends RE6Module {
                     async (event, data) => { await massDownloader.pushSettings("autoDownloadArchive", data); }
                 ),
                 Form.div("The archive will be downloaded automatically after being created", "mid"),
+
+                Form.checkbox(
+                    "fixedSection", massDownloader.fetchSettings("fixedSection"), "Fixed ", "column",
+                    async (event, data) => {
+                        await massDownloader.pushSettings("fixedSection", data);
+                        massDownloader.toggleFixedSection();
+                    }
+                ),
+                Form.div("The downloader interface will remain on the screen as you scroll", "mid"),
+
                 Form.hr(),
             ]),
 

@@ -51,6 +51,7 @@ export class MassDownloader extends RE6Module {
             enabled: true,
             template: "%artist%/%postid%-%copyright%-%character%-%species%",
             autoDownloadArchive: true,
+            fixedSection: true,
         };
     }
 
@@ -60,6 +61,7 @@ export class MassDownloader extends RE6Module {
 
         this.section = $("<section>")
             .attr("id", "downloader-box")
+            .attr("data-fixed", this.fetchSettings("fixedSection") + "")
             .addClass("bg-foreground")
             .appendTo("aside#sidebar");
         $("<h1>").html("Download").appendTo(this.section);
@@ -141,6 +143,14 @@ export class MassDownloader extends RE6Module {
                 .attr("data-downloading", "false")
                 .selectable("disable");
         }
+    }
+
+    /**
+     * Toggles the fixed state of the interface section
+     */
+    public toggleFixedSection(): void {
+        if (this.section.attr("data-fixed") === "true") this.section.attr("data-fixed", "false");
+        else this.section.attr("data-fixed", "true")
     }
 
     /** Processes and downloads the selected files. */
