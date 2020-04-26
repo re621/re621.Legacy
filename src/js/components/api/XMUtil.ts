@@ -9,9 +9,9 @@ export class XMUtil {
      * @param url Page URL
      * @param options Tab options
      */
-    public static openInTab(path: string, loadInBackground?: boolean): void {
-        if (typeof GM === "undefined") XM.Chrome.execBackgroundRequest("XM", "Util", "openInTab", [path, loadInBackground]);
-        else GM.openInTab(path, loadInBackground);
+    public static openInTab(path: string, active = true): void {
+        if (typeof GM === "undefined") XM.Chrome.execBackgroundRequest("XM", "Util", "openInTab", [path, active]);
+        else GM.openInTab(path, { active: active, });
     }
 
     /**

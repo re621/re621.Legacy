@@ -309,7 +309,7 @@ export class ThumbnailEnhancer extends RE6Module {
             $article.addClass("highlight");
             window.setTimeout(() => $article.removeClass("highlight"), 250);
 
-            if (clickAction === ThumbnailClickAction.NewTab) XM.Util.openInTab(window.location.origin + $link.attr("href"));
+            if (clickAction === ThumbnailClickAction.NewTab) XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
             else if (clickAction === ThumbnailClickAction.CopyID) XM.Util.setClipboard($article.attr("data-id"), "text");
             else {
                 $link.off("click.re621.thumbnail");

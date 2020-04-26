@@ -8,12 +8,12 @@
 const sRespFn = {
     "XM": {
         "Util": {
-            "openInTab": (path, loadInBackground) => {
+            "openInTab": (path, active) => {
                 return new Promise((resolve) => {
                     chrome.tabs.query({ active: true, windowType: "normal", currentWindow: true }, function(data) {
                         chrome.tabs.create({
                             url: path,
-                            active: loadInBackground,
+                            active: active,
                             index: typeof data[0] === "undefined" ? undefined : data[0].index + 1,
                         }, () => { resolve(true); });
                     })
