@@ -2,7 +2,7 @@ import { APIPost } from "./responses/APIPost";
 
 export class PostHtml {
 
-    public static create(json: APIPost, lazyload = true): JQuery<HTMLElement> {
+    public static create(json: APIPost, lazyload = true, loadlarge = false): JQuery<HTMLElement> {
         //data-has-sound
         //data-flags
         const allTags = APIPost.getTagString(json);
@@ -38,7 +38,8 @@ export class PostHtml {
             })
             .appendTo($picture);
 
-        $img.attr("data-src", json.file.url);
+        if (loadlarge) $img.attr("data-src", json.sample.url);
+        else $img.attr("data-src", json.preview.url);
 
         const $desc = $("<div>")
             .attr("class", "desc")

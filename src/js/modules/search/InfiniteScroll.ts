@@ -81,7 +81,7 @@ export class InfiniteScroll extends RE6Module {
                 processingPage++;
             }
 
-            $("img.later-lazyload").toggleClass("later-lazyload lazyload");
+            $("img.later-lazyload").removeClass("later-lazyload").addClass("lazyload");
 
             // Load the next result page when scrolled to the bottom
             let timer: number;
@@ -152,7 +152,7 @@ export class InfiniteScroll extends RE6Module {
         const promises: Promise<void>[] = [];
         for (const json of posts) {
             promises.push(new Promise((resolve) => {
-                const element = PostHtml.create(json, options.lazyload);
+                const element = PostHtml.create(json, options.lazyload, upscaleMode === ThumbnailPerformanceMode.Always);
                 const post = new Post(element);
 
                 //only append the post if it has image data
