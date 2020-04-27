@@ -195,12 +195,20 @@ export class SettingsController extends RE6Module {
                     ),
                 ]),
 
-                Form.checkbox("improved-tagcount", miscellaneous.fetchSettings("improveTagCount"), "Expanded Tag Count", "column",
+                Form.checkbox("improve-tagcount", miscellaneous.fetchSettings("improveTagCount"), "Expanded Tag Count", "column",
                     async (event, data) => {
                         await miscellaneous.pushSettings("improveTagCount", data);
                         miscellaneous.improveTagCount(data);
                     }
                 ),
+                Form.checkbox("shorten-tagnames", miscellaneous.fetchSettings("shortenTagNames"), "Shorten Tag Names", "column",
+                    async (event, data) => {
+                        await miscellaneous.pushSettings("shortenTagNames", data);
+                        miscellaneous.shortenTagNames(data);
+                    }
+                ),
+                Form.spacer("column"),
+
                 Form.checkbox("sticky-header", miscellaneous.fetchSettings("stickyHeader"), "Fixed Header", "column",
                     async (event, data) => {
                         await miscellaneous.pushSettings("stickyHeader", data);
@@ -213,6 +221,7 @@ export class SettingsController extends RE6Module {
                         miscellaneous.createStickySearchbox(data);
                     }
                 ),
+                Form.spacer("column"),
 
                 Form.hr(),
             ]),

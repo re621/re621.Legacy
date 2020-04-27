@@ -34,10 +34,13 @@ export class Miscellaneous extends RE6Module {
             hotkeyEditPost: "e",
 
             removeSearchQueryString: true,
+
+            improveTagCount: true,
+            shortenTagNames: true,
+
             stickySearchbox: true,
             stickyHeader: false,
 
-            improveTagCount: true,
             collapseCategories: true,
             categoryData: [],
 
@@ -58,8 +61,9 @@ export class Miscellaneous extends RE6Module {
         }
 
         // Replaces the tag count estimate with the real number
-        if (this.fetchSettings("improveTagCount") === true && Page.matches([PageDefintion.search, PageDefintion.post])) {
-            this.improveTagCount();
+        if (Page.matches([PageDefintion.search, PageDefintion.post])) {
+            this.improveTagCount(this.fetchSettings("improveTagCount"));
+            this.shortenTagNames(this.fetchSettings("shortenTagNames"));
         }
 
         // Restore the collapsed categories
@@ -122,6 +126,14 @@ export class Miscellaneous extends RE6Module {
             const tag = $(element);
             tag.text(tag.attr(source));
         });
+    }
+
+    /**
+     * Shortens the tag names to fit in one line
+     * @param state True to shorten, false to restore
+     */
+    public shortenTagNames(state = true): void {
+        $("section#tag-box, section#tag-list").attr("data-shorten-tagnames", state + "");
     }
 
     /**
