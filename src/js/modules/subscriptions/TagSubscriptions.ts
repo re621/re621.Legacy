@@ -85,15 +85,14 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         const tagData: SubscriptionSettings = await this.fetchSettings("data", true);
         if (Object.keys(tagData).length === 0) return results;
 
-        status.append(`<div>. . . sending API requests</div>`);
-        for (const tagName of Object.keys(tagData)) {
-            status.append(`<div>&nbsp; &nbsp; &nbsp; ` + tagName.replace(/ /g, "_") + `</div>`);
-            const postsJson = await E621.Posts.get<APIPost>({ "tags": encodeURIComponent(tagName.replace(/ /g, "_")) }, 500);
-            for (const post of postsJson) {
-                const postObject = new Post(post);
-                if (new Date(post.created_at).getTime() > lastUpdate && !postObject.matchesBlacklist()) {
-                    results[new Date(post.created_at).getTime()] = await this.formatPostUpdate(post, tagName);
-                }
+        status.append(`<div>. . . sending an API request</div>`);
+        const postsJSON = await E621.Posts.get<APIPost>({ "tags": Object.keys(tagData).map(el => "~" + el).join("+") }, 500);
+
+        status.append(`<div>. . . formatting output/div>`);
+        for (const post of postsJSON) {
+            const postObject = new Post(post);
+            if (new Date(post.created_at).getTime() > lastUpdate && !postObject.matchesBlacklist()) {
+                results[new Date(post.created_at).getTime()] = await this.formatPostUpdate(post);
             }
         }
 
@@ -102,10 +101,10 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         return results;
     }
 
-    private async formatPostUpdate(value: APIPost, tagName: string): Promise<UpdateContent> {
+    private async formatPostUpdate(value: APIPost): Promise<UpdateContent> {
         return {
             id: value.id,
-            name: tagName.replace(/ /g, " "),
+            name: "post #" + value.id,
             md5: value.file.ext === "swf" ? "" : value.file.md5,
             new: true,
         };
