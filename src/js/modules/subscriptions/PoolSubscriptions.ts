@@ -9,6 +9,8 @@ import { SubscriptionSettings, UpdateContent, UpdateData } from "./SubscriptionM
 
 export class PoolSubscriptions extends RE6Module implements Subscription {
 
+    public maxSubscriptionsCap = 100;
+
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,

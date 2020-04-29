@@ -394,15 +394,21 @@ export class SubscriptionManager extends RE6Module {
             });
         }
 
-        async function processSubscribe(subscribe: boolean, id: string, $subscribeButton: JQuery<HTMLElement>, $unsubscribeButton: JQuery<HTMLElement>, $element: JQuery<HTMLElement>): Promise<void> {
+        async function processSubscribe(subscribe: boolean, id: string, $subscribeButton: JQuery<HTMLElement>, $unsubscribeButton: JQuery<HTMLElement>, $element: JQuery<HTMLElement>): Promise<boolean> {
+            subscriptionData = await instance.fetchSettings("data", true);
+            if (subscribe) {
+                if (Object.keys(subscriptionData).length >= instance.maxSubscriptionsCap) {
+                    Danbooru.error("Could not subscribe - subscription cap reached (" + instance.maxSubscriptionsCap + ")");
+                    return Promise.resolve(false);
+                }
+                subscriptionData[id] = { name: instance.getSubscriberName($element), };
+            } else delete subscriptionData[id];
+
             $subscribeButton.toggleClass("hidden");
             $unsubscribeButton.toggleClass("hidden");
 
-            subscriptionData = await instance.fetchSettings("data", true);
-            if (subscribe) subscriptionData[id] = { name: instance.getSubscriberName($element), };
-            else delete subscriptionData[id];
-
             instance.pushSettings("data", subscriptionData);
+            return Promise.resolve(true);
         }
     }
 

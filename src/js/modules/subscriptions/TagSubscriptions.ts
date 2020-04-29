@@ -7,6 +7,8 @@ import { SubscriptionSettings, UpdateContent, UpdateData } from "./SubscriptionM
 
 export class TagSubscriptions extends RE6Module implements Subscription {
 
+    public maxSubscriptionsCap = 40;
+
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,

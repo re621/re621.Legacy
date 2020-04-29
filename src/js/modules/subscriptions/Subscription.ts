@@ -3,6 +3,8 @@ import { UpdateContent, UpdateData } from "./SubscriptionManager";
 
 export interface Subscription extends RE6Module {
 
+    maxSubscriptionsCap: number;
+
     /**
      * Parameter that contains various functions used to format subscription updates properly.  
      * @see UpdateActions
