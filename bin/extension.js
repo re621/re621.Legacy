@@ -9,7 +9,8 @@ const prodMode = process.argv[2] === "prod";
 // Prepare the directory
 rimraf.sync("./build/extension");
 fs.mkdirSync("./build/extension");
-fs.mkdirSync("./build/extension/lib");
+fs.mkdirSync("./build/extension/src");
+fs.mkdirSync("./build/extension/src/lib");
 
 if (prodMode) {
     rimraf.sync("./build/cache");
@@ -22,13 +23,13 @@ const manifest = JSON.parse(util.parseTemplate(
 ));
 
 // Copy the icons
-fs.mkdirSync("./build/extension/icons");
+fs.mkdirSync("./build/extension/src/icons");
 const downloadQueue = [];
 manifest["icons-lib"].forEach((entry, index) => {
     downloadQueue.push(new Promise(async (resolve) => {
         const fileName = entry.path.replace(/^.*[\\\/]/, '');
-        if (prodMode || !fs.existsSync(entry.path)) await fetchFile(entry.url, entry.path, "./build/extension/icons/" + fileName);
-        else fs.createReadStream(entry.path).pipe(fs.createWriteStream("./build/extension/icons/" + fileName));
+        if (prodMode || !fs.existsSync(entry.path)) await fetchFile(entry.url, entry.path, "./build/extension/src/icons/" + fileName);
+        else fs.createReadStream(entry.path).pipe(fs.createWriteStream("./build/extension/src/icons/" + fileName));
         manifest["icons"][entry.size] = "icons/" + fileName;
         resolve();
     }));
@@ -39,8 +40,8 @@ delete manifest["icons-lib"];
 manifest["content_scripts"][0]["js-lib"].forEach((file, index) => {
     downloadQueue.push(new Promise(async (resolve) => {
         const fileName = file[1].replace(/^.*[\\\/]/, '');
-        if (prodMode || !fs.existsSync(file[1])) await fetchFile(file[0], file[1], "./build/extension/lib/" + fileName);
-        else fs.createReadStream(file[1]).pipe(fs.createWriteStream("./build/extension/lib/" + fileName));
+        if (prodMode || !fs.existsSync(file[1])) await fetchFile(file[0], file[1], "./build/extension/src/lib/" + fileName);
+        else fs.createReadStream(file[1]).pipe(fs.createWriteStream("./build/extension/src/lib/" + fileName));
         manifest["content_scripts"][0]["js"].push("lib/" + fileName);
         resolve();
     }));
@@ -58,24 +59,24 @@ Promise.all(downloadQueue).then((resolved) => {
     delete manifest["resources"];
 
     fs.writeFileSync(
-        "./build/extension/script.js",
+        "./build/extension/src/script.js",
         resourceString +
         fs.readFileSync("./build/script.js")
     );
     manifest["content_scripts"][0]["js"].push("script.js");
 
     // Copy the stylesheet
-    fs.createReadStream("./build/style.min.css").pipe(fs.createWriteStream("./build/extension/style.min.css"));
+    fs.createReadStream("./build/style.min.css").pipe(fs.createWriteStream("./build/extension/src/style.min.css"));
 
     // Copy the background page
-    fs.createReadStream("./bin/extension-background.js").pipe(fs.createWriteStream("./build/extension/background.js"));
+    fs.createReadStream("./bin/extension-background.js").pipe(fs.createWriteStream("./build/extension/src/background.js"));
 
     // Copy the injected code
-    fs.createReadStream("./bin/extension-injector.js").pipe(fs.createWriteStream("./build/extension/injector.js"));
+    fs.createReadStream("./bin/extension-injector.js").pipe(fs.createWriteStream("./build/extension/src/injector.js"));
 
 
     // Write the manifest file
-    fs.writeFileSync("./build/extension/manifest.json", JSON.stringify(manifest, null, 4) + "\n");
+    fs.writeFileSync("./build/extension/src/manifest.json", JSON.stringify(manifest, null, 4) + "\n");
 
 });
 
