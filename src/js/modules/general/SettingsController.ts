@@ -20,7 +20,6 @@ import { MassDownloader } from "../search/MassDownloader";
 import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } from "../search/ThumbnailsEnhancer";
 import { ForumSubscriptions } from "../subscriptions/ForumSubscriptions";
 import { PoolSubscriptions } from "../subscriptions/PoolSubscriptions";
-import { FormattingManager } from "./FormattingHelper";
 import { HeaderCustomizer } from "./HeaderCustomizer";
 import { Miscellaneous } from "./Miscellaneous";
 
@@ -135,7 +134,6 @@ export class SettingsController extends RE6Module {
         const titleCustomizer = ModuleController.getWithType<TitleCustomizer>(TitleCustomizer),
             miscellaneous = ModuleController.getWithType<Miscellaneous>(Miscellaneous),
             postViewer = ModuleController.getWithType<PostViewer>(PostViewer),
-            formattingManager = ModuleController.getWithType<FormattingManager>(FormattingManager),
             blacklistEnhancer = ModuleController.getWithType<BlacklistEnhancer>(BlacklistEnhancer),
             imageScaler = ModuleController.getWithType<ImageScaler>(ImageScaler),
             thumbnailEnhancer = ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer);
@@ -360,10 +358,6 @@ export class SettingsController extends RE6Module {
                     async (event, data) => { await postViewer.pushSettings("upvoteOnFavorite", data); }
                 ),
                 Form.checkbox(
-                    "submit-hotkey", formattingManager.fetchSettings("hotkeySubmitActive"), "Comment with Alt+Enter", "column",
-                    async (event, data) => { await formattingManager.pushSettings("hotkeySubmitActive", data); }
-                ),
-                Form.checkbox(
                     "click-scale", imageScaler.fetchSettings("clickScale"), "Click images to resize them", "column",
                     async (event, data) => { await imageScaler.pushSettings("clickScale", data); }),
 
@@ -526,6 +520,11 @@ export class SettingsController extends RE6Module {
             ...createInputs(miscellaneous, "Edit Post", "hotkeyEditPost"),
             ...createInputs(postViewer, "Toggle Notes", "hotkeyHideNotes"),
             ...createInputs(postViewer, "Edit Notes", "hotkeyNewNote"),
+            Form.hr(),
+
+            // Other
+            Form.header("Miscellaneous"),
+            ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
             Form.hr(),
 
             // Tabs

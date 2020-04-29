@@ -18,6 +18,7 @@ export class Miscellaneous extends RE6Module {
             { keys: "hotkeyRandomPost", fnct: this.randomPost },
             { keys: "hotkeyNewComment", fnct: this.openNewComment },
             { keys: "hotkeyEditPost", fnct: this.openEditTab },
+            { keys: "hotkeySubmit", fnct: this.handleSubmitForm, element: $("body"), selector: "textarea, input" },
         );
     }
 
@@ -32,6 +33,8 @@ export class Miscellaneous extends RE6Module {
             hotkeyRandomPost: "r",
             hotkeyNewComment: "n",
             hotkeyEditPost: "e",
+
+            hotkeySubmit: "alt+return",
 
             removeSearchQueryString: true,
 
@@ -294,6 +297,14 @@ export class Miscellaneous extends RE6Module {
                 }
             });
         }
+    }
+
+    /*
+     * Submits the form on hotkey press
+     * @param event Keydown event
+     */
+    private handleSubmitForm(event): void {
+        $(event.target).parents("form").submit();
     }
 
 }

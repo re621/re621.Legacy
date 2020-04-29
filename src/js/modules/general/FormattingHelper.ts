@@ -1,5 +1,4 @@
 import { Api } from "../../components/api/Api";
-import { Hotkeys } from "../../components/data/Hotkeys";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
@@ -88,8 +87,6 @@ export class FormattingManager extends RE6Module {
                 { name: "Wiki", icon: "wiki", text: "[[%selection%]]" },
                 { name: "Link (Prompted)", icon: "link_prompt", text: "\"%selection%\":%prompt:Address%" },
             ],
-            hotkeySubmit: "alt+return",
-            hotkeySubmitActive: true,
         };
     }
 
@@ -149,16 +146,6 @@ class FormattingHelper {
         this.$container = $targetContainer;
 
         this.createDOM();
-
-        this.registerHotkeys();
-    }
-
-    /** Registers the module's hotkeys */
-    public registerHotkeys(): void {
-        Hotkeys.registerInput(this.parent.fetchSettings("hotkeySubmit"), this.$textarea, () => {
-            if (!this.parent.fetchSettings("hotkeySubmitActive")) return;
-            this.$form.submit();
-        });
     }
 
     /** Returns the formatter's container element */

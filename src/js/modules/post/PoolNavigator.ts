@@ -42,7 +42,6 @@ export class PoolNavigator extends RE6Module {
             this.activeNav = parseInt($(event.target).val() + "");
         });
 
-        this.registerHotkeys();
     }
 
     /** Loops through available navbars */

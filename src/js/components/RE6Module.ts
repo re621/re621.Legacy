@@ -216,7 +216,7 @@ export class RE6Module {
         this.hotkeys.forEach((value) => {
             this.fetchSettings(value.keys).split("|").forEach((key) => {
                 if (key === "") return;
-                if (enabled) Hotkeys.register(key, value.fnct);
+                if (enabled) Hotkeys.register(key, value.fnct, value.element, value.selector);
                 else Hotkeys.register(key, () => { return; });
             });
 
@@ -244,8 +244,14 @@ export class RE6Module {
 }
 
 interface Hotkey {
+    /** List of keys that should trigger the function, pipe-separated */
     keys: string;
+    /** Function to execute on hotkey keypress */
     fnct: Function;
+    /** Element to listen to hotkeys. Defaults to document */
+    element?: JQuery<HTMLElement>;
+    /** Selector to look for within the element. Defaults to null */
+    selector?: string;
 }
 
 export type Settings = {

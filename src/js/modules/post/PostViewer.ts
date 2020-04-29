@@ -89,9 +89,7 @@ export class PostViewer extends RE6Module {
         $("button#add-fav-button").on("click", () => {
             if (!this.fetchSettings("upvoteOnFavorite")) return;
             Danbooru.Post.vote(Post.getViewingPost().getId(), 1, true);
-        })
-
-        this.registerHotkeys();
+        });
     }
 
     /** Emulates a click on the upvote button */

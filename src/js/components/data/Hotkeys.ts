@@ -71,9 +71,12 @@ export class Hotkeys {
      * @param key Key to bind
      * @param fn Function to execute on keypress
      */
-    public static register(key: string, fn: Function): boolean {
-        this.unregister(key);
-        $(document).bind("keydown.re621.hotkey-" + key, key, function (event) {
+    public static register(key: string, fn: Function, element?: JQuery<HTMLElement> | JQuery<Document>, selector?: string): boolean {
+        if (element === undefined) element = $(document);
+        if (selector === undefined) selector = null;
+
+        this.unregister(key, element);
+        element.on("keydown.re621.hotkey-" + key, selector, key, function (event) {
             if (!Hotkeys.enabled || $("body").attr("data-recording-hotkey") === "true") return false;
             fn(event, key);
         });
@@ -85,38 +88,9 @@ export class Hotkeys {
      * Unbinds the specified key from its current function
      * @param key Key to inbind
      */
-    public static unregister(key: string): boolean {
+    public static unregister(key: string, element: JQuery<HTMLElement> | JQuery<Document> = $(document)): boolean {
         if (!this.isRegistered(key)) { return false; }
-        $(document).unbind("keydown.re621.hotkey-" + key);
-        this.getInstance().listeners = this.getListeners().filter(e => e !== key);
-        return true;
-    }
-
-    /**
-     * Binds the specified key to trigger the provided function  
-     * Workaround to be able to trigger hotkeys while within an input.
-     * @param key Key to bind
-     * @param element Input to bind it to
-     * @param fn Function to execute on keypress
-     */
-    public static registerInput(key: string, element: JQuery<HTMLElement>, fn: Function): boolean {
-        this.unregisterInput(key, element);
-        $(element).bind("keydown.re621.hotkey-" + key, key, function (event) {
-            if (!Hotkeys.enabled || $("body").attr("data-recording-hotkey") === "true") return false;
-            fn(event, key);
-        });
-        this.getListeners().push(key);
-        return true;
-    }
-
-    /**
-     * Unbinds the specified key from its current function
-     * @param key Key to unbind
-     * @param element Input to unbind it from
-     */
-    public static unregisterInput(key: string, element: JQuery<HTMLElement>): boolean {
-        if (!this.isRegistered(key)) { return false; }
-        $(element).unbind("keydown.re621.hotkey-" + key);
+        $(element).off("keydown.re621.hotkey-" + key);
         this.getInstance().listeners = this.getListeners().filter(e => e !== key);
         return true;
     }
