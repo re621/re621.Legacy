@@ -4,38 +4,30 @@
  */
 
 // Load Modules
-// - requied
-import { DomUtilities } from "./components/structure/DomUtilities";
 import { ModuleController } from "./components/ModuleController";
-// - general
+import { DomUtilities } from "./components/structure/DomUtilities";
 import { FormattingManager } from "./modules/general/FormattingHelper";
 import { HeaderCustomizer } from "./modules/general/HeaderCustomizer";
 import { Miscellaneous } from "./modules/general/Miscellaneous";
+import { SettingsController } from "./modules/general/SettingsController";
 import { ThemeCustomizer } from "./modules/general/ThemeCustomizer";
-// - post
+import { TinyAlias } from "./modules/misc/TinyAlias";
+import { WikiEnhancer } from "./modules/misc/WikiEnhancer";
+import { PoolDownloader } from "./modules/pools/PoolDownloader";
 import { DownloadCustomizer } from "./modules/post/DownloadCustomizer";
 import { ImageScaler } from "./modules/post/ImageScaler";
 import { PoolNavigator } from "./modules/post/PoolNavigator";
 import { PostViewer } from "./modules/post/PostViewer";
 import { TitleCustomizer } from "./modules/post/TitleCustomizer";
-// - search
 import { BlacklistEnhancer } from "./modules/search/BlacklistEnhancer";
-import { InstantSearch } from "./modules/search/InstantSearch";
 import { InfiniteScroll } from "./modules/search/InfiniteScroll";
+import { InstantSearch } from "./modules/search/InstantSearch";
 import { MassDownloader } from "./modules/search/MassDownloader";
 import { ThumbnailEnhancer } from "./modules/search/ThumbnailsEnhancer";
-// - misc
-import { TinyAlias } from "./modules/misc/TinyAlias";
-import { WikiEnhancer } from "./modules/misc/WikiEnhancer";
-// - pools
-import { PoolDownloader } from "./modules/pools/PoolDownloader";
-// - subscriptions
-import { SubscriptionManager } from "./modules/subscriptions/SubscriptionManager";
 import { ForumSubscriptions } from "./modules/subscriptions/ForumSubscriptions";
 import { PoolSubscriptions } from "./modules/subscriptions/PoolSubscriptions";
+import { SubscriptionManager } from "./modules/subscriptions/SubscriptionManager";
 import { TagSubscriptions } from "./modules/subscriptions/TagSubscriptions";
-// - settings
-import { SettingsController } from "./modules/general/SettingsController";
 
 
 const loadOrder = [
@@ -71,16 +63,16 @@ const subscriptions = [
     TagSubscriptions
 ];
 
-// This makes sure that the appropriate document structure exists before modules can load
 DomUtilities.createStructure().then(() => {
 
-    // This is dependent on the previous step, which runs when the document fully loads
+    // This code is pretty fragile. It's also what makes the rest of the project work.
+    // It is dependent on the previous step, which runs when the document fully loads
     // If that changes, this will need to be wrapped in `$(() => { ... });`
 
-    subscriptions.forEach(module => {
-        ModuleController.register(module);
-        SubscriptionManager.register(module);
-    });
+    // Subscriptions have to be registered before the SubscriptionManager
+    ModuleController.register(subscriptions);
+    SubscriptionManager.register(subscriptions);
 
+    // Register the rest of the modules
     ModuleController.register(loadOrder);
 });

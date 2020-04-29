@@ -3,12 +3,20 @@ import { APIForumTopic } from "../../components/api/responses/APIForumTopic";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { Subscription } from "./Subscription";
-import { SubscriptionSettings, UpdateContent, UpdateData, UpdateDefinition } from "./SubscriptionManager";
+import { Subscription, UpdateActions } from "./Subscription";
+import { SubscriptionSettings, UpdateContent, UpdateData } from "./SubscriptionManager";
 
 export class ForumSubscriptions extends RE6Module implements Subscription {
 
-    updateDefinition: UpdateDefinition = {
+    protected getDefaultSettings(): Settings {
+        return {
+            enabled: true,
+            data: {},
+            cache: {},
+        };
+    }
+
+    updateActions: UpdateActions = {
         imageSrc: () => {
             return "";
         },
@@ -26,52 +34,59 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         }
     };
 
-    limit: number;
-
     public getName(): string {
         return "Forums";
     }
 
-    getSubscriberId(): string {
-        return Page.getPageID();
-    }
+    // ===== Buttons =====
 
-    getButtonElements(): JQuery<HTMLElement> {
-        if (Page.matches(PageDefintion.forumPost)) return $("div#c-forum-topics").first();
-        else return $();
-    }
-
-    public createSubscribeButton(): JQuery<HTMLElement> {
+    public makeSubscribeButton(): JQuery<HTMLElement> {
         return $("<button>")
-            .addClass(`large-subscribe-button subscribe`)
+            .addClass("large-subscribe-button subscribe")
             .addClass("button btn-success")
             .html("Subscribe");
     }
 
-    public createUnsubscribeButton(): JQuery<HTMLElement> {
+    public makeUnsubscribeButton(): JQuery<HTMLElement> {
         return $("<button>")
-            .addClass(`large-subscribe-button unsubscribe`)
+            .addClass("large-subscribe-button unsubscribe")
             .addClass("button btn-danger")
             .html("Unsubscribe");
+    }
+
+    public getButtonAttachment(): JQuery<HTMLElement> {
+        if (Page.matches(PageDefintion.forumPost)) return $("div#c-forum-topics").first();
+        else return $();
     }
 
     public insertButton($element: JQuery<HTMLElement>, $button: JQuery<HTMLElement>): void {
         $element.prepend($button);
     }
 
+    public getSubscriberId(): string {
+        return Page.getPageID();
+    }
+
+    public getSubscriberName(): string {
+        return $("div#c-forum-topics div#a-show h1").first().text().trim().replace("Topic: ", "");
+    }
+
+    // ===== Updates =====
+
     public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData> {
         const results: UpdateData = {};
 
         const forumData: SubscriptionSettings = await this.fetchSettings("data", true);
-        if (Object.keys(forumData).length === 0) {
-            return results;
-        }
+        if (Object.keys(forumData).length === 0) return results;
 
         const forumsJson = await E621.ForumTopics.get<APIForumTopic>({ "search[id]": Object.keys(forumData).join(",") });
         for (const forumJson of forumsJson) {
             if (new Date(forumJson.updated_at).getTime() > lastUpdate && forumJson.updater_id !== User.getUserID()) {
                 results[new Date(forumJson.updated_at).getTime()] = await this.formatForumUpdate(forumJson);
             }
+
+            // Fetch and update the saved forum thread name
+            forumData[forumJson.id].name = forumJson.title.replace(/_/g, " ");
         }
         await this.pushSettings("data", forumData);
         return results;
@@ -82,20 +97,15 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
             id: value.id,
             name: value.title,
             md5: "",
-            extra: {    //comment count
+            extra: {    // comment count
                 count: value.response_count
-            }
+            },
+            new: true,
         };
     }
 
-    /**
-     * Returns a set of default settings values
-     * @returns Default settings
-     */
-    protected getDefaultSettings(): Settings {
-        return {
-            enabled: true,
-            data: {}
-        };
+    public async clearCache(): Promise<boolean> {
+        return this.pushSettings("cache", {});
     }
+
 }

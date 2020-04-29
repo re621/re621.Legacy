@@ -20,7 +20,6 @@ import { MassDownloader } from "../search/MassDownloader";
 import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } from "../search/ThumbnailsEnhancer";
 import { ForumSubscriptions } from "../subscriptions/ForumSubscriptions";
 import { PoolSubscriptions } from "../subscriptions/PoolSubscriptions";
-import { ExtraInfo } from "../subscriptions/SubscriptionManager";
 import { FormattingManager } from "./FormattingHelper";
 import { HeaderCustomizer } from "./HeaderCustomizer";
 import { Miscellaneous } from "./Miscellaneous";
@@ -701,7 +700,7 @@ export class SettingsController extends RE6Module {
             async function importPoolData(settings: string, $info: JQuery<HTMLElement>): Promise<void> {
                 $info.html("Processing pools . . .");
                 const poolSubs = PoolSubscriptions.getInstance(),
-                    poolData: ExtraInfo = poolSubs.fetchSettings("data");
+                    poolData = poolSubs.fetchSettings("data");
                 for (const entry of settings) {
                     poolData[entry["id"]] = {
                         md5: entry["thumb"]["url"].substr(6, 32),
@@ -715,7 +714,7 @@ export class SettingsController extends RE6Module {
             async function importForumData(settings: string, $info: JQuery<HTMLElement>): Promise<void> {
                 $info.html("Processing forums . . .");
                 const forumSubs = ForumSubscriptions.getInstance(),
-                    forumData: ExtraInfo = forumSubs.fetchSettings("data"),
+                    forumData = forumSubs.fetchSettings("data"),
                     postIDs = [];
                 for (const entry of settings) {
                     postIDs.push(entry["id"]);

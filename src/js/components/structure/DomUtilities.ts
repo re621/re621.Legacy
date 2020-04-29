@@ -231,6 +231,7 @@ export class DomUtilities {
         if (config.href === undefined) config.href = "";
         if (config.title === undefined) config.title = "";
         if (config.class === undefined) config.class = "";
+        if (config.attr === undefined) config.attr = {};
 
         const $tab = $(`<li>`).appendTo("menu.extra");
         const $link = $("<a>")
@@ -240,6 +241,7 @@ export class DomUtilities {
 
         if (config.href) { $link.attr("href", config.href); }
         if (config.class) { $tab.addClass(config.class); }
+        if (config.attr) { $link.attr(config.attr); }
 
         return $link;
     }
@@ -265,6 +267,13 @@ export class DomUtilities {
         }
     };
 
+    /**
+     * Returns a base-64 encoded image used for placeholder during lazy loading
+     */
+    public static getPlaceholderImage(): string {
+        return "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+    }
+
 }
 
 interface SettingsButton {
@@ -277,4 +286,7 @@ interface SettingsButton {
 
     /** Extra class to append to the tab */
     class?: string;
+
+    /** Name-value pairs of the attribute to set */
+    attr?: { [prop: string]: string };
 }

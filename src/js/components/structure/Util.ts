@@ -150,15 +150,24 @@ export class Util {
     }
 
     /**
-     * Split the array into chunks of specified size.
+     * Split the array into chunks of specified size.  
+     * If `altMode` is set to true, splits array into two parts.  
+     * - [0] is the size specified by the `size` argument  
+     * - [1] is the remainder.  
+     * Otherwise, splits the array normally.
      * @param input Original array
      * @param size Size of the resulting chunks
+     * @param altMode Alternative mode
      * @returns Array of smaller arrays of specified size
      */
-    public static chunkArray(input: any[], size: number): any[] {
+    public static chunkArray(input: any[], size: number, altMode = false): any[] {
         const result = [];
-        for (let i = 0; i < input.length; i += size) {
-            result.push(input.slice(i, i + size));
+        if (altMode) {
+            result[0] = input.slice(0, size);
+            result[1] = input.slice(size);
+        } else {
+            for (let i = 0; i < input.length; i += size)
+                result.push(input.slice(i, i + size));
         }
         return result;
     }
@@ -169,6 +178,7 @@ export class Util {
      * @returns HTML output
      */
     public static quickParseMarkdown(input: string): string {
+        if (input === undefined) return "";
         return input
             .replace(/\*\*(.*?)\*\*/gm, "<strong>$1</strong>")
             .replace(/^[-]+(.*)?/gmi, "<ul><li>$1</li></ul>")

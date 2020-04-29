@@ -97,10 +97,23 @@ export class Form {
         this.$form.trigger("re621:form:create");
 
         if (this.config.collapse) {
-            const section = $("<div>")
-                .addClass(this.formID + "-collapse form-collapse")
-                .append($("<h3>").addClass("form-collapse-header").html(this.config.name))
-                .append($("<div>").addClass("form-collapse-content").append(this.$form));
+            const section = $("<div>").addClass(this.formID + "-collapse form-collapse");
+
+            const header = $("<h3>")
+                .addClass("form-collapse-header")
+                .html(this.config.name)
+                .appendTo(section);
+            if (this.config.collapseBadge)
+                $("<span>")
+                    .addClass("form-collapse-badge")
+                    .html(this.config.collapseBadge + "")
+                    .appendTo(header);
+
+            $("<div>")
+                .addClass("form-collapse-content")
+                .append(this.$form)
+                .appendTo(section);
+
             section.accordion({
                 active: this.config.collapseState,
                 animate: false,
@@ -968,11 +981,11 @@ export class Form {
      * Creates a div FormElement based on the provided parameters  
      * Alias for the more generic make() function with a specific type  
      * @param value Element value
-     * @param label Form label
      * @param stretch Column span
+     * @param label Form label
      */
-    public static div(value = "", stretch: FormElementWidth = "full"): FormElement {
-        return this.make("div", Util.makeID(), undefined, value, stretch);
+    public static div(value: string | JQuery<HTMLElement> = "", stretch: FormElementWidth = "full", label?: string): FormElement {
+        return this.make("div", Util.makeID(), label, value, stretch);
     }
 
     /**
@@ -1116,7 +1129,7 @@ export class Form {
     public static subsection(config: FormConfig, name: string, elements: FormElement[], label?: string, stretch: FormElementWidth = "full"): FormElement {
         config.collapse = true;
         config.name = name;
-        config.collapseState = false;
+        config.collapseState = true;
         return this.make("form", config.id, label, new Form(config, elements), stretch);
     }
 }
@@ -1134,6 +1147,8 @@ interface FormConfig {
     collapse?: boolean;
     /** Whether the collapsable should be open by default */
     collapseState?: boolean;
+    /** Badge attached to the collapsable header */
+    collapseBadge?: string | number;
 }
 
 interface FormEntry {

@@ -1,3 +1,4 @@
+import { DomUtilities } from "../structure/DomUtilities";
 import { APIPost } from "./responses/APIPost";
 
 export class PostHtml {
@@ -33,7 +34,7 @@ export class PostHtml {
             .attr({
                 "title": `Rating: ${json.rating}\nID: ${json.id}\nDate: ${json.created_at}\nScore: ${json.score.total}\n\n ${allTags}`,
                 "alt": allTags,
-                "src": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
+                "src": DomUtilities.getPlaceholderImage(),
             })
             .appendTo($picture);
 

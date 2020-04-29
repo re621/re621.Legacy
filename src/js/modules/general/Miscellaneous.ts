@@ -263,7 +263,8 @@ export class Miscellaneous extends RE6Module {
         /* Handle double-click */
         const clickAction = ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer).fetchSettings("clickAction");
 
-        $("div.avatar > div > a").each((index, element) => {
+        const avatars = $("div.avatar > div > a").get();
+        for (const element of avatars) {
             const $link = $(element);
             let dbclickTimer: number;
             let prevent = false;
@@ -292,7 +293,7 @@ export class Miscellaneous extends RE6Module {
                     $link[0].click();
                 }
             });
-        });
+        }
     }
 
 }

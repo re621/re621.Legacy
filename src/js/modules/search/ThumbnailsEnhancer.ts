@@ -3,6 +3,7 @@ import { XM } from "../../components/api/XM";
 import { PageDefintion } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Util } from "../../components/structure/Util";
 
 export enum ThumbnailPerformanceMode {
@@ -329,7 +330,7 @@ export class ThumbnailEnhancer extends RE6Module {
             // Replace placeholder images with CSS-styled ones
             // Don't forget to update PostHtml.create() accordingly
 
-            $img.attr("src", "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==");
+            $img.attr("src", DomUtilities.getPlaceholderImage());
             $picture.addClass("color-text post-placeholder")
 
             if ($article.attr("data-file-ext") === "swf") $picture.addClass("flash");

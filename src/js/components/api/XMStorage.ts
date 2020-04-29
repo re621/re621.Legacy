@@ -8,14 +8,14 @@ export class XMStorage {
      * @param name Name of the data entry
      * @param value Data value
      */
-    public static async setValue(name: string, value: any): Promise<void> {
+    public static async setValue(name: string, value: any): Promise<boolean> {
         return new Promise(async (resolve) => {
             if (typeof GM === "undefined") {
                 await new Promise((resolve) => {
                     chrome.storage.sync.set({ [name]: value }, () => { resolve(); });
                 });
             } else await GM.setValue(name, value);
-            resolve();
+            resolve(true);
         });
     };
 

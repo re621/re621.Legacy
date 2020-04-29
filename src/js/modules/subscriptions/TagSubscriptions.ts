@@ -2,44 +2,45 @@ import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { Post } from "../../components/data/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { Subscription } from "./Subscription";
-import { SubscriptionSettings, UpdateContent, UpdateData, UpdateDefinition } from "./SubscriptionManager";
+import { Subscription, UpdateActions } from "./Subscription";
+import { SubscriptionSettings, UpdateContent, UpdateData } from "./SubscriptionManager";
 
 export class TagSubscriptions extends RE6Module implements Subscription {
-    updateDefinition: UpdateDefinition = {
+
+    protected getDefaultSettings(): Settings {
+        return {
+            enabled: true,
+            data: {},
+            cache: {},
+        };
+    }
+
+    updateActions: UpdateActions = {
         imageSrc: (data) => {
             return Post.createPreviewUrlFromMd5(data.md5);
         },
         imageHref: (data) => {
-            return `https://e621.net/posts/${data.id}`;
+            return `/posts/${data.id}`;
         },
         imageRemoveOnError: true,
         updateText: (data) => {
             return data.name;
         },
         sourceHref: (data) => {
-            return `https://e621.net/posts?tags=${encodeURIComponent(data.name.replace(/ /g, "_"))}`;
+            return `/posts?tags=${encodeURIComponent(data.name.replace(/ /g, "_"))}`;
         },
         sourceText: () => {
             return "View Tag";
         }
     };
 
-    limit: number;
-
     public getName(): string {
         return "Tags";
     }
 
-    public getSubscriberId($element: JQuery<HTMLElement>): string {
-        return $element.parent().attr("data-tag");
-    }
+    // ===== Buttons =====
 
-    public getButtonElements(): JQuery<HTMLElement> {
-        return $("#tag-box li span.tag-action-subscribe, #tag-list li span.tag-action-subscribe");
-    }
-
-    public createSubscribeButton(): JQuery<HTMLElement> {
+    public makeSubscribeButton(): JQuery<HTMLElement> {
         return $("<a>")
             .attr({
                 "href": "#",
@@ -49,7 +50,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
             .html(`<i class="far fa-heart"></i>`);
     }
 
-    public createUnsubscribeButton(): JQuery<HTMLElement> {
+    public makeUnsubscribeButton(): JQuery<HTMLElement> {
         return $("<a>")
             .attr({
                 "href": "#",
@@ -59,17 +60,29 @@ export class TagSubscriptions extends RE6Module implements Subscription {
             .html(`<i class="fas fa-heart"></i>`);
     }
 
+    public getButtonAttachment(): JQuery<HTMLElement> {
+        return $("#tag-box li span.tag-action-subscribe, #tag-list li span.tag-action-subscribe");
+    }
+
     public insertButton($element: JQuery<HTMLElement>, $button: JQuery<HTMLElement>): void {
         $element.append($button);
     }
+
+    public getSubscriberId($element: JQuery<HTMLElement>): string {
+        return $element.parent().attr("data-tag");
+    }
+
+    public getSubscriberName($element: JQuery<HTMLElement>): string {
+        return $element.parent().attr("data-tag").replace(/_/g, " ");
+    }
+
+    // ===== Updates =====
 
     public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData> {
         const results: UpdateData = {};
 
         const tagData: SubscriptionSettings = await this.fetchSettings("data", true);
-        if (Object.keys(tagData).length === 0) {
-            return results;
-        }
+        if (Object.keys(tagData).length === 0) return results;
 
         for (const tagName of Object.keys(tagData)) {
             const postsJson = await E621.Posts.get<APIPost>({ "tags": encodeURIComponent(tagName.replace(/ /g, "_")) });
@@ -88,18 +101,13 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         return {
             id: value.id,
             name: tagName.replace(/ /g, " "),
-            md5: value.file.ext === "swf" ? "" : value.file.md5
+            md5: value.file.ext === "swf" ? "" : value.file.md5,
+            new: true,
         };
     }
 
-    /**
-     * Returns a set of default settings values
-     * @returns Default settings
-     */
-    protected getDefaultSettings(): Settings {
-        return {
-            enabled: true,
-            data: {}
-        };
+    public async clearCache(): Promise<boolean> {
+        return this.pushSettings("cache", {});
     }
+
 }
