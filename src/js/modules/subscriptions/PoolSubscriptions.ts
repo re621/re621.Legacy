@@ -82,7 +82,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
         const poolData: SubscriptionSettings = await this.fetchSettings("data", true);
         if (Object.keys(poolData).length === 0) return results;
 
-        const poolsJson: APIPool[] = await E621.Pools.get<APIPool>({ "search[id]": Object.keys(poolData).join(",") });
+        const poolsJson: APIPool[] = await E621.Pools.get<APIPool>({ "search[id]": Object.keys(poolData).join(",") }, 500);
         for (const poolJson of poolsJson) {
             if (poolData[poolJson.id].lastId === undefined || !poolJson.post_ids.includes(poolData[poolJson.id].lastId)) {
                 poolData[poolJson.id].lastId = poolJson.post_ids[poolJson.post_ids.length - 1];

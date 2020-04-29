@@ -79,7 +79,7 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         const forumData: SubscriptionSettings = await this.fetchSettings("data", true);
         if (Object.keys(forumData).length === 0) return results;
 
-        const forumsJson = await E621.ForumTopics.get<APIForumTopic>({ "search[id]": Object.keys(forumData).join(",") });
+        const forumsJson = await E621.ForumTopics.get<APIForumTopic>({ "search[id]": Object.keys(forumData).join(",") }, 500);
         for (const forumJson of forumsJson) {
             if (new Date(forumJson.updated_at).getTime() > lastUpdate && forumJson.updater_id !== User.getUserID()) {
                 results[new Date(forumJson.updated_at).getTime()] = await this.formatForumUpdate(forumJson);

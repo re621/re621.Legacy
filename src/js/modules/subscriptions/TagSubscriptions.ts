@@ -85,7 +85,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         if (Object.keys(tagData).length === 0) return results;
 
         for (const tagName of Object.keys(tagData)) {
-            const postsJson = await E621.Posts.get<APIPost>({ "tags": encodeURIComponent(tagName.replace(/ /g, "_")) });
+            const postsJson = await E621.Posts.get<APIPost>({ "tags": encodeURIComponent(tagName.replace(/ /g, "_")) }, 500);
             for (const post of postsJson) {
                 const postObject = new Post(post);
                 if (new Date(post.created_at).getTime() > lastUpdate && !postObject.matchesBlacklist()) {
