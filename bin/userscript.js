@@ -1,10 +1,15 @@
-const fs = require("fs");
-const util = require("./util");
+const fs = require("fs"),
+    rimraf = require("rimraf"),
+    util = require("./util");
 
 const headerData = JSON.parse(fs.readFileSync("./bin/userscript-header.json")),
     package = JSON.parse(fs.readFileSync("./package.json")),
     mode = process.argv[2] ? process.argv[2] : "build",
     browser = process.argv[3] ? process.argv[3] : "chrome";
+
+// Prepare the directory
+rimraf.sync("./build/userscript");
+fs.mkdirSync("./build/userscript");
 
 // Create the userscript header
 let header = "";
