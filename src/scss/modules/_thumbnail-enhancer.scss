@@ -81,6 +81,7 @@ div#page div#posts-container {
                 bottom: 0;
                 grid-template-rows: repeat(auto-fill, 25%);
                 margin-top: 0.25rem;
+                z-index: 90;
 
                 button.voteButton {
                     box-sizing: content-box;
