@@ -1,29 +1,29 @@
-import { HeaderCustomizer } from "./HeaderCustomizer";
+import { Api } from "../../components/api/Api";
+import { GM } from "../../components/api/GM";
+import { Hotkeys } from "../../components/data/Hotkeys";
+import { User } from "../../components/data/User";
+import { ModuleController } from "../../components/ModuleController";
+import { RE6Module, Settings } from "../../components/RE6Module";
+import { DomUtilities } from "../../components/structure/DomUtilities";
+import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { Miscellaneous } from "./Miscellaneous";
-import { Form, FormElement } from "../../components/structure/Form";
-import { Hotkeys } from "../../components/data/Hotkeys";
-import { PoolSubscriptions } from "../subscriptions/PoolSubscriptions";
 import { Util } from "../../components/structure/Util";
-import { ForumSubscriptions } from "../subscriptions/ForumSubscriptions";
-import { TitleCustomizer } from "../post/TitleCustomizer";
-import { DownloadCustomizer } from "../post/DownloadCustomizer";
-import { PostViewer } from "../post/PostViewer";
-import { FormattingManager } from "./FormattingHelper";
-import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
-import { PoolNavigator } from "../post/PoolNavigator";
-import { ImageScaler } from "../post/ImageScaler";
-import { ModuleController } from "../../components/ModuleController";
-import { DomUtilities } from "../../components/structure/DomUtilities";
-import { ExtraInfo } from "../subscriptions/SubscriptionManager";
-import { Api } from "../../components/api/Api";
-import { User } from "../../components/data/User";
-import { ThumbnailEnhancer, ThumbnailPerformanceMode, ThumbnailClickAction } from "../search/ThumbnailsEnhancer";
-import { GM } from "../../components/api/GM";
-import { MassDownloader } from "../search/MassDownloader";
 import { PoolDownloader } from "../pools/PoolDownloader";
+import { DownloadCustomizer } from "../post/DownloadCustomizer";
+import { ImageScaler } from "../post/ImageScaler";
+import { PoolNavigator } from "../post/PoolNavigator";
+import { PostViewer } from "../post/PostViewer";
+import { TitleCustomizer } from "../post/TitleCustomizer";
+import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
+import { MassDownloader } from "../search/MassDownloader";
+import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } from "../search/ThumbnailsEnhancer";
+import { ForumSubscriptions } from "../subscriptions/ForumSubscriptions";
+import { PoolSubscriptions } from "../subscriptions/PoolSubscriptions";
+import { ExtraInfo } from "../subscriptions/SubscriptionManager";
+import { FormattingManager } from "./FormattingHelper";
+import { HeaderCustomizer } from "./HeaderCustomizer";
+import { Miscellaneous } from "./Miscellaneous";
 
 /**
  * SettingsController  
@@ -347,10 +347,6 @@ export class SettingsController extends RE6Module {
                     (event, data) => { postViewer.pushSettings("upvoteOnFavorite", data); }
                 ),
                 Form.checkbox(
-                    "submit-hotkey", formattingManager.fetchSettings("hotkeySubmitActive"), "Comment with Alt+Enter", "column",
-                    (event, data) => { formattingManager.pushSettings("hotkeySubmitActive", data); }
-                ),
-                Form.checkbox(
                     "click-scale", imageScaler.fetchSettings("clickScale"), "Click images to resize them", "column",
                     (event, data) => { imageScaler.pushSettings("clickScale", data); }),
                 Form.checkbox(
@@ -507,6 +503,11 @@ export class SettingsController extends RE6Module {
             ...createInputs(miscellaneous, "Edit Post", "hotkeyEditPost"),
             ...createInputs(postViewer, "Toggle Notes", "hotkeyHideNotes"),
             ...createInputs(postViewer, "Edit Notes", "hotkeyNewNote"),
+            Form.hr(),
+
+            // Other
+            Form.header("Miscellaneous"),
+            ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
             Form.hr(),
 
             // Tabs

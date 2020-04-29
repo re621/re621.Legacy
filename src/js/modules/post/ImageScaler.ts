@@ -92,7 +92,6 @@ export class ImageScaler extends RE6Module {
             this.setScale("", false);
         });
 
-        this.registerHotkeys();
     }
 
     /**

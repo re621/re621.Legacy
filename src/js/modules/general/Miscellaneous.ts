@@ -1,7 +1,7 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { Page, PageDefintion } from "../../components/data/Page";
 import { Api } from "../../components/api/Api";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
+import { Page, PageDefintion } from "../../components/data/Page";
+import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
  * Miscellaneous functionality that does not require a separate module
@@ -15,6 +15,7 @@ export class Miscellaneous extends RE6Module {
             { keys: "hotkeyRandomPost", fnct: this.randomPost },
             { keys: "hotkeyNewComment", fnct: this.openNewComment },
             { keys: "hotkeyEditPost", fnct: this.openEditTab },
+            { keys: "hotkeySubmit", fnct: this.handleSubmitForm, element: $("body"), selector: "textarea, input" },
         );
     }
 
@@ -29,6 +30,8 @@ export class Miscellaneous extends RE6Module {
             hotkeyRandomPost: "r",
             hotkeyNewComment: "n",
             hotkeyEditPost: "e",
+
+            hotkeySubmit: "alt+return",
 
             removeSearchQueryString: true,
             stickySearchbox: true,
@@ -226,6 +229,14 @@ export class Miscellaneous extends RE6Module {
 
         const newVal = $textarea.val() + strippedBody;
         $textarea.focus().val("").val(newVal);
+    }
+
+    /**
+     * Submits the form on hotkey press
+     * @param event Keydown event
+     */
+    private handleSubmitForm(event): void {
+        $(event.target).parents("form").submit();
     }
 
 }
