@@ -34,6 +34,9 @@ jobs:
     - name: Build Userscript Files
       run: npm run userscript:prod
 
+    - name: Build Userscript Files
+      run: npm run userscript:prod
+
     - name: Build Extension Archive
       run: npm run extension:prod
       
@@ -41,6 +44,7 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         allowUpdates: true
-        artifacts: "./build/script.user.js,./build/script.meta.js,./build/style.min.css"
+        artifacts: "./build/userscript/script.user.js,./build/userscript/script.meta.js,./build/userscript/style.min.css,./build/extension/re621.zip"
         replacesArtifacts: true
+        prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
