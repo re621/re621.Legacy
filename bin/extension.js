@@ -12,10 +12,8 @@ fs.mkdirSync("./build/extension");
 fs.mkdirSync("./build/extension/src");
 fs.mkdirSync("./build/extension/src/lib");
 
-if (prodMode) {
-    rimraf.sync("./build/cache");
-    fs.mkdirSync("./build/cache");
-}
+if (prodMode) rimraf.sync("./build/cache");
+if (!fs.existsSync("./build/cache")) fs.mkdirSync("./build/cache");
 
 const manifest = JSON.parse(util.parseTemplate(
     fs.readFileSync("./bin/extension-manifest.json").toString(),
