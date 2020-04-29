@@ -290,31 +290,54 @@ div#page div#a-popular div#posts-container {
 div#page div#posts-container {
 
     picture.picture-container.post-placeholder {
-        background-color: #ffffff50;
-
-        &::after {
-            content: "PLACEHOLDER";
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            font-size: 200%;
-            font-weight: 900;
-            letter-spacing: 2.5px;
+        img.re621-placeholder-replacer {
+            display: none;
         }
 
-        &.flash::after {
-            content: "FLASH";
-        }
-
-        &.deleted::after {
-            content: "DELETED";
+        img.re621-placeholder-default {
+            display: inline;
         }
     }
+
+    &[data-thumb-crop=true] {
+
+        picture.picture-container.post-placeholder {
+            background-color: #ffffff50;
+
+            img.re621-placeholder-replacer {
+                display: inline;
+            }
+
+            img.re621-placeholder-default {
+                display: none;
+            }
+
+            &::after {
+                content: "PLACEHOLDER";
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                font-size: calc(var(--thumbnail-size, 150px) / 10);
+                font-weight: 900;
+                letter-spacing: 2.5px;
+            }
+
+            &.flash::after {
+                content: "FLASH";
+            }
+
+            &.deleted::after {
+                content: "DELETED";
+            }
+        }
+
+    }
+
 }

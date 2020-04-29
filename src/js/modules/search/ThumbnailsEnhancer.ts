@@ -330,8 +330,11 @@ export class ThumbnailEnhancer extends RE6Module {
             // Replace placeholder images with CSS-styled ones
             // Don't forget to update PostHtml.create() accordingly
 
-            $img.attr("src", DomUtilities.getPlaceholderImage());
-            $picture.addClass("color-text post-placeholder")
+            $("<img>").attr("src", DomUtilities.getPlaceholderImage()).addClass("re621-placeholder-replacer").appendTo($picture);
+            $img.addClass("re621-placeholder-default")
+            $picture.addClass("color-text post-placeholder");
+
+            // <img class="has-cropped-true" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="#2234748">
 
             if ($article.attr("data-file-ext") === "swf") $picture.addClass("flash");
             if ($article.attr("data-flags") === "deleted") $picture.addClass("deleted");
