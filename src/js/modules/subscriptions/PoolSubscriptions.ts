@@ -76,13 +76,17 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
 
     // ===== Updates =====
 
-    public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData> {
+    public async getUpdatedEntries(lastUpdate: number, status: JQuery<HTMLElement>): Promise<UpdateData> {
         const results: UpdateData = {};
 
+        status.append(`<div>. . . retreiving settings</div>`);
         const poolData: SubscriptionSettings = await this.fetchSettings("data", true);
         if (Object.keys(poolData).length === 0) return results;
 
+        status.append(`<div>. . . sending an API request</div>`);
         const poolsJson: APIPool[] = await E621.Pools.get<APIPool>({ "search[id]": Object.keys(poolData).join(",") }, 500);
+
+        status.append(`<div>. . . formatting output/div>`);
         for (const poolJson of poolsJson) {
             if (poolData[poolJson.id].lastId === undefined || !poolJson.post_ids.includes(poolData[poolJson.id].lastId)) {
                 poolData[poolJson.id].lastId = poolJson.post_ids[poolJson.post_ids.length - 1];
@@ -99,6 +103,8 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             // Fetch and update the saved pool name
             poolData[poolJson.id].name = poolJson.name.replace(/_/g, " ");
         }
+
+        status.append(`<div>. . . outputting results</div>`);
         await this.pushSettings("data", poolData);
         return results;
     }

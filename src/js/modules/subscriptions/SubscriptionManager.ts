@@ -329,10 +329,14 @@ export class SubscriptionManager extends RE6Module {
 
         sub.tabElement.attr("data-loading", "true");
         sub.content[0].innerHTML = "";
+        const status = $("<div>")
+            .addClass("subscription-load-status")
+            .html("Loading . . .")
+            .appendTo(sub.content);
 
         // Don't update if the last check was pretty recently
         let updates: UpdateData = {};
-        if (shouldUpdate) updates = await sub.instance.getUpdatedEntries(lastUpdate);
+        if (shouldUpdate) updates = await sub.instance.getUpdatedEntries(lastUpdate, status);
 
         const lastTimestamp = await this.addUpdateEntries(sub, updates);
         const lastSeen = sub.instance.fetchSettings("lastSeen");
@@ -413,6 +417,7 @@ export class SubscriptionManager extends RE6Module {
             await sub.instance.pushSettings("cache", cache.getData());
         }
 
+        sub.content[0].innerHTML = "";  // Clear the update statuses as late as possible
         if (cache.getSize() > 0) sub.content.append(this.createCacheDivider());
 
         cache.getIndex().forEach((timestamp) => {

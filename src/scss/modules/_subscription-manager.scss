@@ -152,6 +152,19 @@ div.subscriptions-list {
         }
     }
 
+    div.subscription-load-status {
+        width: fit-content;
+        margin: 3rem auto;
+        grid-column: span 4;
+        font-family: monospace;
+        font-size: 1.5em;
+
+        div {
+            color: #aaa;
+            margin-top: 0.5rem;
+        }
+    }
+
 }
 
 // Forum Subscriptions

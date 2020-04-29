@@ -73,13 +73,17 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
 
     // ===== Updates =====
 
-    public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData> {
+    public async getUpdatedEntries(lastUpdate: number, status: JQuery<HTMLElement>): Promise<UpdateData> {
         const results: UpdateData = {};
 
+        status.append(`<div>. . . retreiving settings</div>`);
         const forumData: SubscriptionSettings = await this.fetchSettings("data", true);
         if (Object.keys(forumData).length === 0) return results;
 
+        status.append(`<div>. . . sending an API request</div>`);
         const forumsJson = await E621.ForumTopics.get<APIForumTopic>({ "search[id]": Object.keys(forumData).join(",") }, 500);
+
+        status.append(`<div>. . . formatting output/div>`);
         for (const forumJson of forumsJson) {
             if (new Date(forumJson.updated_at).getTime() > lastUpdate && forumJson.updater_id !== User.getUserID()) {
                 results[new Date(forumJson.updated_at).getTime()] = await this.formatForumUpdate(forumJson);
@@ -88,6 +92,8 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
             // Fetch and update the saved forum thread name
             forumData[forumJson.id].name = forumJson.title.replace(/_/g, " ");
         }
+
+        status.append(`<div>. . . outputting results</div>`);
         await this.pushSettings("data", forumData);
         return results;
     }

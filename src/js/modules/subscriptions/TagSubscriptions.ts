@@ -78,13 +78,16 @@ export class TagSubscriptions extends RE6Module implements Subscription {
 
     // ===== Updates =====
 
-    public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData> {
+    public async getUpdatedEntries(lastUpdate: number, status: JQuery<HTMLElement>): Promise<UpdateData> {
         const results: UpdateData = {};
 
+        status.append(`<div>. . . retreiving settings</div>`);
         const tagData: SubscriptionSettings = await this.fetchSettings("data", true);
         if (Object.keys(tagData).length === 0) return results;
 
+        status.append(`<div>. . . sending API requests</div>`);
         for (const tagName of Object.keys(tagData)) {
+            status.append(`<div>&nbsp; &nbsp; &nbsp; ` + tagName.replace(/ /g, "_") + `</div>`);
             const postsJson = await E621.Posts.get<APIPost>({ "tags": encodeURIComponent(tagName.replace(/ /g, "_")) }, 500);
             for (const post of postsJson) {
                 const postObject = new Post(post);
@@ -93,6 +96,8 @@ export class TagSubscriptions extends RE6Module implements Subscription {
                 }
             }
         }
+
+        status.append(`<div>. . . outputting results</div>`);
         await this.pushSettings("data", tagData);
         return results;
     }

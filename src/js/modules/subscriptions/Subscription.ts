@@ -45,8 +45,9 @@ export interface Subscription extends RE6Module {
      * Returns all entries which are considered to be updated,
      * i.e the api update date is larger than the last updated date
      * @param lastUpdate Timestamp of the previous update
+     * @param status JQuery element to which status updates are to be appended
      */
-    getUpdatedEntries(lastUpdate: number): Promise<UpdateData>;
+    getUpdatedEntries(lastUpdate: number, status: JQuery<HTMLElement>): Promise<UpdateData>;
 
     /**
      * Clears the cached subscription data for the module.  
