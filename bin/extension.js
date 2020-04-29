@@ -38,9 +38,10 @@ delete manifest["icons-lib"];
 manifest["content_scripts"][0]["js-lib"].forEach((file, index) => {
     downloadQueue.push(new Promise(async (resolve) => {
         const fileName = file[1].replace(/^.*[\\\/]/, '');
+        manifest["content_scripts"][0]["js"].push("lib/" + fileName);
+
         if (prodMode || !fs.existsSync(file[1])) await fetchFile(file[0], file[1], "./build/extension/src/lib/" + fileName);
         else fs.createReadStream(file[1]).pipe(fs.createWriteStream("./build/extension/src/lib/" + fileName));
-        manifest["content_scripts"][0]["js"].push("lib/" + fileName);
         resolve();
     }));
 });
