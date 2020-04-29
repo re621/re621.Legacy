@@ -1,0 +1,50 @@
+name: build-dev
+on:
+  push:
+    tags:
+    - '*-dev.*'
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out the Repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
+        ref: dev
+  
+    - name: Fetch the latest Git tag
+      uses: olegtarasov/get-tag@v2
+      
+    - name: Set up Node
+      uses: actions/setup-node@v1
+  
+    - name: Install Project Dependencies
+      run: npm ci
+
+    - name: Compile Typescript
+      run: npm run compile-typescript:prod
+
+    - name: Compile SASS
+      run: npm run compile-sass
+
+    - name: Build Userscript Files
+      run: npm run userscript:prod
+
+    - name: Build Extension Files
+      run: npm run extension:prod
+
+    - name: Package the Extension
+      run: npm run extension-archive
+      
+    - name: Create a Release
+      uses: ncipollo/release-action@v1
+      with:
+        allowUpdates: true
+        artifacts: "./build/userscript/script.user.js,./build/userscript/script.meta.js,./build/userscript/style.min.css,./build/extension/re621.zip"
+        replacesArtifacts: true
+        prerelease: true
+        token: ${{ secrets.GITHUB_TOKEN }}
