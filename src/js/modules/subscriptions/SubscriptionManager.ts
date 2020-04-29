@@ -175,6 +175,7 @@ export class SubscriptionManager extends RE6Module {
             makeSubSection(this.getSubscription("PoolSubscriptions").instance, 1),
             makeSubSection(this.getSubscription("ForumSubscriptions").instance, 1),
             makeSubSection(this.getSubscription("TagSubscriptions").instance, 2),
+            makeSubSection(this.getSubscription("CommentSubscriptions").instance, 2),
 
             // Settings
             Form.header("Settings"),
@@ -289,6 +290,7 @@ export class SubscriptionManager extends RE6Module {
                 case "Pools": { link.attr("href", "/pools/" + key); break; }
                 case "Forums": { link.attr("href", "/forum_topics/" + key); break; }
                 case "Tags": { link.attr("href", "/posts?tags=" + key); break; }
+                case "Comments": { link.attr("href", "/posts/" + key); break; }
             }
 
             return output;
@@ -539,6 +541,12 @@ export class SubscriptionManager extends RE6Module {
                 })
                 .appendTo($title);
 
+        if (data.nameExtra)
+            $("<span>")
+                .addClass("subscriptions-update-title-extra")
+                .html(data.nameExtra)
+                .appendTo($title);
+
         // Link to "All Posts" page
         const $full = $("<div>")
             .addClass("subscription-update-full")
@@ -692,6 +700,9 @@ export interface UpdateContent {
 
     /** Name of the entry - topic title, pool name, etc */
     name: string;
+
+    /** Extra text added to the name, but outside of the link */
+    nameExtra?: string;
 
     /** MD5 hash of the related image */
     md5: string;

@@ -24,6 +24,7 @@ import { InfiniteScroll } from "./modules/search/InfiniteScroll";
 import { InstantSearch } from "./modules/search/InstantSearch";
 import { MassDownloader } from "./modules/search/MassDownloader";
 import { ThumbnailEnhancer } from "./modules/search/ThumbnailsEnhancer";
+import { CommentSubscriptions } from "./modules/subscriptions/CommentSubscriptions";
 import { ForumSubscriptions } from "./modules/subscriptions/ForumSubscriptions";
 import { PoolSubscriptions } from "./modules/subscriptions/PoolSubscriptions";
 import { SubscriptionManager } from "./modules/subscriptions/SubscriptionManager";
@@ -54,13 +55,14 @@ const loadOrder = [
     PoolDownloader,
 
     SubscriptionManager,
-    SettingsController
+    SettingsController,
 ];
 
 const subscriptions = [
     PoolSubscriptions,
     ForumSubscriptions,
-    TagSubscriptions
+    TagSubscriptions,
+    CommentSubscriptions,
 ];
 
 DomUtilities.createStructure().then(() => {

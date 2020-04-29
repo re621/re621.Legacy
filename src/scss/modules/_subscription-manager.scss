@@ -214,6 +214,22 @@ div.subscriptions-list {
     }
 }
 
+// Comment Subscriptions
+.subscriptions-list[data-subscription-class=CommentSubscriptions] {
+
+    div.subscription-update:not(.notice) {
+
+        div.subscription-update-title {
+            font-weight: inherit;
+            font-size: 1em;
+
+            a::after {
+                content: ": ";
+            }
+        }
+    }
+}
+
 // Subscription Management
 .subscriptions-manage-list {
     display: grid;

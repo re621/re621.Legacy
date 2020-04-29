@@ -187,6 +187,32 @@ export class Util {
     }
 
     /**
+     * Parses the provided DText string, returning it as plain text
+     * @param input Input to process
+     * @param removeSections If true, removes `quote`, `code`, and `sections` blocks altogether
+     */
+    public static parseDText(input: string, removeSections = true): string {
+        if (removeSections) {
+            input = input.replace(/\[quote\][\s\S]*\[\/quote\]/g, "")
+                .replace(/\[code\][\s\S]*\[\/code\]/g, "")
+                .replace(/\\[section[\s\S]*\[\/section\]/g, "");
+        }
+
+        input = input
+            .replace(/\[b\]([\s\S]*)\[\/b\]/g, "<b>$1</b>")                     // bold
+            .replace(/\[i\]([\s\S]*)\[\/i\]/g, "<i>$1</i>")                     // italicts
+            .replace(/\[u\]([\s\S]*)\[\/u\]/g, "<u>$1</u>")                     // Underline
+            .replace(/\[o\]([\s\S]*)\[\/o\]/g, "<o>$1</o>")                     // Overline
+            .replace(/\[s\]([\s\S]*)\[\/s\]/g, "<s>$1</s>")                     // Strikeout
+            .replace(/\[sup\]([\s\S]*)\[\/sup\]/g, "<sup>$1</sup>")             // Superscript
+            .replace(/\[sub\]([\s\S]*)\[\/sub\]/g, "<sub>$1</sub>")             // Subscript
+            .replace(/\[spoiler\]([\s\S]*)\[\/spoiler\]/g, "<span>$1</span>")   // Spoiler
+            .replace(/\[color\]([\s\S]*)\[\/color\]/g, "<span>$1</span>")       // Color
+
+        return input;
+    }
+
+    /**
      * Creates a random string of letters, to be used as an ID.  
      * Don't rely on this for anything important.
      * @param length String length
