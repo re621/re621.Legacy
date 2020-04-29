@@ -20,7 +20,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.2.0/plugins/unload/ls.unload.min.js"
     ],
     "resource": {
-        "re621_css": "%GITHUB%/releases/download/%VERSION%/style.min.css",
+        "re621_css": "%GITHUB%/releases/download/%VERSIONREPO%/style.min.css",
         "re621_dnp": "https://cdn.jsdelivr.net/gh/re621/re621@master/dist/avoid-posting.json"
     },
     "grant": [

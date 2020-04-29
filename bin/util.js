@@ -21,13 +21,15 @@ module.exports = {
      * @param {*} package package.json
      */
     parseTemplate(input, package) {
+        const version = process.env.GIT_TAG_NAME === undefined ? package.version : process.env.GIT_TAG_NAME;
         return input
             .replace(/%NAME%/g, package.name)
             .replace(/%DISPLAYNAME%/g, package.displayName)
             .replace(/%NAMESPACE%/g, package.namespace)
             .replace(/%DESCRIPTION%/g, package.description)
             .replace(/%AUTHOR%/g, package.author)
-            .replace(/%VERSION%/g, (process.env.GIT_TAG_NAME === undefined ? package.version : process.env.GIT_TAG_NAME).split("-")[0])
+            .replace(/%VERSION%/g, version.split("-")[0])
+            .replace(/%VERSIONREPO%/, version)
             .replace(/%VERSHORT%/g, package.version.replace(/\.\d+$/g, ""))
             .replace(/%BUILD%/g, this.getBuildTime())
             .replace(/%HOMEPAGE%/g, package.homepage)

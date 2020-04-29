@@ -1,7 +1,7 @@
 window.re621 = new function() {
     this.name = "%NAME%";
     this.displayName = "%DISPLAYNAME%";
-    this.version = "%VERSION%";
+    this.version = "%VERSIONREPO%";
     this.build = "%BUILD%";
     this.links = {
         website: "%HOMEPAGE%",
