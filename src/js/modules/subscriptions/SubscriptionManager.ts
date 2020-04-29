@@ -34,7 +34,7 @@ export class SubscriptionManager extends RE6Module {
         return {
             enabled: true,
             lastUpdate: 0,
-            cacheSize: 100
+            cacheSize: 60
         };
     }
 
@@ -186,7 +186,8 @@ export class SubscriptionManager extends RE6Module {
                         await this.pushSettings("cacheSize", parseInt(data));
                     }
                 ),
-                Form.div("Number between 10 and 200", "column"),
+                Form.spacer("column"),
+                Form.div(`<div class="unmargin">Number of items kept in the update cache. Must be at least 10, but no more than 200. Large values may lead to performance drops.</div>`, "mid"),
             ]),
 
             // Status and Controls
