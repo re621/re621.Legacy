@@ -9,20 +9,22 @@ const core = require("@actions/core");
             package: package.name + "/dnp",
             version: getBuildTime()
         },
-        data: {}
+        data: []
     };
 
     const dnp = await getDnp();
     dnp.forEach((entry) => {
-        parsedData["data"][entry["antecedent_name"]] = {
-            text: entry["reason"],
-            date: entry["created_at"],
-        }
+        parsedData["data"].push(entry["antecedent_name"]);
     });
 
-    if (fs.existsSync("./dist/avoid-posting.json")) {
-        let oldList = Object.keys(JSON.parse(fs.readFileSync("./dist/avoid-posting.json")).data),
-            newList = Object.keys(parsedData.data);
+    if (fs.existsSync("./dist/avoid-posting.v2.js")) {
+        const oldData = fs.readFileSync("./dist/avoid-posting.v2.js").toString()
+            .replace(/^fetchDNP\(/g, "")
+            .replace(/\);\n?$/g, "");
+        console.log(oldData);
+
+        let oldList = JSON.parse(oldData).data,
+            newList = parsedData.data;
 
         let added = newList.filter(n => !oldList.includes(n)),
             removed = oldList.filter(n => !newList.includes(n));
@@ -34,7 +36,12 @@ const core = require("@actions/core");
         if (changelog != "") core.setOutput("changelog", changelog);
     }
 
-    fs.writeFileSync("./dist/avoid-posting.json", JSON.stringify(parsedData, null, 4) + "\n");
+    fs.writeFileSync(
+        "./dist/avoid-posting.v2.js",
+        "fetchDNP(" +
+        JSON.stringify(parsedData, null, 4) +
+        ");\n"
+    );
 
 })();
 
