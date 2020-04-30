@@ -76,8 +76,11 @@ export class DomUtilities {
      */
     private static async addStylesheets(): Promise<any> {
         return XM.Connect.getResourceText("re621_css").then(
-            (css) => { return Promise.resolve(DomUtilities.addStyle(css)); },
-            () => { return Promise.reject(); }
+            (css) => {
+                const stylesheet = DomUtilities.addStyle(css);
+                $(() => { stylesheet.appendTo("head"); });
+                return Promise.resolve(stylesheet);
+            }, () => { return Promise.reject(); }
         )
     }
 
