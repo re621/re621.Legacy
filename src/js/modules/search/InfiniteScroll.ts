@@ -36,7 +36,10 @@ export class InfiniteScroll extends RE6Module {
      * @returns Default settings
      */
     protected getDefaultSettings(): Settings {
-        return { enabled: true };
+        return {
+            enabled: true,
+            keepHistory: false,
+        };
     }
 
     /**
@@ -64,7 +67,11 @@ export class InfiniteScroll extends RE6Module {
 
         this.currentQuery = Page.getQueryParameter("tags") !== null ? Page.getQueryParameter("tags") : "";
 
-        this.currentPage = parseInt(Page.getQueryParameter("xpage")) || 1;
+        const keepHistory = this.fetchSettings("keepHistory");
+
+        if (keepHistory) this.currentPage = parseInt(Page.getQueryParameter("xpage")) || 1;
+        else this.currentPage = parseInt(Page.getQueryParameter("page")) || 1;
+
         this.isInProgress = false;
         this.pagesLeft = true;
 
@@ -72,16 +79,18 @@ export class InfiniteScroll extends RE6Module {
         // while the layout is still changing
         $(async () => {
             // Load previous result pages on document load
-            let processingPage = 2;
-            while (processingPage <= this.currentPage) {
-                await this.loadPage(processingPage, {
-                    scrollToPage: true,
-                    lazyload: false,
-                });
-                processingPage++;
-            }
+            if (keepHistory) {
+                let processingPage = 2;
+                while (processingPage <= this.currentPage) {
+                    await this.loadPage(processingPage, {
+                        scrollToPage: true,
+                        lazyload: false,
+                    });
+                    processingPage++;
+                }
 
-            $("img.later-lazyload").removeClass("later-lazyload").addClass("lazyload");
+                $("img.later-lazyload").removeClass("later-lazyload").addClass("lazyload");
+            }
 
             // Load the next result page when scrolled to the bottom
             let timer: number;
@@ -110,7 +119,7 @@ export class InfiniteScroll extends RE6Module {
 
         const pageLoaded = await this.loadPage(this.currentPage + 1);
         if (pageLoaded) {
-            Page.setQueryParameter("xpage", (this.currentPage + 1).toString());
+            Page.setQueryParameter((this.fetchSettings("keepHistory") ? "x" : "") + "page", (this.currentPage + 1).toString());
             this.currentPage++;
             this.$postContainer.trigger("re621.infiniteScroll.pageLoad");
         }
@@ -130,10 +139,12 @@ export class InfiniteScroll extends RE6Module {
             return Promise.resolve(false);
         }
 
+        const keepHistory = this.fetchSettings("keepHistory");
+
         $("<a>")
             .attr({
-                "href": document.location.href,
-                "id": "xpage-link-" + page
+                "href": document.location.href + "#" + (keepHistory ? "x" : "") + "page-link-" + page,
+                "id": (keepHistory ? "x" : "") + "page-link-" + page
             })
             .addClass("instantsearch-seperator")
             .html("<h2>Page: " + page + "</h2>")
@@ -141,7 +152,7 @@ export class InfiniteScroll extends RE6Module {
 
         if (options.scrollToPage) {
             $([document.documentElement, document.body]).animate({
-                scrollTop: $("a#xpage-link-" + page).offset().top
+                scrollTop: $("a#" + (keepHistory ? "x" : "") + "page-link-" + page).offset().top
             }, '0');
         }
 

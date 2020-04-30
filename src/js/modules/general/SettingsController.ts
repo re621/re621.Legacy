@@ -16,6 +16,7 @@ import { PoolNavigator } from "../post/PoolNavigator";
 import { PostViewer } from "../post/PostViewer";
 import { TitleCustomizer } from "../post/TitleCustomizer";
 import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
+import { InfiniteScroll } from "../search/InfiniteScroll";
 import { MassDownloader } from "../search/MassDownloader";
 import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } from "../search/ThumbnailsEnhancer";
 import { ForumSubscriptions } from "../subscriptions/ForumSubscriptions";
@@ -136,6 +137,7 @@ export class SettingsController extends RE6Module {
             postViewer = ModuleController.getWithType<PostViewer>(PostViewer),
             blacklistEnhancer = ModuleController.getWithType<BlacklistEnhancer>(BlacklistEnhancer),
             imageScaler = ModuleController.getWithType<ImageScaler>(ImageScaler),
+            infiniteScroll = ModuleController.getWithType<InfiniteScroll>(InfiniteScroll),
             thumbnailEnhancer = ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer);
 
         return new Form({ id: "settings-general", columns: 3, parent: "div#modal-container" }, [
@@ -349,6 +351,26 @@ export class SettingsController extends RE6Module {
                 Form.hr(),
             ]),
 
+            // Infinite Scroll
+            Form.section({ id: "infscroll", columns: 3 }, [
+                Form.header("Infinite Scroll"),
+                Form.checkbox(
+                    "votefavorite", infiniteScroll.fetchSettings("keepHistory"), "Preserve history", "column",
+                    async (event, data) => { await infiniteScroll.pushSettings("keepHistory", data); }
+                ),
+                Form.div(`If enabled, will load all result pages up to the current one.`, "mid"),
+
+                Form.spacer("column"),
+                Form.div(`
+                    <div class="unmargin">
+                        For example, when loading page 3, pages 1 and 2 will be loaded as well.<br />
+                        <b>Requires a page reload</b>
+                    </div>`,
+                    "mid"),
+
+                Form.hr(),
+            ]),
+
             // Actions
             Form.section({ id: "actions", columns: 3 }, [
                 Form.header("Actions"),
@@ -365,10 +387,11 @@ export class SettingsController extends RE6Module {
                     "collapse-tag-cats", miscellaneous.fetchSettings("collapseCategories"), "Collapse tag categories", "column",
                     async (event, data) => { await miscellaneous.pushSettings("collapseCategories", data); }
                 ),
+
                 Form.checkbox(
                     "quickadd", blacklistEnhancer.fetchSettings("quickaddTags"), "Click X to add tag to blacklist", "column",
                     async (event, data) => { await blacklistEnhancer.pushSettings("quickaddTags", data); }),
-                Form.spacer("column"),
+                Form.spacer("mid"),
 
             ]),
 
