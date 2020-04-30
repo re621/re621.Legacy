@@ -167,6 +167,8 @@ export class SubscriptionManager extends RE6Module {
             const now = new Date().getTime();
             $("span#subscriptions-lastupdate").html(getLastUpdateText(now));
             $("span#subscriptions-nextupdate").html(getNextUpdateText(now));
+
+            $("i#subscription-action-update").toggleClass("fa-spin", SubscriptionManager.updateInProgress);
         });
 
         const form = new Form({ id: "subscriptions-controls", columns: 2, parent: "div#modal-container" }, [
@@ -197,7 +199,7 @@ export class SubscriptionManager extends RE6Module {
                 Form.div($("<span>").attr("id", "subscriptions-lastupdate").html(getLastUpdateText(lastUpdate)), "mid", "Last Update:"),
                 Form.div($("<span>").attr("id", "subscriptions-nextupdate").html(getNextUpdateText(lastUpdate)), "mid", "Next Update:"),
                 Form.button(
-                    "triggerupdate", "Manual Update", undefined, "column", async () => {
+                    "triggerupdate", `<i class="fas fa-sync-alt fa-xs fa-spin" id="subscription-action-update"></i> Manual Update`, undefined, "column", () => {
                         if (SubscriptionManager.updateInProgress) {
                             Danbooru.notice("Update is already in progress");
                             return;
@@ -206,14 +208,17 @@ export class SubscriptionManager extends RE6Module {
                         SubscriptionManager.updateInProgress = true;
                         $(document).trigger("re621.subscription.update");
 
-                        const lastUpdate = await this.fetchSettings("lastUpdate", true),
-                            updateThreads: Promise<boolean>[] = [];
-                        this.subscriptions.forEach(async (subscription) => {
-                            await subscription.instance.refreshSettings();
-                            subscription.content[0].innerHTML = "";
-                            updateThreads.push(this.initSubscription(subscription, true, lastUpdate));
-                        });
-                        Promise.all(updateThreads).then(() => {
+                        this.fetchSettings("lastUpdate", true).then((lastUpdate) => {
+                            const updateThreads: Promise<boolean>[] = [];
+                            this.subscriptions.forEach(async (subscription) => {
+                                updateThreads.push(new Promise(async (resolve) => {
+                                    await subscription.instance.refreshSettings();
+                                    subscription.content[0].innerHTML = "";
+                                    resolve(await this.initSubscription(subscription, true, lastUpdate));
+                                }));
+                            });
+                            return Promise.all(updateThreads);
+                        }).then(() => {
                             SubscriptionManager.updateInProgress = false;
                             $(document).trigger("re621.subscription.update");
                         });

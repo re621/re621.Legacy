@@ -771,7 +771,7 @@ export class Form {
      * @param stretch Column span
      * @param onChange Input change callback
      */
-    public static button(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
+    public static button(id: string, value: string | JQuery<HTMLElement> = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
         return this.make("button", id, label, value, stretch, undefined, undefined, undefined, onChange);
     }
 
