@@ -187,6 +187,14 @@ export class TinyAlias extends RE6Module {
             this.$infoText
                 .html("Tag has already been added")
                 .attr("data-state", "error");
+
+            // Looking for the wiki page
+            E621.Wiki.get<APIWikiPage>({ "search[title]": encodeURIComponent(tag) }, 500).then((data) => {
+                const wikiPage = data[0];
+                if (wikiPage !== undefined && wikiPage.title === tag)
+                    this.$infoText.append(` <a href="/wiki_pages/${wikiPage.id}">wiki</a>`);
+            });
+
             return;
         }
 
