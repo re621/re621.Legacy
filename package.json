@@ -11,8 +11,11 @@
     ],
     "main": "./build/script.user.js",
     "scripts": {
-        "build:prod": "npm-run-all compile-typescript:prod compile-sass userscript:prod extension:prod extension-archive",
-        "build:dev": "npm-run-all compile-typescript:dev compile-sass userscript:dev extension:dev",
+        "build:prod": "npm-run-all compile:prod compose:prod",
+        "build:dev": "npm-run-all compile:dev compose:dev",
+
+        "compile:prod": "npm-run-all --parallel compile-typescript:prod compile-sass:prod",
+        "compile:dev": "npm-run-all --parallel compile-typescript:dev compile-sass:dev",
 
         "compile-typescript:prod": "npm-run-all eslint typescript browserify minify template clean",
         "compile-typescript:dev": "npm-run-all eslint typescript browserify template clean",
@@ -23,15 +26,24 @@
         "template": "node ./bin/common.js",
         "clean": "rimraf ./build/tsc-temp/",
 
-        "compile-sass": "npm-run-all sass autoprefixer",
-        "sass": "sass ./src/scss/style.scss ./build/style.min.css --no-source-map --style compressed",
-        "autoprefixer": "postcss ./build/style.min.css --no-map --use autoprefixer -r",
+        "compile-sass:prod": "npm-run-all sass:prod autoprefixer",
+        "compile-sass:dev": "npm-run-all sass:dev autoprefixer",
+        "sass:prod": "sass ./src/scss/style.scss ./build/style.css --no-source-map --style compressed",
+        "sass:dev": "sass ./src/scss/style.scss ./build/style.css --no-source-map --style expanded",
+        "autoprefixer": "postcss ./build/style.css --no-map --use autoprefixer -r",
 
+        "compose:prod": "npm-run-all --parallel compose-userscript:prod compose-extension:prod",
+        "compose:dev": "npm-run-all --parallel compose-userscript:dev compose-extension:dev",
+
+        "compose-userscript:prod": "npm-run-all userscript:prod",
+        "compose-userscript:dev": "npm-run-all userscript:dev",
         "userscript:prod": "node ./bin/userscript.js prod",
         "userscript:dev": "node ./bin/userscript.js",
         "injector:chrome": "node ./bin/userscript.js injector chrome",
         "injector:firefox": "node ./bin/userscript.js injector firefox",
 
+        "compose-extension:prod": "npm-run-all extension:prod extension-archive",
+        "compose-extension:dev": "npm-run-all extension:dev",
         "extension:prod": "node ./bin/extension.js prod",
         "extension:dev": "node ./bin/extension.js",
         "extension-pack": "node ./bin/extension-pack.js",

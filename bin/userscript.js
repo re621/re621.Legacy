@@ -25,7 +25,7 @@ for (let [key, value] of Object.entries(headerData)) {
     }
 }
 
-fs.createReadStream("./build/style.min.css").pipe(fs.createWriteStream("./build/userscript/style.min.css"));
+fs.createReadStream("./build/style.css").pipe(fs.createWriteStream("./build/userscript/style.min.css"));
 
 switch (mode) {
     case "injector": {

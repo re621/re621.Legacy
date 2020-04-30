@@ -65,7 +65,7 @@ Promise.all(downloadQueue).then((resolved) => {
     manifest["content_scripts"][0]["js"].push("script.js");
 
     // Copy the stylesheet
-    fs.createReadStream("./build/style.min.css").pipe(fs.createWriteStream("./build/extension/src/style.min.css"));
+    fs.createReadStream("./build/style.css").pipe(fs.createWriteStream("./build/extension/src/style.min.css"));
 
     // Copy the background page
     fs.createReadStream("./bin/extension-background.js").pipe(fs.createWriteStream("./build/extension/src/background.js"));
