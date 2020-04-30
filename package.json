@@ -51,7 +51,7 @@
     "homepage": "https://re621.github.io",
     "github": "https://github.com/re621/re621",
     "dependencies": {
-        "jquery": "^3.4.1",
+        "jquery": "^3.5.0",
         "jquery-ui": "^1.12.1"
     },
     "devDependencies": {
