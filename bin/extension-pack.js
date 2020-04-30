@@ -14,7 +14,7 @@ const crx = new ChromeExtension({
     privateKey: privateKey
 });
 
-crx.load("./build/extension")
+crx.load("./build/extension/src")
     .then(crx => crx.pack())
     .then(crxBuffer => {
         //    const updateXML = crx.generateUpdateXML()
