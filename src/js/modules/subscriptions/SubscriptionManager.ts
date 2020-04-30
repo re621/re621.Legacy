@@ -379,8 +379,8 @@ export class SubscriptionManager extends RE6Module {
             const $subscribeButton = instance.makeSubscribeButton();
             const $unsubscribeButton = instance.makeUnsubscribeButton();
 
-            if (subscriptionData[id] === undefined) $unsubscribeButton.addClass("hidden");
-            else $subscribeButton.addClass("hidden");
+            if (subscriptionData[id] === undefined) $unsubscribeButton.addClass("display-none");
+            else $subscribeButton.addClass("display-none");
 
             instance.insertButton($element, $subscribeButton);
             instance.insertButton($element, $unsubscribeButton);
@@ -406,8 +406,8 @@ export class SubscriptionManager extends RE6Module {
                 subscriptionData[id] = { name: instance.getSubscriberName($element), };
             } else delete subscriptionData[id];
 
-            $subscribeButton.toggleClass("hidden");
-            $unsubscribeButton.toggleClass("hidden");
+            $subscribeButton.toggleClass("display-none");
+            $unsubscribeButton.toggleClass("display-none");
 
             instance.pushSettings("data", subscriptionData);
             return Promise.resolve(true);

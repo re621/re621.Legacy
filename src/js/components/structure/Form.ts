@@ -664,7 +664,7 @@ export class Form {
             .appendTo($form);
 
         const $input = $("<input>")
-            .addClass("display-hidden")
+            .addClass("display-none")
             .attr("id", this.formID + "-" + element.id + "-input")
             .val(element.value)
             .appendTo($inputContainer);
