@@ -2,7 +2,7 @@
     "compilerOptions": {
         "module": "CommonJS",
         "moduleResolution": "node",
-        "target": "ES6",
+        "target": "ES2019",
         "outDir": "./build/tsc-temp/",
         "rootDir": "./src/",
         "removeComments": true,

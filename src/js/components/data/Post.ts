@@ -43,21 +43,19 @@ export class Post {
      */
     public static fetchPosts(): Post[] {
         if (this.initalPosts === undefined) {
-            const imageContainer = $("#image-container");
+            const imageContainer = $("section#image-container");
             this.initalPosts = [];
             if (imageContainer.length === 0) {
-                $("#posts-container").children(".post-preview").each((index, element) => {
-                    Post.initalPosts.push(new Post($(element)));
-                });
-            } else {
-                this.initalPosts.push(new ViewingPost(imageContainer));
-            }
-            $(".post-thumbnail").each((index, element) => {
-                this.postThumbnails.push(new Post($(element)));
-            });
+                const previews = $("div#posts-container").children(".post-preview").get();
+                for (const preview of previews) this.initalPosts.push(new Post($(preview)));
+            } else this.initalPosts.push(new ViewingPost(imageContainer));
+
+            // What does this do? Nobody knows.
+            for (const thumbnail of $(".post-thumbnail").get())
+                this.postThumbnails.push(new Post($(thumbnail)));
         }
 
-        return this.initalPosts.concat(this.addedPosts).concat(this.postThumbnails);
+        return [...this.initalPosts, ...this.addedPosts, ...this.postThumbnails];
     }
 
     /**

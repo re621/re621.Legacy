@@ -172,7 +172,7 @@ export class ThumbnailEnhancer extends RE6Module {
     public static async modifyThumbnail($article: JQuery<HTMLElement>, upscaleMode = ThumbnailPerformanceMode.Hover, clickAction = ThumbnailClickAction.NewTab): Promise<void> {
 
         /* Create the structure */
-        const $link = $article.find("a.preview-box"),
+        const $link = $article.find<HTMLElement>("a.preview-box"),
             postID = parseInt($article.attr("data-id")),
             $picture = $article.find("picture"),
             $img = $article.find("img"),

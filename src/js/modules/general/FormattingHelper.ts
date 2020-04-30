@@ -163,7 +163,7 @@ class FormattingHelper {
 
         this.$form = this.$container.parents("form.simple_form").first();
         this.$textarea = this.$container.find("textarea");
-        this.$preview = this.$container.find("div.dtext-preview");
+        this.$preview = this.$container.find<HTMLElement>("div.dtext-preview");
 
         this.createToolbar();
         this.createButtonDrawer();

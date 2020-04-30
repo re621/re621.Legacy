@@ -357,7 +357,7 @@ export class HeaderCustomizer extends RE6Module {
     }
 
     private openTabNum(event, key: string): void {
-        const tabs = ModuleController.getWithType<HeaderCustomizer>(HeaderCustomizer).$menu.find("li > a");
+        const tabs = ModuleController.getWithType<HeaderCustomizer>(HeaderCustomizer).$menu.find<HTMLElement>("li > a");
         if (parseInt(key) > tabs.length) return;
         tabs[parseInt(key) - 1].click();
     }

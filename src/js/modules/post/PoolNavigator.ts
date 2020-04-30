@@ -62,7 +62,7 @@ export class PoolNavigator extends RE6Module {
         const navbars = poolNavigator.navbars,
             active = poolNavigator.activeNav;
         if (navbars.length == 0) return;
-        const button = navbars[active].element.find("a.next").first()[0];
+        const button = navbars[active].element.find<HTMLElement>("a.next").first()[0];
         if (button === undefined) return;
         button.click();
     }
@@ -73,7 +73,7 @@ export class PoolNavigator extends RE6Module {
         const navbars = poolNavigator.navbars,
             active = poolNavigator.activeNav;
         if (navbars.length == 0) return;
-        const button = navbars[active].element.find("a.prev").first()[0];
+        const button = navbars[active].element.find<HTMLElement>("a.prev").first()[0];
         if (button === undefined) return;
         button.click();
     }

@@ -437,7 +437,7 @@ export class SubscriptionManager extends RE6Module {
 
         const clickAction = ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer).fetchSettings("clickAction");
 
-        const previewThumbs = sub.content.find("div.subscription-update-preview > a").get();
+        const previewThumbs = sub.content.find<HTMLElement>("div.subscription-update-preview > a").get();
         for (const element of previewThumbs) {
             const $link = $(element);
             let dbclickTimer: number;

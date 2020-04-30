@@ -228,7 +228,7 @@ export class RE6Module {
      * @param hotkeys Hotkey to register
      */
     protected registerHotkeys(...hotkeys: Hotkey[]): void {
-        this.hotkeys = this.hotkeys.concat(hotkeys);
+        this.hotkeys.push(...hotkeys);
         this.resetHotkeys();
     }
 
