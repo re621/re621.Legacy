@@ -93,8 +93,6 @@ export class Miscellaneous extends RE6Module {
 
         // Double-clicking avatars
         this.handleAvatarClick(this.fetchSettings("avatarClick"));
-
-        this.registerHotkeys();
     }
 
     /** Emulates the clicking on "New Comment" link */
