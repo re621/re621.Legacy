@@ -29,16 +29,13 @@ jobs:
       run: npm run compile-typescript:prod
 
     - name: Compile SASS
-      run: npm run compile-sass
+      run: npm run compile-sass:prod
 
     - name: Build Userscript Files
-      run: npm run userscript:prod
+      run: npm run compose-userscript:prod
 
     - name: Build Extension Files
-      run: npm run extension:prod
-
-    - name: Package the Extension
-      run: npm run extension-archive
+      run: npm run compose-extension:prod
       
     - name: Create a Release
       uses: ncipollo/release-action@v1
