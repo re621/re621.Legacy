@@ -40,6 +40,7 @@ export class Hotkeys {
             const key = event.key
                 .toLowerCase()
                 .replace(/enter/g, "return")
+                .replace(/control/g, "ctrl")
                 .replace(/arrow/g, "");
             if (validKeys.indexOf(key) == -1) return;
             keys.push(key);
