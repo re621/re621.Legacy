@@ -1,7 +1,7 @@
 {
     "meta": {
         "package": "re621/dnp",
-        "version": "200420:2053"
+        "version": "200501:0303"
     },
     "data": {
         "7mii": {
@@ -491,6 +491,10 @@
         "ferniio": {
             "text": "on avoid posting list",
             "date": "2012-06-30T12:38:19.750-04:00"
+        },
+        "fetchmonkey": {
+            "text": "",
+            "date": "2020-04-29T10:46:46.040-04:00"
         },
         "ficus": {
             "text": "https://e621.net/takedown/show/7080",
