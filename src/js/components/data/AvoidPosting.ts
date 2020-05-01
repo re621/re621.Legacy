@@ -1,27 +1,49 @@
-import { XM } from "../api/XM";
+import { E621 } from "../api/E621";
+import { APITagImplication } from "../api/responses/APITagImplication";
 
 /**
  * Manages the Avoid Posted list
  */
 export class AvoidPosting {
 
-    private static cache: DNPList;
+    /* How often should the DNP cache be updated */
+    private static cacheLife = 24 * 60 * 60 * 1000; // daily
+
+    private static cache: string[];
+    private static cacheReady = false;
 
     /** Returns the cached DNP data. */
-    private static async getData(): Promise<DNPData> {
-        if (this.cache === undefined) this.cache = await XM.Connect.getResourceJSON<DNPList>("re621_dnp");
-        return Promise.resolve(this.cache.data);
-    }
+    private static async getCache(): Promise<string[]> {
+        // Cache has already been fetched
+        if (this.cacheReady) return Promise.resolve(this.cache);
 
-    /**
-     * Returns the DNP entry for the specified tag name.  
-     * If the tag is not on the list, returns undefined.
-     * @param name Tag name
-     */
-    public static async get(name: string): Promise<DNPDataEntry> {
-        return this.getData().then((data) => {
-            return Promise.resolve(data[name]);
-        });
+        // Cache has not been fetched, but a copy has been stored earlier
+        const storedCache = JSON.parse(window.localStorage.getItem("re621.dnp.cache") || `{ "expires": 0, "content": [] }`) as StoredCache;
+        if (storedCache.expires > new Date().getTime()) {
+            this.cache = storedCache.content;
+            this.cacheReady = true;
+            return Promise.resolve(this.cache);
+        }
+
+        // Cache does not exist, or has expired
+        this.cache = [];
+        let lookup: APITagImplication[], page = 1;
+        do {
+            lookup = await E621.TagImplications.get<APITagImplication>({ "search[consequent_name]": "avoid_posting", "limit": "320", "page": page });
+            lookup.forEach((entry) => { this.cache.push(entry["antecedent_name"]); })
+            page++;
+        } while (lookup.length === 320);
+
+        window.localStorage.setItem(
+            "re621.dnp.cache",
+            JSON.stringify({
+                "expires": (new Date().getTime() + this.cacheLife),
+                "content": this.cache,
+            })
+        );
+
+        this.cacheReady = true;
+        return Promise.resolve(this.cache);
     }
 
     /**
@@ -29,25 +51,14 @@ export class AvoidPosting {
      * @param name Tag name
      */
     public static async contains(name: string): Promise<boolean> {
-        return this.get(name).then((data) => {
-            return Promise.resolve(data !== undefined);
+        return this.getCache().then((cache) => {
+            return Promise.resolve(cache.includes(name));
         });
     }
 
 }
 
-interface DNPList {
-    meta: {
-        package: string;
-        version: string;
-    };
-    data: DNPData;
-}
-
-type DNPData = {
-    [prop: string]: DNPDataEntry;
-}
-
-interface DNPDataEntry {
-    reason: string;
+interface StoredCache {
+    expires: number;
+    content: string[];
 }

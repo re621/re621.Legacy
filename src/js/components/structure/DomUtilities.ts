@@ -5,8 +5,6 @@ import { Util } from "./Util";
 
 declare const GM;
 
-declare const fetchDNP;
-
 /**
  * StructureUtilities  
  * DOM changes that don't belong to any specific project
@@ -33,7 +31,6 @@ export class DomUtilities {
         try {
             const promises: Promise<any>[] = [];
             promises.push(DomUtilities.elementReady("head", DomUtilities.injectChromeScript));
-            promises.push(DomUtilities.elementReady("head", DomUtilities.loadDNPList));
             promises.push(DomUtilities.elementReady("body", DomUtilities.createThemes));
             promises.push(DomUtilities.elementReady("div#page", DomUtilities.createModalContainer));
             promises.push(DomUtilities.elementReady("menu.main", DomUtilities.createHeader));
@@ -85,17 +82,6 @@ export class DomUtilities {
                 return Promise.resolve(stylesheet);
             }, () => { return Promise.reject(); }
         )
-    }
-
-    private static loadDNPList(): Promise<any> {
-        return new Promise((resolve) => {
-            const script = $("<script>")
-                .attr("src", "https://cdn.jsdelivr.net/gh/re621/re621@master/dist/avoid-posting.v2.js")
-                .appendTo("head");
-
-            console.log(fetchDNP());
-            resolve(script);
-        });
     }
 
     /**
