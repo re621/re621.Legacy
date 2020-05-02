@@ -317,18 +317,28 @@ export class SettingsController extends RE6Module {
                     Form.checkbox("state-ribbons", thumbnailEnhancer.fetchSettings("ribbons"), "Status Ribbons", "column",
                         async (event, data) => {
                             await thumbnailEnhancer.pushSettings("ribbons", data);
-                            thumbnailEnhancer.toggleStatusRibbons(data);
+                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleStatusRibbons(data);
+
+                            $("input#advanced-state-relations").prop("disabled", !data);
+                            $("input#advanced-state-relations").parent().toggleClass("input-disabled", !data);
+                            $("div#advanced-state-ribbons-text").parent().toggleClass("input-disabled", !data);
                         }
                     ),
                     Form.div("Use corner ribbons instead of colored borders for flags", "mid"),
 
-                    Form.checkbox("state-relations", thumbnailEnhancer.fetchSettings("relRibbons"), "Relations Ribbons", "column",
+                    Form.checkbox(
+                        "state-relations", thumbnailEnhancer.fetchSettings("relRibbons"), "Relations Ribbons", "column",
                         async (event, data) => {
                             await thumbnailEnhancer.pushSettings("relRibbons", data);
-                            thumbnailEnhancer.toggleRelationRibbons(data);
-                        }
+                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleRelationRibbons(data);
+                        },
+                        (thumbnailEnhancer.fetchSettings("ribbons") ? undefined : "input-disabled")
                     ),
-                    Form.div("Display ribbons for parent/child relationships", "mid"),
+                    Form.div(
+                        "Display ribbons for parent/child relationships",
+                        "mid", undefined, "state-ribbons-text",
+                        (thumbnailEnhancer.fetchSettings("ribbons") ? undefined : "input-disabled")
+                    ),
                 ]),
 
 

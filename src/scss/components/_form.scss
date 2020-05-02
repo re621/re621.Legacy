@@ -92,11 +92,11 @@ form.grid-form {
             }
         }
 
+        // Button / Submit
         button {
             width: 100%;
             padding: 0 0.25rem;
             border-radius: 4px;
-            //    border: 1px solid transparent;
             height: 100%;
             min-height: 1.25rem;
         }
@@ -126,12 +126,14 @@ form.grid-form {
             }
         }
 
+        // Keybind Selector
         &.keyinput input[type=text] {
             text-transform: uppercase;
             font-family: monospace;
             font-size: 1.3em;
         }
 
+        // Icon Selector
         div.icon-picker {
             display: grid;
             grid-template-columns: repeat(auto-fit, 23px);
@@ -226,6 +228,15 @@ form.grid-form {
         hr {
             margin: 0;
             width: 100%;
+        }
+
+        // Disabled Inputs
+        &.input-disabled {
+
+            label,
+            div {
+                color: #666666;
+            }
         }
 
         // End of Input Container
