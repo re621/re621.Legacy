@@ -136,7 +136,8 @@ div#c-comments {
 
     article.post-preview img,
     div.post-preview img {
-        width: 150px;
+        max-width: 150px;
+        max-height: 250px;
     }
 }
 
