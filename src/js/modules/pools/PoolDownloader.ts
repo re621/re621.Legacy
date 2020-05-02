@@ -148,9 +148,10 @@ export class PoolDownloader extends RE6Module {
                 .html(`Fetching API data . . .`);
 
             const dataQueue: Promise<APIPost[]>[] = [];
-            Util.chunkArray(imageList, PoolDownloader.chunkSize).forEach((value) => {
-                dataQueue.push(E621.Posts.get<APIPost>({ tags: "id:" + value.join(",") }));
-            });
+            const resultPages = Math.ceil(imageList.length / 320);
+            for (let i = 1; i <= resultPages; i++) {
+                dataQueue.push(E621.Posts.get<APIPost>({ tags: "pool:" + pool.id, page: i, limit: 320 }));
+            }
 
             return Promise.all(dataQueue);
         }).then((dataChunks) => {
