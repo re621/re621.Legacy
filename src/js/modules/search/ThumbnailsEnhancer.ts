@@ -184,9 +184,7 @@ export class ThumbnailEnhancer extends RE6Module {
 
         // Image not wrapped in picture - usually on comment pages and the like
         let $picture = $article.find("picture");
-        console.log($picture.length);
         if ($picture.length == 0) $picture = $("<picture>").insertAfter($img).append($img);
-        console.log($picture);
 
         // Loading icon
         $("<div>")

@@ -8,7 +8,8 @@ div#page div#c-favorites div#posts {
     justify-content: space-between;
 }
 
-.post-preview {
+article.post-preview,
+div.post-preview {
     overflow: visible;
 
     box-shadow: none;
@@ -24,8 +25,9 @@ div#page div#c-favorites div#posts {
         box-shadow: 0px 0px 0px 5px #ffffff60;
     }
 
-    a.preview-box {
-        display: initial;
+    &>a.preview-box,
+    &>div.preview>a.preview-box {
+        display: inline-block;
         color: white;
 
         outline: 0;
@@ -88,7 +90,7 @@ div#page div#c-favorites div#posts {
             left: -2rem;
             top: 0;
             bottom: 0;
-            grid-template-rows: repeat(auto-fill, 25%);
+            grid-template-rows: repeat(auto-fill, minmax(25%, 2rem));
             margin-top: 0.25rem;
             z-index: 90;
 
@@ -113,7 +115,8 @@ div#page[data-thumb-crop=true] {
     div#c-favorites div#posts {
         grid-template-columns: repeat(auto-fill, var(--thumbnail-size, 150px));
 
-        .post-preview {
+        article.post-preview,
+        div.post-preview {
             margin: 0 0 1rem;
             height: auto;
             width: var(--thumbnail-size, 150px);
@@ -131,7 +134,8 @@ div#page[data-thumb-crop=true] {
 
 div#c-comments {
 
-    .post-preview img {
+    article.post-preview img,
+    div.post-preview img {
         width: 150px;
     }
 }
@@ -227,13 +231,18 @@ div#page {
         }
 
         // disable vanilla borders
-        .post-preview.post-status-flagged img,
-        .post-preview.post-status-pending img,
-        .post-preview.post-status-deleted img,
-        .post-preview.post-status-has-parent img,
-        .post-preview.post-status-has-children img {
-            border: 0;
+        article.post-preview,
+        div.post-preview {
+
+            &.post-status-flagged img,
+            &.post-status-pending img,
+            &.post-status-deleted img,
+            &.post-status-has-parent img,
+            &.post-status-has-children img {
+                border: 0;
+            }
         }
+
     }
 
     &:not([data-thumb-rel-ribbons=true]) {
@@ -247,8 +256,11 @@ div#page {
 // Voting Buttons
 div#page[data-thumb-vote=true] {
 
-    .post-preview:hover {
-        &>a.preview-box {
+    article.post-preview:hover,
+    div.post-preview:hover {
+
+        &>a.preview-box,
+        &>div.preview>a.preview-box {
             div.preview-voting {
                 display: grid;
             }
@@ -264,11 +276,13 @@ div#page div#a-popular {
     &[data-thumb-zoom=true] div#posts-container,
     &[data-thumb-zoom=true] div#c-favorites div#posts {
 
-        .post-preview.loaded:hover {
+        article.post-preview.loaded:hover,
+        div.post-preview.loaded:hover {
             position: relative;
             overflow: visible;
 
-            &>a.preview-box {
+            &>a.preview-box,
+            &>div.preview>a.preview-box {
                 transform: translate(-50%, -50%);
 
                 position: absolute;
