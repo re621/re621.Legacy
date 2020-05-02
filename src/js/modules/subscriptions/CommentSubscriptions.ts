@@ -11,8 +11,6 @@ import { SubscriptionSettings, UpdateContent, UpdateData } from "./SubscriptionM
 
 export class CommentSubscriptions extends RE6Module implements Subscription {
 
-    public maxSubscriptionsCap = 100;
-
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
@@ -82,20 +80,31 @@ export class CommentSubscriptions extends RE6Module implements Subscription {
 
     // ===== Updates =====
 
+    public subBatchSize = 100;
+
     public async getUpdatedEntries(lastUpdate: number, status: JQuery<HTMLElement>): Promise<UpdateData> {
         const results: UpdateData = {};
 
         status.append(`<div>. . . retreiving settings</div>`);
-        const commentData: SubscriptionSettings = await this.fetchSettings("data", true);
-        if (Object.keys(commentData).length === 0) return results;
+        const storedSubs: SubscriptionSettings = await this.fetchSettings("data", true);
+        if (Object.keys(storedSubs).length === 0) return results;
 
         status.append(`<div>. . . sending an API request</div>`);
 
         status.append(`<div>&nbsp; &nbsp; &nbsp; fetching posts</div>`);
-        const postsJSON = await E621.Posts.get<APIPost>({ "tags": "id:" + Object.keys(commentData).join(",") }, 500);
+        const storedSubChunks = Util.chunkArray(Object.keys(storedSubs), this.subBatchSize);
+        const postsJSON: APIPost[] = [];
+        for (const [index, chunk] of storedSubChunks.entries()) {
+            if (storedSubChunks.length > 1) status.append(`<div>&nbsp; &nbsp; &nbsp; - processing batch #${index}</div>`);
+            postsJSON.push(...await E621.Posts.get<APIPost>({ "tags": "id:" + chunk.join(",") }, 500));
+        }
 
         status.append(`<div>&nbsp; &nbsp; &nbsp; fetching comments</div>`);
-        const commentsJSON = await E621.Comments.get<APIComment>({ "group_by": "comment", "search[post_id]": Object.keys(commentData).join(",") }, 500);
+        const commentsJSON: APIComment[] = [];
+        for (const [index, chunk] of storedSubChunks.entries()) {
+            if (storedSubChunks.length > 1) status.append(`<div>&nbsp; &nbsp; &nbsp; - processing batch #${index}</div>`);
+            commentsJSON.push(...await E621.Comments.get<APIComment>({ "group_by": "comment", "search[post_id]": chunk.join(",") }, 500));
+        }
 
         status.append(`<div>. . . processing data</div>`);
         // Put post data into a map for easier retrieval
@@ -115,11 +124,11 @@ export class CommentSubscriptions extends RE6Module implements Subscription {
                 results[new Date(comment.created_at).getTime()] = await this.formatCommentUpdate(comment, posts.get(comment.post_id));
 
             // Fetch and update the saved forum thread name
-            commentData[comment.post_id].name = "#" + comment.post_id;
+            storedSubs[comment.post_id].name = "#" + comment.post_id;
         }
 
         status.append(`<div>. . . outputting results</div>`);
-        await this.pushSettings("data", commentData);
+        await this.pushSettings("data", storedSubs);
         return results;
     }
 

@@ -3,12 +3,11 @@ import { APIForumTopic } from "../../components/api/responses/APIForumTopic";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Util } from "../../components/structure/Util";
 import { Subscription, UpdateActions } from "./Subscription";
 import { SubscriptionSettings, UpdateContent, UpdateData } from "./SubscriptionManager";
 
 export class ForumSubscriptions extends RE6Module implements Subscription {
-
-    public maxSubscriptionsCap = 100;
 
     protected getDefaultSettings(): Settings {
         return {
@@ -75,28 +74,35 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
 
     // ===== Updates =====
 
+    public subBatchSize = 100;
+
     public async getUpdatedEntries(lastUpdate: number, status: JQuery<HTMLElement>): Promise<UpdateData> {
         const results: UpdateData = {};
 
         status.append(`<div>. . . retreiving settings</div>`);
-        const forumData: SubscriptionSettings = await this.fetchSettings("data", true);
-        if (Object.keys(forumData).length === 0) return results;
+        const storedSubs: SubscriptionSettings = await this.fetchSettings("data", true);
+        if (Object.keys(storedSubs).length === 0) return results;
 
         status.append(`<div>. . . sending an API request</div>`);
-        const forumsJson = await E621.ForumTopics.get<APIForumTopic>({ "search[id]": Object.keys(forumData).join(",") }, 500);
+        const storedSubChunks = Util.chunkArray(Object.keys(storedSubs), this.subBatchSize);
+        const apiData: APIForumTopic[] = [];
+        for (const [index, chunk] of storedSubChunks.entries()) {
+            if (storedSubChunks.length > 1) status.append(`<div>&nbsp; &nbsp; &nbsp; - processing batch #${index}</div>`);
+            apiData.push(...await E621.Pools.get<APIForumTopic>({ "search[id]": chunk.join(",") }, 500));
+        }
 
         status.append(`<div>. . . formatting output/div>`);
-        for (const forumJson of forumsJson) {
+        for (const forumJson of apiData) {
             if (new Date(forumJson.updated_at).getTime() > lastUpdate && forumJson.updater_id !== User.getUserID()) {
                 results[new Date(forumJson.updated_at).getTime()] = await this.formatForumUpdate(forumJson);
             }
 
             // Fetch and update the saved forum thread name
-            forumData[forumJson.id].name = forumJson.title.replace(/_/g, " ");
+            storedSubs[forumJson.id].name = forumJson.title.replace(/_/g, " ");
         }
 
         status.append(`<div>. . . outputting results</div>`);
-        await this.pushSettings("data", forumData);
+        await this.pushSettings("data", storedSubs);
         return results;
     }
 

@@ -2,12 +2,11 @@ import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { Post } from "../../components/data/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Util } from "../../components/structure/Util";
 import { Subscription, UpdateActions } from "./Subscription";
 import { SubscriptionSettings, UpdateContent, UpdateData } from "./SubscriptionManager";
 
 export class TagSubscriptions extends RE6Module implements Subscription {
-
-    public maxSubscriptionsCap = 40;
 
     protected getDefaultSettings(): Settings {
         return {
@@ -80,18 +79,25 @@ export class TagSubscriptions extends RE6Module implements Subscription {
 
     // ===== Updates =====
 
+    public subBatchSize = 40;
+
     public async getUpdatedEntries(lastUpdate: number, status: JQuery<HTMLElement>): Promise<UpdateData> {
         const results: UpdateData = {};
 
         status.append(`<div>. . . retreiving settings</div>`);
-        const tagData: SubscriptionSettings = await this.fetchSettings("data", true);
-        if (Object.keys(tagData).length === 0) return results;
+        const storedSubs: SubscriptionSettings = await this.fetchSettings("data", true);
+        if (Object.keys(storedSubs).length === 0) return results;
 
         status.append(`<div>. . . sending an API request</div>`);
-        const postsJSON = await E621.Posts.get<APIPost>({ "tags": Object.keys(tagData).map(el => "~" + el).join("+") }, 500);
+        const storedSubChunks = Util.chunkArray(Object.keys(storedSubs), this.subBatchSize);
+        const apiData: APIPost[] = [];
+        for (const [index, chunk] of storedSubChunks.entries()) {
+            if (storedSubChunks.length > 1) status.append(`<div>&nbsp; &nbsp; &nbsp; - processing batch #${index}</div>`);
+            apiData.push(...await E621.Posts.get<APIPost>({ "tags": chunk.map(el => "~" + el).join("+") }, 500));
+        }
 
         status.append(`<div>. . . formatting output/div>`);
-        for (const post of postsJSON) {
+        for (const post of apiData) {
             const postObject = new Post(post);
             if (new Date(post.created_at).getTime() > lastUpdate && !postObject.matchesBlacklist()) {
                 results[new Date(post.created_at).getTime()] = await this.formatPostUpdate(post);
@@ -99,7 +105,7 @@ export class TagSubscriptions extends RE6Module implements Subscription {
         }
 
         status.append(`<div>. . . outputting results</div>`);
-        await this.pushSettings("data", tagData);
+        await this.pushSettings("data", storedSubs);
         return results;
     }
 

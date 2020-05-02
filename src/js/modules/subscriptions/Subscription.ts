@@ -3,8 +3,6 @@ import { UpdateContent, UpdateData } from "./SubscriptionManager";
 
 export interface Subscription extends RE6Module {
 
-    maxSubscriptionsCap: number;
-
     /**
      * Parameter that contains various functions used to format subscription updates properly.  
      * @see UpdateActions
@@ -42,6 +40,13 @@ export interface Subscription extends RE6Module {
     getSubscriberName($element: JQuery<HTMLElement>): string;
 
     // ===== Updates =====
+
+    /**
+     * The maximum size of an API request batch.  
+     * For subscriptions that are retrieved via numeric ID, this value is probably 100.  
+     * For those that are retrieved by a string name, this value is (likely) set to 40.  
+     */
+    subBatchSize: number;
 
     /**
      * Returns all entries which are considered to be updated,

@@ -441,13 +441,9 @@ export class SubscriptionManager extends RE6Module {
 
         async function processSubscribe(subscribe: boolean, id: string, $subscribeButton: JQuery<HTMLElement>, $unsubscribeButton: JQuery<HTMLElement>, $element: JQuery<HTMLElement>): Promise<boolean> {
             subscriptionData = await instance.fetchSettings("data", true);
-            if (subscribe) {
-                if (Object.keys(subscriptionData).length >= instance.maxSubscriptionsCap) {
-                    Danbooru.error("Could not subscribe - subscription cap reached (" + instance.maxSubscriptionsCap + ")");
-                    return Promise.resolve(false);
-                }
+            if (subscribe)
                 subscriptionData[id] = { name: instance.getSubscriberName($element), };
-            } else delete subscriptionData[id];
+            else delete subscriptionData[id];
 
             $subscribeButton.toggleClass("display-none");
             $unsubscribeButton.toggleClass("display-none");
@@ -764,7 +760,7 @@ export interface UpdateContent {
 }
 
 export interface SubscriptionSettings {
-    [id: number]: SubscriptionSettingsData;
+    [id: string]: SubscriptionSettingsData;
 }
 
 interface SubscriptionSettingsData {

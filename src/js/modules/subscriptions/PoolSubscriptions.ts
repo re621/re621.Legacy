@@ -4,12 +4,11 @@ import { APIPost } from "../../components/api/responses/APIPost";
 import { Page } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Util } from "../../components/structure/Util";
 import { Subscription, UpdateActions } from "./Subscription";
 import { SubscriptionSettings, UpdateContent, UpdateData } from "./SubscriptionManager";
 
 export class PoolSubscriptions extends RE6Module implements Subscription {
-
-    public maxSubscriptionsCap = 100;
 
     protected getDefaultSettings(): Settings {
         return {
@@ -78,36 +77,43 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
 
     // ===== Updates =====
 
+    public subBatchSize = 100;
+
     public async getUpdatedEntries(lastUpdate: number, status: JQuery<HTMLElement>): Promise<UpdateData> {
         const results: UpdateData = {};
 
         status.append(`<div>. . . retreiving settings</div>`);
-        const poolData: SubscriptionSettings = await this.fetchSettings("data", true);
-        if (Object.keys(poolData).length === 0) return results;
+        const storedSubs: SubscriptionSettings = await this.fetchSettings("data", true);
+        if (Object.keys(storedSubs).length === 0) return results;
 
         status.append(`<div>. . . sending an API request</div>`);
-        const poolsJson: APIPool[] = await E621.Pools.get<APIPool>({ "search[id]": Object.keys(poolData).join(",") }, 500);
+        const storedSubChunks = Util.chunkArray(Object.keys(storedSubs), this.subBatchSize);
+        const apiData: APIPool[] = [];
+        for (const [index, chunk] of storedSubChunks.entries()) {
+            if (storedSubChunks.length > 1) status.append(`<div>&nbsp; &nbsp; &nbsp; - processing batch #${index}</div>`);
+            apiData.push(...await E621.Pools.get<APIPool>({ "search[id]": chunk.join(",") }, 500));
+        }
 
         status.append(`<div>. . . formatting output/div>`);
-        for (const poolJson of poolsJson) {
-            if (poolData[poolJson.id].lastId === undefined || !poolJson.post_ids.includes(poolData[poolJson.id].lastId)) {
-                poolData[poolJson.id].lastId = poolJson.post_ids[poolJson.post_ids.length - 1];
+        for (const poolJson of apiData) {
+            if (storedSubs[poolJson.id].lastId === undefined || !poolJson.post_ids.includes(storedSubs[poolJson.id].lastId)) {
+                storedSubs[poolJson.id].lastId = poolJson.post_ids[poolJson.post_ids.length - 1];
             }
 
             // There is only an update if there are posts after the previous last post id
             // If the post id isn't there anymore (supperior version added) show an update
-            const previousStop = poolJson.post_ids.indexOf(poolData[poolJson.id].lastId);
+            const previousStop = poolJson.post_ids.indexOf(storedSubs[poolJson.id].lastId);
             if (new Date(poolJson.updated_at).getTime() > lastUpdate && poolJson.post_ids.length > previousStop) {
-                results[new Date(poolJson.updated_at).getTime()] = await this.formatPoolUpdate(poolJson, poolData);
+                results[new Date(poolJson.updated_at).getTime()] = await this.formatPoolUpdate(poolJson, storedSubs);
             }
-            poolData[poolJson.id].lastId = poolJson.post_ids[poolJson.post_ids.length - 1];
+            storedSubs[poolJson.id].lastId = poolJson.post_ids[poolJson.post_ids.length - 1];
 
             // Fetch and update the saved pool name
-            poolData[poolJson.id].name = poolJson.name.replace(/_/g, " ");
+            storedSubs[poolJson.id].name = poolJson.name.replace(/_/g, " ");
         }
 
         status.append(`<div>. . . outputting results</div>`);
-        await this.pushSettings("data", poolData);
+        await this.pushSettings("data", storedSubs);
         return results;
     }
 
