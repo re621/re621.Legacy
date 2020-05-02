@@ -28,7 +28,7 @@ export class SubscriptionManager extends RE6Module {
     private $openSubsButton: JQuery<HTMLElement>;
 
     /** Number of active notifications */
-    private tabNotificationsCount = 0;
+    private tabNotificationsCountOld = 0;
 
     protected getDefaultSettings(): Settings {
         return {
@@ -58,7 +58,11 @@ export class SubscriptionManager extends RE6Module {
         this.$openSubsButton = DomUtilities.addSettingsButton({
             name: `<i class="fas fa-bell"></i>`,
             title: "Notifications",
-            attr: { "data-loading": "true" }
+            attr: {
+                "data-loading": "true",
+                "data-updates": "0",
+            },
+            linkClass: "update-notification",
         });
 
         // Create structure for the subscription interface
@@ -68,12 +72,19 @@ export class SubscriptionManager extends RE6Module {
         let tabIndex = 0;
         this.subscriptions.forEach((data, name) => {
             data.tabElement = $("<a>")
-                .attr("data-loading", "false")
+                .attr({
+                    "data-loading": "false",
+                    "data-updates": "0",
+                })
+                .addClass("update-notification")
                 .html(data.instance.getName());
             data.tabIndex = tabIndex;
             data.content = $("<div>")
                 .addClass("subscriptions-list subscription-" + data.instance.getName())
-                .attr("data-subscription-class", name)
+                .attr({
+                    "data-subscription-class": name,
+                    "data-updates": "0",
+                })
                 .html(` loading `);
 
             // If the stored setting is different from a hard-coded value,
@@ -101,21 +112,29 @@ export class SubscriptionManager extends RE6Module {
             position: { my: "right top", at: "right top" }
         });
 
-        // Clear the notifications if the user opened the tab
-        modal.getElement().on("dialogopen", () => {
-            this.updateTabNotifications(subsTabs.get().tabs("option", "active"));
-        });
-
-        subsTabs.get().on("tabsactivate", (event, tabProperties) => {
-            this.updateTabNotifications(tabProperties.newTab.index());
-        });
-
         // Update the subscription content
         Promise.all(updateThreads).then(() => {
             SubscriptionManager.updateInProgress = false;
             $(document).trigger("re621.subscription.update");
+
             this.$openSubsButton.attr("data-loading", "false");
-            this.updateHeaderNotifications(0);
+            this.refreshHeaderNotifications();
+
+            if (modal.isOpen()) {
+                const activeTab = subsTabs.get().tabs("option", "active");
+                window.setTimeout(() => {
+                    this.clearTabNotification(activeTab)
+                }, 1000);
+            }
+
+            // Clear the notifications if the user opened the tab
+            modal.getElement().on("dialogopen", () => {
+                this.clearTabNotification(subsTabs.get().tabs("option", "active"));
+            });
+
+            subsTabs.get().on("tabsactivate", (event, tabProperties) => {
+                this.clearTabNotification(tabProperties.newTab.index());
+            });
         });
     }
 
@@ -208,9 +227,15 @@ export class SubscriptionManager extends RE6Module {
                         SubscriptionManager.updateInProgress = true;
                         $(document).trigger("re621.subscription.update");
 
+                        this.$openSubsButton.attr({
+                            "data-loading": "true",
+                            "data-updates": "0",
+                        });
+
                         this.fetchSettings("lastUpdate", true).then((lastUpdate) => {
                             const updateThreads: Promise<boolean>[] = [];
                             this.subscriptions.forEach(async (subscription) => {
+                                subscription.tabElement.attr("data-updates", "0");
                                 updateThreads.push(new Promise(async (resolve) => {
                                     await subscription.instance.refreshSettings();
                                     subscription.content[0].innerHTML = "";
@@ -221,6 +246,9 @@ export class SubscriptionManager extends RE6Module {
                         }).then(() => {
                             SubscriptionManager.updateInProgress = false;
                             $(document).trigger("re621.subscription.update");
+
+                            this.$openSubsButton.attr("data-loading", "false");
+                            this.refreshHeaderNotifications();
                         });
                     }
                 ),
@@ -302,28 +330,48 @@ export class SubscriptionManager extends RE6Module {
         }
     }
 
-    /**
-     * Refreshes the notifications indicator based on the current number of notifications
-     * @param difference Number of notifications to add / subtract
-     */
-    private updateHeaderNotifications(difference: number): void {
-        this.tabNotificationsCount += difference;
-        this.$openSubsButton.attr("data-has-notifications", (this.tabNotificationsCount > 0).toString());
+    private refreshHeaderNotifications(): number {
+        let totalCount = 0;
+        this.subscriptions.forEach((subscription) => {
+            totalCount += parseInt(subscription.tabElement.attr("data-updates"));
+        });
+        this.$openSubsButton.attr("data-updates", totalCount);
+        return totalCount;
     }
 
-    /**
-     * Removes the notifications on an opened subscription tab
-     * @param index Tab index
-     */
-    private updateTabNotifications(index: number): void {
-        const sub = this.getSubscription(index);
-        if (sub === undefined) return;
+    private refreshTabNotifications(subscription: SubscriptionElement): number {
+        const curCount = subscription.content.find(".new").length;
+        subscription.content.attr("data-updates", curCount);
+        subscription.tabElement.attr("data-updates", curCount);
+        return curCount;
+    }
 
-        sub.instance.pushSettings("lastSeen", new Date().getTime());
-        if (sub.tabElement.attr("data-has-notifications") === "true") {
-            this.updateHeaderNotifications(-1);
-            sub.tabElement.attr("data-has-notifications", "false");
-        }
+    /** Clears the notifications for the specified tab */
+    private async clearTabNotification(tabIndex: number): Promise<boolean> {
+        const subscription = this.getSubscription(tabIndex);
+        if (subscription === undefined) return;
+
+        // Clear the `new` class that is counted by `refreshNotifications()`
+        // `new-visited` should have the same exact styling as `new`
+        const newItems = subscription.content.find(".new").get();
+        for (const item of newItems) { $(item).removeClass("new").addClass("new-viewed"); }
+
+        // Recount notifications. The cache can get updated in the background, no need to wait
+        this.refreshTabNotifications(subscription);
+        this.refreshHeaderNotifications();
+
+        // Remove the `new` flags from the cached data
+        const cache = new UpdateCache(
+            await subscription.instance.fetchSettings("cache"),
+            this.fetchSettings("cacheSize")
+        );
+
+        cache.forEach((entry) => {
+            delete entry["new"];
+            return entry;
+        });
+
+        subscription.instance.pushSettings("cache", cache.getData());
     }
 
     /**
@@ -346,20 +394,10 @@ export class SubscriptionManager extends RE6Module {
         let updates: UpdateData = {};
         if (shouldUpdate) updates = await sub.instance.getUpdatedEntries(lastUpdate, status);
 
-        const lastTimestamp = await this.addUpdateEntries(sub, updates);
-        const lastSeen = sub.instance.fetchSettings("lastSeen");
-        const updateCount = Object.keys(updates).length;
-        sub.tabElement.attr("data-loading", "false");
+        await this.addUpdateEntries(sub, updates);
 
-        // Show notification if there are new updates or there are updates you didn't click on yet
-        if ((updateCount !== 0 || lastSeen < lastTimestamp) && lastSeen !== undefined && !isNaN(lastTimestamp)) {
-            // Dont increment the notification count if there already are some
-            // This can happen when the user triggers a manual update
-            if (sub.tabElement.attr("data-has-notifications") !== "true") {
-                sub.tabElement.attr("data-has-notifications", "true");
-                this.tabNotificationsCount++;
-            }
-        }
+        sub.tabElement.attr("data-loading", "false");
+        this.refreshTabNotifications(sub);
 
         return Promise.resolve(true);
     }
@@ -482,7 +520,7 @@ export class SubscriptionManager extends RE6Module {
      * Should be inserted at the very beginning of the stack, actual sorting is done by CSS
      */
     private createCacheDivider(): JQuery<HTMLElement> {
-        const update: UpdateContent = { id: -1, name: "Older Posts", md5: "" };
+        const update: UpdateContent = { id: -1, name: "Older Updates", md5: "" };
         const definition: UpdateActions = {
             imageSrc: () => "",
             sourceText: () => "",
@@ -600,11 +638,6 @@ class UpdateCache {
         this.data = data === undefined ? {} : data;
         this.updateIndex();
         this.maxSize = maxSize;
-
-        // Clear the "new" flags
-        this.index.forEach((entry) => {
-            delete data[entry]["new"];
-        })
     }
 
     /** Returns the stored cache data as an object */
@@ -690,6 +723,17 @@ class UpdateCache {
         const chunks = Util.chunkArray(this.index, this.maxSize, true);
         this.index = chunks[0];
         chunks[1].forEach((entry: number) => { delete this.data[entry]; })
+    }
+
+    /**
+     * Executes the provided function on every element in the cache.  
+     * The function **must** return the new element value.  
+     * @param fn Function to execute
+     */
+    public forEach(fn: (n: UpdateContent) => UpdateContent): void {
+        this.index.forEach((entry) => {
+            this.data[entry] = fn(this.data[entry]);
+        });
     }
 }
 

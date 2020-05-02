@@ -233,7 +233,10 @@ export class DomUtilities {
         if (config.name === undefined) config.name = "T";
         if (config.href === undefined) config.href = "";
         if (config.title === undefined) config.title = "";
-        if (config.class === undefined) config.class = "";
+
+        if (config.tabClass === undefined) config.tabClass = "";
+        if (config.linkClass === undefined) config.linkClass = "";
+
         if (config.attr === undefined) config.attr = {};
 
         const $tab = $(`<li>`).appendTo("menu.extra");
@@ -243,7 +246,8 @@ export class DomUtilities {
             .appendTo($tab);
 
         if (config.href) { $link.attr("href", config.href); }
-        if (config.class) { $tab.addClass(config.class); }
+        if (config.tabClass) { $tab.addClass(config.tabClass); }
+        if (config.linkClass) { $link.addClass(config.linkClass); }
         if (config.attr) { $link.attr(config.attr); }
 
         return $link;
@@ -288,7 +292,9 @@ interface SettingsButton {
     title?: string;
 
     /** Extra class to append to the tab */
-    class?: string;
+    tabClass?: string;
+    /** Extra class to append to the link */
+    linkClass?: string;
 
     /** Name-value pairs of the attribute to set */
     attr?: { [prop: string]: string };

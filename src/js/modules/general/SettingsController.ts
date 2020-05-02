@@ -38,7 +38,7 @@ export class SettingsController extends RE6Module {
         const openSettingsButton = DomUtilities.addSettingsButton({
             name: `<i class="fas fa-wrench"></i>`,
             title: "Settings",
-            class: "float-right",
+            tabClass: "float-right",
         });
 
         // Establish the settings window contents

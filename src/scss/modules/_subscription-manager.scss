@@ -1,6 +1,6 @@
 /* Subscription Manager Styles */
 
-[data-has-notifications=true] {
+.update-notification:not([data-updates="0"]) {
     &::after {
         content: unicode('f111');
         font-family: 'Font Awesome 5 Free';
@@ -13,7 +13,7 @@
     }
 }
 
-[data-loading=true] {
+.update-notification[data-loading=true] {
 
     position: relative;
 
@@ -116,7 +116,8 @@ div.subscriptions-list {
             margin-bottom: 0;
         }
 
-        &.new {
+        &.new,
+        &.new-viewed {
             order: -1;
         }
 
