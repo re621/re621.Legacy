@@ -24,7 +24,7 @@ export class ThumbnailEnhancer extends RE6Module {
     private static zoomPaused = false;
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.popular, PageDefintion.favorites]);
+        super([PageDefintion.search, PageDefintion.popular, PageDefintion.favorites, PageDefintion.comments]);
     }
 
     protected getDefaultSettings(): Settings {
@@ -53,13 +53,15 @@ export class ThumbnailEnhancer extends RE6Module {
     public create(): void {
         super.create();
 
-        this.postContainer = $("div#posts-container");
+        this.postContainer = $("div#page");
 
         const upscaleMode: ThumbnailPerformanceMode = this.fetchSettings("upscale"),
             clickAction: ThumbnailClickAction = this.fetchSettings("clickAction");
-        $("div#posts-container article.post-preview").each((index, element) => {
-            ThumbnailEnhancer.modifyThumbnail($(element), upscaleMode, clickAction);
-        });
+
+        const thumbnails = this.postContainer.find<HTMLElement>("article.post-preview, div.post-preview").get();
+        for (const thumb of thumbnails) {
+            ThumbnailEnhancer.modifyThumbnail($(thumb), upscaleMode, clickAction);
+        }
 
         this.toggleHoverZoom(this.fetchSettings("zoom"));
         this.setZoomScale(this.fetchSettings("zoomScale"));
@@ -152,10 +154,10 @@ export class ThumbnailEnhancer extends RE6Module {
      * @param state True to hide, false to restore
      */
     public static pauseHoverActions(zoomPaused = true): void {
-        if (zoomPaused) $("div#posts-container").attr({ "data-thumb-zoom": "false", "data-thumb-vote": "false", });
+        if (zoomPaused) $("div#page").attr({ "data-thumb-zoom": "false", "data-thumb-vote": "false", });
         else {
             const module = ModuleController.get(ThumbnailEnhancer);
-            $("div#posts-container").attr({
+            $("div#page").attr({
                 "data-thumb-zoom": module.fetchSettings("zoom"),
                 "data-thumb-vote": module.fetchSettings("vote"),
             });
@@ -174,12 +176,17 @@ export class ThumbnailEnhancer extends RE6Module {
         /* Create the structure */
         const $link = $article.find<HTMLElement>("a.preview-box"),
             postID = parseInt($article.attr("data-id")),
-            $picture = $article.find("picture"),
             $img = $article.find("img"),
-            $imgData = $img.attr("title").split("\n").slice(0, -2);     // Replace if the post date is added for the data-attributes.
+            $imgData = $img.attr("title") ? $img.attr("title").split("\n").slice(0, -2) : [];     // Replace if the post date is added for the data-attributes.
 
         $article.find("source").remove();                               // If we ever have to worry about mobile users, this will need to be addressed.
         $img.removeAttr("title").attr("alt", "#" + $article.attr("data-id"));
+
+        // Image not wrapped in picture - usually on comment pages and the like
+        let $picture = $article.find("picture");
+        console.log($picture.length);
+        if ($picture.length == 0) $picture = $("<picture>").insertAfter($img).append($img);
+        console.log($picture);
 
         // Loading icon
         $("<div>")

@@ -201,9 +201,10 @@ export class DomUtilities {
      * Wraps all post-previews in ThumbnailEnhancer-readable structures
      */
     private static createPostPreviews(): void {
-        $("div#posts-container article.post-preview").each((index, element) => {
-            $(element).find("a").first().addClass("preview-box");
-        });
+        const thumbnails = $("div#page").find("article.post-preview, div.post-preview").get();
+        for (const thumb of thumbnails) {
+            $(thumb).find("a").first().addClass("preview-box");
+        };
     }
 
     /**

@@ -1,127 +1,143 @@
 /* Thumbnail Enhancer Styles */
 
 // Restyling post-previews
-div#page div#posts-container {
-
+div#page div#posts-container,
+div#page div#c-favorites div#posts {
     display: grid;
     grid-template-columns: repeat(auto-fill, 150px);
     justify-content: space-between;
+}
 
-    article.post-preview {
-        overflow: visible;
+.post-preview {
+    overflow: visible;
 
-        box-shadow: none;
-        transition: box-shadow 0.25s linear;
+    box-shadow: none;
+    transition: box-shadow 0.25s linear;
 
-        &.highlight {
-            box-shadow: 0px 0px 0px 5px #ffffff60;
+    z-index: 100;
+
+    &:hover {
+        z-index: 150;
+    }
+
+    &.highlight {
+        box-shadow: 0px 0px 0px 5px #ffffff60;
+    }
+
+    a.preview-box {
+        display: initial;
+        color: white;
+
+        outline: 0;
+
+        position: relative;
+
+        &::before {
+            padding: 1px 2px 0;
+            left: -5px;
+            opacity: 0.9;
         }
 
-        &>a.preview-box {
-            display: initial;
-            color: white;
+        div.preview-load {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
 
-            outline: 0;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
 
-            &::before {
-                padding: 1px 2px 0;
-                left: -5px;
-                opacity: 0.9;
-            }
+        &.loading div.preview-load {
+            display: flex;
+        }
 
-            div.preview-load {
-                position: absolute;
-                left: 0;
-                right: 0;
-                top: 0;
-                bottom: 0;
+        div.preview-extras {
+            display: none;
 
-                display: none;
-                justify-content: center;
-                align-items: center;
-            }
+            flex-flow: wrap;
+            justify-content: center;
 
-            &.loading div.preview-load {
-                display: flex;
-            }
+            opacity: 0.9;
+            font-size: 0.8rem;
+            line-height: 1rem;
+            font-weight: bold;
 
-            div.preview-extras {
-                display: none;
+            width: stretch;
+            position: absolute;
+            overflow-wrap: break-word;
+            cursor: default;
 
-                flex-flow: wrap;
-                justify-content: center;
+            min-width: fit-content;
 
-                opacity: 0.9;
-                font-size: 0.8rem;
-                line-height: 1rem;
-                font-weight: bold;
+            span {
+                margin: 0 0.25rem;
+                white-space: nowrap;
 
-                width: stretch;
-                position: absolute;
-                overflow-wrap: break-word;
-                cursor: default;
-
-                min-width: fit-content;
-
-                span {
-                    margin: 0 0.25rem;
-                    white-space: nowrap;
-
-                    &>span {
-                        cursor: pointer;
-                    }
+                &>span {
+                    cursor: pointer;
                 }
             }
+        }
 
-            div.preview-voting {
-                display: none;
-                position: absolute;
-                left: -2rem;
-                top: 0;
-                bottom: 0;
-                grid-template-rows: repeat(auto-fill, 25%);
-                margin-top: 0.25rem;
-                z-index: 90;
+        div.preview-voting {
+            display: none;
+            position: absolute;
+            left: -2rem;
+            top: 0;
+            bottom: 0;
+            grid-template-rows: repeat(auto-fill, 25%);
+            margin-top: 0.25rem;
+            z-index: 90;
 
-                button.voteButton {
-                    box-sizing: content-box;
-                    margin: 0.125rem 0;
-                    border-radius: 6px 0 0 6px;
-                    outline: 0;
-                }
+            button.voteButton {
+                box-sizing: content-box;
+                margin: 0.125rem 0;
+                border-radius: 6px 0 0 6px;
+                outline: 0;
             }
+        }
 
-            &.loading div.preview-extras {
-                display: none;
-            }
+        &.loading div.preview-extras {
+            display: none;
         }
     }
 }
 
 // Resize Thumbnails
-div#page div#posts-container {
+div#page[data-thumb-crop=true] {
 
-    &[data-thumb-crop=true] {
+    div#posts-container,
+    div#c-favorites div#posts {
         grid-template-columns: repeat(auto-fill, var(--thumbnail-size, 150px));
 
-        article.post-preview {
+        .post-preview {
             margin: 0 0 1rem;
             height: auto;
             width: var(--thumbnail-size, 150px);
-        }
 
-        article.post-preview img {
-            width: var(--thumbnail-size, 150px);
-            height: calc(var(--thumbnail-size, 150px) * var(--thumbnail-ratio, 1.3));
-            object-fit: cover;
-            max-width: unset;
-            max-height: unset;
+            img {
+                width: var(--thumbnail-size, 150px);
+                height: calc(var(--thumbnail-size, 150px) * var(--thumbnail-ratio, 1.3));
+                object-fit: cover;
+                max-width: unset;
+                max-height: unset;
+            }
         }
     }
 }
 
+div#c-comments {
+
+    .post-preview img {
+        width: 150px;
+    }
+}
+
 // Ribbons
-div#page div#posts-container {
+div#page {
 
     picture.picture-container {
         position: relative;
@@ -211,11 +227,11 @@ div#page div#posts-container {
         }
 
         // disable vanilla borders
-        article.post-preview.post-status-flagged img,
-        article.post-preview.post-status-pending img,
-        article.post-preview.post-status-deleted img,
-        article.post-preview.post-status-has-parent img,
-        article.post-preview.post-status-has-children img {
+        .post-preview.post-status-flagged img,
+        .post-preview.post-status-pending img,
+        .post-preview.post-status-deleted img,
+        .post-preview.post-status-has-parent img,
+        .post-preview.post-status-has-children img {
             border: 0;
         }
     }
@@ -229,9 +245,9 @@ div#page div#posts-container {
 }
 
 // Voting Buttons
-div#page div#posts-container {
+div#page[data-thumb-vote=true] {
 
-    &[data-thumb-vote=true] article.post-preview:hover {
+    .post-preview:hover {
         &>a.preview-box {
             div.preview-voting {
                 display: grid;
@@ -241,54 +257,58 @@ div#page div#posts-container {
 }
 
 // Zoom on Hover
-div#page.mode-view div#posts-container,
-div#page div#posts-container[data-thumb-zoom-context=false],
-div#page div#a-popular div#posts-container {
+div#page.mode-view,
+div#page[data-thumb-zoom-context=false],
+div#page div#a-popular {
 
-    &[data-thumb-zoom=true] article.post-preview.loaded:hover {
-        position: relative;
-        overflow: visible;
+    &[data-thumb-zoom=true] div#posts-container,
+    &[data-thumb-zoom=true] div#c-favorites div#posts {
 
-        &>a.preview-box {
-            transform: translate(-50%, -50%);
+        .post-preview.loaded:hover {
+            position: relative;
+            overflow: visible;
 
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            z-index: 10;
+            &>a.preview-box {
+                transform: translate(-50%, -50%);
 
-            min-width: 100%;
-            min-height: 100%;
-
-            &::before {
-                display: none;
-            }
-
-            img {
-                object-fit: cover;
-                width: unset;
-                height: unset;
-
-                max-width: calc(var(--thumbnail-size, 150px) * var(--thumbnail-zoom, 2));
-                max-height: calc(calc(var(--thumbnail-size, 150px) * var(--thumbnail-ratio, 1.3)) * var(--thumbnail-zoom, 2));
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                z-index: 10;
 
                 min-width: 100%;
                 min-height: 100%;
+
+                &::before {
+                    display: none;
+                }
+
+                img {
+                    object-fit: cover;
+                    width: unset;
+                    height: unset;
+
+                    max-width: calc(var(--thumbnail-size, 150px) * var(--thumbnail-zoom, 2));
+                    max-height: calc(calc(var(--thumbnail-size, 150px) * var(--thumbnail-ratio, 1.3)) * var(--thumbnail-zoom, 2));
+
+                    min-width: 100%;
+                    min-height: 100%;
+                }
+
+                div.preview-extras {
+                    display: flex;
+                }
             }
 
-            div.preview-extras {
-                display: flex;
+            div.desc {
+                display: none;
             }
-        }
-
-        div.desc {
-            display: none;
         }
     }
 }
 
 // Replace Placeholder Images
-div#page div#posts-container {
+div#page {
 
     picture.picture-container.post-placeholder {
         img.re621-placeholder-replacer {
