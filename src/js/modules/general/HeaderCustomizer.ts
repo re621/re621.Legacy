@@ -22,6 +22,9 @@ export class HeaderCustomizer extends RE6Module {
     private addTabModal: Modal;
     private addTabForm: Form;
 
+    // Temporary workaround for forum updates notification
+    private hasForumUpdates: boolean;
+
     public constructor() {
         super();
         this.registerHotkeys(
@@ -44,6 +47,7 @@ export class HeaderCustomizer extends RE6Module {
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
+
             hotkeyTab1: "1",
             hotkeyTab2: "2",
             hotkeyTab3: "3",
@@ -53,6 +57,7 @@ export class HeaderCustomizer extends RE6Module {
             hotkeyTab7: "7",
             hotkeyTab8: "8",
             hotkeyTab9: "9",
+
             tabs: [
                 { name: "Account", href: "/users/home" },
                 { name: "Posts", href: "/posts" },
@@ -67,7 +72,9 @@ export class HeaderCustomizer extends RE6Module {
                 { name: "Discord", href: "/static/discord" },
                 { name: "Help", href: "/help" },
                 { name: "More »", href: "/static/site_map" },
-            ]
+            ],
+
+            forumUpdateDot: true,
         };
     }
 
@@ -132,6 +139,8 @@ export class HeaderCustomizer extends RE6Module {
      * Builds basic structure for the module
      */
     private createDOM(): void {
+        this.hasForumUpdates = $("li#nav-forum").hasClass("forum-updated");
+
         this.$oldMenu = $("<div>").css("display", "none").appendTo("body");
         this.$menu.children().appendTo(this.$oldMenu);
         this.$menu.addClass("custom");
@@ -261,11 +270,12 @@ export class HeaderCustomizer extends RE6Module {
         const $link = $("<a>")
             .html(this.processTabVariables(config.name))
             .attr("title", this.processTabVariables(config.title))
-
             .appendTo($tab);
 
         if (config.href != "")
             $link.attr("href", this.processTabVariables(config.href));
+        if (config.href === "/forum_topics" && this.fetchSettings("forumUpdateDot") && this.hasForumUpdates)
+            $link.addClass("tab-has-updates");
 
         if (config.controls) { $tab.addClass("configurable"); }
         if (config.class) { $tab.addClass(config.class); }

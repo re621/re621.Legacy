@@ -138,7 +138,8 @@ export class SettingsController extends RE6Module {
             blacklistEnhancer = ModuleController.getWithType<BlacklistEnhancer>(BlacklistEnhancer),
             imageScaler = ModuleController.getWithType<ImageScaler>(ImageScaler),
             infiniteScroll = ModuleController.getWithType<InfiniteScroll>(InfiniteScroll),
-            thumbnailEnhancer = ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer);
+            thumbnailEnhancer = ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer),
+            headerCustomizer = ModuleController.getWithType<HeaderCustomizer>(HeaderCustomizer);
 
         return new Form({ id: "settings-general", columns: 3, parent: "div#modal-container" }, [
 
@@ -361,19 +362,14 @@ export class SettingsController extends RE6Module {
                 Form.div(`If enabled, will load all result pages up to the current one.`, "mid"),
 
                 Form.spacer("column"),
-                Form.div(`
-                    <div class="unmargin">
-                        For example, when loading page 3, pages 1 and 2 will be loaded as well.<br />
-                        <b>Requires a page reload</b>
-                    </div>`,
-                    "mid"),
+                Form.div(`<div class="unmargin"><b>Requires a page reload</b></div>`, "mid"),
 
                 Form.hr(),
             ]),
 
             // Actions
             Form.section({ id: "actions", columns: 3 }, [
-                Form.header("Actions"),
+                Form.header("Miscellaneous"),
 
                 Form.checkbox(
                     "votefavorite", postViewer.fetchSettings("upvoteOnFavorite"), "Auto-upvote favorites", "column",
@@ -392,6 +388,14 @@ export class SettingsController extends RE6Module {
                     "quickadd", blacklistEnhancer.fetchSettings("quickaddTags"), "Click X to add tag to blacklist", "column",
                     async (event, data) => { await blacklistEnhancer.pushSettings("quickaddTags", data); }),
                 Form.spacer("mid"),
+
+                Form.checkbox(
+                    "forumUpdateDot", headerCustomizer.fetchSettings("forumUpdateDot"), "Header forum notifications", "column",
+                    async (event, data) => { await headerCustomizer.pushSettings("forumUpdateDot", data); }),
+                Form.div("Red dot on the Forum tab in the header if there are new posts", "mid"),
+
+                Form.spacer("column"),
+                Form.div(`<div class="unmargin"><b>Requires page update</b></div>`, "mid"),
 
             ]),
 
