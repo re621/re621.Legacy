@@ -145,12 +145,18 @@ export class PoolDownloader extends RE6Module {
             // Create API requests, separated into chunks
             this.infoText
                 .attr("data-state", "loading")
-                .html(`Fetching API data . . .`);
+                .html("Fetching API data . . .");
 
             const dataQueue: Promise<APIPost[]>[] = [];
             const resultPages = Math.ceil(imageList.length / 320);
+            this.infoFile.html(" &nbsp; &nbsp;request 1 / " + resultPages);
+
             for (let i = 1; i <= resultPages; i++) {
-                dataQueue.push(E621.Posts.get<APIPost>({ tags: "pool:" + pool.id, page: i, limit: 320 }));
+                dataQueue.push(new Promise(async (resolve) => {
+                    const result = await E621.Posts.get<APIPost>({ tags: "pool:" + pool.id, page: i, limit: 320 }, 500);
+                    this.infoFile.html(" &nbsp; &nbsp;request " + (i + 1) + " / " + resultPages);
+                    resolve(result);
+                }));
             }
 
             return Promise.all(dataQueue);
@@ -161,6 +167,7 @@ export class PoolDownloader extends RE6Module {
 
             // Create an interface to output queue status
             const threadInfo: JQuery<HTMLElement>[] = [];
+            this.infoFile.html("");
             for (let i = 0; i < downloadQueue.getThreadCount(); i++) {
                 threadInfo.push($("<span>").appendTo(this.infoFile));
             }

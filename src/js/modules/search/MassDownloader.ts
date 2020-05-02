@@ -181,11 +181,18 @@ export class MassDownloader extends RE6Module {
         // Create API requests, separated into chunks
         this.infoText
             .attr("data-state", "loading")
-            .html(`Fetching API data . . .`);
+            .html("Fetching API data . . .");
 
         const dataQueue: Promise<APIPost[]>[] = [];
-        Util.chunkArray(imageList, MassDownloader.chunkSize).forEach((value) => {
-            dataQueue.push(E621.Posts.get<APIPost>({ tags: "id:" + value.join(",") }));
+        const resultPages = Util.chunkArray(imageList, MassDownloader.chunkSize);
+        this.infoFile.html(" &nbsp; &nbsp;request 1 / " + resultPages.length);
+
+        resultPages.forEach((value, index) => {
+            dataQueue.push(new Promise(async (resolve) => {
+                const result = await E621.Posts.get<APIPost>({ tags: "id:" + value.join(",") });
+                this.infoFile.html(" &nbsp; &nbsp;request " + (index + 1) + " / " + resultPages.length);
+                resolve(result);
+            }));
         });
 
         // Fetch the post data from the API
@@ -196,6 +203,7 @@ export class MassDownloader extends RE6Module {
 
             // Create an interface to output queue status
             const threadInfo: JQuery<HTMLElement>[] = [];
+            this.infoFile.html("");
             for (let i = 0; i < downloadQueue.getThreadCount(); i++) {
                 threadInfo.push($("<span>").appendTo(this.infoFile));
             }
