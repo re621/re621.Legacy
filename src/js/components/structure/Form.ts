@@ -1,4 +1,4 @@
-import { GM } from "../api/GM";
+import { XM } from "../api/XM";
 import { Hotkeys } from "../data/Hotkeys";
 import { Util } from "./Util";
 
@@ -97,10 +97,23 @@ export class Form {
         this.$form.trigger("re621:form:create");
 
         if (this.config.collapse) {
-            const section = $("<div>")
-                .addClass(this.formID + "-collapse form-collapse")
-                .append($("<h3>").addClass("form-collapse-header").html(this.config.name))
-                .append($("<div>").addClass("form-collapse-content").append(this.$form));
+            const section = $("<div>").addClass(this.formID + "-collapse form-collapse");
+
+            const header = $("<h3>")
+                .addClass("form-collapse-header")
+                .html(this.config.name)
+                .appendTo(section);
+            if (this.config.collapseBadge)
+                $("<span>")
+                    .addClass("form-collapse-badge")
+                    .html(this.config.collapseBadge + "")
+                    .appendTo(header);
+
+            $("<div>")
+                .addClass("form-collapse-content")
+                .append(this.$form)
+                .appendTo(section);
+
             section.accordion({
                 active: this.config.collapseState,
                 animate: false,
@@ -196,7 +209,7 @@ export class Form {
      * @param data Extra data
      * @param onChange Change callback
      */
-    private static make(type: FormElementType, id: string, label?: string, value?: any, stretch: FormElementWidth = "column", required?: boolean, pattern?: string, data?: FormExtraData[], onChange?: FormChangeEvent): FormElement {
+    private static make(type: FormElementType, id: string, label?: string, value?: any, stretch: FormElementWidth = "column", required?: boolean, pattern?: string, data?: FormExtraData[], onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
         return {
             id: id,
             type: type,
@@ -212,6 +225,8 @@ export class Form {
             data: data,
 
             onChange: onChange,
+
+            wrapperClass: wrapperClass,
         };
     }
 
@@ -231,7 +246,7 @@ export class Form {
         } else if (element.stretch === "default") { element.stretch = "column"; }
 
         const $inputContainer = $("<div>")
-            .addClass("input-container")
+            .addClass("input-container" + (element.wrapperClass ? " " + element.wrapperClass : ""))
             .toggleClass("labeled", labeled)
             .addClass("stretch-" + element.stretch)
             .appendTo($form);
@@ -270,9 +285,9 @@ export class Form {
      * @param reqs Input requirements
      * @param onChange Input change callback
      */
-    public static input(id: string, value?: string, label?: string, stretch?: FormElementWidth, reqs?: FormEntryRequirements, onChange?: FormChangeEvent): FormElement {
+    public static input(id: string, value?: string, label?: string, stretch?: FormElementWidth, reqs?: FormEntryRequirements, onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
         if (reqs === undefined) reqs = { required: undefined, pattern: undefined, };
-        return this.make("input", id, label, value, stretch, reqs.required, reqs.pattern, undefined, onChange);
+        return this.make("input", id, label, value, stretch, reqs.required, reqs.pattern, undefined, onChange, wrapperClass);
     }
 
     /**
@@ -291,7 +306,7 @@ export class Form {
         } else if (element.stretch === "default") { element.stretch = "column"; }
 
         const $inputContainer = $("<div>")
-            .addClass("input-container")
+            .addClass("input-container" + (element.wrapperClass ? " " + element.wrapperClass : ""))
             .toggleClass("labeled", labeled)
             .addClass("copybox")
             .addClass("stretch-" + element.stretch)
@@ -316,7 +331,7 @@ export class Form {
             .appendTo($inputContainer);
 
         $($copybutton).click(function () {
-            GM.setClipboard($input.val());
+            XM.Util.setClipboard($input.val());
         });
 
         let timer: number;
@@ -339,8 +354,8 @@ export class Form {
      * @param stretch Column span
      * @param onChange Input change callback
      */
-    public static copy(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
-        return this.make("copy", id, label, value, stretch, undefined, undefined, undefined, onChange);
+    public static copy(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
+        return this.make("copy", id, label, value, stretch, undefined, undefined, undefined, onChange, wrapperClass);
     }
 
     /**
@@ -359,7 +374,7 @@ export class Form {
         } else if (element.stretch === "default") { element.stretch = "column"; }
 
         const $inputContainer = $("<div>")
-            .addClass("input-container")
+            .addClass("input-container" + (element.wrapperClass ? " " + element.wrapperClass : ""))
             .toggleClass("labeled", labeled)
             .addClass("keyinput")
             .addClass("stretch-" + element.stretch)
@@ -432,8 +447,8 @@ export class Form {
      * @param stretch Column span
      * @param onChange Input change callback
      */
-    public static key(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
-        return this.make("key", id, label, value, stretch, undefined, undefined, undefined, onChange);
+    public static key(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
+        return this.make("key", id, label, value, stretch, undefined, undefined, undefined, onChange, wrapperClass);
     }
 
     /**
@@ -452,7 +467,7 @@ export class Form {
         } else if (element.stretch === "default") { element.stretch = "column"; }
 
         const $inputContainer = $("<div>")
-            .addClass("input-container")
+            .addClass("input-container" + (element.wrapperClass ? " " + element.wrapperClass : ""))
             .toggleClass("labeled", labeled)
             .addClass("stretch-" + element.stretch)
             .appendTo($form);
@@ -487,9 +502,9 @@ export class Form {
      * @param reqs Input requirements
      * @param onChange Input change callback
      */
-    public static file(id: string, value = "", label?: string, stretch: FormElementWidth = "column", reqs?: FormEntryRequirements, onChange?: FormChangeEvent): FormElement {
+    public static file(id: string, value = "", label?: string, stretch: FormElementWidth = "column", reqs?: FormEntryRequirements, onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
         if (reqs === undefined) reqs = { required: undefined, pattern: undefined, };
-        return this.make("file", id, label, value, stretch, reqs.required, reqs.pattern, undefined, onChange);
+        return this.make("file", id, label, value, stretch, reqs.required, reqs.pattern, undefined, onChange, wrapperClass);
     }
 
     /**
@@ -508,7 +523,7 @@ export class Form {
         } else if (element.stretch === "default") { element.stretch = "column"; }
 
         const $inputContainer = $("<div>")
-            .addClass("input-container")
+            .addClass("input-container" + (element.wrapperClass ? " " + element.wrapperClass : ""))
             .toggleClass("labeled", labeled)
             .addClass("stretch-" + element.stretch)
             .appendTo($form);
@@ -568,8 +583,8 @@ export class Form {
      * @param stretch Column span
      * @param onChange Input change callback
      */
-    public static icon(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
-        return this.make("icon", id, label, value, stretch, undefined, undefined, undefined, onChange);
+    public static icon(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
+        return this.make("icon", id, label, value, stretch, undefined, undefined, undefined, onChange, wrapperClass);
     }
 
     /**
@@ -581,7 +596,7 @@ export class Form {
         if (element.stretch === "default") { element.stretch = "column"; }
 
         const $inputContainer = $("<div>")
-            .addClass("input-container")
+            .addClass("input-container" + (element.wrapperClass ? " " + element.wrapperClass : ""))
             .addClass("checkbox-switch")
             .addClass("stretch-" + element.stretch)
             .appendTo($form);
@@ -624,8 +639,8 @@ export class Form {
      * @param stretch Column span
      * @param onChange Input change callback
      */
-    public static checkbox(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
-        return this.make("checkbox", id, label, value, stretch, undefined, undefined, undefined, onChange);
+    public static checkbox(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
+        return this.make("checkbox", id, label, value, stretch, undefined, undefined, undefined, onChange, wrapperClass);
     }
 
     /**
@@ -644,14 +659,14 @@ export class Form {
         } else if (element.stretch === "default") { element.stretch = "column"; }
 
         const $inputContainer = $("<div>")
-            .addClass("input-container")
+            .addClass("input-container" + (element.wrapperClass ? " " + element.wrapperClass : ""))
             .addClass("radio-switch")
             .toggleClass("labeled", labeled)
             .addClass("stretch-" + element.stretch)
             .appendTo($form);
 
         const $input = $("<input>")
-            .addClass("display-hidden")
+            .addClass("display-none")
             .attr("id", this.formID + "-" + element.id + "-input")
             .val(element.value)
             .appendTo($inputContainer);
@@ -705,8 +720,8 @@ export class Form {
      * @param stretch Column span
      * @param onChange Input change callback
      */
-    public static radio(id: string, value = "", label?: string, data?: FormExtraData[], stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
-        return this.make("radio", id, label, value, stretch, undefined, undefined, data, onChange);
+    public static radio(id: string, value = "", label?: string, data?: FormExtraData[], stretch: FormElementWidth = "column", onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
+        return this.make("radio", id, label, value, stretch, undefined, undefined, data, onChange, wrapperClass);
     }
 
     /**
@@ -725,7 +740,7 @@ export class Form {
         }
 
         const $inputContainer = $("<div>")
-            .addClass("input-container")
+            .addClass("input-container" + (element.wrapperClass ? " " + element.wrapperClass : ""))
             .toggleClass("labeled", labeled)
             .addClass("stretch-" + element.stretch)
             .appendTo($form);
@@ -758,8 +773,8 @@ export class Form {
      * @param stretch Column span
      * @param onChange Input change callback
      */
-    public static button(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
-        return this.make("button", id, label, value, stretch, undefined, undefined, undefined, onChange);
+    public static button(id: string, value: string | JQuery<HTMLElement> = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
+        return this.make("button", id, label, value, stretch, undefined, undefined, undefined, onChange, wrapperClass);
     }
 
     /**
@@ -778,7 +793,7 @@ export class Form {
         }
 
         const $inputContainer = $("<div>")
-            .addClass("input-container")
+            .addClass("input-container" + (element.wrapperClass ? " " + element.wrapperClass : ""))
             .toggleClass("labeled", labeled)
             .addClass("stretch-" + element.stretch)
             .appendTo($form);
@@ -811,8 +826,8 @@ export class Form {
      * @param stretch Column span
      * @param onChange Input change callback
      */
-    public static submit(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
-        return this.make("submit", id, label, value, stretch, undefined, undefined, undefined, onChange);
+    public static submit(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
+        return this.make("submit", id, label, value, stretch, undefined, undefined, undefined, onChange, wrapperClass);
     }
 
     /**
@@ -831,7 +846,7 @@ export class Form {
         } else if (element.stretch === "default") { element.stretch = "column"; }
 
         const $inputContainer = $("<div>")
-            .addClass("input-container")
+            .addClass("input-container" + (element.wrapperClass ? " " + element.wrapperClass : ""))
             .toggleClass("labeled", labeled)
             .addClass("stretch-" + element.stretch)
             .appendTo($form);
@@ -869,9 +884,9 @@ export class Form {
      * @param reqs Input requirements
      * @param onChange Input change callback
      */
-    public static textarea(id: string, value = "", label?: string, stretch: FormElementWidth = "column", reqs?: FormEntryRequirements, onChange?: FormChangeEvent): FormElement {
+    public static textarea(id: string, value = "", label?: string, stretch: FormElementWidth = "column", reqs?: FormEntryRequirements, onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
         if (reqs === undefined) reqs = { required: undefined, pattern: undefined, };
-        return this.make("textarea", id, label, value, stretch, reqs.required, reqs.pattern, undefined, onChange);
+        return this.make("textarea", id, label, value, stretch, reqs.required, reqs.pattern, undefined, onChange, wrapperClass);
     }
 
     /**
@@ -890,7 +905,7 @@ export class Form {
         } else if (element.stretch === "default") { element.stretch = "column"; }
 
         const $inputContainer = $("<div>")
-            .addClass("input-container")
+            .addClass("input-container" + (element.wrapperClass ? " " + element.wrapperClass : ""))
             .toggleClass("labeled", labeled)
             .addClass("stretch-" + element.stretch)
             .appendTo($form);
@@ -927,8 +942,8 @@ export class Form {
      * @param stretch Column span
      * @param onChange Input change callback
      */
-    public static select(id: string, value = "", label?: string, data?: FormExtraData[], stretch: FormElementWidth = "column", onChange?: FormChangeEvent): FormElement {
-        return this.make("select", id, label, value, stretch, undefined, undefined, data, onChange);
+    public static select(id: string, value = "", label?: string, data?: FormExtraData[], stretch: FormElementWidth = "column", onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
+        return this.make("select", id, label, value, stretch, undefined, undefined, data, onChange, wrapperClass);
     }
 
     /**
@@ -947,7 +962,7 @@ export class Form {
         } else if (element.stretch === "default") { element.stretch = "column"; }
 
         const $inputContainer = $("<div>")
-            .addClass("input-container")
+            .addClass("input-container" + (element.wrapperClass ? " " + element.wrapperClass : ""))
             .toggleClass("labeled", labeled)
             .addClass("stretch-" + element.stretch)
             .appendTo($form);
@@ -968,11 +983,11 @@ export class Form {
      * Creates a div FormElement based on the provided parameters  
      * Alias for the more generic make() function with a specific type  
      * @param value Element value
-     * @param label Form label
      * @param stretch Column span
+     * @param label Form label
      */
-    public static div(value = "", stretch: FormElementWidth = "full"): FormElement {
-        return this.make("div", Util.makeID(), undefined, value, stretch);
+    public static div(value: string | JQuery<HTMLElement> = "", stretch: FormElementWidth = "full", label?: string, id?: string, wrapperClass?: string): FormElement {
+        return this.make("div", id ? id : Util.makeID(), label, value, stretch, undefined, undefined, undefined, undefined, wrapperClass);
     }
 
     /**
@@ -1030,7 +1045,7 @@ export class Form {
         } else if (element.stretch === "default") { element.stretch = "column"; }
 
         const $inputContainer = $("<div>")
-            .addClass("input-container")
+            .addClass("input-container" + (element.wrapperClass ? " " + element.wrapperClass : ""))
             .toggleClass("labeled", labeled)
             .addClass("stretch-" + element.stretch)
             .appendTo($form);
@@ -1073,7 +1088,7 @@ export class Form {
         } else if (element.stretch === "default") { element.stretch = "column"; }
 
         const $inputContainer = $("<div>")
-            .addClass("input-container")
+            .addClass("input-container" + (element.wrapperClass ? " " + element.wrapperClass : ""))
             .toggleClass("labeled", labeled)
             .addClass("stretch-" + element.stretch)
             .appendTo($form);
@@ -1116,7 +1131,7 @@ export class Form {
     public static subsection(config: FormConfig, name: string, elements: FormElement[], label?: string, stretch: FormElementWidth = "full"): FormElement {
         config.collapse = true;
         config.name = name;
-        config.collapseState = false;
+        config.collapseState = true;
         return this.make("form", config.id, label, new Form(config, elements), stretch);
     }
 }
@@ -1134,6 +1149,8 @@ interface FormConfig {
     collapse?: boolean;
     /** Whether the collapsable should be open by default */
     collapseState?: boolean;
+    /** Badge attached to the collapsable header */
+    collapseBadge?: string | number;
 }
 
 interface FormEntry {
@@ -1167,6 +1184,9 @@ export interface FormElement extends FormEntry, FormEntryRequirements {
 
     /** Fired when the value of the input changes */
     onChange?: FormChangeEvent;
+
+    /** Extra class to be added to the input wrapper */
+    wrapperClass?: string;
 }
 
 type FormElementType = "input" | "copy" | "key" | "file" | "icon" | "checkbox" | "radio" | "button" | "submit" | "textarea" | "select" | "div" | "hr" | "form";

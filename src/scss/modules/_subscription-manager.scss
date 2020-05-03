@@ -1,6 +1,6 @@
 /* Subscription Manager Styles */
 
-[data-has-notifications=true] {
+.update-notification:not([data-updates="0"]) {
     &::after {
         content: unicode('f111');
         font-family: 'Font Awesome 5 Free';
@@ -13,7 +13,10 @@
     }
 }
 
-[data-loading=true] {
+.update-notification[data-loading=true] {
+
+    position: relative;
+
     @keyframes spinner {
         to {
             transform: rotate(360deg);
@@ -22,13 +25,16 @@
 
     &::after {
         content: unicode('f110');
-        font-family: 'Font Awesome 5 Free';
+        font-family: "Font Awesome 5 Free";
         font-weight: 900;
-        font-size: 0.7em;
+        font-size: 0.75em;
+        line-height: 0.75em;
+        text-align: center;
+        color: inherit;
 
         position: absolute;
-        top: -2px;
-        animation: spinner .6s linear infinite;
+
+        animation: spinner 1.0s linear infinite;
     }
 }
 
@@ -61,25 +67,35 @@ div.subscriptions-list {
 
     div.subscription-update.notice {
 
-        &.notice-uptodate {
-            background: #ffffff33;
-            text-align: center;
-            padding: 0.25rem 0.5rem;
-            margin-top: 0.5rem;
-        }
-
         &.notice-cached {
             display: grid;
             grid-template-columns: auto auto;
-            margin: 0.5rem 0 0.5rem;
             font-weight: 900;
             font-size: 0.85rem;
             color: darkgrey;
 
-            div.subscription-update-date {
-                display: block;
-                text-align: right;
-                font-weight: 500;
+            div.subscription-update-title {
+                grid-column: span 2;
+                display: flex;
+                align-items: center;
+                text-align: center;
+
+                color: #ffffff50;
+
+                &::before,
+                &::after {
+                    content: '';
+                    flex: 1;
+                    border-bottom: 1px solid #ffffff50;
+                }
+
+                &::before {
+                    margin-right: .25em;
+                }
+
+                &::after {
+                    margin-left: .25em;
+                }
             }
         }
 
@@ -93,12 +109,16 @@ div.subscriptions-list {
 
     div.subscription-update:not(.notice) {
         display: grid;
-        grid-template-columns: 4rem auto auto min-content;
-        margin-bottom: 0.5rem;
+        grid-template-columns: 4rem auto auto;
         background: #ffffff33;
 
         &:last-child {
             margin-bottom: 0;
+        }
+
+        &.new,
+        &.new-viewed {
+            order: -1;
         }
 
         div.subscription-update-preview {
@@ -118,10 +138,6 @@ div.subscriptions-list {
             margin: 0.5rem 0.5rem 0
         }
 
-        div.subscription-update-unsub {
-            margin: 0.5rem;
-        }
-
         div.subscription-update-full {
             display: flex;
             align-self: end;
@@ -130,12 +146,24 @@ div.subscriptions-list {
         }
 
         div.subscription-update-date {
-            grid-column: span 2;
             display: flex;
             align-self: end;
             font-size: 0.9em;
             margin: 0rem 0.5rem 0.5rem;
             justify-content: flex-end;
+        }
+    }
+
+    div.subscription-load-status {
+        width: fit-content;
+        margin: 3rem auto;
+        grid-column: span 4;
+        font-family: monospace;
+        font-size: 1.5em;
+
+        div {
+            color: #aaa;
+            margin-top: 0.5rem;
         }
     }
 
@@ -184,6 +212,42 @@ div.subscriptions-list {
             img {
                 height: 6rem;
             }
+        }
+    }
+}
+
+// Comment Subscriptions
+.subscriptions-list[data-subscription-class=CommentSubscriptions] {
+
+    div.subscription-update:not(.notice) {
+
+        div.subscription-update-title {
+            font-weight: inherit;
+            font-size: 1em;
+
+            a::after {
+                content: ": ";
+            }
+        }
+    }
+}
+
+// Subscription Management
+.subscriptions-manage-list {
+    display: grid;
+    grid-template-columns: 1fr;
+
+    &.col-2 {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    item {
+        display: inline-block;
+        white-space: nowrap;
+        overflow: hidden;
+
+        a.sub-manage-unsub {
+            margin-right: 0.25rem;
         }
     }
 }

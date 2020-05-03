@@ -1,9 +1,7 @@
+import { PostHtml } from "../api/PostHtml";
+import { APIPost, PostRating } from "../api/responses/APIPost";
 import { TagTypes } from "./Tag";
 import { User } from "./User";
-import { APIPost, PostRating } from "../api/responses/APIPost";
-import { PostHtml } from "../api/PostHtml";
-import { ModuleController } from "../ModuleController";
-import { ThumbnailEnhancer, ThumbnailPerformanceMode } from "../../modules/search/ThumbnailsEnhancer";
 
 /**
  * Collects basic info for a post.
@@ -32,8 +30,7 @@ export class Post {
         } else {
             element = element as APIPost;
             this.apiElement = element;
-            const upscaleMode = ModuleController.get(ThumbnailEnhancer).fetchSettings("upscale");
-            this.htmlElement = PostHtml.create(element, upscaleMode === ThumbnailPerformanceMode.Always);
+            this.htmlElement = PostHtml.create(element);
         }
 
         for (const filter of User.getBlacklist().values()) {
@@ -46,21 +43,19 @@ export class Post {
      */
     public static fetchPosts(): Post[] {
         if (this.initalPosts === undefined) {
-            const imageContainer = $("#image-container");
+            const imageContainer = $("section#image-container");
             this.initalPosts = [];
             if (imageContainer.length === 0) {
-                $("#posts-container").children(".post-preview").each((index, element) => {
-                    Post.initalPosts.push(new Post($(element)));
-                });
-            } else {
-                this.initalPosts.push(new ViewingPost(imageContainer));
-            }
-            $(".post-thumbnail").each((index, element) => {
-                this.postThumbnails.push(new Post($(element)));
-            });
+                const previews = $("div#posts-container").children(".post-preview").get();
+                for (const preview of previews) this.initalPosts.push(new Post($(preview)));
+            } else this.initalPosts.push(new ViewingPost(imageContainer));
+
+            // What does this do? Nobody knows.
+            for (const thumbnail of $(".post-thumbnail").get())
+                this.postThumbnails.push(new Post($(thumbnail)));
         }
 
-        return this.initalPosts.concat(this.addedPosts).concat(this.postThumbnails);
+        return [...this.initalPosts, ...this.addedPosts, ...this.postThumbnails];
     }
 
     /**

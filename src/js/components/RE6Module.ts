@@ -1,6 +1,6 @@
-import { Page } from "./data/Page";
+import { XM } from "./api/XM";
 import { Hotkeys } from "./data/Hotkeys";
-import { GM } from "./api/GM";
+import { Page } from "./data/Page";
 
 /**
  * Class that other modules extend.  
@@ -22,13 +22,11 @@ export class RE6Module {
         if (constraint === undefined) this.constraint = [];
         else if (constraint instanceof RegExp) this.constraint.push(constraint);
         else this.constraint = constraint;
+    }
 
-        this.loadSettingsData();
-
-        // Save if the module is active or not
-        // If no enabled settings is found, assume the module is active
-        const status = this.fetchSettings("enabled");
-        this.enabled = status === undefined ? true : status;
+    public async prepare(): Promise<void> {
+        await this.loadSettingsCache();
+        this.enabled = this.fetchSettings("enabled");
     }
 
     /** Returns true if the module has already been initialized */
@@ -82,43 +80,76 @@ export class RE6Module {
     }
 
     /**
-     * Fetches the specified settings property
-     * @param property Property name
-     * @param fresh Fetches some freshly baked cookies
-     * @returns Property value
+     * Returns the specified settings property.  
+     *   
+     * This is a hybrid method. If the `fresh` argument is set to true, the method will return a promise
+     * that will be fulfilled when new settings are fetched from storage. Otherwise, the settings will
+     * be fetched from the local cache. Note that the second method may result in existant settings to 
+     * either be undefined, or to have wrong values.  
+     *   
+     * If the `property` argument is a string, the method will return the value of the specified property
+     * as-is. If the argument is an array of strings, an object will be returned instead, with properties
+     * matching the ones specified in the argument, their values - the corresponding settings.
+     * @param property Property name / names
+     * @param fresh If true, refreshes the settings cache before returning the value
+     * @returns Property value / values
      */
-    public fetchSettings(property?: string, fresh?: boolean): any {
-        if (fresh) this.loadSettingsData();
-        if (property === undefined) return this.settings;
-        return this.settings[property];
+    public fetchSettings(property: string): any;
+    public fetchSettings<T>(property: string): T;
+    public fetchSettings(property: string[]): SettingsProperty;
+    public fetchSettings(property: string | string[]): any;
+    public async fetchSettings(property: string, fresh: boolean): Promise<any>;
+    public async fetchSettings<T>(property: string, fresh: boolean): Promise<T>;
+    public async fetchSettings(property: string[], fresh: boolean): Promise<SettingsProperty>;
+    public fetchSettings<T>(property: string | string[], fresh?: boolean): any {
+        if (fresh) {
+            return new Promise(async (resolve) => {
+                await this.loadSettingsCache();
+                resolve(this.fetchSettings(property));
+            })
+        }
+
+        if (Array.isArray(property)) {
+            const result = {};
+            property.forEach(entry => { result[entry] = this.settings[entry] as T; });
+            return result;
+        } else return this.settings[property] as T;
     }
 
     /**
-     * Saves the specified settings property-value pair
+     * Saves the provided settings.  
+     *   
+     * This method returns a Promise that is fulfilled when the operation completes, one way or another.
+     * If the action was succesful, the Promise will resolve to true, otherwise, it will return false.
+     *   
+     * If the `property` argument is a string, the method will set the value of the specified property
+     * to the one provided by the second argument. If the `property` is an object containing multiple
+     * pairs of key-value pairs, each of them will be added to the settings instead.
      * @param property Property name
      * @param value Property value
      * @param preserve Ensures that all other values are preserved
+     * @returns True if the settings were saved successfully, false otherwise
      */
-    public pushSettings(property: string, value: any, preserve?: boolean): void {
-        if (preserve) { this.loadSettingsData(); }
-        this.settings[property] = value;
-        this.saveSettingsData();
+    public async pushSettings(property: SettingsProperty): Promise<boolean>;
+    public async pushSettings(property: string, value: any): Promise<boolean>;
+    public async pushSettings(property: any, value?: any): Promise<boolean> {
+        return this.loadSettingsCache().then(() => {
+            if (typeof property === "string") this.settings[property] = value;
+            else Object.keys(property).forEach((key) => {
+                this.settings[key] = property[key];
+            });
+            return this.saveSettingsCache();
+        });
     }
 
     /**
      * Clears stored settings and resets the configuration to default values.
+     * @returns True if the settings were cleared successfully, false otherwise
      */
-    public clearSettings(): void {
-        GM.deleteValue("re621." + this.constructor.name);
-        this.loadSettingsData();
-    }
-
-    /**
-     * Retrieves the data that has actually been saved into the settings.  
-     * Used while exporting settings to file, and pretty much nowhere else.
-     */
-    public getSavedSettings(): any {
-        return { name: "re621." + this.constructor.name, data: GM.getValue("re621." + this.constructor.name, {}) };
+    public async clearSettings(): Promise<boolean> {
+        return XM.Storage.deleteValue("re621." + this.constructor.name).then(() => {
+            return this.loadSettingsCache();
+        });
     }
 
     /**
@@ -132,10 +163,11 @@ export class RE6Module {
     /**
      * Loads the settings data from Tampermonkey storage.  
      * If no settings exist, uses default values instead.
+     * @returns True if the settings were loaded successfully, false otherwise
      */
-    private loadSettingsData(): void {
+    private async loadSettingsCache(): Promise<boolean> {
         const defaultValues = this.getDefaultSettings();
-        this.settings = GM.getValue("re621." + this.constructor.name, defaultValues);
+        this.settings = await XM.Storage.getValue("re621." + this.constructor.name, defaultValues);
 
         // If defaultValues has a entry the defaultSettings do not have, add it
         // this might happen if the user saved and a defaultSetting gets added afterwards
@@ -144,26 +176,50 @@ export class RE6Module {
                 this.settings[key] = defaultValues[key];
             }
         }
+
+        return Promise.resolve(true);
     }
 
     /**
-     * Save the settings to Tampermoknkey storage.  
+     * Save the settings to local storage.  
+     * @returns True if the settings were saved successfully, false otherwise
      */
-    private saveSettingsData(): void {
-        GM.setValue("re621." + this.constructor.name, this.settings);
+    private async saveSettingsCache(): Promise<boolean> {
+        return XM.Storage.setValue("re621." + this.constructor.name, this.settings);
+    }
+
+    /**
+     * Returns a promise that gets fulfilled when the saved settings get loaded.  
+     * If no settings are saved, returns the default values.  
+     * @returns True if the settings were refreshed successfully, false otherwise
+     */
+    public async refreshSettings(): Promise<boolean> {
+        return this.loadSettingsCache();
+    }
+
+    /**
+     * Retrieves the data that has actually been saved into the settings.  
+     * Used while exporting settings to file, and pretty much nowhere else.
+     */
+    public async getSavedSettings(): Promise<{ name: string; data: any }> {
+        return {
+            name: "re621." + this.constructor.name,
+            data: await XM.Storage.getValue("re621." + this.constructor.name, {})
+        };
     }
 
     /** Establish the module's hotkeys */
-    public resetHotkeys(): void {
+    public async resetHotkeys(): Promise<void> {
+        await this.loadSettingsCache();
+
         const enabled = this.pageMatchesFilter();
         this.hotkeys.forEach((value) => {
-
-            const keys = this.fetchSettings(value.keys, true) as string;
-            keys.split("|").forEach((key) => {
+            this.fetchSettings(value.keys).split("|").forEach((key) => {
                 if (key === "") return;
                 if (enabled) Hotkeys.register(key, value.fnct, value.element, value.selector);
                 else Hotkeys.register(key, () => { return; });
             });
+
         });
     }
 
@@ -172,7 +228,7 @@ export class RE6Module {
      * @param hotkeys Hotkey to register
      */
     protected registerHotkeys(...hotkeys: Hotkey[]): void {
-        this.hotkeys = this.hotkeys.concat(hotkeys);
+        this.hotkeys.push(...hotkeys);
         this.resetHotkeys();
     }
 
@@ -201,5 +257,9 @@ interface Hotkey {
 export type Settings = {
     enabled: boolean;
 } & {
+    [prop: string]: any;
+};
+
+type SettingsProperty = {
     [prop: string]: any;
 };

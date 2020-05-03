@@ -35,6 +35,21 @@
                 "camelcase": "off",
                 "@typescript-eslint/camelcase": "off"
             }
+        },
+        {
+            "files": [
+                "build/*.js",
+                "bin/*.js"
+            ],
+            "rules": {
+                "@typescript-eslint/camelcase": "off",
+                "@typescript-eslint/explicit-function-return-type": "off",
+                "@typescript-eslint/no-unused-vars": "off",
+                "@typescript-eslint/no-var-requires": "off",
+                "no-var": "off",
+                "prefer-const": "off",
+                "prefer-rest-params": "off"
+            }
         }
     ],
     "rules": {

@@ -1,7 +1,7 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
 import { PostFilter } from "../../components/data/PostFilter";
+import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
  * Adds a extra search input below the current one where 
@@ -9,7 +9,6 @@ import { PostFilter } from "../../components/data/PostFilter";
  */
 export class InstantSearch extends RE6Module {
 
-    // TODO: this can be of type HTMLInputElememnt, but I don't know how to do that
     private $searchbox: JQuery<HTMLElement>;
 
     public constructor() {
@@ -29,7 +28,6 @@ export class InstantSearch extends RE6Module {
      * Should be run immediately after the constructor finishes.
      */
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
 
         this.createDOM();

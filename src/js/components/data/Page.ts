@@ -92,8 +92,8 @@ export class Page {
 }
 
 export const PageDefintion = {
-    search: /^$|^\/posts\/?$/,
-    post: /^\/posts\/\d+\/?$/,
+    search: /^\/posts\/?$/,
+    post: /^\/posts\/\d+\/?(show_seq)?$/,
     upload: /\/uploads\/new\/?/,
     forum: /^\/forum_topics\/?.*/,
     forumPost: /^\/forum_topics\/\d+.*/,
@@ -101,5 +101,6 @@ export const PageDefintion = {
     set: /^\/post_sets\/.+/,
     popular: /^\/explore\/posts\/popular.?/,
     favorites: /^\/favorites\/?.*/,
-    wiki: /^\/wiki_pages\/[0-9]+/
+    wiki: /^\/wiki_pages\/[0-9]+/,
+    comments: /^\/comments\??.*/g,
 };

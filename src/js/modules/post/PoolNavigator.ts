@@ -1,6 +1,6 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
 import { PageDefintion } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
+import { RE6Module, Settings } from "../../components/RE6Module";
 
 export class PoolNavigator extends RE6Module {
 
@@ -34,7 +34,6 @@ export class PoolNavigator extends RE6Module {
      * Should be run immediately after the constructor finishes.
      */
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
 
         this.buildDOM();
@@ -63,7 +62,9 @@ export class PoolNavigator extends RE6Module {
         const navbars = poolNavigator.navbars,
             active = poolNavigator.activeNav;
         if (navbars.length == 0) return;
-        navbars[active].element.find("a.next").first()[0].click();
+        const button = navbars[active].element.find<HTMLElement>("a.next").first()[0];
+        if (button === undefined) return;
+        button.click();
     }
 
     /** Emulates a click on the "prev" button */
@@ -72,7 +73,9 @@ export class PoolNavigator extends RE6Module {
         const navbars = poolNavigator.navbars,
             active = poolNavigator.activeNav;
         if (navbars.length == 0) return;
-        navbars[active].element.find("a.prev").first()[0].click();
+        const button = navbars[active].element.find<HTMLElement>("a.prev").first()[0];
+        if (button === undefined) return;
+        button.click();
     }
 
     /** Creates the module structure */

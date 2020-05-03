@@ -1,9 +1,9 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
+import { Danbooru } from "../../components/api/Danbooru";
 import { PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
-import { User } from "../../components/data/User";
 import { PostFilter } from "../../components/data/PostFilter";
-import { Danbooru } from "../../components/api/Danbooru";
+import { User } from "../../components/data/User";
+import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
  * Blacklist Enhancer  
@@ -35,13 +35,10 @@ export class BlacklistEnhancer extends RE6Module {
      * Should be run immediately after the constructor finishes.
      */
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
 
         //Override default blacklist function
-        Danbooru.Blacklist.apply = (): void => { return; };
-        Danbooru.Blacklist.initialize_anonymous_blacklist = (): void => { return; };
-        Danbooru.Blacklist.initialize_all = (): void => { return; };
+        Danbooru.Blacklist.stub_vanilla_functions();
         Danbooru.Blacklist.initialize_disable_all_blacklists();
         $("#blacklisted-hider").remove();
 

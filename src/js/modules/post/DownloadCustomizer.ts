@@ -1,8 +1,8 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
+import { XM } from "../../components/api/XM";
+import { PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
 import { TagTypes } from "../../components/data/Tag";
-import { PageDefintion } from "../../components/data/Page";
-import { GM } from "../../components/api/GM";
+import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
  * Renames the files to a user-readable scheme for download
@@ -32,7 +32,6 @@ export class DownloadCustomizer extends RE6Module {
      * Should be run immediately after the constructor finishes.
      */
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
 
         this.post = Post.getViewingPost();
@@ -42,11 +41,8 @@ export class DownloadCustomizer extends RE6Module {
 
         this.link.click(event => {
             event.preventDefault();
-            GM.download({
-                url: this.link.attr("href"),
-                name: this.link.attr("download"),
-                saveAs: true,
-            });
+            event.stopImmediatePropagation();
+            XM.Connect.download(this.link.attr("href"), this.link.attr("download"));
         });
     }
 

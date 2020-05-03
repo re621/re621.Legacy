@@ -11,15 +11,31 @@ export class Tabbed {
         this.config = config;
     }
 
+    /**
+     * Creates a JQuery-UI tab element based on the provided configuration
+     * @deprecated Alias of a more standard `get()`. Use that instead.
+     */
     public create(): JQuery<HTMLElement> {
+        return this.get();
+    }
+
+    /**
+     * Creates a JQuery-UI tab element based on the provided configuration
+     * @param clearCache If true, clears cache and re-creates the element from scratch
+     */
+    public get(clearCache = false): JQuery<HTMLElement> {
+        if (this.$container !== undefined && !clearCache)
+            return this.$container;
 
         this.$container = $("<div>");
         const $tabList = $("<ul>").appendTo(this.$container);
 
         this.config.content.forEach((entry, index) => {
-            const $tab = $("<a>")
-                .attr("href", "#fragment-" + index)
-                .html(entry.name);
+            let $tab: JQuery<HTMLElement>;
+            if (typeof entry.name === "string")
+                $tab = $("<a>").html(entry.name);
+            else $tab = entry.name;
+            $tab.attr("href", "#fragment-" + index)
             $("<li>").appendTo($tabList).append($tab);
 
             $("<div>")
@@ -57,8 +73,8 @@ interface TabbedConfig {
 }
 
 export interface TabContent {
-    /** Tab name. If there is only one tab, does nothing. */
-    name: string;
+    /** Either the tab name, or JQuery element corresponding to the selector */
+    name: string | JQuery<HTMLAnchorElement>;
     /** JQuery element with the modal contents */
     page: JQuery<HTMLElement>;
     /** If true, strips the top margins so that a Tabbed object could be fitted in it */

@@ -1,35 +1,81 @@
-import { UpdateData, UpdateDefinition } from "./SubscriptionManager";
 import { RE6Module } from "../../components/RE6Module";
+import { UpdateContent, UpdateData } from "./SubscriptionManager";
 
 export interface Subscription extends RE6Module {
+
     /**
-     * Returns the name of the tab
+     * Parameter that contains various functions used to format subscription updates properly.  
+     * @see UpdateActions
+     */
+    updateActions: UpdateActions;
+
+    /**
+     * Returns a display name of the Subscription, to be used in the selection tab.  
+     * This may or may not be unique, and thus should not be used to differentiate subscription modules.  
      */
     getName(): string;
+
+    // ===== Buttons =====
+
+    /** Creates and returns a "subscribe" button */
+    makeSubscribeButton(): JQuery<HTMLElement>;
+    /** Creates and returns an "unsubscribe" button */
+    makeUnsubscribeButton(): JQuery<HTMLElement>;
+
+    /** Returns a set of elements to which subscribe / unsubscribe buttons should be attached. */
+    getButtonAttachment(): JQuery<HTMLElement>;
+    /** Insert the passed button to an attachment point from `getButtonAttachment()` */
+    insertButton($attachment: JQuery<HTMLElement>, $button: JQuery<HTMLElement>): void;
+
     /**
-     * Elements where a subscribe/unsubscribe button should be appended to
-     * The elements will be passedt to getSubscriberId
+     * Returns an subscription ID (i.e. pool_id), derived from an element on the page
+     * @param $element attachment point from `getButtonAttachment()`
      */
-    getButtonElements(): JQuery<HTMLElement>;
-    createSubscribeButton(): JQuery<HTMLElement>;
-    createUnsubscribeButton(): JQuery<HTMLElement>;
+    getSubscriberId($element: JQuery<HTMLElement>): string;
+
     /**
-     * Insert the passed button to the elements from getButtonElements
+     * Returns an subscription name (i.e. pool name), derived from an element on the page
+     * @param $element attachment point from `getButtonAttachment()`
      */
-    insertButton($element: JQuery<HTMLElement>, $button: JQuery<HTMLElement>): void;
+    getSubscriberName($element: JQuery<HTMLElement>): string;
+
+    // ===== Updates =====
+
+    /**
+     * The maximum size of an API request batch.  
+     * For subscriptions that are retrieved via numeric ID, this value is probably 100.  
+     * For those that are retrieved by a string name, this value is (likely) set to 40.  
+     */
+    subBatchSize: number;
+
     /**
      * Returns all entries which are considered to be updated,
      * i.e the api update date is larger than the last updated date
+     * @param lastUpdate Timestamp of the previous update
+     * @param status JQuery element to which status updates are to be appended
      */
-    getUpdatedEntries(lastUpdate: number): Promise<UpdateData>;
+    getUpdatedEntries(lastUpdate: number, status: JQuery<HTMLElement>): Promise<UpdateData>;
+
     /**
-     * This function should return the information needed to identify a specific subscription item
-     * for example the pool or forum_topic id
-     * @param $element the element which matched the selector on which to append buttons to
+     * Clears the cached subscription data for the module.  
+     * Uses pushSettings() internally, returns a promise that is fulfilled when the action is complete.
      */
-    getSubscriberId($element: JQuery<HTMLElement>): string;
-    /**
-     * Tab which will hold the updates. Updates are automatically added by the SubscriptionManager
-     */
-    updateDefinition: UpdateDefinition;
+    clearCache(): Promise<boolean>;
+}
+
+export interface UpdateActions {
+    // What link should be opened when you click on the image? Leave empty for no action
+    imageHref?: (data: UpdateContent) => string;
+    // Image link which should be displayed on the left side of the entry
+    imageSrc: (data: UpdateContent) => string;
+    // Should the image be hidden, if it triggers the error event?
+    imageRemoveOnError?: boolean;
+    // Link to get to the update
+    updateHref?: (data: UpdateContent) => string;
+    // Text for the updatelink
+    updateText: (data: UpdateContent) => string;
+    // Text to display when clicking on sourceLink
+    sourceHref?: (data: UpdateContent) => string;
+    // Link to where the "first page" of the subscription
+    sourceText: (data: UpdateContent) => string;
 }

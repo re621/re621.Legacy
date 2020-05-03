@@ -1,8 +1,9 @@
 import { Danbooru } from "../../components/api/Danbooru";
-import { GM } from "../../components/api/GM";
+import { XM } from "../../components/api/XM";
 import { PageDefintion } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Util } from "../../components/structure/Util";
 
 export enum ThumbnailPerformanceMode {
@@ -23,7 +24,7 @@ export class ThumbnailEnhancer extends RE6Module {
     private static zoomPaused = false;
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.popular, PageDefintion.favorites]);
+        super([PageDefintion.search, PageDefintion.popular, PageDefintion.favorites, PageDefintion.comments]);
     }
 
     protected getDefaultSettings(): Settings {
@@ -50,13 +51,17 @@ export class ThumbnailEnhancer extends RE6Module {
     }
 
     public create(): void {
-        this.postContainer = $("div#posts-container");
+        super.create();
+
+        this.postContainer = $("div#page");
 
         const upscaleMode: ThumbnailPerformanceMode = this.fetchSettings("upscale"),
             clickAction: ThumbnailClickAction = this.fetchSettings("clickAction");
-        $("div#posts-container article.post-preview").each((index, element) => {
-            ThumbnailEnhancer.modifyThumbnail($(element), upscaleMode, clickAction);
-        });
+
+        const thumbnails = this.postContainer.find<HTMLElement>("article.post-preview, div.post-preview").get();
+        for (const thumb of thumbnails) {
+            ThumbnailEnhancer.modifyThumbnail($(thumb), upscaleMode, clickAction);
+        }
 
         this.toggleHoverZoom(this.fetchSettings("zoom"));
         this.setZoomScale(this.fetchSettings("zoomScale"));
@@ -149,10 +154,10 @@ export class ThumbnailEnhancer extends RE6Module {
      * @param state True to hide, false to restore
      */
     public static pauseHoverActions(zoomPaused = true): void {
-        if (zoomPaused) $("div#posts-container").attr({ "data-thumb-zoom": "false", "data-thumb-vote": "false", });
+        if (zoomPaused) $("div#page").attr({ "data-thumb-zoom": "false", "data-thumb-vote": "false", });
         else {
             const module = ModuleController.get(ThumbnailEnhancer);
-            $("div#posts-container").attr({
+            $("div#page").attr({
                 "data-thumb-zoom": module.fetchSettings("zoom"),
                 "data-thumb-vote": module.fetchSettings("vote"),
             });
@@ -166,17 +171,20 @@ export class ThumbnailEnhancer extends RE6Module {
      * @param $article JQuery element `article.post-preview`
      * @param upscaleMode If / when to load upscaled versions of the image
      */
-    public static modifyThumbnail($article: JQuery<HTMLElement>, upscaleMode = ThumbnailPerformanceMode.Hover, clickAction = ThumbnailClickAction.NewTab): void {
+    public static async modifyThumbnail($article: JQuery<HTMLElement>, upscaleMode = ThumbnailPerformanceMode.Hover, clickAction = ThumbnailClickAction.NewTab): Promise<void> {
 
         /* Create the structure */
-        const $link = $article.find("a.preview-box"),
+        const $link = $article.find<HTMLElement>("a.preview-box"),
             postID = parseInt($article.attr("data-id")),
-            $picture = $article.find("picture"),
             $img = $article.find("img"),
-            $imgData = $img.attr("title").split("\n").slice(0, -2);     // Replace if the post date is added for the data-attributes.
+            $imgData = $img.attr("title") ? $img.attr("title").split("\n").slice(0, -2) : [];     // Replace if the post date is added for the data-attributes.
 
         $article.find("source").remove();                               // If we ever have to worry about mobile users, this will need to be addressed.
         $img.removeAttr("title").attr("alt", "#" + $article.attr("data-id"));
+
+        // Image not wrapped in picture - usually on comment pages and the like
+        let $picture = $article.find("picture");
+        if ($picture.length == 0) $picture = $("<picture>").insertAfter($img).append($img);
 
         // Loading icon
         $("<div>")
@@ -313,8 +321,8 @@ export class ThumbnailEnhancer extends RE6Module {
             $article.addClass("highlight");
             window.setTimeout(() => $article.removeClass("highlight"), 250);
 
-            if (clickAction === ThumbnailClickAction.NewTab) GM.openInTab(window.location.origin + $link.attr("href"));
-            else if (clickAction === ThumbnailClickAction.CopyID) GM.setClipboard($article.attr("data-id"), "text");
+            if (clickAction === ThumbnailClickAction.NewTab) XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
+            else if (clickAction === ThumbnailClickAction.CopyID) XM.Util.setClipboard($article.attr("data-id"), "text");
             else {
                 $link.off("click.re621.thumbnail");
                 $link[0].click();
@@ -323,41 +331,56 @@ export class ThumbnailEnhancer extends RE6Module {
 
 
         /* Load the larger images */
-        // Thumbnail types that are not compatible with the enhancer
-        if ($article.attr("data-file-ext") === "swf" || $article.attr("data-flags") === "deleted") return;
+        if ($article.attr("data-file-ext") === "swf" || $article.attr("data-flags").includes("deleted")) {
+            // Replace placeholder images with CSS-styled ones
+            // Don't forget to update PostHtml.create() accordingly
 
-        const sampleURL = $article.attr("data-large-file-url");
+            $("<img>").attr("src", DomUtilities.getPlaceholderImage()).addClass("re621-placeholder-replacer").appendTo($picture);
+            $img.addClass("re621-placeholder-default")
+            $picture.addClass("color-text post-placeholder");
 
-        if (upscaleMode === ThumbnailPerformanceMode.Hover) {
-            let timer: number;
-            $article.on("mouseenter", () => {
-                if (ThumbnailEnhancer.zoomPaused) return;
+            // <img class="has-cropped-true" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="#2234748">
 
-                // only load sample after a bit of waiting
-                // this prevents loading images just by hovering over them to get to another one
-                timer = window.setTimeout(() => {
-                    if ($img.attr("data-src") == sampleURL) return;
+            if ($article.attr("data-file-ext") === "swf") $picture.addClass("flash");
+            if ($article.attr("data-flags") === "deleted") $picture.addClass("deleted");
 
-                    $link.addClass("loading");
-                    $img.attr("data-src", sampleURL)
-                        .addClass("lazyload")
-                        .one("lazyloaded", () => {
-                            $link.removeClass("loading");
-                            $article.addClass("loaded");
-                        });
-                }, 200);
-            });
-            $article.on("mouseleave", () => {
-                window.clearTimeout(timer);
-            });
-        } else if (upscaleMode === ThumbnailPerformanceMode.Always) {
-            $link.addClass("loading");
-            $img.attr("data-src", sampleURL)
-                .addClass("lazyload")
-                .one("lazyloaded", () => {
-                    $link.removeClass("loading");
-                    $article.addClass("loaded");
+        } else {
+            // Add dynamically-loaded highres thumbnails
+
+            const sampleURL = $article.attr("data-large-file-url");
+
+            if (upscaleMode === ThumbnailPerformanceMode.Hover) {
+                let timer: number;
+                $article.on("mouseenter", () => {
+                    if (ThumbnailEnhancer.zoomPaused) return;
+
+                    // only load sample after a bit of waiting
+                    // this prevents loading images just by hovering over them to get to another one
+                    timer = window.setTimeout(() => {
+                        if ($img.attr("data-src") == sampleURL) return;
+
+                        $link.addClass("loading");
+                        $img.attr("data-src", sampleURL)
+                            .addClass("lazyload")
+                            .one("lazyloaded", () => {
+                                $link.removeClass("loading");
+                                $article.addClass("loaded");
+                            });
+                    }, 200);
                 });
+                $article.on("mouseleave", () => {
+                    window.clearTimeout(timer);
+                });
+            } else if (upscaleMode === ThumbnailPerformanceMode.Always) {
+                $link.addClass("loading");
+                $img.attr("data-src", sampleURL)
+                    .addClass($img.hasClass("later-lazyload") ? "" : "lazyload")
+                    .one("lazyloaded", () => {
+                        $link.removeClass("loading");
+                        $article.addClass("loaded");
+                    });
+            }
+
         }
 
         function parseRating(input: string): string {

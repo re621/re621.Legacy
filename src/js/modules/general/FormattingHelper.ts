@@ -92,6 +92,8 @@ export class FormattingManager extends RE6Module {
 
     /** Creates the Formatting Helpers for appropriate textareas */
     public create(): void {
+        super.create();
+
         $("div.dtext-previewable:has(textarea)").each((i, element) => {
             const $container = $(element);
             const newFormatter = new FormattingHelper($container, this, this.index);
@@ -161,20 +163,19 @@ class FormattingHelper {
 
         this.$form = this.$container.parents("form.simple_form").first();
         this.$textarea = this.$container.find("textarea");
-        this.$preview = this.$container.find("div.dtext-preview");
+        this.$preview = this.$container.find<HTMLElement>("div.dtext-preview");
 
         this.createToolbar();
         this.createButtonDrawer();
         this.createCharacterCounter();
 
         this.$form.find("input.dtext-preview-button").css("display", "none");
-        this.$form.find("input[type=submit]").addClass("button btn-neutral border-foreground dtext-submit");
+        this.$form.find("input[type=submit]").addClass("dtext-submit");
 
         // Add Styling
-        this.$container.addClass("bg-section color-text");
         this.$form.addClass("formatting-helper");
-        this.$textarea.addClass("bg-section border-foreground color-text");
-        this.$preview.addClass("bg-section border-foreground color-text");
+        this.$textarea.attr({ "rows": "0", "cols": "0" }).addClass("border-foreground");
+        this.$preview.addClass("border-foreground color-text");
 
         // Establish Sorting
         this.$formatButtons.sortable({
@@ -267,7 +268,7 @@ class FormattingHelper {
     private createToolbar(): void {
         const $bar = $("<div>")
             .addClass("comment-header")
-            .addClass("bg-highlight border-foreground")
+            .addClass("border-foreground")
             .prependTo(this.$container);
 
         // - Editing State Tabs
@@ -313,7 +314,7 @@ class FormattingHelper {
 
         $("<div>")
             .addClass("dtext-button-drawer-title")
-            .addClass("bg-highlight border-foreground color-text")
+            .addClass("border-foreground color-text")
             .append($newFormatButton)
             .appendTo(this.$container);
 
@@ -356,7 +357,7 @@ class FormattingHelper {
         // - Drawer Container Element
         this.$formatButtonsDrawer = $("<div>")
             .addClass("dtext-button-drawer")
-            .addClass("bg-section border-foreground color-text")
+            .addClass("border-foreground color-text")
             .appendTo(this.$container);
 
         // - Elements themselves are added when the user opens the drawer
@@ -381,36 +382,40 @@ class FormattingHelper {
     public loadButtons(): void {
         this.$formatButtons.empty();
 
-        this.parent.fetchSettings("buttonsActive", true).forEach((data: ButtonDefinition) => {
-            const buttonElement = this.createButton(data);
-            buttonElement.box.appendTo(this.$formatButtons);
+        this.parent.fetchSettings("buttonsActive", true).then((response) => {
+            response.forEach((data: ButtonDefinition) => {
+                const buttonElement = this.createButton(data);
+                buttonElement.box.appendTo(this.$formatButtons);
 
-            if (buttonElement.box.attr("data-text") === "") {
-                buttonElement.button.addClass("disabled");
-                buttonElement.button.removeAttr("title");
-            }
+                if (buttonElement.box.attr("data-text") === "") {
+                    buttonElement.button.addClass("disabled");
+                    buttonElement.button.removeAttr("title");
+                }
+            });
         });
 
         this.$formatButtonsDrawer.empty();
-        this.parent.fetchSettings("buttonInactive", true).forEach((data: ButtonDefinition) => {
-            const buttonData = this.createButton(data);
-            buttonData.box.appendTo(this.$formatButtonsDrawer);
+        this.parent.fetchSettings("buttonInactive", true).then((response) => {
+            response.forEach((data: ButtonDefinition) => {
+                const buttonData = this.createButton(data);
+                buttonData.box.appendTo(this.$formatButtonsDrawer);
+            });
         });
     }
 
     /** Re-indexes and saves the toolbar configuration */
-    private saveButtons(): void {
+    private async saveButtons(): Promise<void> {
         let buttonData: ButtonDefinition[] = [];
         this.$formatButtons.find("li").each(function (i, element) {
             buttonData.push(fetchData(element));
         });
-        this.parent.pushSettings("buttonsActive", buttonData);
+        await this.parent.pushSettings("buttonsActive", buttonData);
 
         buttonData = [];
         this.$formatButtonsDrawer.find("li").each(function (i, element) {
             buttonData.push(fetchData(element));
         });
-        this.parent.pushSettings("buttonInactive", buttonData);
+        await this.parent.pushSettings("buttonInactive", buttonData);
 
         this.$container.trigger("re621:formatter:update", [this]);
 

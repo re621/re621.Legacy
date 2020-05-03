@@ -1,4 +1,4 @@
-import { GM } from "../api/GM";
+import { XM } from "../api/XM";
 
 /**
  * Common utilities used in other modules
@@ -77,12 +77,13 @@ export class Util {
     /**
      * Returns the data at the specified location as a string.  
      * The location's domain MUST be listed in a @connect field in the script header.
+     * @deprecated Should be replaced with XM.Connect.xmlHttpPromise
      * @param url Page URL
      * @returns string Page data
      */
     public static async userscriptRequest(url: string): Promise<string> {
         return new Promise(resolve => {
-            GM.xmlHttpRequest({
+            XM.Connect.xmlHttpRequest({
                 method: "GET",
                 url: url,
                 headers: { "User-Agent": window["re621"]["useragent"] },
@@ -94,12 +95,13 @@ export class Util {
     /**
      * Returns the image at the specified location as a blob.  
      * The location's domain MUST be listed in a @connect field in the script header.
+     * @deprecated Should be replaced with XM.Connect.xmlHttpPromise
      * @param url Image URL
      * @returns blob Image data
      */
     public static async getImageBlob(url: string): Promise<Blob> {
         return new Promise((resolve) => {
-            GM.xmlHttpRequest({
+            XM.Connect.xmlHttpRequest({
                 method: "GET",
                 url: url,
                 headers: { "User-Agent": window["re621"]["useragent"] },
@@ -113,12 +115,13 @@ export class Util {
      * Returns the image at the specified location as a data-url.  
      * This is used to bypass e621's restrictions on external files.
      * The location's domain MUST be listed in a @connect field in the script header.
+     * @deprecated Should be replaced with XM.Connect.xmlHttpPromise
      * @param url Image URL
      * @returns string Data-URL
      */
     public static async getImageAsDataURL(url: string): Promise<string> {
         return new Promise((resolve) => {
-            GM.xmlHttpRequest({
+            XM.Connect.xmlHttpRequest({
                 method: "GET",
                 url: url,
                 headers: { "User-Agent": window["re621"]["useragent"] },
@@ -147,15 +150,24 @@ export class Util {
     }
 
     /**
-     * Split the array into chunks of specified size.
+     * Split the array into chunks of specified size.  
+     * If `altMode` is set to true, splits array into two parts.  
+     * - [0] is the size specified by the `size` argument  
+     * - [1] is the remainder.  
+     * Otherwise, splits the array normally.
      * @param input Original array
      * @param size Size of the resulting chunks
+     * @param altMode Alternative mode
      * @returns Array of smaller arrays of specified size
      */
-    public static chunkArray(input: any[], size: number): any[] {
+    public static chunkArray(input: any[], size: number, altMode = false): any[] {
         const result = [];
-        for (let i = 0; i < input.length; i += size) {
-            result.push(input.slice(i, i + size));
+        if (altMode) {
+            result[0] = input.slice(0, size);
+            result[1] = input.slice(size);
+        } else {
+            for (let i = 0; i < input.length; i += size)
+                result.push(input.slice(i, i + size));
         }
         return result;
     }
@@ -166,11 +178,38 @@ export class Util {
      * @returns HTML output
      */
     public static quickParseMarkdown(input: string): string {
+        if (input === undefined) return "";
         return input
             .replace(/\*\*(.*?)\*\*/gm, "<strong>$1</strong>")
             .replace(/^[-]+(.*)?/gmi, "<ul><li>$1</li></ul>")
             .replace(/\<\/ul\>\r\n\<ul\>/gm, "")
             .replace(/\n(?!<)/gm, "<br />");
+    }
+
+    /**
+     * Parses the provided DText string, returning it as plain text
+     * @param input Input to process
+     * @param removeSections If true, removes `quote`, `code`, and `sections` blocks altogether
+     */
+    public static parseDText(input: string, removeSections = true): string {
+        if (removeSections) {
+            input = input.replace(/\[quote\][\s\S]*\[\/quote\]/g, "")
+                .replace(/\[code\][\s\S]*\[\/code\]/g, "")
+                .replace(/\\[section[\s\S]*\[\/section\]/g, "");
+        }
+
+        input = input
+            .replace(/\[b\]([\s\S]*)\[\/b\]/g, "<b>$1</b>")                     // bold
+            .replace(/\[i\]([\s\S]*)\[\/i\]/g, "<i>$1</i>")                     // italicts
+            .replace(/\[u\]([\s\S]*)\[\/u\]/g, "<u>$1</u>")                     // Underline
+            .replace(/\[o\]([\s\S]*)\[\/o\]/g, "<o>$1</o>")                     // Overline
+            .replace(/\[s\]([\s\S]*)\[\/s\]/g, "<s>$1</s>")                     // Strikeout
+            .replace(/\[sup\]([\s\S]*)\[\/sup\]/g, "<sup>$1</sup>")             // Superscript
+            .replace(/\[sub\]([\s\S]*)\[\/sub\]/g, "<sub>$1</sub>")             // Subscript
+            .replace(/\[spoiler\]([\s\S]*)\[\/spoiler\]/g, "<span>$1</span>")   // Spoiler
+            .replace(/\[color\]([\s\S]*)\[\/color\]/g, "<span>$1</span>")       // Color
+
+        return input;
     }
 
     /**

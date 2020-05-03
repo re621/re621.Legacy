@@ -1,11 +1,11 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { PageDefintion, Page } from "../../components/data/Page";
+import { DownloadQueue } from "../../components/api/DownloadQueue";
 import { E621 } from "../../components/api/E621";
 import { APIPool } from "../../components/api/responses/APIPool";
-import { Util } from "../../components/structure/Util";
-import { DownloadQueue } from "../../components/api/DownloadQueue";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { APIPostGroup } from "../../components/api/responses/APIPostGroup";
+import { Page, PageDefintion } from "../../components/data/Page";
+import { RE6Module, Settings } from "../../components/RE6Module";
+import { Util } from "../../components/structure/Util";
 
 declare const saveAs;
 
@@ -63,7 +63,6 @@ export class PoolDownloader extends RE6Module {
 
     /** Creates the module's structure. */
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
 
         const base = Page.matches(PageDefintion.pool) ? "div#c-pools" : "div#c-sets";
@@ -146,12 +145,19 @@ export class PoolDownloader extends RE6Module {
             // Create API requests, separated into chunks
             this.infoText
                 .attr("data-state", "loading")
-                .html(`Fetching API data . . .`);
+                .html("Fetching API data . . .");
 
             const dataQueue: Promise<APIPost[]>[] = [];
-            Util.chunkArray(imageList, PoolDownloader.chunkSize).forEach((value) => {
-                dataQueue.push(E621.Posts.get<APIPost>({ tags: "id:" + value.join(",") }));
-            });
+            const resultPages = Math.ceil(imageList.length / 320);
+            this.infoFile.html(" &nbsp; &nbsp;request 1 / " + resultPages);
+
+            for (let i = 1; i <= resultPages; i++) {
+                dataQueue.push(new Promise(async (resolve) => {
+                    const result = await E621.Posts.get<APIPost>({ tags: "pool:" + pool.id, page: i, limit: 320 }, 500);
+                    this.infoFile.html(" &nbsp; &nbsp;request " + (i + 1) + " / " + resultPages);
+                    resolve(result);
+                }));
+            }
 
             return Promise.all(dataQueue);
         }).then((dataChunks) => {
@@ -161,6 +167,7 @@ export class PoolDownloader extends RE6Module {
 
             // Create an interface to output queue status
             const threadInfo: JQuery<HTMLElement>[] = [];
+            this.infoFile.html("");
             for (let i = 0; i < downloadQueue.getThreadCount(); i++) {
                 threadInfo.push($("<span>").appendTo(this.infoFile));
             }
@@ -204,7 +211,7 @@ export class PoolDownloader extends RE6Module {
                         },
                         {
                             onStart: (item, thread, index) => {
-                                this.infoText.html(`Downloading . . . ` + (queueSize - index) + " / " + queueSize);
+                                this.infoText.html(`Downloading ... <span class="float-right">` + (queueSize - index) + ` / ` + queueSize + `</span>`);
                                 threadInfo[thread]
                                     .html(item.file)
                                     .css("--progress", "0%");

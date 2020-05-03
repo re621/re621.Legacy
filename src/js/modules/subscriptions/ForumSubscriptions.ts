@@ -1,14 +1,23 @@
-import { UpdateData, UpdateDefinition, SubscriptionSettings, UpdateContent } from "./SubscriptionManager";
 import { E621 } from "../../components/api/E621";
-import { Page, PageDefintion } from "../../components/data/Page";
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { Subscription } from "./Subscription";
 import { APIForumTopic } from "../../components/api/responses/APIForumTopic";
+import { Page, PageDefintion } from "../../components/data/Page";
 import { User } from "../../components/data/User";
+import { RE6Module, Settings } from "../../components/RE6Module";
+import { Util } from "../../components/structure/Util";
+import { Subscription, UpdateActions } from "./Subscription";
+import { SubscriptionSettings, UpdateContent, UpdateData } from "./SubscriptionManager";
 
 export class ForumSubscriptions extends RE6Module implements Subscription {
 
-    updateDefinition: UpdateDefinition = {
+    protected getDefaultSettings(): Settings {
+        return {
+            enabled: true,
+            data: {},
+            cache: {},
+        };
+    }
+
+    updateActions: UpdateActions = {
         imageSrc: () => {
             return "";
         },
@@ -26,54 +35,74 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         }
     };
 
-    limit: number;
-
     public getName(): string {
         return "Forums";
     }
 
-    getSubscriberId(): string {
-        return Page.getPageID();
-    }
+    // ===== Buttons =====
 
-    getButtonElements(): JQuery<HTMLElement> {
-        if (Page.matches(PageDefintion.forumPost)) return $("div#c-forum-topics").first();
-        else return $();
-    }
-
-    public createSubscribeButton(): JQuery<HTMLElement> {
+    public makeSubscribeButton(): JQuery<HTMLElement> {
         return $("<button>")
-            .addClass(`large-subscribe-button subscribe`)
+            .addClass("large-subscribe-button subscribe")
             .addClass("button btn-success")
             .html("Subscribe");
     }
 
-    public createUnsubscribeButton(): JQuery<HTMLElement> {
+    public makeUnsubscribeButton(): JQuery<HTMLElement> {
         return $("<button>")
-            .addClass(`large-subscribe-button unsubscribe`)
+            .addClass("large-subscribe-button unsubscribe")
             .addClass("button btn-danger")
             .html("Unsubscribe");
+    }
+
+    public getButtonAttachment(): JQuery<HTMLElement> {
+        if (Page.matches(PageDefintion.forumPost)) return $("div#c-forum-topics").first();
+        else return $();
     }
 
     public insertButton($element: JQuery<HTMLElement>, $button: JQuery<HTMLElement>): void {
         $element.prepend($button);
     }
 
-    public async getUpdatedEntries(lastUpdate: number): Promise<UpdateData> {
+    public getSubscriberId(): string {
+        return Page.getPageID();
+    }
+
+    public getSubscriberName(): string {
+        return $("div#c-forum-topics div#a-show h1").first().text().trim().replace("Topic: ", "");
+    }
+
+    // ===== Updates =====
+
+    public subBatchSize = 100;
+
+    public async getUpdatedEntries(lastUpdate: number, status: JQuery<HTMLElement>): Promise<UpdateData> {
         const results: UpdateData = {};
 
-        const forumData: SubscriptionSettings = this.fetchSettings("data", true);
-        if (Object.keys(forumData).length === 0) {
-            return results;
+        status.append(`<div>. . . retreiving settings</div>`);
+        const storedSubs: SubscriptionSettings = await this.fetchSettings("data", true);
+        if (Object.keys(storedSubs).length === 0) return results;
+
+        status.append(`<div>. . . sending an API request</div>`);
+        const storedSubChunks = Util.chunkArray(Object.keys(storedSubs), this.subBatchSize);
+        const apiData: APIForumTopic[] = [];
+        for (const [index, chunk] of storedSubChunks.entries()) {
+            if (storedSubChunks.length > 1) status.append(`<div>&nbsp; &nbsp; &nbsp; - processing batch #${index}</div>`);
+            apiData.push(...await E621.Pools.get<APIForumTopic>({ "search[id]": chunk.join(",") }, 500));
         }
 
-        const forumsJson = await E621.ForumTopics.get<APIForumTopic>({ "search[id]": Object.keys(forumData).join(",") });
-        for (const forumJson of forumsJson) {
+        status.append(`<div>. . . formatting output/div>`);
+        for (const forumJson of apiData) {
             if (new Date(forumJson.updated_at).getTime() > lastUpdate && forumJson.updater_id !== User.getUserID()) {
                 results[new Date(forumJson.updated_at).getTime()] = await this.formatForumUpdate(forumJson);
             }
+
+            // Fetch and update the saved forum thread name
+            storedSubs[forumJson.id].name = forumJson.title.replace(/_/g, " ");
         }
-        this.pushSettings("data", forumData);
+
+        status.append(`<div>. . . outputting results</div>`);
+        await this.pushSettings("data", storedSubs);
         return results;
     }
 
@@ -82,20 +111,15 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
             id: value.id,
             name: value.title,
             md5: "",
-            extra: {    //comment count
+            extra: {    // comment count
                 count: value.response_count
-            }
+            },
+            new: true,
         };
     }
 
-    /**
-     * Returns a set of default settings values
-     * @returns Default settings
-     */
-    protected getDefaultSettings(): Settings {
-        return {
-            enabled: true,
-            data: {}
-        };
+    public async clearCache(): Promise<boolean> {
+        return this.pushSettings("cache", {});
     }
+
 }

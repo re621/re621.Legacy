@@ -2,9 +2,6 @@
 
 form.formatting-helper {
 
-    padding: 0;
-    background: unset !important;
-
     &.new_forum_post,
     &.edit_forum_post,
     &.edit_comment {
@@ -34,7 +31,8 @@ form.formatting-helper {
     }
 }
 
-div.dtext-previewable {
+div#c-uploads div#a-new div.dtext-previewable,
+div.input>div.dtext-previewable {
     display: grid;
     grid-template-columns: auto min-content;
     min-height: 12rem;
@@ -44,6 +42,8 @@ div.dtext-previewable {
 
         display: inline-grid;
         grid-template-columns: max-content auto min-content;
+
+        background: #00000020;
 
         width: 100%;
         padding-top: 0.5rem;
@@ -128,6 +128,8 @@ div.dtext-previewable {
         box-sizing: border-box;
         outline: 0;
 
+        // background: #ffffff10;
+
         box-shadow: unset;
         padding: 0.25rem;
         margin-bottom: 0 !important;
@@ -137,11 +139,6 @@ div.dtext-previewable {
 
         border-top: 0;
         border-radius: 0 0 6px 6px;
-    }
-
-    textarea:focus {
-        background: inherit;
-        color: inherit;
     }
 
     &[data-editing=false] div.comment-buttons,
@@ -157,6 +154,8 @@ div.dtext-previewable {
     div.dtext-button-drawer-title {
         grid-row: 1;
         grid-column: 2;
+
+        background: #00000020;
 
         margin-left: 1rem;
         text-align: center;
@@ -182,6 +181,8 @@ div.dtext-previewable {
         grid-template-rows: repeat(auto-fill, minmax(2.5rem, 1fr));
         align-items: center;
 
+        background: #ffffff10;
+
         min-width: 10rem;
         margin-left: 1rem;
         border-top: 0;
@@ -203,6 +204,8 @@ div.dtext-previewable {
         margin-bottom: -1.25rem;
         text-align: right;
         pointer-events: none;
+
+        color: black;
 
         span.char-counter {
             padding: 0.25rem 2rem;

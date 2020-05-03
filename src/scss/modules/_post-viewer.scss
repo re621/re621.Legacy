@@ -1,4 +1,15 @@
 /* Post Viewer Styles */
+
+// Post Navbar Tweak
+div#image-and-nav {
+    width: fit-content;
+
+    div.nav-notice {
+        margin-bottom: 0;
+    }
+}
+
+// Image Toolbar
 section#image-extra-controls {
     display: inline-grid !important;
     grid-template-columns: max-content max-content max-content max-content max-content auto;

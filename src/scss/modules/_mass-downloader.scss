@@ -6,8 +6,10 @@ section#downloader-box {
     grid-column-gap: 0.5rem;
     grid-row-gap: 0.5rem;
 
-    position: sticky;
-    top: 10rem;
+    &[data-fixed=true] {
+        position: sticky;
+        top: 10rem;
+    }
 
     h1 {
         grid-column: span 2;
@@ -116,7 +118,7 @@ div#posts-container[data-downloading=true] {
             position: absolute;
             top: 0.5rem;
             right: 0.5rem;
-            z-index: 100;
+            z-index: 50;
 
             font-family: "Font Awesome 5 Free";
             font-weight: 500;

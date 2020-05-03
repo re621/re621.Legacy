@@ -1,8 +1,9 @@
+import { DomUtilities } from "../structure/DomUtilities";
 import { APIPost } from "./responses/APIPost";
 
 export class PostHtml {
 
-    public static create(json: APIPost, loadLargeImage = true): JQuery<HTMLElement> {
+    public static create(json: APIPost, lazyload = true, loadlarge = false): JQuery<HTMLElement> {
         //data-has-sound
         //data-flags
         const allTags = APIPost.getTagString(json);
@@ -30,16 +31,20 @@ export class PostHtml {
 
         const $img = $("<img>")
             .addClass("has-cropped-false")
-            .addClass("lazyload")
             .attr({
                 "title": `Rating: ${json.rating}\nID: ${json.id}\nDate: ${json.created_at}\nScore: ${json.score.total}\n\n ${allTags}`,
                 "alt": allTags,
-                "src": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
+                "src": DomUtilities.getPlaceholderImage(),
             })
             .appendTo($picture);
 
-        if (loadLargeImage) $img.attr("data-src", json.file.url);
-        else $img.attr("data-src", json.preview.url);
+        if (!(json.file.ext === "swf" || $article.attr("data-flags").includes("deleted"))) {
+            // Don't forget to update ThumbnailEnhancer accordingly
+            $img.addClass(lazyload ? "lazyload" : "later-lazyload");
+
+            if (loadlarge) $img.attr("data-src", json.sample.url);
+            else $img.attr("data-src", json.preview.url);
+        }
 
         const $desc = $("<div>")
             .attr("class", "desc")

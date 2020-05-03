@@ -1,4 +1,5 @@
-import { GM, GMxmlHttpRequestEvent, GMxmlHttpRequestResponse, GMxmlHttpRequestProgressEvent } from "./GM";
+import { XM } from "./XM";
+import { GMxmlHttpRequestEvent, GMxmlHttpRequestProgressEvent, GMxmlHttpRequestResponse } from "./XMConnect";
 
 declare const JSZip;
 
@@ -109,17 +110,17 @@ export class DownloadQueue {
      * @param item File descriptor
      * @param thread Process that requested the file
      */
-    private async getDataBlob(item: QueuedFile, thread: number): Promise<Blob> {
+    private async getDataBlob(item: QueuedFile, thread: number): Promise<ArrayBuffer> {
         return new Promise((resolve, reject) => {
             let timer: number;
-            GM.xmlHttpRequest({
+            XM.Connect.xmlHttpRequest({
                 method: "GET",
                 url: item.file.path,
                 headers: {
                     "User-Agent": window["re621"]["useragent"],
                     "X-User-Agent": window["re621"]["useragent"],
                 },
-                responseType: "blob",
+                responseType: "arraybuffer",
                 onloadstart: (event) => {
                     item.listeners.onLoadStart(item.file, thread, event);
                 },
@@ -137,7 +138,7 @@ export class DownloadQueue {
                 },
                 onload: (event) => {
                     item.listeners.onLoadFinish(item.file, thread, event);
-                    resolve(event.response as Blob);
+                    resolve(event.response as ArrayBuffer);
                 }
             });
         });

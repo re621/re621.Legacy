@@ -1,10 +1,10 @@
-import { Modal } from "../../components/structure/Modal";
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { User } from "../../components/data/User";
-import { Form } from "../../components/structure/Form";
 import { Page } from "../../components/data/Page";
+import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
+import { Form } from "../../components/structure/Form";
+import { Modal } from "../../components/structure/Modal";
 
 /**
  * HeaderCustomizer  
@@ -21,6 +21,9 @@ export class HeaderCustomizer extends RE6Module {
     private addTabButton: JQuery<HTMLElement>;
     private addTabModal: Modal;
     private addTabForm: Form;
+
+    // Temporary workaround for forum updates notification
+    private hasForumUpdates: boolean;
 
     public constructor() {
         super();
@@ -44,6 +47,7 @@ export class HeaderCustomizer extends RE6Module {
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
+
             hotkeyTab1: "1",
             hotkeyTab2: "2",
             hotkeyTab3: "3",
@@ -53,6 +57,7 @@ export class HeaderCustomizer extends RE6Module {
             hotkeyTab7: "7",
             hotkeyTab8: "8",
             hotkeyTab9: "9",
+
             tabs: [
                 { name: "Account", href: "/users/home" },
                 { name: "Posts", href: "/posts" },
@@ -67,7 +72,9 @@ export class HeaderCustomizer extends RE6Module {
                 { name: "Discord", href: "/static/discord" },
                 { name: "Help", href: "/help" },
                 { name: "More »", href: "/static/site_map" },
-            ]
+            ],
+
+            forumUpdateDot: true,
         };
     }
 
@@ -76,7 +83,6 @@ export class HeaderCustomizer extends RE6Module {
      * Should be run immediately after the constructor finishes.
      */
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
 
         this.$menu = $("menu.main");
@@ -133,6 +139,8 @@ export class HeaderCustomizer extends RE6Module {
      * Builds basic structure for the module
      */
     private createDOM(): void {
+        this.hasForumUpdates = $("li#nav-forum").hasClass("forum-updated");
+
         this.$oldMenu = $("<div>").css("display", "none").appendTo("body");
         this.$menu.children().appendTo(this.$oldMenu);
         this.$menu.addClass("custom");
@@ -161,7 +169,8 @@ export class HeaderCustomizer extends RE6Module {
         // === Tab Configuration Interface
         this.addTabButton = DomUtilities.addSettingsButton({
             name: `<i class="fas fa-tasks"></i>`,
-            class: "float-left",
+            title: "Edit Header Tabs",
+            tabClass: "float-left",
         });
 
         this.addTabForm = new Form(
@@ -261,11 +270,12 @@ export class HeaderCustomizer extends RE6Module {
         const $link = $("<a>")
             .html(this.processTabVariables(config.name))
             .attr("title", this.processTabVariables(config.title))
-
             .appendTo($tab);
 
         if (config.href != "")
             $link.attr("href", this.processTabVariables(config.href));
+        if (config.href === "/forum_topics" && this.fetchSettings("forumUpdateDot") && this.hasForumUpdates)
+            $link.addClass("tab-has-updates");
 
         if (config.controls) { $tab.addClass("configurable"); }
         if (config.class) { $tab.addClass(config.class); }
@@ -343,7 +353,7 @@ export class HeaderCustomizer extends RE6Module {
     /**
      * Iterates over the header menu and saves the data to cookies
      */
-    private saveNavbarSettings(): void {
+    private async saveNavbarSettings(): Promise<void> {
         const tabData = [];
         this.$menu.find("li").each(function (i, element) {
             const $tab = $(element);
@@ -353,11 +363,11 @@ export class HeaderCustomizer extends RE6Module {
                 href: $tab.attr("data-href"),
             });
         });
-        this.pushSettings("tabs", tabData);
+        await this.pushSettings("tabs", tabData);
     }
 
     private openTabNum(event, key: string): void {
-        const tabs = ModuleController.getWithType<HeaderCustomizer>(HeaderCustomizer).$menu.find("li > a");
+        const tabs = ModuleController.getWithType<HeaderCustomizer>(HeaderCustomizer).$menu.find<HTMLElement>("li > a");
         if (parseInt(key) > tabs.length) return;
         tabs[parseInt(key) - 1].click();
     }

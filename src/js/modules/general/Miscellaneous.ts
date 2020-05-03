@@ -1,7 +1,10 @@
 import { Api } from "../../components/api/Api";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
+import { XM } from "../../components/api/XM";
 import { Page, PageDefintion } from "../../components/data/Page";
+import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { ThumbnailClickAction, ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
 
 /**
  * Miscellaneous functionality that does not require a separate module
@@ -34,12 +37,17 @@ export class Miscellaneous extends RE6Module {
             hotkeySubmit: "alt+return",
 
             removeSearchQueryString: true,
+
+            improveTagCount: true,
+            shortenTagNames: true,
+
             stickySearchbox: true,
             stickyHeader: false,
 
-            improveTagCount: true,
             collapseCategories: true,
             categoryData: [],
+
+            avatarClick: true,
         };
     }
 
@@ -48,7 +56,6 @@ export class Miscellaneous extends RE6Module {
      * Should be run immediately after the constructor finishes.
      */
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
 
         // Remove the query string on posts
@@ -57,8 +64,9 @@ export class Miscellaneous extends RE6Module {
         }
 
         // Replaces the tag count estimate with the real number
-        if (this.fetchSettings("improveTagCount") === true && Page.matches([PageDefintion.search, PageDefintion.post])) {
-            this.improveTagCount();
+        if (Page.matches([PageDefintion.search, PageDefintion.post])) {
+            this.improveTagCount(this.fetchSettings("improveTagCount"));
+            this.shortenTagNames(this.fetchSettings("shortenTagNames"));
         }
 
         // Restore the collapsed categories
@@ -71,17 +79,20 @@ export class Miscellaneous extends RE6Module {
             this.autoFocusSearchBar();
         }
 
+        // Enhanced quoting button
         if (Page.matches([PageDefintion.post, PageDefintion.forum])) {
             this.handleQuoteButton();
         }
 
+        // Sticky elements
         if (Page.matches([PageDefintion.search, PageDefintion.post, PageDefintion.favorites])) {
             this.createStickySearchbox(this.fetchSettings("stickySearchbox"));
         }
 
         this.createStickyHeader(this.fetchSettings("stickyHeader"));
 
-        this.registerHotkeys();
+        // Double-clicking avatars
+        this.handleAvatarClick(this.fetchSettings("avatarClick"));
     }
 
     /** Emulates the clicking on "New Comment" link */
@@ -119,24 +130,32 @@ export class Miscellaneous extends RE6Module {
     }
 
     /**
+     * Shortens the tag names to fit in one line
+     * @param state True to shorten, false to restore
+     */
+    public shortenTagNames(state = true): void {
+        $("section#tag-box, section#tag-list").attr("data-shorten-tagnames", state + "");
+    }
+
+    /**
      * Records which tag categories the user has collapsed.
      */
-    private collapseTagCategories(): void {
-        let storedCats: string[] = this.fetchSettings("categoryData", true);
+    private async collapseTagCategories(): Promise<void> {
+        let storedCats: string[] = await this.fetchSettings("categoryData", true);
         $("section#tag-list .tag-list-header").each((index, element) => {
             const $header = $(element),
                 cat = $header.attr("data-category");
             if (storedCats.indexOf(cat) !== -1) $header.get(0).click();
 
-            $header.on("click.danbooru", () => {
-                storedCats = this.fetchSettings("categoryData", true);
+            $header.on("click.danbooru", async () => {
+                storedCats = await this.fetchSettings("categoryData", true);
                 if ($header.hasClass("hidden-category")) {
                     storedCats.push(cat);
                 } else {
                     const index = storedCats.indexOf(cat);
                     if (index !== -1) storedCats.splice(index, 1);
                 }
-                this.pushSettings("categoryData", storedCats, true);
+                await this.pushSettings("categoryData", storedCats);
             });
         });
 
@@ -232,6 +251,53 @@ export class Miscellaneous extends RE6Module {
     }
 
     /**
+     * Handles the double-clicking actions on the avatars
+     * @param state True to enable, false to disable
+     */
+    private handleAvatarClick(state = true): void {
+        $("div.avatar > div.active > a")
+            .off("click.re621.thumbnail")
+            .off("dblclick.re621.thumbnail");
+
+        if (!state) return;
+
+        /* Handle double-click */
+        const clickAction = ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer).fetchSettings("clickAction");
+
+        const avatars = $("div.avatar > div > a").get();
+        for (const element of avatars) {
+            const $link = $(element);
+            let dbclickTimer: number;
+            let prevent = false;
+
+            $link.on("click.re621.thumbnail", (event) => {
+                if (event.button !== 0) { return; }
+                event.preventDefault();
+
+                dbclickTimer = window.setTimeout(() => {
+                    if (!prevent) {
+                        $link.off("click.re621.thumbnail");
+                        $link[0].click();
+                    }
+                    prevent = false;
+                }, 200);
+            }).on("dblclick.re621.thumbnail", (event) => {
+                if (event.button !== 0) { return; }
+
+                event.preventDefault();
+                window.clearTimeout(dbclickTimer);
+                prevent = true;
+
+                if (clickAction === ThumbnailClickAction.NewTab) XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
+                else {
+                    $link.off("click.re621.thumbnail");
+                    $link[0].click();
+                }
+            });
+        }
+    }
+
+    /*
      * Submits the form on hotkey press
      * @param event Keydown event
      */

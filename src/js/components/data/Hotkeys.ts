@@ -20,7 +20,7 @@ export class Hotkeys {
     private static enabled = true;
 
     private constructor() {
-        Danbooru.Utility.disableShortcuts = true;
+        Danbooru.Utility.disableShortcuts(true);
 
         if (Page.matches(PageDefintion.post)
             && $("section#image-container").attr("data-file-ext") === "swf")
@@ -40,6 +40,7 @@ export class Hotkeys {
             const key = event.key
                 .toLowerCase()
                 .replace(/enter/g, "return")
+                .replace(/control/g, "ctrl")
                 .replace(/arrow/g, "");
             if (validKeys.indexOf(key) == -1) return;
             keys.push(key);

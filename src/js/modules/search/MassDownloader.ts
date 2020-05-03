@@ -1,11 +1,11 @@
-import { RE6Module, Settings } from "../../components/RE6Module";
-import { PageDefintion } from "../../components/data/Page";
-import { ThumbnailEnhancer } from "./ThumbnailsEnhancer";
-import { Util } from "../../components/structure/Util";
+import { DownloadQueue } from "../../components/api/DownloadQueue";
 import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
-import { DownloadQueue } from "../../components/api/DownloadQueue";
+import { PageDefintion } from "../../components/data/Page";
+import { RE6Module, Settings } from "../../components/RE6Module";
+import { Util } from "../../components/structure/Util";
 import { InfiniteScroll } from "./InfiniteScroll";
+import { ThumbnailEnhancer } from "./ThumbnailsEnhancer";
 
 declare const saveAs;
 
@@ -51,16 +51,17 @@ export class MassDownloader extends RE6Module {
             enabled: true,
             template: "%artist%/%postid%-%copyright%-%character%-%species%",
             autoDownloadArchive: true,
+            fixedSection: true,
         };
     }
 
     /** Creates the module's structure. */
     public create(): void {
-        if (!this.canInitialize()) return;
         super.create();
 
         this.section = $("<section>")
             .attr("id", "downloader-box")
+            .attr("data-fixed", this.fetchSettings("fixedSection") + "")
             .addClass("bg-foreground")
             .appendTo("aside#sidebar");
         $("<h1>").html("Download").appendTo(this.section);
@@ -144,6 +145,14 @@ export class MassDownloader extends RE6Module {
         }
     }
 
+    /**
+     * Toggles the fixed state of the interface section
+     */
+    public toggleFixedSection(): void {
+        if (this.section.attr("data-fixed") === "true") this.section.attr("data-fixed", "false");
+        else this.section.attr("data-fixed", "true")
+    }
+
     /** Processes and downloads the selected files. */
     private processFiles(): void {
         if (this.processing) return;
@@ -172,11 +181,18 @@ export class MassDownloader extends RE6Module {
         // Create API requests, separated into chunks
         this.infoText
             .attr("data-state", "loading")
-            .html(`Fetching API data . . .`);
+            .html("Fetching API data . . .");
 
         const dataQueue: Promise<APIPost[]>[] = [];
-        Util.chunkArray(imageList, MassDownloader.chunkSize).forEach((value) => {
-            dataQueue.push(E621.Posts.get<APIPost>({ tags: "id:" + value.join(",") }));
+        const resultPages = Util.chunkArray(imageList, MassDownloader.chunkSize);
+        this.infoFile.html(" &nbsp; &nbsp;request 1 / " + resultPages.length);
+
+        resultPages.forEach((value, index) => {
+            dataQueue.push(new Promise(async (resolve) => {
+                const result = await E621.Posts.get<APIPost>({ tags: "id:" + value.join(",") });
+                this.infoFile.html(" &nbsp; &nbsp;request " + (index + 1) + " / " + resultPages.length);
+                resolve(result);
+            }));
         });
 
         // Fetch the post data from the API
@@ -187,6 +203,7 @@ export class MassDownloader extends RE6Module {
 
             // Create an interface to output queue status
             const threadInfo: JQuery<HTMLElement>[] = [];
+            this.infoFile.html("");
             for (let i = 0; i < downloadQueue.getThreadCount(); i++) {
                 threadInfo.push($("<span>").appendTo(this.infoFile));
             }
@@ -224,7 +241,7 @@ export class MassDownloader extends RE6Module {
                         },
                         {
                             onStart: (item, thread, index) => {
-                                this.infoText.html(`Downloading . . . ` + (queueSize - index) + " / " + queueSize);
+                                this.infoText.html(`Downloading ... <span class="float-right">` + (queueSize - index) + ` / ` + queueSize + `</span>`);
                                 threadInfo[thread]
                                     .html(item.file)
                                     .css("--progress", "0%");

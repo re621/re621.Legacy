@@ -1,0 +1,91 @@
+{
+    "manifest_version": 2,
+    "name": "%DISPLAYNAME%",
+    "short_name": "%NAME%",
+    "version": "%VERSION%",
+    "description": "%DESCRIPTION%",
+    "author": "%AUTHOR%",
+
+    "icons": {},
+    "icons-lib": [
+        {
+            "size": "32",
+            "url": "https://cdn.jsdelivr.net/gh/re621/re621.github.io@master/images/icons/icon32.png",
+            "path": "./build/cache/icon32.png"
+        },
+        {
+            "size": "64",
+            "url": "https://cdn.jsdelivr.net/gh/re621/re621.github.io@master/images/icons/icon64.png",
+            "path": "./build/cache/icon64.png"
+        },
+        {
+            "size": "129",
+            "url": "https://cdn.jsdelivr.net/gh/re621/re621.github.io@master/images/icons/icon128.png",
+            "path": "./build/cache/icon128.png"
+        }
+    ],
+
+    "background": {
+        "scripts": ["background.js"],
+        "persistent": false
+    },
+
+    "content_scripts": [
+        {
+            "matches": [
+                "https://e621.net/*",
+                "https://e926.net/*"
+            ],
+            "css": [],
+            "js": [],
+            "js-lib": [
+                [
+                    "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js",
+                    "./build/cache/jquery.min.js"
+                ],
+                [
+                    "https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js",
+                    "./build/cache/jquery-ui.min.js"
+                ],
+                [
+                    "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.3.0/jszip.min.js",
+                    "./build/cache/jszip.min.js"
+                ],
+                [
+                    "https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js",
+                    "./build/cache/FileSaver.min.js"
+                ],
+                [
+                    "https://cdn.jsdelivr.net/npm/jquery.hotkeys@0.1.0/jquery.hotkeys.min.js",
+                    "./build/cache/jquery.hotkeys.min.js"
+                ],
+                [
+                    "https://cdn.jsdelivr.net/gh/re621/re621-lib@1.0.0/lazysizes/lazysizes.min.js",
+                    "./build/cache/lazysizes.min.js"
+                ],
+                [
+                    "https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.2.0/plugins/unload/ls.unload.min.js",
+                    "./build/cache/ls.unload.min.js"
+                ]
+            ]
+        }
+    ],
+
+    "permissions": [
+        "storage",
+        "tabs",
+        "https://api.github.com/*",
+        "https://static1.e621.net/*",
+        "https://cdn.jsdelivr.net/gh/re621/re621@master/dist/avoid-posting.json"
+    ],
+
+    "resources": {
+        "re621_css": "style.min.css",
+        "re621_dnp": "https://cdn.jsdelivr.net/gh/re621/re621@master/dist/avoid-posting.json"
+    },
+
+    "web_accessible_resources": [
+        "style.min.css",
+        "injector.js"
+    ]
+}

@@ -2,23 +2,55 @@
     "name": "re621",
     "displayName": "re621 - e621 Reimagined",
     "namespace": "re621.github.io",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "Increases the amount of customization on e621",
-    "author": "bitWolfy",
+    "author": "re621 team",
+    "contributors": [
+        "bitWolfy <@bitWolfy#7932>",
+        "Earlopain <@Earlopain#9703>"
+    ],
     "main": "./build/script.user.js",
     "scripts": {
-        "autoprefixer": "postcss ./build/style.min.css --no-map --use autoprefixer -r",
-        "build:prod": "npm-run-all eslint typescript browserify minify userscript creatednp sass autoprefixer clean",
-        "build:dev": "npm-run-all eslint typescript browserify userscript sass autoprefixer clean",
+        "build:prod": "npm-run-all compile:prod compose:prod",
+        "build:dev": "npm-run-all compile:dev compose:dev",
+
+        "compile:prod": "npm-run-all --parallel compile-typescript:prod compile-sass:prod",
+        "compile:dev": "npm-run-all --parallel compile-typescript:dev compile-sass:dev",
+
+        "compile-typescript:prod": "npm-run-all eslint typescript browserify minify template clean",
+        "compile-typescript:dev": "npm-run-all eslint typescript browserify template clean",
         "eslint": "eslint ./**/*.ts",
-        "clean": "rimraf ./build/temp/",
-        "test": "echo \"Error: no test specified\" && exit 1",
         "typescript": "tsc",
-        "browserify": "browserify ./build/temp/js/main.js -o ./build/script.user.js",
-        "minify": "terser ./build/script.user.js --compress -o ./build/script.user.js",
-        "userscript": "node ./bin/userscript-format.js",
-        "sass": "sass ./src/scss/style.scss ./build/style.min.css --no-source-map --style compressed",
-        "creatednp": "node ./bin/create-dnp.js"
+        "browserify": "browserify ./build/tsc-temp/js/main.js -o ./build/script.js",
+        "minify": "terser ./build/script.js --compress -o ./build/script.js",
+        "template": "node ./bin/common.js",
+        "clean": "rimraf ./build/tsc-temp/",
+
+        "compile-sass:prod": "npm-run-all sass:prod autoprefixer",
+        "compile-sass:dev": "npm-run-all sass:dev autoprefixer",
+        "sass:prod": "sass ./src/scss/style.scss ./build/style.css --no-source-map --style compressed",
+        "sass:dev": "sass ./src/scss/style.scss ./build/style.css --no-source-map --style expanded",
+        "autoprefixer": "postcss ./build/style.css --no-map --use autoprefixer -r",
+
+        "compose:prod": "npm-run-all --parallel compose-userscript:prod compose-extension:prod",
+        "compose:dev": "npm-run-all --parallel compose-userscript:dev compose-extension:dev",
+
+        "compose-userscript:prod": "npm-run-all userscript:prod",
+        "compose-userscript:dev": "npm-run-all userscript:dev",
+        "userscript:prod": "node ./bin/userscript.js prod",
+        "userscript:dev": "node ./bin/userscript.js",
+        "injector:chrome": "node ./bin/userscript.js injector chrome",
+        "injector:firefox": "node ./bin/userscript.js injector firefox",
+
+        "compose-extension:prod": "npm-run-all extension:prod extension-archive",
+        "compose-extension:dev": "npm-run-all extension:dev",
+        "extension:prod": "node ./bin/extension.js prod",
+        "extension:dev": "node ./bin/extension.js",
+        "extension-pack": "node ./bin/extension-pack.js",
+        "extension-archive": "node ./bin/extension-archive.js",
+
+        "creatednp": "node ./bin/create-dnp.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {
         "type": "git",
@@ -28,7 +60,8 @@
     "bugs": {
         "url": "https://github.com/re621/re621/issues"
     },
-    "homepage": "https://re621.github.io/",
+    "homepage": "https://re621.github.io",
+    "github": "https://github.com/re621/re621",
     "dependencies": {
         "jquery": "^3.5.0",
         "jquery-ui": "^1.12.1"
@@ -37,10 +70,12 @@
         "@actions/core": "^1.2.3",
         "@types/jquery": "^3.3.36",
         "@types/jqueryui": "^1.12.10",
-        "@typescript-eslint/eslint-plugin": "^2.30.0",
-        "@typescript-eslint/parser": "^2.30.0",
-        "autoprefixer": "^9.7.6",
-        "browserify": "^16.5.1",
+        "@typescript-eslint/eslint-plugin": "^2.25.0",
+        "@typescript-eslint/parser": "^2.25.0",
+        "archiver": "^4.0.1",
+        "autoprefixer": "^9.7.5",
+        "browserify": "^16.5.0",
+        "crx": "^5.0.1",
         "eslint": "^6.8.0",
         "npm-run-all": "^4.1.5",
         "postcss-cli": "^7.1.1",
