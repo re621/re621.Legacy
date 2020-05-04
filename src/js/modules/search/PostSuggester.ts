@@ -144,7 +144,11 @@ export class PostSuggester extends RE6Module {
                 .attr({
                     "for": "tag-" + tag,
                 })
-                .html(`<a href="/posts?tags=${tag}">${tag.replace(/_/g, " ")}</a>`)
+                .html(tag.replace(/_/g, " "))
+                .appendTo(container);
+            $("<a>")
+                .attr("href", "/posts?tags=" + tag)
+                .html("?")
                 .appendTo(container);
             $("<span>")
                 .addClass("tag-count")
@@ -155,7 +159,8 @@ export class PostSuggester extends RE6Module {
         // Action Link
         this.status[0].innerHTML = "";
         $("<a>")
-            .html("create_query")
+            .html("Search")
+            .addClass("button btn-neutral post-suggester-search")
             .appendTo(this.status)
             .click((event) => {
                 event.preventDefault();

@@ -2,15 +2,19 @@
 
 div.post-suggester {
     width: 30rem;
-    height: 20rem;
+    height: 30rem;
     margin: -1em;
     display: grid;
-    grid-template-rows: 2rem auto;
+    grid-template-rows: 5rem auto;
 
     div.post-suggester-status {
         font-family: monospace;
         justify-self: center;
         align-self: center;
+
+        a.post-suggester-search {
+            font-family: initial;
+        }
     }
 
     div.post-suggester-content {
@@ -20,19 +24,16 @@ div.post-suggester {
 
         &>span {
             display: inline-grid;
-            grid-template-columns: 1rem auto min-content;
+            grid-template-columns: 1rem auto min-content min-content;
+            grid-column-gap: 0.5rem;
             align-items: end;
             margin: 0 0.5rem;
 
             label {
                 display: inline-block;
-                margin-left: 0.5rem;
                 overflow: hidden;
                 text-overflow: ellipsis;
-            }
-
-            span.tag-count {
-                float: right;
+                font-weight: normal;
             }
 
         }
