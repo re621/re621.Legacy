@@ -1,0 +1,40 @@
+/* Post Suggester Styles */
+
+div.post-suggester {
+    width: 30rem;
+    height: 20rem;
+    margin: -1em;
+    display: grid;
+    grid-template-rows: 2rem auto;
+
+    div.post-suggester-status {
+        font-family: monospace;
+        justify-self: center;
+        align-self: center;
+    }
+
+    div.post-suggester-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: repeat(auto-fit, 1rem);
+
+        &>span {
+            display: inline-grid;
+            grid-template-columns: 1rem auto min-content;
+            align-items: end;
+            margin: 0 0.5rem;
+
+            label {
+                display: inline-block;
+                margin-left: 0.5rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            span.tag-count {
+                float: right;
+            }
+
+        }
+    }
+}

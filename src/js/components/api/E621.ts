@@ -258,7 +258,7 @@ export class E621 {
 
         while (this.queue.length > 0) {
             const item = this.queue.shift();
-            // console.log("processing " + item.request.url);
+            console.log("processing " + item.request.url);
             const request = await fetch(item.request);
 
             if (request.ok) {

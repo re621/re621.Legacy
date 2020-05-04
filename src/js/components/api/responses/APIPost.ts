@@ -105,8 +105,21 @@ export namespace PostRating {
 
 export namespace APIPost {
 
+    export function getTags(post: APIPost): string[] {
+        return [
+            ...post.tags.artist,
+            ...post.tags.character,
+            ...post.tags.copyright,
+            ...post.tags.general,
+            ...post.tags.invalid,
+            ...post.tags.lore,
+            ...post.tags.meta,
+            ...post.tags.species
+        ];
+    }
+
     export function getTagString(post: APIPost): string {
-        return [...post.tags.artist, ...post.tags.character, ...post.tags.copyright, ...post.tags.general, ...post.tags.invalid, ...post.tags.lore, ...post.tags.meta, ...post.tags.species].join(" ");
+        return APIPost.getTags(post).join(" ");
     }
 
     export function getFlagString(post: APIPost): string {

@@ -23,6 +23,7 @@ import { BlacklistEnhancer } from "./modules/search/BlacklistEnhancer";
 import { InfiniteScroll } from "./modules/search/InfiniteScroll";
 import { InstantSearch } from "./modules/search/InstantSearch";
 import { MassDownloader } from "./modules/search/MassDownloader";
+import { PostSuggester } from "./modules/search/PostSuggester";
 import { ThumbnailEnhancer } from "./modules/search/ThumbnailsEnhancer";
 import { CommentSubscriptions } from "./modules/subscriptions/CommentSubscriptions";
 import { ForumSubscriptions } from "./modules/subscriptions/ForumSubscriptions";
@@ -47,6 +48,7 @@ const loadOrder = [
     InstantSearch,
     MassDownloader,
     ThumbnailEnhancer,
+    PostSuggester,
     Miscellaneous,
 
     TinyAlias,
