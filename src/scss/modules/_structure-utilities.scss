@@ -17,6 +17,11 @@ body {
     }
 }
 
+// Fix for notice layering
+div#notice {
+    z-index: 10000;
+}
+
 // Gridify the header
 header#top {
     h1 {
