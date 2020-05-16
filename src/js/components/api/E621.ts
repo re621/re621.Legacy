@@ -21,12 +21,15 @@ const ENDPOINT_DEFS: EndpointDefinition[] = [
     { name: "comments", path: "comments", },
     { name: "forum_posts", path: "forum_posts", },
     { name: "forum_topics", path: "forum_topics", },
+
+    { name: "dtext_preview", path: "dtext_preview", extension: "", },
 ];
 
 class APIEndpoint {
 
     private queue: E621;
     private path: string;
+    private extension: string;
 
     private name: string;
     private nodeDef: NodeDefinition;
@@ -37,6 +40,10 @@ class APIEndpoint {
     public constructor(queue: E621, endpoint: EndpointDefinition) {
         this.queue = queue;
         this.path = endpoint.path;
+
+        if (endpoint.extension === undefined) this.extension = "json";
+        else if (endpoint.extension.length > 0) this.extension = endpoint.extension;
+        else this.extension = "";
 
         this.name = endpoint.name;
         this.nodeDef = endpoint.node === undefined ? {} : endpoint.node;
@@ -87,8 +94,8 @@ class APIEndpoint {
 
     /** Returns the endpoint path, accounting for the possible parameter */
     private getParsedPath(): string {
-        if (this.param === "") return this.path + ".json";
-        const newPath = this.path + "/" + this.param + ".json";
+        if (this.param === "") return this.path + (this.extension.length > 0 ? "." + this.extension : "");
+        const newPath = this.path + "/" + this.param + (this.extension.length > 0 ? "." + this.extension : "");
         this.param = "";
         return newPath;
     }
@@ -177,6 +184,8 @@ export class E621 {
     public static ForumPosts: APIEndpoint = E621.getEndpoint("forum_posts");
     public static ForumTopics: APIEndpoint = E621.getEndpoint("forum_topics");
 
+    public static DTextPreview: APIEndpoint = E621.getEndpoint("dtext_preview");
+
     /** Constructor - should be kept private */
     private constructor() {
         this.authToken = $("head meta[name=csrf-token]").attr("content");
@@ -206,7 +215,7 @@ export class E621 {
      * @param data Data to POST
      * @param delay How quickly the next request can be sent, in ms
      */
-    public async createRequest(path: string, query: string, method: "GET" | "POST", data: string, endpoint: string, node: NodeType, delay: number): Promise<any> {
+    public async createRequest(path: string, query: string, method: "GET" | "POST", requestBody: string, endpoint: string, node: NodeType, delay: number): Promise<any> {
         if (delay === undefined) delay = E621.requestRateLimit;
         else if (delay < 500) delay = 500;
 
@@ -221,7 +230,7 @@ export class E621 {
             mode: "cors"
         };
 
-        if (method === "POST") requestInfo.body = data + ((data.length > 0) ? "&" : "") + "authenticity_token=" + this.authToken;
+        if (method === "POST") { requestInfo.body = requestBody + ((requestBody.length > 0) ? "&" : "") + "authenticity_token=" + encodeURIComponent(this.authToken); }
         query = query + (query.length > 0 ? "&" : "") + "_client=" + encodeURIComponent(window["re621"]["useragent"]);
 
         const entry = new Request(location.origin + "/" + path + "?" + query, requestInfo);
@@ -303,7 +312,17 @@ interface EndpointDefinition {
      */
     path: string;
 
+    /**
+     * **node** - defined special cases for endpoint nodes  
+     * Mainly used to get rid of the wrapper around posts results
+     */
     node?: NodeDefinition;
+
+    /**
+     * **extension** - endpoint extension, usually `json`.  
+     * Leave blank for endpoints with no extension, like dtext_preview
+     */
+    extension?: string;
 }
 
 /**

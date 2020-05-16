@@ -1,7 +1,7 @@
+import { XMChrome } from "./XMChrome";
 import { XMConnect } from "./XMConnect";
 import { XMStorage } from "./XMStorage";
 import { XMUtil } from "./XMUtil";
-import { XMChrome } from "./XMChrome";
 
 declare const GM: any;
 declare const unsafeWindow: Window;

@@ -1,4 +1,5 @@
-import { Api } from "../../components/api/Api";
+import { Danbooru } from "../../components/api/Danbooru";
+import { E621 } from "../../components/api/E621";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
@@ -506,9 +507,12 @@ class FormattingHelper {
             this.$toggleTabs.find("a").toggleClass("active");
 
             // format the text
-            this.formatDText(this.$textarea.val(), async (data) => {
-                this.$preview.html(data.html);
+            E621.DTextPreview.post({ "body": this.$textarea.val() }).then((response) => {
+                this.$preview.html(response[0].html);
+                Danbooru.E621.addDeferredPosts(response[0].posts);
+                Danbooru.Thumbnails.initialize();
             });
+
         } else {
             this.$container.attr("data-editing", "true");
             this.$toggleTabs.find("a").toggleClass("active");
@@ -596,18 +600,6 @@ class FormattingHelper {
         });
     }
 
-    /**
-     * Formats the provided DText string into HTML
-     * @param input string
-     * @param handleData Callback function
-     */
-    private async formatDText(input: string | string[] | number, handleData: (data: any) => void): Promise<void> {
-        const response = await Api.postUrl(
-            "/dtext_preview",
-            { body: input }
-        );
-        handleData(JSON.parse(response));
-    }
 }
 
 interface ButtonElement {
