@@ -225,6 +225,7 @@ export class SubscriptionManager extends RE6Module {
                         }
 
                         SubscriptionManager.updateInProgress = true;
+                        this.pushSettings("lastUpdate", new Date().getTime());
                         $(document).trigger("re621.subscription.update");
 
                         this.$openSubsButton.attr({
