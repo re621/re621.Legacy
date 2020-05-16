@@ -88,7 +88,7 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
         const apiData: APIForumTopic[] = [];
         for (const [index, chunk] of storedSubChunks.entries()) {
             if (storedSubChunks.length > 1) status.append(`<div>&nbsp; &nbsp; &nbsp; - processing batch #${index}</div>`);
-            apiData.push(...await E621.Pools.get<APIForumTopic>({ "search[id]": chunk.join(",") }, 500));
+            apiData.push(...await E621.ForumTopics.get<APIForumTopic>({ "search[id]": chunk.join(",") }, 500));
         }
 
         status.append(`<div>. . . formatting output/div>`);

@@ -30,10 +30,19 @@ const fn_Danbooru = {
         },
         "toggle": () => { Danbooru.Note.TranslationMode.toggle(new CustomEvent("re621.dummy-event")); },
     },
+    "Thumbnails": {
+        "initialize": () => { Danbooru.Thumbnails.initialize(); },
+    },
     "Utility": {
         "disableShortcuts": (state) => {
             if (state !== undefined) Danbooru.Utility.disableShortcuts = state;
             return Danbooru.Utility.disableShortcuts;
+        },
+    },
+    "E621": {
+        "addDeferredPosts": (posts) => {
+            window.___deferred_posts = window.___deferred_posts || {}
+            window.___deferred_posts = $.extend(window.___deferred_posts, posts);
         },
     },
     "Notice": {
@@ -42,7 +51,7 @@ const fn_Danbooru = {
     },
 };
 
-const fn = { "Danbooru": fn_Danbooru }
+const fn = { "Danbooru": fn_Danbooru };
 
 async function handleMessage(data) {
     const request = data.detail;
