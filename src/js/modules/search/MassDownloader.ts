@@ -62,7 +62,6 @@ export class MassDownloader extends RE6Module {
         this.section = $("<section>")
             .attr("id", "downloader-box")
             .attr("data-fixed", this.fetchSettings("fixedSection") + "")
-            .addClass("bg-foreground")
             .appendTo("aside#sidebar");
         $("<h1>").html("Download").appendTo(this.section);
 
