@@ -138,10 +138,32 @@ export class Post {
     }
 
     public getId(): number { return this.apiElement.id; }
-    public getTags(): string { return APIPost.getTagString(this.apiElement) }
     public getRating(): PostRating { return this.apiElement.rating; }
     public getFavCount(): number { return this.apiElement.fav_count; }
     public getScoreCount(): number { return this.apiElement.score.total; }
+
+    /**
+     * Returns all post tags as one space-separated string
+     * @deprecated Replaced by getTagString()
+     */
+    public getTags(): string { return this.getTagString(); }
+
+    /**
+     * Returns all post tags as one space-separated string
+     */
+    public getTagString(): string {
+        return APIPost.getTagString(this.apiElement);
+    }
+
+    /**
+     * Returns post tags of the specified type as an array.  
+     * If no type is provided, returns all post tags.  
+     * @param tagType Tag type, i.e. artist, character, lore, etc.
+     */
+    public getTagArray(tagType?: string): string[] {
+        if (tagType === undefined) return APIPost.getTags(this.apiElement);
+        else return this.apiElement.tags[tagType];
+    }
 
     public getImageURL(): string { return this.apiElement.file.url; }
     public getSampleURL(): string { return this.apiElement.sample.url; }

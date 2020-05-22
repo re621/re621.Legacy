@@ -16,6 +16,7 @@ import { PoolNavigator } from "../post/PoolNavigator";
 import { PostViewer } from "../post/PostViewer";
 import { TitleCustomizer } from "../post/TitleCustomizer";
 import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
+import { CustomFlagger } from "../search/CustomFlagger";
 import { InfiniteScroll } from "../search/InfiniteScroll";
 import { MassDownloader } from "../search/MassDownloader";
 import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } from "../search/ThumbnailsEnhancer";
@@ -48,6 +49,7 @@ export class SettingsController extends RE6Module {
                 { name: "Features", page: this.createFeaturesTab().get() },
                 { name: "General", page: this.createGeneralTab().get() },
                 { name: "Downloads", page: this.createDownloadsTab().get() },
+                { name: "Custom Flags", page: this.createFlagsTab().get() },
                 { name: "Hotkeys", page: this.createHotkeysTab().get() },
                 { name: "Other", page: this.createMiscTab().get() },
                 { name: "About", page: this.createAboutTab().get() },
@@ -495,6 +497,24 @@ export class SettingsController extends RE6Module {
                 Form.div("The archive will be downloaded automatically after being created", "mid"),
             ]),
 
+        ]);
+    }
+
+    /** Creates the Custom Flagger tab */
+    private createFlagsTab(): Form {
+        const customFlagger = ModuleController.getWithType<CustomFlagger>(CustomFlagger);
+
+        return new Form({ id: "settings-flags", columns: 3, parent: "div#modal-container" }, [
+            Form.header("Flag Definitions", "full"),
+            Form.textarea("defs", customFlagger.fetchSettings("flags"), undefined, "full"),
+            Form.button(
+                "defs-save", "Save", undefined, "column",
+                async (event) => {
+                    // TODO Add "settings saved" notification
+                    event.preventDefault();
+                    await customFlagger.pushSettings("flags", $("textarea#settings-flags-defs").val());
+                }
+            ),
         ]);
     }
 
