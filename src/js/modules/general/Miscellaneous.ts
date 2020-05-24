@@ -48,6 +48,8 @@ export class Miscellaneous extends RE6Module {
             categoryData: [],
 
             avatarClick: true,
+
+            fixForumTitle: true,
         };
     }
 
@@ -93,6 +95,12 @@ export class Miscellaneous extends RE6Module {
 
         // Double-clicking avatars
         this.handleAvatarClick(this.fetchSettings("avatarClick"));
+
+        // Fix the forum title
+        if (this.fetchSettings("fixForumTitle") && Page.matches(PageDefintion.forum)) {
+            const title = /^(?:Forum - )(.+)(?: - (e621|e926))$/g.exec(document.title);
+            if (title) document.title = `${title[1]} - Forum - ${title[2]}`;
+        }
     }
 
     /** Emulates the clicking on "New Comment" link */
