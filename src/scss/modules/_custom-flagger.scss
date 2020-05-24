@@ -30,3 +30,25 @@ div.custom-flag {
         padding: 0.125rem 0.5rem;
     }
 }
+
+/** Search page view **/
+div.flag-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+    span.custom-flag-thumb {
+        margin: 0.125rem;
+        display: block;
+        height: 1rem;
+        font-size: 0.75em;
+        width: 1em;
+        border-radius: 0.75em;
+        overflow: hidden;
+        padding: 0 0.125rem;
+
+        &:hover {
+            width: unset;
+        }
+    }
+}

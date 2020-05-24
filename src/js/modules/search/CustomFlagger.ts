@@ -20,8 +20,17 @@ export class CustomFlagger extends RE6Module {
 
     public create(): void {
 
-        if (Page.matches(PageDefintion.post)) this.createPostPage();
+        const postContainer = $("div#page");
 
+        if (Page.matches(PageDefintion.post)) this.createPostPage();
+        else if (Page.matches(PageDefintion.search)) {
+
+            const flagData = this.fetchSettings<FlagDefinition[]>("flags");
+            const thumbnails = postContainer.find<HTMLElement>("article.post-preview, div.post-preview").get();
+            for (const thumb of thumbnails) {
+                CustomFlagger.modifyThumbnail($(thumb), flagData);
+            }
+        }
     }
 
     protected createPostPage(): void {
@@ -68,6 +77,44 @@ export class CustomFlagger extends RE6Module {
 
         return true;
     }
+
+    public static async modifyThumbnail($article: JQuery<HTMLElement>, flagData: FlagDefinition[]): Promise<void> {
+
+        /* Create the structure */
+        const $img = $article.find("img"),
+            tagData = $article.attr("data-tags").split(" ");
+
+        // Image not wrapped in picture - usually on comment pages and the like
+        let $picture = $article.find("picture");
+        if ($picture.length == 0) $picture = $("<picture>").insertAfter($img).append($img);
+
+        /* Determine active flags */
+        const activeFlags: JQuery<HTMLElement>[] = [];
+
+        for (const flag of flagData) {
+            if (CustomFlagger.tagsMatchFilter(tagData, flag.tags.split(" ")))
+                activeFlags.push(
+                    $("<span>")
+                        .addClass("custom-flag-thumb")
+                        .html(flag.name)
+                        .css("background-color", flag.color)
+                );
+        }
+
+        /* Flag Elements */
+        const flagContainer = $("<div>")
+            .addClass("flag-container")
+            .appendTo($picture);
+
+        // Display the flags if any are active
+        if (activeFlags.length == 0) return;
+
+        activeFlags.forEach((entry) => {
+            entry.appendTo(flagContainer);
+        });
+    }
+
+}
 
 export interface FlagDefinition {
     name: string;
