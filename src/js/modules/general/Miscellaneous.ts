@@ -1,4 +1,4 @@
-import { Api } from "../../components/api/Api";
+import { E621 } from "../../components/api/E621";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
 import { Page, PageDefintion } from "../../components/data/Page";
@@ -218,7 +218,7 @@ export class Miscellaneous extends RE6Module {
             $(".re621-forum-post-reply").on('click', (event) => {
                 event.preventDefault();
                 const $parent = $(event.target).parents("article.forum-post");
-                this.quote($parent, "/forum_posts/" + $parent.data("forum-post-id") + ".json", $("#forum_post_body"), $("a#new-response-link"));
+                this.quote($parent, "forum", $parent.data("forum-post-id"), $("#forum_post_body"), $("a#new-response-link"));
             });
         } else if (Page.matches(PageDefintion.post)) {
             $(".comment-reply-link").each(function (index, element) {
@@ -232,17 +232,17 @@ export class Miscellaneous extends RE6Module {
             $(".re621-comment-reply").on('click', (event) => {
                 event.preventDefault();
                 const $parent = $(event.target).parents("article.comment");
-                this.quote($parent, "/comments/" + $parent.data("comment-id") + ".json", $("#comment_body_for_"), $("a.expand-comment-response"));
+                this.quote($parent, "comment", $parent.data("comment-id"), $("#comment_body_for_"), $("a.expand-comment-response"));
             });
         }
     }
 
-    private async quote($parent: JQuery<HTMLElement>, requestURL: string, $textarea: JQuery<HTMLElement>, $responseButton: JQuery<HTMLElement>): Promise<void> {
+    private async quote($parent: JQuery<HTMLElement>, endpoint: "forum" | "comment", id: number, $textarea: JQuery<HTMLElement>, $responseButton: JQuery<HTMLElement>): Promise<void> {
         let strippedBody = "";
         const selection = window.getSelection().toString();
 
         if (selection === "") {
-            const jsonData: APIForumPost = await Api.getJson(requestURL);
+            const jsonData: APIForumPost = endpoint === "forum" ? await E621.ForumPosts.find(id).first() : await E621.Comments.find(id).first();
             strippedBody = jsonData.body.replace(/\[quote\](?:.|\n|\r)+?\[\/quote\][\n\r]*/gm, "");
             strippedBody = `[quote]"` + $parent.data('creator') + `":/user/show/` + $parent.data('creator-id') + ` said:\n` + strippedBody + `\n[/quote]`;
         } else {

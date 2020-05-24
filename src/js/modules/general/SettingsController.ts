@@ -1,4 +1,5 @@
-import { Api } from "../../components/api/Api";
+import { E621 } from "../../components/api/E621";
+import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { User } from "../../components/data/User";
@@ -868,7 +869,7 @@ export class SettingsController extends RE6Module {
                 for (const entry of settings) {
                     postIDs.push(entry["id"]);
                 }
-                const data = await Api.getJson("/forum_posts.json?search[id]=" + postIDs.join(","));
+                const data = await E621.ForumPosts.get<APIForumPost>({ "search[id]": postIDs.join(",") });
                 data.forEach((postData) => {
                     forumData[postData["topic_id"]] = {};
                 });

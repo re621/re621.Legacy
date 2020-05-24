@@ -79,6 +79,19 @@ class APIEndpoint {
     }
 
     /**
+     * Sends a GET request to the endpoint, and returns the first result found.  
+     * If no results are found, returns null.
+     * @param query Request query, either as a raw string or an APIQuery
+     * @param delay Optional delay override, in milliseconds
+     */
+    public async first<T extends APIResponse>(query?: string | APIQuery, delay?: number): Promise<T> {
+        return this.get<T>(query, delay).then((response) => {
+            if (response.length > 0) return Promise.resolve(response[0]);
+            else return Promise.resolve(null);
+        });
+    }
+
+    /**
      * Send a POST request to the endpoint
      * @param data Data to be sent with the request
      * @param delay Optional delay override, in milliseconds
@@ -267,14 +280,17 @@ export class E621 {
 
         while (this.queue.length > 0) {
             const item = this.queue.shift();
-            // console.log("processing " + item.request.url);
+            console.log("processing " + item.request.url);
             const request = await fetch(item.request);
 
             if (request.ok) {
+                let responseText = await request.text();
+                if (!responseText) responseText = "[]";
+
                 this.emitter.trigger(
                     "api.re621.result-" + item.index,
                     [
-                        await request.json(),
+                        JSON.parse(responseText),
                         request.status,
                         item.endpoint,
                         item.node,
