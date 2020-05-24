@@ -20,6 +20,7 @@ import { PoolNavigator } from "./modules/post/PoolNavigator";
 import { PostViewer } from "./modules/post/PostViewer";
 import { TitleCustomizer } from "./modules/post/TitleCustomizer";
 import { BlacklistEnhancer } from "./modules/search/BlacklistEnhancer";
+import { CustomFlagger } from "./modules/search/CustomFlagger";
 import { InfiniteScroll } from "./modules/search/InfiniteScroll";
 import { InstantSearch } from "./modules/search/InstantSearch";
 import { MassDownloader } from "./modules/search/MassDownloader";
@@ -44,6 +45,7 @@ const loadOrder = [
     TitleCustomizer,
 
     BlacklistEnhancer,
+    CustomFlagger,
     InfiniteScroll,
     InstantSearch,
     MassDownloader,

@@ -7,6 +7,7 @@ import { Post } from "../../components/data/Post";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
+import { CustomFlagger, FlagDefinition } from "./CustomFlagger";
 import { InstantSearch } from "./InstantSearch";
 import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } from "./ThumbnailsEnhancer";
 
@@ -158,7 +159,8 @@ export class InfiniteScroll extends RE6Module {
 
         const thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer),
             upscaleMode: ThumbnailPerformanceMode = thumbnailEnhancer.fetchSettings("upscale"),
-            clickAction: ThumbnailClickAction = thumbnailEnhancer.fetchSettings("clickAction");
+            clickAction: ThumbnailClickAction = thumbnailEnhancer.fetchSettings("clickAction"),
+            flagData = ModuleController.getWithType<CustomFlagger>(CustomFlagger).fetchSettings<FlagDefinition[]>("flags");
 
         const promises: Promise<void>[] = [];
         for (const json of posts) {
@@ -179,6 +181,7 @@ export class InfiniteScroll extends RE6Module {
                     this.$postContainer.append(element);
 
                     ThumbnailEnhancer.modifyThumbnail(element, upscaleMode, clickAction);
+                    CustomFlagger.modifyThumbnail(element, flagData);
                 }
 
                 resolve();
