@@ -37,11 +37,11 @@ export class CustomFlagger extends RE6Module {
     protected createPostPage(): void {
         // Parse the post for active flags
         const flagData = this.fetchSettings<FlagDefinition[]>("flags"),
-            tagData = Post.getViewingPost().getTagArray(),
+            post = Post.getViewingPost(),
             activeFlags: string[] = [];
 
         for (const flag of flagData) {
-            if (CustomFlagger.tagsMatchFilter(tagData, flag.tags.split(" ")))
+            if (CustomFlagger.tagsMatchFilter(post, flag.tags.split(" ")))
                 activeFlags.push(`<span class="custom-flag-title" style="background-color: ${flag.color}">${flag.name}</span> ${flag.tags}`);
         }
 
@@ -64,15 +64,15 @@ export class CustomFlagger extends RE6Module {
         });
     }
 
-    private static tagsMatchFilter(tags: string[], filter: string[]): boolean {
+    private static tagsMatchFilter(post: Post, filter: string[]): boolean {
         for (const entry of filter) {
             if (entry.startsWith("-")) {         // negation
-                if (tags.includes(entry.substr(1))) return false;
+                return !post.hasTag(entry.substr(1));
             } else if (entry.startsWith("~")) {  // optional
                 // TODO Implement optional tag handling
-                if (!tags.includes(entry.substr(1))) return false;
+                return post.hasTag(entry.substr(1));
             } else {                            // generic
-                if (!tags.includes(entry)) return false;
+                return post.hasTag(entry);
             }
         }
 
@@ -83,7 +83,7 @@ export class CustomFlagger extends RE6Module {
 
         /* Create the structure */
         const $img = $article.find("img"),
-            tagData = $article.attr("data-tags").split(" ");
+            post = new Post($article);
 
         // Image not wrapped in picture - usually on comment pages and the like
         let $picture = $article.find("picture");
@@ -93,7 +93,7 @@ export class CustomFlagger extends RE6Module {
         const activeFlags: JQuery<HTMLElement>[] = [];
 
         for (const flag of flagData) {
-            if (CustomFlagger.tagsMatchFilter(tagData, flag.tags.split(" ")))
+            if (CustomFlagger.tagsMatchFilter(post, flag.tags.split(" ")))
                 activeFlags.push(
                     $("<span>")
                         .addClass("custom-flag-thumb")

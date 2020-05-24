@@ -16,6 +16,8 @@ export class Post {
     protected htmlElement: JQuery<HTMLElement>;
     protected apiElement: APIPost;
 
+    private tags: string[];
+
     /**
      * 
      * @param element The element to create the post from. Can either be dom element or api element
@@ -36,6 +38,8 @@ export class Post {
         for (const filter of User.getBlacklist().values()) {
             filter.addPost(this, false);
         }
+
+        this.tags = APIPost.getTags(this.apiElement);
     }
 
     /**
@@ -161,8 +165,46 @@ export class Post {
      * @param tagType Tag type, i.e. artist, character, lore, etc.
      */
     public getTagArray(tagType?: string): string[] {
-        if (tagType === undefined) return APIPost.getTags(this.apiElement);
+        if (tagType === undefined) return this.tags;
         else return this.apiElement.tags[tagType];
+    }
+
+    /**
+     * Checks the post contains the specified tags.  
+     * Also works with post-based metatags, as defined here: https://e621.net/help/cheatsheet#post-based_metatags
+     * @param tag Tag to look for
+     */
+    public hasTag(tag: string): boolean {
+        const tagPieces = tag.split(":");
+        if (tagPieces.length == 1) return this.tags.includes(tag);
+
+        const value = tagPieces[1];
+        switch (tagPieces[0]) {
+            case "id": { return matchRange(this.getId(), value); }
+            case "score": { return matchRange(this.getScoreCount(), value); }
+            case "favcount": { return matchRange(this.getFavCount(), value); }
+            case "comments": { return false; }  // N/A
+            case "tagcount": { return matchRange(this.getTagArray().length, value); }
+            case "gentags": { return matchRange(this.getTagArray("general").length, value); }
+            case "arttags": { return matchRange(this.getTagArray("artist").length, value); }
+            case "chartags": { return matchRange(this.getTagArray("character").length, value); }
+            case "copytags": { return matchRange(this.getTagArray("copyright").length, value); }
+            case "speciestags": { return matchRange(this.getTagArray("species").length, value); }
+            case "loretags": { return matchRange(this.getTagArray("lore").length, value); }
+            case "metatags": { return matchRange(this.getTagArray("meta").length, value); }
+        }
+
+        return false;
+
+        function matchRange(target, value): boolean {
+            if (value.substr(0, 1) === "<") {
+                if (value.substr(1, 1) === "=") return target <= parseInt(value.substr(2));
+                else return target < parseInt(value.substr(1));
+            } else if (value.substr(0, 1) === ">") {
+                if (value.substr(1, 1) === "=") return target >= parseInt(value.substr(2));
+                else return target > parseInt(value.substr(1));
+            } else return target == parseInt(value);
+        }
     }
 
     public getImageURL(): string { return this.apiElement.file.url; }
