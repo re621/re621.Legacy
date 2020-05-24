@@ -46,6 +46,7 @@ div.flag-container {
         border-radius: 0.75em;
         overflow: hidden;
         padding: 0 0.125rem;
+        box-shadow: 0 0 5px 0px #000;
 
         &:hover {
             width: unset;
