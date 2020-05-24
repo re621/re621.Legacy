@@ -214,6 +214,7 @@ form.grid-form {
         // DIV
         div.input-div {
             width: 100%;
+            line-height: 1.25rem;
 
             div.notice {
                 font-size: smaller;
@@ -221,6 +222,13 @@ form.grid-form {
 
             div.unmargin {
                 margin: -0.5rem 0;
+            }
+
+            pre {
+                display: inline;
+                background: #ffffff15;
+                padding: 0 0.25rem;
+                border-radius: 0.25rem;
             }
         }
 

@@ -15,6 +15,7 @@ export class Modal {
 
         this.$modal = $("<div>")
             .appendTo("div#modal-container")
+            .addClass(config.wrapperClass)
             .attr("title", config.title)
             .append(this.config.content)
             .dialog({
@@ -145,6 +146,8 @@ export class Modal {
         if (config.fixed === undefined) config.fixed = false;
         if (config.reserveHeight === undefined) config.reserveHeight = false;
 
+        if (config.wrapperClass === undefined) config.wrapperClass = "";
+
         if (config.disabled === undefined) config.disabled = false;
         if (config.position === undefined) config.position = { my: "center", at: "center" };
 
@@ -231,6 +234,8 @@ interface ModalConfig {
     minHeight?: number;
     fixed?: boolean;
     reserveHeight?: boolean;
+
+    wrapperClass?: string;
 
     disabled?: boolean;
     position?: {

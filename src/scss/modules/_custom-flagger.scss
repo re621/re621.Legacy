@@ -1,0 +1,55 @@
+/** Settings textarea **/
+textarea#settings-flags-defs {
+    height: 20rem;
+    white-space: pre;
+    font-family: monospace;
+    font-size: 1.1em;
+}
+
+.flag-defs-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr 5fr 2rem;
+    grid-column-gap: 0.5rem;
+    margin-bottom: 0.5rem;
+
+    input {
+        box-sizing: border-box;
+        border-radius: 0;
+    }
+}
+
+/** Post page view **/
+div.custom-flag {
+    font-family: monospace;
+    font-size: 1.1em;
+    margin: 0.25rem 0;
+
+    span.custom-flag-title {
+        background: maroon;
+        border-radius: 0.25rem;
+        padding: 0.125rem 0.5rem;
+    }
+}
+
+/** Search page view **/
+div.flag-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+    span.custom-flag-thumb {
+        margin: 0.125rem;
+        display: block;
+        height: 1rem;
+        font-size: 0.75em;
+        width: 1em;
+        border-radius: 0.75em;
+        overflow: hidden;
+        padding: 0 0.125rem;
+        box-shadow: 0 0 5px 0px #000;
+
+        &:hover {
+            width: unset;
+        }
+    }
+}

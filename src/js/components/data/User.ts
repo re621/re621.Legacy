@@ -1,7 +1,7 @@
-import { Api } from "../api/Api";
-import { PostFilter } from "./PostFilter";
-import { Post } from "./Post";
+import { E621 } from "../api/E621";
 import { APICurrentUser } from "../api/responses/APIUser";
+import { Post } from "./Post";
+import { PostFilter } from "./PostFilter";
 
 /**
  * User  
@@ -81,7 +81,7 @@ export class User {
         const filtered = new Set<number>();
         for (const filter of this.getBlacklist().values()) {
             for (const id of filter.getMatchesIds()) {
-                filtered.add(id);    
+                filtered.add(id);
             }
         }
         return filtered.size;
@@ -113,7 +113,10 @@ export class User {
      * @returns the users e6 site settings
      */
     public static async getCurrentSettings(): Promise<APICurrentUser> {
-        return Api.getJson("/users/" + this.getUserID() + ".json");
+        return E621.Users.find(this.getUserID()).first<APICurrentUser>().then((response) => {
+            console.log(response);
+            return Promise.resolve(response);
+        });
     }
 
     /**
@@ -121,14 +124,11 @@ export class User {
      * There is no need to put the keys into array form, this happens automatically
      */
     public static async setSettings(data: {}): Promise<void> {
-        const url = "/users/" + this.getUserID() + ".json";
-        const json = {
-            "_method": "patch"
-        };
+        const json = { "_method": "patch" };
         for (const key of Object.keys(data)) {
             json["user[" + key + "]"] = data[key];
         }
-        await Api.postUrl(url, json);
+        await E621.Users.find(this.getUserID()).post(json);
     }
 
     public static getInstance(): User {
