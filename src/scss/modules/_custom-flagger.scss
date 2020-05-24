@@ -6,6 +6,18 @@ textarea#settings-flags-defs {
     font-size: 1.1em;
 }
 
+.flag-defs-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr 5fr 2rem;
+    grid-column-gap: 0.5rem;
+    margin-bottom: 0.5rem;
+
+    input {
+        box-sizing: border-box;
+        border-radius: 0;
+    }
+}
+
 /** Post page view **/
 div.custom-flag {
     font-family: monospace;

@@ -16,7 +16,7 @@ import { PoolNavigator } from "../post/PoolNavigator";
 import { PostViewer } from "../post/PostViewer";
 import { TitleCustomizer } from "../post/TitleCustomizer";
 import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
-import { CustomFlagger } from "../search/CustomFlagger";
+import { CustomFlagger, FlagDefinition } from "../search/CustomFlagger";
 import { InfiniteScroll } from "../search/InfiniteScroll";
 import { MassDownloader } from "../search/MassDownloader";
 import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } from "../search/ThumbnailsEnhancer";
@@ -504,18 +504,110 @@ export class SettingsController extends RE6Module {
     private createFlagsTab(): Form {
         const customFlagger = ModuleController.getWithType<CustomFlagger>(CustomFlagger);
 
+        const defsContainer = $("<div>")
+            .attr("id", "flag-defs-container");
+        const flagDefs = customFlagger.fetchSettings("flags");
+
+        flagDefs.forEach((flag) => {
+            makeDefInput(flag).appendTo(defsContainer);
+        });
+
         return new Form({ id: "settings-flags", columns: 3, parent: "div#modal-container" }, [
-            Form.header("Flag Definitions", "full"),
-            Form.textarea("defs", customFlagger.fetchSettings("flags"), undefined, "full"),
+            Form.header("Flag Definitions", "mid"),
+            Form.button(
+                "defs-add", "New Flag", undefined, "column",
+                async () => {
+                    makeDefInput({
+                        name: "",
+                        color: "#" + Math.floor(Math.random() * 16777215).toString(16),     // Random HEX color
+                        tags: "",
+                    }).appendTo(defsContainer);
+                }
+            ),
+
+            Form.div(defsContainer, "full"),
+
             Form.button(
                 "defs-save", "Save", undefined, "column",
                 async (event) => {
-                    // TODO Add "settings saved" notification
                     event.preventDefault();
-                    await customFlagger.pushSettings("flags", $("textarea#settings-flags-defs").val());
+                    const confirmBox = $("span#defs-confirm").html("Saving . . .");
+
+                    const defData: FlagDefinition[] = [];
+                    const defInputs = $(defsContainer).find("div.flag-defs-inputs").get();
+
+                    for (const inputContainer of defInputs) {
+                        const inputs = $(inputContainer).find("input").get();
+
+                        const name = $(inputs[0]),
+                            color = $(inputs[1]),
+                            tags = $(inputs[2]);
+
+                        if ((name.val() as string).length == 0) name.val("FLAG");
+                        if (!(color.val() as string).match(/^#(?:[0-9a-f]{3}){1,2}$/i)) color.val("#800000");
+                        if ((tags.val() as string).length == 0) continue;
+
+                        defData.push({
+                            name: name.val() as string,
+                            color: color.val() as string,
+                            tags: tags.val() as string,
+                        });
+                    }
+
+                    await customFlagger.pushSettings("flags", defData);
+                    confirmBox.html("Settings Saved");
                 }
             ),
+            Form.div(`<span id="defs-confirm"></span>`, "mid"),
+
+            Form.div(`
+                <b>Custom Flags</b> allow you to automatically highlight posts that match specified tags.<br />
+                For example, creating a flag with tags <pre>-solo -duo -group -zero_pictured</pre> will highlight posts that do not inlcude character count tags.<br />
+                Flag names must be unique. Duplicate tag strings are allowed, by their corresponding flag may not display.
+            `),
         ]);
+
+        function makeDefInput(flag?: FlagDefinition): JQuery<HTMLElement> {
+            const flagContainer = $("<div>")
+                .addClass("flag-defs-inputs")
+            $("<input>")
+                .attr({
+                    "type": "text",
+                    "placeholder": "name",
+                })
+                .val(flag === undefined ? "" : flag.name)
+                .appendTo(flagContainer);
+            $("<input>")
+                .attr({
+                    "type": "text",
+                    "placeholder": "color",
+                })
+                .val(flag === undefined ? "" : flag.color)
+                .css("border-left-color", flag === undefined ? "transparent" : flag.color)
+                .appendTo(flagContainer)
+                .keyup((event) => {
+                    const $target = $(event.target);
+                    if (($target.val() + "").match(/^#(?:[0-9a-f]{3}){1,2}$/i)) {
+                        $target.css("border-left-color", $target.val() + "");
+                    }
+                });
+            $("<input>")
+                .attr({
+                    "type": "text",
+                    "placeholder": "tags",
+                })
+                .val(flag === undefined ? "" : flag.tags)
+                .appendTo(flagContainer);
+
+            $("<button>")
+                .html(`<i class="far fa-trash-alt"></i>`)
+                .appendTo(flagContainer)
+                .click(() => {
+                    flagContainer.remove();
+                });
+
+            return flagContainer;
+        }
     }
 
     /** Creates the hotkeys tab */

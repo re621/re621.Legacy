@@ -222,6 +222,13 @@ form.grid-form {
             div.unmargin {
                 margin: -0.5rem 0;
             }
+
+            pre {
+                display: inline;
+                background: #ffffff15;
+                padding: 0 0.25rem;
+                border-radius: 0.25rem;
+            }
         }
 
         // HR
