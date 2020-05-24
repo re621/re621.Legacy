@@ -27,8 +27,8 @@ export class SubscriptionManager extends RE6Module {
     /** Header button that opens the subscription modal */
     private $openSubsButton: JQuery<HTMLElement>;
 
-    /** Number of active notifications */
-    private tabNotificationsCountOld = 0;
+    /** True if the notifications window has been opened since page load */
+    private notificationsAlreadyOpened = false;
 
     protected getDefaultSettings(): Settings {
         return {
@@ -123,13 +123,28 @@ export class SubscriptionManager extends RE6Module {
             if (modal.isOpen()) {
                 const activeTab = subsTabs.get().tabs("option", "active");
                 window.setTimeout(() => {
-                    this.clearTabNotification(activeTab)
+                    this.clearTabNotification(activeTab);
                 }, 1000);
             }
 
             // Clear the notifications if the user opened the tab
             modal.getElement().on("dialogopen", () => {
+                if (!this.notificationsAlreadyOpened) {
+                    this.notificationsAlreadyOpened = true;
+
+                    let index = 0;
+                    for (const sub of this.subscriptions) {
+                        if (parseInt(sub[1].tabElement.attr("data-updates")) > 0) {
+                            subsTabs.get().tabs("option", "active", index);
+                            break;
+                        }
+                        index++;
+                    }
+                }
                 this.clearTabNotification(subsTabs.get().tabs("option", "active"));
+                window.setTimeout(() => {
+                    this.clearTabNotification(subsTabs.get().tabs("option", "active"));
+                }, 1000);
             });
 
             subsTabs.get().on("tabsactivate", (event, tabProperties) => {
