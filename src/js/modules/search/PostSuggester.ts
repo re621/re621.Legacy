@@ -1,6 +1,7 @@
 import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { PageDefintion } from "../../components/data/Page";
+import { User } from "../../components/data/User";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Modal } from "../../components/structure/Modal";
 
@@ -48,6 +49,8 @@ export class PostSuggester extends RE6Module {
     public create(): void {
         super.create();
 
+        if (!User.isLoggedIn()) return;
+
         // Create the sidebar button
         const listItem = $("<li>").appendTo("ul#related-list");
         const button = $("<a>")
@@ -91,7 +94,7 @@ export class PostSuggester extends RE6Module {
         for (let i = 1; i <= PostSuggester.maxPages; i++) {
             // Fetching data from the API
             this.status.html(`Analyzing favorites [ ${i} / ${PostSuggester.maxPages} ]`);
-            result = await E621.Posts.get<APIPost>({ tags: "fav:Lunacy", page: i, limit: 320 }, 500); // TODO Use the actual username
+            result = await E621.Posts.get<APIPost>({ tags: "fav:" + User.getUsername(), page: i, limit: 320 }, 500); // TODO Use the actual username
             result.forEach((post) => {
                 APIPost.getTags(post).forEach((tag) => {
                     if (data[tag]) data[tag] = data[tag] + 1;
