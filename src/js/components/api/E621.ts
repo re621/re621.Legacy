@@ -97,7 +97,7 @@ class APIEndpoint {
      * @param delay Optional delay override, in milliseconds
      */
     public async post(data?: string | APIQuery, delay?: number): Promise<any> {
-        return this.queue.createRequest(this.getParsedPath(), "", "POST", this.queryToString(data), this.name, this.getNode(), delay).then(
+        return this.queue.createRequest(this.getParsedPath(), "", "POST", this.queryToString(data, true), this.name, this.getNode(), delay).then(
             (data) => {
                 return Promise.resolve(data);
             },
@@ -114,7 +114,7 @@ class APIEndpoint {
     }
 
     /** Converts APIQuery into a raw string */
-    private queryToString(query: string | APIQuery): string {
+    private queryToString(query: string | APIQuery, post = false): string {
         if (query === undefined) return "";
         if (typeof query === "string") return query;
 
@@ -126,7 +126,12 @@ class APIEndpoint {
             if (key.includes("search")) this.nodeCur = "search";
             let value = query[key];
             if (Array.isArray(value)) value = (value as string[]).join("+");
-            queryString.push(encodeURIComponent(key) + "=" + encodeURIComponent(value).replace(/%2B/g, "+"));
+
+            // This is a workaround for a very specific problem and needs to be cleaned up
+            // When the query parameters are added to the URL, plus signs should be preserved
+            // When using this method to parse POST data, plus signs must be converted to %2B
+            if (post) queryString.push(encodeURIComponent(key) + "=" + encodeURIComponent(value));
+            else queryString.push(encodeURIComponent(key) + "=" + encodeURIComponent(value).replace(/%2B/g, "+"));
         });
         return queryString.join("&");
     }
