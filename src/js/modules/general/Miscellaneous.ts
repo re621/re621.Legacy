@@ -270,7 +270,7 @@ export class Miscellaneous extends RE6Module {
         if (!state) return;
 
         /* Handle double-click */
-        const clickAction = ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer).fetchSettings("clickAction");
+        const clickAction = ModuleController.get(ThumbnailEnhancer).fetchSettings("clickAction");
 
         const avatars = $("div.avatar > div > a").get();
         for (const element of avatars) {

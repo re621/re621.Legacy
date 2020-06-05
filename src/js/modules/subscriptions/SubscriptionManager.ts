@@ -161,7 +161,7 @@ export class SubscriptionManager extends RE6Module {
         if (!Array.isArray(moduleList)) moduleList = [moduleList];
 
         moduleList.forEach(async (moduleClass: any) => {
-            const instance = ModuleController.getWithType<Subscription>(moduleClass);
+            const instance = ModuleController.get<Subscription>(moduleClass);
             const manager = this.getInstance() as SubscriptionManager;
             manager.subscriptions.set(moduleClass.prototype.constructor.name, { instance: instance });
         });
@@ -490,7 +490,7 @@ export class SubscriptionManager extends RE6Module {
             );
         });
 
-        const clickAction = ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer).fetchSettings("clickAction");
+        const clickAction = ModuleController.get(ThumbnailEnhancer).fetchSettings("clickAction");
 
         const previewThumbs = sub.content.find<HTMLElement>("div.subscription-update-preview > a").get();
         for (const element of previewThumbs) {
