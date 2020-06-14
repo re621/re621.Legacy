@@ -116,6 +116,9 @@ export class SubscriptionManager extends RE6Module {
         Promise.all(updateThreads).then(() => {
             SubscriptionManager.updateInProgress = false;
             $(document).trigger("re621.subscription.update");
+            setInterval(() => { // Update the timers every minute
+                $(document).trigger("re621.subscription.update");
+            }, 60 * 1000);
 
             this.$openSubsButton.attr("data-loading", "false");
             this.refreshHeaderNotifications();
@@ -205,7 +208,7 @@ export class SubscriptionManager extends RE6Module {
             $("i#subscription-action-update").toggleClass("fa-spin", SubscriptionManager.updateInProgress);
         });
 
-        const form = new Form({ id: "subscriptions-controls", columns: 2, parent: "div#modal-container" }, [
+        return new Form({ id: "subscriptions-controls", columns: 2, parent: "div#modal-container" }, [
             // List and manage active subscriptions
             Form.header("Subscriptions"),
             makeSubSection(this.getSubscription("PoolSubscriptions").instance, 1),
@@ -278,7 +281,6 @@ export class SubscriptionManager extends RE6Module {
                 ),
             ], undefined, "mid"),
         ]);
-        return form;
 
         /** Formats the last update timestamp into a readable date */
         function getLastUpdateText(lastUpdate: number): string {
