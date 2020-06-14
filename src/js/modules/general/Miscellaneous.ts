@@ -101,6 +101,11 @@ export class Miscellaneous extends RE6Module {
             const title = /^(?:Forum - )(.+)(?: - (e621|e926))$/g.exec(document.title);
             if (title) document.title = `${title[1]} - Forum - ${title[2]}`;
         }
+
+        // Add a character counter to the blacklist input in the settings
+        if (Page.matches(PageDefintion.settings)) {
+            this.modifyBlacklistForm();
+        }
     }
 
     /** Emulates the clicking on "New Comment" link */
@@ -311,6 +316,25 @@ export class Miscellaneous extends RE6Module {
      */
     private handleSubmitForm(event): void {
         $(event.target).parents("form").submit();
+    }
+
+    /**
+     * Adds a character counter to the blacklist input in the settings
+     */
+    private modifyBlacklistForm(): void {
+        const $textarea = $("textarea#user_blacklisted_tags"),
+            $container = $("div.user_blacklisted_tags");
+        const charCounter = $("<span>")
+            .addClass("char-counter")
+            .html(($textarea.val() + "").length + " / 50000");
+        $("<div>")
+            .addClass("blacklist-character-counter-box")
+            .append(charCounter)
+            .appendTo($container);
+
+        $textarea.keyup(() => {
+            charCounter.html(($textarea.val() + "").length + " / 50000");
+        });
     }
 
 }
