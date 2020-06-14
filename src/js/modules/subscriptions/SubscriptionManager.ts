@@ -447,27 +447,45 @@ export class SubscriptionManager extends RE6Module {
             instance.insertButton($element, $unsubscribeButton);
 
             // Process subscribe / unsubscribe actions
+            let processing = false;
             $subscribeButton.click(async (event) => {
                 event.preventDefault();
-                processSubscribe(true, id, $subscribeButton, $unsubscribeButton, $element);
+
+                if (processing) return;
+                processing = true;
+
+                execSubscribe(id, $subscribeButton, $unsubscribeButton, $element)
+                    .then(() => { processing = false; });
             });
             $unsubscribeButton.click(async (event) => {
                 event.preventDefault();
-                processSubscribe(false, id, $subscribeButton, $unsubscribeButton, $element);
+
+                if (processing) return;
+                processing = true;
+
+                execUnsubscribe(id, $subscribeButton, $unsubscribeButton)
+                    .then(() => { processing = false; });
             });
         }
 
-        async function processSubscribe(subscribe: boolean, id: string, $subscribeButton: JQuery<HTMLElement>, $unsubscribeButton: JQuery<HTMLElement>, $element: JQuery<HTMLElement>): Promise<boolean> {
+        async function execSubscribe(id: string, $subscribeButton: JQuery<HTMLElement>, $unsubscribeButton: JQuery<HTMLElement>, $element: JQuery<HTMLElement>): Promise<boolean> {
             subscriptionData = await instance.fetchSettings("data", true);
-            if (subscribe)
-                subscriptionData[id] = { name: instance.getSubscriberName($element), };
-            else delete subscriptionData[id];
+            subscriptionData[id] = { name: instance.getSubscriberName($element), };
 
-            $subscribeButton.toggleClass("display-none");
-            $unsubscribeButton.toggleClass("display-none");
+            $subscribeButton.addClass("display-none");
+            $unsubscribeButton.removeClass("display-none");
 
-            instance.pushSettings("data", subscriptionData);
-            return Promise.resolve(true);
+            return instance.pushSettings("data", subscriptionData);
+        }
+
+        async function execUnsubscribe(id: string, $subscribeButton: JQuery<HTMLElement>, $unsubscribeButton: JQuery<HTMLElement>): Promise<boolean> {
+            subscriptionData = await instance.fetchSettings("data", true);
+            delete subscriptionData[id];
+
+            $subscribeButton.removeClass("display-none");
+            $unsubscribeButton.addClass("display-none");
+
+            return instance.pushSettings("data", subscriptionData);
         }
     }
 
