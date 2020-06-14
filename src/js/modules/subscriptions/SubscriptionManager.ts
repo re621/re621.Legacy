@@ -293,7 +293,7 @@ export class SubscriptionManager extends RE6Module {
         function getNextUpdateText(lastUpdate: number): string {
             if (SubscriptionManager.updateInProgress) return "In Progress . . .";
             else if (lastUpdate === 0) return Util.timeAgo(new Date().getTime() + SubscriptionManager.updateInterval);
-            else return Util.timeAgo(lastUpdate + SubscriptionManager.updateInterval);
+            else return Util.timeAgo(lastUpdate + SubscriptionManager.updateInterval + (60 * 1000));
         }
 
         /** Creates a form section that lists currently subscribed items */
