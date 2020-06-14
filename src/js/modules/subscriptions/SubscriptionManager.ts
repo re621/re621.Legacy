@@ -198,9 +198,9 @@ export class SubscriptionManager extends RE6Module {
         const lastUpdate = this.fetchSettings("lastUpdate");
 
         $(document).on("re621.subscription.update", () => {
-            const now = new Date().getTime();
-            $("span#subscriptions-lastupdate").html(getLastUpdateText(now));
-            $("span#subscriptions-nextupdate").html(getNextUpdateText(now));
+            const lastUpdate = this.fetchSettings("lastUpdate");
+            $("span#subscriptions-lastupdate").html(getLastUpdateText(lastUpdate));
+            $("span#subscriptions-nextupdate").html(getNextUpdateText(lastUpdate));
 
             $("i#subscription-action-update").toggleClass("fa-spin", SubscriptionManager.updateInProgress);
         });
