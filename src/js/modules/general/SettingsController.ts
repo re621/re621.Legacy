@@ -665,6 +665,8 @@ export class SettingsController extends RE6Module {
             ...createInputs(poolNavigator, "Next Post", "hotkeyNext"),
             ...createInputs(poolNavigator, "Cycle Navigation", "hotkeyCycle"),
             ...createInputs(imageScaler, "Change Scale", "hotkeyScale"),
+            ...createInputs(postViewer, "Add to Set", "hotkeyAddSet"),
+            ...createInputs(postViewer, "Add to Pool", "hotkeyAddPool"),
             Form.hr(),
 
             // Actions

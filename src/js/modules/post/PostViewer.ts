@@ -23,6 +23,9 @@ export class PostViewer extends RE6Module {
 
             { keys: "hotkeyHideNotes", fnct: this.toggleNotes },
             { keys: "hotkeyNewNote", fnct: this.switchNewNote },
+
+            { keys: "hotkeyAddSet", fnct: this.addSet },
+            { keys: "hotkeyAddPool", fnct: this.addPool },
         );
     }
 
@@ -42,6 +45,9 @@ export class PostViewer extends RE6Module {
 
             hotkeyHideNotes: "o",
             hotkeyNewNote: "p",
+
+            hotkeyAddSet: "",
+            hotkeyAddPool: "",
 
             upvoteOnFavorite: true,
             hideNotes: false,
@@ -153,4 +159,16 @@ export class PostViewer extends RE6Module {
 
         Danbooru.Note.TranslationMode.toggle(new Event("re621.dummy-event"));
     }
+
+    /** Opens the dialog to add the post to the set */
+    private addSet(): void {
+        $("a#set")[0].click();
+
+    }
+
+    /** Opens the dialog to add the post to the pool */
+    private addPool(): void {
+        $("a#pool")[0].click();
+    }
+
 }
