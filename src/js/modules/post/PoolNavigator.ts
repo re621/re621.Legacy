@@ -46,7 +46,7 @@ export class PoolNavigator extends RE6Module {
 
     /** Loops through available navbars */
     private cycleNavbars(): void {
-        const poolNavigator = ModuleController.getWithType<PoolNavigator>(PoolNavigator);
+        const poolNavigator = ModuleController.get(PoolNavigator);
         const navbars = poolNavigator.navbars,
             active = poolNavigator.activeNav;
 
@@ -58,7 +58,7 @@ export class PoolNavigator extends RE6Module {
 
     /** Emulates a click on the "next" button */
     private triggerNextPost(): void {
-        const poolNavigator = ModuleController.getWithType<PoolNavigator>(PoolNavigator);
+        const poolNavigator = ModuleController.get(PoolNavigator);
         const navbars = poolNavigator.navbars,
             active = poolNavigator.activeNav;
         if (navbars.length == 0) return;
@@ -69,7 +69,7 @@ export class PoolNavigator extends RE6Module {
 
     /** Emulates a click on the "prev" button */
     private triggerPrevPost(): void {
-        const poolNavigator = ModuleController.getWithType<PoolNavigator>(PoolNavigator);
+        const poolNavigator = ModuleController.get(PoolNavigator);
         const navbars = poolNavigator.navbars,
             active = poolNavigator.activeNav;
         if (navbars.length == 0) return;

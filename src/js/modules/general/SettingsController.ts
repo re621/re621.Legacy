@@ -135,14 +135,14 @@ export class SettingsController extends RE6Module {
 
     /** Creates the general settings tab */
     private createGeneralTab(): Form {
-        const titleCustomizer = ModuleController.getWithType<TitleCustomizer>(TitleCustomizer),
-            miscellaneous = ModuleController.getWithType<Miscellaneous>(Miscellaneous),
-            postViewer = ModuleController.getWithType<PostViewer>(PostViewer),
-            blacklistEnhancer = ModuleController.getWithType<BlacklistEnhancer>(BlacklistEnhancer),
-            imageScaler = ModuleController.getWithType<ImageScaler>(ImageScaler),
-            infiniteScroll = ModuleController.getWithType<InfiniteScroll>(InfiniteScroll),
-            thumbnailEnhancer = ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer),
-            headerCustomizer = ModuleController.getWithType<HeaderCustomizer>(HeaderCustomizer);
+        const titleCustomizer = ModuleController.get(TitleCustomizer),
+            miscellaneous = ModuleController.get(Miscellaneous),
+            postViewer = ModuleController.get(PostViewer),
+            blacklistEnhancer = ModuleController.get(BlacklistEnhancer),
+            imageScaler = ModuleController.get(ImageScaler),
+            infiniteScroll = ModuleController.get(InfiniteScroll),
+            thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer),
+            headerCustomizer = ModuleController.get(HeaderCustomizer);
 
         return new Form({ id: "settings-general", columns: 3, parent: "div#modal-container" }, [
 
@@ -417,9 +417,9 @@ export class SettingsController extends RE6Module {
 
     /** Creates the downloads settings tab */
     private createDownloadsTab(): Form {
-        const downloadCustomizer = ModuleController.getWithType<DownloadCustomizer>(DownloadCustomizer),
-            massDownloader = ModuleController.getWithType<MassDownloader>(MassDownloader),
-            poolDownloader = ModuleController.getWithType<PoolDownloader>(PoolDownloader);
+        const downloadCustomizer = ModuleController.get(DownloadCustomizer),
+            massDownloader = ModuleController.get(MassDownloader),
+            poolDownloader = ModuleController.get(PoolDownloader);
 
         return new Form({ id: "settings-download", columns: 3, parent: "div#modal-container" }, [
 
@@ -503,7 +503,7 @@ export class SettingsController extends RE6Module {
 
     /** Creates the Custom Flagger tab */
     private createFlagsTab(): Form {
-        const customFlagger = ModuleController.getWithType<CustomFlagger>(CustomFlagger);
+        const customFlagger = ModuleController.get(CustomFlagger);
 
         const defsContainer = $("<div>")
             .attr("id", "flag-defs-container");
@@ -614,11 +614,11 @@ export class SettingsController extends RE6Module {
 
     /** Creates the hotkeys tab */
     private createHotkeysTab(): Form {
-        const postViewer = ModuleController.getWithType<PostViewer>(PostViewer),
-            poolNavigator = ModuleController.getWithType<PoolNavigator>(PoolNavigator),
-            imageScaler = ModuleController.getWithType<ImageScaler>(ImageScaler),
-            miscellaneous = ModuleController.getWithType<Miscellaneous>(Miscellaneous),
-            headerCustomizer = ModuleController.getWithType<HeaderCustomizer>(HeaderCustomizer);
+        const postViewer = ModuleController.get(PostViewer),
+            poolNavigator = ModuleController.get(PoolNavigator),
+            imageScaler = ModuleController.get(ImageScaler),
+            miscellaneous = ModuleController.get(Miscellaneous),
+            headerCustomizer = ModuleController.get(HeaderCustomizer);
 
         function createInputs(module: RE6Module, label: string, settingsKey: string): FormElement[] {
             const values = module.fetchSettings(settingsKey).split("|");
@@ -658,11 +658,15 @@ export class SettingsController extends RE6Module {
             Form.header("Posts"),
             ...createInputs(postViewer, "Upvote", "hotkeyUpvote"),
             ...createInputs(postViewer, "Downvote", "hotkeyDownvote"),
-            ...createInputs(postViewer, "Favorite", "hotkeyFavorite"),
+            ...createInputs(postViewer, "Toggle Favorite", "hotkeyFavorite"),
+            ...createInputs(postViewer, "Add to Favorites", "hotkeyAddFavorite"),
+            ...createInputs(postViewer, "Remove From Favorites", "hotkeyRemoveFavorite"),
             ...createInputs(poolNavigator, "Previous Post", "hotkeyPrev"),
             ...createInputs(poolNavigator, "Next Post", "hotkeyNext"),
             ...createInputs(poolNavigator, "Cycle Navigation", "hotkeyCycle"),
             ...createInputs(imageScaler, "Change Scale", "hotkeyScale"),
+            ...createInputs(postViewer, "Add to Set", "hotkeyAddSet"),
+            ...createInputs(postViewer, "Add to Pool", "hotkeyAddPool"),
             Form.hr(),
 
             // Actions
@@ -766,7 +770,7 @@ export class SettingsController extends RE6Module {
                 "reset-specific-action", "Reset", " ", "mid",
                 () => {
                     if (selectedModule === "none") return;
-                    ModuleController.getByName(selectedModule).clearSettings();
+                    ModuleController.get(selectedModule).clearSettings();
                 }
             ),
             Form.div("<b>This cannot be undone.</b>", "column"),

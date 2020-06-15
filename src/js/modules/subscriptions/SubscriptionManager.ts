@@ -116,6 +116,9 @@ export class SubscriptionManager extends RE6Module {
         Promise.all(updateThreads).then(() => {
             SubscriptionManager.updateInProgress = false;
             $(document).trigger("re621.subscription.update");
+            setInterval(() => { // Update the timers every minute
+                $(document).trigger("re621.subscription.update");
+            }, 60 * 1000);
 
             this.$openSubsButton.attr("data-loading", "false");
             this.refreshHeaderNotifications();
@@ -161,7 +164,7 @@ export class SubscriptionManager extends RE6Module {
         if (!Array.isArray(moduleList)) moduleList = [moduleList];
 
         moduleList.forEach(async (moduleClass: any) => {
-            const instance = ModuleController.getWithType<Subscription>(moduleClass);
+            const instance = ModuleController.get<Subscription>(moduleClass);
             const manager = this.getInstance() as SubscriptionManager;
             manager.subscriptions.set(moduleClass.prototype.constructor.name, { instance: instance });
         });
@@ -198,14 +201,14 @@ export class SubscriptionManager extends RE6Module {
         const lastUpdate = this.fetchSettings("lastUpdate");
 
         $(document).on("re621.subscription.update", () => {
-            const now = new Date().getTime();
-            $("span#subscriptions-lastupdate").html(getLastUpdateText(now));
-            $("span#subscriptions-nextupdate").html(getNextUpdateText(now));
+            const lastUpdate = this.fetchSettings("lastUpdate");
+            $("span#subscriptions-lastupdate").html(getLastUpdateText(lastUpdate));
+            $("span#subscriptions-nextupdate").html(getNextUpdateText(lastUpdate));
 
             $("i#subscription-action-update").toggleClass("fa-spin", SubscriptionManager.updateInProgress);
         });
 
-        const form = new Form({ id: "subscriptions-controls", columns: 2, parent: "div#modal-container" }, [
+        return new Form({ id: "subscriptions-controls", columns: 2, parent: "div#modal-container" }, [
             // List and manage active subscriptions
             Form.header("Subscriptions"),
             makeSubSection(this.getSubscription("PoolSubscriptions").instance, 1),
@@ -278,7 +281,6 @@ export class SubscriptionManager extends RE6Module {
                 ),
             ], undefined, "mid"),
         ]);
-        return form;
 
         /** Formats the last update timestamp into a readable date */
         function getLastUpdateText(lastUpdate: number): string {
@@ -291,7 +293,7 @@ export class SubscriptionManager extends RE6Module {
         function getNextUpdateText(lastUpdate: number): string {
             if (SubscriptionManager.updateInProgress) return "In Progress . . .";
             else if (lastUpdate === 0) return Util.timeAgo(new Date().getTime() + SubscriptionManager.updateInterval);
-            else return Util.timeAgo(lastUpdate + SubscriptionManager.updateInterval);
+            else return Util.timeAgo(lastUpdate + SubscriptionManager.updateInterval + (60 * 1000));
         }
 
         /** Creates a form section that lists currently subscribed items */
@@ -445,27 +447,45 @@ export class SubscriptionManager extends RE6Module {
             instance.insertButton($element, $unsubscribeButton);
 
             // Process subscribe / unsubscribe actions
+            let processing = false;
             $subscribeButton.click(async (event) => {
                 event.preventDefault();
-                processSubscribe(true, id, $subscribeButton, $unsubscribeButton, $element);
+
+                if (processing) return;
+                processing = true;
+
+                execSubscribe(id, $subscribeButton, $unsubscribeButton, $element)
+                    .then(() => { processing = false; });
             });
             $unsubscribeButton.click(async (event) => {
                 event.preventDefault();
-                processSubscribe(false, id, $subscribeButton, $unsubscribeButton, $element);
+
+                if (processing) return;
+                processing = true;
+
+                execUnsubscribe(id, $subscribeButton, $unsubscribeButton)
+                    .then(() => { processing = false; });
             });
         }
 
-        async function processSubscribe(subscribe: boolean, id: string, $subscribeButton: JQuery<HTMLElement>, $unsubscribeButton: JQuery<HTMLElement>, $element: JQuery<HTMLElement>): Promise<boolean> {
+        async function execSubscribe(id: string, $subscribeButton: JQuery<HTMLElement>, $unsubscribeButton: JQuery<HTMLElement>, $element: JQuery<HTMLElement>): Promise<boolean> {
             subscriptionData = await instance.fetchSettings("data", true);
-            if (subscribe)
-                subscriptionData[id] = { name: instance.getSubscriberName($element), };
-            else delete subscriptionData[id];
+            subscriptionData[id] = { name: instance.getSubscriberName($element), };
 
-            $subscribeButton.toggleClass("display-none");
-            $unsubscribeButton.toggleClass("display-none");
+            $subscribeButton.addClass("display-none");
+            $unsubscribeButton.removeClass("display-none");
 
-            instance.pushSettings("data", subscriptionData);
-            return Promise.resolve(true);
+            return instance.pushSettings("data", subscriptionData);
+        }
+
+        async function execUnsubscribe(id: string, $subscribeButton: JQuery<HTMLElement>, $unsubscribeButton: JQuery<HTMLElement>): Promise<boolean> {
+            subscriptionData = await instance.fetchSettings("data", true);
+            delete subscriptionData[id];
+
+            $subscribeButton.removeClass("display-none");
+            $unsubscribeButton.addClass("display-none");
+
+            return instance.pushSettings("data", subscriptionData);
         }
     }
 
@@ -490,7 +510,7 @@ export class SubscriptionManager extends RE6Module {
             );
         });
 
-        const clickAction = ModuleController.getWithType<ThumbnailEnhancer>(ThumbnailEnhancer).fetchSettings("clickAction");
+        const clickAction = ModuleController.get(ThumbnailEnhancer).fetchSettings("clickAction");
 
         const previewThumbs = sub.content.find<HTMLElement>("div.subscription-update-preview > a").get();
         for (const element of previewThumbs) {

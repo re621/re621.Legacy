@@ -160,7 +160,7 @@ export class InfiniteScroll extends RE6Module {
         const thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer),
             upscaleMode: ThumbnailPerformanceMode = thumbnailEnhancer.fetchSettings("upscale"),
             clickAction: ThumbnailClickAction = thumbnailEnhancer.fetchSettings("clickAction"),
-            flagData = ModuleController.getWithType<CustomFlagger>(CustomFlagger).fetchSettings<FlagDefinition[]>("flags");
+            flagData = ModuleController.get(CustomFlagger).fetchSettings<FlagDefinition[]>("flags");
 
         const promises: Promise<void>[] = [];
         for (const json of posts) {
@@ -192,8 +192,8 @@ export class InfiniteScroll extends RE6Module {
             this.isInProgress = false;
             this.$loadingIndicator.hide();
 
-            const blacklistEnhancer = ModuleController.getWithType<BlacklistEnhancer>(BlacklistEnhancer),
-                instantSearch = ModuleController.getWithType<InstantSearch>(InstantSearch);
+            const blacklistEnhancer = ModuleController.get(BlacklistEnhancer),
+                instantSearch = ModuleController.get(InstantSearch);
             if (blacklistEnhancer.isInitialized()) blacklistEnhancer.updateSidebar();
             if (instantSearch.isInitialized()) instantSearch.applyFilter();
         });

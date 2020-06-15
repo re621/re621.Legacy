@@ -271,3 +271,16 @@ textarea.error-feedback {
 
     @include scrollbars;
 }
+
+/* Increase the size of blacklist form */
+textarea#user_blacklisted_tags {
+    height: 400px;
+}
+
+div.blacklist-character-counter-box {
+    width: 80%;
+    text-align: right;
+    margin-top: -1rem;
+    font-size: 0.75rem;
+    opacity: 0.5;
+}

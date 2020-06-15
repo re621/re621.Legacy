@@ -16,9 +16,16 @@ export class PostViewer extends RE6Module {
         this.registerHotkeys(
             { keys: "hotkeyUpvote", fnct: this.triggerUpvote },
             { keys: "hotkeyDownvote", fnct: this.triggerDownvote },
+
             { keys: "hotkeyFavorite", fnct: this.toggleFavorite },
+            { keys: "hotkeyAddFavorite", fnct: this.addFavorite },
+            { keys: "hotkeyRemoveFavorite", fnct: this.removeFavorite },
+
             { keys: "hotkeyHideNotes", fnct: this.toggleNotes },
             { keys: "hotkeyNewNote", fnct: this.switchNewNote },
+
+            { keys: "hotkeyAddSet", fnct: this.addSet },
+            { keys: "hotkeyAddPool", fnct: this.addPool },
         );
     }
 
@@ -31,10 +38,16 @@ export class PostViewer extends RE6Module {
             enabled: true,
             hotkeyUpvote: "w",
             hotkeyDownvote: "s",
+
             hotkeyFavorite: "f",
+            hotkeyAddFavorite: "",
+            hotkeyRemoveFavorite: "",
 
             hotkeyHideNotes: "o",
             hotkeyNewNote: "p",
+
+            hotkeyAddSet: "",
+            hotkeyAddPool: "",
 
             upvoteOnFavorite: true,
             hideNotes: false,
@@ -108,6 +121,20 @@ export class PostViewer extends RE6Module {
         else { $("button#remove-fav-button")[0].click(); }
     }
 
+    /** Adds the post to favorites, does not remove it */
+    private addFavorite(): void {
+        if ($("div.fav-buttons").hasClass("fav-buttons-false")) {
+            $("button#add-fav-button")[0].click();
+        }
+    }
+
+    /** Removes the post from favorites, does not add it */
+    private removeFavorite(): void {
+        if (!$("div.fav-buttons").hasClass("fav-buttons-false")) {
+            $("button#remove-fav-button")[0].click();
+        }
+    }
+
     /** Switches the notes container to its opposite state */
     private async toggleNotes(): Promise<void> {
         const module = ModuleController.get(PostViewer),
@@ -132,4 +159,16 @@ export class PostViewer extends RE6Module {
 
         Danbooru.Note.TranslationMode.toggle(new Event("re621.dummy-event"));
     }
+
+    /** Opens the dialog to add the post to the set */
+    private addSet(): void {
+        $("a#set")[0].click();
+
+    }
+
+    /** Opens the dialog to add the post to the pool */
+    private addPool(): void {
+        $("a#pool")[0].click();
+    }
+
 }
