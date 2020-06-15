@@ -16,7 +16,11 @@ export class PostViewer extends RE6Module {
         this.registerHotkeys(
             { keys: "hotkeyUpvote", fnct: this.triggerUpvote },
             { keys: "hotkeyDownvote", fnct: this.triggerDownvote },
+
             { keys: "hotkeyFavorite", fnct: this.toggleFavorite },
+            { keys: "hotkeyAddFavorite", fnct: this.addFavorite },
+            { keys: "hotkeyRemoveFavorite", fnct: this.removeFavorite },
+
             { keys: "hotkeyHideNotes", fnct: this.toggleNotes },
             { keys: "hotkeyNewNote", fnct: this.switchNewNote },
         );
@@ -31,7 +35,10 @@ export class PostViewer extends RE6Module {
             enabled: true,
             hotkeyUpvote: "w",
             hotkeyDownvote: "s",
+
             hotkeyFavorite: "f",
+            hotkeyAddFavorite: "",
+            hotkeyRemoveFavorite: "",
 
             hotkeyHideNotes: "o",
             hotkeyNewNote: "p",
@@ -106,6 +113,20 @@ export class PostViewer extends RE6Module {
     private toggleFavorite(): void {
         if ($("div.fav-buttons").hasClass("fav-buttons-false")) { $("button#add-fav-button")[0].click(); }
         else { $("button#remove-fav-button")[0].click(); }
+    }
+
+    /** Adds the post to favorites, does not remove it */
+    private addFavorite(): void {
+        if ($("div.fav-buttons").hasClass("fav-buttons-false")) {
+            $("button#add-fav-button")[0].click();
+        }
+    }
+
+    /** Removes the post from favorites, does not add it */
+    private removeFavorite(): void {
+        if (!$("div.fav-buttons").hasClass("fav-buttons-false")) {
+            $("button#remove-fav-button")[0].click();
+        }
     }
 
     /** Switches the notes container to its opposite state */
