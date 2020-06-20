@@ -30,10 +30,6 @@ export class BlacklistEnhancer extends RE6Module {
         };
     }
 
-    /**
-     * Creates the module's structure.  
-     * Should be run immediately after the constructor finishes.
-     */
     public create(): void {
         super.create();
 
@@ -46,6 +42,15 @@ export class BlacklistEnhancer extends RE6Module {
 
         //Apply blacklist without user interaction. Blacklist might be active
         this.applyBlacklist(true);
+
+        BlacklistEnhancer.on("updateSidebar.main", () => {
+            this.updateSidebar();
+        });
+    }
+
+    public destroy(): void {
+        super.destroy();
+        BlacklistEnhancer.off("updateSidebar.main");
     }
 
     private modifyDOM(): void {

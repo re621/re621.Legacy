@@ -17,8 +17,6 @@ import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } fro
  */
 export class InfiniteScroll extends RE6Module {
 
-    private static scrollPaused = false;
-
     private $postContainer: JQuery<HTMLElement>;
     private $loadingIndicator: JQuery<HTMLElement>;
     private $nextButton: JQuery<HTMLElement>;
@@ -27,6 +25,8 @@ export class InfiniteScroll extends RE6Module {
     private currentPage: number;
     private isInProgress: boolean;
     private pagesLeft: boolean;
+
+    private scrollPaused = false;
 
     public constructor() {
         super(PageDefintion.search);
@@ -76,6 +76,12 @@ export class InfiniteScroll extends RE6Module {
         this.isInProgress = false;
         this.pagesLeft = true;
 
+        // Listen for other modules trying to pause loading additional pages
+        InfiniteScroll.on("pauseScroll.main", (event, scrollPaused) => {
+            if (typeof scrollPaused === "undefined") return;
+            else this.scrollPaused = scrollPaused;
+        });
+
         // Wait until all images are loaded, to prevent fetching posts 
         // while the layout is still changing
         $(async () => {
@@ -107,14 +113,16 @@ export class InfiniteScroll extends RE6Module {
 
     public destroy(): void {
         super.destroy();
+
         this.$nextButton.remove();
+        InfiniteScroll.off("pauseScroll.main");
     }
 
     /**
      * Adds more posts to the site, if the user has scrolled down enough
      */
     private async addMorePosts(override = false): Promise<boolean> {
-        if (!this.isEnabled() || this.isInProgress || !this.pagesLeft || !this.shouldAddMore(override) || InfiniteScroll.scrollPaused) {
+        if (!this.isEnabled() || this.isInProgress || !this.pagesLeft || !this.shouldAddMore(override) || this.scrollPaused) {
             return Promise.resolve(false);
         }
 
@@ -122,7 +130,7 @@ export class InfiniteScroll extends RE6Module {
         if (pageLoaded) {
             Page.setQueryParameter((this.fetchSettings("keepHistory") ? "x" : "") + "page", (this.currentPage + 1).toString());
             this.currentPage++;
-            this.$postContainer.trigger("re621.infiniteScroll.pageLoad");
+            InfiniteScroll.trigger("pageLoad");
         }
         return Promise.resolve(pageLoaded);
     }
@@ -192,10 +200,8 @@ export class InfiniteScroll extends RE6Module {
             this.isInProgress = false;
             this.$loadingIndicator.hide();
 
-            const blacklistEnhancer = ModuleController.get(BlacklistEnhancer),
-                instantSearch = ModuleController.get(InstantSearch);
-            if (blacklistEnhancer.isInitialized()) blacklistEnhancer.updateSidebar();
-            if (instantSearch.isInitialized()) instantSearch.applyFilter();
+            BlacklistEnhancer.trigger("updateSidebar");
+            InstantSearch.trigger("applyFilter");
         });
 
         return Promise.resolve(true);
@@ -209,12 +215,4 @@ export class InfiniteScroll extends RE6Module {
         return $(window).scrollTop() + $(window).height() > $(document).height() - 50 || override;
     }
 
-    /**
-     * Temporarily pauses the infinite scroll.  
-     * This is a hack to improve MassDownloader performance.
-     * @param scrollPaused True to pause the loading, false to unpause
-     */
-    public static pauseScroll(scrollPaused = true): void {
-        InfiniteScroll.scrollPaused = scrollPaused;
-    }
 }

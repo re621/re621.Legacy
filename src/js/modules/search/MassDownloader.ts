@@ -110,9 +110,15 @@ export class MassDownloader extends RE6Module {
                         .attr("data-state", "ready");
                 }
             });
-        this.container.on("re621.infiniteScroll.pageLoad", () => {
+
+        InfiniteScroll.on("pageLoad.MassDownloader", () => {
             this.container.selectable("refresh");
         });
+    }
+
+    public destroy(): void {
+        super.destroy();
+        InfiniteScroll.off("pageLoad.MassDownloader");
     }
 
     /**
@@ -122,7 +128,7 @@ export class MassDownloader extends RE6Module {
      */
     private toggleInterface(): void {
         this.showInterface = !this.showInterface;
-        ThumbnailEnhancer.pauseHoverActions(this.showInterface);
+        ThumbnailEnhancer.trigger("pauseHoverActions", this.showInterface);
 
         if (this.showInterface) {
             this.selectButton.html("Cancel");
@@ -158,7 +164,7 @@ export class MassDownloader extends RE6Module {
         this.processing = true;
         this.actButton.attr("disabled", "disabled");
 
-        InfiniteScroll.pauseScroll(this.showInterface);
+        InfiniteScroll.trigger("pauseScroll", true);
 
         this.infoText
             .attr("data-state", "loading")
@@ -310,6 +316,8 @@ export class MassDownloader extends RE6Module {
                         .html(`Download has exceeded the maximum file size.<br /><br />Click the download button again for the next part.`)
                         .appendTo(this.infoText);
                 }
+            } else {
+                InfiniteScroll.trigger("pauseScroll", false);
             }
         });
     }

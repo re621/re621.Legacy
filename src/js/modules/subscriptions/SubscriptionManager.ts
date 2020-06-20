@@ -115,9 +115,9 @@ export class SubscriptionManager extends RE6Module {
         // Update the subscription content
         Promise.all(updateThreads).then(() => {
             SubscriptionManager.updateInProgress = false;
-            $(document).trigger("re621.subscription.update");
+            SubscriptionManager.trigger("update");
             setInterval(() => { // Update the timers every minute
-                $(document).trigger("re621.subscription.update");
+                SubscriptionManager.trigger("update");
             }, 60 * 1000);
 
             this.$openSubsButton.attr("data-loading", "false");
@@ -200,7 +200,7 @@ export class SubscriptionManager extends RE6Module {
     private getInfoPage(): Form {
         const lastUpdate = this.fetchSettings("lastUpdate");
 
-        $(document).on("re621.subscription.update", () => {
+        SubscriptionManager.on("update.main", () => {
             const lastUpdate = this.fetchSettings("lastUpdate");
             $("span#subscriptions-lastupdate").html(getLastUpdateText(lastUpdate));
             $("span#subscriptions-nextupdate").html(getNextUpdateText(lastUpdate));
@@ -244,7 +244,7 @@ export class SubscriptionManager extends RE6Module {
 
                         SubscriptionManager.updateInProgress = true;
                         this.pushSettings("lastUpdate", new Date().getTime());
-                        $(document).trigger("re621.subscription.update");
+                        SubscriptionManager.trigger("update");
 
                         this.$openSubsButton.attr({
                             "data-loading": "true",
@@ -264,7 +264,7 @@ export class SubscriptionManager extends RE6Module {
                             return Promise.all(updateThreads);
                         }).then(() => {
                             SubscriptionManager.updateInProgress = false;
-                            $(document).trigger("re621.subscription.update");
+                            SubscriptionManager.trigger("update");
 
                             this.$openSubsButton.attr("data-loading", "false");
                             this.refreshHeaderNotifications();
