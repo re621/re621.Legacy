@@ -8,7 +8,7 @@ import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
 import { Util } from "../../components/structure/Util";
 import { ThumbnailClickAction, ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
-import { Subscription, UpdateActions } from "./Subscription";
+import { Subscription } from "./Subscription";
 
 export class SubscriptionManager extends RE6Module {
 
@@ -505,9 +505,7 @@ export class SubscriptionManager extends RE6Module {
         if (cache.getSize() > 0) sub.content.append(this.createCacheDivider());
 
         cache.getIndex().forEach((timestamp) => {
-            sub.content.append(
-                this.createUpdateEntry(timestamp, cache.getItem(timestamp), sub.instance.updateActions)
-            );
+            sub.content.append(this.createUpdateEntry(cache, timestamp, sub.instance));
         });
 
         const clickAction = ModuleController.get(ThumbnailEnhancer).fetchSettings("clickAction");
@@ -552,27 +550,32 @@ export class SubscriptionManager extends RE6Module {
      * Should be inserted at the very beginning of the stack, actual sorting is done by CSS
      */
     private createCacheDivider(): JQuery<HTMLElement> {
-        const update: UpdateContent = { id: -1, name: "Older Updates", md5: "" };
-        const definition: UpdateActions = {
-            imageSrc: () => "",
-            sourceText: () => "",
-            updateText: data => data.name
-        };
-        return this.createUpdateEntry(new Date().getTime(), update, definition, "notice notice-cached");
+        const $content = $("<div>")
+            .addClass("subscription-update notice notice-cached");
+
+        $("<div>")
+            .addClass("subscription-update-title")
+            .html("Older Updates")
+            .appendTo($content);
+
+        return $content;
     }
 
     /**
      * Creates a subscription update element based on the provided data and the subscription's definition
      * @param timeStamp Time when the update was created
      * @param data Update data
-     * @param definition Subscription definition
+     * @param actions Subscription definition
      * @param customClass Custom class to add to the element
      */
-    private createUpdateEntry(timeStamp: number, data: UpdateContent, actions: UpdateActions, customClass?: string): JQuery<HTMLElement> {
+    private createUpdateEntry(cache: UpdateCache, timestamp: number, subscription: Subscription, customClass?: string): JQuery<HTMLElement> {
+        const actions = subscription.updateActions,
+            data = cache.getItem(timestamp);
+
         const $content = $("<div>")
             .addClass("subscription-update" + (customClass ? " " + customClass : "") + (data.new ? " new" : ""));
-        const timeAgo = Util.timeAgo(timeStamp);
-        const timeString = new Date(timeStamp).toLocaleString();
+        const timeAgo = Util.timeAgo(timestamp);
+        const timeString = new Date(timestamp).toLocaleString();
 
         // ===== Create Elements =====
         // Image
@@ -630,7 +633,13 @@ export class SubscriptionManager extends RE6Module {
         $("<a>")
             .html(`<i class="fas fa-times"></i>`)
             .attr("title", "Remove")
-            .appendTo($remove);
+            .appendTo($remove)
+            .click((event) => {
+                event.preventDefault();
+                cache.deleteItem(timestamp);
+                subscription.pushSettings("cache", cache.getData());
+                $content.css("display", "none");
+            });
 
         // Link to "All Posts" page
         const $full = $("<div>")
