@@ -622,6 +622,16 @@ export class SubscriptionManager extends RE6Module {
                 .html(data.nameExtra)
                 .appendTo($title);
 
+        // Remove from Cache
+        const $remove = $("<div>")
+            .addClass("subscription-update-remove")
+            .appendTo($content);
+
+        $("<a>")
+            .html(`<i class="fas fa-times"></i>`)
+            .attr("title", "Remove")
+            .appendTo($remove);
+
         // Link to "All Posts" page
         const $full = $("<div>")
             .addClass("subscription-update-full")
