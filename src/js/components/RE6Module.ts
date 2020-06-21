@@ -241,6 +241,34 @@ export class RE6Module {
         return this.instance;
     }
 
+    /**
+     * Attach a handler function for the specified event to the module
+     * @param event Event selector
+     * @param callback Handler function
+     */
+    public static on(event: string, callback: (event: JQuery.TriggeredEvent, data: any) => void): void {
+        $(document).on("re621.module." + this.getInstance().constructor.name + "." + event, (event, data) => {
+            callback(event, data);
+        });
+    }
+
+    /**
+     * Detaches all handlers from the specified module event
+     * @param event Event selector
+     */
+    public static off(event: string): void {
+        $(document).off("re621.module." + this.getInstance().constructor.name + "." + event);
+    }
+
+    /**
+     * Execute all handlers for the specified module event
+     * @param event Event selector
+     * @param data Event data
+     */
+    public static trigger(event: string, data?: any): void {
+        $(document).trigger("re621.module." + this.getInstance().constructor.name + "." + event, data);
+    }
+
 }
 
 interface Hotkey {

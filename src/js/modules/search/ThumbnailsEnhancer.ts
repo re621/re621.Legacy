@@ -21,6 +21,7 @@ export enum ThumbnailClickAction {
 export class ThumbnailEnhancer extends RE6Module {
 
     private postContainer: JQuery<HTMLElement>;
+
     private static zoomPaused = false;
 
     public constructor() {
@@ -75,6 +76,25 @@ export class ThumbnailEnhancer extends RE6Module {
 
         this.toggleStatusRibbons(this.fetchSettings("ribbons"));
         this.toggleRelationRibbons(this.fetchSettings("relRibbons"));
+
+        ThumbnailEnhancer.on("pauseHoverActions.main", (event, zoomPaused) => {
+            if (typeof zoomPaused === "undefined") return;
+            if (zoomPaused) $("div#page").attr({ "data-thumb-zoom": "false", "data-thumb-vote": "false", });
+            else {
+                const module = ModuleController.get(ThumbnailEnhancer);
+                $("div#page").attr({
+                    "data-thumb-zoom": module.fetchSettings("zoom"),
+                    "data-thumb-vote": module.fetchSettings("vote"),
+                });
+            }
+
+            ThumbnailEnhancer.zoomPaused = zoomPaused;
+        })
+    }
+
+    public destroy(): void {
+        super.destroy();
+        ThumbnailEnhancer.off("pauseHoverActions.main")
     }
 
     /**
@@ -147,23 +167,6 @@ export class ThumbnailEnhancer extends RE6Module {
      */
     public toggleRelationRibbons(state = true): void {
         this.postContainer.attr("data-thumb-rel-ribbons", state + "");
-    }
-
-    /**
-     * Pauses or unpauses ThumbnailEnhancer's hover actions
-     * @param state True to hide, false to restore
-     */
-    public static pauseHoverActions(zoomPaused = true): void {
-        if (zoomPaused) $("div#page").attr({ "data-thumb-zoom": "false", "data-thumb-vote": "false", });
-        else {
-            const module = ModuleController.get(ThumbnailEnhancer);
-            $("div#page").attr({
-                "data-thumb-zoom": module.fetchSettings("zoom"),
-                "data-thumb-vote": module.fetchSettings("vote"),
-            });
-        }
-
-        ThumbnailEnhancer.zoomPaused = zoomPaused;
     }
 
     /**

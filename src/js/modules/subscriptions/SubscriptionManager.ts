@@ -8,7 +8,7 @@ import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
 import { Util } from "../../components/structure/Util";
 import { ThumbnailClickAction, ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
-import { Subscription, UpdateActions } from "./Subscription";
+import { Subscription } from "./Subscription";
 
 export class SubscriptionManager extends RE6Module {
 
@@ -115,9 +115,9 @@ export class SubscriptionManager extends RE6Module {
         // Update the subscription content
         Promise.all(updateThreads).then(() => {
             SubscriptionManager.updateInProgress = false;
-            $(document).trigger("re621.subscription.update");
+            SubscriptionManager.trigger("update");
             setInterval(() => { // Update the timers every minute
-                $(document).trigger("re621.subscription.update");
+                SubscriptionManager.trigger("update");
             }, 60 * 1000);
 
             this.$openSubsButton.attr("data-loading", "false");
@@ -200,7 +200,7 @@ export class SubscriptionManager extends RE6Module {
     private getInfoPage(): Form {
         const lastUpdate = this.fetchSettings("lastUpdate");
 
-        $(document).on("re621.subscription.update", () => {
+        SubscriptionManager.on("update.main", () => {
             const lastUpdate = this.fetchSettings("lastUpdate");
             $("span#subscriptions-lastupdate").html(getLastUpdateText(lastUpdate));
             $("span#subscriptions-nextupdate").html(getNextUpdateText(lastUpdate));
@@ -244,7 +244,7 @@ export class SubscriptionManager extends RE6Module {
 
                         SubscriptionManager.updateInProgress = true;
                         this.pushSettings("lastUpdate", new Date().getTime());
-                        $(document).trigger("re621.subscription.update");
+                        SubscriptionManager.trigger("update");
 
                         this.$openSubsButton.attr({
                             "data-loading": "true",
@@ -264,7 +264,7 @@ export class SubscriptionManager extends RE6Module {
                             return Promise.all(updateThreads);
                         }).then(() => {
                             SubscriptionManager.updateInProgress = false;
-                            $(document).trigger("re621.subscription.update");
+                            SubscriptionManager.trigger("update");
 
                             this.$openSubsButton.attr("data-loading", "false");
                             this.refreshHeaderNotifications();
@@ -505,9 +505,7 @@ export class SubscriptionManager extends RE6Module {
         if (cache.getSize() > 0) sub.content.append(this.createCacheDivider());
 
         cache.getIndex().forEach((timestamp) => {
-            sub.content.append(
-                this.createUpdateEntry(timestamp, cache.getItem(timestamp), sub.instance.updateActions)
-            );
+            sub.content.append(this.createUpdateEntry(cache, timestamp, sub.instance));
         });
 
         const clickAction = ModuleController.get(ThumbnailEnhancer).fetchSettings("clickAction");
@@ -552,27 +550,32 @@ export class SubscriptionManager extends RE6Module {
      * Should be inserted at the very beginning of the stack, actual sorting is done by CSS
      */
     private createCacheDivider(): JQuery<HTMLElement> {
-        const update: UpdateContent = { id: -1, name: "Older Updates", md5: "" };
-        const definition: UpdateActions = {
-            imageSrc: () => "",
-            sourceText: () => "",
-            updateText: data => data.name
-        };
-        return this.createUpdateEntry(new Date().getTime(), update, definition, "notice notice-cached");
+        const $content = $("<div>")
+            .addClass("subscription-update notice notice-cached");
+
+        $("<div>")
+            .addClass("subscription-update-title")
+            .html("Older Updates")
+            .appendTo($content);
+
+        return $content;
     }
 
     /**
      * Creates a subscription update element based on the provided data and the subscription's definition
      * @param timeStamp Time when the update was created
      * @param data Update data
-     * @param definition Subscription definition
+     * @param actions Subscription definition
      * @param customClass Custom class to add to the element
      */
-    private createUpdateEntry(timeStamp: number, data: UpdateContent, actions: UpdateActions, customClass?: string): JQuery<HTMLElement> {
+    private createUpdateEntry(cache: UpdateCache, timestamp: number, subscription: Subscription, customClass?: string): JQuery<HTMLElement> {
+        const actions = subscription.updateActions,
+            data = cache.getItem(timestamp);
+
         const $content = $("<div>")
             .addClass("subscription-update" + (customClass ? " " + customClass : "") + (data.new ? " new" : ""));
-        const timeAgo = Util.timeAgo(timeStamp);
-        const timeString = new Date(timeStamp).toLocaleString();
+        const timeAgo = Util.timeAgo(timestamp);
+        const timeString = new Date(timestamp).toLocaleString();
 
         // ===== Create Elements =====
         // Image
@@ -621,6 +624,22 @@ export class SubscriptionManager extends RE6Module {
                 .addClass("subscriptions-update-title-extra")
                 .html(data.nameExtra)
                 .appendTo($title);
+
+        // Remove from Cache
+        const $remove = $("<div>")
+            .addClass("subscription-update-remove")
+            .appendTo($content);
+
+        $("<a>")
+            .html(`<i class="fas fa-times"></i>`)
+            .attr("title", "Remove")
+            .appendTo($remove)
+            .click((event) => {
+                event.preventDefault();
+                cache.deleteItem(timestamp);
+                subscription.pushSettings("cache", cache.getData());
+                $content.css("display", "none");
+            });
 
         // Link to "All Posts" page
         const $full = $("<div>")

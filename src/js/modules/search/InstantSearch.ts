@@ -37,17 +37,23 @@ export class InstantSearch extends RE6Module {
             clearTimeout(typingTimeout);
             typingTimeout = window.setTimeout(() => { this.applyFilter(); }, 500);
         });
-        //The user might have paginated, which means the input is not empty,
-        //but there was no input event yet.
+
+        // The user might have paginated, which means the input is not empty, but there was no input event yet.
         this.$searchbox.trigger("input");
+
+        InstantSearch.on("applyFilter.main", () => {
+            this.applyFilter();
+        });
     }
 
     public destroy(): void {
-        if (!this.isInitialized()) return;
         super.destroy();
+
         this.$searchbox.val("");
         this.applyFilter();
         $("section#re-instantsearch").remove();
+
+        InstantSearch.off("applyFilter.main");
     }
 
     public applyFilter(): void {
@@ -55,7 +61,7 @@ export class InstantSearch extends RE6Module {
         const filter = new PostFilter(filterText);
         sessionStorage.setItem("re-instantsearch", filterText);
         const posts = Post.fetchPosts();
-        //when the user clears the input, show all posts
+        // When the user clears the input, show all posts
         if (filterText === "") {
             for (const post of posts) {
                 post.show();
