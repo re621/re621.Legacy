@@ -247,6 +247,7 @@ export class SubscriptionManager extends RE6Module {
                     "mid",
                     async (event, data) => {
                         await this.pushSettings("updateInterval", parseInt(data));
+                        SubscriptionManager.trigger("update");
                     }
                 ),
                 Form.div(`<div class="unmargin">How often should the subscriptions be checked for updates.</div>`, "mid"),
