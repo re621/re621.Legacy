@@ -215,6 +215,7 @@ export class SubscriptionManager extends RE6Module {
             makeSubSection(this.getSubscription("ForumSubscriptions").instance, 1),
             makeSubSection(this.getSubscription("TagSubscriptions").instance, 2),
             makeSubSection(this.getSubscription("CommentSubscriptions").instance, 2),
+            Form.hr(),
 
             // Settings
             Form.header("Settings"),
@@ -229,6 +230,7 @@ export class SubscriptionManager extends RE6Module {
                 Form.spacer("column"),
                 Form.div(`<div class="unmargin">Number of items kept in the update cache. Must be at least 10, but no more than 200. Large values may lead to performance drops.</div>`, "mid"),
             ]),
+            Form.hr(),
 
             // Status and Controls
             Form.section({ id: "status", columns: 2 }, [
