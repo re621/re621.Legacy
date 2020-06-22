@@ -12,9 +12,6 @@ import { Subscription } from "./Subscription";
 
 export class SubscriptionManager extends RE6Module {
 
-    /** How often should the subscriptions be refreshed _on their own_. */
-    private static updateInterval = 60 * 60 * 1000; // 1 hour
-
     /** Used to invalidate cache if the format changes */
     private static cacheVersion = 1;
 
@@ -34,7 +31,11 @@ export class SubscriptionManager extends RE6Module {
         return {
             enabled: true,
             lastUpdate: 0,
-            cacheSize: 60
+
+            /** How often should the subscriptions be refreshed, in milliseconds */
+            updateInterval: 60 * 60 * 1000,
+            /** Maximum number of items in the update cache */
+            cacheSize: 60,
         };
     }
 
@@ -191,19 +192,22 @@ export class SubscriptionManager extends RE6Module {
         const now = nowFake !== undefined ? nowFake : new Date().getTime();
         lastUpdate = lastUpdate ? lastUpdate : this.fetchSettings("lastUpdate");
         return !SubscriptionManager.updateInProgress &&
-            (now - lastUpdate) >= SubscriptionManager.updateInterval;
+            (now - lastUpdate) >= this.fetchSettings("updateInterval");
     }
 
     /**
      * Builds a subscription settings page, containing various controls
      */
     private getInfoPage(): Form {
-        const lastUpdate = this.fetchSettings("lastUpdate");
+        const lastUpdate = this.fetchSettings<number>("lastUpdate"),
+            updateInterval = this.fetchSettings<number>("updateInterval");
 
         SubscriptionManager.on("update.main", () => {
-            const lastUpdate = this.fetchSettings("lastUpdate");
+            const lastUpdate = this.fetchSettings("lastUpdate"),
+                updateInterval = this.fetchSettings("updateInterval");
+
             $("span#subscriptions-lastupdate").html(getLastUpdateText(lastUpdate));
-            $("span#subscriptions-nextupdate").html(getNextUpdateText(lastUpdate));
+            $("span#subscriptions-nextupdate").html(getNextUpdateText(lastUpdate, updateInterval));
 
             $("i#subscription-action-update").toggleClass("fa-spin", SubscriptionManager.updateInProgress);
         });
@@ -221,7 +225,7 @@ export class SubscriptionManager extends RE6Module {
             Form.header("Settings"),
             Form.section({ id: "settings", columns: 2 }, [
                 Form.input(
-                    "template", this.fetchSettings("cacheSize"), "Cache Size", "column", { pattern: "^(1?[0-9][0-9]|200)$" },
+                    "cache-size", this.fetchSettings("cacheSize"), "Cache Size", "column", { pattern: "^(1?[0-9][0-9]|200)$" },
                     async (event, data) => {
                         if (!(event.target as HTMLInputElement).checkValidity()) return;
                         await this.pushSettings("cacheSize", parseInt(data));
@@ -229,6 +233,23 @@ export class SubscriptionManager extends RE6Module {
                 ),
                 Form.spacer("column"),
                 Form.div(`<div class="unmargin">Number of items kept in the update cache. Must be at least 10, but no more than 200. Large values may lead to performance drops.</div>`, "mid"),
+                Form.spacer("mid"),
+
+                Form.select(
+                    "update-interval", this.fetchSettings("updateInterval"), "Update Interval",
+                    [
+                        { value: (30 * 60 * 1000) + "", name: "30 minutes" },
+                        { value: (60 * 60 * 1000) + "", name: "1 hour" },
+                        { value: (360 * 60 * 1000) + "", name: "6 hours" },
+                        { value: (720 * 60 * 1000) + "", name: "12 hours" },
+                        { value: (1440 * 60 * 1000) + "", name: "24 hours" },
+                    ],
+                    "mid",
+                    async (event, data) => {
+                        await this.pushSettings("updateInterval", parseInt(data));
+                    }
+                ),
+                Form.div(`<div class="unmargin">How often should the subscriptions be checked for updates.</div>`, "mid"),
             ]),
             Form.hr(),
 
@@ -236,7 +257,7 @@ export class SubscriptionManager extends RE6Module {
             Form.section({ id: "status", columns: 2 }, [
                 Form.header("Other"),
                 Form.div($("<span>").attr("id", "subscriptions-lastupdate").html(getLastUpdateText(lastUpdate)), "mid", "Last Update:"),
-                Form.div($("<span>").attr("id", "subscriptions-nextupdate").html(getNextUpdateText(lastUpdate)), "mid", "Next Update:"),
+                Form.div($("<span>").attr("id", "subscriptions-nextupdate").html(getNextUpdateText(lastUpdate, updateInterval)), "mid", "Next Update:"),
                 Form.button(
                     "triggerupdate", `<i class="fas fa-sync-alt fa-xs fa-spin" id="subscription-action-update"></i> Manual Update`, undefined, "column", () => {
                         if (SubscriptionManager.updateInProgress) {
@@ -292,10 +313,10 @@ export class SubscriptionManager extends RE6Module {
         }
 
         /** Formats the next update timestamp into a readable date */
-        function getNextUpdateText(lastUpdate: number): string {
+        function getNextUpdateText(lastUpdate: number, updateInterval: number): string {
             if (SubscriptionManager.updateInProgress) return "In Progress . . .";
-            else if (lastUpdate === 0) return Util.timeAgo(new Date().getTime() + SubscriptionManager.updateInterval);
-            else return Util.timeAgo(lastUpdate + SubscriptionManager.updateInterval + (60 * 1000));
+            else if (lastUpdate === 0) return Util.timeAgo(new Date().getTime() + updateInterval);
+            else return Util.timeAgo(lastUpdate + updateInterval + (60 * 1000));
         }
 
         /** Creates a form section that lists currently subscribed items */
