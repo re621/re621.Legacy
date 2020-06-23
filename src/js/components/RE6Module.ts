@@ -117,6 +117,15 @@ export class RE6Module {
     }
 
     /**
+     * Retrieves the provided settings value without refreshing the entire settings cache.  
+     * This is a workaround specifically made for subscription cache synchronization between tabs.
+     * @param property Property name
+     */
+    public async fetchSettingsGently<T>(property: string): Promise<T> {
+        return Promise.resolve((await this.loadSettingsValues())[property] as T);
+    }
+
+    /**
      * Saves the provided settings.  
      *   
      * This method returns a Promise that is fulfilled when the operation completes, one way or another.
@@ -161,23 +170,34 @@ export class RE6Module {
     }
 
     /**
-     * Loads the settings data from Tampermonkey storage.  
+     * Loads the settings data from storage.  
+     * Unlike `loadSettingsValues()`, this method saves the values to cache, rather than return them. 
      * If no settings exist, uses default values instead.
      * @returns True if the settings were loaded successfully, false otherwise
      */
     private async loadSettingsCache(): Promise<boolean> {
-        const defaultValues = this.getDefaultSettings();
-        this.settings = await XM.Storage.getValue("re621." + this.constructor.name, defaultValues);
+        this.settings = await this.loadSettingsValues();
+        return Promise.resolve(true);
+    }
+
+    /**
+     * Loads the settings data from storage.  
+     * Unlike `loadSettingsCache()`, this method returns the stored values, rather than save them. 
+     * If no settings exist, uses default values instead.
+     * @returns Stored settings values
+     */
+    private async loadSettingsValues(): Promise<any> {
+        const defaultValues = this.getDefaultSettings(),
+            result = await XM.Storage.getValue("re621." + this.constructor.name, defaultValues);
 
         // If defaultValues has a entry the defaultSettings do not have, add it
         // this might happen if the user saved and a defaultSetting gets added afterwards
         for (const key of Object.keys(defaultValues)) {
-            if (this.settings[key] === undefined) {
-                this.settings[key] = defaultValues[key];
-            }
+            if (result[key] === undefined)
+                result[key] = defaultValues[key];
         }
 
-        return Promise.resolve(true);
+        return Promise.resolve(result);
     }
 
     /**
