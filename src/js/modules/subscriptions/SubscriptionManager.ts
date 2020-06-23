@@ -30,9 +30,6 @@ export class SubscriptionManager extends RE6Module {
     /** Header button that opens the subscription modal */
     private $openSubsButton: JQuery<HTMLElement>;
 
-    /** Used to differentiate the initial subscription loads from consequent updates */
-    private firstLoad = true;
-
     /** True if the notifications window has been opened since page load */
     private notificationsAlreadyOpened = false;
 
@@ -139,13 +136,12 @@ export class SubscriptionManager extends RE6Module {
                 subscription.tabElement.attr("data-updates", "0");
                 updateThreads.push(new Promise(async (resolve) => {
                     await subscription.instance.refreshSettings();
-                    resolve(await this.initSubscription(subscription, shouldUpdate, this.firstLoad, settings.lastUpdate));
+                    resolve(await this.initSubscription(subscription, shouldUpdate, settings.lastUpdate));
                 }));
             });
 
             Promise.all(updateThreads).then(() => {
                 SubscriptionManager.updateInProgress = false;
-                this.firstLoad = false;
                 this.pushSettings("updateStarted", 0);
                 SubscriptionManager.trigger("refresh");
 
@@ -439,12 +435,12 @@ export class SubscriptionManager extends RE6Module {
      * @param shouldUpdate True if entries need to be loaded, false otherwise
      * @param lastUpdate Last update timestamp
      */
-    public async initSubscription(sub: SubscriptionElement, shouldUpdate: boolean, forceRefresh: boolean, lastUpdate: number): Promise<boolean> {
+    public async initSubscription(sub: SubscriptionElement, shouldUpdate: boolean, lastUpdate: number): Promise<boolean> {
         this.addSubscribeButtons(sub.instance);
 
         const now = new Date().getTime();
 
-        // Cache is invalid - saved cache updated after the current one
+        // Cache is considered invalid if either it has been updated in another tab, or this is the initial load.
         const cacheRefreshed = (sub.cacheTimestamp < (await sub.instance.fetchSettingsGently("cacheTimestamp") || now));
         if (cacheRefreshed) sub.instance.refreshSettings();
 
@@ -466,14 +462,18 @@ export class SubscriptionManager extends RE6Module {
 
             sub.cacheTimestamp = now;
             sub.instance.pushSettings("cacheTimestamp", now);
-        } else if (cacheRefreshed || forceRefresh) {
+        } else if (cacheRefreshed) {
             sub.content[0].innerHTML = "";
             await this.addUpdateEntries(sub, {});
             this.refreshTabNotifications(sub);
 
             // Fallback, in case the cache timestamp is missing
-            if (!sub.instance.fetchSettings("cacheTimestamp"))
+            const cacheTimestamp = sub.instance.fetchSettings("cacheTimestamp");
+            if (cacheTimestamp === undefined) {
                 sub.instance.pushSettings("cacheTimestamp", now);
+                sub.cacheTimestamp = now;
+            } else sub.cacheTimestamp = cacheTimestamp;
+
         }
 
         return Promise.resolve(true);
