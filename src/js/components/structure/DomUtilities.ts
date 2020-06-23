@@ -243,7 +243,10 @@ export class DomUtilities {
         const $tab = $(`<li>`).appendTo("menu.extra");
         const $link = $("<a>")
             .html(config.name)
-            .attr("title", config.title)
+            .attr({
+                "title": config.title,
+                "id": config.id,
+            })
             .appendTo($tab);
 
         if (config.href) { $link.attr("href", config.href); }
@@ -285,6 +288,10 @@ export class DomUtilities {
 }
 
 interface SettingsButton {
+
+    /** Unique button ID */
+    id: string;
+
     /** Text inside the link */
     name?: string;
     /** Link address */

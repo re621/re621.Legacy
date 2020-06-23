@@ -23,6 +23,7 @@ import { MassDownloader } from "../search/MassDownloader";
 import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } from "../search/ThumbnailsEnhancer";
 import { ForumSubscriptions } from "../subscriptions/ForumSubscriptions";
 import { PoolSubscriptions } from "../subscriptions/PoolSubscriptions";
+import { SubscriptionManager } from "../subscriptions/SubscriptionManager";
 import { HeaderCustomizer } from "./HeaderCustomizer";
 import { Miscellaneous } from "./Miscellaneous";
 
@@ -32,12 +33,18 @@ import { Miscellaneous } from "./Miscellaneous";
  */
 export class SettingsController extends RE6Module {
 
-    private modal: Modal;
+    public constructor() {
+        super();
+        this.registerHotkeys(
+            { keys: "hotkeyOpenSettings", fnct: this.openSettings },
+        );
+    }
 
     public create(): void {
 
         // Create a button in the header
         const openSettingsButton = DomUtilities.addSettingsButton({
+            id: "header-button-settings",
             name: `<i class="fas fa-wrench"></i>`,
             title: "Settings",
             tabClass: "float-right",
@@ -58,7 +65,7 @@ export class SettingsController extends RE6Module {
         });
 
         // Create the modal
-        this.modal = new Modal({
+        new Modal({
             title: "Settings",
             triggers: [{ element: openSettingsButton }],
             escapable: false,
@@ -88,6 +95,8 @@ export class SettingsController extends RE6Module {
     public getDefaultSettings(): Settings {
         return {
             enabled: true,
+
+            hotkeyOpenSettings: "",
 
             newVersionAvailable: false,
             lastVersionCheck: 0,
@@ -618,7 +627,8 @@ export class SettingsController extends RE6Module {
             poolNavigator = ModuleController.get(PoolNavigator),
             imageScaler = ModuleController.get(ImageScaler),
             miscellaneous = ModuleController.get(Miscellaneous),
-            headerCustomizer = ModuleController.get(HeaderCustomizer);
+            headerCustomizer = ModuleController.get(HeaderCustomizer),
+            subscriptionManager = ModuleController.get(SubscriptionManager);
 
         function createInputs(module: RE6Module, label: string, settingsKey: string): FormElement[] {
             const values = module.fetchSettings(settingsKey).split("|");
@@ -693,6 +703,9 @@ export class SettingsController extends RE6Module {
             ...createInputs(headerCustomizer, "Tab #7", "hotkeyTab7"),
             ...createInputs(headerCustomizer, "Tab #8", "hotkeyTab8"),
             ...createInputs(headerCustomizer, "Tab #9", "hotkeyTab9"),
+
+            ...createInputs(this, "Open Settings", "hotkeyOpenSettings"),
+            ...createInputs(subscriptionManager, "Open Notifications", "hotkeyOpenNotifications"),
         ]);
     }
 
@@ -930,6 +943,13 @@ export class SettingsController extends RE6Module {
             Form.header(`<a href="` + window["re621"]["links"]["releases"] + `" class="unmargin">What's new?</a>`),
             Form.div(`<div id="changelog-list">` + Util.quickParseMarkdown(this.fetchSettings("changelog")) + `</div>`)
         ]);
+    }
+
+    /**
+     * Toggles the settings window
+     */
+    private openSettings(): void {
+        $("a#header-button-settings")[0].click();
     }
 
 }

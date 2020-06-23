@@ -33,6 +33,13 @@ export class SubscriptionManager extends RE6Module {
     /** True if the notifications window has been opened since page load */
     private notificationsAlreadyOpened = false;
 
+    public constructor() {
+        super();
+        this.registerHotkeys(
+            { keys: "hotkeyOpenNotifications", fnct: this.openNotifications },
+        );
+    }
+
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
@@ -44,6 +51,8 @@ export class SubscriptionManager extends RE6Module {
             updateInterval: 60 * 60 * 1000,
             /** Maximum number of items in the update cache */
             cacheSize: 60,
+
+            hotkeyOpenNotifications: "",
         };
     }
 
@@ -59,6 +68,7 @@ export class SubscriptionManager extends RE6Module {
 
         // Create a button in the header
         this.$openSubsButton = DomUtilities.addSettingsButton({
+            id: "header-button-notifications",
             name: `<i class="fas fa-bell"></i>`,
             title: "Notifications",
             attr: {
@@ -741,6 +751,13 @@ export class SubscriptionManager extends RE6Module {
             .appendTo($date);
 
         return $content;
+    }
+
+    /**
+     * Toggles the notifications window
+     */
+    private openNotifications(): void {
+        $("a#header-button-notifications")[0].click();
     }
 
 }
