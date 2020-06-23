@@ -193,15 +193,18 @@ export class SubscriptionManager extends RE6Module {
 
             /** Formats the last update timestamp into a readable date */
             function getLastUpdateText(lastUpdate: number): string {
-                if (SubscriptionManager.updateInProgress) return "In Progress . . .";
+                if (SubscriptionManager.updateInProgress) return "In progress . . .";
                 else if (lastUpdate === 0) return "Never";
                 else return Util.timeAgo(lastUpdate);
             }
 
             /** Formats the next update timestamp into a readable date */
             function getNextUpdateText(lastUpdate: number, updateInterval: number): string {
-                if (SubscriptionManager.updateInProgress) return "In Progress . . .";
-                else if (lastUpdate === 0) return Util.timeAgo(new Date().getTime() + updateInterval);
+                const now = new Date().getTime();
+
+                if (SubscriptionManager.updateInProgress) return "In progress . . .";
+                else if (lastUpdate === 0) return Util.timeAgo(now + updateInterval);
+                else if ((lastUpdate + updateInterval) < now) return "Less than a minute";
                 else return Util.timeAgo(lastUpdate + updateInterval + (60 * 1000));
             }
         });
