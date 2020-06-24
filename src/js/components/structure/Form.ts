@@ -639,7 +639,7 @@ export class Form {
      * @param stretch Column span
      * @param onChange Input change callback
      */
-    public static checkbox(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
+    public static checkbox(id: string, value: boolean, label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
         return this.make("checkbox", id, label, value, stretch, undefined, undefined, undefined, onChange, wrapperClass);
     }
 
