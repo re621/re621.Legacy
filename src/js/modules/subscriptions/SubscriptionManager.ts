@@ -241,10 +241,12 @@ export class SubscriptionManager extends RE6Module {
     public static register(moduleList: any | any[]): void {
         if (!Array.isArray(moduleList)) moduleList = [moduleList];
 
-        const manager = this.getInstance() as SubscriptionManager;  // TODO fix this shit
+        const subscriptions = (this.getInstance() as SubscriptionManager).subscriptions;
         moduleList.forEach(async (moduleClass: any) => {
-            const instance = ModuleController.get<Subscription>(moduleClass);
-            manager.subscriptions.set(moduleClass.prototype.constructor.name, { instance: instance });
+            subscriptions.set(
+                moduleClass.prototype.constructor.name,
+                { instance: ModuleController.get<Subscription>(moduleClass) }
+            );
         });
     }
 
