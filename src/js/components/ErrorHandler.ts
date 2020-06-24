@@ -1,6 +1,8 @@
-import { Modal } from "./structure/Modal";
-import { RE6Module } from "./RE6Module";
 import { XM } from "./api/XM";
+import { RE6Module } from "./RE6Module";
+import { Modal } from "./structure/Modal";
+
+declare const UAParser;
 
 export class ErrorHandler {
 
@@ -72,6 +74,31 @@ export class ErrorHandler {
         const instance = this.getInstance();
         if (!instance.modal.isOpen()) instance.trigger.get(0).click();
         this.log(module, message, context);
+    }
+
+    public static async sendReport(): Promise<boolean> {
+        //    if(await XM.Storage.getValue("re621.stats", false)) return;
+        //    XM.Storage.setValue("re621.stats", true);
+
+        const userAgent = UAParser(navigator.userAgent);
+        const userInfo = {
+            browserName: userAgent.browser.name,
+            browserVersion: userAgent.browser.major,
+            osName: userAgent.os.name,
+            osVersion: userAgent.os.version,
+            handlerName: XM.info().scriptHandler,
+            handlerVersion: XM.info().version,
+        }
+
+        XM.Connect.xmlHttpRequest({
+            method: "POST",
+            url: "https://bitwolfy.com/re621/report.php",
+            headers: { "User-Agent": window["re621"]["useragent"] },
+            data: JSON.stringify(userInfo),
+            onload: (data) => { console.log(JSON.parse(data.responseText)); }
+        });
+
+        return Promise.resolve(true);
     }
 
 }

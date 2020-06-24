@@ -81,4 +81,6 @@ DomUtilities.createStructure().then(() => {
 
     // Register the rest of the modules
     ModuleController.register(loadOrder);
+
+    // ErrorHandler.sendReport();
 });
