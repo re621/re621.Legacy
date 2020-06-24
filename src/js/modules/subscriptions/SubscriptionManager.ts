@@ -456,16 +456,21 @@ export class SubscriptionManager extends RE6Module {
             this.fetchSettings("cacheMaxAge")
         );
 
+        let cleared = 0;
         cache.forEach((entry) => {
+            if (entry.new) cleared++;
             delete entry["new"];
             return entry;
         });
 
-        subscription.instance.pushSettings("cache", cache.getData());
+        // Only update cache if changes have been made
+        if (cleared > 0) {
+            subscription.instance.pushSettings("cache", cache.getData());
 
-        const now = new Date().getTime();
-        subscription.instance.pushSettings("cacheTimestamp", now);
-        subscription.cacheTimestamp = now;
+            const now = new Date().getTime();
+            subscription.instance.pushSettings("cacheTimestamp", now);
+            subscription.cacheTimestamp = now;
+        }
     }
 
     /**
