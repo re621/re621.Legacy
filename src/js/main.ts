@@ -63,9 +63,9 @@ const loadOrder = [
 ];
 
 const subscriptions = [
+    TagSubscriptions,
     PoolSubscriptions,
     ForumSubscriptions,
-    TagSubscriptions,
     CommentSubscriptions,
 ];
 
