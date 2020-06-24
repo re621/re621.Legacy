@@ -95,8 +95,12 @@ export class SubscriptionManager extends RE6Module {
                 .attr({
                     "data-subscription-class": name,
                     "data-updates": "0",
-                })
-                .html(` loading `); // TODO Make this more presentable
+                });
+
+            $("<div>")
+                .addClass("subscription-load-status")
+                .html("Initializing . . .")
+                .appendTo(data.content);
 
             // If the stored setting is different from a hard-coded value,
             // the cache format must have changed and data must be cleared
