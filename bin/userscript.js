@@ -8,8 +8,10 @@ const headerData = JSON.parse(fs.readFileSync("./bin/userscript-header.json")),
     browser = process.argv[3] ? process.argv[3] : "chrome";
 
 // Prepare the directory
-rimraf.sync("./build/userscript");
-fs.mkdirSync("./build/userscript");
+if (mode !== "injector") {
+    rimraf.sync("./build/userscript");
+    fs.mkdirSync("./build/userscript");
+}
 
 // Create the userscript header
 let header = "";
