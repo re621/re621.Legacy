@@ -111,7 +111,7 @@ export class SubscriptionManager extends RE6Module {
         content.push({ name: "Info", page: this.getInfoPage().get() });
 
         const subsTabs = new Tabbed({
-            name: "settings-tabs",
+            name: "notifications-tabs",
             content: content
         });
 
