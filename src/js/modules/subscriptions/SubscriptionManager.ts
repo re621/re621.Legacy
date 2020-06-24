@@ -440,6 +440,10 @@ export class SubscriptionManager extends RE6Module {
         });
 
         subscription.instance.pushSettings("cache", cache.getData());
+
+        const now = new Date().getTime();
+        subscription.instance.pushSettings("cacheTimestamp", now);
+        subscription.cacheTimestamp = now;
     }
 
     /**
