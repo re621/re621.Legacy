@@ -4,10 +4,17 @@ import { Page, PageDefintion } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/structure/Util";
-import { Subscription, UpdateActions } from "./Subscription";
-import { SubscriptionSettings, UpdateContent, UpdateData } from "./SubscriptionManager";
+import { Subscription, UpdateActions, UpdateCache, UpdateContent, UpdateData } from "./Subscription";
+import { SubscriptionSettings } from "./SubscriptionManager";
 
 export class ForumSubscriptions extends RE6Module implements Subscription {
+
+    private cache: UpdateCache;
+
+    public constructor() {
+        super();
+        this.cache = new UpdateCache(this);
+    }
 
     protected getDefaultSettings(): Settings {
         return {
@@ -76,6 +83,10 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
 
     public subBatchSize = 100;
 
+    public getCache(): UpdateCache {
+        return this.cache;
+    }
+
     public async getUpdatedEntries(lastUpdate: number, status: JQuery<HTMLElement>): Promise<UpdateData> {
         const results: UpdateData = {};
 
@@ -116,10 +127,6 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
             },
             new: true,
         };
-    }
-
-    public async clearCache(): Promise<boolean> {
-        return this.pushSettings("cache", {});
     }
 
 }

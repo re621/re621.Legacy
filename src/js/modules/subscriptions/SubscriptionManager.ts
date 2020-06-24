@@ -8,7 +8,7 @@ import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
 import { Util } from "../../components/structure/Util";
 import { ThumbnailClickAction, ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
-import { Subscription } from "./Subscription";
+import { Subscription, UpdateData } from "./Subscription";
 
 export class SubscriptionManager extends RE6Module {
 
@@ -18,10 +18,7 @@ export class SubscriptionManager extends RE6Module {
     /** Used to block manual updates while an interval update is in progress */
     private static updateInProgress = false;
 
-    /**
-     * Used to prevent conflicts between several opened tabs
-     * This much time must pass before the script assumes that a previous update failed.
-     */
+    /** This much time must pass before the script assumes that a previous update failed. */
     private static updateTimeout = 60 * 1000;
 
     /** Map of active subscription modules */
@@ -99,11 +96,14 @@ export class SubscriptionManager extends RE6Module {
                     "data-subscription-class": name,
                     "data-updates": "0",
                 })
-                .html(` loading `);
+                .html(` loading `); // TODO Make this more presentable
 
             // If the stored setting is different from a hard-coded value,
             // the cache format must have changed and data must be cleared
-            if (cacheInvalid) data.instance.clearCache();
+            if (cacheInvalid) data.instance.getCache().clear();
+
+            // Load subscription cache from storage
+            data.instance.getCache().loadSync();
 
             content.push({ name: data.tabElement, page: data.content });
             tabIndex++;
@@ -132,7 +132,7 @@ export class SubscriptionManager extends RE6Module {
 
             SubscriptionManager.updateInProgress = true;
             if (shouldUpdate) {
-                const now = new Date().getTime();
+                const now = Util.getTime();
                 this.pushSettings("lastUpdate", now);
                 this.pushSettings("updateStarted", now);
             }
@@ -146,10 +146,7 @@ export class SubscriptionManager extends RE6Module {
             const updateThreads: Promise<boolean>[] = [];
             this.subscriptions.forEach(async (subscription) => {
                 subscription.tabElement.attr("data-updates", "0");
-                updateThreads.push(new Promise(async (resolve) => {
-                    await subscription.instance.refreshSettings();
-                    resolve(await this.initSubscription(subscription, shouldUpdate, settings.lastUpdate));
-                }));
+                updateThreads.push(this.initSubscription(subscription, shouldUpdate, this.fetchSettings("lastUpdate")));
             });
 
             Promise.all(updateThreads).then(() => {
@@ -212,7 +209,7 @@ export class SubscriptionManager extends RE6Module {
 
             /** Formats the next update timestamp into a readable date */
             function getNextUpdateText(lastUpdate: number, updateInterval: number): string {
-                const now = new Date().getTime();
+                const now = Util.getTime();
 
                 if (SubscriptionManager.updateInProgress) return "In progress . . .";
                 else if (lastUpdate === 0) return Util.timeAgo(now + updateInterval);
@@ -240,10 +237,10 @@ export class SubscriptionManager extends RE6Module {
     public static register(moduleList: any | any[]): void {
         if (!Array.isArray(moduleList)) moduleList = [moduleList];
 
+        const manager = this.getInstance() as SubscriptionManager;  // TODO fix this shit
         moduleList.forEach(async (moduleClass: any) => {
             const instance = ModuleController.get<Subscription>(moduleClass);
-            const manager = this.getInstance() as SubscriptionManager;
-            manager.subscriptions.set(moduleClass.prototype.constructor.name, { instance: instance, cacheTimestamp: 0 });
+            manager.subscriptions.set(moduleClass.prototype.constructor.name, { instance: instance });
         });
     }
 
@@ -267,7 +264,7 @@ export class SubscriptionManager extends RE6Module {
         const time = await this.fetchSettings(["lastUpdate", "updateStarted", "now", "updateInterval"], true);
 
         // "now" setting is used for debugging purposes only
-        if (time.now === undefined) time.now = new Date().getTime();
+        if (time.now === undefined) time.now = Util.getTime();
 
         return Promise.resolve(
             !SubscriptionManager.updateInProgress                                                                   // Update process isn't running already
@@ -359,7 +356,7 @@ export class SubscriptionManager extends RE6Module {
                 Form.button(
                     "clear-cache", "Clear Cache", undefined, "column", () => {
                         this.subscriptions.forEach(async (subscription) => {
-                            await subscription.instance.clearCache();
+                            await subscription.instance.getCache().clear();
                             subscription.content[0].innerHTML = "";
                         });
                     }
@@ -450,11 +447,7 @@ export class SubscriptionManager extends RE6Module {
         this.refreshHeaderNotifications();
 
         // Remove the `new` flags from the cached data
-        const cache = new UpdateCache(
-            await subscription.instance.fetchSettings("cache"),
-            this.fetchSettings("cacheSize"),
-            this.fetchSettings("cacheMaxAge")
-        );
+        const cache = subscription.instance.getCache();
 
         let cleared = 0;
         cache.forEach((entry) => {
@@ -464,13 +457,7 @@ export class SubscriptionManager extends RE6Module {
         });
 
         // Only update cache if changes have been made
-        if (cleared > 0) {
-            subscription.instance.pushSettings("cache", cache.getData());
-
-            const now = new Date().getTime();
-            subscription.instance.pushSettings("cacheTimestamp", now);
-            subscription.cacheTimestamp = now;
-        }
+        if (cleared > 0) await cache.save();
     }
 
     /**
@@ -482,11 +469,11 @@ export class SubscriptionManager extends RE6Module {
     public async initSubscription(sub: SubscriptionElement, shouldUpdate: boolean, lastUpdate: number): Promise<boolean> {
         this.addSubscribeButtons(sub.instance);
 
-        const now = new Date().getTime();
+        const cache = sub.instance.getCache();
 
         // Cache is considered invalid if either it has been updated in another tab, or this is the initial load.
-        const cacheRefreshed = (sub.cacheTimestamp < (await sub.instance.fetchSettingsGently("cacheTimestamp") || now));
-        if (cacheRefreshed) sub.instance.refreshSettings();
+        const cacheRefreshed = cache.isOutdated();
+        if (cacheRefreshed) cache.load();
 
         if (shouldUpdate) {
             sub.tabElement.attr("data-loading", "true");
@@ -503,21 +490,10 @@ export class SubscriptionManager extends RE6Module {
 
             sub.tabElement.attr("data-loading", "false");
             this.refreshTabNotifications(sub);
-
-            sub.cacheTimestamp = now;
-            sub.instance.pushSettings("cacheTimestamp", now);
         } else if (cacheRefreshed) {
             sub.content[0].innerHTML = "";
             await this.addUpdateEntries(sub, {});
             this.refreshTabNotifications(sub);
-
-            // Fallback, in case the cache timestamp is missing
-            const cacheTimestamp = sub.instance.fetchSettings("cacheTimestamp");
-            if (cacheTimestamp === undefined) {
-                sub.instance.pushSettings("cacheTimestamp", now);
-                sub.cacheTimestamp = now;
-            } else sub.cacheTimestamp = cacheTimestamp;
-
         }
 
         return Promise.resolve(true);
@@ -598,15 +574,11 @@ export class SubscriptionManager extends RE6Module {
      * @param updates Updates to process
      */
     public async addUpdateEntries(sub: SubscriptionElement, updates: UpdateData): Promise<number> {
-        const cache = new UpdateCache(
-            await sub.instance.fetchSettings("cache", true),
-            await this.fetchSettings("cacheSize", true),
-            await this.fetchSettings("cacheMaxAge", true)
-        );
+        const cache = sub.instance.getCache();
 
         if (Object.keys(updates).length > 0) {
             cache.push(updates);
-            await sub.instance.pushSettings("cache", cache.getData());
+            await cache.save();
         }
 
         // console.log("drawing " + cache.getSize() + " cached items");
@@ -615,7 +587,7 @@ export class SubscriptionManager extends RE6Module {
         if (cache.getSize() > 0) sub.content.append(this.createCacheDivider());
 
         cache.getIndex().forEach((timestamp) => {
-            sub.content.append(this.createUpdateEntry(cache, timestamp, sub));
+            sub.content.append(this.createUpdateEntry(timestamp, sub));
         });
 
         const clickAction = ModuleController.get(ThumbnailEnhancer).fetchSettings("clickAction");
@@ -678,8 +650,9 @@ export class SubscriptionManager extends RE6Module {
      * @param actions Subscription definition
      * @param customClass Custom class to add to the element
      */
-    private createUpdateEntry(cache: UpdateCache, timestamp: number, subscription: SubscriptionElement, customClass?: string): JQuery<HTMLElement> {
+    private createUpdateEntry(timestamp: number, subscription: SubscriptionElement, customClass?: string): JQuery<HTMLElement> {
         const actions = subscription.instance.updateActions,
+            cache = subscription.instance.getCache(),
             data = cache.getItem(timestamp);
 
         const $content = $("<div>")
@@ -744,15 +717,12 @@ export class SubscriptionManager extends RE6Module {
             .html(`<i class="fas fa-times"></i>`)
             .attr("title", "Remove")
             .appendTo($remove)
-            .click((event) => {
+            .click(async (event) => {
                 event.preventDefault();
+                // TODO Block multiple presses of all "remove" buttons for this subscription while processing
 
                 cache.deleteItem(timestamp);
-                subscription.instance.pushSettings("cache", cache.getData());
-
-                const now = new Date().getTime();
-                subscription.instance.pushSettings("cacheTimestamp", now);
-                subscription.cacheTimestamp = now;
+                await cache.save();
 
                 $content.css("display", "none");
             });
@@ -794,164 +764,6 @@ export class SubscriptionManager extends RE6Module {
 
 }
 
-/** Handles the storage and organization of update cache */
-class UpdateCache {
-
-    private data: UpdateData;
-    private index: number[];
-
-    private maxSize: number;
-    private maxAge: number;
-
-    /**
-     * Create a new UpdateCache based on stored data  
-     * Don't add _new_ data here, it should be processed through the `push()` method
-     * @param data Update data
-     * @param maxSize Maximum cache size
-     * @param maxAge How old could an update be
-     */
-    public constructor(data: UpdateData, maxSize: number, maxAge: number) {
-        this.data = data === undefined ? {} : data;
-        this.updateIndex();
-        this.maxSize = maxSize;
-        this.maxAge = maxAge;
-    }
-
-    /** Returns the stored cache data as an object */
-    public getData(): UpdateData {
-        return this.data;
-    }
-
-    /**
-     * Returns the sorted index of cache's timestamps.  
-     * Items are sorted in descending order (newest first).  
-     */
-    public getIndex(): number[] {
-        return this.index;
-    }
-
-    /** Returns cache's current size */
-    public getSize(): number {
-        return this.index.length;
-    }
-
-    /**
-     * Returns an item corresponding to the provided timestamp
-     * @param timestamp Timestamp to look for
-     */
-    public getItem(timestamp: number): UpdateContent {
-        return this.data[timestamp];
-    }
-
-    /**
-     * Removes an item with the provded timestamp from cache
-     * @param timestamp Timestamp to look for
-     */
-    public deleteItem(timestamp: number): void {
-        const el = this.index.indexOf(timestamp);
-        if (el !== -1) {
-            this.index.splice(el, 1);
-            delete this.data[timestamp];
-        }
-    }
-
-    /**
-     * Adds new data to cache.  
-     * Note that all updates added through this method are flagged as "new".
-     * @param newData Data to add to cache
-     */
-    public push(newData: UpdateData): void {
-        Object.keys(newData).forEach((key) => {
-            this.data[key] = newData[key];
-        });
-        this.updateIndex();
-        this.trim();
-    }
-
-    /**
-     * Refreshes the cache index.  
-     * Should be executed every time an item is added to or removed from cache
-     */
-    private updateIndex(): void {
-        this.index = Object.keys(this.data)
-            .map(x => parseInt(x))
-            .sort((a, b) => b - a); // newest to oldest
-    }
-
-    /**
-     * Processes the cache, removing duplicate entries and trimming to match the maximum size.  
-     * Note that this method presumes that the cache index is already up to date.  
-     */
-    private trim(): void {
-
-        // If maxAge is set to never, its value is 0
-        const ageLimit = this.maxAge === 0 ? 0 : new Date().getTime() - this.maxAge;
-
-        const uniqueKeys = [];
-        this.index.forEach((timestamp) => {
-            const update: UpdateContent = this.data[timestamp];
-
-            // Remove expired updates
-            if (timestamp < ageLimit && !update.new) {
-                delete this.data[timestamp];
-                return;
-            }
-
-            // Remove all non-unique updates
-            // Forum posts may get replies all the time, only the recent one is important
-            if (uniqueKeys.indexOf(update.id) === -1)
-                uniqueKeys.push(update.id);
-            else delete this.data[timestamp];
-
-        });
-
-        // Re-index the updated data
-        this.updateIndex();
-
-        // Trims the index to maxSize, then removes the unwanted items from the data
-        const chunks = Util.chunkArray(this.index, this.maxSize, true);
-        this.index = chunks[0];
-        chunks[1].forEach((entry: number) => { delete this.data[entry]; })
-    }
-
-    /**
-     * Executes the provided function on every element in the cache.  
-     * The function **must** return the new element value.  
-     * @param fn Function to execute
-     */
-    public forEach(fn: (n: UpdateContent) => UpdateContent): void {
-        this.index.forEach((entry) => {
-            this.data[entry] = fn(this.data[entry]);
-        });
-    }
-}
-
-/** Container for multiple `UpdateContent` entries */
-export interface UpdateData {
-    [timestamp: number]: UpdateContent;
-}
-
-/** Contains data as it is passed from a subscription module or stored in cache */
-export interface UpdateContent {
-    /** Entry's unique ID. This can be forum_id, pool_id, etc.*/
-    id: number;
-
-    /** Name of the entry - topic title, pool name, etc */
-    name: string;
-
-    /** Extra text added to the name, but outside of the link */
-    nameExtra?: string;
-
-    /** MD5 hash of the related image */
-    md5: string;
-
-    /** Any extra information that needs to be passed to the manager */
-    extra?: any;
-
-    /** True for items that have been added by the latest update */
-    new?: boolean;
-}
-
 export interface SubscriptionSettings {
     [id: string]: SubscriptionSettingsData;
 }
@@ -965,9 +777,6 @@ interface SubscriptionSettingsData {
 interface SubscriptionElement {
     /** Subscription instance */
     instance: Subscription;
-
-    /** Last time cache was updated */
-    cacheTimestamp: number;
 
     /** Tab selection element */
     tabElement?: JQuery<HTMLElement>;

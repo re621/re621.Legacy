@@ -5,10 +5,17 @@ import { Page } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/structure/Util";
-import { Subscription, UpdateActions } from "./Subscription";
-import { SubscriptionSettings, UpdateContent, UpdateData } from "./SubscriptionManager";
+import { Subscription, UpdateActions, UpdateCache, UpdateContent, UpdateData } from "./Subscription";
+import { SubscriptionSettings } from "./SubscriptionManager";
 
 export class PoolSubscriptions extends RE6Module implements Subscription {
+
+    private cache: UpdateCache;
+
+    public constructor() {
+        super();
+        this.cache = new UpdateCache(this);
+    }
 
     protected getDefaultSettings(): Settings {
         return {
@@ -79,6 +86,10 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
 
     public subBatchSize = 100;
 
+    public getCache(): UpdateCache {
+        return this.cache;
+    }
+
     public async getUpdatedEntries(lastUpdate: number, status: JQuery<HTMLElement>): Promise<UpdateData> {
         const results: UpdateData = {};
 
@@ -132,10 +143,6 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             },
             new: true,
         };
-    }
-
-    public async clearCache(): Promise<boolean> {
-        return this.pushSettings("cache", {});
     }
 
 }
