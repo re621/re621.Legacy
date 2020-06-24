@@ -47,10 +47,12 @@ export class SubscriptionManager extends RE6Module {
 
             updateStarted: 0,
 
-            /** How often should the subscriptions be refreshed, in milliseconds */
-            updateInterval: 60 * 60 * 1000,
             /** Maximum number of items in the update cache */
             cacheSize: 60,
+            /** How often should the subscriptions be refreshed, in milliseconds */
+            updateInterval: 60 * 60 * 1000,
+            /** At which age updates get removed from cache */
+            cacheMaxAge: 0,
 
             hotkeyOpenNotifications: "",
         };
@@ -302,21 +304,40 @@ export class SubscriptionManager extends RE6Module {
                 Form.spacer("mid"),
 
                 Form.select(
-                    "update-interval", this.fetchSettings("updateInterval"), "Update Interval",
+                    "update-interval", this.fetchSettings("updateInterval") / TIME_PERIOD.HOUR, "Update Interval",
                     [
-                        { value: (30 * 60 * 1000), name: "30 minutes" },
-                        { value: (60 * 60 * 1000), name: "1 hour" },
-                        { value: (360 * 60 * 1000), name: "6 hours" },
-                        { value: (720 * 60 * 1000), name: "12 hours" },
-                        { value: (1440 * 60 * 1000), name: "24 hours" },
+                        { value: 0.5, name: "30 minutes" },
+                        { value: 1, name: "1 hour" },
+                        { value: 6, name: "6 hours" },
+                        { value: 12, name: "12 hours" },
+                        { value: 24, name: "24 hours" },
                     ],
                     "mid",
                     async (event, data) => {
-                        await this.pushSettings("updateInterval", parseInt(data));
+                        await this.pushSettings("updateInterval", parseInt(data) * TIME_PERIOD.HOUR);
                         SubscriptionManager.trigger("refresh");
                     }
                 ),
                 Form.div(`<div class="unmargin">How often should the subscriptions be checked for updates.</div>`, "mid"),
+                Form.spacer("mid"),
+
+                Form.select(
+                    "update-expiration", this.fetchSettings("cacheMaxAge") / TIME_PERIOD.WEEK, "Cache expiration",
+                    [
+                        { value: 0, name: "Never" },
+                        { value: 7, name: "1 week" },
+                        { value: 2, name: "2 weeks" },
+                        { value: 4, name: "1 month" },
+                        { value: 24, name: "6 months" },
+                    ],
+                    "mid",
+                    async (event, data) => {
+                        await this.pushSettings("cacheMaxAge", parseInt(data) * TIME_PERIOD.WEEK);
+                        SubscriptionManager.trigger("refresh");
+                    }
+                ),
+                Form.div(`<div class="unmargin">Updates older than this are removed automatically</div>`, "mid"),
+
             ]),
             Form.hr(),
 
@@ -431,7 +452,8 @@ export class SubscriptionManager extends RE6Module {
         // Remove the `new` flags from the cached data
         const cache = new UpdateCache(
             await subscription.instance.fetchSettings("cache"),
-            this.fetchSettings("cacheSize")
+            this.fetchSettings("cacheSize"),
+            this.fetchSettings("cacheMaxAge")
         );
 
         cache.forEach((entry) => {
@@ -573,7 +595,8 @@ export class SubscriptionManager extends RE6Module {
     public async addUpdateEntries(sub: SubscriptionElement, updates: UpdateData): Promise<number> {
         const cache = new UpdateCache(
             await sub.instance.fetchSettings("cache", true),
-            await this.fetchSettings("cacheSize", true)
+            await this.fetchSettings("cacheSize", true),
+            await this.fetchSettings("cacheMaxAge", true)
         );
 
         if (Object.keys(updates).length > 0) {
@@ -773,17 +796,20 @@ class UpdateCache {
     private index: number[];
 
     private maxSize: number;
+    private maxAge: number;
 
     /**
      * Create a new UpdateCache based on stored data  
      * Don't add _new_ data here, it should be processed through the `push()` method
      * @param data Update data
      * @param maxSize Maximum cache size
+     * @param maxAge How old could an update be
      */
-    public constructor(data: UpdateData, maxSize: number) {
+    public constructor(data: UpdateData, maxSize: number, maxAge: number) {
         this.data = data === undefined ? {} : data;
         this.updateIndex();
         this.maxSize = maxSize;
+        this.maxAge = maxAge;
     }
 
     /** Returns the stored cache data as an object */
@@ -852,14 +878,25 @@ class UpdateCache {
      * Note that this method presumes that the cache index is already up to date.  
      */
     private trim(): void {
-        // Remove all non-unique updates
-        // Forum posts may get replies all the time, only the recent one is important
+        const maxAge = new Date().getTime() - this.maxAge;
+
         const uniqueKeys = [];
         this.index.forEach((timestamp) => {
             const update: UpdateContent = this.data[timestamp];
+
+            // Remove expired updates
+            // maxAge might be 0, in which case it checks if the updates aren't from the future
+            if (timestamp < maxAge && !update.new) {
+                delete this.data[timestamp];
+                return;
+            }
+
+            // Remove all non-unique updates
+            // Forum posts may get replies all the time, only the recent one is important
             if (uniqueKeys.indexOf(update.id) === -1)
                 uniqueKeys.push(update.id);
             else delete this.data[timestamp];
+
         });
 
         // Re-index the updated data
@@ -935,3 +972,11 @@ interface SubscriptionElement {
     /** Tab contents */
     content?: JQuery<HTMLElement>;
 }
+
+enum TIME_PERIOD {
+    SECOND = 1000,
+    MINUTE = 60 * TIME_PERIOD.SECOND,
+    HOUR = 60 * TIME_PERIOD.MINUTE,
+    DAY = 24 * TIME_PERIOD.HOUR,
+    WEEK = 7 * TIME_PERIOD.DAY,
+};
