@@ -878,15 +878,16 @@ class UpdateCache {
      * Note that this method presumes that the cache index is already up to date.  
      */
     private trim(): void {
-        const maxAge = new Date().getTime() - this.maxAge;
+
+        // If maxAge is set to never, its value is 0
+        const ageLimit = this.maxAge === 0 ? 0 : new Date().getTime() - this.maxAge;
 
         const uniqueKeys = [];
         this.index.forEach((timestamp) => {
             const update: UpdateContent = this.data[timestamp];
 
             // Remove expired updates
-            // maxAge might be 0, in which case it checks if the updates aren't from the future
-            if (timestamp < maxAge && !update.new) {
+            if (timestamp < ageLimit && !update.new) {
                 delete this.data[timestamp];
                 return;
             }
