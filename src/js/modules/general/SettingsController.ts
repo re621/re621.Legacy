@@ -3,6 +3,7 @@ import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { User } from "../../components/data/User";
+import { Debug } from "../../components/ErrorHandler";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
@@ -787,6 +788,23 @@ export class SettingsController extends RE6Module {
                 }
             ),
             Form.div("<b>This cannot be undone.</b>", "column"),
+            Form.hr(),
+
+            Form.header("<h3>Debugging Tools</h3>"),
+            Form.checkbox(
+                "debug-enabled", Debug.isEnabled(), "Console output", "column",
+                (event, data) => {
+                    Debug.setEnabled(data);
+                }
+            ),
+            Form.div("Enable debug messages in the console log", "mid"),
+            Form.checkbox(
+                "connect-log-enabled", Debug.isConnectLogEnabled(), "Connections log", "column",
+                (event, data) => {
+                    Debug.setConnectLogEnabled(data);
+                }
+            ),
+            Form.div("Logs all outbound connections in the console", "mid"),
         ]);
 
         /** Export the currnt module settings to file */

@@ -4,6 +4,7 @@
  */
 
 // Load Modules
+import { Debug } from "./components/ErrorHandler";
 import { ModuleController } from "./components/ModuleController";
 import { DomUtilities } from "./components/structure/DomUtilities";
 import { FormattingManager } from "./modules/general/FormattingHelper";
@@ -69,7 +70,10 @@ const subscriptions = [
     CommentSubscriptions,
 ];
 
-DomUtilities.createStructure().then(() => {
+DomUtilities.createStructure().then(async () => {
+
+    Debug.init();
+    // ErrorHandler.report();
 
     // This code is pretty fragile. It's also what makes the rest of the project work.
     // It is dependent on the previous step, which runs when the document fully loads
@@ -82,5 +86,4 @@ DomUtilities.createStructure().then(() => {
     // Register the rest of the modules
     ModuleController.register(loadOrder);
 
-    // ErrorHandler.sendReport();
 });

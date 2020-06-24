@@ -2,6 +2,9 @@
 // All endpoints must be registered here.
 // Name is irrelevant, as long as it is unique.
 // Path is the endpoint address, without https://e621.net/
+
+import { Debug } from "../ErrorHandler";
+
 // Don't forget to update the name in the E621 aliases below
 const ENDPOINT_DEFS: EndpointDefinition[] = [
     { name: "posts", path: "posts", node: { list: "posts", id: "post" } },
@@ -285,7 +288,7 @@ export class E621 {
 
         while (this.queue.length > 0) {
             const item = this.queue.shift();
-            // console.log("processing " + item.request.url);
+            Debug.connectLog(item.request.url);
             const request = await fetch(item.request);
 
             if (request.ok) {
