@@ -18,6 +18,9 @@ export class SubscriptionManager extends RE6Module {
     /** Used to block manual updates while an interval update is in progress */
     private static updateInProgress = false;
 
+    /** Used to force the script to output update entries on first run */
+    private static firstRun = true;
+
     /** This much time must pass before the script assumes that a previous update failed. */
     private static updateTimeout = 60 * 1000;
 
@@ -155,6 +158,7 @@ export class SubscriptionManager extends RE6Module {
 
             Promise.all(updateThreads).then(() => {
                 SubscriptionManager.updateInProgress = false;
+                SubscriptionManager.firstRun = false;
                 this.pushSettings("updateStarted", 0);
                 SubscriptionManager.trigger("refresh");
 
@@ -478,10 +482,11 @@ export class SubscriptionManager extends RE6Module {
         const cache = sub.instance.getCache();
 
         // Cache is considered invalid if either it has been updated in another tab, or this is the initial load.
-        const cacheRefreshed = cache.isOutdated();
+        const cacheRefreshed = await cache.isOutdated();
         if (cacheRefreshed) cache.load();
 
         if (shouldUpdate) {
+            // console.log("redrawing because update");
             sub.tabElement.attr("data-loading", "true");
             sub.content[0].innerHTML = "";
             const status = $("<div>")
@@ -496,7 +501,8 @@ export class SubscriptionManager extends RE6Module {
 
             sub.tabElement.attr("data-loading", "false");
             this.refreshTabNotifications(sub);
-        } else if (cacheRefreshed) {
+        } else if (SubscriptionManager.firstRun || cacheRefreshed) {
+            // console.log("redrawing because refresh");
             sub.content[0].innerHTML = "";
             await this.addUpdateEntries(sub, {});
             this.refreshTabNotifications(sub);
