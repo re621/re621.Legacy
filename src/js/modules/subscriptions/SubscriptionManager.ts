@@ -718,16 +718,20 @@ export class SubscriptionManager extends RE6Module {
             .appendTo($content);
 
         $("<a>")
-            .html(`<i class="fas fa-times"></i>`)
+            .addClass("sub-" + subscription.tabIndex + "-remove")
             .attr("title", "Remove")
+            .html(`<i class="fas fa-times"></i>`)
             .appendTo($remove)
             .click(async (event) => {
                 event.preventDefault();
-                // TODO Block multiple presses of all "remove" buttons for this subscription while processing
+
+                const $buttons = $("a.sub-" + subscription.tabIndex + "-remove");
+                $buttons.css("visibility", "hidden");
 
                 cache.deleteItem(timestamp);
                 await cache.save();
 
+                $buttons.css("visibility", "");
                 $content.css("display", "none");
             });
 
