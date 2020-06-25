@@ -139,7 +139,8 @@ export class FavDownloader extends RE6Module {
         }
 
         // Iterate over the post data to make sure we don't hit the data cap
-        lookup.then((posts) => {
+        lookup.then((output) => {
+            this.posts = output;
             const downloadQueue = new DownloadQueue();
 
             // Create an interface to output queue status
@@ -155,7 +156,7 @@ export class FavDownloader extends RE6Module {
 
             // Add post data to the queue
             let processingPost: APIPost;
-            while (processingPost = posts.pop()) {
+            while (processingPost = this.posts.pop()) {
                 const post = processingPost;
                 totalFileSize += post.file.size;
                 if (totalFileSize > FavDownloader.maxBlobSize) {
