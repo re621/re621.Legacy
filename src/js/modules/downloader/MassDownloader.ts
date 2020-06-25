@@ -4,8 +4,8 @@ import { APIPost } from "../../components/api/responses/APIPost";
 import { PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/structure/Util";
-import { InfiniteScroll } from "./InfiniteScroll";
-import { ThumbnailEnhancer } from "./ThumbnailsEnhancer";
+import { InfiniteScroll } from "../search/InfiniteScroll";
+import { ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
 
 declare const saveAs;
 

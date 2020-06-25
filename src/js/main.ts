@@ -7,6 +7,8 @@
 import { Debug } from "./components/ErrorHandler";
 import { ModuleController } from "./components/ModuleController";
 import { DomUtilities } from "./components/structure/DomUtilities";
+import { MassDownloader } from "./modules/downloader/MassDownloader";
+import { PoolDownloader } from "./modules/downloader/PoolDownloader";
 import { FormattingManager } from "./modules/general/FormattingHelper";
 import { HeaderCustomizer } from "./modules/general/HeaderCustomizer";
 import { Miscellaneous } from "./modules/general/Miscellaneous";
@@ -14,7 +16,6 @@ import { SettingsController } from "./modules/general/SettingsController";
 import { ThemeCustomizer } from "./modules/general/ThemeCustomizer";
 import { TinyAlias } from "./modules/misc/TinyAlias";
 import { WikiEnhancer } from "./modules/misc/WikiEnhancer";
-import { PoolDownloader } from "./modules/pools/PoolDownloader";
 import { DownloadCustomizer } from "./modules/post/DownloadCustomizer";
 import { ImageScaler } from "./modules/post/ImageScaler";
 import { PoolNavigator } from "./modules/post/PoolNavigator";
@@ -24,7 +25,6 @@ import { BlacklistEnhancer } from "./modules/search/BlacklistEnhancer";
 import { CustomFlagger } from "./modules/search/CustomFlagger";
 import { InfiniteScroll } from "./modules/search/InfiniteScroll";
 import { InstantSearch } from "./modules/search/InstantSearch";
-import { MassDownloader } from "./modules/search/MassDownloader";
 import { PostSuggester } from "./modules/search/PostSuggester";
 import { ThumbnailEnhancer } from "./modules/search/ThumbnailsEnhancer";
 import { CommentSubscriptions } from "./modules/subscriptions/CommentSubscriptions";
@@ -49,7 +49,6 @@ const loadOrder = [
     CustomFlagger,
     InfiniteScroll,
     InstantSearch,
-    MassDownloader,
     ThumbnailEnhancer,
     PostSuggester,
     Miscellaneous,
@@ -58,6 +57,7 @@ const loadOrder = [
     WikiEnhancer,
 
     PoolDownloader,
+    MassDownloader,
 
     SubscriptionManager,
     SettingsController,
