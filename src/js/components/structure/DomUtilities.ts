@@ -128,7 +128,9 @@ export class DomUtilities {
      * Creates a sticky searchbox container
      */
     private static createSearchbox(): void {
-        if (Page.matches([PageDefintion.search, PageDefintion.post, PageDefintion.favorites])) {
+
+        // If favorites are private, the sidebar does not exist
+        if (Page.matches([PageDefintion.search, PageDefintion.post, PageDefintion.favorites]) && $("aside#sidebar").length > 0) {
             const $searchContainer = $("<div>").attr("id", "re621-search").prependTo("aside#sidebar");
             $("aside#sidebar section#search-box").appendTo($searchContainer);
             $("aside#sidebar section#mode-box").appendTo($searchContainer);
