@@ -130,7 +130,7 @@ export class FavDownloader extends RE6Module {
 
         async function recursiveLookup(output: APIPost[], info: JQuery<HTMLElement>, username: string, index: number): Promise<APIPost[]> {
             info.html(" &nbsp; &nbsp;request " + index + " / ?");
-            return E621.Posts.get<APIPost>({ tags: "fav:" + username, page: index, limit: 320 }, 500)
+            return E621.Posts.get<APIPost>({ tags: "fav:" + username, page: index, limit: 320 })
                 .then((data) => {
                     output.push(...data);
                     if (data.length == 320) return recursiveLookup(output, info, username, ++index);
