@@ -1,0 +1,95 @@
+/* Mass Downloader Styles */
+
+section#fav-downloader-box {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-column-gap: 0.5rem;
+    grid-row-gap: 0.5rem;
+
+    &[data-fixed=true] {
+        position: sticky;
+        top: 10rem;
+    }
+
+    h1 {
+        grid-column: span 2;
+    }
+
+    a.button {
+        text-align: center;
+    }
+
+    div.download-info {
+        grid-column: span 2;
+
+        &[data-state] {
+            padding-left: 1.125rem;
+            position: relative;
+
+            &::before {
+                content: "";
+                display: block;
+                line-height: 1;
+
+                font-family: "Font Awesome 5 Free";
+                font-weight: 400;
+
+                position: absolute;
+                left: 0;
+                top: 0.125rem;
+            }
+
+            &[data-state=done]::before {
+                content: unicode("f058"); // fa-check-circle
+            }
+
+            &[data-state=error]::before {
+                content: unicode("f057"); // fa-times-circle
+            }
+
+            &[data-state=loading]::before {
+                content: unicode("f1ce"); // fa-circle-notch
+                font-weight: 700;
+                animation: fa-spin 2s infinite linear;
+            }
+        }
+
+        div.download-notice {
+            font-weight: bold;
+            margin-top: 0.5rem;
+            margin-left: -1.125rem;
+        }
+    }
+
+    div.download-file {
+        grid-column: span 2;
+        font-family: monospace;
+        word-break: break-word;
+
+        counter-reset: number;
+
+        span {
+            position: relative;
+            display: block;
+            word-break: keep-all;
+            overflow: hidden;
+            padding-left: 1.125rem;
+            margin: 0 -0.25rem 1px -0.125rem;
+            font-size: 85%;
+            counter-increment: number;
+
+            background: linear-gradient(90deg, #ffffff40 var(--progress), transparent 0%);
+
+            &::before {
+                content: "["counter(number)"]";
+                position: absolute;
+                left: 0;
+            }
+        }
+    }
+
+}
+
+body[data-sticky-header=true] section#downloader-box {
+    top: 12.5rem;
+}

@@ -7,6 +7,7 @@
 import { Debug } from "./components/ErrorHandler";
 import { ModuleController } from "./components/ModuleController";
 import { DomUtilities } from "./components/structure/DomUtilities";
+import { FavDownloader } from "./modules/downloader/FavDownloader";
 import { MassDownloader } from "./modules/downloader/MassDownloader";
 import { PoolDownloader } from "./modules/downloader/PoolDownloader";
 import { FormattingManager } from "./modules/general/FormattingHelper";
@@ -56,6 +57,7 @@ const loadOrder = [
     TinyAlias,
     WikiEnhancer,
 
+    FavDownloader,
     PoolDownloader,
     MassDownloader,
 

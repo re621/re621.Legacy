@@ -11,6 +11,7 @@ import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
 import { Util } from "../../components/structure/Util";
+import { FavDownloader } from "../downloader/FavDownloader";
 import { MassDownloader } from "../downloader/MassDownloader";
 import { PoolDownloader } from "../downloader/PoolDownloader";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
@@ -429,7 +430,8 @@ export class SettingsController extends RE6Module {
     private createDownloadsTab(): Form {
         const downloadCustomizer = ModuleController.get(DownloadCustomizer),
             massDownloader = ModuleController.get(MassDownloader),
-            poolDownloader = ModuleController.get(PoolDownloader);
+            poolDownloader = ModuleController.get(PoolDownloader),
+            favDownloader = ModuleController.get(FavDownloader);
 
         return new Form({ id: "settings-download", columns: 3, parent: "div#modal-container" }, [
 
@@ -479,6 +481,36 @@ export class SettingsController extends RE6Module {
                     async (event, data) => {
                         await massDownloader.pushSettings("fixedSection", data);
                         massDownloader.toggleFixedSection();
+                    }
+                ),
+                Form.div("The downloader interface will remain on the screen as you scroll", "mid"),
+
+                Form.hr(),
+            ]),
+
+            // Fav Downloader
+            Form.section({ id: "fav", columns: 3 }, [
+                Form.header("Favorites Downloader", "column"),
+                Form.div(`<div class="notice float-right">Download all favorites at once</div>`, "mid"),
+                Form.input(
+                    "template", favDownloader.fetchSettings("template"), "Download File Name", "full", undefined,
+                    async (event, data) => { await favDownloader.pushSettings("template", data); }
+                ),
+                Form.section({ id: "template-vars-fav", columns: 2 }, [
+                    Form.div(`<div class="notice unmargin">The same variables as above can be used. Add a forward slash ( / ) to signify a folder.</div>`, "mid"),
+                ], " "),
+
+                Form.checkbox(
+                    "autodownload", favDownloader.fetchSettings("autoDownloadArchive"), "Auto Download", "column",
+                    async (event, data) => { await favDownloader.pushSettings("autoDownloadArchive", data); }
+                ),
+                Form.div("The archive will be downloaded automatically after being created", "mid"),
+
+                Form.checkbox(
+                    "fixedSection", favDownloader.fetchSettings("fixedSection"), "Fixed Interface", "column",
+                    async (event, data) => {
+                        await favDownloader.pushSettings("fixedSection", data);
+                        favDownloader.toggleFixedSection();
                     }
                 ),
                 Form.div("The downloader interface will remain on the screen as you scroll", "mid"),
