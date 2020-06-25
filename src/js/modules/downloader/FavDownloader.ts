@@ -10,10 +10,6 @@ declare const saveAs;
 
 export class FavDownloader extends RE6Module {
 
-    // Requesting multiple post ID from the API is limited to a specific number.
-    // What that number is... nobody knows. It is currently presumed to be ~100.
-    private static chunkSize = 100;
-
     // Maximum Blob size. This value differs depending on the browser.
     // Different sources cite different numbers. For now, we'll go with 800MB.
     private static maxBlobSize = 1024 * 1024 * 800;
@@ -32,10 +28,7 @@ export class FavDownloader extends RE6Module {
     private downloadIndex = 1;
 
     // Interface elements
-    private container: JQuery<HTMLElement>;
-
     private section: JQuery<HTMLElement>;
-    private selectButton: JQuery<HTMLElement>;
     private actButton: JQuery<HTMLElement>;
     private infoText: JQuery<HTMLElement>;
     private infoFile: JQuery<HTMLElement>;
@@ -129,7 +122,7 @@ export class FavDownloader extends RE6Module {
         } else lookup = Promise.resolve(this.posts);
 
         async function recursiveLookup(output: APIPost[], info: JQuery<HTMLElement>, username: string, index: number): Promise<APIPost[]> {
-            info.html(" &nbsp; &nbsp;request " + index + " / ?");
+            info.html(" &nbsp; &nbsp;request " + index + " [" + output.length + "]");
             return E621.Posts.get<APIPost>({ tags: "fav:" + username, page: index, limit: 320 })
                 .then((data) => {
                     output.push(...data);
