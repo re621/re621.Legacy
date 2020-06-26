@@ -436,6 +436,7 @@ export class SubscriptionManager extends RE6Module {
         });
 
         this.refreshTabNotifications(trackerData);
+        this.refreshHeaderNotifications();
 
         if (this.modal.isOpen()) {
             const activeTab = this.tabs.get().tabs("option", "active");
