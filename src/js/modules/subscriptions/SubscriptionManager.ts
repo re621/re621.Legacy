@@ -1,6 +1,5 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { XM } from "../../components/api/XM";
-import { User } from "../../components/data/User";
 import { Debug } from "../../components/ErrorHandler";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -58,8 +57,6 @@ export class SubscriptionManager extends RE6Module {
             updateInterval: 60 * 60 * 1000,
             /** At which age updates get removed from cache */
             cacheMaxAge: 0,
-            /** Should blacklisted items be hidden */
-            applyBlacklist: true,
 
             hotkeyOpenNotifications: "",
         };
@@ -281,16 +278,8 @@ export class SubscriptionManager extends RE6Module {
                         SubscriptionManager.trigger("timerRefresh");
                     }
                 ),
-                Form.div(`<div class="unmargin">Updates older than this are removed automatically.</div>`, "mid"),
-                Form.spacer("mid"),
+                Form.div(`<div class="unmargin">Updates older than this are removed automatically</div>`, "mid"),
 
-                Form.checkbox(
-                    "update-blacklist", this.fetchSettings("applyBlacklist"), "Apply Blacklist", "mid",
-                    async (event, data) => {
-                        await this.pushSettings("applyBlacklist", data);
-                    }
-                ),
-                Form.div(`<div class="unmargin">Hide updates that match the blacklisted tags.</div>`, "mid")
             ]),
             Form.hr(),
 
@@ -627,17 +616,6 @@ export class SubscriptionManager extends RE6Module {
         const $content = $("<div>").addClass("subscription-update" + (data.new ? " new" : ""));
         const timeAgo = Util.timeAgo(timestamp);
         const timeString = new Date(timestamp).toLocaleString();
-
-        // Blacklist
-        if (subscription.instance.containsBlacklisted() && this.fetchSettings("applyBlacklist") && matchesBlacklist(data.id)) {
-            $content.css("display", "none");
-        }
-
-        function matchesBlacklist(id: number): boolean {
-            for (const filter of User.getBlacklist().values())
-                if (filter.matchesID(id, true)) { return true; }
-            return false;
-        }
 
         // ===== Create Elements =====
         // Image

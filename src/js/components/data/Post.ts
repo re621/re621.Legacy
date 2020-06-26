@@ -106,9 +106,9 @@ export class Post {
     /**
      * Checks if the post is found in an activated blacklist filter
      */
-    public matchesBlacklist(): boolean {
+    public matchesBlacklist(ignoreDisabled = false): boolean {
         for (const filter of User.getBlacklist().values()) {
-            if (filter.matchesPost(this)) {
+            if (filter.matchesPost(this, ignoreDisabled)) {
                 return true;
             }
         }
