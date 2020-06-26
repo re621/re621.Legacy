@@ -37,6 +37,9 @@
         "GM.xmlHttpRequest",
         "GM_xmlhttpRequest",
 
+        "GM_addValueChangeListener",
+        "GM_removeValueChangeListener",
+
         "unsafeWindow"
     ],
     "icon64": "https://cdn.jsdelivr.net/gh/re621/re621.github.io@master/images/icons/icon64.png",
