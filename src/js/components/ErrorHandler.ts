@@ -103,6 +103,39 @@ export class ErrorHandler {
 
 }
 
+export class Patcher {
+
+    /**
+     * Runs patch-ups on the settings to preserve backwards compatibility.  
+     * All patches MUST be documented and versioned.
+     */
+    public static async run(): Promise<void> {
+
+        let counter = 0;
+
+        // Version 1.3.5
+        // The subscription modules were renamed to make the overall structure more clear.
+        // Cache was removed from the module settings to prevent event listeners from being
+        // triggered needlessly.
+        for (const type of ["Comment", "Forum", "Pool", "Tag"]) {
+            const entry = await XM.Storage.getValue("re621." + type + "Subscriptions", undefined);
+            if (entry === undefined) continue;
+            if (entry["cache"] !== undefined) {
+                await XM.Storage.setValue("re621." + type + "Tracker.cache", entry["cache"]);
+                delete entry["cache"];
+                counter++;
+            }
+            await XM.Storage.setValue("re621." + type + "Tracker", entry);
+            await XM.Storage.deleteValue("re621." + type + "Subscriptions");
+            counter++;
+        }
+
+        Debug.log(`Patcher: ${counter} records changed`)
+
+    }
+
+}
+
 export class Debug {
 
     private static enabled: boolean;

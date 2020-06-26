@@ -4,7 +4,7 @@
  */
 
 // Load Modules
-import { Debug } from "./components/ErrorHandler";
+import { Debug, Patcher } from "./components/ErrorHandler";
 import { ModuleController } from "./components/ModuleController";
 import { DomUtilities } from "./components/structure/DomUtilities";
 import { FavDownloader } from "./modules/downloader/FavDownloader";
@@ -76,6 +76,8 @@ DomUtilities.createStructure().then(async () => {
 
     await Debug.init();
     // ErrorHandler.report();
+
+    await Patcher.run();
 
     // This code is pretty fragile. It's also what makes the rest of the project work.
     // It is dependent on the previous step, which runs when the document fully loads
