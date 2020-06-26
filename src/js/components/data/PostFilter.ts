@@ -98,8 +98,8 @@ export class PostFilter {
         return result;
     }
 
-    public matchesPost(post: Post): boolean {
-        return this.enabled && this.matchesIds.has(post.getId());
+    public matchesPost(post: Post, ignoreDisabled = false): boolean {
+        return (this.enabled || ignoreDisabled) && this.matchesIds.has(post.getId());
     }
 
     public compareNumbers(a: number, b: number, mode: Comparable): boolean {

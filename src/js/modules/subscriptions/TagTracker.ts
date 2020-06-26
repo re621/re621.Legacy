@@ -110,7 +110,7 @@ export class TagTracker extends RE6Module implements SubscriptionTracker {
         status.append(`<div>. . . formatting output</div>`);
         for (const post of apiData) {
             const postObject = new Post(post);
-            if (new Date(post.created_at).getTime() > lastUpdate && !postObject.matchesBlacklist()) {
+            if (new Date(post.created_at).getTime() > lastUpdate && !postObject.matchesBlacklist(true)) {
                 results[new Date(post.created_at).getTime()] = await this.formatPostUpdate(post);
             }
         }
