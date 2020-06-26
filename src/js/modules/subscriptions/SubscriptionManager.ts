@@ -256,7 +256,7 @@ export class SubscriptionManager extends RE6Module {
                     ],
                     "mid",
                     async (event, data) => {
-                        await this.pushSettings("updateInterval", parseInt(data) * TIME_PERIOD.HOUR);
+                        await this.pushSettings("updateInterval", parseFloat(data) * TIME_PERIOD.HOUR);
                         SubscriptionManager.trigger("timerRefresh");
                     }
                 ),
@@ -295,7 +295,7 @@ export class SubscriptionManager extends RE6Module {
                             return;
                         }
 
-                        SubscriptionManager.trigger("update", true);
+                        SubscriptionManager.trigger("update");
                     }
                 ),
                 Form.button(
@@ -444,9 +444,9 @@ export class SubscriptionManager extends RE6Module {
     }
 
     /** Reloads the timers on the info page */
-    private executeTimerRefreshEvent(): void {
+    private async executeTimerRefreshEvent(): Promise<void> {
         this.refreshSettings();
-        const time = this.fetchSettings(["lastUpdate", "updateInterval"]);
+        const time = await this.fetchSettings(["lastUpdate", "updateInterval"], true);
 
         $("span#subscriptions-lastupdate").html(getLastUpdateText(time.lastUpdate));
         $("span#subscriptions-nextupdate").html(getNextUpdateText(time.lastUpdate, time.updateInterval));
