@@ -639,7 +639,7 @@ export class Form {
      * @param stretch Column span
      * @param onChange Input change callback
      */
-    public static checkbox(id: string, value = "", label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
+    public static checkbox(id: string, value: boolean, label?: string, stretch: FormElementWidth = "column", onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
         return this.make("checkbox", id, label, value, stretch, undefined, undefined, undefined, onChange, wrapperClass);
     }
 
@@ -942,7 +942,7 @@ export class Form {
      * @param stretch Column span
      * @param onChange Input change callback
      */
-    public static select(id: string, value = "", label?: string, data?: FormExtraData[], stretch: FormElementWidth = "column", onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
+    public static select(id: string, value: string | number = "", label?: string, data?: FormExtraData[], stretch: FormElementWidth = "column", onChange?: FormChangeEvent, wrapperClass?: string): FormElement {
         return this.make("select", id, label, value, stretch, undefined, undefined, data, onChange, wrapperClass);
     }
 
@@ -1191,7 +1191,10 @@ export interface FormElement extends FormEntry, FormEntryRequirements {
 
 type FormElementType = "input" | "copy" | "key" | "file" | "icon" | "checkbox" | "radio" | "button" | "submit" | "textarea" | "select" | "div" | "hr" | "form";
 type FormElementWidth = "default" | "column" | "mid" | "full";
-type FormExtraData = { name: string; value: string };
+type FormExtraData = {
+    name: string;
+    value: string | number;
+};
 type FormChangeEvent = (event: Event, data: any) => void;
 
 type FormInput = {

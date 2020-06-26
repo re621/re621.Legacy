@@ -254,7 +254,7 @@ export class ThumbnailEnhancer extends RE6Module {
         const $voteBox = $("<div>")
             .addClass("preview-voting")
             .appendTo($link);
-        const $voteUp = $("<button>")        // Upvote
+        const $voteUp = $("<button>")           // Upvote
             .attr("href", "#")
             .html(`<i class="far fa-thumbs-up"></i>`)
             .addClass("button score-neutral voteButton post-vote-up-" + postID)
@@ -264,13 +264,12 @@ export class ThumbnailEnhancer extends RE6Module {
             .html(`<i class="far fa-thumbs-down"></i>`)
             .addClass("button score-neutral voteButton post-vote-down-" + postID)
             .appendTo($voteBox);
-        /*
-        $("<button>")        // Favorite
+        const $favorite = $("<button>")        // Favorite
             .attr("href", "#")
             .html(`<i class="far fa-star"></i>`)
             .addClass("button score-neutral voteButton")
+            .css("display", "none")
             .appendTo($voteBox);
-        */
 
         $voteUp.click((event) => {
             event.preventDefault();
@@ -280,6 +279,10 @@ export class ThumbnailEnhancer extends RE6Module {
             event.preventDefault();
             Danbooru.Post.vote(postID, -1);
         });
+        $favorite.click((event) => {
+            event.preventDefault();
+            alert("sike, it does not work");
+        })
 
 
         /* Handle double-click */

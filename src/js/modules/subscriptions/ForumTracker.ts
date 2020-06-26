@@ -4,10 +4,17 @@ import { Page, PageDefintion } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/structure/Util";
-import { Subscription, UpdateActions } from "./Subscription";
-import { SubscriptionSettings, UpdateContent, UpdateData } from "./SubscriptionManager";
+import { Subscription } from "./SubscriptionManager";
+import { SubscriptionTracker, UpdateActions, UpdateCache, UpdateContent, UpdateData } from "./SubscriptionTracker";
 
-export class ForumSubscriptions extends RE6Module implements Subscription {
+export class ForumTracker extends RE6Module implements SubscriptionTracker {
+
+    private cache: UpdateCache;
+
+    public constructor() {
+        super();
+        this.cache = new UpdateCache(this);
+    }
 
     protected getDefaultSettings(): Settings {
         return {
@@ -76,11 +83,15 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
 
     public subBatchSize = 100;
 
+    public getCache(): UpdateCache {
+        return this.cache;
+    }
+
     public async getUpdatedEntries(lastUpdate: number, status: JQuery<HTMLElement>): Promise<UpdateData> {
         const results: UpdateData = {};
 
-        status.append(`<div>. . . retreiving settings</div>`);
-        const storedSubs: SubscriptionSettings = await this.fetchSettings("data", true);
+        status.append(`<div>. . . retrieving settings</div>`);
+        const storedSubs: Subscription = await this.fetchSettings("data", true);
         if (Object.keys(storedSubs).length === 0) return results;
 
         status.append(`<div>. . . sending an API request</div>`);
@@ -91,7 +102,7 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
             apiData.push(...await E621.ForumTopics.get<APIForumTopic>({ "search[id]": chunk.join(",") }, 500));
         }
 
-        status.append(`<div>. . . formatting output/div>`);
+        status.append(`<div>. . . formatting output</div>`);
         for (const forumJson of apiData) {
             if (new Date(forumJson.updated_at).getTime() > lastUpdate && forumJson.updater_id !== User.getUserID()) {
                 results[new Date(forumJson.updated_at).getTime()] = await this.formatForumUpdate(forumJson);
@@ -116,10 +127,6 @@ export class ForumSubscriptions extends RE6Module implements Subscription {
             },
             new: true,
         };
-    }
-
-    public async clearCache(): Promise<boolean> {
-        return this.pushSettings("cache", {});
     }
 
 }

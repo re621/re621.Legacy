@@ -226,4 +226,12 @@ export class Util {
         return result;
     }
 
+    /**
+     * Shorthand for `new Date().getTime()`
+     * @returns Current timestamp
+     */
+    public static getTime(): number {
+        return new Date().getTime();
+    }
+
 }

@@ -1,3 +1,4 @@
+import { Debug } from "../ErrorHandler";
 import { XM } from "./XM";
 
 declare const GM: any;
@@ -16,6 +17,7 @@ export class XMConnect {
      * @param details Request details
      */
     public static xmlHttpRequest(details: XMConnectRequest): void {
+        Debug.connectLog(details.url);
         const validDetails = XMConnect.validateXHRDetails(details);
         if (typeof GM !== "undefined" && typeof GM.xmlHttpRequest === "function") GM.xmlHttpRequest(validDetails);
         else if (typeof GM_xmlhttpRequest === "function") GM_xmlhttpRequest(validDetails);

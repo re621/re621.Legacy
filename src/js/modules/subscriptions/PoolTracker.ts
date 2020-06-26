@@ -5,10 +5,17 @@ import { Page } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/structure/Util";
-import { Subscription, UpdateActions } from "./Subscription";
-import { SubscriptionSettings, UpdateContent, UpdateData } from "./SubscriptionManager";
+import { Subscription } from "./SubscriptionManager";
+import { SubscriptionTracker, UpdateActions, UpdateCache, UpdateContent, UpdateData } from "./SubscriptionTracker";
 
-export class PoolSubscriptions extends RE6Module implements Subscription {
+export class PoolTracker extends RE6Module implements SubscriptionTracker {
+
+    private cache: UpdateCache;
+
+    public constructor() {
+        super();
+        this.cache = new UpdateCache(this);
+    }
 
     protected getDefaultSettings(): Settings {
         return {
@@ -79,11 +86,15 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
 
     public subBatchSize = 100;
 
+    public getCache(): UpdateCache {
+        return this.cache;
+    }
+
     public async getUpdatedEntries(lastUpdate: number, status: JQuery<HTMLElement>): Promise<UpdateData> {
         const results: UpdateData = {};
 
-        status.append(`<div>. . . retreiving settings</div>`);
-        const storedSubs: SubscriptionSettings = await this.fetchSettings("data", true);
+        status.append(`<div>. . . retrieving settings</div>`);
+        const storedSubs: Subscription = await this.fetchSettings("data", true);
         if (Object.keys(storedSubs).length === 0) return results;
 
         status.append(`<div>. . . sending an API request</div>`);
@@ -94,7 +105,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             apiData.push(...await E621.Pools.get<APIPool>({ "search[id]": chunk.join(",") }, 500));
         }
 
-        status.append(`<div>. . . formatting output/div>`);
+        status.append(`<div>. . . formatting output</div>`);
         for (const poolJson of apiData) {
             if (storedSubs[poolJson.id].lastId === undefined || !poolJson.post_ids.includes(storedSubs[poolJson.id].lastId)) {
                 storedSubs[poolJson.id].lastId = poolJson.post_ids[poolJson.post_ids.length - 1];
@@ -117,7 +128,7 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
         return results;
     }
 
-    private async formatPoolUpdate(value: APIPool, subSettings: SubscriptionSettings): Promise<UpdateContent> {
+    private async formatPoolUpdate(value: APIPool, subSettings: Subscription): Promise<UpdateContent> {
         const poolInfo = subSettings[value.id];
         if (poolInfo.md5 === undefined) {
             const post = (await E621.Posts.find(value.post_ids[0]).get<APIPost>())[0];
@@ -132,10 +143,6 @@ export class PoolSubscriptions extends RE6Module implements Subscription {
             },
             new: true,
         };
-    }
-
-    public async clearCache(): Promise<boolean> {
-        return this.pushSettings("cache", {});
     }
 
 }

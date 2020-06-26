@@ -1,4 +1,7 @@
+
 declare const GM: any;
+declare const GM_addValueChangeListener: any;
+declare const GM_removeValueChangeListener: any;
 declare const chrome: any;
 
 export class XMStorage {
@@ -51,6 +54,34 @@ export class XMStorage {
             } else await GM.deleteValue(name);
             resolve();
         });
+    }
+
+    /**
+     * Adds a change listener to the storage and returns the listener ID.
+     * @param name string The name of the observed variable
+     * @param callback function(name, oldValue, newValue, remote) {}  
+     *      **name**        _string_  The name of the observed variable  
+     *      **oldValue**    _any_     The old value of the variable (undefined if created)  
+     *      **newValue**    _any_     The new value of the variable (undefined if deleted)  
+     *      **remote**      _boolean_ true if modified in another tab or false for this script instance  
+     */
+    public static addListener(name: string, callback: (name: string, oldValue: any, newValue: any, remote: boolean) => void): string {
+        if (typeof GM_addValueChangeListener === "undefined") {
+            chrome.storage.onChanged.addListener(function (changes) {
+                for (const key in changes)
+                    callback(key, changes[key].oldValue, changes[key].newValue, true);
+            });
+        } else return GM_addValueChangeListener(name, callback);
+    }
+
+    /**
+     * Removes a change listener by its ID.
+     * @param listenerId string ID of the listener
+     */
+    public static removeListener(listenerId: string): void {
+        if (typeof GM_removeValueChangeListener === "undefined") {
+            return;
+        } else GM_removeValueChangeListener(listenerId);
     }
 
 }

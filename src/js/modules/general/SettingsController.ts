@@ -3,6 +3,7 @@ import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { User } from "../../components/data/User";
+import { Debug } from "../../components/ErrorHandler";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
@@ -10,7 +11,9 @@ import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
 import { Util } from "../../components/structure/Util";
-import { PoolDownloader } from "../pools/PoolDownloader";
+import { FavDownloader } from "../downloader/FavDownloader";
+import { MassDownloader } from "../downloader/MassDownloader";
+import { PoolDownloader } from "../downloader/PoolDownloader";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { ImageScaler } from "../post/ImageScaler";
 import { PoolNavigator } from "../post/PoolNavigator";
@@ -19,10 +22,10 @@ import { TitleCustomizer } from "../post/TitleCustomizer";
 import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
 import { CustomFlagger, FlagDefinition } from "../search/CustomFlagger";
 import { InfiniteScroll } from "../search/InfiniteScroll";
-import { MassDownloader } from "../search/MassDownloader";
 import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } from "../search/ThumbnailsEnhancer";
-import { ForumSubscriptions } from "../subscriptions/ForumSubscriptions";
-import { PoolSubscriptions } from "../subscriptions/PoolSubscriptions";
+import { ForumTracker } from "../subscriptions/ForumTracker";
+import { PoolTracker } from "../subscriptions/PoolTracker";
+import { SubscriptionManager } from "../subscriptions/SubscriptionManager";
 import { HeaderCustomizer } from "./HeaderCustomizer";
 import { Miscellaneous } from "./Miscellaneous";
 
@@ -32,12 +35,18 @@ import { Miscellaneous } from "./Miscellaneous";
  */
 export class SettingsController extends RE6Module {
 
-    private modal: Modal;
+    public constructor() {
+        super();
+        this.registerHotkeys(
+            { keys: "hotkeyOpenSettings", fnct: this.openSettings },
+        );
+    }
 
     public create(): void {
 
         // Create a button in the header
         const openSettingsButton = DomUtilities.addSettingsButton({
+            id: "header-button-settings",
             name: `<i class="fas fa-wrench"></i>`,
             title: "Settings",
             tabClass: "float-right",
@@ -58,7 +67,7 @@ export class SettingsController extends RE6Module {
         });
 
         // Create the modal
-        this.modal = new Modal({
+        new Modal({
             title: "Settings",
             triggers: [{ element: openSettingsButton }],
             escapable: false,
@@ -88,6 +97,8 @@ export class SettingsController extends RE6Module {
     public getDefaultSettings(): Settings {
         return {
             enabled: true,
+
+            hotkeyOpenSettings: "",
 
             newVersionAvailable: false,
             lastVersionCheck: 0,
@@ -419,7 +430,8 @@ export class SettingsController extends RE6Module {
     private createDownloadsTab(): Form {
         const downloadCustomizer = ModuleController.get(DownloadCustomizer),
             massDownloader = ModuleController.get(MassDownloader),
-            poolDownloader = ModuleController.get(PoolDownloader);
+            poolDownloader = ModuleController.get(PoolDownloader),
+            favDownloader = ModuleController.get(FavDownloader);
 
         return new Form({ id: "settings-download", columns: 3, parent: "div#modal-container" }, [
 
@@ -469,6 +481,36 @@ export class SettingsController extends RE6Module {
                     async (event, data) => {
                         await massDownloader.pushSettings("fixedSection", data);
                         massDownloader.toggleFixedSection();
+                    }
+                ),
+                Form.div("The downloader interface will remain on the screen as you scroll", "mid"),
+
+                Form.hr(),
+            ]),
+
+            // Fav Downloader
+            Form.section({ id: "fav", columns: 3 }, [
+                Form.header("Favorites Downloader", "column"),
+                Form.div(`<div class="notice float-right">Download all favorites at once</div>`, "mid"),
+                Form.input(
+                    "template", favDownloader.fetchSettings("template"), "Download File Name", "full", undefined,
+                    async (event, data) => { await favDownloader.pushSettings("template", data); }
+                ),
+                Form.section({ id: "template-vars-fav", columns: 2 }, [
+                    Form.div(`<div class="notice unmargin">The same variables as above can be used. Add a forward slash ( / ) to signify a folder.</div>`, "mid"),
+                ], " "),
+
+                Form.checkbox(
+                    "autodownload", favDownloader.fetchSettings("autoDownloadArchive"), "Auto Download", "column",
+                    async (event, data) => { await favDownloader.pushSettings("autoDownloadArchive", data); }
+                ),
+                Form.div("The archive will be downloaded automatically after being created", "mid"),
+
+                Form.checkbox(
+                    "fixedSection", favDownloader.fetchSettings("fixedSection"), "Fixed Interface", "column",
+                    async (event, data) => {
+                        await favDownloader.pushSettings("fixedSection", data);
+                        favDownloader.toggleFixedSection();
                     }
                 ),
                 Form.div("The downloader interface will remain on the screen as you scroll", "mid"),
@@ -618,7 +660,8 @@ export class SettingsController extends RE6Module {
             poolNavigator = ModuleController.get(PoolNavigator),
             imageScaler = ModuleController.get(ImageScaler),
             miscellaneous = ModuleController.get(Miscellaneous),
-            headerCustomizer = ModuleController.get(HeaderCustomizer);
+            headerCustomizer = ModuleController.get(HeaderCustomizer),
+            subscriptionManager = ModuleController.get(SubscriptionManager);
 
         function createInputs(module: RE6Module, label: string, settingsKey: string): FormElement[] {
             const values = module.fetchSettings(settingsKey).split("|");
@@ -693,6 +736,9 @@ export class SettingsController extends RE6Module {
             ...createInputs(headerCustomizer, "Tab #7", "hotkeyTab7"),
             ...createInputs(headerCustomizer, "Tab #8", "hotkeyTab8"),
             ...createInputs(headerCustomizer, "Tab #9", "hotkeyTab9"),
+
+            ...createInputs(this, "Open Settings", "hotkeyOpenSettings"),
+            ...createInputs(subscriptionManager, "Open Notifications", "hotkeyOpenNotifications"),
         ]);
     }
 
@@ -774,6 +820,23 @@ export class SettingsController extends RE6Module {
                 }
             ),
             Form.div("<b>This cannot be undone.</b>", "column"),
+            Form.hr(),
+
+            Form.header("<h3>Debugging Tools</h3>"),
+            Form.checkbox(
+                "debug-enabled", Debug.isEnabled(), "Console output", "column",
+                (event, data) => {
+                    Debug.setEnabled(data);
+                }
+            ),
+            Form.div("Enable debug messages in the console log", "mid"),
+            Form.checkbox(
+                "connect-log-enabled", Debug.isConnectLogEnabled(), "Connections log", "column",
+                (event, data) => {
+                    Debug.setConnectLogEnabled(data);
+                }
+            ),
+            Form.div("Logs all outbound connections in the console", "mid"),
         ]);
 
         /** Export the currnt module settings to file */
@@ -853,7 +916,7 @@ export class SettingsController extends RE6Module {
             /** Import the pool data from string */
             async function importPoolData(settings: string, $info: JQuery<HTMLElement>): Promise<void> {
                 $info.html("Processing pools . . .");
-                const poolSubs = PoolSubscriptions.getInstance(),
+                const poolSubs = PoolTracker.getInstance(),
                     poolData = poolSubs.fetchSettings("data");
                 for (const entry of settings) {
                     poolData[entry["id"]] = {
@@ -867,7 +930,7 @@ export class SettingsController extends RE6Module {
             /** Import the forum data from string */
             async function importForumData(settings: string, $info: JQuery<HTMLElement>): Promise<void> {
                 $info.html("Processing forums . . .");
-                const forumSubs = ForumSubscriptions.getInstance(),
+                const forumSubs = ForumTracker.getInstance(),
                     forumData = forumSubs.fetchSettings("data"),
                     postIDs = [];
                 for (const entry of settings) {
@@ -930,6 +993,13 @@ export class SettingsController extends RE6Module {
             Form.header(`<a href="` + window["re621"]["links"]["releases"] + `" class="unmargin">What's new?</a>`),
             Form.div(`<div id="changelog-list">` + Util.quickParseMarkdown(this.fetchSettings("changelog")) + `</div>`)
         ]);
+    }
+
+    /**
+     * Toggles the settings window
+     */
+    private openSettings(): void {
+        $("a#header-button-settings")[0].click();
     }
 
 }

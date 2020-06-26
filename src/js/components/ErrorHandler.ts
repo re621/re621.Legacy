@@ -1,6 +1,8 @@
-import { Modal } from "./structure/Modal";
-import { RE6Module } from "./RE6Module";
 import { XM } from "./api/XM";
+import { RE6Module } from "./RE6Module";
+import { Modal } from "./structure/Modal";
+
+declare const UAParser;
 
 export class ErrorHandler {
 
@@ -72,6 +74,110 @@ export class ErrorHandler {
         const instance = this.getInstance();
         if (!instance.modal.isOpen()) instance.trigger.get(0).click();
         this.log(module, message, context);
+    }
+
+    public static async report(): Promise<boolean> {
+        //    if(await XM.Storage.getValue("re621.stats", false)) return;
+        //    XM.Storage.setValue("re621.stats", true);
+
+        const userAgent = UAParser(navigator.userAgent);
+        const userInfo = {
+            browserName: userAgent.browser.name,
+            browserVersion: userAgent.browser.major,
+            osName: userAgent.os.name,
+            osVersion: userAgent.os.version,
+            handlerName: XM.info().scriptHandler,
+            handlerVersion: XM.info().version,
+        }
+
+        XM.Connect.xmlHttpRequest({
+            method: "POST",
+            url: "https://bitwolfy.com/re621/report.php",
+            headers: { "User-Agent": window["re621"]["useragent"] },
+            data: JSON.stringify(userInfo),
+            onload: (data) => { console.log(JSON.parse(data.responseText)); }
+        });
+
+        return Promise.resolve(true);
+    }
+
+}
+
+export class Patcher {
+
+    /**
+     * Runs patch-ups on the settings to preserve backwards compatibility.  
+     * All patches MUST be documented and versioned.
+     */
+    public static async run(): Promise<void> {
+
+        let counter = 0;
+
+        // Version 1.3.5
+        // The subscription modules were renamed to make the overall structure more clear.
+        // Cache was removed from the module settings to prevent event listeners from being
+        // triggered needlessly.
+        for (const type of ["Comment", "Forum", "Pool", "Tag"]) {
+            const entry = await XM.Storage.getValue("re621." + type + "Subscriptions", undefined);
+            if (entry === undefined) continue;
+            if (entry["cache"] !== undefined) {
+                await XM.Storage.setValue("re621." + type + "Tracker.cache", entry["cache"]);
+                delete entry["cache"];
+                counter++;
+            }
+            await XM.Storage.setValue("re621." + type + "Tracker", entry);
+            await XM.Storage.deleteValue("re621." + type + "Subscriptions");
+            counter++;
+        }
+
+        Debug.log(`Patcher: ${counter} records changed`)
+
+    }
+
+}
+
+export class Debug {
+
+    private static enabled: boolean;
+    private static connect: boolean;
+
+    /** Initialize the debug logger */
+    public static async init(): Promise<boolean> {
+        Debug.enabled = await XM.Storage.getValue("re621.debug.enabled", false);
+        Debug.connect = await XM.Storage.getValue("re621.debug.connect", false);
+        return Promise.resolve(true);
+    }
+
+    /** Returns true if the debug messages are enabled, false otherwise */
+    public static isEnabled(): boolean {
+        return Debug.enabled;
+    }
+
+    /** Enables or disables the debug message output */
+    public static setEnabled(enabled: boolean): void {
+        this.enabled = enabled;
+        XM.Storage.setValue("re621.debug.enabled", enabled);
+    }
+
+    /** Logs the provided data into the console log if debug is enabled */
+    public static log(...data: any[]): void {
+        if (Debug.enabled) console.log(...data);
+    }
+
+    /** Returns true if connections log is enabled, false otherwise */
+    public static isConnectLogEnabled(): boolean {
+        return Debug.connect;
+    }
+
+    /** Enables or disables the connect log output */
+    public static setConnectLogEnabled(enabled: boolean): void {
+        this.connect = enabled;
+        XM.Storage.setValue("re621.debug.connect", enabled);
+    }
+
+    /** Logs the provided data into the console log if connections logging is enabled */
+    public static connectLog(...data: any[]): void {
+        if (Debug.connect) console.warn("CONNECT", ...data);
     }
 
 }
