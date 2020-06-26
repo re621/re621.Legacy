@@ -1,9 +1,10 @@
+import { XM } from "../../components/api/XM";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module } from "../../components/RE6Module";
 import { Util } from "../../components/structure/Util";
 import { SubscriptionManager } from "./SubscriptionManager";
 
-export interface Subscription extends RE6Module {
+export interface SubscriptionTracker extends RE6Module {
 
     /**
      * Parameter that contains various functions used to format subscription updates properly.  
@@ -85,58 +86,51 @@ export interface UpdateActions {
 /** Handles the storage and organization of update cache */
 export class UpdateCache {
 
-    private instance: Subscription;
+    private instance: SubscriptionTracker;
 
     private data: UpdateData;
     private index: number[];
-
-    private lastUpdate: number;
 
     /**
      * Create a new UpdateCache for the specificed subscription
      * @param instance Subscription instance
      */
-    public constructor(instance: Subscription) {
+    public constructor(instance: SubscriptionTracker) {
         this.instance = instance;
         this.data = {};
         this.updateIndex();
     }
 
+    private getStorageTag(): string {
+        return "re621." + this.instance.getSettingsTag() + ".cache";
+    }
+
     /** Refreshes update cache from stored data */
     public async load(): Promise<boolean> {
-        this.data = await this.instance.fetchSettings("cache", true);
-        this.lastUpdate = await this.instance.fetchSettings("cacheTimestamp", true);
+        this.data = await XM.Storage.getValue(this.getStorageTag(), {});
         this.updateIndex();
-        if (!this.lastUpdate) {
-            const now = Util.getTime();
-            this.lastUpdate = now;
-            await this.instance.pushSettings("cacheTimestamp", now);
-        }
         return Promise.resolve(true);
     }
 
     /**
-     * Same as `load()`, but gets data from the cache instead of remote storage.  
-     * Should only be used on first load, as that data is guaranteed to be up to date.
+     * Fetches update data from the parent instance's `getUpdatedEntries` method
+     * and appends it to the cache. If changes were made, saves cache to file.
+     * @param lastUpdate Timestamp of the previous update
+     * @param status JQuery element to which status updates are to be appended
+     * @returns True if changes have been made, false otherwise
      */
-    public loadSync(): void {
-        this.data = this.instance.fetchSettings("cache");
-        this.lastUpdate = this.instance.fetchSettings("cacheTimestamp");
-        this.updateIndex();
-        if (!this.lastUpdate) {
-            const now = Util.getTime();
-            this.lastUpdate = now;
-            this.instance.pushSettings("cacheTimestamp", now);
+    public async update(lastUpdate: number, status: JQuery<HTMLElement>): Promise<boolean> {
+        const updates = await this.instance.getUpdatedEntries(lastUpdate, status);
+        if (Object.keys(updates).length > 0) {
+            this.push(updates);
+            return this.save();
         }
+        return Promise.resolve(false);
     }
 
     /** Saves update cache to storage */
     public async save(): Promise<boolean> {
-        const now = Util.getTime();
-        await this.instance.pushSettings("cache", this.data);
-        await this.instance.pushSettings("cacheTimestamp", now);
-        this.lastUpdate = now;
-        return Promise.resolve(true);
+        return XM.Storage.setValue(this.getStorageTag(), this.data);
     }
 
     /** Irreversibly clears the update cache */
@@ -144,15 +138,6 @@ export class UpdateCache {
         this.data = {};
         this.updateIndex();
         return this.save();
-    }
-
-    /**
-     * Checks the stored cache timestamp against the remote cache.  
-     * Returns true if the remote cache is newer, false otherwise
-     */
-    public async isOutdated(): Promise<boolean> {
-        const remoteUpdate = await this.instance.fetchSettingsGently("cacheTimestamp");
-        return Promise.resolve(this.lastUpdate < remoteUpdate);
     }
 
     /**
@@ -186,7 +171,6 @@ export class UpdateCache {
             this.index.splice(el, 1);
             delete this.data[timestamp];
         }
-        this.lastUpdate = Util.getTime();
     }
 
     /**
@@ -200,7 +184,6 @@ export class UpdateCache {
         });
         this.updateIndex();
         this.trim();
-        this.lastUpdate = Util.getTime();
     }
 
     /**
@@ -219,7 +202,7 @@ export class UpdateCache {
      */
     private trim(): void {
         const manager = ModuleController.get(SubscriptionManager),
-            params = manager.fetchSettings(["cacheMaxAge", "cacheSize"]);    // TODO Make this async
+            params = manager.fetchSettings(["cacheMaxAge", "cacheSize"]);
 
         // If cacheMaxAge is set to never, its value is 0
         const ageLimit = params.cacheMaxAge === 0 ? 0 : new Date().getTime() - params.cacheMaxAge;
@@ -256,13 +239,10 @@ export class UpdateCache {
      * If the function returns a value, said value will be assigned to the corresponding element.
      * @param fn Function to execute
      */
-    public forEach(fn: (n: UpdateContent) => void | UpdateContent): void {
-        this.index.forEach((entry) => {
-            const result = fn(this.data[entry]);
-            if (typeof result !== "undefined") {
-                this.data[entry] = result;
-                this.lastUpdate = Util.getTime();
-            }
+    public forEach(fn: (data: UpdateContent, timestamp: number) => void | UpdateContent): void {
+        this.index.forEach((timestamp) => {
+            const result = fn(this.data[timestamp], timestamp);
+            if (typeof result !== "undefined") this.data[timestamp] = result;
         });
     }
 }

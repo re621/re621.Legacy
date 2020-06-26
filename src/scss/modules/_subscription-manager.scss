@@ -175,7 +175,7 @@ div.subscriptions-list {
 }
 
 // Forum Subscriptions
-.subscriptions-list[data-subscription-class=ForumSubscriptions] {
+.subscriptions-list[data-subscription-class=ForumTracker] {
 
     div.subscription-update:not(.notice) {
 
@@ -194,7 +194,7 @@ div.subscriptions-list {
 }
 
 // Tag Subscriptions
-.subscriptions-list[data-subscription-class=TagSubscriptions] {
+.subscriptions-list[data-subscription-class=TagTracker] {
     grid-template-columns: 1fr 1fr 1fr 1fr;
 
     div.subscription-update.notice {
@@ -243,7 +243,7 @@ div.subscriptions-list {
 }
 
 // Comment Subscriptions
-.subscriptions-list[data-subscription-class=CommentSubscriptions] {
+.subscriptions-list[data-subscription-class=CommentTracker] {
 
     div.subscription-update:not(.notice) {
 

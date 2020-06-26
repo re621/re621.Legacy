@@ -6,10 +6,10 @@ import { Post } from "../../components/data/Post";
 import { User } from "../../components/data/User";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/structure/Util";
-import { Subscription, UpdateActions, UpdateCache, UpdateContent, UpdateData } from "./Subscription";
-import { SubscriptionSettings } from "./SubscriptionManager";
+import { Subscription } from "./SubscriptionManager";
+import { SubscriptionTracker, UpdateActions, UpdateCache, UpdateContent, UpdateData } from "./SubscriptionTracker";
 
-export class CommentSubscriptions extends RE6Module implements Subscription {
+export class CommentTracker extends RE6Module implements SubscriptionTracker {
 
     private cache: UpdateCache;
 
@@ -96,8 +96,8 @@ export class CommentSubscriptions extends RE6Module implements Subscription {
     public async getUpdatedEntries(lastUpdate: number, status: JQuery<HTMLElement>): Promise<UpdateData> {
         const results: UpdateData = {};
 
-        status.append(`<div>. . . retreiving settings</div>`);
-        const storedSubs: SubscriptionSettings = await this.fetchSettings("data", true);
+        status.append(`<div>. . . retrieving settings</div>`);
+        const storedSubs: Subscription = await this.fetchSettings("data", true);
         if (Object.keys(storedSubs).length === 0) return results;
 
         status.append(`<div>. . . sending an API request</div>`);

@@ -1,5 +1,6 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { XM } from "../../components/api/XM";
+import { Debug } from "../../components/ErrorHandler";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
@@ -8,7 +9,7 @@ import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
 import { Util } from "../../components/structure/Util";
 import { ThumbnailClickAction, ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
-import { Subscription, UpdateData } from "./Subscription";
+import { SubscriptionTracker, UpdateContent } from "./SubscriptionTracker";
 
 export class SubscriptionManager extends RE6Module {
 
@@ -18,20 +19,23 @@ export class SubscriptionManager extends RE6Module {
     /** Used to block manual updates while an interval update is in progress */
     private static updateInProgress = false;
 
-    /** Used to force the script to output update entries on first run */
-    private static firstRun = true;
-
     /** This much time must pass before the script assumes that a previous update failed. */
     private static updateTimeout = 60 * 1000;
 
     /** Map of active subscription modules */
-    private subscriptions = new Map<string, SubscriptionElement>();
+    private trackers = new Map<string, TrackerData>();
 
     /** Header button that opens the subscription modal */
     private $openSubsButton: JQuery<HTMLElement>;
 
     /** True if the notifications window has been opened since page load */
     private notificationsAlreadyOpened = false;
+
+    /** Notifications window */
+    private modal: Modal;
+
+    /** Tabs inside the modal window */
+    private tabs: Tabbed;
 
     public constructor() {
         super();
@@ -58,6 +62,31 @@ export class SubscriptionManager extends RE6Module {
         };
     }
 
+    /** Registers the provided tracker(s) into the system */
+    public static register(moduleList: any | any[]): void {
+        if (!Array.isArray(moduleList)) moduleList = [moduleList];
+
+        const trackers = (this.getInstance() as SubscriptionManager).trackers;
+        moduleList.forEach(async (moduleClass: any) => {
+            trackers.set(
+                moduleClass.prototype.constructor.name,
+                { instance: ModuleController.get<SubscriptionTracker>(moduleClass) }
+            );
+        });
+    }
+
+    /**
+     * Returns the SubscriptionElement corresponding to the provided ID.  
+     * The ID can be either the subscription name as a string, or its numeric tab ID
+     * @param id Subscription ID
+     */
+    public getTracker(id: string | number): TrackerData {
+        if (typeof id === "string") return this.trackers.get(id);
+        for (const value of this.trackers.values())
+            if (value.tabIndex === id) { return value; }
+        return undefined;
+    }
+
     public async create(): Promise<void> {
         super.create();
 
@@ -74,7 +103,7 @@ export class SubscriptionManager extends RE6Module {
             name: `<i class="fas fa-bell"></i>`,
             title: "Notifications",
             attr: {
-                "data-loading": "true",
+                "data-loading": "false",
                 "data-updates": "0",
             },
             linkClass: "update-notification",
@@ -84,7 +113,7 @@ export class SubscriptionManager extends RE6Module {
         const content = [];
 
         let tabIndex = 0;
-        this.subscriptions.forEach((data, name) => {
+        this.trackers.forEach((data, name) => {
             data.tabElement = $("<a>")
                 .attr({
                     "data-loading": "false",
@@ -109,191 +138,97 @@ export class SubscriptionManager extends RE6Module {
             // the cache format must have changed and data must be cleared
             if (cacheInvalid) data.instance.getCache().clear();
 
-            // Load subscription cache from storage
-            data.instance.getCache().loadSync();
+            // Create subscribe buttons
+            this.addSubscribeButtons(data.instance);
 
             content.push({ name: data.tabElement, page: data.content });
             tabIndex++;
         });
-        content.push({ name: "Info", page: this.getInfoPage().get() });
+        content.push({ name: "Info", page: this.buildInfoPage().get() });
 
-        const subsTabs = new Tabbed({
+        this.tabs = new Tabbed({
             name: "notifications-tabs",
             content: content
         });
 
         // Create the modal
-        const modal = new Modal({
+        this.modal = new Modal({
             title: "Subscriptions",
             triggers: [{ element: this.$openSubsButton }],
             escapable: false,
             reserveHeight: true,
-            content: subsTabs.get(),
+            content: this.tabs.get(),
             position: { my: "right top", at: "right top" }
         });
 
-        // Update the subscription content
-        SubscriptionManager.on("update.main", async (event, shouldUpdate) => {
-            if (typeof shouldUpdate === "undefined")
-                shouldUpdate = await this.getShouldUpdate();
+        /* == Event Listeners == */
+        SubscriptionManager.on("update.main", () => { this.executeUpdateEvent(); });
+        SubscriptionManager.on("timerRefresh.main", () => { this.executeTimerRefreshEvent(); });
 
-            SubscriptionManager.updateInProgress = true;
-            if (shouldUpdate) {
-                const now = Util.getTime();
-                this.pushSettings("lastUpdate", now);
-                this.pushSettings("updateStarted", now);
-            }
-            SubscriptionManager.trigger("refresh");
-
-            this.$openSubsButton.attr({
-                "data-loading": "true",
-                "data-updates": "0",
-            });
-
-            const updateThreads: Promise<boolean>[] = [];
-            this.subscriptions.forEach(async (subscription) => {
-                subscription.tabElement.attr("data-updates", "0");
-                updateThreads.push(this.initSubscription(subscription, shouldUpdate, this.fetchSettings("lastUpdate")));
-            });
-
-            Promise.all(updateThreads).then(() => {
-                SubscriptionManager.updateInProgress = false;
-                SubscriptionManager.firstRun = false;
-                this.pushSettings("updateStarted", 0);
-                SubscriptionManager.trigger("refresh");
-
-                this.$openSubsButton.attr("data-loading", "false");
-                this.refreshHeaderNotifications();
-
-                if (modal.isOpen()) {
-                    const activeTab = subsTabs.get().tabs("option", "active");
-                    window.setTimeout(() => {
-                        this.clearTabNotification(activeTab);
-                    }, 1000);
+        this.trackers.forEach((trackerData) => {
+            XM.Storage.addListener(
+                "re621." + trackerData.instance.getSettingsTag() + ".cache",
+                (name, oldValue, newValue, remote) => {
+                    if (!remote) return;
+                    Debug.log(`SubM${trackerData.tabIndex}: Cache updated`);
+                    this.executeReloadEvent(trackerData);
                 }
-
-                // Clear the notifications if the user opened the tab
-                modal.getElement().off("dialogopen.onUpdate").on("dialogopen.onUpdate", () => {
-                    if (!this.notificationsAlreadyOpened) {
-                        this.notificationsAlreadyOpened = true;
-
-                        let index = 0;
-                        for (const sub of this.subscriptions) {
-                            if (parseInt(sub[1].tabElement.attr("data-updates")) > 0) {
-                                subsTabs.get().tabs("option", "active", index);
-                                break;
-                            }
-                            index++;
-                        }
-                    }
-                    this.clearTabNotification(subsTabs.get().tabs("option", "active"));
-                    window.setTimeout(() => {
-                        this.clearTabNotification(subsTabs.get().tabs("option", "active"));
-                    }, 1000);
-                });
-
-                subsTabs.get().off("tabsactivate.onUpdate").on("tabsactivate.onUpdate", (event, tabProperties) => {
-                    this.clearTabNotification(tabProperties.newTab.index());
-                });
-            });
+            );
         });
 
-        // Refresh the update timers
-        SubscriptionManager.on("refresh.main", () => {
-            this.refreshSettings();
-            const time = this.fetchSettings(["lastUpdate", "updateInterval"]);
-
-            $("span#subscriptions-lastupdate").html(getLastUpdateText(time.lastUpdate));
-            $("span#subscriptions-nextupdate").html(getNextUpdateText(time.lastUpdate, time.updateInterval));
-
-            $("i#subscription-action-update").toggleClass("fa-spin", SubscriptionManager.updateInProgress);
-
-            /** Formats the last update timestamp into a readable date */
-            function getLastUpdateText(lastUpdate: number): string {
-                if (SubscriptionManager.updateInProgress) return "In progress . . .";
-                else if (lastUpdate === 0) return "Never";
-                else return Util.timeAgo(lastUpdate);
-            }
-
-            /** Formats the next update timestamp into a readable date */
-            function getNextUpdateText(lastUpdate: number, updateInterval: number): string {
-                const now = Util.getTime();
-
-                if (SubscriptionManager.updateInProgress) return "In progress . . .";
-                else if (lastUpdate === 0) return Util.timeAgo(now + updateInterval);
-                else if ((lastUpdate + updateInterval) < now) return "Less than a minute";
-                else return Util.timeAgo(lastUpdate + updateInterval + (60 * 1000));
-            }
-        });
-
-        SubscriptionManager.trigger("update");
-
-        setInterval(async () => { // Update the timers every minute
+        // Clear the notifications if the user opened the tab
+        this.modal.getElement().on("dialogopen.onUpdate", () => {
             if (SubscriptionManager.updateInProgress) return;
 
-            SubscriptionManager.trigger(
-                "update",
-                await this.getShouldUpdate()
-            );
-        }, 60 * 1000);
-    }
+            if (!this.notificationsAlreadyOpened) {
+                this.notificationsAlreadyOpened = true;
 
-    /**
-     * Adds a subscriber to the list of them and creates a tab for it.
-     * @param instance subscriber to be queued for update check
-     */
-    public static register(moduleList: any | any[]): void {
-        if (!Array.isArray(moduleList)) moduleList = [moduleList];
-
-        const subscriptions = (this.getInstance() as SubscriptionManager).subscriptions;
-        moduleList.forEach(async (moduleClass: any) => {
-            subscriptions.set(
-                moduleClass.prototype.constructor.name,
-                { instance: ModuleController.get<Subscription>(moduleClass) }
-            );
+                let index = 0;
+                for (const sub of this.trackers) {
+                    if (parseInt(sub[1].tabElement.attr("data-updates")) > 0) {
+                        this.tabs.get().tabs("option", "active", index);
+                        break;
+                    }
+                    index++;
+                }
+            }
+            this.clearTabNotification(this.tabs.get().tabs("option", "active"));
+            window.setTimeout(() => {
+                this.clearTabNotification(this.tabs.get().tabs("option", "active"));
+            }, 1000);
         });
-    }
 
-    /**
-     * Returns the SubscriptionElement corresponding to the provided ID.  
-     * The ID can be either the subscription name as a string, or its numeric tab ID
-     * @param id Subscription ID
-     */
-    public getSubscription(id: string | number): SubscriptionElement {
-        if (typeof id === "string") return this.subscriptions.get(id);
-        for (const value of this.subscriptions.values())
-            if (value.tabIndex === id) { return value; }
-        return undefined;
-    }
+        this.tabs.get().on("tabsactivate.onUpdate", (event, tabProperties) => {
+            if (SubscriptionManager.updateInProgress) return;
+            this.clearTabNotification(tabProperties.newTab.index());
+        });
 
-    /**
-     * Checks if the subscriptions should be updated
-     * @param lastUpdate Timestamp of the previous update
-     */
-    private async getShouldUpdate(): Promise<boolean> {
-        const time = await this.fetchSettings(["lastUpdate", "updateStarted", "now", "updateInterval"], true);
+        /** == Initialization == */
+        SubscriptionManager.trigger("timerRefresh");
+        this.updateRequired().then((updateRequired) => {
+            if (updateRequired) this.executeUpdateEvent();
+            else this.trackers.forEach((trackerData) => { this.executeReloadEvent(trackerData); });
+        })
 
-        // "now" setting is used for debugging purposes only
-        if (time.now === undefined) time.now = Util.getTime();
+        setInterval(async () => {
+            if (SubscriptionManager.updateInProgress) return;
 
-        return Promise.resolve(
-            !SubscriptionManager.updateInProgress                                                                   // Update process isn't running already
-            && (time.now - time.lastUpdate) >= time.updateInterval                                                  // Update interval passed
-            && (time.updateStarted === 0 || time.now - time.updateStarted >= SubscriptionManager.updateTimeout)     // Previous update completed or failed
-        );
+            if (await this.updateRequired()) SubscriptionManager.trigger("update");
+            else SubscriptionManager.trigger("timerRefresh");
+        }, TIME_PERIOD.MINUTE);
     }
 
     /**
      * Builds a subscription settings page, containing various controls
      */
-    private getInfoPage(): Form {
+    private buildInfoPage(): Form {
         return new Form({ id: "subscriptions-controls", columns: 2, parent: "div#modal-container" }, [
             // List and manage active subscriptions
             Form.header("Subscriptions"),
-            makeSubSection(this.getSubscription("PoolSubscriptions").instance, 1),
-            makeSubSection(this.getSubscription("ForumSubscriptions").instance, 1),
-            makeSubSection(this.getSubscription("TagSubscriptions").instance, 2),
-            makeSubSection(this.getSubscription("CommentSubscriptions").instance, 2),
+            makeSubSection(this.getTracker("TagTracker").instance, 2),
+            makeSubSection(this.getTracker("PoolTracker").instance, 1),
+            makeSubSection(this.getTracker("ForumTracker").instance, 1),
+            makeSubSection(this.getTracker("CommentTracker").instance, 2),
             Form.hr(),
 
             // Settings
@@ -322,7 +257,7 @@ export class SubscriptionManager extends RE6Module {
                     "mid",
                     async (event, data) => {
                         await this.pushSettings("updateInterval", parseInt(data) * TIME_PERIOD.HOUR);
-                        SubscriptionManager.trigger("refresh");
+                        SubscriptionManager.trigger("timerRefresh");
                     }
                 ),
                 Form.div(`<div class="unmargin">How often should the subscriptions be checked for updates.</div>`, "mid"),
@@ -340,7 +275,7 @@ export class SubscriptionManager extends RE6Module {
                     "mid",
                     async (event, data) => {
                         await this.pushSettings("cacheMaxAge", parseInt(data) * TIME_PERIOD.WEEK);
-                        SubscriptionManager.trigger("refresh");
+                        SubscriptionManager.trigger("timerRefresh");
                     }
                 ),
                 Form.div(`<div class="unmargin">Updates older than this are removed automatically</div>`, "mid"),
@@ -365,7 +300,7 @@ export class SubscriptionManager extends RE6Module {
                 ),
                 Form.button(
                     "clear-cache", "Clear Cache", undefined, "column", () => {
-                        this.subscriptions.forEach(async (subscription) => {
+                        this.trackers.forEach(async (subscription) => {
                             await subscription.instance.getCache().clear();
                             subscription.content[0].innerHTML = "";
                         });
@@ -375,9 +310,9 @@ export class SubscriptionManager extends RE6Module {
         ]);
 
         /** Creates a form section that lists currently subscribed items */
-        function makeSubSection(instance: Subscription, columns: number): FormElement {
+        function makeSubSection(instance: SubscriptionTracker, columns: number): FormElement {
             const $subsSection = $("<div>").addClass("subscriptions-manage-list col-" + columns),
-                data = instance.fetchSettings<SubscriptionSettings>("data");
+                data = instance.fetchSettings<Subscription>("data");
             Object.keys(data).forEach((key) => {
                 formatSubSectionEntry(instance, key, data[key]).appendTo($subsSection);
             });
@@ -388,7 +323,7 @@ export class SubscriptionManager extends RE6Module {
         }
 
         /** Creates and returns an entry for the `makeSubSection()` method */
-        function formatSubSectionEntry(instance: Subscription, key: string, entry: SubscriptionSettingsData): JQuery<HTMLElement> {
+        function formatSubSectionEntry(instance: SubscriptionTracker, key: string, entry: SubscriptionData): JQuery<HTMLElement> {
             const output = $("<item>");
 
             // Subscribe / Unsubscribe Buttons
@@ -400,7 +335,7 @@ export class SubscriptionManager extends RE6Module {
                 .addClass("sub-manage-unsub")
                 .on("click", async (event): Promise<void> => {
                     event.preventDefault();
-                    const subData = await instance.fetchSettings<SubscriptionSettings>("data", true);
+                    const subData = await instance.fetchSettings<Subscription>("data", true);
                     if (currentlySubbed) {
                         delete subData[key];
                         Danbooru.notice("Successfully unsubscribed");
@@ -426,16 +361,126 @@ export class SubscriptionManager extends RE6Module {
         }
     }
 
+    /**
+     * Checks if the trackers need to update the cache
+     * @returns true if an update is needed, false otherwise
+     */
+    private async updateRequired(): Promise<boolean> {
+        const time = await this.fetchSettings(["lastUpdate", "updateStarted", "now", "updateInterval"], true);
+        if (time.now === undefined) time.now = Util.getTime();  // "now" setting is used for debugging purposes only
+
+        return Promise.resolve(
+            !SubscriptionManager.updateInProgress                                                                   // Update process isn't running already
+            && (time.now - time.lastUpdate) >= time.updateInterval                                                  // Update interval passed
+            && (time.updateStarted === 0 || time.now - time.updateStarted >= SubscriptionManager.updateTimeout)     // Previous update completed or failed
+        );
+    }
+
+    /** Loads new subscription data into tracker cache */
+    private async executeUpdateEvent(): Promise<void> {
+        SubscriptionManager.updateInProgress = true;
+        const now = Util.getTime(),
+            prevUpdate = await this.fetchSettings("lastUpdate", true);
+        this.pushSettings("lastUpdate", now);
+        this.pushSettings("updateStarted", now);
+        SubscriptionManager.trigger("timerRefresh");
+
+        this.$openSubsButton.attr({
+            "data-loading": "true",
+            "data-updates": "0",
+        });
+
+        this.trackers.forEach(async (trackerData) => {
+            Debug.log("SubM: redrawing [update]");
+            trackerData.tabElement.attr("data-updates", "0");
+            trackerData.tabElement.attr("data-loading", "true");
+            trackerData.content[0].innerHTML = "";
+            const status = $("<div>")
+                .addClass("subscription-load-status")
+                .html("Loading . . .")
+                .appendTo(trackerData.content);
+
+            await trackerData.instance.getCache().update(prevUpdate, status);
+            trackerData.tabElement.attr("data-loading", "false");
+            this.executeReloadEvent(trackerData);
+        });
+
+        SubscriptionManager.updateInProgress = false;
+        this.pushSettings("updateStarted", 0);
+        SubscriptionManager.trigger("timerRefresh");
+
+        this.$openSubsButton.attr("data-loading", "false");
+        this.refreshHeaderNotifications();
+
+        if (this.modal.isOpen()) {
+            const activeTab = this.tabs.get().tabs("option", "active");
+            window.setTimeout(() => { this.clearTabNotification(activeTab); }, 1000);
+        }
+    }
+
+    /** Reloads the entries on the tracker's tab */
+    private async executeReloadEvent(trackerData: TrackerData): Promise<void> {
+        const cache = trackerData.instance.getCache();
+        await cache.load();
+        Debug.log(`SubM${trackerData.tabIndex}: drawing ${cache.getSize()} items`);
+
+        trackerData.content[0].innerHTML = "";
+
+        if (cache.getSize() > 0)    // Can be appended anywhere, sorting is done through CSS
+            trackerData.content.append(this.createCacheDivider());
+
+        const clickAction = ModuleController.get(ThumbnailEnhancer).fetchSettings("clickAction");
+
+        cache.forEach((content, timestamp) => {
+            trackerData.content.append(this.createUpdateEntry(timestamp, content, trackerData, clickAction));
+        });
+
+        this.refreshTabNotifications(trackerData);
+
+        if (this.modal.isOpen()) {
+            const activeTab = this.tabs.get().tabs("option", "active");
+            window.setTimeout(() => { this.clearTabNotification(activeTab); }, 1000);
+        }
+    }
+
+    /** Reloads the timers on the info page */
+    private executeTimerRefreshEvent(): void {
+        this.refreshSettings();
+        const time = this.fetchSettings(["lastUpdate", "updateInterval"]);
+
+        $("span#subscriptions-lastupdate").html(getLastUpdateText(time.lastUpdate));
+        $("span#subscriptions-nextupdate").html(getNextUpdateText(time.lastUpdate, time.updateInterval));
+
+        $("i#subscription-action-update").toggleClass("fa-spin", SubscriptionManager.updateInProgress);
+
+        /** Formats the last update timestamp into a readable date */
+        function getLastUpdateText(lastUpdate: number): string {
+            if (SubscriptionManager.updateInProgress) return "In progress . . .";
+            else if (lastUpdate === 0) return "Never";
+            else return Util.timeAgo(lastUpdate);
+        }
+
+        /** Formats the next update timestamp into a readable date */
+        function getNextUpdateText(lastUpdate: number, updateInterval: number): string {
+            const now = Util.getTime();
+
+            if (SubscriptionManager.updateInProgress) return "In progress . . .";
+            else if (lastUpdate === 0) return Util.timeAgo(now + updateInterval);
+            else if ((lastUpdate + updateInterval) < now) return "Less than a minute";
+            else return Util.timeAgo(lastUpdate + updateInterval + (60 * 1000));
+        }
+    }
+
     private refreshHeaderNotifications(): number {
         let totalCount = 0;
-        this.subscriptions.forEach((subscription) => {
+        this.trackers.forEach((subscription) => {
             totalCount += parseInt(subscription.tabElement.attr("data-updates"));
         });
         this.$openSubsButton.attr("data-updates", totalCount);
         return totalCount;
     }
 
-    private refreshTabNotifications(subscription: SubscriptionElement): number {
+    private refreshTabNotifications(subscription: TrackerData): number {
         const curCount = subscription.content.find(".new").length;
         subscription.content.attr("data-updates", curCount);
         subscription.tabElement.attr("data-updates", curCount);
@@ -444,7 +489,7 @@ export class SubscriptionManager extends RE6Module {
 
     /** Clears the notifications for the specified tab */
     private async clearTabNotification(tabIndex: number): Promise<boolean> {
-        const subscription = this.getSubscription(tabIndex);
+        const subscription = this.getTracker(tabIndex);
         if (subscription === undefined) return;
 
         // Clear the `new` class that is counted by `refreshNotifications()`
@@ -471,52 +516,11 @@ export class SubscriptionManager extends RE6Module {
     }
 
     /**
-     * Processes the passed subscription
-     * @param sub Subscription to process
-     * @param shouldUpdate True if entries need to be loaded, false otherwise
-     * @param lastUpdate Last update timestamp
-     */
-    public async initSubscription(sub: SubscriptionElement, shouldUpdate: boolean, lastUpdate: number): Promise<boolean> {
-        this.addSubscribeButtons(sub.instance);
-
-        const cache = sub.instance.getCache();
-
-        // Cache is considered invalid if either it has been updated in another tab, or this is the initial load.
-        const cacheRefreshed = await cache.isOutdated();
-        if (cacheRefreshed) cache.load();
-
-        if (shouldUpdate) {
-            // console.log("redrawing because update");
-            sub.tabElement.attr("data-loading", "true");
-            sub.content[0].innerHTML = "";
-            const status = $("<div>")
-                .addClass("subscription-load-status")
-                .html("Loading . . .")
-                .appendTo(sub.content);
-
-            let updates: UpdateData = {};
-            if (shouldUpdate) updates = await sub.instance.getUpdatedEntries(lastUpdate, status);
-
-            await this.addUpdateEntries(sub, updates);
-
-            sub.tabElement.attr("data-loading", "false");
-            this.refreshTabNotifications(sub);
-        } else if (SubscriptionManager.firstRun || cacheRefreshed) {
-            // console.log("redrawing because refresh");
-            sub.content[0].innerHTML = "";
-            await this.addUpdateEntries(sub, {});
-            this.refreshTabNotifications(sub);
-        }
-
-        return Promise.resolve(true);
-    }
-
-    /**
      * Adds the subscribe / unsubscribe buttons for the provided subscription
      * @param instance Subscription instance
      */
-    public addSubscribeButtons(instance: Subscription): void {
-        let subscriptionData: SubscriptionSettings = instance.fetchSettings("data");
+    public addSubscribeButtons(instance: SubscriptionTracker): void {
+        let subscriptionData: Subscription = instance.fetchSettings("data");
 
         const elements = instance.getButtonAttachment().get();
         for (const element of elements) {
@@ -581,32 +585,60 @@ export class SubscriptionManager extends RE6Module {
     }
 
     /**
-     * Adds the passed updates to the tab of the subscription module
-     * @param sub Subscription module
-     * @param updates Updates to process
+     * Creates a divider between cached items and the ones added by an update.  
+     * Should be inserted at the very beginning of the stack, actual sorting is done by CSS
      */
-    public async addUpdateEntries(sub: SubscriptionElement, updates: UpdateData): Promise<number> {
-        const cache = sub.instance.getCache();
+    private createCacheDivider(): JQuery<HTMLElement> {
+        const $content = $("<div>")
+            .addClass("subscription-update notice notice-cached");
 
-        if (Object.keys(updates).length > 0) {
-            cache.push(updates);
-            await cache.save();
-        }
+        $("<div>")
+            .addClass("subscription-update-title")
+            .html("Older Updates")
+            .appendTo($content);
 
-        // console.log("drawing " + cache.getSize() + " cached items");
+        return $content;
+    }
 
-        sub.content[0].innerHTML = "";  // Clear the update statuses as late as possible
-        if (cache.getSize() > 0) sub.content.append(this.createCacheDivider());
+    /**
+     * Creates a subscription update element based on the provided data and the subscription's definition
+     * // TODO Fix this
+     * @param timeStamp Time when the update was created
+     * @param data Update data
+     * @param actions Subscription definition
+     * @param customClass Custom class to add to the element
+     */
+    private createUpdateEntry(timestamp: number, data: UpdateContent, subscription: TrackerData, clickAction: ThumbnailClickAction): JQuery<HTMLElement> {
+        const actions = subscription.instance.updateActions,
+            cache = subscription.instance.getCache();
 
-        cache.getIndex().forEach((timestamp) => {
-            sub.content.append(this.createUpdateEntry(timestamp, sub));
-        });
+        const $content = $("<div>").addClass("subscription-update" + (data.new ? " new" : ""));
+        const timeAgo = Util.timeAgo(timestamp);
+        const timeString = new Date(timestamp).toLocaleString();
 
-        const clickAction = ModuleController.get(ThumbnailEnhancer).fetchSettings("clickAction");
+        // ===== Create Elements =====
+        // Image
+        const $imageDiv = $("<div>")
+            .addClass("subscription-update-preview")
+            .appendTo($content);
 
-        const previewThumbs = sub.content.find<HTMLElement>("div.subscription-update-preview > a").get();
-        for (const element of previewThumbs) {
-            const $link = $(element);
+        const $image = $("<img>")
+            .attr({
+                "src": DomUtilities.getPlaceholderImage(),
+                "data-src": actions.imageSrc(data),
+                "title": actions.updateText(data) + "\n" + timeAgo + "\n" + timeString
+            })
+            .addClass("lazyload")
+            .on("error", () => { if (actions.imageRemoveOnError) $content.remove(); });
+
+        if (actions.imageHref === undefined) $image.appendTo($imageDiv);
+        else {
+            const $link = $("<a>")
+                .addClass("subscription-update-thumbnail")
+                .attr("href", actions.imageHref(data))
+                .appendTo($imageDiv)
+                .append($image);
+
             let dbclickTimer: number;
             let prevent = false;
 
@@ -635,65 +667,6 @@ export class SubscriptionManager extends RE6Module {
                 }
             });
         }
-
-        return Promise.resolve(cache.getIndex()[0]);
-    }
-
-    /**
-     * Creates a divider between cached items and the ones added by an update.  
-     * Should be inserted at the very beginning of the stack, actual sorting is done by CSS
-     */
-    private createCacheDivider(): JQuery<HTMLElement> {
-        const $content = $("<div>")
-            .addClass("subscription-update notice notice-cached");
-
-        $("<div>")
-            .addClass("subscription-update-title")
-            .html("Older Updates")
-            .appendTo($content);
-
-        return $content;
-    }
-
-    /**
-     * Creates a subscription update element based on the provided data and the subscription's definition
-     * @param timeStamp Time when the update was created
-     * @param data Update data
-     * @param actions Subscription definition
-     * @param customClass Custom class to add to the element
-     */
-    private createUpdateEntry(timestamp: number, subscription: SubscriptionElement, customClass?: string): JQuery<HTMLElement> {
-        const actions = subscription.instance.updateActions,
-            cache = subscription.instance.getCache(),
-            data = cache.getItem(timestamp);
-
-        const $content = $("<div>")
-            .addClass("subscription-update" + (customClass ? " " + customClass : "") + (data.new ? " new" : ""));
-        const timeAgo = Util.timeAgo(timestamp);
-        const timeString = new Date(timestamp).toLocaleString();
-
-        // ===== Create Elements =====
-        // Image
-        const $imageDiv = $("<div>")
-            .addClass("subscription-update-preview")
-            .appendTo($content);
-
-        const $image = $("<img>")
-            .attr({
-                "src": DomUtilities.getPlaceholderImage(),
-                "data-src": actions.imageSrc(data),
-                "title": actions.updateText(data) + "\n" + timeAgo + "\n" + timeString
-            })
-            .addClass("lazyload")
-            .on("error", () => { if (actions.imageRemoveOnError) $content.remove(); });
-
-        if (actions.imageHref === undefined) $image.appendTo($imageDiv);
-        else
-            $("<a>")
-                .addClass("subscription-update-thumbnail")
-                .attr("href", actions.imageHref(data))
-                .appendTo($imageDiv)
-                .append($image);
 
         // Title
         const $title = $("<div>")
@@ -780,19 +753,19 @@ export class SubscriptionManager extends RE6Module {
 
 }
 
-export interface SubscriptionSettings {
-    [id: string]: SubscriptionSettingsData;
+export interface Subscription {
+    [id: string]: SubscriptionData;
 }
 
-interface SubscriptionSettingsData {
+interface SubscriptionData {
     md5?: string;
     lastId?: number;
     name?: string;
 }
 
-interface SubscriptionElement {
-    /** Subscription instance */
-    instance: Subscription;
+interface TrackerData {
+    /** Tracker instance */
+    instance: SubscriptionTracker;
 
     /** Tab selection element */
     tabElement?: JQuery<HTMLElement>;

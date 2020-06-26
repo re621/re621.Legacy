@@ -28,11 +28,11 @@ import { InfiniteScroll } from "./modules/search/InfiniteScroll";
 import { InstantSearch } from "./modules/search/InstantSearch";
 import { PostSuggester } from "./modules/search/PostSuggester";
 import { ThumbnailEnhancer } from "./modules/search/ThumbnailsEnhancer";
-import { CommentSubscriptions } from "./modules/subscriptions/CommentSubscriptions";
-import { ForumSubscriptions } from "./modules/subscriptions/ForumSubscriptions";
-import { PoolSubscriptions } from "./modules/subscriptions/PoolSubscriptions";
+import { CommentTracker } from "./modules/subscriptions/CommentTracker";
+import { ForumTracker } from "./modules/subscriptions/ForumTracker";
+import { PoolTracker } from "./modules/subscriptions/PoolTracker";
 import { SubscriptionManager } from "./modules/subscriptions/SubscriptionManager";
-import { TagSubscriptions } from "./modules/subscriptions/TagSubscriptions";
+import { TagTracker } from "./modules/subscriptions/TagTracker";
 
 
 const loadOrder = [
@@ -66,15 +66,15 @@ const loadOrder = [
 ];
 
 const subscriptions = [
-    TagSubscriptions,
-    PoolSubscriptions,
-    ForumSubscriptions,
-    CommentSubscriptions,
+    TagTracker,
+    PoolTracker,
+    ForumTracker,
+    CommentTracker,
 ];
 
 DomUtilities.createStructure().then(async () => {
 
-    Debug.init();
+    await Debug.init();
     // ErrorHandler.report();
 
     // This code is pretty fragile. It's also what makes the rest of the project work.

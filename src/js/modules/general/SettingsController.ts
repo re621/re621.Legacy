@@ -23,8 +23,8 @@ import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
 import { CustomFlagger, FlagDefinition } from "../search/CustomFlagger";
 import { InfiniteScroll } from "../search/InfiniteScroll";
 import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } from "../search/ThumbnailsEnhancer";
-import { ForumSubscriptions } from "../subscriptions/ForumSubscriptions";
-import { PoolSubscriptions } from "../subscriptions/PoolSubscriptions";
+import { ForumTracker } from "../subscriptions/ForumTracker";
+import { PoolTracker } from "../subscriptions/PoolTracker";
 import { SubscriptionManager } from "../subscriptions/SubscriptionManager";
 import { HeaderCustomizer } from "./HeaderCustomizer";
 import { Miscellaneous } from "./Miscellaneous";
@@ -916,7 +916,7 @@ export class SettingsController extends RE6Module {
             /** Import the pool data from string */
             async function importPoolData(settings: string, $info: JQuery<HTMLElement>): Promise<void> {
                 $info.html("Processing pools . . .");
-                const poolSubs = PoolSubscriptions.getInstance(),
+                const poolSubs = PoolTracker.getInstance(),
                     poolData = poolSubs.fetchSettings("data");
                 for (const entry of settings) {
                     poolData[entry["id"]] = {
@@ -930,7 +930,7 @@ export class SettingsController extends RE6Module {
             /** Import the forum data from string */
             async function importForumData(settings: string, $info: JQuery<HTMLElement>): Promise<void> {
                 $info.html("Processing forums . . .");
-                const forumSubs = ForumSubscriptions.getInstance(),
+                const forumSubs = ForumTracker.getInstance(),
                     forumData = forumSubs.fetchSettings("data"),
                     postIDs = [];
                 for (const entry of settings) {
