@@ -10,6 +10,7 @@ export class RE6Module {
 
     private static instance: RE6Module;
 
+    private settingsTag: string;
     private settings: Settings;
 
     private enabled: boolean;
@@ -18,10 +19,13 @@ export class RE6Module {
     private constraint: RegExp[] = [];
     private hotkeys: Hotkey[] = [];
 
-    public constructor(constraint?: RegExp | RegExp[]) {
+    public constructor(constraint?: RegExp | RegExp[], settingsTag?: string) {
         if (constraint === undefined) this.constraint = [];
         else if (constraint instanceof RegExp) this.constraint.push(constraint);
         else this.constraint = constraint;
+
+        if (settingsTag) this.settingsTag = settingsTag;
+        else this.settingsTag = this.constructor.name;
     }
 
     public async prepare(): Promise<void> {
@@ -37,6 +41,11 @@ export class RE6Module {
     /** Checks if the module should call the init function */
     public canInitialize(): boolean {
         return !this.initialized && this.pageMatchesFilter() && this.enabled;
+    }
+
+    /** Returns the settings tag for this module */
+    public getSettingsTag(): string {
+        return this.settingsTag;
     }
 
     /**
@@ -156,7 +165,7 @@ export class RE6Module {
      * @returns True if the settings were cleared successfully, false otherwise
      */
     public async clearSettings(): Promise<boolean> {
-        return XM.Storage.deleteValue("re621." + this.constructor.name).then(() => {
+        return XM.Storage.deleteValue("re621." + this.settingsTag).then(() => {
             return this.loadSettingsCache();
         });
     }
@@ -188,7 +197,7 @@ export class RE6Module {
      */
     private async loadSettingsValues(): Promise<any> {
         const defaultValues = this.getDefaultSettings(),
-            result = await XM.Storage.getValue("re621." + this.constructor.name, defaultValues);
+            result = await XM.Storage.getValue("re621." + this.settingsTag, defaultValues);
 
         // If defaultValues has a entry the defaultSettings do not have, add it
         // this might happen if the user saved and a defaultSetting gets added afterwards
@@ -205,7 +214,7 @@ export class RE6Module {
      * @returns True if the settings were saved successfully, false otherwise
      */
     private async saveSettingsCache(): Promise<boolean> {
-        return XM.Storage.setValue("re621." + this.constructor.name, this.settings);
+        return XM.Storage.setValue("re621." + this.settingsTag, this.settings);
     }
 
     /**
@@ -223,8 +232,8 @@ export class RE6Module {
      */
     public async getSavedSettings(): Promise<{ name: string; data: any }> {
         return {
-            name: "re621." + this.constructor.name,
-            data: await XM.Storage.getValue("re621." + this.constructor.name, {})
+            name: "re621." + this.settingsTag,
+            data: await XM.Storage.getValue("re621." + this.settingsTag, {})
         };
     }
 
