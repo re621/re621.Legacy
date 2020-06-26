@@ -153,7 +153,7 @@ export class PoolDownloader extends RE6Module {
 
             for (let i = 1; i <= resultPages; i++) {
                 dataQueue.push(new Promise(async (resolve) => {
-                    const result = await E621.Posts.get<APIPost>({ tags: "pool:" + pool.id, page: i, limit: 320 }, 500);
+                    const result = await E621.Posts.get<APIPost>({ tags: (Page.matches(PageDefintion.pool) ? "pool:" : "set:") + pool.id, page: i, limit: 320 }, 500);
                     this.infoFile.html(" &nbsp; &nbsp;request " + (i + 1) + " / " + resultPages);
                     resolve(result);
                 }));
