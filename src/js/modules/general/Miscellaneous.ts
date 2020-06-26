@@ -4,6 +4,7 @@ import { XM } from "../../components/api/XM";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { DomUtilities } from "../../components/structure/DomUtilities";
 import { ThumbnailClickAction, ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
 
 /**
@@ -106,6 +107,13 @@ export class Miscellaneous extends RE6Module {
         if (Page.matches(PageDefintion.settings)) {
             this.modifyBlacklistForm();
         }
+
+        DomUtilities.addSettingsButton({
+            id: "header-button-dmail",
+            name: `<i class="fas fa-envelope"></i>`,
+            href: "/dmails",
+            title: "DMail",
+        });
     }
 
     /** Emulates the clicking on "New Comment" link */
