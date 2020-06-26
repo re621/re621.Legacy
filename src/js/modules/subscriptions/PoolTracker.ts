@@ -50,6 +50,10 @@ export class PoolTracker extends RE6Module implements SubscriptionTracker {
         return "Pools";
     }
 
+    public containsBlacklisted(): boolean {
+        return false;
+    }
+
     // ===== Buttons =====
 
     public makeSubscribeButton(): JQuery<HTMLElement> {

@@ -102,6 +102,10 @@ export class PostFilter {
         return this.enabled && this.matchesIds.has(post.getId());
     }
 
+    public matchesID(id: number, ignoreEnabled = false): boolean {
+        return (this.enabled || ignoreEnabled) && this.matchesIds.has(id);
+    }
+
     public compareNumbers(a: number, b: number, mode: Comparable): boolean {
         switch (mode) {
             case Comparable.Equals:

@@ -46,6 +46,10 @@ export class ForumTracker extends RE6Module implements SubscriptionTracker {
         return "Forums";
     }
 
+    public containsBlacklisted(): boolean {
+        return false;
+    }
+
     // ===== Buttons =====
 
     public makeSubscribeButton(): JQuery<HTMLElement> {

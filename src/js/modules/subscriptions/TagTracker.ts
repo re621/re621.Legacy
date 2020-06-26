@@ -46,6 +46,10 @@ export class TagTracker extends RE6Module implements SubscriptionTracker {
         return "Tags";
     }
 
+    public containsBlacklisted(): boolean {
+        return true;
+    }
+
     // ===== Buttons =====
 
     public makeSubscribeButton(): JQuery<HTMLElement> {

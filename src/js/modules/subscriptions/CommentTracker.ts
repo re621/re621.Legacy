@@ -52,6 +52,10 @@ export class CommentTracker extends RE6Module implements SubscriptionTracker {
         return "Comments";
     }
 
+    public containsBlacklisted(): boolean {
+        return false;
+    }
+
     // ===== Buttons =====
 
     public makeSubscribeButton(): JQuery<HTMLElement> {

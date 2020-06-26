@@ -18,6 +18,9 @@ export interface SubscriptionTracker extends RE6Module {
      */
     getName(): string;
 
+    /** Returns true if the tracker can contain blacklisted items, false otherwise */
+    containsBlacklisted(): boolean;
+
     // ===== Buttons =====
 
     /** Creates and returns a "subscribe" button */
