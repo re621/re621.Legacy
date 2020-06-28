@@ -298,7 +298,9 @@ export class ThumbnailEnhancer extends RE6Module {
                 // Stop keeping track of double clicks if the zoom is paused
                 (ThumbnailEnhancer.zoomPaused) ||
                 // Make sure the click does not get triggered on the voting buttons
-                ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton"))
+                ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton")) ||
+                // Only use double-click actions in the view mode
+                $("#mode-box-mode").val() !== "view"
             ) { return; }
 
             event.preventDefault();
@@ -317,7 +319,9 @@ export class ThumbnailEnhancer extends RE6Module {
                 // Stop keeping track of double clicks if the zoom is paused
                 (ThumbnailEnhancer.zoomPaused) ||
                 // Make sure the click does not get triggered on the voting buttons
-                ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton"))
+                ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton")) ||
+                // Only use double-click actions in the view mode
+                $("#mode-box-mode").val() !== "view"
             ) { return; }
 
             event.preventDefault();
