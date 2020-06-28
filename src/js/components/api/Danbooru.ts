@@ -49,6 +49,13 @@ export class Danbooru {
         }
     };
 
+    public static PostModeMenu = {
+        change(): void {
+            if (Danbooru.hasModules()) Danbooru.getModules()["PostModeMenu"].change();
+            else XM.Chrome.execInjectorRequest("Danbooru", "PostModeMenu", "change");
+        }
+    };
+
     public static Note: DanbooruNote = {
         Box: {
             scale_all(): void {

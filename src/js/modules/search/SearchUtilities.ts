@@ -1,3 +1,4 @@
+import { Danbooru } from "../../components/api/Danbooru";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
@@ -8,7 +9,22 @@ export class SearchUtilities extends RE6Module {
         this.registerHotkeys(
             { keys: "hotkeyFocusSearch", fnct: this.focusSearchbar },
             { keys: "hotkeyRandomPost", fnct: this.randomPost },
+
+            { keys: "hotkeySwitchModeView", fnct: this.switchModeView },
+            { keys: "hotkeySwitchModeEdit", fnct: this.switchModeEdit },
+            { keys: "hotkeySwitchModeAddFav", fnct: this.switchModeAddFav },
+            { keys: "hotkeySwitchModeRemFav", fnct: this.switchModeRemFav },
+            { keys: "hotkeySwitchModeAddSet", fnct: this.switchModeAddSet },
+            { keys: "hotkeySwitchModeRemSet", fnct: this.switchModeRemSet },
         );
+
+        $("select#mode-box-mode").on("change", () => {
+            console.log("trigger 1");
+        });
+
+        $("select#mode-box-mode").on("change.danbooru", () => {
+            console.log("trigger 2");
+        });
     }
 
     public getDefaultSettings(): Settings {
@@ -23,6 +39,13 @@ export class SearchUtilities extends RE6Module {
 
             hotkeyFocusSearch: "q",
             hotkeyRandomPost: "r",
+
+            hotkeySwitchModeView: "",
+            hotkeySwitchModeEdit: "",
+            hotkeySwitchModeAddFav: "",
+            hotkeySwitchModeRemFav: "",
+            hotkeySwitchModeAddSet: "",
+            hotkeySwitchModeRemSet: "",
         }
     }
 
@@ -112,6 +135,18 @@ export class SearchUtilities extends RE6Module {
     /** Switches the location over to a random post */
     private randomPost(): void {
         location.pathname = "/posts/random";
+    }
+
+    private switchModeView(): void { SearchUtilities.switchMode("view"); }
+    private switchModeEdit(): void { SearchUtilities.switchMode("edit"); }
+    private switchModeAddFav(): void { SearchUtilities.switchMode("add-fav"); }
+    private switchModeRemFav(): void { SearchUtilities.switchMode("remove-fav"); }
+    private switchModeAddSet(): void { SearchUtilities.switchMode("add-to-set"); }
+    private switchModeRemSet(): void { SearchUtilities.switchMode("remove-from-set"); }
+
+    private static switchMode(mode: string): void {
+        $("select#mode-box-mode").val(mode);
+        Danbooru.PostModeMenu.change();
     }
 
 }

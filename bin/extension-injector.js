@@ -20,6 +20,9 @@ const fn_Danbooru = {
     "Post": {
         "vote": (postid, scoreDifference, preventUnvote) => { Danbooru.Post.vote(postid, scoreDifference, preventUnvote); },
     },
+    "PostModeMenu": {
+        "change": () => { Danbooru.PostModeMenu.change(); }
+    },
     "Note.Box": {
         "scale_all": () => { Danbooru.Note.Box.scale_all(); },
     },

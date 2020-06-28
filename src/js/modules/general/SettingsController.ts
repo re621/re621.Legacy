@@ -723,9 +723,14 @@ export class SettingsController extends RE6Module {
             ...createInputs(postViewer, "Edit Notes", "hotkeyNewNote"),
             Form.hr(),
 
-            // Other
-            Form.header("Miscellaneous"),
-            ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
+            // Modes
+            Form.header("Search Modes"),
+            ...createInputs(searchUtilities, "View", "hotkeySwitchModeView"),
+            ...createInputs(searchUtilities, "Edit", "hotkeySwitchModeEdit"),
+            ...createInputs(searchUtilities, "Add Favorite", "hotkeySwitchModeAddFav"),
+            ...createInputs(searchUtilities, "Remove Favorite", "hotkeySwitchModeRemFav"),
+            ...createInputs(searchUtilities, "Add to Set", "hotkeySwitchModeAddSet"),
+            ...createInputs(searchUtilities, "Remove from Set", "hotkeySwitchModeRemSet"),
             Form.hr(),
 
             // Tabs
@@ -742,6 +747,11 @@ export class SettingsController extends RE6Module {
 
             ...createInputs(this, "Open Settings", "hotkeyOpenSettings"),
             ...createInputs(subscriptionManager, "Open Notifications", "hotkeyOpenNotifications"),
+
+            // Other
+            Form.header("Miscellaneous"),
+            ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
+            Form.hr(),
         ]);
     }
 
