@@ -720,11 +720,6 @@ export class SettingsController extends RE6Module {
             ...createInputs(postViewer, "Edit Notes", "hotkeyNewNote"),
             Form.hr(),
 
-            // Other
-            Form.header("Miscellaneous"),
-            ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
-            Form.hr(),
-
             // Tabs
             Form.header("Header Tabs"),
             ...createInputs(headerCustomizer, "Tab #1", "hotkeyTab1"),
@@ -739,6 +734,11 @@ export class SettingsController extends RE6Module {
 
             ...createInputs(this, "Open Settings", "hotkeyOpenSettings"),
             ...createInputs(subscriptionManager, "Open Notifications", "hotkeyOpenNotifications"),
+            Form.hr(),
+
+            // Other
+            Form.header("Miscellaneous"),
+            ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
         ]);
     }
 
