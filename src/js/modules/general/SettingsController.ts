@@ -22,6 +22,7 @@ import { TitleCustomizer } from "../post/TitleCustomizer";
 import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
 import { CustomFlagger, FlagDefinition } from "../search/CustomFlagger";
 import { InfiniteScroll } from "../search/InfiniteScroll";
+import { SearchUtilities } from "../search/SearchUtilities";
 import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } from "../search/ThumbnailsEnhancer";
 import { ForumTracker } from "../subscriptions/ForumTracker";
 import { PoolTracker } from "../subscriptions/PoolTracker";
@@ -153,7 +154,8 @@ export class SettingsController extends RE6Module {
             imageScaler = ModuleController.get(ImageScaler),
             infiniteScroll = ModuleController.get(InfiniteScroll),
             thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer),
-            headerCustomizer = ModuleController.get(HeaderCustomizer);
+            headerCustomizer = ModuleController.get(HeaderCustomizer),
+            searchUtilities = ModuleController.get(SearchUtilities);
 
         return new Form({ id: "settings-general", columns: 3, parent: "div#modal-container" }, [
 
@@ -209,16 +211,16 @@ export class SettingsController extends RE6Module {
                     ),
                 ]),
 
-                Form.checkbox("improve-tagcount", miscellaneous.fetchSettings("improveTagCount"), "Expanded Tag Count", "column",
+                Form.checkbox("improve-tagcount", searchUtilities.fetchSettings("improveTagCount"), "Expanded Tag Count", "column",
                     async (event, data) => {
-                        await miscellaneous.pushSettings("improveTagCount", data);
-                        miscellaneous.improveTagCount(data);
+                        await searchUtilities.pushSettings("improveTagCount", data);
+                        searchUtilities.improveTagCount(data);
                     }
                 ),
-                Form.checkbox("shorten-tagnames", miscellaneous.fetchSettings("shortenTagNames"), "Shorten Tag Names", "column",
+                Form.checkbox("shorten-tagnames", searchUtilities.fetchSettings("shortenTagNames"), "Shorten Tag Names", "column",
                     async (event, data) => {
-                        await miscellaneous.pushSettings("shortenTagNames", data);
-                        miscellaneous.shortenTagNames(data);
+                        await searchUtilities.pushSettings("shortenTagNames", data);
+                        searchUtilities.shortenTagNames(data);
                     }
                 ),
                 Form.spacer("column"),
@@ -404,8 +406,8 @@ export class SettingsController extends RE6Module {
                     async (event, data) => { await imageScaler.pushSettings("clickScale", data); }),
 
                 Form.checkbox(
-                    "collapse-tag-cats", miscellaneous.fetchSettings("collapseCategories"), "Collapse tag categories", "column",
-                    async (event, data) => { await miscellaneous.pushSettings("collapseCategories", data); }
+                    "collapse-tag-cats", searchUtilities.fetchSettings("collapseCategories"), "Collapse tag categories", "column",
+                    async (event, data) => { await searchUtilities.pushSettings("collapseCategories", data); }
                 ),
 
                 Form.checkbox(
@@ -661,7 +663,8 @@ export class SettingsController extends RE6Module {
             imageScaler = ModuleController.get(ImageScaler),
             miscellaneous = ModuleController.get(Miscellaneous),
             headerCustomizer = ModuleController.get(HeaderCustomizer),
-            subscriptionManager = ModuleController.get(SubscriptionManager);
+            subscriptionManager = ModuleController.get(SubscriptionManager),
+            searchUtilities = ModuleController.get(SearchUtilities);
 
         function createInputs(module: RE6Module, label: string, settingsKey: string): FormElement[] {
             const values = module.fetchSettings(settingsKey).split("|");
@@ -693,8 +696,8 @@ export class SettingsController extends RE6Module {
         return new Form({ "id": "settings-hotkeys", columns: 3, parent: "div#modal-container" }, [
             // Listing
             Form.header("Listing"),
-            ...createInputs(miscellaneous, "Search", "hotkeyFocusSearch"),
-            ...createInputs(miscellaneous, "Random Post", "hotkeyRandomPost"),
+            ...createInputs(searchUtilities, "Search", "hotkeyFocusSearch"),
+            ...createInputs(searchUtilities, "Random Post", "hotkeyRandomPost"),
             Form.hr(),
 
             // Posts

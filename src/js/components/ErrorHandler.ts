@@ -137,8 +137,34 @@ export class Patcher {
             Patcher.version = 1;
         }
 
-        Debug.log(`Patcher: ${counter} records changed`)
+        // Patch 2 - Version 1.3.7
+        // The "Miscellaneous" module was split apart into several more specialized modules
+        if (Patcher.version < 2) {
+            const miscSettings = await XM.Storage.getValue("re621.Miscellaneous", {}),
+                searchUtilities = await XM.Storage.getValue("re621.SearchUtilities", {});
 
+            for (const property of ["improveTagCount", "shortenTagNames", "collapseCategories", "hotkeyFocusSearch", "hotkeyRandomPost"]) {
+                if (miscSettings.hasOwnProperty(property)) {
+                    searchUtilities[property] = miscSettings[property];
+                    delete miscSettings[property];
+                    counter++;
+                }
+            }
+
+            for (const property of ["removeSearchQueryString", "categoryData"]) {
+                if (miscSettings.hasOwnProperty(property)) {
+                    delete miscSettings[property];
+                    counter++;
+                }
+            }
+
+            await XM.Storage.setValue("re621.Miscellaneous", miscSettings);
+            await XM.Storage.setValue("re621.SearchUtilities", searchUtilities);
+
+            Patcher.version = 2;
+        }
+
+        Debug.log(`Patcher: ${counter} records changed`)
         await XM.Storage.setValue("re621.patchVersion", Patcher.version);
     }
 

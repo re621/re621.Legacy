@@ -15,8 +15,6 @@ export class Miscellaneous extends RE6Module {
     public constructor() {
         super();
         this.registerHotkeys(
-            { keys: "hotkeyFocusSearch", fnct: this.focusSearchbar },
-            { keys: "hotkeyRandomPost", fnct: this.randomPost },
             { keys: "hotkeyNewComment", fnct: this.openNewComment },
             { keys: "hotkeyEditPost", fnct: this.openEditTab },
             { keys: "hotkeySubmit", fnct: this.handleSubmitForm, element: $("body"), selector: "textarea, input" },
@@ -30,23 +28,13 @@ export class Miscellaneous extends RE6Module {
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
-            hotkeyFocusSearch: "q",
-            hotkeyRandomPost: "r",
             hotkeyNewComment: "n",
             hotkeyEditPost: "e",
 
             hotkeySubmit: "alt+return",
 
-            removeSearchQueryString: true,
-
-            improveTagCount: true,
-            shortenTagNames: true,
-
             stickySearchbox: true,
             stickyHeader: false,
-
-            collapseCategories: true,
-            categoryData: [],
 
             avatarClick: true,
 
@@ -60,27 +48,6 @@ export class Miscellaneous extends RE6Module {
      */
     public create(): void {
         super.create();
-
-        // Remove the query string on posts
-        if (this.fetchSettings("removeSearchQueryString") === true && Page.matches(PageDefintion.post)) {
-            this.removeSearchQueryString();
-        }
-
-        // Replaces the tag count estimate with the real number
-        if (Page.matches([PageDefintion.search, PageDefintion.post])) {
-            this.improveTagCount(this.fetchSettings("improveTagCount"));
-            this.shortenTagNames(this.fetchSettings("shortenTagNames"));
-        }
-
-        // Restore the collapsed categories
-        if (this.fetchSettings("collapseCategories") === true && Page.matches(PageDefintion.post)) {
-            this.collapseTagCategories();
-        }
-
-        // Auto-focus on the searchbar
-        if (Page.matches(PageDefintion.search)) {
-            this.autoFocusSearchBar();
-        }
 
         // Enhanced quoting button
         if (Page.matches([PageDefintion.post, PageDefintion.forum])) {
@@ -132,57 +99,6 @@ export class Miscellaneous extends RE6Module {
     }
 
     /**
-     * Removes the search query from the address bar
-     */
-    private removeSearchQueryString(): void {
-        Page.removeQueryParameter("q");
-    }
-
-    /**
-     * Replaces the tag estimates with the real count
-     * @param state True to replace, false to restore
-     */
-    public async improveTagCount(state = true): Promise<void> {
-        const source = state ? "data-count" : "data-count-short";
-        $("span.re621-post-count").each(function (index, element) {
-            const tag = $(element);
-            tag.text(tag.attr(source));
-        });
-    }
-
-    /**
-     * Shortens the tag names to fit in one line
-     * @param state True to shorten, false to restore
-     */
-    public shortenTagNames(state = true): void {
-        $("section#tag-box, section#tag-list").attr("data-shorten-tagnames", state + "");
-    }
-
-    /**
-     * Records which tag categories the user has collapsed.
-     */
-    private async collapseTagCategories(): Promise<void> {
-        let storedCats: string[] = await this.fetchSettings("categoryData", true);
-        $("section#tag-list .tag-list-header").each((index, element) => {
-            const $header = $(element),
-                cat = $header.attr("data-category");
-            if (storedCats.indexOf(cat) !== -1) $header.get(0).click();
-
-            $header.on("click.danbooru", async () => {
-                storedCats = await this.fetchSettings("categoryData", true);
-                if ($header.hasClass("hidden-category")) {
-                    storedCats.push(cat);
-                } else {
-                    const index = storedCats.indexOf(cat);
-                    if (index !== -1) storedCats.splice(index, 1);
-                }
-                await this.pushSettings("categoryData", storedCats);
-            });
-        });
-
-    }
-
-    /**
      * Makes the searchbox stick to the page when scrolling down
      * @param state True to stick, false to unstick
      */
@@ -196,23 +112,6 @@ export class Miscellaneous extends RE6Module {
      */
     public createStickyHeader(state = true): void {
         $("body").attr("data-sticky-header", state + "");
-    }
-
-    /** If the searchbar is empty, focuses on it. */
-    private autoFocusSearchBar(): void {
-        const searchbox = $("section#search-box input");
-        if (searchbox.val() == "") searchbox.focus();
-    }
-
-    /** Sets the focus on the search bar */
-    private focusSearchbar(event): void {
-        event.preventDefault();
-        $("section#search-box input").focus();
-    }
-
-    /** Switches the location over to a random post */
-    private randomPost(): void {
-        location.pathname = "/posts/random";
     }
 
     /**
