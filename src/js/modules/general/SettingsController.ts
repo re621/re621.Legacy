@@ -3,7 +3,7 @@ import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { User } from "../../components/data/User";
-import { Debug } from "../../components/ErrorHandler";
+import { Debug, Patcher } from "../../components/ErrorHandler";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
@@ -22,6 +22,7 @@ import { TitleCustomizer } from "../post/TitleCustomizer";
 import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
 import { CustomFlagger, FlagDefinition } from "../search/CustomFlagger";
 import { InfiniteScroll } from "../search/InfiniteScroll";
+import { SearchUtilities } from "../search/SearchUtilities";
 import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } from "../search/ThumbnailsEnhancer";
 import { ForumTracker } from "../subscriptions/ForumTracker";
 import { PoolTracker } from "../subscriptions/PoolTracker";
@@ -153,7 +154,8 @@ export class SettingsController extends RE6Module {
             imageScaler = ModuleController.get(ImageScaler),
             infiniteScroll = ModuleController.get(InfiniteScroll),
             thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer),
-            headerCustomizer = ModuleController.get(HeaderCustomizer);
+            headerCustomizer = ModuleController.get(HeaderCustomizer),
+            searchUtilities = ModuleController.get(SearchUtilities);
 
         return new Form({ id: "settings-general", columns: 3, parent: "div#modal-container" }, [
 
@@ -209,16 +211,16 @@ export class SettingsController extends RE6Module {
                     ),
                 ]),
 
-                Form.checkbox("improve-tagcount", miscellaneous.fetchSettings("improveTagCount"), "Expanded Tag Count", "column",
+                Form.checkbox("improve-tagcount", searchUtilities.fetchSettings("improveTagCount"), "Expanded Tag Count", "column",
                     async (event, data) => {
-                        await miscellaneous.pushSettings("improveTagCount", data);
-                        miscellaneous.improveTagCount(data);
+                        await searchUtilities.pushSettings("improveTagCount", data);
+                        searchUtilities.improveTagCount(data);
                     }
                 ),
-                Form.checkbox("shorten-tagnames", miscellaneous.fetchSettings("shortenTagNames"), "Shorten Tag Names", "column",
+                Form.checkbox("shorten-tagnames", searchUtilities.fetchSettings("shortenTagNames"), "Shorten Tag Names", "column",
                     async (event, data) => {
-                        await miscellaneous.pushSettings("shortenTagNames", data);
-                        miscellaneous.shortenTagNames(data);
+                        await searchUtilities.pushSettings("shortenTagNames", data);
+                        searchUtilities.shortenTagNames(data);
                     }
                 ),
                 Form.spacer("column"),
@@ -404,8 +406,8 @@ export class SettingsController extends RE6Module {
                     async (event, data) => { await imageScaler.pushSettings("clickScale", data); }),
 
                 Form.checkbox(
-                    "collapse-tag-cats", miscellaneous.fetchSettings("collapseCategories"), "Collapse tag categories", "column",
-                    async (event, data) => { await miscellaneous.pushSettings("collapseCategories", data); }
+                    "collapse-tag-cats", searchUtilities.fetchSettings("collapseCategories"), "Collapse tag categories", "column",
+                    async (event, data) => { await searchUtilities.pushSettings("collapseCategories", data); }
                 ),
 
                 Form.checkbox(
@@ -661,7 +663,8 @@ export class SettingsController extends RE6Module {
             imageScaler = ModuleController.get(ImageScaler),
             miscellaneous = ModuleController.get(Miscellaneous),
             headerCustomizer = ModuleController.get(HeaderCustomizer),
-            subscriptionManager = ModuleController.get(SubscriptionManager);
+            subscriptionManager = ModuleController.get(SubscriptionManager),
+            searchUtilities = ModuleController.get(SearchUtilities);
 
         function createInputs(module: RE6Module, label: string, settingsKey: string): FormElement[] {
             const values = module.fetchSettings(settingsKey).split("|");
@@ -693,8 +696,8 @@ export class SettingsController extends RE6Module {
         return new Form({ "id": "settings-hotkeys", columns: 3, parent: "div#modal-container" }, [
             // Listing
             Form.header("Listing"),
-            ...createInputs(miscellaneous, "Search", "hotkeyFocusSearch"),
-            ...createInputs(miscellaneous, "Random Post", "hotkeyRandomPost"),
+            ...createInputs(searchUtilities, "Search", "hotkeyFocusSearch"),
+            ...createInputs(searchUtilities, "Random Post", "hotkeyRandomPost"),
             Form.hr(),
 
             // Posts
@@ -720,9 +723,14 @@ export class SettingsController extends RE6Module {
             ...createInputs(postViewer, "Edit Notes", "hotkeyNewNote"),
             Form.hr(),
 
-            // Other
-            Form.header("Miscellaneous"),
-            ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
+            // Modes
+            Form.header("Search Modes"),
+            ...createInputs(searchUtilities, "View", "hotkeySwitchModeView"),
+            ...createInputs(searchUtilities, "Edit", "hotkeySwitchModeEdit"),
+            ...createInputs(searchUtilities, "Add Favorite", "hotkeySwitchModeAddFav"),
+            ...createInputs(searchUtilities, "Remove Favorite", "hotkeySwitchModeRemFav"),
+            ...createInputs(searchUtilities, "Add to Set", "hotkeySwitchModeAddSet"),
+            ...createInputs(searchUtilities, "Remove from Set", "hotkeySwitchModeRemSet"),
             Form.hr(),
 
             // Tabs
@@ -739,6 +747,11 @@ export class SettingsController extends RE6Module {
 
             ...createInputs(this, "Open Settings", "hotkeyOpenSettings"),
             ...createInputs(subscriptionManager, "Open Notifications", "hotkeyOpenNotifications"),
+
+            // Other
+            Form.header("Miscellaneous"),
+            ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
+            Form.hr(),
         ]);
     }
 
@@ -966,32 +979,32 @@ export class SettingsController extends RE6Module {
         return new Form({ "id": "about-form", "columns": 3, parent: "div#modal-container" }, [
             // About
             Form.div(
-                `<h3 class="display-inline"><a href="` + window["re621"]["links"]["website"] + `">` + window["re621"]["name"] + ` v.` + window["re621"]["version"] + `</a></h3>` +
-                ` <span class="display-inline">build ` + window["re621"]["build"] + `</span>`,
+                `<h3 class="display-inline"><a href="${window["re621"]["links"]["website"]}">${window["re621"]["name"]} v.${window["re621"]["version"]}</a></h3>` +
+                ` <span class="display-inline">build ${window["re621"]["build"]}:${Patcher.version}</span>`,
                 "mid"
             ),
             Form.div(
-                `<span class="float-right" id="project-update-button" data-available="` + this.fetchSettings("newVersionAvailable") + `">
-                    <a href="` + window["re621"]["links"]["releases"] + `">Update Available</a>
+                `<span class="float-right" id="project-update-button" data-available="${this.fetchSettings("newVersionAvailable")}">
+                    <a href="${window["re621"]["links"]["releases"]}">Update Available</a>
                 </span>`,
                 "column"
             ),
             Form.div(
-                `<b>` + window["re621"]["name"] + `</b> is a comprehensive set of tools designed to enhance the website for both casual and power users. ` +
+                `<b>${window["re621"]["name"]}</b> is a comprehensive set of tools designed to enhance the website for both casual and power users. ` +
                 `It is created and maintained by unpaid volunteers, with the hope that it will be useful for the community.`
             ),
             Form.div(
                 `Keeping the script - and the website - fully functional is our highest priority. ` +
-                `If you are experiencing bugs or issues, do not hesitate to create a new ticket on <a href="` + window["re621"]["links"]["issues"] + `">github</a>, ` +
-                `or leave us a message in the <a href="` + window["re621"]["links"]["forum"] + `">forum thread</a>. ` +
+                `If you are experiencing bugs or issues, do not hesitate to create a new ticket on <a href="${window["re621"]["links"]["issues"]}">github</a>, ` +
+                `or leave us a message in the <a href="${window["re621"]["links"]["forum"]}">forum thread</a>. ` +
                 `Feature requests, comments, and overall feedback are also appreciated.`
             ),
             Form.div(`Thank you for downloading and using this script. We hope that you enjoy the experience.`),
             Form.spacer("full"),
 
             // Changelog
-            Form.header(`<a href="` + window["re621"]["links"]["releases"] + `" class="unmargin">What's new?</a>`),
-            Form.div(`<div id="changelog-list">` + Util.quickParseMarkdown(this.fetchSettings("changelog")) + `</div>`)
+            Form.header(`<a href="${window["re621"]["links"]["releases"]}" class="unmargin">What's new?</a>`),
+            Form.div(`<div id="changelog-list">${Util.quickParseMarkdown(this.fetchSettings("changelog"))}</div>`)
         ]);
     }
 

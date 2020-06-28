@@ -27,6 +27,7 @@ import { CustomFlagger } from "./modules/search/CustomFlagger";
 import { InfiniteScroll } from "./modules/search/InfiniteScroll";
 import { InstantSearch } from "./modules/search/InstantSearch";
 import { PostSuggester } from "./modules/search/PostSuggester";
+import { SearchUtilities } from "./modules/search/SearchUtilities";
 import { ThumbnailEnhancer } from "./modules/search/ThumbnailsEnhancer";
 import { CommentTracker } from "./modules/subscriptions/CommentTracker";
 import { ForumTracker } from "./modules/subscriptions/ForumTracker";
@@ -52,6 +53,7 @@ const loadOrder = [
     InstantSearch,
     ThumbnailEnhancer,
     PostSuggester,
+    SearchUtilities,
     Miscellaneous,
 
     TinyAlias,

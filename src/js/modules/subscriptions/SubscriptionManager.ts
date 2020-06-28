@@ -137,6 +137,7 @@ export class SubscriptionManager extends RE6Module {
             // If the stored setting is different from a hard-coded value,
             // the cache format must have changed and data must be cleared
             if (cacheInvalid) data.instance.getCache().clear();
+            else data.instance.getCache().load();
 
             // Create subscribe buttons
             this.addSubscribeButtons(data.instance);
@@ -400,7 +401,10 @@ export class SubscriptionManager extends RE6Module {
                 .html("Loading . . .")
                 .appendTo(trackerData.content);
 
-            await trackerData.instance.getCache().update(prevUpdate, status);
+            const cache = trackerData.instance.getCache();
+            await cache.load();
+            await cache.update(prevUpdate, status);
+
             trackerData.tabElement.attr("data-loading", "false");
             this.executeReloadEvent(trackerData);
         });
