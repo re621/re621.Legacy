@@ -3,7 +3,7 @@ import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { User } from "../../components/data/User";
-import { Debug } from "../../components/ErrorHandler";
+import { Debug, Patcher } from "../../components/ErrorHandler";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
@@ -966,32 +966,32 @@ export class SettingsController extends RE6Module {
         return new Form({ "id": "about-form", "columns": 3, parent: "div#modal-container" }, [
             // About
             Form.div(
-                `<h3 class="display-inline"><a href="` + window["re621"]["links"]["website"] + `">` + window["re621"]["name"] + ` v.` + window["re621"]["version"] + `</a></h3>` +
-                ` <span class="display-inline">build ` + window["re621"]["build"] + `</span>`,
+                `<h3 class="display-inline"><a href="${window["re621"]["links"]["website"]}">${window["re621"]["name"]} v.${window["re621"]["version"]}</a></h3>` +
+                ` <span class="display-inline">build ${window["re621"]["build"]}:${Patcher.version}</span>`,
                 "mid"
             ),
             Form.div(
-                `<span class="float-right" id="project-update-button" data-available="` + this.fetchSettings("newVersionAvailable") + `">
-                    <a href="` + window["re621"]["links"]["releases"] + `">Update Available</a>
+                `<span class="float-right" id="project-update-button" data-available="${this.fetchSettings("newVersionAvailable")}">
+                    <a href="${window["re621"]["links"]["releases"]}">Update Available</a>
                 </span>`,
                 "column"
             ),
             Form.div(
-                `<b>` + window["re621"]["name"] + `</b> is a comprehensive set of tools designed to enhance the website for both casual and power users. ` +
+                `<b>${window["re621"]["name"]}</b> is a comprehensive set of tools designed to enhance the website for both casual and power users. ` +
                 `It is created and maintained by unpaid volunteers, with the hope that it will be useful for the community.`
             ),
             Form.div(
                 `Keeping the script - and the website - fully functional is our highest priority. ` +
-                `If you are experiencing bugs or issues, do not hesitate to create a new ticket on <a href="` + window["re621"]["links"]["issues"] + `">github</a>, ` +
-                `or leave us a message in the <a href="` + window["re621"]["links"]["forum"] + `">forum thread</a>. ` +
+                `If you are experiencing bugs or issues, do not hesitate to create a new ticket on <a href="${window["re621"]["links"]["issues"]}">github</a>, ` +
+                `or leave us a message in the <a href="${window["re621"]["links"]["forum"]}">forum thread</a>. ` +
                 `Feature requests, comments, and overall feedback are also appreciated.`
             ),
             Form.div(`Thank you for downloading and using this script. We hope that you enjoy the experience.`),
             Form.spacer("full"),
 
             // Changelog
-            Form.header(`<a href="` + window["re621"]["links"]["releases"] + `" class="unmargin">What's new?</a>`),
-            Form.div(`<div id="changelog-list">` + Util.quickParseMarkdown(this.fetchSettings("changelog")) + `</div>`)
+            Form.header(`<a href="${window["re621"]["links"]["releases"]}" class="unmargin">What's new?</a>`),
+            Form.div(`<div id="changelog-list">${Util.quickParseMarkdown(this.fetchSettings("changelog"))}</div>`)
         ]);
     }
 
