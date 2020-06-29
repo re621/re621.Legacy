@@ -68,10 +68,10 @@ Promise.all(downloadQueue).then((resolved) => {
     fs.createReadStream("./build/style.css").pipe(fs.createWriteStream("./build/extension/src/style.min.css"));
 
     // Copy the background page
-    fs.createReadStream("./bin/extension-background.js").pipe(fs.createWriteStream("./build/extension/src/background.js"));
+    fs.createReadStream("./build/tsc-temp/chrome/background.js").pipe(fs.createWriteStream("./build/extension/src/background.js"));
 
     // Copy the injected code
-    fs.createReadStream("./bin/extension-injector.js").pipe(fs.createWriteStream("./build/extension/src/injector.js"));
+    fs.createReadStream("./build/tsc-temp/chrome/injector.js").pipe(fs.createWriteStream("./build/extension/src/injector.js"));
 
 
     // Write the manifest file

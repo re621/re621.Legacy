@@ -4,13 +4,15 @@
  * Must be called from XM.Chrome.execBackgroundRequest()
  */
 
+declare const chrome;
+
 /** Function index */
 const sRespFn = {
     "XM": {
         "Util": {
-            "openInTab": (path, active) => {
+            "openInTab": (path, active): Promise<boolean> => {
                 return new Promise((resolve) => {
-                    chrome.tabs.query({ active: true, windowType: "normal", currentWindow: true }, function(data) {
+                    chrome.tabs.query({ active: true, windowType: "normal", currentWindow: true }, function (data) {
                         chrome.tabs.create({
                             url: path,
                             active: active,
@@ -19,8 +21,8 @@ const sRespFn = {
                     })
                 });
             },
-            "setClipboard": (data) => {
-                var copyFrom = document.createElement("textarea");
+            "setClipboard": (data): void => {
+                const copyFrom = document.createElement("textarea");
                 copyFrom.textContent = data;
                 document.body.appendChild(copyFrom);
                 copyFrom.select();
@@ -32,7 +34,7 @@ const sRespFn = {
     },
 }
 
-async function handleMessage(request, sender, sendResponse) {
+async function handleBackgroundMessage(request, sender, sendResponse): Promise<void> {
 
     if (sRespFn[request.component] === undefined ||
         sRespFn[request.component][request.module] === undefined ||
@@ -55,7 +57,7 @@ async function handleMessage(request, sender, sendResponse) {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // This has to be in a separate function because otherwise the port closes prematurely
-    handleMessage(request, sender, sendResponse);
+    handleBackgroundMessage(request, sender, sendResponse);
     return true;
 });
 
@@ -70,20 +72,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
  * @param {string} port 
  * @param {object} details 
  */
-function xmlHttpNative(port, details) {
+function xmlHttpNative(port, details: any): void {
     const request = new XMLHttpRequest();
 
     /** **onabort** callback to be executed if the request was aborted */
-    request.onabort = () => { port.postMessage(createResponse("onabort", request)); }
+    request.onabort = (): void => { port.postMessage(createResponse("onabort", request)); }
 
     /** **onerror** callback to be executed if the request ended up with an error */
-    request.onerror = () => { port.postMessage(createResponse("onerror", request)); }
+    request.onerror = (): void => { port.postMessage(createResponse("onerror", request)); }
 
     /** **onloadstart** callback to be executed if the request started to load */
-    request.onloadstart = () => { port.postMessage(createResponse("onloadstart", request)); }
+    request.onloadstart = (): void => { port.postMessage(createResponse("onloadstart", request)); }
 
     /** **onprogress** callback to be executed if the request made some progress */
-    request.onprogress = (event) => {
+    request.onprogress = (event): void => {
         port.postMessage(createResponse("onprogress", request, {
             // Sometimes, total is 0. If it is, the length cannot be computed.
             lengthComputable: event.total > 0,
@@ -93,13 +95,13 @@ function xmlHttpNative(port, details) {
     }
 
     /** **onreadystatechange** callback to be executed if the request's ready state changed */
-    request.onreadystatechange = () => { port.postMessage(createResponse("onreadystatechange", request)); };
+    request.onreadystatechange = (): void => { port.postMessage(createResponse("onreadystatechange", request)); };
 
     /** **ontimeout** callback to be executed if the request failed due to a timeout */
-    request.ontimeout = () => { port.postMessage(createResponse("ontimeout", request)); }
+    request.ontimeout = (): void => { port.postMessage(createResponse("ontimeout", request)); }
 
     /** **onload** callback to be executed if the request was loaded. */
-    request.onload = () => {
+    request.onload = (): void => {
         if (request.readyState !== 4) return;
         if (request.status >= 200 && request.status < 300) {
             port.postMessage(createResponse("onload", request, {
@@ -122,13 +124,12 @@ function xmlHttpNative(port, details) {
     if (details.responseType) // ArrayBuffer gets fetched as a blob, for the sake of converting to ObjectURL
         request.responseType = (details.responseType === "arraybuffer") ? "blob" : details.responseType;
 
-    if (details.overrideMimeType) request.overrideMimeType();
+    if (details.overrideMimeType) request.overrideMimeType(details.overrideMimeType);
 
-    if (details.binary) request.sendAsBinary();
-    else request.send();
+    request.send();
 
-    function createResponse(event, request, data) {
-        let result = {
+    function createResponse(event, request, data?: any): any {
+        const result = {
             event: event,
             finalURL: request.finalURL,
             state: request.readyState,
@@ -150,8 +151,8 @@ chrome.runtime.onConnect.addListener((port) => {
         return;
     }
 
-    sendResponse({
-        eventID: request.eventID,
+    port.postMessage({
+        eventID: 0,
         data: "RE6 Background - Invalid Request",
     });
 
