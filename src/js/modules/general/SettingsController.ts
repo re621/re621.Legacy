@@ -747,11 +747,11 @@ export class SettingsController extends RE6Module {
 
             ...createInputs(this, "Open Settings", "hotkeyOpenSettings"),
             ...createInputs(subscriptionManager, "Open Notifications", "hotkeyOpenNotifications"),
+            Form.hr(),
 
             // Other
             Form.header("Miscellaneous"),
             ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
-            Form.hr(),
         ]);
     }
 
