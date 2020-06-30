@@ -3,6 +3,7 @@ window.re621 = new function() {
     this.displayName = "%DISPLAYNAME%";
     this.version = "%VERSIONREPO%";
     this.build = "%BUILD%";
+    this.type = "%BUILDTYPE%";
     this.links = {
         website: "%HOMEPAGE%",
         repository: "%GITHUB%/",
@@ -10,7 +11,7 @@ window.re621 = new function() {
         releases: "%GITHUB%/releases",
         forum: "https://e621.net/forum_topics/25872",
     };
-    this.useragent = "%NAME%/%VERSHORT% userscript";
+    this.useragent = "%NAME%:%BUILDTYPE%/%VERSHORT%";
     this.debug = true;
 };
 
