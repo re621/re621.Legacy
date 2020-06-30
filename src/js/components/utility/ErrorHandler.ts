@@ -1,6 +1,8 @@
 import { XM } from "../api/XM";
 import { RE6Module } from "../RE6Module";
 import { Modal } from "../structure/Modal";
+import { Debug } from "./Debug";
+import { Util } from "./Util";
 
 declare const UAParser;
 
@@ -77,8 +79,9 @@ export class ErrorHandler {
     }
 
     public static async report(): Promise<any> {
-        //    if(await XM.Storage.getValue("re621.report", false)) return;
-        //    XM.Storage.setValue("re621.stats", true);
+        const version = await XM.Storage.getValue("re621.report", "0.0.1");
+        if (Util.versionCompare(version, window["re621"]["version"]) == 0) return;
+        XM.Storage.setValue("re621.report", window["re621"]["version"]);
 
         const userAgent = UAParser(navigator.userAgent);
         const userInfo = {
@@ -88,14 +91,15 @@ export class ErrorHandler {
             osVersion: userAgent.os.version,
             handlerName: XM.info().scriptHandler,
             handlerVersion: XM.info().version,
-        }
+            scriptVersion: window["re621"]["version"],
+        };
 
         return XM.Connect.xmlHttpPromise({
             method: "POST",
             url: "https://re621.bitwolfy.com/report",
             headers: { "User-Agent": window["re621"]["useragent"] },
             data: JSON.stringify(userInfo),
-            onload: (data) => { console.log(data.responseText); }
+            onload: (data) => { Debug.log(data.responseText); }
         });
     }
 
