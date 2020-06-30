@@ -3,7 +3,7 @@ import { APIForumTopic } from "../../components/api/responses/APIForumTopic";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { Util } from "../../components/structure/Util";
+import { Util } from "../../components/utility/Util";
 import { Subscription } from "./SubscriptionManager";
 import { SubscriptionTracker, UpdateActions, UpdateCache, UpdateContent, UpdateData } from "./SubscriptionTracker";
 

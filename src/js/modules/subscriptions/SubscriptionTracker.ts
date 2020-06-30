@@ -1,7 +1,7 @@
 import { XM } from "../../components/api/XM";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module } from "../../components/RE6Module";
-import { Util } from "../../components/structure/Util";
+import { Util } from "../../components/utility/Util";
 import { SubscriptionManager } from "./SubscriptionManager";
 
 export interface SubscriptionTracker extends RE6Module {

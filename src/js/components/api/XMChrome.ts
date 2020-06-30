@@ -1,4 +1,4 @@
-import { Util } from "../structure/Util";
+import { Util } from "../utility/Util";
 
 declare const chrome;
 

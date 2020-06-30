@@ -4,7 +4,7 @@ import { PageDefintion } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
-import { Util } from "../../components/structure/Util";
+import { Util } from "../../components/utility/Util";
 
 export enum ThumbnailPerformanceMode {
     Disabled = "disabled",

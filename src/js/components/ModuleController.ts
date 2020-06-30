@@ -1,5 +1,5 @@
-import { ErrorHandler } from "./ErrorHandler";
 import { RE6Module } from "./RE6Module";
+import { ErrorHandler } from "./utility/ErrorHandler";
 
 export class ModuleController {
 

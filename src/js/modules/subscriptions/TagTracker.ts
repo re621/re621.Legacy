@@ -2,7 +2,7 @@ import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { Post } from "../../components/data/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { Util } from "../../components/structure/Util";
+import { Util } from "../../components/utility/Util";
 import { Subscription } from "./SubscriptionManager";
 import { SubscriptionTracker, UpdateActions, UpdateCache, UpdateContent, UpdateData } from "./SubscriptionTracker";
 

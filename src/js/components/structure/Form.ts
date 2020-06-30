@@ -1,6 +1,6 @@
 import { XM } from "../api/XM";
 import { Hotkeys } from "../data/Hotkeys";
-import { Util } from "./Util";
+import { Util } from "../utility/Util";
 
 /**
  * Removes the hassle of creating HTML elements for a form
