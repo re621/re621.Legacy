@@ -109,8 +109,7 @@ export class TinyAlias extends RE6Module {
 
         // Sort textarea
         $sortButton.on("click", () => {
-            const currentText = this.prepareInput(this.$textarea.val());
-            let tags = currentText.split(" ").map(e => e.trim());
+            let tags = this.getTextareaArray();
             tags = [...new Set(tags)];
             tags.sort();
             this.$textarea.val(tags.join(" "));
@@ -296,7 +295,7 @@ export class TinyAlias extends RE6Module {
      */
     private tagAlreadyAdded(input: string): boolean {
         input = this.prepareTag(input);
-        return this.$textarea.val().toString().includes(input);
+        return this.getTextareaArray().includes(input);
     }
 
     /**
@@ -400,6 +399,16 @@ export class TinyAlias extends RE6Module {
         $("<button>").attr({ type: "button" }).html("Delete").appendTo($aliasForm);
         $("<button>").attr({ type: "submit" }).html("Update").appendTo($aliasForm);
         return $aliasForm;
+    }
+
+    /** Returns the textarea value as a string */
+    private getTextareaString(): string {
+        return this.$textarea.val().toString().toLowerCase().trim();
+    }
+
+    /** Returns the textarea value as an array */
+    private getTextareaArray(): string[] {
+        return this.getTextareaString().split(/[\s\n]+/).map(e => e.trim());
     }
 
 }
