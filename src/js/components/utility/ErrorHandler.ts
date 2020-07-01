@@ -10,6 +10,8 @@ export class ErrorHandler {
 
     private static instance: ErrorHandler;
 
+    public static reportVersion: string | boolean;
+
     private modal: Modal;
 
     private feedback: JQuery<HTMLElement>;
@@ -78,13 +80,13 @@ export class ErrorHandler {
         this.log(module, message, context);
     }
 
-    public static async report(): Promise<any> {
-        const version = await XM.Storage.getValue("re621.report", "0.0.1");
-        if (Util.versionCompare(version, window["re621"]["version"]) == 0) return;
-        XM.Storage.setValue("re621.report", window["re621"]["version"]);
-
+    /**
+     * Collect and return the script's environment data.  
+     * This includes the names and versions of the browser, operating system, and script handler.
+     */
+    public static getEnvData(): EnvironmentData {
         const userAgent = UAParser(navigator.userAgent);
-        const userInfo = {
+        return {
             browserName: userAgent.browser.name,
             browserVersion: userAgent.browser.major,
             osName: userAgent.os.name,
@@ -93,14 +95,30 @@ export class ErrorHandler {
             handlerVersion: XM.info().version,
             scriptVersion: window["re621"]["version"],
         };
+    }
+
+    public static async report(): Promise<any> {
+        ErrorHandler.reportVersion = await XM.Storage.getValue("re621.report", "0.0.1");
+        if (!ErrorHandler.reportVersion || Util.versionCompare(ErrorHandler.reportVersion as string, window["re621"]["version"]) == 0) return;
+        XM.Storage.setValue("re621.report", window["re621"]["version"]);
 
         return XM.Connect.xmlHttpPromise({
             method: "POST",
             url: "https://re621.bitwolfy.com/report",
             headers: { "User-Agent": window["re621"]["useragent"] },
-            data: JSON.stringify(userInfo),
+            data: JSON.stringify(ErrorHandler.getEnvData()),
             onload: (data) => { Debug.log(data.responseText); }
         });
     }
 
+}
+
+interface EnvironmentData {
+    browserName: string;
+    browserVersion: string;
+    osName: string;
+    osVersion: string;
+    handlerName: string;
+    handlerVersion: string;
+    scriptVersion: string;
 }
