@@ -7,6 +7,13 @@ export class Danbooru {
     private static getModules(): any { return XM.Window["Danbooru"]; }
     private static hasModules(): boolean { return XM.Window["Danbooru"] !== undefined; }
 
+    public static Autocomplete = {
+        initialize_all(): void {
+            if (Danbooru.hasModules()) Danbooru.getModules()["Autocomplete"].initialize_all();
+            else XM.Chrome.execInjectorRequest("Danbooru", "Autocomplete", "initialize_all");
+        }
+    }
+
     public static Blacklist: DanbooruBlacklist = {
         apply(): void {
             if (Danbooru.hasModules()) Danbooru.getModules()["Blacklist"].apply();

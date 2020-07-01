@@ -8,6 +8,9 @@ declare const Danbooru;
 
 /** Function index */
 const fnDanbooru = {
+    "Autocomplete": {
+        "initialize_all": (): void => { Danbooru.Autocomplete.initialize_all(); }
+    },
     "Blacklist": {
         "apply": (): void => { Danbooru.Blacklist.apply(); },
         "initialize_anonymous_blacklist": (): void => { Danbooru.Blacklist.initialize_anonymous_blacklist(); },

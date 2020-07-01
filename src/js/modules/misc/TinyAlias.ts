@@ -75,33 +75,47 @@ export class TinyAlias extends RE6Module {
         const $input = $("<input>")
             .attr({ type: "text" })
             .attr("id", "tiny-alias-taginput")
+            .attr("data-autocomplete", "tag")
+            .addClass("ui-autocomplete-input")
             .appendTo($toolbar);
 
         const $sortButton = $("<button>").attr("type", "button").html("Sort").appendTo($toolbar);
         this.$infoText = $("<div>").addClass("info-text").appendTo($toolbar);
         const $settingsButton = $("<button>").attr("type", "button").html("TinyAlias").appendTo($toolbar);
-        // Adding Functionality
-        this.tagAlreadyChecked = false;
-        let timer: number;
-        $input.on("input", () => {
-            this.tagAlreadyChecked = false;
-            if ($input.val().toString().trim() === "") {
-                this.$infoText.html("").removeAttr("data-state");
-                return;
-            }
+        Danbooru.Autocomplete.initialize_all();
 
-            if (timer) clearTimeout(timer);
-            timer = window.setTimeout(() => {
-                this.handleCheckButton($input);
+        // Check button
+        this.tagAlreadyChecked = false;
+        let inputUpdateInterval: number;    // Checking input while it is in focus
+        let changeTimeout: number;          // Waiting for the user to stop typing
+        $input.on("focus", () => {
+            let inputValue = getInputValue();
+            inputUpdateInterval = setInterval(() => {
+                // Input has changed
+                if (getInputValue() === inputValue) return;
+                inputValue = getInputValue();
+                this.tagAlreadyChecked = false;
+
+                // Input is not blank
+                if (inputValue === "") {
+                    this.$infoText.html("").removeAttr("data-state");
+                    clearTimeout(changeTimeout)
+                    return;
+                }
+
+                // User has stopped typing
+                if (changeTimeout) clearTimeout(changeTimeout);
+                changeTimeout = window.setTimeout(() => {
+                    this.handleCheckButton($input);
+                }, 500);
             }, 500);
-        });
+
+            function getInputValue(): string {
+                return $input.val().toString().trim();
+            }
+        }).on("focusout", () => { clearInterval(inputUpdateInterval); });
 
         // Insert tag
-        $input.bind("keyup", "return", () => {
-            if (!this.tagAlreadyChecked) return;
-            this.handleInsertButton($input);
-        });
-
         $insertButton.on("click", () => {
             if (!this.tagAlreadyChecked) return;
             this.handleInsertButton($input);
@@ -181,7 +195,8 @@ export class TinyAlias extends RE6Module {
 
     /** Handles the tag checking */
     private async handleCheckButton($input: JQuery<HTMLElement>): Promise<void> {
-        const tag = this.prepareTag($input.val().toString().trim());
+        const tag = this.prepareTag($input.val().toString());
+        console.log("checking " + tag);
         if (this.tagAlreadyAdded(tag)) {
             this.$infoText
                 .html("Tag has already been added")
@@ -245,7 +260,7 @@ export class TinyAlias extends RE6Module {
      * Normalizes input into a standard form
      * @param input Input to normalize
      */
-    private prepareInput(input): string {
+    private prepareInput(input: string): string {
         return input.trim().toLowerCase();
     }
 
