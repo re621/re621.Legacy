@@ -3,7 +3,7 @@
 div.tiny-alias-container {
 
     display: grid;
-    grid-template-columns: auto 4rem 4rem;
+    grid-template-columns: 4rem auto 4rem;
     grid-column-gap: 0.25rem;
     grid-row-gap: 0.25rem;
     margin-bottom: 0.5rem;
@@ -16,8 +16,7 @@ div.tiny-alias-container {
 
     input[type=text] {
         border-radius: 3px;
-        grid-column: 1 / 3;
-        grid-row: 1 / 2;
+        grid-column: span 2;
         padding: 0.25rem;
     }
 
