@@ -3,7 +3,7 @@ import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { Util } from "../../components/structure/Util";
+import { Util } from "../../components/utility/Util";
 import { InfiniteScroll } from "../search/InfiniteScroll";
 
 declare const saveAs;

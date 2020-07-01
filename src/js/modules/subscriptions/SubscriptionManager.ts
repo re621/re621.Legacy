@@ -1,13 +1,13 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { XM } from "../../components/api/XM";
-import { Debug } from "../../components/ErrorHandler";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
-import { Util } from "../../components/structure/Util";
+import { Debug } from "../../components/utility/Debug";
+import { Util } from "../../components/utility/Util";
 import { ThumbnailClickAction, ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
 import { SubscriptionTracker, UpdateContent } from "./SubscriptionTracker";
 

@@ -4,9 +4,11 @@
  */
 
 // Load Modules
-import { Debug, Patcher } from "./components/ErrorHandler";
 import { ModuleController } from "./components/ModuleController";
 import { DomUtilities } from "./components/structure/DomUtilities";
+import { Debug } from "./components/utility/Debug";
+import { ErrorHandler } from "./components/utility/ErrorHandler";
+import { Patcher } from "./components/utility/Patcher";
 import { FavDownloader } from "./modules/downloader/FavDownloader";
 import { MassDownloader } from "./modules/downloader/MassDownloader";
 import { PoolDownloader } from "./modules/downloader/PoolDownloader";
@@ -77,9 +79,8 @@ const subscriptions = [
 DomUtilities.createStructure().then(async () => {
 
     await Debug.init();
-    // ErrorHandler.report();
-
     await Patcher.run();
+    await ErrorHandler.report();
 
     // This code is pretty fragile. It's also what makes the rest of the project work.
     // It is dependent on the previous step, which runs when the document fully loads

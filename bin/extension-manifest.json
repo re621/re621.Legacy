@@ -80,7 +80,7 @@
         "tabs",
         "https://api.github.com/*",
         "https://static1.e621.net/*",
-        "https://bitwolfy.com/*"
+        "https://re621.bitwolfy.com/*"
     ],
 
     "resources": {

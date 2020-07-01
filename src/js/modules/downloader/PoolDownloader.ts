@@ -5,7 +5,7 @@ import { APIPost } from "../../components/api/responses/APIPost";
 import { APIPostGroup } from "../../components/api/responses/APIPostGroup";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { Util } from "../../components/structure/Util";
+import { Util } from "../../components/utility/Util";
 
 declare const saveAs;
 

@@ -11,26 +11,27 @@
     ],
     "main": "./build/script.user.js",
     "scripts": {
-        "build:prod": "npm-run-all compile:prod compose:prod",
-        "build:dev": "npm-run-all compile:dev compose:dev",
+        "build:prod": "npm-run-all compile:prod compose:prod clean",
+        "build:dev": "npm-run-all compile:dev compose:dev clean",
+
 
         "compile:prod": "npm-run-all --parallel compile-typescript:prod compile-sass:prod",
         "compile:dev": "npm-run-all --parallel compile-typescript:dev compile-sass:dev",
 
-        "compile-typescript:prod": "npm-run-all eslint typescript browserify minify template clean",
-        "compile-typescript:dev": "npm-run-all eslint typescript browserify template clean",
+        "compile-typescript:prod": "npm-run-all eslint typescript browserify minify template",
+        "compile-typescript:dev": "npm-run-all eslint typescript browserify template",
         "eslint": "eslint ./**/*.ts",
         "typescript": "tsc",
         "browserify": "browserify ./build/tsc-temp/js/main.js -o ./build/script.js",
         "minify": "terser ./build/script.js --compress -o ./build/script.js",
         "template": "node ./bin/common.js",
-        "clean": "rimraf ./build/tsc-temp/",
 
         "compile-sass:prod": "npm-run-all sass:prod autoprefixer",
         "compile-sass:dev": "npm-run-all sass:dev autoprefixer",
         "sass:prod": "sass ./src/scss/style.scss ./build/style.css --no-source-map --style compressed",
         "sass:dev": "sass ./src/scss/style.scss ./build/style.css --no-source-map --style expanded",
         "autoprefixer": "postcss ./build/style.css --no-map --use autoprefixer -r",
+
 
         "compose:prod": "npm-run-all --parallel compose-userscript:prod compose-extension:prod",
         "compose:dev": "npm-run-all --parallel compose-userscript:dev compose-extension:dev",
@@ -49,7 +50,8 @@
         "extension-pack": "node ./bin/extension-pack.js",
         "extension-archive": "node ./bin/extension-archive.js",
 
-        "creatednp": "node ./bin/create-dnp.js",
+        "clean": "rimraf ./build/tsc-temp/",
+
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {

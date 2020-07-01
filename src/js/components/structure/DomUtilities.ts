@@ -1,7 +1,7 @@
 import { XM } from "../api/XM";
 import { Page, PageDefintion } from "../data/Page";
-import { ErrorHandler } from "../ErrorHandler";
-import { Util } from "./Util";
+import { ErrorHandler } from "../utility/ErrorHandler";
+import { Util } from "../utility/Util";
 
 declare const GM;
 

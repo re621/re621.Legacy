@@ -46,7 +46,7 @@
     "connect": [
         "api.github.com",
         "static1.e621.net",
-        "bitwolfy.com"
+        "re621.bitwolfy.com"
     ],
     "run-at": "document-start"
 }

@@ -3,7 +3,7 @@
 // Name is irrelevant, as long as it is unique.
 // Path is the endpoint address, without https://e621.net/
 
-import { Debug } from "../ErrorHandler";
+import { Debug } from "../utility/Debug";
 
 // Don't forget to update the name in the E621 aliases below
 const ENDPOINT_DEFS: EndpointDefinition[] = [

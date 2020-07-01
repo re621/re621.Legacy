@@ -23,7 +23,7 @@ export class XM {
             return {
                 script: null,
                 scriptMetaStr: null,
-                scriptHandler: "chrome/ext",
+                scriptHandler: window["re621"].type,
                 version: "1.0",
             }
         } else return GM.info;

@@ -5,7 +5,7 @@ import { Page, PageDefintion } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
 import { User } from "../../components/data/User";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { Util } from "../../components/structure/Util";
+import { Util } from "../../components/utility/Util";
 import { Subscription } from "./SubscriptionManager";
 import { SubscriptionTracker, UpdateActions, UpdateCache, UpdateContent, UpdateData } from "./SubscriptionTracker";
 

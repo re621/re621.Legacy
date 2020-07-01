@@ -60,7 +60,7 @@ Promise.all(downloadQueue).then((resolved) => {
     fs.writeFileSync(
         "./build/extension/src/script.js",
         resourceString +
-        fs.readFileSync("./build/script.js")
+        (fs.readFileSync("./build/script.js") + "").replace(/%BUILDTYPE%/g, "chrome")
     );
     manifest["content_scripts"][0]["js"].push("script.js");
 
@@ -68,10 +68,10 @@ Promise.all(downloadQueue).then((resolved) => {
     fs.createReadStream("./build/style.css").pipe(fs.createWriteStream("./build/extension/src/style.min.css"));
 
     // Copy the background page
-    fs.createReadStream("./bin/extension-background.js").pipe(fs.createWriteStream("./build/extension/src/background.js"));
+    fs.createReadStream("./build/tsc-temp/chrome/background.js").pipe(fs.createWriteStream("./build/extension/src/background.js"));
 
     // Copy the injected code
-    fs.createReadStream("./bin/extension-injector.js").pipe(fs.createWriteStream("./build/extension/src/injector.js"));
+    fs.createReadStream("./build/tsc-temp/chrome/injector.js").pipe(fs.createWriteStream("./build/extension/src/injector.js"));
 
 
     // Write the manifest file

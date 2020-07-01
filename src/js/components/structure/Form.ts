@@ -1,6 +1,6 @@
 import { XM } from "../api/XM";
 import { Hotkeys } from "../data/Hotkeys";
-import { Util } from "./Util";
+import { Util } from "../utility/Util";
 
 /**
  * Removes the hassle of creating HTML elements for a form
@@ -23,6 +23,7 @@ export class Form {
         if (config.parent === undefined) config.parent = "body";
         if (config.collapse === undefined) config.collapse = false;
         if (config.collapseState === undefined) config.collapseState = true;
+        if (config.customClass === undefined) config.customClass = "";
         this.config = config;
 
         this.formID = (parent === undefined) ? config.id : config.id + "-" + parent;
@@ -67,7 +68,7 @@ export class Form {
 
         this.$form = $("<form>")
             .attr("id", this.formID)
-            .addClass("grid-form");
+            .addClass("grid-form" + (this.config.customClass ? " " + this.config.customClass : ""));
 
         if (this.config.columns > 1) { this.$form.addClass("columns-" + this.config.columns); }
 
@@ -1151,6 +1152,8 @@ interface FormConfig {
     collapseState?: boolean;
     /** Badge attached to the collapsable header */
     collapseBadge?: string | number;
+    /** Custom class to add to the form element */
+    customClass?: string;
 }
 
 interface FormEntry {

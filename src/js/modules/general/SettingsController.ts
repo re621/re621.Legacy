@@ -3,14 +3,16 @@ import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { User } from "../../components/data/User";
-import { Debug, Patcher } from "../../components/ErrorHandler";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
-import { Util } from "../../components/structure/Util";
+import { Debug } from "../../components/utility/Debug";
+import { ErrorHandler } from "../../components/utility/ErrorHandler";
+import { Patcher } from "../../components/utility/Patcher";
+import { Util } from "../../components/utility/Util";
 import { FavDownloader } from "../downloader/FavDownloader";
 import { MassDownloader } from "../downloader/MassDownloader";
 import { PoolDownloader } from "../downloader/PoolDownloader";
@@ -809,7 +811,7 @@ export class SettingsController extends RE6Module {
             Form.hr(),
 
             // Reset Configuration
-            Form.header("<h3>Reset Modules</h3>"),
+            Form.header("Reset Modules"),
             Form.button(
                 "reset-everything", "Clear", "Everything", "column",
                 () => {
@@ -835,22 +837,52 @@ export class SettingsController extends RE6Module {
             Form.div("<b>This cannot be undone.</b>", "column"),
             Form.hr(),
 
-            Form.header("<h3>Debugging Tools</h3>"),
-            Form.checkbox(
-                "debug-enabled", Debug.isEnabled(), "Console output", "column",
-                (event, data) => {
-                    Debug.setEnabled(data);
-                }
-            ),
-            Form.div("Enable debug messages in the console log", "mid"),
-            Form.checkbox(
-                "connect-log-enabled", Debug.isConnectLogEnabled(), "Connections log", "column",
-                (event, data) => {
-                    Debug.setConnectLogEnabled(data);
-                }
-            ),
-            Form.div("Logs all outbound connections in the console", "mid"),
+            // Report
+            Form.section({ id: "statistics", columns: 3, customClass: "display-none-important" }, [
+                Form.header("Anonymous Statistics"),
+                Form.checkbox(
+                    "report-enabled", ErrorHandler.reportVersion !== false, "Enabled", "full",
+                    async (event, data) => {
+                        if (data !== false) await XM.Storage.setValue("re621.report", "0.0.1");
+                        else await XM.Storage.setValue("re621.report", false);
+                    }
+                ),
+                Form.div(
+                    `re621 collects and records anonymous data about the environment in which the script runs. ` +
+                    `This data is used to improve the user experience, and to determine what system needs more attention.`
+                ),
+                Form.subsection({ id: "collected-data", columns: 2 }, "Collected data", [
+                    ...printEnvData(),
+                ], undefined, "full"),
+                Form.hr(),
+            ]),
+
+            // Debug Settings
+            Form.section({ id: "debug", columns: 3 }, [
+                Form.header("Debugging Tools"),
+                Form.checkbox(
+                    "debug-enabled", Debug.isEnabled(), "Console output", "column",
+                    (event, data) => {
+                        Debug.setEnabled(data);
+                    }
+                ),
+                Form.div("Enable debug messages in the console log", "mid"),
+                Form.checkbox(
+                    "connect-log-enabled", Debug.isConnectLogEnabled(), "Connections log", "column",
+                    (event, data) => {
+                        Debug.setConnectLogEnabled(data);
+                    }
+                ),
+                Form.div("Logs all outbound connections in the console", "mid"),
+            ]),
         ]);
+
+        function printEnvData(): FormElement[] {
+            const output: FormElement[] = [];
+            const data = ErrorHandler.getEnvData();
+            for (const key in data) output.push(Form.div(data[key], "column", key));
+            return output;
+        }
 
         /** Export the currnt module settings to file */
         function exportToFile(): void {

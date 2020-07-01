@@ -53,7 +53,7 @@ switch (mode) {
         fs.writeFileSync(
             "./build/userscript/script.user.js",
             util.parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n", package) + "\n\n" +
-            fs.readFileSync("./build/script.js")
+            (fs.readFileSync("./build/script.js") + "").replace(/%BUILDTYPE%/g, "script")
         );
     }
 }

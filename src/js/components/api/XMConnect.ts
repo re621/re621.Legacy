@@ -1,4 +1,4 @@
-import { Debug } from "../ErrorHandler";
+import { Debug } from "../utility/Debug";
 import { XM } from "./XM";
 
 declare const GM: any;
