@@ -1,3 +1,4 @@
+import { Danbooru } from "../../components/api/Danbooru";
 import { E621 } from "../../components/api/E621";
 import { APITag } from "../../components/api/responses/APITag";
 import { APITagAlias } from "../../components/api/responses/APITagAlias";
@@ -66,7 +67,11 @@ export class TinyAlias extends RE6Module {
         // Building the structure
         const $toolbar = $("<div>")
             .addClass("tiny-alias-container")
-            .appendTo(this.$container);
+            .insertAfter(this.$textarea);
+
+        const $sortButton = $("<button>").attr("type", "button").html("Sort").appendTo($toolbar);
+        this.$infoText = $("<div>").addClass("info-text").appendTo($toolbar);
+        const $settingsButton = $("<button>").attr("type", "button").html("TinyAlias").appendTo($toolbar);
 
         const $insertButton = $("<button>")
             .html("Insert")
@@ -79,9 +84,6 @@ export class TinyAlias extends RE6Module {
             .addClass("ui-autocomplete-input")
             .appendTo($toolbar);
 
-        const $sortButton = $("<button>").attr("type", "button").html("Sort").appendTo($toolbar);
-        this.$infoText = $("<div>").addClass("info-text").appendTo($toolbar);
-        const $settingsButton = $("<button>").attr("type", "button").html("TinyAlias").appendTo($toolbar);
         Danbooru.Autocomplete.initialize_all();
 
         // Check button
