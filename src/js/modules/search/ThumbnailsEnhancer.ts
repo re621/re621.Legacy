@@ -47,6 +47,8 @@ export class ThumbnailEnhancer extends RE6Module {
             ribbons: true,
             relRibbons: true,
 
+            preserveHoverText: false,
+
             clickAction: ThumbnailClickAction.NewTab,
         };
     }
@@ -56,12 +58,13 @@ export class ThumbnailEnhancer extends RE6Module {
 
         this.postContainer = $("div#page");
 
-        const upscaleMode: ThumbnailPerformanceMode = this.fetchSettings("upscale"),
-            clickAction: ThumbnailClickAction = this.fetchSettings("clickAction");
+        const upscaleMode = this.fetchSettings<ThumbnailPerformanceMode>("upscale"),
+            clickAction = this.fetchSettings<ThumbnailClickAction>("clickAction"),
+            preserveHoverText = this.fetchSettings<boolean>("preserveHoverText");
 
         const thumbnails = this.postContainer.find<HTMLElement>("article.post-preview, div.post-preview").get();
         for (const thumb of thumbnails) {
-            ThumbnailEnhancer.modifyThumbnail($(thumb), upscaleMode, clickAction);
+            ThumbnailEnhancer.modifyThumbnail($(thumb), upscaleMode, clickAction, preserveHoverText);
         }
 
         this.toggleHoverZoom(this.fetchSettings("zoom"));
@@ -174,7 +177,7 @@ export class ThumbnailEnhancer extends RE6Module {
      * @param $article JQuery element `article.post-preview`
      * @param upscaleMode If / when to load upscaled versions of the image
      */
-    public static async modifyThumbnail($article: JQuery<HTMLElement>, upscaleMode = ThumbnailPerformanceMode.Hover, clickAction = ThumbnailClickAction.NewTab): Promise<void> {
+    public static async modifyThumbnail($article: JQuery<HTMLElement>, upscaleMode = ThumbnailPerformanceMode.Hover, clickAction = ThumbnailClickAction.NewTab, preserveHoverText: boolean): Promise<void> {
 
         /* Create the structure */
         const $link = $article.find<HTMLElement>("a.preview-box"),
@@ -183,7 +186,9 @@ export class ThumbnailEnhancer extends RE6Module {
             $imgData = $img.attr("title") ? $img.attr("title").split("\n").slice(0, -2) : [];     // Replace if the post date is added for the data-attributes.
 
         $article.find("source").remove();                               // If we ever have to worry about mobile users, this will need to be addressed.
-        $img.removeAttr("title").attr("alt", "#" + $article.attr("data-id"));
+
+        if (!preserveHoverText) $img.removeAttr("title");
+        $img.attr("alt", "#" + $article.attr("data-id"));
 
         // Image not wrapped in picture - usually on comment pages and the like
         let $picture = $article.find("picture");

@@ -166,8 +166,9 @@ export class InfiniteScroll extends RE6Module {
         }
 
         const thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer),
-            upscaleMode: ThumbnailPerformanceMode = thumbnailEnhancer.fetchSettings("upscale"),
-            clickAction: ThumbnailClickAction = thumbnailEnhancer.fetchSettings("clickAction"),
+            upscaleMode = thumbnailEnhancer.fetchSettings<ThumbnailPerformanceMode>("upscale"),
+            clickAction = thumbnailEnhancer.fetchSettings<ThumbnailClickAction>("clickAction"),
+            preserveHoverText = thumbnailEnhancer.fetchSettings<boolean>("preserveHoverText"),
             flagData = ModuleController.get(CustomFlagger).fetchSettings<FlagDefinition[]>("flags");
 
         const promises: Promise<void>[] = [];
@@ -188,7 +189,7 @@ export class InfiniteScroll extends RE6Module {
 
                     this.$postContainer.append(element);
 
-                    ThumbnailEnhancer.modifyThumbnail(element, upscaleMode, clickAction);
+                    ThumbnailEnhancer.modifyThumbnail(element, upscaleMode, clickAction, preserveHoverText);
                     CustomFlagger.modifyThumbnail(element, flagData);
                 }
 
