@@ -41,7 +41,7 @@ export class Debug {
 
     /** Logs the provided data into the console log if connections logging is enabled */
     public static connectLog(...data: any[]): void {
-        if (Debug.connect) console.warn("CONNECT", ...data);
+        if (Debug.connect) console.log("CONNECT", ...data);
     }
 
 }
