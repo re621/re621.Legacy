@@ -26,9 +26,13 @@ export class Post {
     public constructor(element: JQuery<HTMLElement> | APIPost) {
         if (element instanceof jQuery) {
             element = element as JQuery<HTMLElement>;
-            element.removeClass("blacklisted-active");
             this.apiElement = APIPost.fromDomElement(element);
             this.htmlElement = element;
+
+            if (element.hasClass("blacklisted-active")) {
+                element.removeClass("blacklisted-active");
+                this.hide();
+            }
         } else {
             element = element as APIPost;
             this.apiElement = element;
