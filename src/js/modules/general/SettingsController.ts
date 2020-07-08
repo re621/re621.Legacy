@@ -458,6 +458,7 @@ export class SettingsController extends RE6Module {
                     Form.copy("character", "%character%", "Characters"),
                     Form.copy("species", "%species%", "Species"),
                     Form.copy("meta", "%meta%", "Meta"),
+                    Form.copy("md5", "%md5%", "MD5"),
                 ], " "),
                 Form.hr(),
             ]),

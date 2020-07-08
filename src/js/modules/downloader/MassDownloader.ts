@@ -327,17 +327,22 @@ export class MassDownloader extends RE6Module {
      * @param data Post data
      */
     private createFilename(data: APIPost): string {
-        return this.fetchSettings("template")
-            .replace(/%postid%/g, data.id)
+        return MassDownloader.createFilenameBase(this.fetchSettings<string>("template"), data)
+            .slice(0, 128)
+            .replace(/-{2,}/g, "-")
+            .replace(/-*$/g, "")
+            + "." + data.file.ext;
+    }
+
+    public static createFilenameBase(template: string, data: APIPost): string {
+        return template
+            .replace(/%postid%/g, data.id + "")
             .replace(/%artist%/g, data.tags.artist.join("-"))
             .replace(/%copyright%/g, data.tags.copyright.join("-"))
             .replace(/%character%/g, data.tags.character.join("-"))
             .replace(/%species%/g, data.tags.species.join("-"))
             .replace(/%meta%/g, data.tags.meta.join("-"))
-            .slice(0, 128)
-            .replace(/-{2,}/g, "-")
-            .replace(/-*$/g, "")
-            + "." + data.file.ext;
+            .replace(/%md5%/g, data.file.md5);
     }
 
 }

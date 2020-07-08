@@ -6,6 +6,7 @@ import { APIPostGroup } from "../../components/api/responses/APIPostGroup";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
+import { MassDownloader } from "./MassDownloader";
 
 declare const saveAs;
 
@@ -299,13 +300,7 @@ export class PoolDownloader extends RE6Module {
      * @param data Post data
      */
     private createFilename(data: APIPost): string {
-        return this.fetchSettings("template")
-            .replace(/%postid%/g, data.id)
-            .replace(/%artist%/g, data.tags.artist.join("-"))
-            .replace(/%copyright%/g, data.tags.copyright.join("-"))
-            .replace(/%character%/g, data.tags.character.join("-"))
-            .replace(/%species%/g, data.tags.species.join("-"))
-            .replace(/%meta%/g, data.tags.meta.join("-"))
+        return MassDownloader.createFilenameBase(this.fetchSettings<string>("template"), data)
             .replace(/%pool%/g, this.poolName)
             .replace(/%index%/g, "" + (this.poolFiles.indexOf(data.id) + 1))
             .slice(0, 128)
