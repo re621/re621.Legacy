@@ -4,40 +4,28 @@ import { Tag } from "./Tag";
 export class PostFilter {
 
     private entries: SinglePostFilter[];
-    private enabled;
-    private matchesCount;
+    private enabled: boolean;
     private matchesIds: Set<number>;
 
     constructor(input: string, enabled = true) {
         this.entries = [];
         this.enabled = enabled;
-        this.matchesCount = 0;
         this.matchesIds = new Set();
-        this.createPostFilter(input);
-    }
 
-    private createPostFilter(input: string): void {
-        const seperatedFilters = input.split(" ");
-        for (let filter of seperatedFilters) {
-            //Remove dash from filter, if it starts with one
+        for (let filter of input.split(" ")) {
+            // Remove dash from filter, if it starts with one
             const inverse = filter.startsWith("-");
             filter = inverse ? filter.substring(1) : filter;
 
-            //get filter type, like tags, id, score
+            // Get filter type, like tags, id, score
             let filterType = PostFilterType.getFromString(filter);
-            if (filterType === undefined) {
-                filterType = PostFilterType.Tags;
-            } else {
-                filter = filter.substring(filterType.length);
-            }
+            if (filterType === undefined) filterType = PostFilterType.Tags;
+            else filter = filter.substring(filterType.length);
 
-            //Get comapre methods, like equals or smaller then
+            // Get comapre methods, like equals or smaller then
             let comparable = Comparable.getFromString(filter);
-            if (comparable === undefined) {
-                comparable = Comparable.Equals;
-            } else {
-                filter = filter.substring(comparable.length);
-            }
+            if (comparable === undefined) comparable = Comparable.Equals;
+            else filter = filter.substring(comparable.length);
 
             this.entries.push({ type: filterType, content: filter, invert: inverse, comparable: comparable });
         }
@@ -55,10 +43,8 @@ export class PostFilter {
     public addPost(post: Post, shouldDecrement: boolean): boolean {
         let result = true;
         for (const filter of this.entries) {
-            //If the result is already negative, bail. All filters must match
-            if (result === false) {
-                break;
-            }
+            // If the result is already negative, bail. All filters must match
+            if (result === false) break;
             const content = filter.content;
             switch (filter.type) {
                 case PostFilterType.Flag:
@@ -88,13 +74,8 @@ export class PostFilter {
             //invert the result, depending on if the filter started with a -
             result = result !== filter.invert;
         }
-        if (result === true) {
-            this.matchesCount++;
-            this.matchesIds.add(post.getId());
-        } else if (result === false && shouldDecrement) {
-            this.matchesCount--;
-            this.matchesIds.delete(post.getId());
-        }
+        if (result === true) this.matchesIds.add(post.getId());
+        else if (result === false && shouldDecrement) this.matchesIds.delete(post.getId());
         return result;
     }
 
@@ -136,7 +117,7 @@ export class PostFilter {
      * Returns how many posts are affected by this filter
      */
     public getMatches(): number {
-        return this.matchesCount;
+        return this.matchesIds.size;
     }
 
     /**
@@ -189,9 +170,9 @@ export namespace PostFilterType {
     }
 }
 
-//Its important that they are in this order
-//should the one character ones be in front they will match
-//before the other ones have a chance
+// Its important that they are in this order
+// should the one character ones be in front they will match
+// before the other ones have a chance
 export enum Comparable {
     EqualsSmaller = "<=",
     EqualsLarger = ">=",
