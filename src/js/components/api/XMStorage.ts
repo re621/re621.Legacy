@@ -67,9 +67,11 @@ export class XMStorage {
      */
     public static addListener(name: string, callback: (name: string, oldValue: any, newValue: any, remote: boolean) => void): string {
         if (typeof GM_addValueChangeListener === "undefined") {
-            chrome.storage.onChanged.addListener(function (changes) {
-                for (const key in changes)
+            chrome.storage.onChanged.addListener(function (changes: ChromeStorageDataChange) {
+                for (const key in changes) {
+                    if (key !== name) return;
                     callback(key, changes[key].oldValue, changes[key].newValue, true);
+                }
             });
         } else return GM_addValueChangeListener(name, callback);
     }
@@ -84,4 +86,11 @@ export class XMStorage {
         } else GM_removeValueChangeListener(listenerId);
     }
 
+}
+
+type ChromeStorageDataChange = {
+    [name: string]: {
+        oldValue: any;
+        newValue: any;
+    };
 }

@@ -122,14 +122,14 @@ export class Danbooru {
 
     public static notice(input: string): void {
         if (Danbooru.hasModules())
-            XM.Chrome.execInjectorRequest("Danbooru", "Notice", "notice", [input]);
-        else Danbooru.getModules()["notice"](input);
+            Danbooru.getModules()["notice"](input);
+        else XM.Chrome.execInjectorRequest("Danbooru", "Notice", "notice", [input]);
     }
 
     public static error(input: string): void {
         if (Danbooru.hasModules())
-            XM.Chrome.execInjectorRequest("Danbooru", "Notice", "error", [input]);
-        else Danbooru.getModules()["error"](input);
+            Danbooru.getModules()["error"](input);
+        else XM.Chrome.execInjectorRequest("Danbooru", "Notice", "error", [input]);
     }
 }
 
