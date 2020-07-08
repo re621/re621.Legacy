@@ -126,7 +126,7 @@ function xmlHttpNative(port, details: any): void {
 
     if (details.overrideMimeType) request.overrideMimeType(details.overrideMimeType);
 
-    request.send();
+    request.send(details.data);
 
     function createResponse(event, request, data?: any): any {
         const result = {
