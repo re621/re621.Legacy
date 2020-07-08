@@ -49,7 +49,6 @@ const loadOrder = [
     PostViewer,
     TitleCustomizer,
 
-    BlacklistEnhancer,
     CustomFlagger,
     InfiniteScroll,
     InstantSearch,
@@ -57,6 +56,7 @@ const loadOrder = [
     PostSuggester,
     SearchUtilities,
     Miscellaneous,
+    BlacklistEnhancer,
 
     TinyAlias,
     WikiEnhancer,

@@ -142,9 +142,12 @@ export class Post {
     }
 
     public getId(): number { return this.apiElement.id; }
+    public getMD5(): string { return this.apiElement.file.md5; }
     public getRating(): PostRating { return this.apiElement.rating; }
     public getFavCount(): number { return this.apiElement.fav_count; }
     public getScoreCount(): number { return this.apiElement.score.total; }
+
+    public getAPIElement(): APIPost { return this.apiElement; }
 
     /**
      * Returns all post tags as one space-separated string

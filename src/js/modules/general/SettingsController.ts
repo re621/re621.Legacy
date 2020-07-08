@@ -376,6 +376,15 @@ export class SettingsController extends RE6Module {
                 Form.spacer(),
                 Form.div(`<div class="unmargin"><b>Requires a page reload</b></div>`, "mid"),
 
+                Form.checkbox(
+                    "preserve-hover-text", thumbnailEnhancer.fetchSettings("preserveHoverText"), "Preserve Hover Text", "column",
+                    async (event, data) => {
+                        await thumbnailEnhancer.pushSettings("preserveHoverText", data);
+                    }
+                ),
+                Form.div("Restores text displayed when hovering over the thumbnail", "mid"),
+                Form.spacer(),
+                Form.div(`<div class="unmargin"><b>Requires a page reload</b></div>`, "mid"),
 
                 Form.hr(),
             ]),
@@ -458,6 +467,7 @@ export class SettingsController extends RE6Module {
                     Form.copy("character", "%character%", "Characters"),
                     Form.copy("species", "%species%", "Species"),
                     Form.copy("meta", "%meta%", "Meta"),
+                    Form.copy("md5", "%md5%", "MD5"),
                 ], " "),
                 Form.hr(),
             ]),

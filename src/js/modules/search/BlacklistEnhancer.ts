@@ -11,9 +11,10 @@ import { RE6Module, Settings } from "../../components/RE6Module";
  */
 export class BlacklistEnhancer extends RE6Module {
 
-    private $box: JQuery<HTMLElement>;
-    private $toggle: JQuery<HTMLElement>;
-    private $list: JQuery<HTMLElement>;
+    /** Container for the blacklist filters in the sidebar */
+    private static $box: JQuery<HTMLElement>;
+    /** List of filters within the box */
+    private static $list: JQuery<HTMLElement>;
 
     public constructor() {
         super([PageDefintion.search, PageDefintion.post]);
@@ -33,18 +34,63 @@ export class BlacklistEnhancer extends RE6Module {
     public create(): void {
         super.create();
 
-        //Override default blacklist function
+        // Override default blacklist function
         Danbooru.Blacklist.stub_vanilla_functions();
         Danbooru.Blacklist.initialize_disable_all_blacklists();
         $("#blacklisted-hider").remove();
 
-        this.modifyDOM();
+        // Remove already added entries
+        BlacklistEnhancer.$box = $("section#blacklist-box");
+        BlacklistEnhancer.$list = $("#blacklist-list").html("");
 
-        //Apply blacklist without user interaction. Blacklist might be active
-        this.applyBlacklist(true);
+        const $disableAllButton = $("#disable-all-blacklists").text("Disable all filters");
+        const $enableAllbutton = $("#re-enable-all-blacklists").text("Enable all filters");
+
+        // Catch when the user toggles the blacklist
+        $disableAllButton
+            .off("click.danbooru")
+            .on("click.re621", () => {
+                for (const filter of User.getBlacklist().values())
+                    filter.setEnabled(false);
+                BlacklistEnhancer.applyBlacklist();
+                $disableAllButton.hide();
+                $enableAllbutton.show();
+            });
+        $enableAllbutton
+            .off("click.danbooru")
+            .on("click.re621", () => {
+                for (const filter of User.getBlacklist().values())
+                    filter.setEnabled(true);
+                BlacklistEnhancer.applyBlacklist();
+                $disableAllButton.show();
+                $enableAllbutton.hide();
+            });
+
+        // Add x next to tag names to toggle them from the blacklist
+        if (this.fetchSettings("quickaddTags") === true && User.isLoggedIn()) {
+            $("div.tag-actions span.tag-action-blacklist").each((index, element) => {
+                const $container = $(element);
+
+                $("<a>")
+                    .attr({
+                        "href": "#",
+                        "title": "Blacklist Tag",
+                    })
+                    .addClass("blacklist-tag-toggle")
+                    .html(`<i class="fas fa-times"></i>`)
+                    .prependTo($container)
+                    .click((event) => {
+                        event.preventDefault();
+                        this.toggleBlacklistTag($container.parent().attr("data-tag"));
+                    });
+            });
+        }
+
+        // Apply blacklist without user interaction. Blacklist might be active
+        BlacklistEnhancer.applyBlacklist();
 
         BlacklistEnhancer.on("updateSidebar.main", () => {
-            this.updateSidebar();
+            BlacklistEnhancer.updateSidebar();
         });
     }
 
@@ -53,161 +99,102 @@ export class BlacklistEnhancer extends RE6Module {
         BlacklistEnhancer.off("updateSidebar.main");
     }
 
-    private modifyDOM(): void {
-        //Remove already added entries
-        this.$box = $("section#blacklist-box");
-        this.$list = $("#blacklist-list").empty();
-
-
-        const $disableAllButton = $("#disable-all-blacklists").text("Disable all filters");
-        const $enableAllbutton = $("#re-enable-all-blacklists").text("Enable all filters");
-
-        //catch when the user toggles the blacklist
-        $disableAllButton
-            .off("click.danbooru")
-            .on("click.re621", () => {
-                for (const filter of User.getBlacklist().values()) {
-                    filter.setEnabled(false);
-                }
-                this.applyBlacklist();
-                $disableAllButton.hide();
-                $enableAllbutton.show();
-            });
-        $enableAllbutton
-            .off("click.danbooru")
-            .on("click.re621", () => {
-                for (const filter of User.getBlacklist().values()) {
-                    filter.setEnabled(true);
-                }
-                this.applyBlacklist();
-                $disableAllButton.show();
-                $enableAllbutton.hide();
-            });
-
-        //Add x next to tag names to toggle them from the blacklist
-        if (this.fetchSettings("quickaddTags") === true && User.isLoggedIn()) {
-            $("div.tag-actions span.tag-action-blacklist").each((index, element) => {
-                const $container = $(element);
-
-                const toggleButton = $("<a>")
-                    .attr({
-                        "href": "#",
-                        "title": "Blacklist Tag",
-                    })
-                    .addClass("blacklist-tag-toggle")
-                    .html(`<i class="fas fa-times"></i>`)
-                    .prependTo($container);
-
-                toggleButton.click((event) => {
-                    event.preventDefault();
-                    this.toggleBlacklistTag($container.parent().attr("data-tag"));
-                });
-            });
-        }
-    }
-
     /**
-     * Removes or adds a tag to the users blacklist
+     * Adds or removes a tag from the user's blacklist
+     * @param tagname Name of the tag to toggle
      */
-    private async toggleBlacklistTag(tag): Promise<void> {
+    private async toggleBlacklistTag(tagname: string): Promise<void> {
         Danbooru.notice("Getting current blacklist");
         let currentBlacklist = (await User.getCurrentSettings()).blacklisted_tags.split("\n");
 
-        if (currentBlacklist.indexOf(tag) === -1) {
-            currentBlacklist.push(tag);
-            User.getInstance().addBlacklistFilter(tag);
-            Danbooru.notice("Adding " + tag + " to blacklist");
+        if (currentBlacklist.indexOf(tagname) === -1) {
+            currentBlacklist.push(tagname);
+            User.getInstance().addBlacklistFilter(tagname);
+            Danbooru.notice("Adding " + tagname + " to blacklist");
         } else {
-            currentBlacklist = currentBlacklist.filter(e => e !== tag);
-            User.getInstance().removeBlacklistFilter(tag);
-            Danbooru.notice("Removing " + tag + " from blacklist");
+            currentBlacklist = currentBlacklist.filter(e => e !== tagname);
+            User.getInstance().removeBlacklistFilter(tagname);
+            Danbooru.notice("Removing " + tagname + " from blacklist");
         }
         await User.setSettings({ blacklisted_tags: currentBlacklist.join("\n") });
         Danbooru.notice("Done!");
-        this.applyBlacklist();
+        BlacklistEnhancer.applyBlacklist();
     }
 
     /**
-     * Hides posts, if they are blacklisted and blacklist is active, show otherwise
-     * @param hide 
+     * Refreshes the post's visibility status in accordance to the blacklist
+     * @param firstRun 
      */
-    private applyBlacklist(firstRun = false): void {
-        for (const post of Post.fetchPosts()) {
-            //Skip over posts who were already hidden by other means, like instantsearch
-            if (firstRun && !post.getDomElement().is(":visible")) {
-                continue;
-            }
-            //do not apply the blacklist to the post you're viewing
-            if (post instanceof ViewingPost) {
-                continue;
-            }
+    private static async applyBlacklist(): Promise<void> {
+        const posts = Post.fetchPosts();
+        for (const post of posts) {
+            if (post instanceof ViewingPost) continue;
             post.applyBlacklist();
         }
 
         this.updateSidebar();
+        return Promise.resolve();
     }
 
-    public updateSidebar(): void {
-        //remove already added entries
-        this.$list.empty();
+    private static async updateSidebar(): Promise<void> {
+        // Remove already added entries
+        BlacklistEnhancer.$list.html("");
 
-        for (const entry of User.getBlacklist().entries()) {
-            this.addSidebarEntry(entry[0], entry[1]);
+        const blacklist = User.getBlacklist();
+
+        let filtered = new Set<number>();
+        for (const [filterString, filter] of blacklist.entries()) {
+            addSidebarEntry(filterString, filter);
+            filtered = new Set<number>([...filtered, ...filter.getMatchesIds()]);
         }
 
-        //When there are no entries there's no need to display the blacklist box
-        let nonZeorFilterCount = 0;
-        for (const filter of User.getBlacklist().values()) {
-            if (filter.getMatches() !== 0) {
-                nonZeorFilterCount++;
-            }
+        // When there are no entries there's no need to display the blacklist box
+        if (filtered.size === 0) BlacklistEnhancer.$box.hide();
+        else BlacklistEnhancer.$box.show();
+
+        // Update total count
+        $("#blacklisted-count").text("(" + filtered.size + ")");
+
+        /**
+         * Creates a filter list entry and appends it to the list  
+         * https://github.com/zwagoth/e621ng/blob/master/app/javascript/src/javascripts/blacklists.js
+         * @param filterString Filter string
+         * @param filter PostFilter object
+         * @returns True if an entry was added, false otherwise
+         */
+        function addSidebarEntry(filterString: string, filter: PostFilter): boolean {
+            if (filter.getMatches() === 0) return false;
+            console.log(filterString, filter.getMatches(), filter.getMatchesIds());
+
+            const $entry = $("<li>");
+
+            const $link = $("<a>")
+                .text(filterString)
+                .addClass("blacklist-toggle-link")
+                .toggleClass("blacklisted-active", !filter.isEnabled())
+                .attr({
+                    "href": `/posts?tags=${encodeURIComponent(filterString)}`,
+                    "title": filterString,
+                    "rel": "nofollow"
+                })
+                .appendTo($entry)
+                .on("click", event => {
+                    event.preventDefault();
+                    filter.toggleEnabled();
+                    BlacklistEnhancer.applyBlacklist();
+                    $link.toggleClass("blacklisted-active");
+                });
+
+            $entry.append(" ");
+
+            $("<span>")
+                .html(filter.getMatches() + "")
+                .addClass("post-count")
+                .appendTo($entry);
+
+            BlacklistEnhancer.$list.append($entry);
+            return true;
         }
-        if (nonZeorFilterCount === 0) {
-            this.$box.hide();
-        } else {
-            this.$box.show();
-        }
-
-        //update total count
-        $("#blacklisted-count").text(`(${User.getTotalBlacklistMatches()})`);
-    }
-
-    private addSidebarEntry(filterString, filter: PostFilter): void {
-        //https://github.com/zwagoth/e621ng/blob/master/app/javascript/src/javascripts/blacklists.js
-
-        //don't display filters with zero matches
-        if (filter.getMatches() === 0) {
-            return;
-        }
-
-        const $entry = $("<li>");
-        const $link = $("<a>");
-        const $count = $("<span>");
-
-        $link.text(filterString);
-        $link.addClass("blacklist-toggle-link");
-        $link.attr("href", `/posts?tags=${encodeURIComponent(filterString)}`);
-        $link.attr("title", filterString);
-        $link.attr("rel", "nofollow");
-
-        $link.on("click", e => {
-            e.preventDefault();
-            filter.toggleEnabled();
-            this.applyBlacklist();
-            $link.toggleClass("blacklisted-active");
-        });
-
-        if (!filter.isEnabled()) {
-            $link.addClass("blacklisted-active");
-        }
-
-        $count.html(filter.getMatches() + "");
-        $count.addClass("post-count");
-        $entry.append($link);
-        $entry.append(" ");
-        $entry.append($count);
-
-        this.$list.append($entry);
     }
 
 }
