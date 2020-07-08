@@ -66,6 +66,9 @@ export class BlacklistEnhancer extends RE6Module {
                 $enableAllbutton.hide();
             });
 
+        if (!$disableAllButton.is(":visible") && !$enableAllbutton.is(":visible"))
+            $enableAllbutton[0].click();
+
         // Add x next to tag names to toggle them from the blacklist
         if (this.fetchSettings("quickaddTags") === true && User.isLoggedIn()) {
             $("div.tag-actions span.tag-action-blacklist").each((index, element) => {
@@ -164,7 +167,7 @@ export class BlacklistEnhancer extends RE6Module {
          */
         function addSidebarEntry(filterString: string, filter: PostFilter): boolean {
             if (filter.getMatches() === 0) return false;
-            console.log(filterString, filter.getMatches(), filter.getMatchesIds());
+            // console.log(filterString, filter.getMatches(), filter.getMatchesIds());
 
             const $entry = $("<li>");
 
