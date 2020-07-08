@@ -70,7 +70,6 @@ export class XMStorage {
             chrome.storage.onChanged.addListener(function (changes: ChromeStorageDataChange) {
                 for (const key in changes) {
                     if (key !== name) return;
-                    console.log(changes[key]);
                     callback(key, changes[key].oldValue, changes[key].newValue, true);
                 }
             });
