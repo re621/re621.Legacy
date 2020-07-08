@@ -382,8 +382,8 @@ export class SubscriptionManager extends RE6Module {
         SubscriptionManager.updateInProgress = true;
         const now = Util.getTime(),
             prevUpdate = await this.fetchSettings("lastUpdate", true);
-        this.pushSettings("lastUpdate", now);
-        this.pushSettings("updateStarted", now);
+        await this.pushSettings("lastUpdate", now);
+        await this.pushSettings("updateStarted", now);
         SubscriptionManager.trigger("timerRefresh");
 
         this.$openSubsButton.attr({
@@ -410,7 +410,7 @@ export class SubscriptionManager extends RE6Module {
         });
 
         SubscriptionManager.updateInProgress = false;
-        this.pushSettings("updateStarted", 0);
+        await this.pushSettings("updateStarted", 0);
         SubscriptionManager.trigger("timerRefresh");
 
         this.$openSubsButton.attr("data-loading", "false");
