@@ -164,7 +164,7 @@ export class BlacklistEnhancer extends RE6Module {
          */
         function addSidebarEntry(filterString: string, filter: PostFilter): boolean {
             if (filter.getMatches() === 0) return false;
-            console.log(filterString, filter.getMatches(), filter.getMatchesIds());
+            // console.log(filterString, filter.getMatches(), filter.getMatchesIds());
 
             const $entry = $("<li>");
 
