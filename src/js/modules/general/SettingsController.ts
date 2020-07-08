@@ -87,9 +87,9 @@ export class SettingsController extends RE6Module {
             (async (): Promise<void> => {
                 releases.latest = JSON.parse(await Util.userscriptRequest("https://api.github.com/repos/re621/re621/releases/latest"));
                 releases.current = JSON.parse(await Util.userscriptRequest("https://api.github.com/repos/re621/re621/releases/tags/" + window["re621"]["version"]));
-                this.pushSettings("newVersionAvailable", releases.latest.name !== releases.current.name);
-                this.pushSettings("lastVersionCheck", new Date().getTime());
-                this.pushSettings("changelog", releases.current.body);
+                await this.pushSettings("newVersionAvailable", releases.latest.name !== releases.current.name);
+                await this.pushSettings("lastVersionCheck", new Date().getTime());
+                await this.pushSettings("changelog", releases.current.body);
 
                 $("div#changelog-list").html(Util.quickParseMarkdown(releases.current.body));
                 $("#project-update-button").attr("data-available", (releases.latest.name !== releases.current.name) + "");
