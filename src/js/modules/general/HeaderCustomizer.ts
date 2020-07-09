@@ -28,15 +28,15 @@ export class HeaderCustomizer extends RE6Module {
     public constructor() {
         super();
         this.registerHotkeys(
-            { keys: "hotkeyTab1", fnct: this.openTabNum },
-            { keys: "hotkeyTab2", fnct: this.openTabNum },
-            { keys: "hotkeyTab3", fnct: this.openTabNum },
-            { keys: "hotkeyTab4", fnct: this.openTabNum },
-            { keys: "hotkeyTab5", fnct: this.openTabNum },
-            { keys: "hotkeyTab6", fnct: this.openTabNum },
-            { keys: "hotkeyTab7", fnct: this.openTabNum },
-            { keys: "hotkeyTab8", fnct: this.openTabNum },
-            { keys: "hotkeyTab9", fnct: this.openTabNum },
+            { keys: "hotkeyTab1", fnct: () => { HeaderCustomizer.openTabNum(0); } },
+            { keys: "hotkeyTab2", fnct: () => { HeaderCustomizer.openTabNum(1); } },
+            { keys: "hotkeyTab3", fnct: () => { HeaderCustomizer.openTabNum(2); } },
+            { keys: "hotkeyTab4", fnct: () => { HeaderCustomizer.openTabNum(3); } },
+            { keys: "hotkeyTab5", fnct: () => { HeaderCustomizer.openTabNum(4); } },
+            { keys: "hotkeyTab6", fnct: () => { HeaderCustomizer.openTabNum(5); } },
+            { keys: "hotkeyTab7", fnct: () => { HeaderCustomizer.openTabNum(6); } },
+            { keys: "hotkeyTab8", fnct: () => { HeaderCustomizer.openTabNum(7); } },
+            { keys: "hotkeyTab9", fnct: () => { HeaderCustomizer.openTabNum(8); } },
         );
     }
 
@@ -367,10 +367,10 @@ export class HeaderCustomizer extends RE6Module {
         await this.pushSettings("tabs", tabData);
     }
 
-    private openTabNum(event, key: string): void {
+    private static openTabNum(num: number): void {
         const tabs = ModuleController.get(HeaderCustomizer).$menu.find<HTMLElement>("li > a");
-        if (parseInt(key) > tabs.length) return;
-        tabs[parseInt(key) - 1].click();
+        if (num > tabs.length) return;
+        tabs[num].click();
     }
 
 }
