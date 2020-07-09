@@ -250,8 +250,13 @@ export class TinyAlias extends RE6Module {
         // Looking for the wiki page
         E621.Wiki.get<APIWikiPage>({ "search[title]": encodeURIComponent(tagInfo.realName) }, 500).then((data) => {
             const wikiPage = data[0];
-            if (wikiPage !== undefined && wikiPage.title === tagInfo.realName)
-                this.$infoText.append(` <a href="/wiki_pages/${wikiPage.id}">wiki</a>`);
+
+            // Wiki page does not exist
+            if (wikiPage === undefined || wikiPage.title !== tagInfo.realName) return;
+            // Input text changed
+            if (tag !== this.prepareTag($input.val().toString())) return;
+
+            this.$infoText.append(` <a href="/wiki_pages/${wikiPage.id}">wiki</a>`);
         });
 
         this.$infoText.attr("data-state", "done");
