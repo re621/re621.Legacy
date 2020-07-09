@@ -114,6 +114,13 @@ form.grid-form {
                 text-align: center;
                 outline: 0;
 
+                box-shadow: none;
+                transition: box-shadow 0.25s linear;
+
+                &.highlight {
+                    box-shadow: inset 0px 0px 0px 2px #ffffff60;
+                }
+
                 &.input-info {
                     color: orange;
                 }

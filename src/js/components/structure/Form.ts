@@ -331,8 +331,13 @@ export class Form {
             .html(`<i class="far fa-copy"></i>`)
             .appendTo($inputContainer);
 
-        $($copybutton).click(function () {
+        let copyTimer: number;
+        $copybutton.click(function () {
             XM.Util.setClipboard($input.val());
+
+            window.clearTimeout(copyTimer);
+            $input.addClass("highlight");
+            copyTimer = window.setTimeout(() => $input.removeClass("highlight"), 250);
         });
 
         let timer: number;
