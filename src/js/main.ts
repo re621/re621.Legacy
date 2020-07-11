@@ -7,8 +7,8 @@
 import { ModuleController } from "./components/ModuleController";
 import { DomUtilities } from "./components/structure/DomUtilities";
 import { Debug } from "./components/utility/Debug";
-import { ErrorHandler } from "./components/utility/ErrorHandler";
 import { Patcher } from "./components/utility/Patcher";
+import { Sync } from "./components/utility/Sync";
 import { FavDownloader } from "./modules/downloader/FavDownloader";
 import { MassDownloader } from "./modules/downloader/MassDownloader";
 import { PoolDownloader } from "./modules/downloader/PoolDownloader";
@@ -80,7 +80,9 @@ DomUtilities.createStructure().then(async () => {
 
     await Debug.init();
     await Patcher.run();
-    await ErrorHandler.report();
+
+    await Sync.validateRegistration();
+    await Sync.report();
 
     // This code is pretty fragile. It's also what makes the rest of the project work.
     // It is dependent on the previous step, which runs when the document fully loads

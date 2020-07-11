@@ -10,8 +10,8 @@ import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
 import { Debug } from "../../components/utility/Debug";
-import { ErrorHandler } from "../../components/utility/ErrorHandler";
 import { Patcher } from "../../components/utility/Patcher";
+import { Sync } from "../../components/utility/Sync";
 import { Util } from "../../components/utility/Util";
 import { FavDownloader } from "../downloader/FavDownloader";
 import { MassDownloader } from "../downloader/MassDownloader";
@@ -851,7 +851,7 @@ export class SettingsController extends RE6Module {
             Form.section({ id: "statistics", columns: 3, customClass: "display-none-important" }, [
                 Form.header("Anonymous Statistics"),
                 Form.checkbox(
-                    "report-enabled", ErrorHandler.reportVersion !== false, "Enabled", "full",
+                    "report-enabled", Sync.version !== false, "Enabled", "full",
                     async (event, data) => {
                         if (data !== false) await XM.Storage.setValue("re621.report", "0.0.1");
                         else await XM.Storage.setValue("re621.report", false);
@@ -889,7 +889,7 @@ export class SettingsController extends RE6Module {
 
         function printEnvData(): FormElement[] {
             const output: FormElement[] = [];
-            const data = ErrorHandler.getEnvData();
+            const data = Sync.getEnvData();
             for (const key in data) output.push(Form.div(data[key], "column", key));
             return output;
         }
