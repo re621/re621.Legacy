@@ -80,19 +80,17 @@ DomUtilities.createStructure().then(async () => {
 
     await Debug.init();
     await Patcher.run();
-
-    await Sync.validateRegistration();
-    await Sync.report();
+    await Sync.init();
 
     // This code is pretty fragile. It's also what makes the rest of the project work.
     // It is dependent on the previous step, which runs when the document fully loads
     // If that changes, this will need to be wrapped in `$(() => { ... });`
 
     // Subscriptions have to be registered before the SubscriptionManager
-    ModuleController.register(subscriptions);
-    SubscriptionManager.register(subscriptions);
+    await ModuleController.register(subscriptions);
+    await SubscriptionManager.register(subscriptions);
 
     // Register the rest of the modules
-    ModuleController.register(loadOrder);
+    await ModuleController.register(loadOrder);
 
 });
