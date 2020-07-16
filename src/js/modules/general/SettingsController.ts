@@ -64,7 +64,7 @@ export class SettingsController extends RE6Module {
                 { name: "Downloads", page: this.createDownloadsTab().get() },
                 { name: "Custom Flags", page: this.createFlagsTab().get() },
                 { name: "Hotkeys", page: this.createHotkeysTab().get() },
-                { name: "Sync", page: this.createSyncTab().get() },
+                // { name: "Sync", page: this.createSyncTab().get() },
                 { name: "Other", page: this.createMiscTab().get() },
                 { name: "About", page: this.createAboutTab().get() },
             ]
