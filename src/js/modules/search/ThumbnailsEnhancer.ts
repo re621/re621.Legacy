@@ -200,6 +200,8 @@ export class ThumbnailEnhancer extends RE6Module {
         if (!preserveHoverText) $img.removeAttr("title");
         $img.attr("alt", "#" + $article.attr("data-id"));
 
+        $img.css("--native-ratio", $img.height() / $img.width());
+
         // Image not wrapped in picture - usually on comment pages and the like
         let $picture = $article.find("picture");
         if ($picture.length == 0) $picture = $("<picture>").insertAfter($img).append($img);

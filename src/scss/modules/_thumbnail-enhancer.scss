@@ -138,7 +138,8 @@ div#page[data-thumb-crop=true] {
 
             article.post-preview img,
             div.post-preview img {
-                height: unset;
+                height: calc(var(--thumbnail-size, 150px) * var(--native-ratio, 1));
+                max-height: 50vh;
             }
         }
     }
