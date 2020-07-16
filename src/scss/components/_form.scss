@@ -79,6 +79,10 @@ form.grid-form {
             min-height: 1.25rem;
             overflow: hidden;
 
+            &:disabled {
+                color: #666;
+            }
+
             &:required {
                 border-left: 5px solid grey;
             }
@@ -113,6 +117,13 @@ form.grid-form {
                 border-radius: 4px 0 0 4px;
                 text-align: center;
                 outline: 0;
+
+                box-shadow: none;
+                transition: box-shadow 0.25s linear;
+
+                &.highlight {
+                    box-shadow: inset 0px 0px 0px 2px #ffffff60;
+                }
 
                 &.input-info {
                     color: orange;

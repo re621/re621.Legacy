@@ -10,8 +10,8 @@ import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
 import { Debug } from "../../components/utility/Debug";
-import { ErrorHandler } from "../../components/utility/ErrorHandler";
 import { Patcher } from "../../components/utility/Patcher";
+import { Sync } from "../../components/utility/Sync";
 import { Util } from "../../components/utility/Util";
 import { FavDownloader } from "../downloader/FavDownloader";
 import { MassDownloader } from "../downloader/MassDownloader";
@@ -64,6 +64,7 @@ export class SettingsController extends RE6Module {
                 { name: "Downloads", page: this.createDownloadsTab().get() },
                 { name: "Custom Flags", page: this.createFlagsTab().get() },
                 { name: "Hotkeys", page: this.createHotkeysTab().get() },
+                // { name: "Sync", page: this.createSyncTab().get() },
                 { name: "Other", page: this.createMiscTab().get() },
                 { name: "About", page: this.createAboutTab().get() },
             ]
@@ -87,9 +88,9 @@ export class SettingsController extends RE6Module {
             (async (): Promise<void> => {
                 releases.latest = JSON.parse(await Util.userscriptRequest("https://api.github.com/repos/re621/re621/releases/latest"));
                 releases.current = JSON.parse(await Util.userscriptRequest("https://api.github.com/repos/re621/re621/releases/tags/" + window["re621"]["version"]));
-                this.pushSettings("newVersionAvailable", releases.latest.name !== releases.current.name);
-                this.pushSettings("lastVersionCheck", new Date().getTime());
-                this.pushSettings("changelog", releases.current.body);
+                await this.pushSettings("newVersionAvailable", releases.latest.name !== releases.current.name);
+                await this.pushSettings("lastVersionCheck", new Date().getTime());
+                await this.pushSettings("changelog", releases.current.body);
 
                 $("div#changelog-list").html(Util.quickParseMarkdown(releases.current.body));
                 $("#project-update-button").attr("data-available", (releases.latest.name !== releases.current.name) + "");
@@ -328,6 +329,15 @@ export class SettingsController extends RE6Module {
                         }
                     ),
                     Form.div("Height to width ratio of the image", "mid"),
+
+                    Form.checkbox("preserve-ratio", thumbnailEnhancer.fetchSettings("cropPreserveRatio"), "Preserve ratio", "column",
+                        async (event, data) => {
+                            await thumbnailEnhancer.pushSettings("cropPreserveRatio", data);
+                            $("input#advanced-crop-ratio").prop('disabled', data);
+                            thumbnailEnhancer.toggleThumbPreserveRatio(data);
+                        }
+                    ),
+                    Form.div("Keep the image ratio of the original image", "mid"),
 
                     Form.spacer("full"),
 
@@ -767,6 +777,34 @@ export class SettingsController extends RE6Module {
         ]);
     }
 
+    private createSyncTab(): Form {
+        return new Form({ id: "settings-sync", columns: 3, parent: "div#modal-container" }, [
+            Form.header("Settings Synchronization"),
+
+            Form.checkbox(
+                "sync-enabled", Sync.enabled, "Enabled", "column",
+                async (data) => {
+                    console.log(data);
+                }
+            ),
+            Form.spacer("mid"),
+
+            Form.div("ID", "column"),
+            Form.input(
+                "sync-id", Sync.userID, undefined, "column", undefined,
+                async (data) => {
+                    console.log(data);
+                }
+            ),
+            Form.input(
+                "sync-pass", "password", undefined, "column", undefined,
+                async (data) => {
+                    console.log(data);
+                }
+            ),
+        ]);
+    }
+
     /** Creates the miscellaneous settings tab */
     private createMiscTab(): Form {
         const modules = ModuleController.getAll();
@@ -851,7 +889,7 @@ export class SettingsController extends RE6Module {
             Form.section({ id: "statistics", columns: 3, customClass: "display-none-important" }, [
                 Form.header("Anonymous Statistics"),
                 Form.checkbox(
-                    "report-enabled", ErrorHandler.reportVersion !== false, "Enabled", "full",
+                    "report-enabled", Sync.version !== false, "Enabled", "full",
                     async (event, data) => {
                         if (data !== false) await XM.Storage.setValue("re621.report", "0.0.1");
                         else await XM.Storage.setValue("re621.report", false);
@@ -889,7 +927,7 @@ export class SettingsController extends RE6Module {
 
         function printEnvData(): FormElement[] {
             const output: FormElement[] = [];
-            const data = ErrorHandler.getEnvData();
+            const data = Sync.getEnvData();
             for (const key in data) output.push(Form.div(data[key], "column", key));
             return output;
         }

@@ -43,6 +43,7 @@ export class ThumbnailEnhancer extends RE6Module {
             crop: true,
             cropSize: "150px",
             cropRatio: "0.9",
+            cropPreserveRatio: false,
 
             ribbons: true,
             relRibbons: true,
@@ -76,6 +77,7 @@ export class ThumbnailEnhancer extends RE6Module {
         this.toggleThumbCrop(this.fetchSettings("crop"));
         this.setThumbSize(this.fetchSettings("cropSize"));
         this.setThumbRatio(this.fetchSettings("cropRatio"));
+        this.toggleThumbPreserveRatio(this.fetchSettings("cropPreserveRatio"))
 
         this.toggleStatusRibbons(this.fetchSettings("ribbons"));
         this.toggleRelationRibbons(this.fetchSettings("relRibbons"));
@@ -157,6 +159,14 @@ export class ThumbnailEnhancer extends RE6Module {
     }
 
     /**
+     * If set to true, ignores the forced thumbnail ratio in favor of the original one
+     * @param state True to preserve, false to enforce
+     */
+    public toggleThumbPreserveRatio(state = true): void {
+        this.postContainer.attr("data-thumb-preserve-ratio", state + "");
+    }
+
+    /**
      * Toggles the post flag ribbons
      * @param state True to enable, false to disable
      */
@@ -189,6 +199,8 @@ export class ThumbnailEnhancer extends RE6Module {
 
         if (!preserveHoverText) $img.removeAttr("title");
         $img.attr("alt", "#" + $article.attr("data-id"));
+
+        $img.css("--native-ratio", $img.height() / $img.width());
 
         // Image not wrapped in picture - usually on comment pages and the like
         let $picture = $article.find("picture");

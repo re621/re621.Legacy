@@ -130,6 +130,19 @@ div#page[data-thumb-crop=true] {
             }
         }
     }
+
+    &[data-thumb-preserve-ratio=true] {
+
+        div#posts-container,
+        div#c-favorites div#posts {
+
+            article.post-preview img,
+            div.post-preview img {
+                height: calc(var(--thumbnail-size, 150px) * var(--native-ratio, 1));
+                max-height: 50vh;
+            }
+        }
+    }
 }
 
 div#c-comments {

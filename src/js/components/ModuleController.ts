@@ -11,17 +11,23 @@ export class ModuleController {
      * @todo any parameter is not correct here but I couldn't figure the right types out
      *  { new(): RE6Module } works to access constructor name but not static methods
      */
-    public static register(moduleList: any | any[]): void {
+    public static async register(moduleList: any | any[]): Promise<number> {
         if (!Array.isArray(moduleList)) moduleList = [moduleList];
 
-        moduleList.forEach(async (moduleClass: any) => {
+        let activeModules = 0;
+        for (const moduleClass of moduleList) {
             try {
                 const moduleInstance = moduleClass.getInstance();
                 this.modules.set(moduleClass.prototype.constructor.name, moduleInstance);
                 await moduleInstance.prepare();
-                if (moduleInstance.canInitialize()) moduleInstance.create();
+                if (moduleInstance.canInitialize()) {
+                    moduleInstance.create();
+                    activeModules++;
+                }
             } catch (error) { ErrorHandler.error(moduleClass, error.stack, "init"); }
-        });
+        }
+
+        return Promise.resolve(activeModules);
     }
 
     /**
