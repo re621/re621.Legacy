@@ -43,6 +43,7 @@ export class ThumbnailEnhancer extends RE6Module {
             crop: true,
             cropSize: "150px",
             cropRatio: "0.9",
+            cropPreserveRatio: false,
 
             ribbons: true,
             relRibbons: true,
@@ -76,6 +77,7 @@ export class ThumbnailEnhancer extends RE6Module {
         this.toggleThumbCrop(this.fetchSettings("crop"));
         this.setThumbSize(this.fetchSettings("cropSize"));
         this.setThumbRatio(this.fetchSettings("cropRatio"));
+        this.toggleThumbPreserveRatio(this.fetchSettings("cropPreserveRatio"))
 
         this.toggleStatusRibbons(this.fetchSettings("ribbons"));
         this.toggleRelationRibbons(this.fetchSettings("relRibbons"));
@@ -154,6 +156,14 @@ export class ThumbnailEnhancer extends RE6Module {
      */
     public setThumbRatio(ratio: string): void {
         this.postContainer.css("--thumbnail-ratio", ratio);
+    }
+
+    /**
+     * If set to true, ignores the forced thumbnail ratio in favor of the original one
+     * @param state True to preserve, false to enforce
+     */
+    public toggleThumbPreserveRatio(state = true): void {
+        this.postContainer.attr("data-thumb-preserve-ratio", state + "");
     }
 
     /**

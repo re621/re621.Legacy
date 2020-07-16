@@ -329,6 +329,15 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.div("Height to width ratio of the image", "mid"),
 
+                    Form.checkbox("preserve-ratio", thumbnailEnhancer.fetchSettings("cropPreserveRatio"), "Preserve ratio", "column",
+                        async (event, data) => {
+                            await thumbnailEnhancer.pushSettings("cropPreserveRatio", data);
+                            $("input#advanced-crop-ratio").prop('disabled', data);
+                            thumbnailEnhancer.toggleThumbPreserveRatio(data);
+                        }
+                    ),
+                    Form.div("Keep the image ratio of the original image", "mid"),
+
                     Form.spacer("full"),
 
 

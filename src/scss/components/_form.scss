@@ -79,6 +79,10 @@ form.grid-form {
             min-height: 1.25rem;
             overflow: hidden;
 
+            &:disabled {
+                color: #666;
+            }
+
             &:required {
                 border-left: 5px solid grey;
             }
