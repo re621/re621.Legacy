@@ -62,6 +62,17 @@ export class Patcher {
             Patcher.version = 2;
         }
 
+        // Patch 3 - Version 1.3.12
+        // Rework of existing sync code meant the removal of existing variables
+        if (Patcher.version < 3) {
+            if (await XM.Storage.getValue("re621.report", undefined) !== undefined) {
+                await XM.Storage.deleteValue("re621.report");
+                counter++;
+            }
+
+            Patcher.version = 3;
+        }
+
         Debug.log(`Patcher: ${counter} records changed`)
         await XM.Storage.setValue("re621.patchVersion", Patcher.version);
     }

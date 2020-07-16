@@ -7,9 +7,14 @@ import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
 import { Debug } from "../../components/utility/Debug";
+import { Sync } from "../../components/utility/Sync";
 import { Util } from "../../components/utility/Util";
 import { ThumbnailClickAction, ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
+import { CommentTracker } from "./CommentTracker";
+import { ForumTracker } from "./ForumTracker";
+import { PoolTracker } from "./PoolTracker";
 import { SubscriptionTracker, UpdateContent } from "./SubscriptionTracker";
+import { TagTracker } from "./TagTracker";
 
 export class SubscriptionManager extends RE6Module {
 
@@ -63,16 +68,18 @@ export class SubscriptionManager extends RE6Module {
     }
 
     /** Registers the provided tracker(s) into the system */
-    public static register(moduleList: any | any[]): void {
+    public static async register(moduleList: any | any[]): Promise<number> {
         if (!Array.isArray(moduleList)) moduleList = [moduleList];
 
         const trackers = (this.getInstance() as SubscriptionManager).trackers;
-        moduleList.forEach(async (moduleClass: any) => {
+        for (const moduleClass of moduleList) {
             trackers.set(
                 moduleClass.prototype.constructor.name,
                 { instance: ModuleController.get<SubscriptionTracker>(moduleClass) }
             );
-        });
+        }
+
+        return Promise.resolve(moduleList.length);
     }
 
     /**
@@ -391,6 +398,24 @@ export class SubscriptionManager extends RE6Module {
             "data-updates": "0",
         });
 
+        if (Sync.enabled) {
+            const syncData = await Sync.download();
+            if (syncData === null) await Sync.upload();
+            else {
+                const time = new Date(syncData["timestamp"] + "Z").getTime();
+                console.log(time, Sync.timestamp, time > Sync.timestamp);
+                if (time > Sync.timestamp) {
+                    Debug.log("SYNC: downloading remote")
+                    await ModuleController.get(CommentTracker).pushSettings("data", syncData.data.CommentTracker);
+                    await ModuleController.get(ForumTracker).pushSettings("data", syncData.data.ForumTracker);
+                    await ModuleController.get(PoolTracker).pushSettings("data", syncData.data.PoolTracker);
+                    await ModuleController.get(TagTracker).pushSettings("data", syncData.data.TagTracker);
+                    Sync.timestamp = time;
+                    await Sync.saveSettings();
+                } else Debug.log("SYNC: up to date");
+            }
+        }
+
         this.trackers.forEach(async (trackerData) => {
             Debug.log("SubM: redrawing [update]");
             trackerData.tabElement.attr("data-updates", "0");
@@ -555,6 +580,10 @@ export class SubscriptionManager extends RE6Module {
                 processing = true;
 
                 execSubscribe(id, $subscribeButton, $unsubscribeButton, $element)
+                    .then(() => {
+                        if (Sync.enabled) return Sync.upload();
+                        return Promise.resolve();
+                    })
                     .then(() => { processing = false; });
             });
             $unsubscribeButton.click(async (event) => {
@@ -564,6 +593,10 @@ export class SubscriptionManager extends RE6Module {
                 processing = true;
 
                 execUnsubscribe(id, $subscribeButton, $unsubscribeButton)
+                    .then(() => {
+                        if (Sync.enabled) return Sync.upload();
+                        return Promise.resolve();
+                    })
                     .then(() => { processing = false; });
             });
         }

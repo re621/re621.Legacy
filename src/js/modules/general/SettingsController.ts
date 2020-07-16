@@ -64,6 +64,7 @@ export class SettingsController extends RE6Module {
                 { name: "Downloads", page: this.createDownloadsTab().get() },
                 { name: "Custom Flags", page: this.createFlagsTab().get() },
                 { name: "Hotkeys", page: this.createHotkeysTab().get() },
+                // { name: "Sync", page: this.createSyncTab().get() },
                 { name: "Other", page: this.createMiscTab().get() },
                 { name: "About", page: this.createAboutTab().get() },
             ]
@@ -773,6 +774,34 @@ export class SettingsController extends RE6Module {
             // Other
             Form.header("Miscellaneous"),
             ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
+        ]);
+    }
+
+    private createSyncTab(): Form {
+        return new Form({ id: "settings-sync", columns: 3, parent: "div#modal-container" }, [
+            Form.header("Settings Synchronization"),
+
+            Form.checkbox(
+                "sync-enabled", Sync.enabled, "Enabled", "column",
+                async (data) => {
+                    console.log(data);
+                }
+            ),
+            Form.spacer("mid"),
+
+            Form.div("ID", "column"),
+            Form.input(
+                "sync-id", Sync.userID, undefined, "column", undefined,
+                async (data) => {
+                    console.log(data);
+                }
+            ),
+            Form.input(
+                "sync-pass", "password", undefined, "column", undefined,
+                async (data) => {
+                    console.log(data);
+                }
+            ),
         ]);
     }
 
