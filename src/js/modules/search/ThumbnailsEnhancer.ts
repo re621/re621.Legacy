@@ -200,8 +200,6 @@ export class ThumbnailEnhancer extends RE6Module {
         if (!preserveHoverText) $img.removeAttr("title");
         $img.attr("alt", "#" + $article.attr("data-id"));
 
-        $img.css("--native-ratio", $img.height() / $img.width());
-
         // Image not wrapped in picture - usually on comment pages and the like
         let $picture = $article.find("picture");
         if ($picture.length == 0) $picture = $("<picture>").insertAfter($img).append($img);
@@ -362,8 +360,12 @@ export class ThumbnailEnhancer extends RE6Module {
             // Replace placeholder images with CSS-styled ones
             // Don't forget to update PostHtml.create() accordingly
 
-            $("<img>").attr("src", DomUtilities.getPlaceholderImage()).addClass("re621-placeholder-replacer").appendTo($picture);
-            $img.addClass("re621-placeholder-default")
+            $("<img>")
+                .attr("src", DomUtilities.getPlaceholderImage())
+                .css("--native-ratio", 1)
+                .addClass("re621-placeholder-replacer resized")
+                .appendTo($picture);
+            $img.addClass("re621-placeholder-default");
             $picture.addClass("color-text post-placeholder");
 
             // <img class="has-cropped-true" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="#2234748">
@@ -377,6 +379,8 @@ export class ThumbnailEnhancer extends RE6Module {
             const sampleURL = $article.attr("data-large-file-url");
 
             if (upscaleMode === ThumbnailPerformanceMode.Hover) {
+                resolveRatio();
+
                 let timer: number;
                 $article.on("mouseenter", () => {
                     if (ThumbnailEnhancer.zoomPaused) return;
@@ -403,9 +407,13 @@ export class ThumbnailEnhancer extends RE6Module {
                 $img.attr("data-src", sampleURL)
                     .addClass($img.hasClass("later-lazyload") ? "" : "lazyload")
                     .one("lazyloaded", () => {
+                        resolveRatio();
                         $link.removeClass("loading");
                         $article.addClass("loaded");
                     });
+            } else {
+                // Presume ThumbnailPerformanceMode.Disabled
+                resolveRatio();
             }
 
         }
@@ -422,6 +430,13 @@ export class ThumbnailEnhancer extends RE6Module {
         function parseDate(input: string): string {
             const date = new Date(input.split(": ").pop().replace(" ", "T").replace(" ", ""));
             return `<span title="` + date.toLocaleString() + `">` + Util.timeAgo(date) + `</span>`;
+        }
+
+        function resolveRatio(force = false): void {
+            if (force || !$img.hasClass("resized")) {
+                $img.css("--native-ratio", $img.height() / $img.width());
+                $img.addClass("resized");
+            }
         }
 
     }

@@ -209,7 +209,7 @@ export class FavDownloader extends RE6Module {
                 else { this.infoFile.html(""); }
             });
         }).then((zipData) => {
-            let filename = "re621-download-" + this.fileTimestamp;
+            let filename = this.username + "-fav-" + this.fileTimestamp;
             filename += this.downloadOverSize ? "-part" + this.downloadIndex + ".zip" : ".zip";
 
             this.infoText

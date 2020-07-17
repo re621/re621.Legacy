@@ -123,6 +123,7 @@ export class PoolDownloader extends RE6Module {
         // Get the IDs of all selected images
 
         let source: Promise<APIPostGroup[]>;
+        let poolName = "UnknownPostGroup";
 
         if (Page.matches(PageDefintion.pool)) source = E621.Pools.get<APIPool>({ "search[id]": Page.getPageID() });
         else source = E621.Sets.get<APIPool>({ "search[id]": Page.getPageID() });
@@ -132,6 +133,7 @@ export class PoolDownloader extends RE6Module {
             const pool = poolData[0],
                 imageList = pool.post_ids.filter(n => !this.poolDownloaded.includes(n));
             this.poolFiles = pool.post_ids;
+            poolName = pool.name;
 
             // Get the IDs of all pool images
             if (imageList.length === 0) {
@@ -250,7 +252,7 @@ export class PoolDownloader extends RE6Module {
                 else { this.infoFile.html(""); }
             });
         }).then((zipData) => {
-            let filename = "re621-download-" + this.fileTimestamp;
+            let filename = this.createPoolFilename(poolName) + "-" + this.fileTimestamp;
             filename += this.downloadOverSize ? "-part" + this.downloadIndex + ".zip" : ".zip";
 
             this.infoText
@@ -307,6 +309,19 @@ export class PoolDownloader extends RE6Module {
             .replace(/-{2,}/g, "-")
             .replace(/-*$/g, "")
             + "." + data.file.ext;
+    }
+
+    /**
+     * Turns a pool name returned by the API into a proper filename
+     * @param name Pool name
+     */
+    private createPoolFilename(name: string): string {
+        return name
+            .slice(0, 64)
+            .replace(/\s/g, "_")
+            .replace(/_{2,}/g, "_")
+            .replace(/-{2,}/g, "-")
+            .replace(/-*$/g, "");
     }
 
 }
