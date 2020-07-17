@@ -38,6 +38,9 @@ export class PostHtml {
             })
             .appendTo($picture);
 
+        $img.css("--native-ratio", json.file.height / json.file.width);
+        $img.addClass("resized");
+
         if (!(json.file.ext === "swf" || $article.attr("data-flags").includes("deleted"))) {
             // Don't forget to update ThumbnailEnhancer accordingly
             $img.addClass(lazyload ? "lazyload" : "later-lazyload");
