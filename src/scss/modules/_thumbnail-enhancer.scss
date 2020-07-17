@@ -140,6 +140,7 @@ div#page[data-thumb-crop=true] {
             div.post-preview img {
                 height: calc(var(--thumbnail-size, 150px) * var(--native-ratio, 1));
                 max-height: 50vh;
+                min-height: 70px;
             }
         }
     }
