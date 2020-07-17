@@ -282,7 +282,7 @@ export class MassDownloader extends RE6Module {
                 else { this.infoFile.html(""); }
             });
         }).then((zipData) => {
-            let filename = "re621-download-" + this.fileTimestamp;
+            let filename = "e621-" + this.fileTimestamp;
             filename += this.downloadOverSize ? "-part" + this.downloadIndex + ".zip" : ".zip";
 
             this.infoText
