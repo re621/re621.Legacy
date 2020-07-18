@@ -107,7 +107,7 @@ export class Form {
             if (this.config.collapseBadge)
                 $("<span>")
                     .addClass("form-collapse-badge")
-                    .html(this.config.collapseBadge + "")
+                    .append(this.config.collapseBadge)
                     .appendTo(header);
 
             $("<div>")
@@ -1156,7 +1156,7 @@ interface FormConfig {
     /** Whether the collapsable should be open by default */
     collapseState?: boolean;
     /** Badge attached to the collapsable header */
-    collapseBadge?: string | number;
+    collapseBadge?: JQuery<HTMLElement>;
     /** Custom class to add to the form element */
     customClass?: string;
 }

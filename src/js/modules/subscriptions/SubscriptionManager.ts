@@ -320,13 +320,23 @@ export class SubscriptionManager extends RE6Module {
 
         /** Creates a form section that lists currently subscribed items */
         function makeSubSection(instance: SubscriptionTracker, columns: number): FormElement {
-            const $subsSection = $("<div>").addClass("subscriptions-manage-list col-" + columns),
-                data = instance.fetchSettings<Subscription>("data");
+            const data = instance.fetchSettings<Subscription>("data"),
+                $subsSection = $("<div>").addClass("subscriptions-manage-list col-" + columns),
+                $badge = $("<span>").html(Object.keys(data).length + "");
             Object.keys(data).forEach((key) => {
                 formatSubSectionEntry(instance, key, data[key]).appendTo($subsSection);
             });
 
-            return Form.subsection({ id: Util.makeID(), columns: 2, collapseBadge: Object.keys(data).length }, instance.getName(), [
+            SubscriptionManager.on("sublist.update", async () => {
+                const subData = await instance.fetchSettings<Subscription>("data", true);
+                $subsSection.html("");
+                Object.keys(subData).forEach((key) => {
+                    formatSubSectionEntry(instance, key, subData[key]).appendTo($subsSection);
+                });
+                $badge.html(Object.keys(subData).length + "");
+            });
+
+            return Form.subsection({ id: Util.makeID(), columns: 2, collapseBadge: $badge }, instance.getName(), [
                 Form.div($subsSection, "mid"),
             ], undefined, "mid");
         }
@@ -582,10 +592,9 @@ export class SubscriptionManager extends RE6Module {
 
                 execSubscribe(id, $subscribeButton, $unsubscribeButton, $element)
                     .then(() => {
-                        if (Sync.enabled) return Sync.upload();
-                        return Promise.resolve();
-                    })
-                    .then(() => { processing = false; });
+                        SubscriptionManager.trigger("sublist.update");
+                        processing = false;
+                    });
             });
             $unsubscribeButton.click(async (event) => {
                 event.preventDefault();
@@ -595,10 +604,9 @@ export class SubscriptionManager extends RE6Module {
 
                 execUnsubscribe(id, $subscribeButton, $unsubscribeButton)
                     .then(() => {
-                        if (Sync.enabled) return Sync.upload();
-                        return Promise.resolve();
-                    })
-                    .then(() => { processing = false; });
+                        SubscriptionManager.trigger("sublist.update");
+                        processing = false;
+                    });
             });
         }
 
@@ -609,6 +617,8 @@ export class SubscriptionManager extends RE6Module {
             $subscribeButton.addClass("display-none");
             $unsubscribeButton.removeClass("display-none");
 
+            if (Sync.enabled) await Sync.upload();
+
             return instance.pushSettings("data", subscriptionData);
         }
 
@@ -618,6 +628,8 @@ export class SubscriptionManager extends RE6Module {
 
             $subscribeButton.removeClass("display-none");
             $unsubscribeButton.addClass("display-none");
+
+            if (Sync.enabled) await Sync.upload();
 
             return instance.pushSettings("data", subscriptionData);
         }
