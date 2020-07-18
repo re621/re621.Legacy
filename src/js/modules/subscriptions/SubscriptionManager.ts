@@ -325,7 +325,13 @@ export class SubscriptionManager extends RE6Module {
 
             executeSubUpdateEvent();
 
-            SubscriptionManager.on("sublist.update", executeSubUpdateEvent);
+            XM.Storage.addListener(
+                "re621." + instance.getSettingsTag(),
+                () => {
+                    Debug.log(`SubM: Subscriptions updated`);
+                    executeSubUpdateEvent();
+                }
+            );
 
             return Form.subsection({ id: Util.makeID(), columns: 2, collapseBadge: $badge }, instance.getName(), [
                 Form.div($subsSection, "mid"),
@@ -601,10 +607,7 @@ export class SubscriptionManager extends RE6Module {
                 processing = true;
 
                 execSubscribe(id, $subscribeButton, $unsubscribeButton, $element)
-                    .then(() => {
-                        SubscriptionManager.trigger("sublist.update");
-                        processing = false;
-                    });
+                    .then(() => { processing = false; });
             });
             $unsubscribeButton.click(async (event) => {
                 event.preventDefault();
@@ -613,10 +616,7 @@ export class SubscriptionManager extends RE6Module {
                 processing = true;
 
                 execUnsubscribe(id, $subscribeButton, $unsubscribeButton)
-                    .then(() => {
-                        SubscriptionManager.trigger("sublist.update");
-                        processing = false;
-                    });
+                    .then(() => { processing = false; });
             });
         }
 
