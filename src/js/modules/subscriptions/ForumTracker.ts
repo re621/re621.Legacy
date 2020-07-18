@@ -20,7 +20,6 @@ export class ForumTracker extends RE6Module implements SubscriptionTracker {
         return {
             enabled: true,
             data: {},
-            cache: {},
         };
     }
 

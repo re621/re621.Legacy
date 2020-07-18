@@ -22,7 +22,6 @@ export class CommentTracker extends RE6Module implements SubscriptionTracker {
         return {
             enabled: true,
             data: {},
-            cache: {},
         };
     }
 

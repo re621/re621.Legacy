@@ -21,7 +21,6 @@ export class PoolTracker extends RE6Module implements SubscriptionTracker {
         return {
             enabled: true,
             data: {},
-            cache: {},
         };
     }
 
