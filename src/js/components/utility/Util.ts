@@ -160,7 +160,7 @@ export class Util {
      * @param altMode Alternative mode
      * @returns Array of smaller arrays of specified size
      */
-    public static chunkArray(input: any[], size: number, altMode = false): any[] {
+    public static chunkArray<T>(input: T[], size: number, altMode = false): T[][] {
         const result = [];
         if (altMode) {
             result[0] = input.slice(0, size);
