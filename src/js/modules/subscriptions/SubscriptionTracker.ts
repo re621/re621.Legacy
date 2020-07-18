@@ -201,8 +201,9 @@ export class UpdateCache {
      * Note that this method presumes that the cache index is already up to date.  
      */
     private trim(): void {
-        const manager = ModuleController.get(SubscriptionManager),
-            params = manager.fetchSettings(["cacheMaxAge", "cacheSize"]);
+        const params = ModuleController
+            .get(SubscriptionManager)
+            .fetchSettings(["cacheMaxAge", "cacheSize"]);
 
         // If cacheMaxAge is set to never, its value is 0
         const ageLimit = params.cacheMaxAge === 0 ? 0 : new Date().getTime() - params.cacheMaxAge;

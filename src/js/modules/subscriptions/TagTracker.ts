@@ -1,9 +1,11 @@
 import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { Post } from "../../components/data/Post";
+import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
-import { Subscription } from "./SubscriptionManager";
+import { Subscription, SubscriptionManager } from "./SubscriptionManager";
 import { SubscriptionTracker, UpdateActions, UpdateCache, UpdateContent, UpdateData } from "./SubscriptionTracker";
 
 export class TagTracker extends RE6Module implements SubscriptionTracker {
@@ -101,16 +103,44 @@ export class TagTracker extends RE6Module implements SubscriptionTracker {
 
         status.append(`<div>. . . sending an API request</div>`);
         const storedSubChunks = Util.chunkArray(Object.keys(storedSubs), this.subBatchSize);
-        const apiData: APIPost[] = [];
+        const apiChunks: APIPost[][] = [];
         for (const [index, chunk] of storedSubChunks.entries()) {
             if (storedSubChunks.length > 1) status.append(`<div>&nbsp; &nbsp; &nbsp; - processing batch #${index}</div>`);
-            apiData.push(...await E621.Posts.get<APIPost>({ "tags": chunk.map(el => "~" + el).join("+") }, 500));
+            apiChunks.push(await E621.Posts.get<APIPost>({ "tags": chunk.map(el => "~" + el).join("+"), "limit": 320 }, 500));
         }
 
+        Debug.log("posts from " + Util.formatTime(new Date(lastUpdate)));
+        Debug.log(apiChunks);
         status.append(`<div>. . . formatting output</div>`);
-        for (const post of apiData) {
-            const postObject = new Post(post);
-            if (new Date(post.created_at).getTime() > lastUpdate && !postObject.matchesBlacklist(true)) {
+        const postLimit = ModuleController.get(SubscriptionManager).fetchSettings<number>("cacheSize")
+        for (const apiData of apiChunks) {
+            for (const post of apiData) {
+                Debug.log(
+                    "TgT:",
+                    post.id,
+                    Util.formatTime(new Date(post.created_at)),
+                    new Date(post.created_at).getTime() > lastUpdate ? "new" : "old"
+                );
+
+                // Stop loading updates if they will get trimmed from the cache anyways
+                if (Object.keys(results).length > postLimit) {
+                    Debug.log("TgT: postlimit");
+                    break;
+                }
+
+                // Posts are ordered by upload date, with newest first
+                // Thus, if one post fails the age check, so will any that follow
+                if (new Date(post.created_at).getTime() < lastUpdate) {
+                    Debug.log("TgT: lastupdate");
+                    break;
+                }
+
+                // Only add posts that match the blacklist
+                if (new Post(post).matchesBlacklist(true)) {
+                    Debug.log("TgT: blacklist");
+                    continue;
+                }
+
                 results[new Date(post.created_at).getTime()] = await this.formatPostUpdate(post);
             }
         }

@@ -256,6 +256,7 @@ export class SubscriptionManager extends RE6Module {
                 Form.select(
                     "update-interval", this.fetchSettings("updateInterval") / TIME_PERIOD.HOUR, "Update Interval",
                     [
+                        // { value: 0.1, name: "6 minutes" },
                         { value: 0.5, name: "30 minutes" },
                         { value: 1, name: "1 hour" },
                         { value: 6, name: "6 hours" },

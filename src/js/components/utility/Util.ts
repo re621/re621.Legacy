@@ -235,6 +235,27 @@ export class Util {
     }
 
     /**
+     * Formats the provided date as a string in YYYY-MM-DD HH:SS format
+     * @param date Date to format. If none is provided, formats current date
+     */
+    public static formatTime(date = new Date()): string {
+        const parts = {
+            year: "" + date.getFullYear(),
+            month: "" + (date.getMonth() + 1),
+            day: "" + date.getDate(),
+            hours: "" + date.getHours(),
+            minutes: "" + date.getMinutes(),
+            seconds: "" + date.getSeconds(),
+        }
+
+        for (const id in parts) {
+            if (parts[id].length < 2) parts[id] = "0" + parts[id];
+        }
+
+        return parts.year + "-" + parts.month + "-" + parts.day + " " + parts.hours + ":" + parts.minutes + ":" + parts.seconds;
+    }
+
+    /**
      * Compares two software version numbers (e.g. "1.7.1" or "1.2b").
      *
      * This function was born in http://stackoverflow.com/a/6832721.
