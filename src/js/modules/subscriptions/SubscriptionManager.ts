@@ -320,25 +320,35 @@ export class SubscriptionManager extends RE6Module {
 
         /** Creates a form section that lists currently subscribed items */
         function makeSubSection(instance: SubscriptionTracker, columns: number): FormElement {
-            const data = instance.fetchSettings<Subscription>("data"),
-                $subsSection = $("<div>").addClass("subscriptions-manage-list col-" + columns),
-                $badge = $("<span>").html(Object.keys(data).length + "");
-            Object.keys(data).forEach((key) => {
-                formatSubSectionEntry(instance, key, data[key]).appendTo($subsSection);
-            });
+            const $subsSection = $("<div>").addClass("subscriptions-manage-list col-" + columns),
+                $badge = $("<span>");
 
-            SubscriptionManager.on("sublist.update", async () => {
-                const subData = await instance.fetchSettings<Subscription>("data", true);
-                $subsSection.html("");
-                Object.keys(subData).forEach((key) => {
-                    formatSubSectionEntry(instance, key, subData[key]).appendTo($subsSection);
-                });
-                $badge.html(Object.keys(subData).length + "");
-            });
+            executeSubUpdateEvent();
+
+            SubscriptionManager.on("sublist.update", executeSubUpdateEvent);
 
             return Form.subsection({ id: Util.makeID(), columns: 2, collapseBadge: $badge }, instance.getName(), [
                 Form.div($subsSection, "mid"),
             ], undefined, "mid");
+
+            async function executeSubUpdateEvent(): Promise<void> {
+                const subData = await instance.fetchSettings<Subscription>("data", true);
+                $subsSection.html("");
+                sortSubscriptionKeys(subData).forEach((key) => {
+                    formatSubSectionEntry(instance, key, subData[key]).appendTo($subsSection);
+                });
+                $badge.html(Object.keys(subData).length + "");
+            }
+
+            function sortSubscriptionKeys(unordered: any): string[] {
+                return Object.keys(unordered)
+                    .sort((a, b) => {
+                        const aName = unordered[a].name ? unordered[a].name.toLowerCase() : "zzz_undefined";
+                        const bName = unordered[b].name ? unordered[b].name.toLowerCase() : "zzz_undefined";
+                        if (aName == bName) return 0;
+                        return aName < bName ? -1 : 1;
+                    });
+            }
         }
 
         /** Creates and returns an entry for the `makeSubSection()` method */
@@ -614,6 +624,8 @@ export class SubscriptionManager extends RE6Module {
             subscriptionData = await instance.fetchSettings("data", true);
             subscriptionData[id] = { name: instance.getSubscriberName($element), };
 
+            subscriptionData = sortSubscriptions(subscriptionData);
+
             $subscribeButton.addClass("display-none");
             $unsubscribeButton.removeClass("display-none");
 
@@ -626,12 +638,22 @@ export class SubscriptionManager extends RE6Module {
             subscriptionData = await instance.fetchSettings("data", true);
             delete subscriptionData[id];
 
+            subscriptionData = sortSubscriptions(subscriptionData);
+
             $subscribeButton.removeClass("display-none");
             $unsubscribeButton.addClass("display-none");
 
             if (Sync.enabled) await Sync.upload();
 
             return instance.pushSettings("data", subscriptionData);
+        }
+
+        function sortSubscriptions(unordered: any): any {
+            const ordered = {};
+            Object.keys(unordered).sort().forEach(function (key) {
+                ordered[key] = unordered[key];
+            });
+            return ordered;
         }
     }
 
