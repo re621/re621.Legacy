@@ -1,0 +1,206 @@
+/* Generated Form Styles */
+
+@mixin form-element {
+    &[labeled=true] {
+        &[colspan="2"] { grid-column: span 3; }
+        &[colspan="3"] { grid-column: span 5; }
+    }
+    &[labeled=false] {
+        &[colspan="1"] { grid-column: span 2; }
+        &[colspan="2"] { grid-column: span 4; }
+        &[colspan="3"] { grid-column: span 6; }
+    }
+}
+
+form.form-section,
+form-section {
+    display: grid;
+    grid-column-gap: 0.5rem;
+    grid-row-gap: 0.5rem;
+
+    @include form-element;
+
+    &[columns="1"] { grid-template-columns: 1fr 2fr; }
+    &[columns="2"] { grid-template-columns: 1fr 2fr 1fr 2fr; }
+    &[columns="3"] { grid-template-columns: 1fr 2fr 1fr 2fr 1fr 2fr; }
+
+    &[formspan="1"] { width: 15rem; }
+    &[formspan="2"] { width: 30rem; }
+    &[formspan="3"] { width: 45rem; }
+}
+
+form.form-section > label,
+form-section > label {
+    font-weight: 500;
+    align-self: center;
+}
+
+
+form.form-section > form-input,
+form-section > form-input {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    @include form-element;
+
+    & > input,
+    & > select,
+    & > textarea {
+        width: 100%;
+        height: 100%;
+        padding: 0 0.25rem;
+        border-radius: 4px;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        min-height: 1.25rem;
+        overflow: hidden;
+
+        &:required { border-left: 5px solid grey; }
+        &:invalid { border-left: 5px solid orange; }
+        &:valid { border-left: 5px solid transparent; }
+    }
+
+    & > button.button {
+        width: 100%;
+        height: 100%;
+        min-height: 1.25rem;
+        padding: 0 0.25rem;
+        border-radius: 4px;
+    }
+    
+    // Copybox
+    &.copybox,
+    &.keyinput {
+        display: inline-grid;
+        grid-template-columns: 80% 20%;
+        overflow: hidden;
+
+        input[type=text] {
+            width: unset;
+            border-radius: 4px 0 0 4px;
+            text-align: center;
+            outline: 0;
+
+            &.input-info { color: orange; }
+        }
+
+        button[type=button] {
+            width: unset;
+            border-radius: 0 4px 4px 0;
+            outline: 0;
+        }
+    }
+
+    // Keybind Selector
+    &.keyinput input[type=text] {
+        text-transform: uppercase;
+        font-family: monospace;
+        font-size: 1.3em;
+    }
+
+    // Icon Selector
+    div.icon-picker {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, 23px);
+        grid-column-gap: 0.29rem;
+        grid-row-gap: 0.30rem;
+        width: 100%;
+
+        a {
+            display: inline-flex;
+            justify-content: space-around;
+            padding: 0.125rem 0.25rem;
+            outline: 0;
+
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+
+            border: 1px dashed #666666;
+
+            &.active { background: #ffffff30; }
+        }
+    }
+
+    // Checkbox Switch
+    &.checkbox-switch {
+        justify-content: unset;
+
+        input[type=checkbox] {  display: none; }
+
+        /* to hide the checkbox itself */
+        input[type=checkbox]+label:before {
+            content: unicode("f0c8");
+            font-family: "Font Awesome 5 Free";
+            display: inline-block;
+            letter-spacing: 10px;
+            cursor: pointer;
+        }
+
+        input[type=checkbox]:checked+label:before {
+            content: unicode("f14a");
+        }
+
+        label {  cursor: pointer; }
+    }
+
+    // Radio Switch
+    &.radio-switch {
+        justify-content: unset;
+
+        div.radio-element {
+            display: inline-flex;
+            margin-right: 0.25rem;
+            border-radius: 4px;
+
+            &:last-child {
+                margin-right: 0;
+            }
+
+            input[type=radio] {
+                display: none;
+            }
+
+            label {
+                padding: 0.25rem 0.5rem;
+                min-width: 3rem;
+                text-align: center;
+                cursor: pointer;
+            }
+        }
+    }
+
+    // DIV
+    &.text-div {
+        width: 100%;
+        line-height: 1.25rem;
+
+        div.notice {
+            font-size: smaller;
+        }
+
+        div.unmargin {
+            margin: -0.5rem 0;
+        }
+
+        pre {
+            display: inline;
+            background: #ffffff15;
+            padding: 0 0.25rem;
+            border-radius: 0.25rem;
+        }
+    }
+
+    // HR
+    hr {
+        margin: 0;
+        width: 100%;
+    }
+
+    // Disabled Inputs
+    &.input-disabled {
+        label, div { color: #666666; }
+    }
+
+    // End of Input Container
+}

@@ -3,7 +3,7 @@ import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
-import { Form } from "../../components/structure/Form";
+import { Form2 } from "../../components/structure/Form2";
 import { Modal } from "../../components/structure/Modal";
 
 /**
@@ -16,11 +16,10 @@ export class HeaderCustomizer extends RE6Module {
     private $menu: JQuery<HTMLElement>;
 
     private updateTabModal: Modal;
-    private updateTabForm: Form;
+    private updateTabForm: Form2;
 
     private addTabButton: JQuery<HTMLElement>;
     private addTabModal: Modal;
-    private addTabForm: Form;
 
     // Temporary workaround for forum updates notification
     private hasForumUpdates: boolean;
@@ -28,15 +27,15 @@ export class HeaderCustomizer extends RE6Module {
     public constructor() {
         super();
         this.registerHotkeys(
-            { keys: "hotkeyTab1", fnct: () => { HeaderCustomizer.openTabNum(0); } },
-            { keys: "hotkeyTab2", fnct: () => { HeaderCustomizer.openTabNum(1); } },
-            { keys: "hotkeyTab3", fnct: () => { HeaderCustomizer.openTabNum(2); } },
-            { keys: "hotkeyTab4", fnct: () => { HeaderCustomizer.openTabNum(3); } },
-            { keys: "hotkeyTab5", fnct: () => { HeaderCustomizer.openTabNum(4); } },
-            { keys: "hotkeyTab6", fnct: () => { HeaderCustomizer.openTabNum(5); } },
-            { keys: "hotkeyTab7", fnct: () => { HeaderCustomizer.openTabNum(6); } },
-            { keys: "hotkeyTab8", fnct: () => { HeaderCustomizer.openTabNum(7); } },
-            { keys: "hotkeyTab9", fnct: () => { HeaderCustomizer.openTabNum(8); } },
+            { keys: "hotkeyTab1", fnct: this.openTabNum },
+            { keys: "hotkeyTab2", fnct: this.openTabNum },
+            { keys: "hotkeyTab3", fnct: this.openTabNum },
+            { keys: "hotkeyTab4", fnct: this.openTabNum },
+            { keys: "hotkeyTab5", fnct: this.openTabNum },
+            { keys: "hotkeyTab6", fnct: this.openTabNum },
+            { keys: "hotkeyTab7", fnct: this.openTabNum },
+            { keys: "hotkeyTab8", fnct: this.openTabNum },
+            { keys: "hotkeyTab9", fnct: this.openTabNum },
         );
     }
 
@@ -89,35 +88,6 @@ export class HeaderCustomizer extends RE6Module {
         this.createDOM();
 
         // Configuration Form Listeners
-        this.addTabForm.get().on("re621:form:submit", (event, data) => {
-            event.preventDefault();
-            this.addTab({
-                name: data.get("name"),
-                title: data.get("title"),
-                href: data.get("href"),
-            });
-            this.addTabForm.reset();
-        });
-
-        this.updateTabForm.get().on("re621:form:submit", (event, data) => {
-            event.preventDefault();
-            this.updateTab(
-                this.updateTabModal.getActiveTrigger().parent(),
-                {
-                    name: data.get("name"),
-                    title: data.get("title"),
-                    href: data.get("href"),
-                }
-            );
-            this.updateTabModal.close();
-        });
-
-        this.updateTabForm.getInputList().get("delete").click(event => {
-            event.preventDefault();
-            this.deleteTab(this.updateTabModal.getActiveTrigger().parent());
-            this.updateTabModal.close();
-        });
-
         this.addTabModal.getElement().on("dialogopen", () => { this.enableEditingMode(); });
         this.addTabModal.getElement().on("dialogclose", () => { this.disableEditingMode(); });
     }
@@ -146,9 +116,10 @@ export class HeaderCustomizer extends RE6Module {
         this.$menu.addClass("custom");
 
         // Fetch stored data
-        this.fetchSettings("tabs").forEach(value => {
+        this.fetchSettings("tabs").forEach((value: HeaderTab) => {
             this.createTabElement({
                 name: value.name,
+                title: value.title,
                 href: value.href,
             });
         });
@@ -174,45 +145,65 @@ export class HeaderCustomizer extends RE6Module {
             tabClass: "float-left",
         });
 
-        this.addTabForm = new Form(
-            {
-                id: "header-addtab",
-                parent: "div#modal-container",
-            },
+        const newTabForm = new Form2(
+            { name: "header-customizer-new" },
             [
-                { id: "name", label: "Name", type: "input", required: true, pattern: "[\\S ]+", },
-                { id: "title", label: "Hover", type: "input" },
-                { id: "href", label: "Link", type: "input" },
-                { id: "submit", value: "Submit", type: "submit", stretch: "column" },
-                { id: "help-hr", type: "hr" },
-                { id: "help-var", value: "Available variables:", type: "div" },
-                { id: "help-var-userid", label: "Unique ID", value: "%userid%", type: "copy" },
-                { id: "help-var-username", label: "Username", value: "%username%", type: "copy" },
-                { id: "info-hr", type: "hr" },
-                { id: "info-div", value: "Drag-and-drop tabs to re-arrange.<br />Click on a tab to edit it.", type: "div" },
-            ]
+                Form2.input({ label: "Name", name: "name", value: "", required: true, pattern: "[\\S ]+" }),
+                Form2.input({ label: "Hover", value: "", name: "title" }),
+                Form2.input({ label: "Link", value: "", name: "href" }),
+                Form2.button({ value: "Submit", type: "submit" }),
+                Form2.hr(),
+                Form2.div({ value: "Available variables:" }),
+                Form2.copy({ label: "Unique ID", value: "%userid%" }),
+                Form2.copy({ label: "Username", value: "%username%" }),
+                Form2.hr(),
+                Form2.div({ value: "Drag-and-drop tabs to re-arrange.<br />Click on a tab to edit it." }),
+            ],
+            (values, form) => {
+                this.addTab({
+                    name: values["name"],
+                    title: values["title"],
+                    href: values["href"],
+                });
+                form.reset();
+            }
         );
 
         this.addTabModal = new Modal({
             title: "Add Tab",
             triggers: [{ element: this.addTabButton }],
-            content: this.addTabForm.get(),
+            content: newTabForm.get(),
             position: { my: "right top", at: "right top" }
         });
 
         // Tab Update Interface
-        this.updateTabForm = new Form(
-            {
-                id: "header-updatetab",
-                parent: "div#modal-container",
-            },
+        this.updateTabForm = new Form2(
+            { name: "header-customizer-update" },
             [
-                { id: "name", label: "Name", type: "input", required: true, pattern: "[\\S ]+", },
-                { id: "title", label: "Hover", type: "input" },
-                { id: "href", label: "Link", type: "input" },
-                { id: "delete", value: "Delete", type: "button" },
-                { id: "submit", value: "Update", type: "submit" },
-            ]
+                Form2.input({ label: "Name", name: "name", value: "", required: true, pattern: "[\\S ]+" }),
+                Form2.input({ label: "Hover", value: "", name: "title" }),
+                Form2.input({ label: "Link", value: "", name: "href" }),
+                Form2.button(
+                    { value: "Delete", type: "button" },
+                    () => {
+                        this.deleteTab(this.updateTabModal.getActiveTrigger().parent());
+                        this.updateTabModal.close();
+                    }
+                ),
+                Form2.button({ value: "Update", type: "submit" }),
+            ],
+            (values, form) => {
+                this.updateTab(
+                    this.updateTabModal.getActiveTrigger().parent(),
+                    {
+                        name: values["name"],
+                        title: values["title"],
+                        href: values["href"],
+                    }
+                );
+                this.updateTabModal.close();
+                form.reset();
+            }
         );
 
         this.updateTabModal = new Modal({
@@ -367,10 +358,10 @@ export class HeaderCustomizer extends RE6Module {
         await this.pushSettings("tabs", tabData);
     }
 
-    private static openTabNum(num: number): void {
+    private openTabNum(event, key: string): void {
         const tabs = ModuleController.get(HeaderCustomizer).$menu.find<HTMLElement>("li > a");
-        if (num > tabs.length) return;
-        tabs[num].click();
+        if (parseInt(key) > tabs.length) return;
+        tabs[parseInt(key) - 1].click();
     }
 
 }
