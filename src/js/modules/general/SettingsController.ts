@@ -430,6 +430,7 @@ export class SettingsController extends RE6Module {
                 Form2.hr(3),
             ]),
 
+            // Miscellaneous
             Form2.section({ name: "actions", columns: 3 }, [
                 Form2.header("Miscellaneous", 3),
 
@@ -464,118 +465,123 @@ export class SettingsController extends RE6Module {
     }
 
     /** Creates the downloads settings tab */
-    private createDownloadsTab(): Form {
+    private createDownloadsTab(): Form2 {
         const downloadCustomizer = ModuleController.get(DownloadCustomizer),
             massDownloader = ModuleController.get(MassDownloader),
             poolDownloader = ModuleController.get(PoolDownloader),
             favDownloader = ModuleController.get(FavDownloader);
 
-        return new Form({ id: "settings-download", columns: 3, parent: "div#modal-container" }, [
+        return new Form2({ name: "optdownload", columns: 3, width: 3 }, [
 
             // Download Customizer
-            Form.section({ id: "customizer", columns: 3 }, [
-                Form.header("Download Customizer", "column"),
-                Form.div(`<div class="notice float-right">Download individual files</div>`, "mid"),
-                Form.input(
-                    "template", downloadCustomizer.fetchSettings("template"), "Download File Name", "full", undefined,
-                    async (event, data) => {
+            Form2.section({ name: "customizer", columns: 3 }, [
+                Form2.header("Download Customizer"),
+                Form2.div({ value: `<div class="notice float-right">Download individual files</div>`, width: 2 }),
+                Form2.input(
+                    { value: downloadCustomizer.fetchSettings("template"), label: "Filename", width: 3 },
+                    async (data) => {
                         await downloadCustomizer.pushSettings("template", data);
                         if (downloadCustomizer.isInitialized()) downloadCustomizer.refreshDownloadLink();
                     }
                 ),
-                Form.section({ id: "template-vars-cust", columns: 2 }, [
-                    Form.div(`<div class="notice unmargin">The following variables can be used:</div>`, "mid"),
-                    Form.copy("postid", "%postid%", "Post ID"),
-                    Form.copy("artist", "%artist%", "Artist"),
-                    Form.copy("copyright", "%copyright%", "Copyright"),
-                    Form.copy("character", "%character%", "Characters"),
-                    Form.copy("species", "%species%", "Species"),
-                    Form.copy("meta", "%meta%", "Meta"),
-                    Form.copy("md5", "%md5%", "MD5"),
-                ], " "),
-                Form.hr(),
+                Form2.section({ columns: 2, width: 3, label: " " }, [
+                    Form2.div({ value: `<div class="notice unmargin">The following variables can be used:</div>`, width: 2 }),
+                    Form2.copy({ value: "%postid%", label: "Post ID" }),
+                    Form2.copy({ value: "%artist%", label: "Artist" }),
+                    Form2.copy({ value: "%copyright%", label: "Copyright" }),
+                    Form2.copy({ value: "%character%", label: "Characters" }),
+                    Form2.copy({ value: "%species%", label: "Species" }),
+                    Form2.copy({ value: "%meta%", label: "Meta" }),
+                    Form2.copy({ value: "%md5%", label: "MD5" }),
+                ]),
+
+                Form2.hr(3),
             ]),
 
             // Mass Downloader
-            Form.section({ id: "mass", columns: 3 }, [
-                Form.header("Image Downloader", "column"),
-                Form.div(`<div class="notice float-right">Download files from the search page</div>`, "mid"),
-                Form.input(
-                    "template", massDownloader.fetchSettings("template"), "Download File Name", "full", undefined,
-                    async (event, data) => { await massDownloader.pushSettings("template", data); }
+            Form2.section({ name: "mass", columns: 3 }, [
+                Form2.header("Image Downloader"),
+                Form2.div({ name: `<div class="notice float-right">Download files from the search page</div>`, width: 2 }),
+                Form2.input(
+                    { value: massDownloader.fetchSettings("template"), label: "Filename", width: 3 },
+                    async (data) => { await massDownloader.pushSettings("template", data); }
                 ),
-                Form.section({ id: "template-vars-mass", columns: 2 }, [
-                    Form.div(`<div class="notice unmargin">The same variables as above can be used. Add a forward slash ( / ) to signify a folder.</div>`, "mid"),
-                ], " "),
+                Form2.div({
+                    value: `<div class="notice unmargin">The same variables as above can be used. Add a forward slash ( / ) to signify a folder.</div>`,
+                    width: 3,
+                    label: " ",
+                }),
 
-                Form.checkbox(
-                    "autodownload", massDownloader.fetchSettings("autoDownloadArchive"), "Auto Download", "column",
-                    async (event, data) => { await massDownloader.pushSettings("autoDownloadArchive", data); }
+                Form2.checkbox(
+                    { value: massDownloader.fetchSettings("autoDownloadArchive"), label: "Auto Download" },
+                    async (data) => { await massDownloader.pushSettings("autoDownloadArchive", data); }
                 ),
-                Form.div("The archive will be downloaded automatically after being created", "mid"),
+                Form2.div({ value: "The archive will be downloaded automatically after being created", width: 2 }),
 
-                Form.checkbox(
-                    "fixedSection", massDownloader.fetchSettings("fixedSection"), "Fixed Interface", "column",
-                    async (event, data) => {
+                Form2.checkbox(
+                    { value: massDownloader.fetchSettings("fixedSection"), label: "Fixed Interface" },
+                    async (data) => {
                         await massDownloader.pushSettings("fixedSection", data);
                         massDownloader.toggleFixedSection();
                     }
                 ),
-                Form.div("The downloader interface will remain on the screen as you scroll", "mid"),
+                Form2.div({ value: "The downloader interface will remain on the screen as you scroll", width: 2 }),
 
-                Form.hr(),
+                Form2.hr(3),
             ]),
 
             // Fav Downloader
-            Form.section({ id: "fav", columns: 3 }, [
-                Form.header("Favorites Downloader", "column"),
-                Form.div(`<div class="notice float-right">Download all favorites at once</div>`, "mid"),
-                Form.input(
-                    "template", favDownloader.fetchSettings("template"), "Download File Name", "full", undefined,
-                    async (event, data) => { await favDownloader.pushSettings("template", data); }
+            Form2.section({ name: "fav", columns: 3 }, [
+                Form2.header("Favorites Downloader"),
+                Form2.div({ value: `<div class="notice float-right">Download all favorites at once</div>`, width: 2 }),
+                Form2.input(
+                    { value: favDownloader.fetchSettings("template"), label: "Filename", width: 3 },
+                    async (data) => { await favDownloader.pushSettings("template", data); }
                 ),
-                Form.section({ id: "template-vars-fav", columns: 2 }, [
-                    Form.div(`<div class="notice unmargin">The same variables as above can be used. Add a forward slash ( / ) to signify a folder.</div>`, "mid"),
-                ], " "),
+                Form2.div({
+                    value: `<div class="notice unmargin">The same variables as above can be used. Add a forward slash ( / ) to signify a folder.</div>`,
+                    width: 3,
+                    label: " ",
+                }),
 
-                Form.checkbox(
-                    "autodownload", favDownloader.fetchSettings("autoDownloadArchive"), "Auto Download", "column",
-                    async (event, data) => { await favDownloader.pushSettings("autoDownloadArchive", data); }
+                Form2.checkbox(
+                    { value: favDownloader.fetchSettings("autoDownloadArchive"), label: "Auto Download" },
+                    async (data) => { await favDownloader.pushSettings("autoDownloadArchive", data); }
                 ),
-                Form.div("The archive will be downloaded automatically after being created", "mid"),
+                Form2.div({ value: "The archive will be downloaded automatically after being created", width: 2 }),
 
-                Form.checkbox(
-                    "fixedSection", favDownloader.fetchSettings("fixedSection"), "Fixed Interface", "column",
-                    async (event, data) => {
+                Form2.checkbox(
+                    { value: favDownloader.fetchSettings("fixedSection"), label: "Fixed Interface" },
+                    async (data) => {
                         await favDownloader.pushSettings("fixedSection", data);
                         favDownloader.toggleFixedSection();
                     }
                 ),
-                Form.div("The downloader interface will remain on the screen as you scroll", "mid"),
+                Form2.div({ value: "The downloader interface will remain on the screen as you scroll", width: 2 }),
 
-                Form.hr(),
+                Form2.hr(3),
             ]),
 
             // Pool Downloader
-            Form.section({ id: "pool", columns: 3 }, [
-                Form.header("Pool Downloader", "column"),
-                Form.div(`<div class="notice float-right">Download image pools or sets</div>`, "mid"),
-                Form.input(
-                    "template", poolDownloader.fetchSettings("template"), "Download File Name", "full", undefined,
-                    async (event, data) => { await poolDownloader.pushSettings("template", data); }
+            Form2.section({ name: "pool", columns: 3 }, [
+                Form2.header("Pool Downloader"),
+                Form2.div({ value: `<div class="notice float-right">Download image pools or sets</div>`, width: 2 }),
+                Form2.input(
+                    { value: poolDownloader.fetchSettings("template"), label: "Filename", width: 3 },
+                    async (data) => { await poolDownloader.pushSettings("template", data); }
                 ),
-                Form.section({ id: "template-vars-pool", columns: 2 }, [
-                    Form.div(`<div class="notice unmargin">The same variables as above can be used. Add a forward slash ( / ) to signify a folder.</div>`, "mid"),
-                    Form.div(`<div class="notice unmargin">The following variables can also be used:</div>`, "mid"),
-                    Form.copy("pool", "%pool%", "Pool Name"),
-                    Form.copy("index", "%index%", "Index"),
-                ], " "),
+                Form2.section({ name: "template-vars-pool", columns: 2, width: 3, label: " " }, [
+                    Form2.div({ value: `<div class="notice unmargin">The same variables as above can be used. Add a forward slash ( / ) to signify a folder.</div>`, width: 2 }),
+                    Form2.div({ value: `<div class="notice unmargin">The following variables can also be used:</div>`, width: 2 }),
+                    Form2.copy({ value: "%pool%", label: "Pool Name" }),
+                    Form2.copy({ value: "%index%", label: "Index" }),
+                ]),
 
-                Form.checkbox(
-                    "autodownload", poolDownloader.fetchSettings("autoDownloadArchive"), "Auto Download", "column",
-                    async (event, data) => { await poolDownloader.pushSettings("autoDownloadArchive", data); }
+                Form2.checkbox(
+                    { value: poolDownloader.fetchSettings("autoDownloadArchive"), label: "Auto Download" },
+                    async (data) => { await poolDownloader.pushSettings("autoDownloadArchive", data); }
                 ),
-                Form.div("The archive will be downloaded automatically after being created", "mid"),
+                Form2.div({ value: "The archive will be downloaded automatically after being created", width: 2 }),
             ]),
 
         ]);

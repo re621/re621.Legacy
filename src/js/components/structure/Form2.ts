@@ -405,7 +405,7 @@ export class Form2 {
             .attr("id", options.name)
             .append(options.value);
 
-        return new Form2Element($element, $label);
+        return new Form2Element($element, undefined, $label);
     }
 
     /**
