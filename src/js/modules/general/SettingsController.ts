@@ -699,7 +699,7 @@ export class SettingsController extends RE6Module {
     }
 
     /** Creates the hotkeys tab */
-    private createHotkeysTab(): Form {
+    private createHotkeysTab(): Form2 {
         const postViewer = ModuleController.get(PostViewer),
             poolNavigator = ModuleController.get(PoolNavigator),
             imageScaler = ModuleController.get(ImageScaler),
@@ -708,7 +708,7 @@ export class SettingsController extends RE6Module {
             subscriptionManager = ModuleController.get(SubscriptionManager),
             searchUtilities = ModuleController.get(SearchUtilities);
 
-        function createInputs(module: RE6Module, label: string, settingsKey: string): FormElement[] {
+        function createInputs(module: RE6Module, label: string, settingsKey: string): Form2Element[] {
             const values = module.fetchSettings(settingsKey).split("|");
             const bindings: string[] = [
                 values[0] === undefined ? "" : values[0],
@@ -716,14 +716,14 @@ export class SettingsController extends RE6Module {
             ];
 
             return [
-                Form.label(label),
-                Form.key(
-                    settingsKey + "-input-0", bindings[0], undefined, "column",
-                    async (event, data) => { await handleRebinding(data, 0); }
+                Form2.div({ value: label }),
+                Form2.key(
+                    { value: bindings[0] },
+                    async (data) => { await handleRebinding(data, 0); }
                 ),
-                Form.key(
-                    settingsKey + "-input-1", bindings[1], undefined, "column",
-                    async (event, data) => { await handleRebinding(data, 1); }
+                Form2.key(
+                    { value: bindings[1] },
+                    async (data) => { await handleRebinding(data, 1); }
                 ),
             ];
 
@@ -735,15 +735,15 @@ export class SettingsController extends RE6Module {
             }
         }
 
-        return new Form({ "id": "settings-hotkeys", columns: 3, parent: "div#modal-container" }, [
+        return new Form2({ name: "opthotkeys", columns: 3, width: 3 }, [
             // Listing
-            Form.header("Listing"),
+            Form2.header("Listing", 3),
             ...createInputs(searchUtilities, "Search", "hotkeyFocusSearch"),
             ...createInputs(searchUtilities, "Random Post", "hotkeyRandomPost"),
-            Form.hr(),
+            Form2.hr(3),
 
             // Posts
-            Form.header("Posts"),
+            Form2.header("Posts", 3),
             ...createInputs(postViewer, "Upvote", "hotkeyUpvote"),
             ...createInputs(postViewer, "Downvote", "hotkeyDownvote"),
             ...createInputs(postViewer, "Toggle Favorite", "hotkeyFavorite"),
@@ -755,28 +755,28 @@ export class SettingsController extends RE6Module {
             ...createInputs(imageScaler, "Change Scale", "hotkeyScale"),
             ...createInputs(postViewer, "Add to Set", "hotkeyAddSet"),
             ...createInputs(postViewer, "Add to Pool", "hotkeyAddPool"),
-            Form.hr(),
+            Form2.hr(3),
 
             // Actions
-            Form.header("Actions"),
+            Form2.header("Actions", 3),
             ...createInputs(miscellaneous, "New Comment", "hotkeyNewComment"),
             ...createInputs(miscellaneous, "Edit Post", "hotkeyEditPost"),
             ...createInputs(postViewer, "Toggle Notes", "hotkeyHideNotes"),
             ...createInputs(postViewer, "Edit Notes", "hotkeyNewNote"),
-            Form.hr(),
+            Form2.hr(3),
 
             // Modes
-            Form.header("Search Modes"),
+            Form2.header("Search Modes", 3),
             ...createInputs(searchUtilities, "View", "hotkeySwitchModeView"),
             ...createInputs(searchUtilities, "Edit", "hotkeySwitchModeEdit"),
             ...createInputs(searchUtilities, "Add Favorite", "hotkeySwitchModeAddFav"),
             ...createInputs(searchUtilities, "Remove Favorite", "hotkeySwitchModeRemFav"),
             ...createInputs(searchUtilities, "Add to Set", "hotkeySwitchModeAddSet"),
             ...createInputs(searchUtilities, "Remove from Set", "hotkeySwitchModeRemSet"),
-            Form.hr(),
+            Form2.hr(3),
 
             // Tabs
-            Form.header("Header Tabs"),
+            Form2.header("Header Tabs", 3),
             ...createInputs(headerCustomizer, "Tab #1", "hotkeyTab1"),
             ...createInputs(headerCustomizer, "Tab #2", "hotkeyTab2"),
             ...createInputs(headerCustomizer, "Tab #3", "hotkeyTab3"),
@@ -789,10 +789,10 @@ export class SettingsController extends RE6Module {
 
             ...createInputs(this, "Open Settings", "hotkeyOpenSettings"),
             ...createInputs(subscriptionManager, "Open Notifications", "hotkeyOpenNotifications"),
-            Form.hr(),
+            Form2.hr(3),
 
             // Other
-            Form.header("Miscellaneous"),
+            Form2.header("Miscellaneous", 3),
             ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
         ]);
     }

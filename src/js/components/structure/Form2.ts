@@ -1,4 +1,5 @@
 import { XM } from "../api/XM";
+import { Hotkeys } from "../data/Hotkeys";
 import { Util } from "../utility/Util";
 
 export class Form2 {
@@ -257,6 +258,76 @@ export class Form2 {
             window.clearTimeout(copyTimer);
             $input.addClass("highlight");
             copyTimer = window.setTimeout(() => $input.removeClass("highlight"), 250);
+        });
+
+        return new Form2Element($element, $input, $label);
+    }
+
+    /**
+     * Creates a key input FormElement based on the provided parameters  
+     * @param options Element configuration
+     */
+    public static key(options?: ElementOptions, changed?: InputChangeEvent): Form2Element {
+        if (!options.name) options.name = FormUtils.getUniqueID();
+
+        let $label: JQuery<HTMLElement>;
+        if (options.label)
+            $label = FormUtils.makeLabel(options.name, options.label);
+
+        const $element = FormUtils
+            .makeInputWrapper(options.label, options.wrapper, options.width)
+            .addClass("keyinput");
+
+        const $input = $("<input>")
+            .attr({
+                "type": "text",
+                "id": options.name,
+                "readonly": "",
+            })
+            .addClass("bg-section color-text")
+            .val(options.value)
+            .appendTo($element);
+
+        const $recordbutton = $("<button>")
+            .attr({
+                "type": "button",
+                "id": options.name + "-key",
+            })
+            .addClass("button btn-neutral border-highlight border-left")
+            .html(`<i class="far fa-keyboard"></i>`)
+            .appendTo($element);
+
+        let occupied = false;
+        $($recordbutton).click(function () {
+            if (occupied) return;
+            occupied = true;
+
+            const $oldKey = $input.val();
+            $input
+                .addClass("input-info")
+                .val("Recording");
+
+            Hotkeys.recordSingleKeypress(function (key: string) {
+                if (key.includes("escape")) {
+                    $input.removeClass("input-info").val("");
+                    if (changed !== undefined) changed(["", $oldKey], $input);
+                    occupied = false;
+                }
+                else if (Hotkeys.isRegistered(key)) {
+                    $input.val("Already Taken");
+                    setTimeout(() => {
+                        $input
+                            .removeClass("input-info")
+                            .val($oldKey);
+                        occupied = false;
+                    }, 1000);
+                }
+                else {
+                    $input.removeClass("input-info").val(key);
+                    if (changed !== undefined) changed([key, $oldKey], $input);
+                    occupied = false;
+                }
+            });
         });
 
         return new Form2Element($element, $input, $label);
