@@ -5,7 +5,7 @@
         &[colspan="2"] { grid-column: span 3; }
         &[colspan="3"] { grid-column: span 5; }
     }
-    &[labeled=false] {
+    &:not([labeled=true]) {
         &[colspan="1"] { grid-column: span 2; }
         &[colspan="2"] { grid-column: span 4; }
         &[colspan="3"] { grid-column: span 6; }
@@ -20,13 +20,13 @@ form-section {
 
     @include form-element;
 
-    &[columns="1"] { grid-template-columns: 1fr 2fr; }
-    &[columns="2"] { grid-template-columns: 1fr 2fr 1fr 2fr; }
-    &[columns="3"] { grid-template-columns: 1fr 2fr 1fr 2fr 1fr 2fr; }
+    &[columns="1"] { grid-template-columns: 5rem 10rem; }
+    &[columns="2"] { grid-template-columns: 5rem 10rem 5rem 10rem; }
+    &[columns="3"] { grid-template-columns: 5rem 10rem 5rem 10rem 5rem 10rem; }
 
-    &[formspan="1"] { width: 15rem; }
-    &[formspan="2"] { width: 30rem; }
-    &[formspan="3"] { width: 45rem; }
+    &[formspan="1"] { width: 15.5rem; } // 15 + 0.5 rem for 1 column gap
+    &[formspan="2"] { width: 31.5rem; } // 30 + 1.5 rem for 3 column gaps
+    &[formspan="3"] { width: 47.5rem; } // 45 + 2.5 rem for 5 column gaps
 }
 
 form.form-section > label,
@@ -82,7 +82,14 @@ form-section > form-input {
             text-align: center;
             outline: 0;
 
+            box-shadow: none;
+            transition: box-shadow 0.25s linear;
+
             &.input-info { color: orange; }
+
+            &.highlight {
+                box-shadow: inset 0px 0px 0px 2px #ffffff60;
+            }
         }
 
         button[type=button] {
@@ -141,7 +148,10 @@ form-section > form-input {
             content: unicode("f14a");
         }
 
-        label {  cursor: pointer; }
+        label {
+            cursor: pointer;
+            font-weight: 500;
+        }
     }
 
     // Radio Switch
@@ -172,6 +182,7 @@ form-section > form-input {
 
     // DIV
     &.text-div {
+        display: block;
         width: 100%;
         line-height: 1.25rem;
 
@@ -192,15 +203,58 @@ form-section > form-input {
     }
 
     // HR
-    hr {
-        margin: 0;
+    & > hr {
         width: 100%;
+        border: 0;
+        border-top: 1px solid #ffffff33;
     }
 
     // Disabled Inputs
-    &.input-disabled {
-        label, div { color: #666666; }
-    }
+    &.input-disabled { color: #666666; }
 
     // End of Input Container
+}
+
+/* Collapsable section */
+form.form-section > form-collapse,
+form-section > form-collapse {
+    display: block;
+    justify-content: space-between;
+    align-items: center;
+
+    margin: 0 -0.75rem 0 -0.75rem !important;
+    width: stretch;
+
+    @include form-element;
+
+    & > h3.collapse-header {
+        border: unset !important;
+        background: #ffffff05 !important;
+        color: unset !important;
+        font-weight: unset !important;
+        outline: 0;
+        padding: 0.25rem 0.5rem;
+        cursor: pointer;
+
+        span.form-collapse-badge {
+            float: right;
+            width: 2rem;
+            padding: 0 0.5rem;
+            margin-right: 0.25rem;
+            border-radius: 0.5rem;
+            background: #00000030;
+            box-shadow: inset 0 0 5px 0px #00000050;
+            font-weight: bold;
+            text-align: center;
+        }
+    }
+
+    & > form-section.collapse-content {
+        height: unset !important;
+        background: #ffffff05;
+        color: unset;
+        border: 0;
+        padding: 0.25rem 0.75rem;
+    }
+
 }

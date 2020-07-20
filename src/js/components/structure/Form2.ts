@@ -19,12 +19,14 @@ export class Form2 {
      * @param onSubmit Form submittion callback
      */
     public constructor(options?: SectionOptions, content?: Form2Element[], onSubmit?: FormSubmitEvent) {
+        if (!options.name) options.name = FormUtils.getUniqueID();
+
         this.element = $("<form>")
             .addClass("form-section")
             .attr({
-                "id": FormUtils.getUniqueID(),
+                "id": options.name,
                 "columns": options.columns || 1,
-                "formspan": options.width || 1,
+                "formspan": options.width || options.columns || 1,
             })
             .on("submit", (event) => {
                 event.preventDefault();
@@ -114,10 +116,57 @@ export class Form2 {
                 "id": options.name,
                 "labeled": options.label !== undefined,
                 "columns": options.columns || 1,
+                "colspan": options.width || options.columns || 1,
+            });
+
+        return new Form2Element($element, undefined, $label, content);
+    }
+
+    /**
+     * Creates a collapsable section FormElement based on the provided parameters  
+     * @param options Section configuration
+     * @param content Form elements
+     */
+    public static collapse(options?: SectionOptions & { title?: string; badge?: JQuery<HTMLElement>; collapsed?: boolean }, content?: Form2Element[]): Form2Element {
+        if (!options.name) options.name = FormUtils.getUniqueID();
+
+        let $label: JQuery<HTMLElement>;
+        if (options.label)
+            $label = FormUtils.makeLabel(options.name, options.label);
+
+        const $element = $("<form-collapse>")
+            .attr({
+                "id": options.name,
                 "colspan": options.width || 1,
             });
 
-        return new Form2Element($element, $label, undefined, content);
+        const header = $("<h3>")
+            .addClass("collapse-header")
+            .html(options.title || "Details")
+            .appendTo($element);
+        if (options.badge)
+            $("<span>")
+                .addClass("form-collapse-badge")
+                .append(options.badge)
+                .appendTo(header);
+
+        const container = $("<form-section>")
+            .addClass("collapse-content")
+            .attr({
+                "labeled": options.label !== undefined,
+                "columns": options.columns || 1,
+                "colspan": options.width || options.columns || 1,
+            })
+            .appendTo($element);
+
+        $element.accordion({
+            active: !options.collapsed,
+            animate: false,
+            collapsible: true,
+            header: "h3",
+        });
+
+        return new Form2Element($element, undefined, $label, content, container);
     }
 
     /**
@@ -133,7 +182,7 @@ export class Form2 {
             $label = FormUtils.makeLabel(options.name, options.label);
 
         const $element = FormUtils
-            .makeInputWrapper(options.label, options.width);
+            .makeInputWrapper(options.label, options.wrapper, options.width);
 
         const $input = $("<input>")
             .attr({
@@ -158,7 +207,7 @@ export class Form2 {
             $input.on("input", () => {
                 if (timer) clearTimeout(timer);
                 timer = window.setTimeout(
-                    () => { changed($input.val().toString()); },
+                    () => { changed($input.val().toString(), $input); },
                     Form2.inputTimeout
                 );
             });
@@ -179,7 +228,7 @@ export class Form2 {
             $label = FormUtils.makeLabel(options.name, options.label);
 
         const $element = FormUtils
-            .makeInputWrapper(options.label, options.width)
+            .makeInputWrapper(options.label, options.wrapper, options.width)
             .addClass("copybox");
 
         const $input = $("<input>")
@@ -201,8 +250,13 @@ export class Form2 {
             .html(`<i class="far fa-copy"></i>`)
             .appendTo($element);
 
+        let copyTimer: number;
         $($copybutton).click(function () {
             XM.Util.setClipboard($input.val());
+
+            window.clearTimeout(copyTimer);
+            $input.addClass("highlight");
+            copyTimer = window.setTimeout(() => $input.removeClass("highlight"), 250);
         });
 
         return new Form2Element($element, $input, $label);
@@ -221,7 +275,7 @@ export class Form2 {
             $label = FormUtils.makeLabel(options.name, options.label);
 
         const $element = FormUtils
-            .makeInputWrapper(options.label, options.width);
+            .makeInputWrapper(options.label, options.wrapper, options.width);
 
         const $input = $("<button>")
             .attr({
@@ -233,9 +287,49 @@ export class Form2 {
             .appendTo($element);
 
         if (changed !== undefined)
-            $input.on("click", () => { changed(true); });
+            $input.on("click", () => { changed(true, $input); });
 
         return new Form2Element($element, $input, $label);
+    }
+
+    /**
+     * Creates a checkbox FormElement based on the provided parameters  
+     * @param options Element configuration
+     * @param changed Input change callback
+     */
+    public static checkbox(options?: ElementOptions, changed?: InputChangeEvent): Form2Element {
+        if (!options.name) options.name = FormUtils.getUniqueID();
+
+        const $element = FormUtils
+            .makeInputWrapper(undefined, options.wrapper, options.width)
+            .addClass("checkbox-switch");
+
+        const $input = $("<input>")
+            .attr({
+                "id": options.name,
+                "name": options.name,
+                "type": "checkbox",
+            })
+            .addClass("switch")
+            .attr("checked", options.value)
+            .appendTo($element);
+
+        $("<label>")
+            .attr("for", options.name)
+            .addClass("switch")
+            .appendTo($element);
+
+        if (options.label) {
+            $("<label>")
+                .attr("for", options.name)
+                .html(options.label)
+                .appendTo($element);
+        }
+
+        if (changed !== undefined)
+            $input.on("change", () => { changed($input.is(":checked"), $input); });
+
+        return new Form2Element($element, $input);
     }
 
     /**
@@ -252,7 +346,7 @@ export class Form2 {
             $label = FormUtils.makeLabel(options.name, options.label);
 
         const $element = FormUtils
-            .makeInputWrapper(options.label, options.width);
+            .makeInputWrapper(options.label, options.wrapper, options.width);
 
         const $input = $("<select>")
             .attr({
@@ -272,9 +366,26 @@ export class Form2 {
         }
 
         if (changed !== undefined)
-            $input.on("change", () => { changed($input.val().toString()); });
+            $input.on("change", () => { changed($input.val().toString(), $input); });
 
         return new Form2Element($element, $input, $label);
+    }
+
+    /**
+     * Creates a header FormElement based on the provided parameters
+     * @param text Header text
+     * @param width Element span
+     */
+    public static header(text: string, width?: number): Form2Element {
+        const $element = FormUtils.makeInputWrapper(undefined, undefined, width);
+
+        $("<h3>")
+            .attr("id", FormUtils.getUniqueID())
+            .addClass("color-text")
+            .html(text)
+            .appendTo($element);
+
+        return new Form2Element($element);
     }
 
     /**
@@ -289,8 +400,9 @@ export class Form2 {
             $label = FormUtils.makeLabel(options.name, options.label);
 
         const $element = FormUtils
-            .makeInputWrapper(options.label, options.width)
+            .makeInputWrapper(options.label, options.wrapper, options.width)
             .addClass("text-div")
+            .attr("id", options.name)
             .append(options.value);
 
         return new Form2Element($element, $label);
@@ -301,11 +413,26 @@ export class Form2 {
      * @param width Element width
      */
     public static hr(width?: number): Form2Element {
-        const $element = FormUtils.makeInputWrapper(undefined, width);
+        const $element = FormUtils.makeInputWrapper(undefined, undefined, width);
 
         $("<hr>")
             .attr("id", FormUtils.getUniqueID())
             .addClass("color-text-muted")
+            .appendTo($element);
+
+        return new Form2Element($element);
+    }
+
+    /**
+     * Creates an empty spacer element
+     * @param width Element width
+     */
+    public static spacer(width?: number): Form2Element {
+        const $element = FormUtils.makeInputWrapper(undefined, undefined, width);
+
+        $("<div>")
+            .attr("id", FormUtils.getUniqueID())
+            .html(" ")
             .appendTo($element);
 
         return new Form2Element($element);
@@ -331,8 +458,9 @@ class FormUtils {
             .html(text);
     }
 
-    public static makeInputWrapper(label: string, width: number): JQuery<HTMLElement> {
+    public static makeInputWrapper(label: string, wrapper: string, width: number): JQuery<HTMLElement> {
         return $("<form-input>")
+            .addClass(wrapper ? " " + wrapper : "")
             .attr({
                 "labeled": label !== undefined,
                 "colspan": width || 1
@@ -341,19 +469,21 @@ class FormUtils {
 
 }
 
-class Form2Element {
+export class Form2Element {
 
     private created: boolean;               // Used for caching, true if build() has been called before
     private element: JQuery<HTMLElement>;   // Container element
     private input: JQuery<HTMLElement>;     // Actual form element, if it exists
     private label: JQuery<HTMLElement>;     // Input label, if it exists
     private content: Form2Element[];        // Additional elements to be appended
+    private container: JQuery<HTMLElement>; // Container to which content elements are added
 
-    public constructor(element: JQuery<HTMLElement>, input?: JQuery<HTMLElement>, label?: JQuery<HTMLElement>, content?: Form2Element[]) {
+    public constructor(element: JQuery<HTMLElement>, input?: JQuery<HTMLElement>, label?: JQuery<HTMLElement>, content?: Form2Element[], container?: JQuery<HTMLElement>) {
         this.element = element;
         this.input = input;
         this.label = label;
         this.content = content ? content : [];
+        this.container = container ? container : element;
     }
 
     public getInput(): JQuery<HTMLElement> {
@@ -374,12 +504,17 @@ class Form2Element {
         if (force || !this.created) {
             for (const entry of this.content) {
                 for (const childElem of entry.build(parentID + "-" + this.element.attr("id"), force))
-                    childElem.appendTo(this.element);
+                    childElem.appendTo(this.container);
             }
             this.created = true;
 
             if (this.label !== undefined) this.label.attr("for", parentID + "-" + this.label.attr("for"));
             if (this.input !== undefined) this.input.attr("id", parentID + "-" + this.input.attr("id"));
+            if (this.element.is("form-input"))
+                for (const label of this.element.find("> label")) {
+                    const $subLabel = $(label);
+                    $subLabel.attr("for", parentID + "-" + $subLabel.attr("for"));
+                }
         }
 
         if (this.label) return [this.label, this.element];
@@ -400,6 +535,7 @@ interface ElementOptions {
     label?: string;
     value?: any;
     width?: number;
+    wrapper?: string;
 }
 
 interface InputElementOptions extends ElementOptions {
@@ -408,4 +544,4 @@ interface InputElementOptions extends ElementOptions {
 }
 
 type FormSubmitEvent = (values: any, form: Form2) => void;
-type InputChangeEvent = (value: any) => void;
+type InputChangeEvent = (value: any, input: JQuery<HTMLElement>) => void;

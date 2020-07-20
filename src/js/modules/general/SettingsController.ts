@@ -7,6 +7,7 @@ import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Form, FormElement } from "../../components/structure/Form";
+import { Form2, Form2Element } from "../../components/structure/Form2";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
 import { Debug } from "../../components/utility/Debug";
@@ -25,7 +26,7 @@ import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
 import { CustomFlagger, FlagDefinition } from "../search/CustomFlagger";
 import { InfiniteScroll } from "../search/InfiniteScroll";
 import { SearchUtilities } from "../search/SearchUtilities";
-import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } from "../search/ThumbnailsEnhancer";
+import { ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
 import { ForumTracker } from "../subscriptions/ForumTracker";
 import { PoolTracker } from "../subscriptions/PoolTracker";
 import { SubscriptionManager } from "../subscriptions/SubscriptionManager";
@@ -111,14 +112,14 @@ export class SettingsController extends RE6Module {
     }
 
     /** Creates the script features tab */
-    private createFeaturesTab(): Form {
+    private createFeaturesTab(): Form2 {
         const modules = ModuleController.getAll();
 
-        function createInput(moduleName: string, label: string): FormElement {
+        function createInput2(moduleName: string, label: string): Form2Element {
             const module = modules.get(moduleName);
-            return Form.checkbox(
-                moduleName + "-enabled", module.fetchSettings("enabled"), label, "column",
-                (event, data) => {
+            return Form2.checkbox(
+                { name: moduleName + "-enabled", value: module.fetchSettings("enabled"), label: label, },
+                (data) => {
                     module.pushSettings("enabled", data);
                     module.setEnabled(data);
                     if (data === true) {
@@ -128,28 +129,28 @@ export class SettingsController extends RE6Module {
             );
         }
 
-        return new Form({ id: "settings-module-status", columns: 3, parent: "div#modal-container", }, [
-            Form.header("Features"),
+        return new Form2({ name: "settings-modules", columns: 3, width: 3, }, [
+            Form2.header("Features", 3),
 
-            createInput("HeaderCustomizer", "Header Customizer"),
-            Form.div("Add, delete, and customize header links to your heart's content", "mid"),
+            createInput2("HeaderCustomizer", "Header Customizer"),
+            Form2.div({ value: "Add, delete, and customize header links to your heart's content.", width: 2 }),
 
-            createInput("InfiniteScroll", "Infinite Scroll"),
-            Form.div("New posts are automatically loaded. No need to turn pages", "mid"),
+            createInput2("InfiniteScroll", "Infinite Scroll"),
+            Form2.div({ value: "New posts are automatically loaded as you scroll.", width: 2 }),
 
-            createInput("InstantSearch", "Instant Filters"),
-            Form.div("Quickly add filters to your current search, with no need for a page reload", "mid"),
+            createInput2("InstantSearch", "Instant Filters"),
+            Form2.div({ value: "Quickly add filters to your current search.", width: 2 }),
 
-            createInput("FormattingManager", "Formatting Helper"),
-            Form.div("Fully customizable toolbar for easy DText formatting and post templates", "mid"),
+            createInput2("FormattingManager", "Formatting Helper"),
+            Form2.div({ value: "Fully customizable toolbar for easy DText formatting.", width: 2 }),
 
-            createInput("TinyAlias", "Tiny Alias"),
-            Form.div("A more intelligent way to quickly fill out post tags", "mid"),
+            createInput2("TinyAlias", "Tiny Alias"),
+            Form2.div({ value: "A more intelligent way to quickly fill out post tags.", width: 2 }),
         ]);
     }
 
     /** Creates the general settings tab */
-    private createGeneralTab(): Form {
+    private createGeneralTab(): Form2 {
         const titleCustomizer = ModuleController.get(TitleCustomizer),
             miscellaneous = ModuleController.get(Miscellaneous),
             postViewer = ModuleController.get(PostViewer),
@@ -160,290 +161,303 @@ export class SettingsController extends RE6Module {
             headerCustomizer = ModuleController.get(HeaderCustomizer),
             searchUtilities = ModuleController.get(SearchUtilities);
 
-        return new Form({ id: "settings-general", columns: 3, parent: "div#modal-container" }, [
+        return new Form2({ name: "optgeneral", columns: 3, width: 3 }, [
 
-            // General
-            Form.section({ id: "general", columns: 3 }, [
-                Form.header("General", "column"),
-                Form.div(`<div class="notice text-right">Settings are saved and applied automatically.</div>`, "mid"),
+            // General Settings
+            Form2.section({ name: "common", columns: 3 }, [
+                Form2.header("General"),
+                Form2.div({ value: `<div class="notice float-right">Settings are saved and applied automatically.</div>`, width: 2 }),
 
-                // TitleCustomizer
-                Form.section({ id: "title", columns: 3 }, [
-                    Form.input(
-                        "template", titleCustomizer.fetchSettings("template"), "Page Title", "full", undefined,
-                        async (event, data) => {
+                // Title Customizer
+                Form2.section({ name: "title", columns: 3 }, [
+                    Form2.input(
+                        { name: "template", value: titleCustomizer.fetchSettings("template"), label: "Page Title", width: 3 },
+                        async (data) => {
                             await titleCustomizer.pushSettings("template", data);
                             if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
                         }
                     ),
-                    Form.section({ id: "template-vars-title", columns: 2, }, [
-                        Form.div(`<div class="notice unmargin">The following variables can be used:</div>`, "mid"),
-                        Form.copy("postnum", "%postid%", "Post ID"),
-                        Form.copy("author", "%artist%", "Artist"),
-                        Form.copy("copyright", "%copyright%", "Copyright"),
-                        Form.copy("characters", "%character%", "Characters"),
-                        Form.copy("species", "%species%", "Species"),
-                        Form.copy("meta", "%meta%", "Meta"),
-                    ], " "),
-
-                    Form.checkbox(
-                        "symbol-enabled", titleCustomizer.fetchSettings("symbolsEnabled"), "Vote / Favorite Icons", "column",
-                        async (event, data) => {
+                    Form2.section({ columns: 2, width: 3, label: " " }, [
+                        Form2.div({ value: `<div class="notice unmargin">The following variables can be used:</div>`, width: 2 }),
+                        Form2.copy({ value: "%postid%", label: "Post ID" }),
+                        Form2.copy({ value: "%artist%", label: "Artist" }),
+                        Form2.copy({ value: "%copyright%", label: "Copyright" }),
+                        Form2.copy({ value: "%character%", label: "Characters" }),
+                        Form2.copy({ value: "%species%", label: "Species" }),
+                        Form2.copy({ value: "%meta%", label: "Meta" }),
+                    ]),
+                    Form2.checkbox(
+                        { value: titleCustomizer.fetchSettings("symbolsEnabled"), label: "Vote / Favorite Icons" },
+                        async (data) => {
                             await titleCustomizer.pushSettings("symbolsEnabled", data);
                             if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
                         }
                     ),
-                    Form.spacer("mid"),
-                    Form.input("symbol-fav", titleCustomizer.fetchSettings("symbolFav"), "Favorite", "column", undefined,
-                        async (event, data) => {
+                    Form2.spacer(2),
+                    Form2.input(
+                        { value: titleCustomizer.fetchSettings("symbolFav"), label: "Favorite" },
+                        async (data) => {
                             await titleCustomizer.pushSettings("symbolFav", data);
                             if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
                         }
                     ),
-                    Form.input("symbol-voteup", titleCustomizer.fetchSettings("symbolVoteUp"), "Upvoted", "column", undefined,
-                        async (event, data) => {
+                    Form2.input({ value: titleCustomizer.fetchSettings("symbolVoteUp"), label: "Upvoted", },
+                        async (data) => {
                             await titleCustomizer.pushSettings("symbolVoteUp", data);
                             if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
                         }
                     ),
-                    Form.input("symbol-votedown", titleCustomizer.fetchSettings("symbolVoteDown"), "Downvoted", "column", undefined,
-                        async (event, data) => {
+                    Form2.input({ value: titleCustomizer.fetchSettings("symbolVoteDown"), label: "Downvoted", },
+                        async (data) => {
                             await titleCustomizer.pushSettings("symbolVoteDown", data);
                             if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
                         }
                     ),
                 ]),
 
-                Form.checkbox("improve-tagcount", searchUtilities.fetchSettings("improveTagCount"), "Expanded Tag Count", "column",
-                    async (event, data) => {
-                        await searchUtilities.pushSettings("improveTagCount", data);
-                        searchUtilities.improveTagCount(data);
-                    }
-                ),
-                Form.checkbox("shorten-tagnames", searchUtilities.fetchSettings("shortenTagNames"), "Shorten Tag Names", "column",
-                    async (event, data) => {
-                        await searchUtilities.pushSettings("shortenTagNames", data);
-                        searchUtilities.shortenTagNames(data);
-                    }
-                ),
-                Form.spacer("column"),
+                // Layout
+                Form2.section({ name: "layout", columns: 2, width: 3 }, [
+                    Form2.checkbox(
+                        { value: searchUtilities.fetchSettings("improveTagCount"), label: "Expanded Tag Count" },
+                        async (data) => {
+                            await searchUtilities.pushSettings("improveTagCount", data);
+                            searchUtilities.improveTagCount(data);
+                        }
+                    ),
+                    Form2.checkbox(
+                        { value: searchUtilities.fetchSettings("shortenTagNames"), label: "Shorten Tag Names" },
+                        async (data) => {
+                            await searchUtilities.pushSettings("shortenTagNames", data);
+                            searchUtilities.shortenTagNames(data);
+                        }
+                    ),
 
-                Form.checkbox("sticky-header", miscellaneous.fetchSettings("stickyHeader"), "Fixed Header", "column",
-                    async (event, data) => {
-                        await miscellaneous.pushSettings("stickyHeader", data);
-                        miscellaneous.createStickyHeader(data);
-                    }
-                ),
-                Form.checkbox("sticky-searchbox", miscellaneous.fetchSettings("stickySearchbox"), "Fixed Searchbox", "column",
-                    async (event, data) => {
-                        await miscellaneous.pushSettings("stickySearchbox", data);
-                        miscellaneous.createStickySearchbox(data);
-                    }
-                ),
-                Form.spacer("column"),
+                    Form2.checkbox(
+                        { value: miscellaneous.fetchSettings("stickyHeader"), label: "Fixed Header" },
+                        async (data) => {
+                            await miscellaneous.pushSettings("stickyHeader", data);
+                            miscellaneous.createStickyHeader(data);
+                        }
+                    ),
+                    Form2.checkbox(
+                        { value: miscellaneous.fetchSettings("stickySearchbox"), label: "Fixed Searchbox" },
+                        async (data) => {
+                            await miscellaneous.pushSettings("stickySearchbox", data);
+                            miscellaneous.createStickySearchbox(data);
+                        }
+                    ),
+                ]),
 
-                Form.hr(),
+                Form2.hr(3),
             ]),
 
-            // ThumbnailEnhancer
-            Form.section({ id: "thumb", columns: 3 }, [
-                Form.header("Thumbnails"),
-                Form.select(
-                    "upscale", thumbnailEnhancer.fetchSettings("upscale"), "Upscale",
-                    [
-                        { value: ThumbnailPerformanceMode.Disabled, name: "Disabled" },
-                        { value: ThumbnailPerformanceMode.Hover, name: "On Hover" },
-                        { value: ThumbnailPerformanceMode.Always, name: "Always" },
-                    ],
-                    "column",
-                    async (event, data) => {
-                        await thumbnailEnhancer.pushSettings("upscale", data);
-                    }
+            // Thumbnail Enhancer
+            Form2.section({ name: "thumb", columns: 3 }, [
+                Form2.header("Thumbnails", 3),
+                Form2.select(
+                    { value: thumbnailEnhancer.fetchSettings("upscale"), label: "Upscale" },
+                    {
+                        "disabled": "Disabled",
+                        "hover": "On Hover",
+                        "always": "Always",
+                    },
+                    async (data) => { await thumbnailEnhancer.pushSettings("upscale", data); }
                 ),
-                Form.div("Replace 150x150 blurry thumbnails with larger versions", "mid"),
-                Form.spacer(),
-                Form.div(`<div class="unmargin"><b>Requires a page reload</b></div>`, "mid"),
+                Form2.div({ value: "Replace 150x150 blurry thumbnails with larger versions", width: 2 },),
+                Form2.spacer(),
+                Form2.div({ value: `<div class="unmargin"><b>Requires a page reload</b></div>`, width: 2 }),
 
-                Form.subsection({ id: "advanced", columns: 3 }, "Advanced", [
-                    Form.checkbox("zoom", thumbnailEnhancer.fetchSettings("zoom"), "Enlarge on Hover", "column",
-                        async (event, data) => {
+                // Advanced
+                Form2.collapse({ name: "advanced", columns: 3, width: 3, title: "Advanced", collapsed: true }, [
+                    Form2.checkbox(
+                        { value: thumbnailEnhancer.fetchSettings("zoom"), label: "Enlarge on Hover" },
+                        async (data) => {
                             await thumbnailEnhancer.pushSettings("zoom", data);
                             thumbnailEnhancer.toggleHoverZoom(data);
                         }
                     ),
-                    Form.div("Increases the size of the thumbnail when hovering over it", "mid"),
+                    Form2.div({ value: "Increases the size of the thumbnail when hovering over it", width: 2 }),
 
-                    Form.input("zoom-scale", thumbnailEnhancer.fetchSettings("zoomScale"), "Zoom scale", "column", { pattern: "^[1-9](\\.\\d+)?$" },
-                        async (event, data) => {
-                            if (!(event.target as HTMLInputElement).checkValidity()) return;
+                    Form2.input(
+                        { value: thumbnailEnhancer.fetchSettings("zoomScale"), label: "Zoom scale", pattern: "^[1-9](\\.\\d+)?$" },
+                        async (data, input) => {
+                            if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
                             await thumbnailEnhancer.pushSettings("zoomScale", data);
                             thumbnailEnhancer.setZoomScale(data);
                         }
                     ),
-                    Form.div("The ratio of the enlarged thumbnail to its original size", "mid"),
+                    Form2.div({ value: "The ratio of the enlarged thumbnail to its original size", width: 2 }),
 
-                    Form.checkbox("zoom-contextual", thumbnailEnhancer.fetchSettings("zoomContextual"), "Contextual Scaling", "column",
-                        async (event, data) => {
+                    Form2.checkbox(
+                        { value: thumbnailEnhancer.fetchSettings("zoomContextual"), label: "Contextual Scaling" },
+                        async (data) => {
                             await thumbnailEnhancer.pushSettings("zoomContextual", data);
                             thumbnailEnhancer.toggleZoomContextual(data);
                         }
                     ),
-                    Form.div("Only enable thumbnail scaling in the viewing mode", "mid"),
+                    Form2.div({ value: "Only enable thumbnail scaling in the viewing mode", width: 2 }),
 
-                    Form.spacer("full"),
+                    Form2.spacer(3),
 
 
-                    Form.checkbox("vote", thumbnailEnhancer.fetchSettings("vote"), "Voting Buttons", "column",
-                        async (event, data) => {
+                    Form2.checkbox(
+                        { value: thumbnailEnhancer.fetchSettings("vote"), label: "Voting Buttons" },
+                        async (data) => {
                             await thumbnailEnhancer.pushSettings("vote", data);
                             thumbnailEnhancer.toggleHoverVote(data);
                         }
                     ),
-                    Form.div("Adds voting buttons when hovering over a thumbnail", "mid"),
+                    Form2.div({ value: "Adds voting buttons when hovering over a thumbnail", width: 2 }),
 
-                    Form.spacer("full"),
+                    Form2.spacer(3),
 
 
-                    Form.checkbox("crop", thumbnailEnhancer.fetchSettings("crop"), "Resize Images", "column",
-                        async (event, data) => {
+                    Form2.checkbox(
+                        { value: thumbnailEnhancer.fetchSettings("crop"), label: "Resize Images" },
+                        async (data) => {
                             await thumbnailEnhancer.pushSettings("crop", data);
                             thumbnailEnhancer.toggleThumbCrop(data);
                         }
                     ),
-                    Form.div("Resize thumbnail images according to settings below", "mid"),
+                    Form2.div({ value: "Resize thumbnail images according to settings below", width: 2 }),
 
-                    Form.input("crop-size", thumbnailEnhancer.fetchSettings("cropSize"), "Thumbnail Size", "column", { pattern: "^\\d{2,3}(px|rem|em)$" },
-                        async (event, data) => {
-                            if (!(event.target as HTMLInputElement).checkValidity()) return;
+                    Form2.input(
+                        { value: thumbnailEnhancer.fetchSettings("cropSize"), label: "Thumbnail Size", pattern: "^\\d{2,3}(px|rem|em)$" },
+                        async (data, input) => {
+                            if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
                             await thumbnailEnhancer.pushSettings("cropSize", data);
                             thumbnailEnhancer.setThumbSize(data);
                         }
                     ),
-                    Form.div("Thumbnail width, in px, em, or rem", "mid"),
+                    Form2.div({ value: "Thumbnail width, in px, em, or rem", width: 2 }),
 
-                    Form.input("crop-ratio", thumbnailEnhancer.fetchSettings("cropRatio"), "Image Ratio", "column", { pattern: "^(([01](\\.\\d+)?)|2)$" },
-                        async (event, data) => {
-                            if (!(event.target as HTMLInputElement).checkValidity()) return;
+                    Form2.input(
+                        { value: thumbnailEnhancer.fetchSettings("cropRatio"), label: "Image Ratio", pattern: "^(([01](\\.\\d+)?)|2)$" },
+                        async (data, input) => {
+                            if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
                             await thumbnailEnhancer.pushSettings("cropRatio", data);
                             thumbnailEnhancer.setThumbRatio(data);
                         }
                     ),
-                    Form.div("Height to width ratio of the image", "mid"),
+                    Form2.div({ value: "Height to width ratio of the image", width: 2 }),
 
-                    Form.checkbox("preserve-ratio", thumbnailEnhancer.fetchSettings("cropPreserveRatio"), "Preserve ratio", "column",
-                        async (event, data) => {
+                    Form2.checkbox(
+                        { value: thumbnailEnhancer.fetchSettings("cropPreserveRatio"), label: "Preserve ratio" },
+                        async (data) => {
                             await thumbnailEnhancer.pushSettings("cropPreserveRatio", data);
                             $("input#advanced-crop-ratio").prop('disabled', data);
                             thumbnailEnhancer.toggleThumbPreserveRatio(data);
                         }
                     ),
-                    Form.div("Keep the image ratio of the original image", "mid"),
+                    Form2.div({ value: "Keep the image ratio of the original image", width: 2 }),
 
-                    Form.spacer("full"),
+                    Form2.spacer(3),
 
 
-                    Form.checkbox("state-ribbons", thumbnailEnhancer.fetchSettings("ribbons"), "Status Ribbons", "column",
-                        async (event, data) => {
+                    Form2.checkbox(
+                        { value: thumbnailEnhancer.fetchSettings("ribbons"), label: "Status Ribbons" },
+                        async (data) => {
                             await thumbnailEnhancer.pushSettings("ribbons", data);
                             if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleStatusRibbons(data);
 
-                            $("input#advanced-state-relations").prop("disabled", !data);
-                            $("input#advanced-state-relations").parent().toggleClass("input-disabled", !data);
-                            $("div#advanced-state-ribbons-text").parent().toggleClass("input-disabled", !data);
+                            $("input#optgeneral-thumb-advanced-relations-ribbons").prop("disabled", !data);
+                            $("input#optgeneral-thumb-advanced-relations-ribbons").parent().toggleClass("input-disabled", !data);
+                            $("form-input#relations-ribbons-text").toggleClass("input-disabled", !data);
                         }
                     ),
-                    Form.div("Use corner ribbons instead of colored borders for flags", "mid"),
+                    Form2.div({ value: "Use corner ribbons instead of colored borders for flags", width: 2 }),
 
-                    Form.checkbox(
-                        "state-relations", thumbnailEnhancer.fetchSettings("relRibbons"), "Relations Ribbons", "column",
-                        async (event, data) => {
+                    Form2.checkbox(
+                        {
+                            name: "relations-ribbons",
+                            value: thumbnailEnhancer.fetchSettings("relRibbons"),
+                            label: "Relations Ribbons",
+                            wrapper: (thumbnailEnhancer.fetchSettings("ribbons") ? undefined : "input-disabled")
+                        },
+                        async (data) => {
                             await thumbnailEnhancer.pushSettings("relRibbons", data);
                             if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleRelationRibbons(data);
-                        },
-                        (thumbnailEnhancer.fetchSettings("ribbons") ? undefined : "input-disabled")
+                        }
                     ),
-                    Form.div(
-                        "Display ribbons for parent/child relationships",
-                        "mid", undefined, "state-ribbons-text",
-                        (thumbnailEnhancer.fetchSettings("ribbons") ? undefined : "input-disabled")
-                    ),
+                    Form2.div({
+                        name: "relations-ribbons-text",
+                        value: "Display ribbons for parent/child relationships",
+                        width: 2,
+                        wrapper: (thumbnailEnhancer.fetchSettings("ribbons") ? undefined : "input-disabled")
+                    }),
                 ]),
 
-
-                Form.select(
-                    "click-action", thumbnailEnhancer.fetchSettings("clickAction"), "Double Click Action",
-                    [
-                        { value: ThumbnailClickAction.Disabled, name: "Disabled" },
-                        { value: ThumbnailClickAction.NewTab, name: "Open New Tab" },
-                        { value: ThumbnailClickAction.CopyID, name: "Copy Post ID" },
-                    ],
-                    "column",
-                    async (event, data) => {
+                Form2.select(
+                    { value: thumbnailEnhancer.fetchSettings("clickAction"), label: "Double Click Action" },
+                    {
+                        "disabled": "Disabled",
+                        "newtab": "Open New Tab",
+                        "copyid": "Copy Post ID",
+                    },
+                    async (data) => {
                         await thumbnailEnhancer.pushSettings("clickAction", data);
                     }
                 ),
-                Form.div("Action taken when a thumbnail is double-clicked", "mid"),
-                Form.spacer(),
-                Form.div(`<div class="unmargin"><b>Requires a page reload</b></div>`, "mid"),
+                Form2.div({ value: "Action taken when a thumbnail is double-clicked", width: 2 }),
+                Form2.spacer(),
+                Form2.div({ value: `<div class="unmargin"><b>Requires a page reload</b></div>`, width: 2 }),
 
-                Form.checkbox(
-                    "preserve-hover-text", thumbnailEnhancer.fetchSettings("preserveHoverText"), "Preserve Hover Text", "column",
-                    async (event, data) => {
+                Form2.checkbox(
+                    { value: thumbnailEnhancer.fetchSettings("preserveHoverText"), label: "Preserve Hover Text" },
+                    async (data) => {
                         await thumbnailEnhancer.pushSettings("preserveHoverText", data);
                     }
                 ),
-                Form.div("Restores text displayed when hovering over the thumbnail", "mid"),
-                Form.spacer(),
-                Form.div(`<div class="unmargin"><b>Requires a page reload</b></div>`, "mid"),
+                Form2.div({ value: "Restores text displayed when hovering over the thumbnail", width: 2 }),
+                Form2.spacer(),
+                Form2.div({ value: `<div class="unmargin"><b>Requires a page reload</b></div>`, width: 2 }),
 
-                Form.hr(),
+                Form2.hr(3),
             ]),
 
             // Infinite Scroll
-            Form.section({ id: "infscroll", columns: 3 }, [
-                Form.header("Infinite Scroll"),
-                Form.checkbox(
-                    "votefavorite", infiniteScroll.fetchSettings("keepHistory"), "Preserve history", "column",
-                    async (event, data) => { await infiniteScroll.pushSettings("keepHistory", data); }
+            Form2.section({ name: "infscroll", columns: 3 }, [
+                Form2.header("Infinite Scroll", 3),
+                Form2.checkbox(
+                    { value: infiniteScroll.fetchSettings("keepHistory"), label: "Preserve history" },
+                    async (data) => { await infiniteScroll.pushSettings("keepHistory", data); }
                 ),
-                Form.div(`If enabled, will load all result pages up to the current one.`, "mid"),
+                Form2.div({ value: `If enabled, will load all result pages up to the current one.`, width: 2 }),
 
-                Form.spacer("column"),
-                Form.div(`<div class="unmargin"><b>Requires a page reload</b></div>`, "mid"),
+                Form2.spacer(),
+                Form2.div({ value: `<div class="unmargin"><b>Requires a page reload</b></div>`, width: 2 }),
 
-                Form.hr(),
+                Form2.hr(3),
             ]),
 
-            // Actions
-            Form.section({ id: "actions", columns: 3 }, [
-                Form.header("Miscellaneous"),
+            Form2.section({ name: "actions", columns: 3 }, [
+                Form2.header("Miscellaneous", 3),
 
-                Form.checkbox(
-                    "votefavorite", postViewer.fetchSettings("upvoteOnFavorite"), "Auto-upvote favorites", "column",
-                    async (event, data) => { await postViewer.pushSettings("upvoteOnFavorite", data); }
+                Form2.checkbox(
+                    { value: postViewer.fetchSettings("upvoteOnFavorite"), label: "Auto-upvote favorites" },
+                    async (data) => { await postViewer.pushSettings("upvoteOnFavorite", data); }
                 ),
-                Form.checkbox(
-                    "click-scale", imageScaler.fetchSettings("clickScale"), "Click images to resize them", "column",
-                    async (event, data) => { await imageScaler.pushSettings("clickScale", data); }),
+                Form2.checkbox(
+                    { value: imageScaler.fetchSettings("clickScale"), label: "Click images to resize them" },
+                    async (data) => { await imageScaler.pushSettings("clickScale", data); }),
 
-                Form.checkbox(
-                    "collapse-tag-cats", searchUtilities.fetchSettings("collapseCategories"), "Collapse tag categories", "column",
-                    async (event, data) => { await searchUtilities.pushSettings("collapseCategories", data); }
+                Form2.checkbox(
+                    { value: searchUtilities.fetchSettings("collapseCategories"), label: "Collapse tag categories" },
+                    async (data) => { await searchUtilities.pushSettings("collapseCategories", data); }
                 ),
 
-                Form.checkbox(
-                    "quickadd", blacklistEnhancer.fetchSettings("quickaddTags"), "Click X to add tag to blacklist", "column",
-                    async (event, data) => { await blacklistEnhancer.pushSettings("quickaddTags", data); }),
-                Form.spacer("mid"),
+                Form2.checkbox(
+                    { value: blacklistEnhancer.fetchSettings("quickaddTags"), label: "Click X to add tag to blacklist" },
+                    async (data) => { await blacklistEnhancer.pushSettings("quickaddTags", data); }),
+                Form2.spacer(2),
 
-                Form.checkbox(
-                    "forumUpdateDot", headerCustomizer.fetchSettings("forumUpdateDot"), "Header forum notifications", "column",
-                    async (event, data) => { await headerCustomizer.pushSettings("forumUpdateDot", data); }),
-                Form.div("Red dot on the Forum tab in the header if there are new posts", "mid"),
+                Form2.checkbox(
+                    { value: headerCustomizer.fetchSettings("forumUpdateDot"), label: "Header forum notifications" },
+                    async (data) => { await headerCustomizer.pushSettings("forumUpdateDot", data); }),
+                Form2.div({ value: "Red dot on the Forum tab in the header if there are new posts", width: 2 }),
 
-                Form.spacer("column"),
-                Form.div(`<div class="unmargin"><b>Requires page update</b></div>`, "mid"),
-
+                Form2.spacer(),
+                Form2.div({ value: `<div class="unmargin"><b>Requires page update</b></div>`, width: 2 }),
             ]),
 
         ]);
