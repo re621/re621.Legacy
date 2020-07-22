@@ -6,7 +6,6 @@ import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
-import { Form, FormElement } from "../../components/structure/Form";
 import { Form2, Form2Element } from "../../components/structure/Form2";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
@@ -588,7 +587,7 @@ export class SettingsController extends RE6Module {
     }
 
     /** Creates the Custom Flagger tab */
-    private createFlagsTab(): Form {
+    private createFlagsTab(): Form2 {
         const customFlagger = ModuleController.get(CustomFlagger);
 
         const defsContainer = $("<div>")
@@ -599,10 +598,10 @@ export class SettingsController extends RE6Module {
             makeDefInput(flag).appendTo(defsContainer);
         });
 
-        return new Form({ id: "settings-flags", columns: 3, parent: "div#modal-container" }, [
-            Form.header("Flag Definitions", "mid"),
-            Form.button(
-                "defs-add", "New Flag", undefined, "column",
+        return new Form2({ name: "optflags", columns: 3, width: 3 }, [
+            Form2.header("Flag Definitions", 2),
+            Form2.button(
+                { value: "New Flag" },
                 async () => {
                     makeDefInput({
                         name: "",
@@ -611,13 +610,11 @@ export class SettingsController extends RE6Module {
                     }).appendTo(defsContainer);
                 }
             ),
+            Form2.div({ value: defsContainer, width: 3 }),
 
-            Form.div(defsContainer, "full"),
-
-            Form.button(
-                "defs-save", "Save", undefined, "column",
-                async (event) => {
-                    event.preventDefault();
+            Form2.button(
+                { value: "Save" },
+                async () => {
                     const confirmBox = $("span#defs-confirm").html("Saving . . .");
 
                     const defData: FlagDefinition[] = [];
@@ -645,14 +642,16 @@ export class SettingsController extends RE6Module {
                     confirmBox.html("Settings Saved");
                 }
             ),
-            Form.div(`<span id="defs-confirm"></span>`, "mid"),
+            Form2.div({ value: `<span id="defs-confirm"></span>` }),
 
-            Form.div(`
+            Form2.div({
+                value: `
                 <b>Custom Flags</b> allow you to automatically highlight posts that match specified tags. For example:<br />
                 <pre>-solo -duo -group -zero_pictured</pre>: posts that do not inlcude character count tags.<br />
                 <pre>tagcount:&lt;5</pre>: posts with less than 5 tags<br />
-                Flag names must be unique. Duplicate tag strings are allowed, by their corresponding flag may not display.
-            `),
+                Flag names must be unique. Duplicate tag strings are allowed, by their corresponding flag may not display.`,
+                width: 3
+            }),
         ]);
 
         function makeDefInput(flag?: FlagDefinition): JQuery<HTMLElement> {
@@ -797,27 +796,27 @@ export class SettingsController extends RE6Module {
         ]);
     }
 
-    private createSyncTab(): Form {
-        return new Form({ id: "settings-sync", columns: 3, parent: "div#modal-container" }, [
-            Form.header("Settings Synchronization"),
+    private createSyncTab(): Form2 {
+        return new Form2({ name: "optsync", columns: 3, width: 3 }, [
+            Form2.header("Settings Synchronization", 3),
 
-            Form.checkbox(
-                "sync-enabled", Sync.enabled, "Enabled", "column",
+            Form2.checkbox(
+                { value: Sync.enabled, label: "Enabled" },
                 async (data) => {
                     console.log(data);
                 }
             ),
-            Form.spacer("mid"),
+            Form2.spacer(2),
 
-            Form.div("ID", "column"),
-            Form.input(
-                "sync-id", Sync.userID, undefined, "column", undefined,
+            Form2.div({ value: "ID" }),
+            Form2.input(
+                { value: Sync.userID },
                 async (data) => {
                     console.log(data);
                 }
             ),
-            Form.input(
-                "sync-pass", "password", undefined, "column", undefined,
+            Form2.input(
+                { value: "password" },
                 async (data) => {
                     console.log(data);
                 }
@@ -826,131 +825,116 @@ export class SettingsController extends RE6Module {
     }
 
     /** Creates the miscellaneous settings tab */
-    private createMiscTab(): Form {
+    private createMiscTab(): Form2 {
         const modules = ModuleController.getAll();
 
         // "Reset Module" selector
-        const moduleSelector = [{ value: "none", name: "------" }];
+        const moduleSelector = { "none": "------" };
         modules.forEach((module) => {
-            moduleSelector.push({ value: module.constructor.name, name: module.constructor.name });
+            moduleSelector[module.getSettingsTag()] = module.getSettingsTag();
         });
         let selectedModule = "none";
 
         // Create the settings form
-        return new Form({ id: "settings-misc", columns: 3, parent: "div#modal-container" }, [
-            Form.header("Miscellaneous"),
+        return new Form2({ name: "optmisc", columns: 3, width: 3 }, [
+            Form2.header("Miscellaneous", 3),
 
-            // Import from File
-            Form.header("Import / Export from file", "column"),
-            Form.div(`<div class="notice unmargin float-right">Import subscription data from file</div>`, "mid"),
+            Form2.section({ name: "export", columns: 3, width: 3 }, [
 
-            Form.button(
-                "export-button", "Export", "Export to file", "mid",
-                () => { exportToFile(); }
-            ),
-            Form.spacer(),
+                // Import from File
+                Form2.section({ name: "file", columns: 3, width: 3 }, [
+                    Form2.header("Import / Export from file"),
+                    Form2.div({ value: `<div class="notice unmargin float-right">Import subscription data from file</div>`, width: 2 }),
 
-            Form.file(
-                "import-file", "json", "Import from file", "mid", undefined,
-                (event, data) => { importFromFile(data); }
-            ),
-            Form.spacer(),
-            Form.status(`<div id="file-import-status" class="unmargin"></div>`),
+                    Form2.button(
+                        { value: "Export", label: "Export to file", width: 2 },
+                        () => { exportToFile(); }
+                    ),
+                    Form2.spacer(),
 
-            // eSix Extended
-            Form.header("eSix Extended", "column"),
-            Form.div(`<div class="notice unmargin float-right">Import the settings from eSix Extended (Legacy)</div>`, "mid"),
+                    Form2.file(
+                        { accept: "json", label: "Import from file", width: 2 },
+                        (data) => { importFromFile(data); }
+                    ),
+                    Form2.spacer(),
+                    Form2.div({ value: `<div id="file-import-status" class="unmargin"></div>`, label: " ", width: 3 }),
+                ]),
 
-            // From File
-            Form.file(
-                "esix-file", "json", "Select file", "mid", undefined,
-                (event, data) => { importE6FromFile(data); }
-            ),
-            Form.spacer(),
-            Form.status(`<div id="file-esix-status" class="unmargin"></div>`),
+                // eSix Extended
+                Form2.section({ name: "esix", columns: 3, width: 3, wrapper: Debug.isEnabled() ? undefined : "display-none" }, [
+                    Form2.header("eSix Extended"),
+                    Form2.div({ value: `<div class="notice unmargin float-right">Import the settings from eSix Extended (Legacy)</div>`, width: 2 }),
 
-            // From LocalStorage
-            Form.button(
-                "esix-localstorage", "Load", "From LocalStorage", "mid",
-                () => { importE6FromLocalStorage(); }
-            ),
-            Form.spacer(),
-            Form.status(`<div id="localstorage-esix-status" class="unmargin"></div>`),
-            Form.hr(),
+                    // From File
+                    Form2.file(
+                        { accept: "json", label: "Select file", width: 2 },
+                        (data) => { importE6FromFile(data); }
+                    ),
+                    Form2.spacer(),
+                    Form2.div({ value: `<div id="file-esix-status" class="unmargin"></div>`, label: " ", width: 3 }),
+
+                    // From LocalStorage
+                    Form2.button(
+                        { value: "Load", label: "From LocalStorage", width: 2 },
+                        () => { importE6FromLocalStorage(); }
+                    ),
+                    Form2.spacer(),
+                    Form2.div({ value: `<div id="localstorage-esix-status" class="unmargin"></div>`, label: " ", width: 3 }),
+                ]),
+
+                Form2.hr(3),
+            ]),
 
             // Reset Configuration
-            Form.header("Reset Modules"),
-            Form.button(
-                "reset-everything", "Clear", "Everything", "column",
-                () => {
-                    if (confirm("Are you absolutely sure?")) {
-                        ModuleController.getAll().forEach((module) => { module.clearSettings(); });
-                        location.reload();
-                    }
-                }
-            ),
-            Form.div("Delete settings for all modules. <b>This cannot be undone.</b>", "mid"),
-            Form.select(
-                "reset-specific", "none", "Module", moduleSelector, "mid",
-                (event, data) => { selectedModule = data; }
-            ),
-            Form.div("Reset a specific module", "column"),
-            Form.button(
-                "reset-specific-action", "Reset", " ", "mid",
-                () => {
-                    if (selectedModule === "none") return;
-                    ModuleController.get(selectedModule).clearSettings();
-                }
-            ),
-            Form.div("<b>This cannot be undone.</b>", "column"),
-            Form.hr(),
-
-            // Report
-            Form.section({ id: "statistics", columns: 3, customClass: "display-none-important" }, [
-                Form.header("Anonymous Statistics"),
-                Form.checkbox(
-                    "report-enabled", Sync.version !== false, "Enabled", "full",
-                    async (event, data) => {
-                        if (data !== false) await XM.Storage.setValue("re621.report", "0.0.1");
-                        else await XM.Storage.setValue("re621.report", false);
+            Form2.section({ name: "reset", columns: 3, width: 3 }, [
+                Form2.header("Reset Modules", 3),
+                Form2.button(
+                    { value: "Clear", label: "Everything" },
+                    () => {
+                        if (confirm("Are you absolutely sure?")) {
+                            ModuleController.getAll().forEach((module) => { module.clearSettings(); });
+                            location.reload();
+                        }
                     }
                 ),
-                Form.div(
-                    `re621 collects and records anonymous data about the environment in which the script runs. ` +
-                    `This data is used to improve the user experience, and to determine what system needs more attention.`
+                Form2.div({ value: "Delete settings for all modules. <b>This cannot be undone.</b>", width: 2 }),
+                Form2.select(
+                    { value: selectedModule, label: "Module", width: 2 },
+                    moduleSelector,
+                    (data) => { selectedModule = data; }
                 ),
-                Form.subsection({ id: "collected-data", columns: 2 }, "Collected data", [
-                    ...printEnvData(),
-                ], undefined, "full"),
-                Form.hr(),
+                Form2.div({ value: "Reset a specific module" }),
+                Form2.button(
+                    { value: "Reset", label: " ", width: 2 },
+                    () => {
+                        if (selectedModule === "none") return;
+                        ModuleController.get(selectedModule).clearSettings();
+                    }
+                ),
+                Form2.div({ value: "<b>This cannot be undone.</b>" }),
+                Form2.hr(3),
             ]),
 
             // Debug Settings
-            Form.section({ id: "debug", columns: 3 }, [
-                Form.header("Debugging Tools"),
-                Form.checkbox(
-                    "debug-enabled", Debug.isEnabled(), "Console output", "column",
-                    (event, data) => {
+            Form2.section({ name: "debug", columns: 3, width: 3 }, [
+                Form2.header("Debugging Tools", 3),
+                Form2.checkbox(
+                    { value: Debug.isEnabled(), label: "Console output" },
+                    (data) => {
                         Debug.setEnabled(data);
                     }
                 ),
-                Form.div("Enable debug messages in the console log", "mid"),
-                Form.checkbox(
-                    "connect-log-enabled", Debug.isConnectLogEnabled(), "Connections log", "column",
-                    (event, data) => {
+                Form2.div({ value: "Enable debug messages in the console log", width: 2 }),
+
+                Form2.checkbox(
+                    { value: Debug.isConnectLogEnabled(), label: "Connections log" },
+                    (data) => {
                         Debug.setConnectLogEnabled(data);
                     }
                 ),
-                Form.div("Logs all outbound connections in the console", "mid"),
+                Form2.div({ value: "Logs all outbound connections in the console", width: 2 }),
             ]),
         ]);
-
-        function printEnvData(): FormElement[] {
-            const output: FormElement[] = [];
-            const data = Sync.getEnvData();
-            for (const key in data) output.push(Form.div(data[key], "column", key));
-            return output;
-        }
 
         /** Export the currnt module settings to file */
         function exportToFile(): void {
@@ -1075,36 +1059,41 @@ export class SettingsController extends RE6Module {
     }
 
     /** Creates the about tab */
-    private createAboutTab(): Form {
-        return new Form({ "id": "about-form", "columns": 3, parent: "div#modal-container" }, [
+    private createAboutTab(): Form2 {
+        return new Form2({ name: "optabout", columns: 3, width: 3 }, [
             // About
-            Form.div(
-                `<h3 class="display-inline"><a href="${window["re621"]["links"]["website"]}">${window["re621"]["name"]} v.${window["re621"]["version"]}</a></h3>` +
-                ` <span class="display-inline">build ${window["re621"]["build"]}:${Patcher.version}</span>`,
-                "mid"
-            ),
-            Form.div(
-                `<span class="float-right" id="project-update-button" data-available="${this.fetchSettings("newVersionAvailable")}">
+            Form2.div({
+                value:
+                    `<h3 class="display-inline"><a href="${window["re621"]["links"]["website"]}">${window["re621"]["name"]} v.${window["re621"]["version"]}</a></h3>` +
+                    ` <span class="display-inline">build ${window["re621"]["build"]}:${Patcher.version}</span>`,
+                width: 2
+            }),
+            Form2.div({
+                value:
+                    `<span class="float-right" id="project-update-button" data-available="${this.fetchSettings("newVersionAvailable")}">
                     <a href="${window["re621"]["links"]["releases"]}">Update Available</a>
-                </span>`,
-                "column"
-            ),
-            Form.div(
-                `<b>${window["re621"]["name"]}</b> is a comprehensive set of tools designed to enhance the website for both casual and power users. ` +
-                `It is created and maintained by unpaid volunteers, with the hope that it will be useful for the community.`
-            ),
-            Form.div(
-                `Keeping the script - and the website - fully functional is our highest priority. ` +
-                `If you are experiencing bugs or issues, do not hesitate to create a new ticket on <a href="${window["re621"]["links"]["issues"]}">github</a>, ` +
-                `or leave us a message in the <a href="${window["re621"]["links"]["forum"]}">forum thread</a>. ` +
-                `Feature requests, comments, and overall feedback are also appreciated.`
-            ),
-            Form.div(`Thank you for downloading and using this script. We hope that you enjoy the experience.`),
-            Form.spacer("full"),
+                    </span>`
+            }),
+            Form2.div({
+                value:
+                    `<b>${window["re621"]["name"]}</b> is a comprehensive set of tools designed to enhance the website for both casual and power users. ` +
+                    `It is created and maintained by unpaid volunteers, with the hope that it will be useful for the community.`,
+                width: 3
+            }),
+            Form2.div({
+                value:
+                    `Keeping the script - and the website - fully functional is our highest priority. ` +
+                    `If you are experiencing bugs or issues, do not hesitate to create a new ticket on <a href="${window["re621"]["links"]["issues"]}">github</a>, ` +
+                    `or leave us a message in the <a href="${window["re621"]["links"]["forum"]}">forum thread</a>. ` +
+                    `Feature requests, comments, and overall feedback are also appreciated.`,
+                width: 3
+            }),
+            Form2.div({ value: `Thank you for downloading and using this script. We hope that you enjoy the experience.`, width: 3 }),
+            Form2.spacer(3),
 
             // Changelog
-            Form.header(`<a href="${window["re621"]["links"]["releases"]}" class="unmargin">What's new?</a>`),
-            Form.div(`<div id="changelog-list">${Util.quickParseMarkdown(this.fetchSettings("changelog"))}</div>`)
+            Form2.header(`<a href="${window["re621"]["links"]["releases"]}" class="unmargin">What's new?</a>`, 3),
+            Form2.div({ value: `<div id="changelog-list">${Util.quickParseMarkdown(this.fetchSettings("changelog"))}</div>`, width: 3 })
         ]);
     }
 

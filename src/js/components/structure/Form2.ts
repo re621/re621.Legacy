@@ -23,7 +23,7 @@ export class Form2 {
         if (!options.name) options.name = FormUtils.getUniqueID();
 
         this.element = $("<form>")
-            .addClass("form-section")
+            .addClass("form-section" + (options.wrapper ? " " + options.wrapper : ""))
             .attr({
                 "id": options.name,
                 "columns": options.columns || 1,
@@ -113,6 +113,7 @@ export class Form2 {
             $label = FormUtils.makeLabel(options.name, options.label);
 
         const $element = $("<form-section>")
+            .toggleClass(options.wrapper, options.wrapper)
             .attr({
                 "id": options.name,
                 "labeled": options.label !== undefined,
@@ -329,6 +330,39 @@ export class Form2 {
                 }
             });
         });
+
+        return new Form2Element($element, $input, $label);
+    }
+
+    /**
+     * Creates a file input FormElement based on the provided parameters  
+     * @param options Element configuration
+     */
+    public static file(options?: ElementOptions & { accept: string }, changed?: InputChangeEvent): Form2Element {
+        if (!options.name) options.name = FormUtils.getUniqueID();
+
+        let $label: JQuery<HTMLElement>;
+        if (options.label)
+            $label = FormUtils.makeLabel(options.name, options.label);
+
+        const $element = FormUtils
+            .makeInputWrapper(options.label, options.wrapper, options.width)
+            .addClass("keyinput");
+
+        const $input = $("<input>")
+            .attr({
+                "type": "file",
+                "accept": options.accept,
+                "id": options.name,
+            })
+            .addClass("bg-section color-text")
+            .appendTo($element);
+
+        if (changed !== undefined) {
+            $input.on("change", () => {
+                changed($input.prop("files"), $input);
+            });
+        }
 
         return new Form2Element($element, $input, $label);
     }
@@ -599,6 +633,7 @@ interface SectionOptions {
     label?: string;
     columns?: number;
     width?: number;
+    wrapper?: string;
 }
 
 interface ElementOptions {
