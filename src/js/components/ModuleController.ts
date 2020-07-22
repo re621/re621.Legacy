@@ -16,6 +16,7 @@ export class ModuleController {
 
         let activeModules = 0;
         for (const moduleClass of moduleList) {
+            // console.time(moduleClass.prototype.constructor.name);
             try {
                 const moduleInstance = moduleClass.getInstance();
                 this.modules.set(moduleClass.prototype.constructor.name, moduleInstance);
@@ -25,6 +26,7 @@ export class ModuleController {
                     activeModules++;
                 }
             } catch (error) { ErrorHandler.error(moduleClass, error.stack, "init"); }
+            // console.timeEnd(moduleClass.prototype.constructor.name);
         }
 
         return Promise.resolve(activeModules);

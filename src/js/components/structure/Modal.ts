@@ -163,6 +163,15 @@ export class Modal {
     }
 
     /**
+     * Sets the modal content
+     * @param $content Content to add
+     */
+    public setContent($content: JQuery<HTMLElement>): void {
+        this.$modal.html("");
+        this.$modal.append($content);
+    }
+
+    /**
      * Listens to the specified element in order to trigger the modal
      * @param trigger Element-event pair to listen to
      */

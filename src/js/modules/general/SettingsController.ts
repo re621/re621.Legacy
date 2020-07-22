@@ -56,6 +56,11 @@ export class SettingsController extends RE6Module {
         });
 
         // Establish the settings window contents
+        const $placeholder = new Form2(
+            { name: "opttemp", columns: 3, width: 3 },
+            [Form2.spacer(3)]
+        );
+
         const $settings = new Tabbed({
             name: "settings-tabs",
             content: [
@@ -71,14 +76,21 @@ export class SettingsController extends RE6Module {
         });
 
         // Create the modal
-        new Modal({
+        const settingsModal = new Modal({
             title: "Settings",
             triggers: [{ element: openSettingsButton }],
             escapable: false,
             fixed: true,
             reserveHeight: true,
-            content: $settings.create(),
+            content: $placeholder.get(),
             position: { my: "center", at: "center" }
+        });
+
+        let settingsOpened = false;
+        settingsModal.getElement().on("dialogopen", () => {
+            if (settingsOpened) return;
+            settingsOpened = true;
+            settingsModal.setContent($settings.create());
         });
 
         // Start up the version checker
