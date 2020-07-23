@@ -3,14 +3,7 @@ import { PageDefintion } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { Form } from "../../components/structure/Form";
-
-const IMAGE_SIZES = [
-    { value: "sample", name: "Sample" },
-    { value: "fit-vertical", name: "Fill Screen" },
-    { value: "fit-horizontal", name: "Fit Horizontally" },
-    { value: "original", name: "Original" },
-];
+import { Form2 } from "../../components/structure/Form2";
 
 /**
  * Handles scaling post images in an intelligent way
@@ -56,24 +49,18 @@ export class ImageScaler extends RE6Module {
         const resizeButtonContainer = $("#image-resize-cycle").empty();
         this.setImageSize(this.fetchSettings("size"));
 
-        const resizeForm = new Form(
-            {
-                id: "resize-image",
-                parent: "#image-resize-cycle",
-                columns: 2,
-            },
+        const resizeForm = new Form2({ name: "resize-image", columns: 2, width: 2 },
             [
-                {
-                    id: "scale",
-                    type: "select",
-                    data: IMAGE_SIZES,
-                    value: this.fetchSettings("size"),
-                },
-                {
-                    id: "fullsize",
-                    type: "div",
-                    value: `<a href="` + this.post.getImageURL() + `" class="button btn-neutral" id="fullsize-image">Fullscreen</a>`,
-                }
+                Form2.select(
+                    { name: "scale", value: this.fetchSettings("size") },
+                    {
+                        "sample": "Sample",
+                        "fit-vertical": "Fill Screen",
+                        "fit-horizontal": "Fit Horizontally",
+                        "original": "Original",
+                    }
+                ),
+                Form2.div({ value: `<a href="` + this.post.getImageURL() + `" class="button btn-neutral" id="fullsize-image">Fullscreen</a>` }),
             ]
         );
 

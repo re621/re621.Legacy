@@ -3,6 +3,10 @@ import { Hotkeys } from "../data/Hotkeys";
 import { Util } from "../utility/Util";
 import { DomStructure } from "./DomStructure";
 
+/**
+ * Form Engine v.2.0  
+ * Simplifies the process of creating complex, visually consistent forms.
+ */
 export class Form2 implements DomStructure {
 
     private static inputTimeout = 500;          // Typing timeout on text input fields
@@ -379,6 +383,61 @@ export class Form2 implements DomStructure {
         return new Form2Element($element, $input, $label);
     }
 
+    public static icon(options?: ElementOptions, content?: { [name: string]: any }, changed?: InputChangeEvent): Form2Element {
+        if (!options.name) options.name = FormUtils.getUniqueID();
+
+        let $label: JQuery<HTMLElement>;
+        if (options.label)
+            $label = FormUtils.makeLabel(options.name, options.label);
+
+        const $element = FormUtils.makeInputWrapper(options.label, options.wrapper, options.width);
+
+        const $input = $("<input>")
+            .attr({
+                "type": "text",
+                "id": options.name,
+                "name": options.name,
+            })
+            .css("display", "none")
+            .val(options.value)
+            .appendTo($element);
+
+        const $selectContainer = $("<div>")
+            .addClass("icon-picker")
+            .appendTo($element);
+
+        for (const key in content) {
+            $("<a>")
+                .attr("href", "#")
+                .attr("data-value", key)
+                .html(content[key])
+                .appendTo($selectContainer);
+        }
+
+        $selectContainer.find("a").click((event) => {
+            event.preventDefault();
+            $selectContainer.find("a").removeClass("active");
+
+            const $target = $(event.target);
+            $input.val($target.attr("data-value"));
+            $target.addClass("active");
+
+            if (changed) changed($input.val().toString(), $input);
+        });
+
+        if (options.value) { $selectContainer.find("a[data-value='" + options.value + "']").first().click(); }
+        else { $selectContainer.find("a").first().click(); }
+
+        // When the field value is set externally, this event needs to be triggered on the text input field.
+        // There is probably a better way to do this, but this should work for now.
+        $input.on("re621:form:update", () => {
+            if ($input.val() == "") { $selectContainer.find("a").first().click(); }
+            else { $selectContainer.find("a[data-value='" + $input.val() + "']").first().click(); }
+        });
+
+        return new Form2Element($element, $input, $label);
+    }
+
     /**
      * Creates a button FormElement based on the provided parameters  
      * @param options Element configuration
@@ -404,7 +463,10 @@ export class Form2 implements DomStructure {
             .appendTo($element);
 
         if (changed !== undefined)
-            $input.on("click", () => { changed(true, $input); });
+            $input.on("click", (event) => {
+                event.preventDefault();
+                changed(true, $input);
+            });
 
         return new Form2Element($element, $input, $label);
     }
