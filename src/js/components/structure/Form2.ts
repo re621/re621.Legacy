@@ -1,8 +1,9 @@
 import { XM } from "../api/XM";
 import { Hotkeys } from "../data/Hotkeys";
 import { Util } from "../utility/Util";
+import { DomStructure } from "./DomStructure";
 
-export class Form2 {
+export class Form2 implements DomStructure {
 
     private static inputTimeout = 500;          // Typing timeout on text input fields
 
@@ -98,6 +99,17 @@ export class Form2 {
         });
 
         return results;
+    }
+
+    /**
+     * An empty, placeholder form. Used to properly space out and center modals
+     * @param width Form width
+     */
+    public static placeholder(width = 1): JQuery<HTMLElement> {
+        return new Form2(
+            { columns: width, width: width },
+            [Form2.spacer(width)]
+        ).get();
     }
 
     /**

@@ -2,6 +2,7 @@ import { Danbooru } from "../../components/api/Danbooru";
 import { E621 } from "../../components/api/E621";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
+import { Form2 } from "../../components/structure/Form2";
 import { Modal } from "../../components/structure/Modal";
 import { Prompt } from "../../components/structure/Prompt";
 
@@ -218,7 +219,8 @@ class FormattingHelper {
 
         this.$editButtonsModal = new Modal({
             title: "Edit Button",
-            content: $editButtonsForm.get(),
+            content: Form2.placeholder(),
+            structure: $editButtonsForm,
             triggers: [],
             triggerMulti: true,
             fixed: true,
@@ -336,7 +338,8 @@ class FormattingHelper {
 
         const newFormatModal = new Modal({
             title: "New Custom Button",
-            content: newFormatForm.get(),
+            content: Form2.placeholder(),
+            structure: newFormatForm,
             triggers: [{ element: $newFormatButton }],
             fixed: true,
         });

@@ -87,7 +87,8 @@ export class ThemeCustomizer extends RE6Module {
         new Modal({
             title: "Themes",
             triggers: [{ element: openCustomizerButton }],
-            content: form.get(),
+            content: Form2.placeholder(),
+            structure: form,
             position: { my: "right top", at: "right top" }
         });
     }

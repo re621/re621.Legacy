@@ -5,7 +5,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
-import { Tabbed } from "../../components/structure/Tabbed";
+import { Tabbed, TabContent } from "../../components/structure/Tabbed";
 import { Debug } from "../../components/utility/Debug";
 import { Sync } from "../../components/utility/Sync";
 import { Util } from "../../components/utility/Util";
@@ -117,7 +117,7 @@ export class SubscriptionManager extends RE6Module {
         });
 
         // Create structure for the subscription interface
-        const content = [];
+        const content: TabContent[] = [];
 
         let tabIndex = 0;
         this.trackers.forEach((data, name) => {
@@ -149,10 +149,10 @@ export class SubscriptionManager extends RE6Module {
             // Create subscribe buttons
             this.addSubscribeButtons(data.instance);
 
-            content.push({ name: data.tabElement, page: data.content });
+            content.push({ name: data.tabElement, content: data.content });
             tabIndex++;
         });
-        content.push({ name: "Info", page: this.buildInfoPage().get() });
+        content.push({ name: "Info", content: this.buildInfoPage().get() });
 
         this.tabs = new Tabbed({
             name: "notifications-tabs",

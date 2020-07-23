@@ -56,41 +56,30 @@ export class SettingsController extends RE6Module {
         });
 
         // Establish the settings window contents
-        const $placeholder = new Form2(
-            { name: "opttemp", columns: 3, width: 3 },
-            [Form2.spacer(3)]
-        );
-
         const $settings = new Tabbed({
             name: "settings-tabs",
             content: [
-                { name: "Features", page: this.createFeaturesTab().get() },
-                { name: "General", page: this.createGeneralTab().get() },
-                { name: "Downloads", page: this.createDownloadsTab().get() },
-                { name: "Custom Flags", page: this.createFlagsTab().get() },
-                { name: "Hotkeys", page: this.createHotkeysTab().get() },
-                // { name: "Sync", page: this.createSyncTab().get() },
-                { name: "Other", page: this.createMiscTab().get() },
-                { name: "About", page: this.createAboutTab().get() },
+                { name: "Features", structure: this.createFeaturesTab() },
+                { name: "General", structure: this.createGeneralTab() },
+                { name: "Downloads", structure: this.createDownloadsTab() },
+                { name: "Custom Flags", structure: this.createFlagsTab() },
+                { name: "Hotkeys", structure: this.createHotkeysTab() },
+                // { name: "Sync", structure: this.createSyncTab() },
+                { name: "Other", structure: this.createMiscTab() },
+                { name: "About", structure: this.createAboutTab() },
             ]
         });
 
         // Create the modal
-        const settingsModal = new Modal({
+        new Modal({
             title: "Settings",
             triggers: [{ element: openSettingsButton }],
             escapable: false,
             fixed: true,
             reserveHeight: true,
-            content: $placeholder.get(),
-            position: { my: "center", at: "center" }
-        });
-
-        let settingsOpened = false;
-        settingsModal.getElement().on("dialogopen", () => {
-            if (settingsOpened) return;
-            settingsOpened = true;
-            settingsModal.setContent($settings.create());
+            content: Form2.placeholder(3),
+            structure: $settings,
+            position: { my: "center", at: "center" },
         });
 
         // Start up the version checker

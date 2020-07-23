@@ -1,22 +1,21 @@
+import { Util } from "../utility/Util";
+import { DomStructure } from "./DomStructure";
+
 /**
  * Tabbed  
  * Relateively easy tabbed content, powered by CSS
  */
-export class Tabbed {
+export class Tabbed implements DomStructure {
 
+    private static elementIDs: string[] = [];   // Used to make sure that IDs are unique
+
+    private id: string;
     private config: TabbedConfig;
     private $container: JQuery<HTMLElement>;
 
     constructor(config: TabbedConfig) {
+        this.id = Tabbed.getUniqueID();
         this.config = config;
-    }
-
-    /**
-     * Creates a JQuery-UI tab element based on the provided configuration
-     * @deprecated Alias of a more standard `get()`. Use that instead.
-     */
-    public create(): JQuery<HTMLElement> {
-        return this.get();
     }
 
     /**
@@ -35,13 +34,15 @@ export class Tabbed {
             if (typeof entry.name === "string")
                 $tab = $("<a>").html(entry.name);
             else $tab = entry.name;
-            $tab.attr("href", "#fragment-" + index)
+            $tab.attr("href", "#" + this.id + "-fragment-" + index)
             $("<li>").appendTo($tabList).append($tab);
 
-            $("<div>")
-                .attr("id", "fragment-" + index)
-                .append(entry.page)
+            const elem = $("<div>")
+                .attr("id", this.id + "-fragment-" + index)
                 .appendTo(this.$container);
+
+            if (entry.content) elem.append(entry.content);
+            if (entry.structure) elem.append(entry.structure.get());
         });
 
         this.$container.tabs({
@@ -62,7 +63,16 @@ export class Tabbed {
      * @param $element Element which will replace the current content
      */
     public replace(index: number, $element: JQuery<HTMLElement>): void {
-        this.$container.find("#fragment-" + index).children().replaceWith($element);
+        this.$container.find("#" + this.id + "-fragment-" + index).children().replaceWith($element);
+    }
+
+    /** Creates and returns a unique element ID */
+    private static getUniqueID(): string {
+        let uniqueID: string;
+        do { uniqueID = Util.makeID(8); }
+        while (this.elementIDs.includes(uniqueID));
+        this.elementIDs.push(uniqueID);
+        return uniqueID;
     }
 
 }
@@ -74,9 +84,14 @@ interface TabbedConfig {
 
 export interface TabContent {
     /** Either the tab name, or JQuery element corresponding to the selector */
-    name: string | JQuery<HTMLAnchorElement>;
+    name: string | JQuery<HTMLElement>;
+
     /** JQuery element with the modal contents */
-    page: JQuery<HTMLElement>;
+    content?: JQuery<HTMLElement>;
+
+    /** If specified, the content parameter is ignored, replaced by this DomStructure */
+    structure?: DomStructure;
+
     /** If true, strips the top margins so that a Tabbed object could be fitted in it */
     tabbable?: boolean;
 }

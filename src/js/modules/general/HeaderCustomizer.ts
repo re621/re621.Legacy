@@ -172,7 +172,8 @@ export class HeaderCustomizer extends RE6Module {
         this.addTabModal = new Modal({
             title: "Add Tab",
             triggers: [{ element: this.addTabButton }],
-            content: newTabForm.get(),
+            content: Form2.placeholder(),
+            structure: newTabForm,
             position: { my: "right top", at: "right top" }
         });
 
@@ -209,7 +210,8 @@ export class HeaderCustomizer extends RE6Module {
         this.updateTabModal = new Modal({
             title: "Update Tab",
             triggers: [{ element: $("menu.main li a") }],
-            content: this.updateTabForm.get(),
+            content: Form2.placeholder(),
+            structure: this.updateTabForm,
             position: { my: "center top", at: "center top" },
             triggerMulti: true,
             disabled: true,

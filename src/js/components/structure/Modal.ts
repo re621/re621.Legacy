@@ -1,3 +1,4 @@
+import { DomStructure } from "./DomStructure";
 
 export class Modal {
 
@@ -13,6 +14,7 @@ export class Modal {
         this.uid = Math.round(new Date().getTime() + (Math.random() * 100));
         this.config = this.validateConfig(config);
 
+        // Create the DOM structure for the modal window
         this.$modal = $("<div>")
             .appendTo("div#modal-container")
             .addClass(config.wrapperClass)
@@ -45,6 +47,7 @@ export class Modal {
                 }
             });
 
+        // Initialize JQueryUI functionality
         this.$modal.dialog("widget")
             .addClass("re621-ui-dialog")
             .removeClass("ui-dialog ui-widget ui-widget-content")
@@ -57,6 +60,19 @@ export class Modal {
                 containment: "parent"
             });
 
+        // Replace the modal structure on window open, if necessary
+        if (config.structure) {
+            let modalOpened = false;
+            this.$modal.on("dialogopen", () => {
+                if (modalOpened) return;
+                modalOpened = true;
+                this.$modal.html("");
+                this.$modal.append(config.structure.get());
+            });
+        }
+
+        // Fix resizing and dragging issue with the "position: fixed"
+        // This code is terrible, and should be fixed by a braver soul than I
         if (config.fixed) {
             const widget = this.$modal.dialog("widget");
             widget.addClass("modal-fixed");
@@ -80,6 +96,7 @@ export class Modal {
                 left = widget.css("left"),
                 top = widget.css("top");
 
+            // I an sorry
             const style = $("<style>")
                 .attr("id", "style-" + this.uid)
                 .attr("type", "text/css")
@@ -230,23 +247,44 @@ export class Modal {
 }
 
 interface ModalConfig {
+    /** String displayed on top of the modal window */
     title?: string;
+
+    /** Modal content, created on page load */
     content?: JQuery<HTMLElement>;
+    /**
+     * Optional. The modal content is replaced with this generated structure when the window is open.  
+     * If used, the content parameter is used as a placeholder to properly size and center the window.
+     */
+    structure?: DomStructure;
+
+    /** List of JQuery object & event name pairs that trigger the modal opening */
     triggers?: ModalTrigger[];
+    /** Refreshes the modal instead of toggling it. Special case for HeaderCustomizer */
     triggerMulti?: boolean;
 
+    /** If true, modal window is closed when the ESC key is pressed */
     escapable?: boolean;
+    /** Users can resize the window at will. Glitchy. */
     resizable?: boolean;
+    /** Users can drag the window around the screen. Glitchy when used with "fixed" option. */
     draggable?: boolean;
 
+    /** Minimum modal window width, in pixels */
     minWidth?: number;
+    /** Minimum modal window width, in pixels */
     minHeight?: number;
+    /** If true, the modal window has "position: fixed" style set. */
     fixed?: boolean;
+    /** Sets the modal window to 80vh. Special case for the Settings modal */
     reserveHeight?: boolean;
 
+    /** Additional class added to the window */
     wrapperClass?: string;
 
+    /** If true, triggers are disabled */
     disabled?: boolean;
+    /** Initial position of the modal window */
     position?: {
         at: string;
         my: string;
