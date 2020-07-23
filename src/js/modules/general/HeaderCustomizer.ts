@@ -3,7 +3,7 @@ import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
-import { Form2 } from "../../components/structure/Form2";
+import { Form } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 
 /**
@@ -16,7 +16,7 @@ export class HeaderCustomizer extends RE6Module {
     private $menu: JQuery<HTMLElement>;
 
     private updateTabModal: Modal;
-    private updateTabForm: Form2;
+    private updateTabForm: Form;
 
     private addTabButton: JQuery<HTMLElement>;
     private addTabModal: Modal;
@@ -145,19 +145,19 @@ export class HeaderCustomizer extends RE6Module {
             tabClass: "float-left",
         });
 
-        const newTabForm = new Form2(
+        const newTabForm = new Form(
             { name: "header-customizer-new" },
             [
-                Form2.input({ label: "Name", name: "name", value: "", required: true, pattern: "[\\S ]+" }),
-                Form2.input({ label: "Hover", value: "", name: "title" }),
-                Form2.input({ label: "Link", value: "", name: "href" }),
-                Form2.button({ value: "Submit", type: "submit" }),
-                Form2.hr(),
-                Form2.div({ value: "Available variables:" }),
-                Form2.copy({ label: "Unique ID", value: "%userid%" }),
-                Form2.copy({ label: "Username", value: "%username%" }),
-                Form2.hr(),
-                Form2.div({ value: "Drag-and-drop tabs to re-arrange.<br />Click on a tab to edit it." }),
+                Form.input({ label: "Name", name: "name", value: "", required: true, pattern: "[\\S ]+" }),
+                Form.input({ label: "Hover", value: "", name: "title" }),
+                Form.input({ label: "Link", value: "", name: "href" }),
+                Form.button({ value: "Submit", type: "submit" }),
+                Form.hr(),
+                Form.div({ value: "Available variables:" }),
+                Form.copy({ label: "Unique ID", value: "%userid%" }),
+                Form.copy({ label: "Username", value: "%username%" }),
+                Form.hr(),
+                Form.div({ value: "Drag-and-drop tabs to re-arrange.<br />Click on a tab to edit it." }),
             ],
             (values, form) => {
                 this.addTab({
@@ -172,26 +172,26 @@ export class HeaderCustomizer extends RE6Module {
         this.addTabModal = new Modal({
             title: "Add Tab",
             triggers: [{ element: this.addTabButton }],
-            content: Form2.placeholder(),
+            content: Form.placeholder(),
             structure: newTabForm,
             position: { my: "right top", at: "right top" }
         });
 
         // Tab Update Interface
-        this.updateTabForm = new Form2(
+        this.updateTabForm = new Form(
             { name: "header-customizer-update" },
             [
-                Form2.input({ label: "Name", name: "name", value: "", required: true, pattern: "[\\S ]+" }),
-                Form2.input({ label: "Hover", value: "", name: "title" }),
-                Form2.input({ label: "Link", value: "", name: "href" }),
-                Form2.button(
+                Form.input({ label: "Name", name: "name", value: "", required: true, pattern: "[\\S ]+" }),
+                Form.input({ label: "Hover", value: "", name: "title" }),
+                Form.input({ label: "Link", value: "", name: "href" }),
+                Form.button(
                     { value: "Delete", type: "button" },
                     () => {
                         this.deleteTab(this.updateTabModal.getActiveTrigger().parent());
                         this.updateTabModal.close();
                     }
                 ),
-                Form2.button({ value: "Update", type: "submit" }),
+                Form.button({ value: "Update", type: "submit" }),
             ],
             (values, form) => {
                 this.updateTab(
@@ -210,7 +210,7 @@ export class HeaderCustomizer extends RE6Module {
         this.updateTabModal = new Modal({
             title: "Update Tab",
             triggers: [{ element: $("menu.main li a") }],
-            content: Form2.placeholder(),
+            content: Form.placeholder(),
             structure: this.updateTabForm,
             position: { my: "center top", at: "center top" },
             triggerMulti: true,

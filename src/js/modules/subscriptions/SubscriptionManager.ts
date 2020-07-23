@@ -3,7 +3,7 @@ import { XM } from "../../components/api/XM";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
-import { Form2, Form2Element } from "../../components/structure/Form2";
+import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed, TabContent } from "../../components/structure/Tabbed";
 import { Debug } from "../../components/utility/Debug";
@@ -229,35 +229,35 @@ export class SubscriptionManager extends RE6Module {
     /**
      * Builds a subscription settings page, containing various controls
      */
-    private buildInfoPage(): Form2 {
-        return new Form2({ name: "subscriptions-controls", columns: 2, width: 2 }, [
+    private buildInfoPage(): Form {
+        return new Form({ name: "subscriptions-controls", columns: 2, width: 2 }, [
             // List and manage active subscriptions
-            Form2.header("Subscriptions"),
+            Form.header("Subscriptions"),
             makeSubSection(this.getTracker("TagTracker").instance, 2),
             makeSubSection(this.getTracker("PoolTracker").instance, 1),
             makeSubSection(this.getTracker("ForumTracker").instance, 1),
             makeSubSection(this.getTracker("CommentTracker").instance, 2),
-            Form2.hr(2),
+            Form.hr(2),
 
             // Settings
-            Form2.header("Settings"),
-            Form2.section({ name: "settings", columns: 2, width: 2 }, [
-                Form2.div({ value: "Cache Size" }),
-                Form2.input(
+            Form.header("Settings"),
+            Form.section({ name: "settings", columns: 2, width: 2 }, [
+                Form.div({ value: "Cache Size" }),
+                Form.input(
                     { value: this.fetchSettings("cacheSize"), pattern: "^(1?[0-9][0-9]|200)$" },
                     async (data, input) => {
                         if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
                         await this.pushSettings("cacheSize", parseInt(data));
                     }
                 ),
-                Form2.div({
+                Form.div({
                     value: `<div class="unmargin">Number of items kept in the update cache. Must be at least 10, but no more than 200. Large values may lead to performance drops.</div>`,
                     width: 2
                 }),
-                Form2.spacer(2),
+                Form.spacer(2),
 
-                Form2.div({ value: "Update Interval" }),
-                Form2.select(
+                Form.div({ value: "Update Interval" }),
+                Form.select(
                     { value: this.fetchSettings("updateInterval") / TIME_PERIOD.HOUR },
                     {
                         // "0.1": "6 minutes",
@@ -272,11 +272,11 @@ export class SubscriptionManager extends RE6Module {
                         SubscriptionManager.trigger("timerRefresh");
                     }
                 ),
-                Form2.div({ value: `<div class="unmargin">How often should the subscriptions be checked for updates.</div>`, width: 2 }),
-                Form2.spacer(2),
+                Form.div({ value: `<div class="unmargin">How often should the subscriptions be checked for updates.</div>`, width: 2 }),
+                Form.spacer(2),
 
-                Form2.div({ value: "Cache Expiration" }),
-                Form2.select(
+                Form.div({ value: "Cache Expiration" }),
+                Form.select(
                     { value: this.fetchSettings("cacheMaxAge") / TIME_PERIOD.WEEK },
                     {
                         "0": "Never",
@@ -290,22 +290,22 @@ export class SubscriptionManager extends RE6Module {
                         SubscriptionManager.trigger("timerRefresh");
                     }
                 ),
-                Form2.div({ value: `<div class="unmargin">Updates older than this are removed automatically</div>`, width: 2 }),
+                Form.div({ value: `<div class="unmargin">Updates older than this are removed automatically</div>`, width: 2 }),
 
             ]),
-            Form2.hr(2),
+            Form.hr(2),
 
             // Status and Controls
-            Form2.section({ name: "status", columns: 2 }, [
-                Form2.header("Other", 2),
+            Form.section({ name: "status", columns: 2 }, [
+                Form.header("Other", 2),
 
-                Form2.div({ value: "Last Update" }),
-                Form2.div({ value: $("<span>").attr("id", "subscriptions-lastupdate").html("Initializing . . .") }),
+                Form.div({ value: "Last Update" }),
+                Form.div({ value: $("<span>").attr("id", "subscriptions-lastupdate").html("Initializing . . .") }),
 
-                Form2.div({ value: "Next Update" }),
-                Form2.div({ value: $("<span>").attr("id", "subscriptions-nextupdate").html("Initializing . . .") }),
+                Form.div({ value: "Next Update" }),
+                Form.div({ value: $("<span>").attr("id", "subscriptions-nextupdate").html("Initializing . . .") }),
 
-                Form2.button(
+                Form.button(
                     { value: `<i class="fas fa-sync-alt fa-xs fa-spin" id="subscription-action-update"></i> Manual Update` },
                     () => {
                         if (SubscriptionManager.updateInProgress) {
@@ -317,7 +317,7 @@ export class SubscriptionManager extends RE6Module {
                     }
                 ),
 
-                Form2.button(
+                Form.button(
                     { value: "Clear Cache" },
                     () => {
                         this.trackers.forEach(async (subscription) => {
@@ -330,7 +330,7 @@ export class SubscriptionManager extends RE6Module {
         ]);
 
         /** Creates a form section that lists currently subscribed items */
-        function makeSubSection(instance: SubscriptionTracker, columns: number): Form2Element {
+        function makeSubSection(instance: SubscriptionTracker, columns: number): FormElement {
             const $subsSection = $("<div>").addClass("subscriptions-manage-list col-" + columns),
                 $badge = $("<span>");
 
@@ -344,8 +344,8 @@ export class SubscriptionManager extends RE6Module {
                 }
             );
 
-            return Form2.collapse({ title: instance.getName(), columns: 2, width: 2, badge: $badge }, [
-                Form2.div({ value: $subsSection, width: 2 }),
+            return Form.collapse({ title: instance.getName(), columns: 2, width: 2, badge: $badge }, [
+                Form.div({ value: $subsSection, width: 2 }),
             ]);
 
             async function executeSubUpdateEvent(): Promise<void> {

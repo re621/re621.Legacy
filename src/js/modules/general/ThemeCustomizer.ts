@@ -1,6 +1,6 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
-import { Form2 } from "../../components/structure/Form2";
+import { Form } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 
 /**
@@ -37,8 +37,8 @@ export class ThemeCustomizer extends RE6Module {
         });
 
         // === Establish the settings window contents
-        const form = new Form2({ name: "theme-customizer" }, [
-            Form2.select(
+        const form = new Form({ name: "theme-customizer" }, [
+            Form.select(
                 { label: "Theme", value: window.localStorage.getItem("theme") || "hexagon", },
                 {
                     "hexagon": "Hexagon",
@@ -52,7 +52,7 @@ export class ThemeCustomizer extends RE6Module {
                     $("body").attr("data-th-main", data);
                 }
             ),
-            Form2.select(
+            Form.select(
                 { label: "Extras", value: window.localStorage.getItem("theme-extra") || "hexagons", },
                 {
                     "none": "None",
@@ -69,7 +69,7 @@ export class ThemeCustomizer extends RE6Module {
                     $("body").attr("data-th-extra", data);
                 }
             ),
-            Form2.select(
+            Form.select(
                 { label: "Post Navbar", value: window.localStorage.getItem("theme-nav") || "top", },
                 {
                     "top": "Top",
@@ -87,7 +87,7 @@ export class ThemeCustomizer extends RE6Module {
         new Modal({
             title: "Themes",
             triggers: [{ element: openCustomizerButton }],
-            content: Form2.placeholder(),
+            content: Form.placeholder(),
             structure: form,
             position: { my: "right top", at: "right top" }
         });

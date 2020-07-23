@@ -3,7 +3,7 @@ import { PageDefintion } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { Form2 } from "../../components/structure/Form2";
+import { Form } from "../../components/structure/Form";
 
 /**
  * Handles scaling post images in an intelligent way
@@ -49,9 +49,9 @@ export class ImageScaler extends RE6Module {
         const resizeButtonContainer = $("#image-resize-cycle").empty();
         this.setImageSize(this.fetchSettings("size"));
 
-        const resizeForm = new Form2({ name: "resize-image", columns: 2, width: 2 },
+        const resizeForm = new Form({ name: "resize-image", columns: 2, width: 2 },
             [
-                Form2.select(
+                Form.select(
                     { name: "scale", value: this.fetchSettings("size") },
                     {
                         "sample": "Sample",
@@ -60,7 +60,7 @@ export class ImageScaler extends RE6Module {
                         "original": "Original",
                     }
                 ),
-                Form2.div({ value: `<a href="` + this.post.getImageURL() + `" class="button btn-neutral" id="fullsize-image">Fullscreen</a>` }),
+                Form.div({ value: `<a href="` + this.post.getImageURL() + `" class="button btn-neutral" id="fullsize-image">Fullscreen</a>` }),
             ]
         );
 

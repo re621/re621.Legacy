@@ -1,7 +1,7 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { E621 } from "../../components/api/E621";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { Form2 } from "../../components/structure/Form2";
+import { Form } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Prompt } from "../../components/structure/Prompt";
 
@@ -202,27 +202,27 @@ class FormattingHelper {
         });
 
         // Create the Button Editing Modal
-        const $editButtonsForm = new Form2(
+        const $editButtonsForm = new Form(
             { name: "dtext-edit-button-" + this.id, columns: 2, width: 2 },
             [
-                Form2.input({ name: "name", label: "Name", width: 2 }),
-                Form2.icon({ name: "icon", label: "Icon", width: 2 }, iconDefinitions),
-                Form2.input({ name: "text", label: "Content", width: 2 }),
+                Form.input({ name: "name", label: "Name", width: 2 }),
+                Form.icon({ name: "icon", label: "Icon", width: 2 }, iconDefinitions),
+                Form.input({ name: "text", label: "Content", width: 2 }),
 
-                Form2.button(
+                Form.button(
                     { name: "delete", value: "Delete" },
                     async () => {
                         this.deleteButton(this.$editButtonsModal.getActiveTrigger().parent());
                         this.$editButtonsModal.close();
                     }
                 ),
-                Form2.button({ name: "update", value: "Update", type: "submit" }),
+                Form.button({ name: "update", value: "Update", type: "submit" }),
 
-                Form2.hr(2),
+                Form.hr(2),
 
-                Form2.div({ value: "Available variables:", width: 2 }),
-                Form2.copy({ label: "Selection", value: "%selection%", width: 2 }),
-                Form2.copy({ label: "Prompt", value: "%prompt%", width: 2 }),
+                Form.div({ value: "Available variables:", width: 2 }),
+                Form.copy({ label: "Selection", value: "%selection%", width: 2 }),
+                Form.copy({ label: "Prompt", value: "%prompt%", width: 2 }),
             ],
             async (values) => {
                 this.updateButton(
@@ -238,7 +238,7 @@ class FormattingHelper {
 
         this.$editButtonsModal = new Modal({
             title: "Edit Button",
-            content: Form2.placeholder(),
+            content: Form.placeholder(),
             structure: $editButtonsForm,
             triggers: [],
             triggerMulti: true,
@@ -322,21 +322,21 @@ class FormattingHelper {
             .appendTo(this.$container);
 
         // - New Button Process
-        const newFormatForm = new Form2(
+        const newFormatForm = new Form(
             { name: "dtext-custom-button-" + this.id, columns: 2, width: 2 },
             [
-                Form2.input({ name: "name", label: "Name", width: 2 }),
-                Form2.icon({ name: "icon", label: "Icon", width: 2 }, iconDefinitions),
-                Form2.input({ name: "text", label: "Content", width: 2 }),
+                Form.input({ name: "name", label: "Name", width: 2 }),
+                Form.icon({ name: "icon", label: "Icon", width: 2 }, iconDefinitions),
+                Form.input({ name: "text", label: "Content", width: 2 }),
 
-                Form2.spacer(),
-                Form2.button({ name: "submit", value: "Create", type: "submit" }),
+                Form.spacer(),
+                Form.button({ name: "submit", value: "Create", type: "submit" }),
 
-                Form2.hr(2),
+                Form.hr(2),
 
-                Form2.div({ value: "Available variables:", width: 2 }),
-                Form2.copy({ label: "Selection", value: "%selection%", width: 2 }),
-                Form2.copy({ label: "Prompt", value: "%prompt%", width: 2 }),
+                Form.div({ value: "Available variables:", width: 2 }),
+                Form.copy({ label: "Selection", value: "%selection%", width: 2 }),
+                Form.copy({ label: "Prompt", value: "%prompt%", width: 2 }),
             ],
             (values) => {
                 const buttonData = this.createButton({
@@ -354,7 +354,7 @@ class FormattingHelper {
 
         const newFormatModal = new Modal({
             title: "New Custom Button",
-            content: Form2.placeholder(),
+            content: Form.placeholder(),
             structure: newFormatForm,
             triggers: [{ element: $newFormatButton }],
             fixed: true,

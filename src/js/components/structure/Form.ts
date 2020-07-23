@@ -7,13 +7,13 @@ import { DomStructure } from "./DomStructure";
  * Form Engine v.2.0  
  * Simplifies the process of creating complex, visually consistent forms.
  */
-export class Form2 implements DomStructure {
+export class Form implements DomStructure {
 
     private static inputTimeout = 500;          // Typing timeout on text input fields
 
     private created: boolean;                   // Used for caching, true if get() has been called before
     private element: JQuery<HTMLElement>;       // DOM element for the form
-    private content: Form2Element[];            // Array of form elements
+    private content: FormElement[];            // Array of form elements
 
     private inputList: Map<string, JQuery<HTMLElement>>;
 
@@ -24,7 +24,7 @@ export class Form2 implements DomStructure {
      * @param content Form elements
      * @param onSubmit Form submittion callback
      */
-    public constructor(options?: SectionOptions, content?: Form2Element[], onSubmit?: FormSubmitEvent) {
+    public constructor(options?: SectionOptions, content?: FormElement[], onSubmit?: FormSubmitEvent) {
         if (!options.name) options.name = FormUtils.getUniqueID();
 
         this.element = $("<form>")
@@ -110,9 +110,9 @@ export class Form2 implements DomStructure {
      * @param width Form width
      */
     public static placeholder(width = 1): JQuery<HTMLElement> {
-        return new Form2(
+        return new Form(
             { columns: width, width: width },
-            [Form2.spacer(width)]
+            [Form.spacer(width)]
         ).get();
     }
 
@@ -121,7 +121,7 @@ export class Form2 implements DomStructure {
      * @param options Section configuration
      * @param content Form elements
      */
-    public static section(options?: SectionOptions, content?: Form2Element[]): Form2Element {
+    public static section(options?: SectionOptions, content?: FormElement[]): FormElement {
         if (!options.name) options.name = FormUtils.getUniqueID();
 
         let $label: JQuery<HTMLElement>;
@@ -137,7 +137,7 @@ export class Form2 implements DomStructure {
                 "colspan": options.width || options.columns || 1,
             });
 
-        return new Form2Element($element, undefined, $label, content);
+        return new FormElement($element, undefined, $label, content);
     }
 
     /**
@@ -145,7 +145,7 @@ export class Form2 implements DomStructure {
      * @param options Section configuration
      * @param content Form elements
      */
-    public static collapse(options?: SectionOptions & { title?: string; badge?: JQuery<HTMLElement>; collapsed?: boolean }, content?: Form2Element[]): Form2Element {
+    public static collapse(options?: SectionOptions & { title?: string; badge?: JQuery<HTMLElement>; collapsed?: boolean }, content?: FormElement[]): FormElement {
         if (!options.name) options.name = FormUtils.getUniqueID();
 
         let $label: JQuery<HTMLElement>;
@@ -184,7 +184,7 @@ export class Form2 implements DomStructure {
             header: "h3",
         });
 
-        return new Form2Element($element, undefined, $label, content, container);
+        return new FormElement($element, undefined, $label, content, container);
     }
 
     /**
@@ -192,7 +192,7 @@ export class Form2 implements DomStructure {
      * @param options Element configuration
      * @param changed Input change callback
      */
-    public static input(options?: InputElementOptions, changed?: InputChangeEvent): Form2Element {
+    public static input(options?: InputElementOptions, changed?: InputChangeEvent): FormElement {
         if (!options.name) options.name = FormUtils.getUniqueID();
 
         let $label: JQuery<HTMLElement>;
@@ -226,19 +226,19 @@ export class Form2 implements DomStructure {
                 if (timer) clearTimeout(timer);
                 timer = window.setTimeout(
                     () => { changed($input.val().toString(), $input); },
-                    Form2.inputTimeout
+                    Form.inputTimeout
                 );
             });
         }
 
-        return new Form2Element($element, $input, $label);
+        return new FormElement($element, $input, $label);
     }
 
     /**
      * Creates a copy input FormElement based on the provided parameters  
      * @param options Element configuration
      */
-    public static copy(options?: ElementOptions): Form2Element {
+    public static copy(options?: ElementOptions): FormElement {
         if (!options.name) options.name = FormUtils.getUniqueID();
 
         let $label: JQuery<HTMLElement>;
@@ -277,14 +277,14 @@ export class Form2 implements DomStructure {
             copyTimer = window.setTimeout(() => $input.removeClass("highlight"), 250);
         });
 
-        return new Form2Element($element, $input, $label);
+        return new FormElement($element, $input, $label);
     }
 
     /**
      * Creates a key input FormElement based on the provided parameters  
      * @param options Element configuration
      */
-    public static key(options?: ElementOptions, changed?: InputChangeEvent): Form2Element {
+    public static key(options?: ElementOptions, changed?: InputChangeEvent): FormElement {
         if (!options.name) options.name = FormUtils.getUniqueID();
 
         let $label: JQuery<HTMLElement>;
@@ -347,14 +347,14 @@ export class Form2 implements DomStructure {
             });
         });
 
-        return new Form2Element($element, $input, $label);
+        return new FormElement($element, $input, $label);
     }
 
     /**
      * Creates a file input FormElement based on the provided parameters  
      * @param options Element configuration
      */
-    public static file(options?: ElementOptions & { accept: string }, changed?: InputChangeEvent): Form2Element {
+    public static file(options?: ElementOptions & { accept: string }, changed?: InputChangeEvent): FormElement {
         if (!options.name) options.name = FormUtils.getUniqueID();
 
         let $label: JQuery<HTMLElement>;
@@ -380,10 +380,10 @@ export class Form2 implements DomStructure {
             });
         }
 
-        return new Form2Element($element, $input, $label);
+        return new FormElement($element, $input, $label);
     }
 
-    public static icon(options?: ElementOptions, content?: { [name: string]: any }, changed?: InputChangeEvent): Form2Element {
+    public static icon(options?: ElementOptions, content?: { [name: string]: any }, changed?: InputChangeEvent): FormElement {
         if (!options.name) options.name = FormUtils.getUniqueID();
 
         let $label: JQuery<HTMLElement>;
@@ -435,7 +435,7 @@ export class Form2 implements DomStructure {
             else { $selectContainer.find("a[data-value='" + $input.val() + "']").first().click(); }
         });
 
-        return new Form2Element($element, $input, $label);
+        return new FormElement($element, $input, $label);
     }
 
     /**
@@ -443,7 +443,7 @@ export class Form2 implements DomStructure {
      * @param options Element configuration
      * @param changed Input change callback
      */
-    public static button(options?: ElementOptions & { "type"?: "submit" | "button" }, changed?: InputChangeEvent): Form2Element {
+    public static button(options?: ElementOptions & { "type"?: "submit" | "button" }, changed?: InputChangeEvent): FormElement {
         if (!options.name) options.name = FormUtils.getUniqueID();
 
         let $label: JQuery<HTMLElement>;
@@ -468,7 +468,7 @@ export class Form2 implements DomStructure {
                 changed(true, $input);
             });
 
-        return new Form2Element($element, $input, $label);
+        return new FormElement($element, $input, $label);
     }
 
     /**
@@ -476,7 +476,7 @@ export class Form2 implements DomStructure {
      * @param options Element configuration
      * @param changed Input change callback
      */
-    public static checkbox(options?: ElementOptions, changed?: InputChangeEvent): Form2Element {
+    public static checkbox(options?: ElementOptions, changed?: InputChangeEvent): FormElement {
         if (!options.name) options.name = FormUtils.getUniqueID();
 
         const $element = FormUtils
@@ -508,7 +508,7 @@ export class Form2 implements DomStructure {
         if (changed !== undefined)
             $input.on("change", () => { changed($input.is(":checked"), $input); });
 
-        return new Form2Element($element, $input);
+        return new FormElement($element, $input);
     }
 
     /**
@@ -517,7 +517,7 @@ export class Form2 implements DomStructure {
      * @param content Select options data
      * @param changed Input change callback
      */
-    public static select(options?: ElementOptions, content?: { [name: string]: any }, changed?: InputChangeEvent): Form2Element {
+    public static select(options?: ElementOptions, content?: { [name: string]: any }, changed?: InputChangeEvent): FormElement {
         if (!options.name) options.name = FormUtils.getUniqueID();
 
         let $label: JQuery<HTMLElement>;
@@ -547,7 +547,7 @@ export class Form2 implements DomStructure {
         if (changed !== undefined)
             $input.on("change", () => { changed($input.val().toString(), $input); });
 
-        return new Form2Element($element, $input, $label);
+        return new FormElement($element, $input, $label);
     }
 
     /**
@@ -555,7 +555,7 @@ export class Form2 implements DomStructure {
      * @param text Header text
      * @param width Element span
      */
-    public static header(text: string, width?: number): Form2Element {
+    public static header(text: string, width?: number): FormElement {
         const $element = FormUtils.makeInputWrapper(undefined, undefined, width);
 
         $("<h3>")
@@ -564,14 +564,14 @@ export class Form2 implements DomStructure {
             .html(text)
             .appendTo($element);
 
-        return new Form2Element($element);
+        return new FormElement($element);
     }
 
     /**
      * Creates a div FormElement based on the provided parameters  
      * @param options Element configuration
      */
-    public static div(options?: ElementOptions): Form2Element {
+    public static div(options?: ElementOptions): FormElement {
         if (!options.name) options.name = FormUtils.getUniqueID();
 
         let $label: JQuery<HTMLElement>;
@@ -584,14 +584,14 @@ export class Form2 implements DomStructure {
             .attr("id", options.name)
             .append(options.value);
 
-        return new Form2Element($element, undefined, $label);
+        return new FormElement($element, undefined, $label);
     }
 
     /**
      * Creates an hr FormElement based on the provided parameters  
      * @param width Element width
      */
-    public static hr(width?: number): Form2Element {
+    public static hr(width?: number): FormElement {
         const $element = FormUtils.makeInputWrapper(undefined, undefined, width);
 
         $("<hr>")
@@ -599,22 +599,22 @@ export class Form2 implements DomStructure {
             .addClass("color-text-muted")
             .appendTo($element);
 
-        return new Form2Element($element);
+        return new FormElement($element);
     }
 
     /**
      * Creates an empty spacer element
      * @param width Element width
      */
-    public static spacer(width?: number): Form2Element {
+    public static spacer(width?: number): FormElement {
         const $element = FormUtils.makeInputWrapper(undefined, undefined, width);
 
         $("<div>")
             .attr("id", FormUtils.getUniqueID())
-            .html(" ")
+            .html("&nbsp;")
             .appendTo($element);
 
-        return new Form2Element($element);
+        return new FormElement($element);
     }
 }
 
@@ -648,16 +648,16 @@ class FormUtils {
 
 }
 
-export class Form2Element {
+export class FormElement {
 
     private created: boolean;               // Used for caching, true if build() has been called before
     private element: JQuery<HTMLElement>;   // Container element
     private input: JQuery<HTMLElement>;     // Actual form element, if it exists
     private label: JQuery<HTMLElement>;     // Input label, if it exists
-    private content: Form2Element[];        // Additional elements to be appended
+    private content: FormElement[];         // Additional elements to be appended
     private container: JQuery<HTMLElement>; // Container to which content elements are added
 
-    public constructor(element: JQuery<HTMLElement>, input?: JQuery<HTMLElement>, label?: JQuery<HTMLElement>, content?: Form2Element[], container?: JQuery<HTMLElement>) {
+    public constructor(element: JQuery<HTMLElement>, input?: JQuery<HTMLElement>, label?: JQuery<HTMLElement>, content?: FormElement[], container?: JQuery<HTMLElement>) {
         this.element = element;
         this.input = input;
         this.label = label;
@@ -723,5 +723,5 @@ interface InputElementOptions extends ElementOptions {
     pattern?: string;
 }
 
-type FormSubmitEvent = (values: any, form: Form2) => void;
+type FormSubmitEvent = (values: any, form: Form) => void;
 type InputChangeEvent = (value: any, input: JQuery<HTMLElement>) => void;
