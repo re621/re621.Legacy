@@ -641,6 +641,7 @@ export class SettingsController extends RE6Module {
 
                     await customFlagger.pushSettings("flags", defData);
                     confirmBox.html("Settings Saved");
+                    window.setTimeout(() => { confirmBox.html(""); }, 1000);
                 }
             ),
             Form.div({ value: `<span id="defs-confirm"></span>` }),

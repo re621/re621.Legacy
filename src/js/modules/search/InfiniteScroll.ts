@@ -7,7 +7,7 @@ import { Post } from "../../components/data/Post";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
-import { CustomFlagger, FlagDefinition } from "./CustomFlagger";
+import { CustomFlagger } from "./CustomFlagger";
 import { InstantSearch } from "./InstantSearch";
 import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } from "./ThumbnailsEnhancer";
 
@@ -168,8 +168,7 @@ export class InfiniteScroll extends RE6Module {
         const thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer),
             upscaleMode = thumbnailEnhancer.fetchSettings<ThumbnailPerformanceMode>("upscale"),
             clickAction = thumbnailEnhancer.fetchSettings<ThumbnailClickAction>("clickAction"),
-            preserveHoverText = thumbnailEnhancer.fetchSettings<boolean>("preserveHoverText"),
-            flagData = ModuleController.get(CustomFlagger).fetchSettings<FlagDefinition[]>("flags");
+            preserveHoverText = thumbnailEnhancer.fetchSettings<boolean>("preserveHoverText");
 
         const promises: Promise<void>[] = [];
         for (const json of posts) {
@@ -190,7 +189,7 @@ export class InfiniteScroll extends RE6Module {
                     this.$postContainer.append(element);
 
                     ThumbnailEnhancer.modifyThumbnail(element, upscaleMode, clickAction, preserveHoverText);
-                    CustomFlagger.modifyThumbnail(element, flagData);
+                    CustomFlagger.modifyThumbnail(post);
                 }
 
                 resolve();
