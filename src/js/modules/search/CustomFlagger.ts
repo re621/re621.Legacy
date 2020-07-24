@@ -8,7 +8,7 @@ export class CustomFlagger extends RE6Module {
     private static filters: Map<string, FilterPair>;
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.post]);
+        super([PageDefintion.post, PageDefintion.search, PageDefintion.favorites, PageDefintion.popular]);
     }
 
     protected getDefaultSettings(): Settings {

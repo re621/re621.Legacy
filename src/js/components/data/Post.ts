@@ -1,5 +1,6 @@
 import { PostHtml } from "../api/PostHtml";
 import { APIPost, PostRating } from "../api/responses/APIPost";
+import { Page, PageDefintion } from "./Page";
 import { TagTypes } from "./Tag";
 import { User } from "./User";
 
@@ -54,7 +55,9 @@ export class Post {
             const imageContainer = $("section#image-container");
             this.initalPosts = [];
             if (imageContainer.length === 0) {
-                const previews = $("div#posts-container").children(".post-preview").get();
+                const previews = Page.matches(PageDefintion.favorites)              // Thumbnails are not wrapped in a container on the favorites page
+                    ? $("div#posts").children(".post-preview").get()                // If that bug gets fixed, this code could be simplified
+                    : $("div#posts-container").children(".post-preview").get();
                 for (const preview of previews) this.initalPosts.push(new Post($(preview)));
             } else this.initalPosts.push(new ViewingPost(imageContainer));
 
