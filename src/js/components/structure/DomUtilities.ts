@@ -205,7 +205,15 @@ export class DomUtilities {
     private static createPostPreviews(): void {
         const thumbnails = $("div#page").find("article.post-preview, div.post-preview").get();
         for (const thumb of thumbnails) {
-            $(thumb).find("a").first().addClass("preview-box");
+            const $thumb = $(thumb);
+            $thumb.find("a").first().addClass("preview-box");
+
+            // Sometimes, the image might not be wrapped in a picture tag properly
+            // This is most common on comment pages and the like
+            // If that bug gets fixed, this code can be removed
+            const $img = $thumb.find("img");
+            if ($thumb.find("picture").length == 0)
+                $("<picture>").insertAfter($img).append($img);
         };
     }
 

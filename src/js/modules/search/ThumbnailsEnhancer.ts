@@ -193,16 +193,13 @@ export class ThumbnailEnhancer extends RE6Module {
         const $link = $article.find<HTMLElement>("a.preview-box"),
             postID = parseInt($article.attr("data-id")),
             $img = $article.find("img"),
+            $picture = $article.find("picture"),
             $imgData = $img.attr("title") ? $img.attr("title").split("\n").slice(0, -2) : [];     // Replace if the post date is added for the data-attributes.
 
         $article.find("source").remove();                               // If we ever have to worry about mobile users, this will need to be addressed.
 
         if (!preserveHoverText) $img.removeAttr("title");
         $img.attr("alt", "#" + $article.attr("data-id"));
-
-        // Image not wrapped in picture - usually on comment pages and the like
-        let $picture = $article.find("picture");
-        if ($picture.length == 0) $picture = $("<picture>").insertAfter($img).append($img);
 
         // Loading icon
         $("<div>")
