@@ -5,6 +5,8 @@ import { XM } from "../api/XM";
  */
 export class Util {
 
+    private static uniqueIDs: string[] = [];
+
     /**
      * Converts time from absolute format to relative (i.e. "5 minutes ago")
      * @param time Time to process
@@ -214,7 +216,7 @@ export class Util {
 
     /**
      * Creates a random string of letters, to be used as an ID.  
-     * Don't rely on this for anything important.
+     * Collisions may occur; use `makeUniqueID()` if that is a concern.
      * @param length String length
      */
     public static makeID(length = 8): string {
@@ -224,6 +226,19 @@ export class Util {
             result += chars.charAt(Math.floor(Math.random() * charLength));
         }
         return result;
+    }
+
+    /**
+     * Creates a random string of letters, to be used as an ID.  
+     * Unlike `makeID()`, the results are cached to prevent collisions.
+     * @param length String length
+     */
+    public static makeUniqueID(length = 8): string {
+        let uniqueID: string;
+        do { uniqueID = Util.makeID(length); }
+        while (Util.uniqueIDs.includes(uniqueID));
+        Util.uniqueIDs.push(uniqueID);
+        return uniqueID;
     }
 
     /**

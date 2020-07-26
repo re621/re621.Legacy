@@ -68,20 +68,17 @@ export class XMChrome {
             component: component,
             module: module,
             method: method,
-            eventID: this.makeRequestID(),
+            eventID: makeRequestID(),
             args: (args === undefined) ? [] : args,
         };
-    }
 
-    /**
-     * Returns a unique ID for the request
-     */
-    private static makeRequestID(): string {
-        let id: string;
-        do { id = Util.makeID(); }
-        while (this.requests.includes(id));
-        this.requests.push(id);
-        return id;
+        function makeRequestID(): string {
+            let id: string;
+            do { id = Util.makeID(); }
+            while (XMChrome.requests.includes(id));
+            XMChrome.requests.push(id);
+            return id;
+        }
     }
 
     /**

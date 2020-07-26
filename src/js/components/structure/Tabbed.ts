@@ -7,14 +7,12 @@ import { DomStructure } from "./DomStructure";
  */
 export class Tabbed implements DomStructure {
 
-    private static elementIDs: string[] = [];   // Used to make sure that IDs are unique
-
     private id: string;
     private config: TabbedConfig;
     private $container: JQuery<HTMLElement>;
 
     constructor(config: TabbedConfig) {
-        this.id = Tabbed.getUniqueID();
+        this.id = Util.makeUniqueID();
         this.config = config;
     }
 
@@ -64,15 +62,6 @@ export class Tabbed implements DomStructure {
      */
     public replace(index: number, $element: JQuery<HTMLElement>): void {
         this.$container.find("#" + this.id + "-fragment-" + index).children().replaceWith($element);
-    }
-
-    /** Creates and returns a unique element ID */
-    private static getUniqueID(): string {
-        let uniqueID: string;
-        do { uniqueID = Util.makeID(8); }
-        while (this.elementIDs.includes(uniqueID));
-        this.elementIDs.push(uniqueID);
-        return uniqueID;
     }
 
 }

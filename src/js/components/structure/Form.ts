@@ -25,7 +25,7 @@ export class Form implements DomStructure {
      * @param onSubmit Form submittion callback
      */
     public constructor(options?: SectionOptions, content?: FormElement[], onSubmit?: FormSubmitEvent) {
-        if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.name) options.name = Util.makeUniqueID();
         if (!options.columns) options.columns = 1;
         if (!options.width) options.width = options.columns;
 
@@ -124,7 +124,7 @@ export class Form implements DomStructure {
      * @param content Form elements
      */
     public static section(options?: SectionOptions, content?: FormElement[]): FormElement {
-        if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.name) options.name = Util.makeUniqueID();
         if (!options.columns) options.columns = 1;
         if (!options.width) options.width = options.columns;
 
@@ -150,7 +150,7 @@ export class Form implements DomStructure {
      * @param content Form elements
      */
     public static accordion(options?: SectionOptions & { active?: boolean | number; collapsible?: boolean }, content?: FormAccordionElement[]): FormElement {
-        if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.name) options.name = Util.makeUniqueID();
         if (!options.columns) options.columns = 1;
         if (!options.width) options.width = options.columns;
 
@@ -181,7 +181,7 @@ export class Form implements DomStructure {
     }
 
     public static accordionTab(options?: SectionOptions & { badge?: JQuery<HTMLElement>; subheader?: string }, content?: FormElement[]): FormElement {
-        if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.name) options.name = Util.makeUniqueID();
         if (!options.columns) options.columns = 1;
         if (!options.width) options.width = options.columns;
 
@@ -219,7 +219,7 @@ export class Form implements DomStructure {
      * @param content Form elements
      */
     public static collapse(options?: SectionOptions & { title?: string; badge?: JQuery<HTMLElement>; collapsed?: boolean }, content?: FormElement[]): FormElement {
-        if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.name) options.name = Util.makeUniqueID();
         if (!options.columns) options.columns = 1;
         if (!options.width) options.width = options.columns;
 
@@ -268,7 +268,7 @@ export class Form implements DomStructure {
      * @param changed Input change callback
      */
     public static input(options?: InputElementOptions, changed?: InputChangeEvent): FormElement {
-        if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.name) options.name = Util.makeUniqueID();
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -314,7 +314,7 @@ export class Form implements DomStructure {
      * @param options Element configuration
      */
     public static copy(options?: ElementOptions): FormElement {
-        if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.name) options.name = Util.makeUniqueID();
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -360,7 +360,7 @@ export class Form implements DomStructure {
      * @param options Element configuration
      */
     public static key(options?: ElementOptions, changed?: InputChangeEvent): FormElement {
-        if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.name) options.name = Util.makeUniqueID();
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -430,7 +430,7 @@ export class Form implements DomStructure {
      * @param options Element configuration
      */
     public static file(options?: ElementOptions & { accept: string }, changed?: InputChangeEvent): FormElement {
-        if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.name) options.name = Util.makeUniqueID();
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -459,7 +459,7 @@ export class Form implements DomStructure {
     }
 
     public static icon(options?: ElementOptions, content?: { [name: string]: any }, changed?: InputChangeEvent): FormElement {
-        if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.name) options.name = Util.makeUniqueID();
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -519,7 +519,7 @@ export class Form implements DomStructure {
      * @param changed Input change callback
      */
     public static button(options?: ElementOptions & { "type"?: "submit" | "button" }, changed?: InputChangeEvent): FormElement {
-        if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.name) options.name = Util.makeUniqueID();
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -552,7 +552,7 @@ export class Form implements DomStructure {
      * @param changed Input change callback
      */
     public static checkbox(options?: ElementOptions, changed?: InputChangeEvent): FormElement {
-        if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.name) options.name = Util.makeUniqueID();
 
         const $element = FormUtils
             .makeInputWrapper(undefined, options.wrapper, options.width)
@@ -593,7 +593,7 @@ export class Form implements DomStructure {
      * @param changed Input change callback
      */
     public static select(options?: ElementOptions, content?: { [name: string]: any }, changed?: InputChangeEvent): FormElement {
-        if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.name) options.name = Util.makeUniqueID();
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -634,7 +634,7 @@ export class Form implements DomStructure {
         const $element = FormUtils.makeInputWrapper(undefined, undefined, width);
 
         $("<h3>")
-            .attr("id", FormUtils.getUniqueID())
+            .attr("id", Util.makeUniqueID())
             .addClass("color-text")
             .html(text)
             .appendTo($element);
@@ -647,7 +647,7 @@ export class Form implements DomStructure {
      * @param options Element configuration
      */
     public static div(options?: ElementOptions): FormElement {
-        if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.name) options.name = Util.makeUniqueID();
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -689,7 +689,7 @@ export class Form implements DomStructure {
         const $element = FormUtils.makeInputWrapper(undefined, undefined, width);
 
         $("<hr>")
-            .attr("id", FormUtils.getUniqueID())
+            .attr("id", Util.makeUniqueID())
             .addClass("color-text-muted")
             .appendTo($element);
 
@@ -704,7 +704,7 @@ export class Form implements DomStructure {
         const $element = FormUtils.makeInputWrapper(undefined, undefined, width);
 
         $("<div>")
-            .attr("id", FormUtils.getUniqueID())
+            .attr("id", Util.makeUniqueID())
             .html("&nbsp;")
             .appendTo($element);
 
@@ -713,17 +713,6 @@ export class Form implements DomStructure {
 }
 
 class FormUtils {
-
-    private static elementIDs: string[] = [];   // Used to make sure that IDs are unique
-
-    /** Creates and returns a unique element ID */
-    public static getUniqueID(): string {
-        let uniqueID: string;
-        do { uniqueID = Util.makeID(8); }
-        while (this.elementIDs.includes(uniqueID));
-        this.elementIDs.push(uniqueID);
-        return uniqueID;
-    }
 
     public static makeLabel(name: string, text: string): JQuery<HTMLElement> {
         return $("<label>")

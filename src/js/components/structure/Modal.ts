@@ -1,8 +1,9 @@
+import { Util } from "../utility/Util";
 import { DomStructure } from "./DomStructure";
 
 export class Modal {
 
-    private uid: number;
+    private id: string;
 
     private config: ModalConfig;
     private $modal: JQuery<HTMLElement>;
@@ -11,15 +12,15 @@ export class Modal {
     private $activeTrigger: JQuery<HTMLElement>;
 
     public constructor(config: ModalConfig) {
-        this.uid = Math.round(new Date().getTime() + (Math.random() * 100));
+        this.id = Util.makeUniqueID();
         this.config = this.validateConfig(config);
 
         // Create the DOM structure for the modal window
         this.$modal = $("<div>")
-            .appendTo("div#modal-container")
             .addClass(config.wrapperClass)
             .attr("title", config.title)
             .append(this.config.content)
+            .appendTo("div#modal-container")
             .dialog({
                 autoOpen: false,
                 appendTo: "div#modal-container",
@@ -51,6 +52,7 @@ export class Modal {
         this.$modal.dialog("widget")
             .addClass("re621-ui-dialog")
             .removeClass("ui-dialog ui-widget ui-widget-content")
+            .toggleClass("modal-reserve-height", config.reserveHeight)
             .draggable({
                 disabled: !config.draggable,
                 containment: "parent"
@@ -96,52 +98,45 @@ export class Modal {
                 left = widget.css("left"),
                 top = widget.css("top");
 
-            // I an sorry
             const style = $("<style>")
-                .attr("id", "style-" + this.uid)
-                .attr("type", "text/css")
+                .attr({
+                    "id": "style-" + this.id,
+                    "type": "text/css"
+                })
                 .html(`
-                    .modal-fixed-` + this.uid + ` {
-                        left: ` + left + ` !important;
-                        top: ` + top + ` !important;
-                    }`
-                )
+                    .modal-fixed-${this.id} {
+                        left: ${left} !important;
+                        top: ${top} !important;
+                    }
+                `)
                 .appendTo("head");
 
+            // This effectively clamps down the modal position while scrolling
+            // Without this, the modal gets run off the screen for some reason
             $(window).scroll(() => {
                 if (timer) clearTimeout(timer);
                 else {
                     left = widget.css("left");
                     top = widget.css("top");
                     style.html(`
-                        .modal-fixed-` + this.uid + ` {
-                            left: ` + left + ` !important;
-                            top: ` + top + ` !important;
-                        }`
-                    );
-                    widget.addClass("modal-fixed-" + this.uid);
+                        .modal-fixed-${this.id} {
+                            left: ${left} !important;
+                            top: ${top} !important;
+                        }
+                    `);
+                    widget.addClass("modal-fixed-" + this.id);
                 }
                 timer = window.setTimeout(() => {
                     timer = 0;
-                    widget.removeClass("modal-fixed-" + this.uid);
+                    widget.removeClass("modal-fixed-" + this.id);
                     widget.css("left", left);
                     widget.css("top", top);
                 }, 500);
             });
         }
 
-        if (config.reserveHeight) {
-            this.$modal.dialog("widget").addClass("modal-reserve-height");
-        }
-
-        for (const trigger of config.triggers) {
+        for (const trigger of config.triggers)
             this.registerTrigger(trigger);
-        }
-    }
-
-    /** Returns this modal's unique ID */
-    public getUID(): number {
-        return this.uid;
     }
 
     /**

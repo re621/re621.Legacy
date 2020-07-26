@@ -274,18 +274,11 @@ export class DomUtilities {
     public static addStyle(css: string): JQuery<HTMLElement> {
         return $("<style>")
             .attr({
-                "id": getID(),
+                "id": Util.makeUniqueID(),
                 "type": "text/css"
             })
             .html(css)
             .appendTo("head");
-
-        function getID(): string {
-            let id: string;
-            do { id = Util.makeID(); }
-            while ($("style#" + id).length > 0);
-            return id;
-        }
     };
 
     /**
