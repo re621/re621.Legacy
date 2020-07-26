@@ -130,9 +130,12 @@ export class SettingsController extends RE6Module {
                 // Title Customizer
                 Form.accordionTab({ name: "layout", label: "Layout", columns: 3, width: 3 }, [
 
-                    Form.subheader("Page Title", "", 1),
                     Form.input(
-                        { name: "template", value: titleCustomizer.fetchSettings("template"), width: 2 },
+                        {
+                            name: "template", value: titleCustomizer.fetchSettings("template"),
+                            label: `<b>Page Title</b>`,
+                            width: 3,
+                        },
                         async (data) => {
                             await titleCustomizer.pushSettings("template", data);
                             if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
@@ -149,9 +152,8 @@ export class SettingsController extends RE6Module {
                     ]),
                     Form.spacer(3),
 
-                    Form.subheader("Title Icons", "", 2),
                     Form.checkbox(
-                        { value: titleCustomizer.fetchSettings("symbolsEnabled") },
+                        { value: titleCustomizer.fetchSettings("symbolsEnabled"), label: "<b>Title Icons</b>", width: 3 },
                         async (data) => {
                             await titleCustomizer.pushSettings("symbolsEnabled", data);
                             if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
@@ -178,9 +180,12 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.hr(3),
 
-                    Form.subheader("Expanded Tag Count", "Replace the rounded tag count in the sidebar with the precise one", 2),
                     Form.checkbox(
-                        { value: searchUtilities.fetchSettings("improveTagCount") },
+                        {
+                            value: searchUtilities.fetchSettings("improveTagCount"),
+                            label: "<b>Expanded Tag Count</b><br />Replace the rounded tag count in the sidebar with the precise one",
+                            width: 3,
+                        },
                         async (data) => {
                             await searchUtilities.pushSettings("improveTagCount", data);
                             searchUtilities.improveTagCount(data);
@@ -188,9 +193,12 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3),
 
-                    Form.subheader("Shorten Tag Names", "Cut off long tag names to make them fit on one line", 2),
                     Form.checkbox(
-                        { value: searchUtilities.fetchSettings("shortenTagNames") },
+                        {
+                            value: searchUtilities.fetchSettings("shortenTagNames"),
+                            label: "<b>Shorten Tag Names</b><br />Cut off long tag names to make them fit on one line",
+                            width: 3,
+                        },
                         async (data) => {
                             await searchUtilities.pushSettings("shortenTagNames", data);
                             searchUtilities.shortenTagNames(data);
@@ -198,9 +206,12 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3),
 
-                    Form.subheader("Fixed Header", "Make the page header stick to the top when scrolling", 2),
                     Form.checkbox(
-                        { value: miscellaneous.fetchSettings("stickyHeader") },
+                        {
+                            value: miscellaneous.fetchSettings("stickyHeader"),
+                            label: "<b>Fixed Header</b><br />Make the page header stick to the top when scrolling",
+                            width: 3,
+                        },
                         async (data) => {
                             await miscellaneous.pushSettings("stickyHeader", data);
                             miscellaneous.createStickyHeader(data);
@@ -208,9 +219,12 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3),
 
-                    Form.subheader("Fixed Searchbox", "Make the searchbox remain visible when scrolling", 2),
                     Form.checkbox(
-                        { value: miscellaneous.fetchSettings("stickySearchbox") },
+                        {
+                            value: miscellaneous.fetchSettings("stickySearchbox"),
+                            label: "<b>Fixed Searchbox</b><br />Make the searchbox remain visible when scrolling",
+                            width: 3,
+                        },
                         async (data) => {
                             await miscellaneous.pushSettings("stickySearchbox", data);
                             miscellaneous.createStickySearchbox(data);
@@ -252,9 +266,12 @@ export class SettingsController extends RE6Module {
                     Form.text(`<div class="unmargin text-center text-bold">Requires a page reload</div>`),
 
                     // Thumbnail Scaling
-                    Form.subheader("Thumbnail Rescaling", "Resize thumbnail images according to settings below", 2),
                     Form.checkbox(
-                        { value: thumbnailEnhancer.fetchSettings("crop") },
+                        {
+                            value: thumbnailEnhancer.fetchSettings("crop"),
+                            label: "<b>Thumbnail Rescaling</b><br />Resize thumbnail images according to settings below",
+                            width: 3,
+                        },
                         async (data) => {
                             await thumbnailEnhancer.pushSettings("crop", data);
                             thumbnailEnhancer.toggleThumbCrop(data);
@@ -285,9 +302,12 @@ export class SettingsController extends RE6Module {
                         ),
                         Form.spacer(3),
 
-                        Form.subheader("Preserve Ratio", "Keep the image ratio of the original image", 2),
                         Form.checkbox(
-                            { value: thumbnailEnhancer.fetchSettings("cropPreserveRatio"), },
+                            {
+                                value: thumbnailEnhancer.fetchSettings("cropPreserveRatio"),
+                                label: "<b>Preserve Ratio</b><br />Keep the image ratio of the original image",
+                                width: 3,
+                            },
                             async (data) => {
                                 await thumbnailEnhancer.pushSettings("cropPreserveRatio", data);
                                 $("input#advanced-crop-ratio").prop('disabled', data);
@@ -297,9 +317,12 @@ export class SettingsController extends RE6Module {
 
                         Form.hr(3),
 
-                        Form.subheader("Zoom on Hover", "Increases the size of the thumbnail when hovering over it", 2),
                         Form.checkbox(
-                            { value: thumbnailEnhancer.fetchSettings("zoom") },
+                            {
+                                value: thumbnailEnhancer.fetchSettings("zoom"),
+                                label: "<b>Zoom on Hover</b><br />Increases the size of the thumbnail when hovering over it",
+                                width: 3,
+                            },
                             async (data) => {
                                 await thumbnailEnhancer.pushSettings("zoom", data);
                                 thumbnailEnhancer.toggleHoverZoom(data);
@@ -318,9 +341,12 @@ export class SettingsController extends RE6Module {
                         ),
                         Form.spacer(3),
 
-                        Form.subheader("Contextual Zoom", "Only enable thumbnail zoom in the viewing mode", 2),
                         Form.checkbox(
-                            { value: thumbnailEnhancer.fetchSettings("zoomContextual"), label: "" },
+                            {
+                                value: thumbnailEnhancer.fetchSettings("zoomContextual"),
+                                label: "<b>Contextual Zoom</b><br />Only enable thumbnail zoom in the viewing mode",
+                                width: 3,
+                            },
                             async (data) => {
                                 await thumbnailEnhancer.pushSettings("zoomContextual", data);
                                 thumbnailEnhancer.toggleZoomContextual(data);
@@ -331,9 +357,12 @@ export class SettingsController extends RE6Module {
                     ]),
 
 
-                    Form.subheader("Voting Buttons", "Adds voting buttons when hovering over a thumbnail", 2),
                     Form.checkbox(
-                        { value: thumbnailEnhancer.fetchSettings("vote") },
+                        {
+                            value: thumbnailEnhancer.fetchSettings("vote"),
+                            label: "<b>Voting Buttons</b><br />Adds voting buttons when hovering over a thumbnail",
+                            width: 3,
+                        },
                         async (data) => {
                             await thumbnailEnhancer.pushSettings("vote", data);
                             thumbnailEnhancer.toggleHoverVote(data);
@@ -342,32 +371,29 @@ export class SettingsController extends RE6Module {
                     Form.spacer(3),
 
 
-                    Form.text(`<b>Status Ribbons</b><br />Use corner ribbons instead of colored borders for flags`, 2),
                     Form.checkbox(
-                        { value: thumbnailEnhancer.fetchSettings("ribbons"), },
+                        {
+                            value: thumbnailEnhancer.fetchSettings("ribbons"),
+                            label: "<b>Status Ribbons</b><br />Use corner ribbons instead of colored borders for flags",
+                            width: 3,
+                        },
                         async (data) => {
                             await thumbnailEnhancer.pushSettings("ribbons", data);
                             if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleStatusRibbons(data);
 
                             $("input#optgeneral-thumb-advanced-relations-ribbons").prop("disabled", !data);
                             $("input#optgeneral-thumb-advanced-relations-ribbons").parent().toggleClass("input-disabled", !data);
-                            $("form-input#relations-ribbons-text").toggleClass("input-disabled", !data);
                         }
                     ),
                     Form.spacer(3),
 
-                    Form.div({
-                        name: "relations-ribbons-text",
-                        value: `<b>Relations Ribbons</b><br />Display ribbons for parent/child relationships`,
-                        width: 2,
-                        wrapper: (thumbnailEnhancer.fetchSettings("ribbons") ? undefined : "input-disabled")
-                    }),
                     Form.checkbox(
                         {
                             name: "relations-ribbons",
                             value: thumbnailEnhancer.fetchSettings("relRibbons"),
-                            // label: "Relations Ribbons",
-                            wrapper: (thumbnailEnhancer.fetchSettings("ribbons") ? undefined : "input-disabled")
+                            label: "<b>Relations Ribbons</b><br />Display ribbons for parent/child relationships",
+                            width: 3,
+                            wrapper: (thumbnailEnhancer.fetchSettings("ribbons") ? undefined : "input-disabled"),
                         },
                         async (data) => {
                             await thumbnailEnhancer.pushSettings("relRibbons", data);
@@ -376,68 +402,83 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3),
 
-                    Form.subheader("Preserve Hover Text", "Restores text displayed when hovering over the thumbnail", 2),
                     Form.checkbox(
                         {
                             value: thumbnailEnhancer.fetchSettings("preserveHoverText"),
-                            label: `<div class="unmargin text-center text-bold">Requires a page reload</div>`
+                            label: "<b>Preserve Hover Text</b><br />Restores text displayed when hovering over the thumbnail",
+                            width: 2,
                         },
                         async (data) => {
                             await thumbnailEnhancer.pushSettings("preserveHoverText", data);
                         }
                     ),
+                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
 
                 ]),
 
                 Form.accordionTab({ name: "misc", label: "Other", columns: 3, width: 3 }, [
 
-                    Form.subheader("Preserve Scroll History", "Load all result pages up to the current one (Infinite Scroll)", 2),
                     Form.checkbox(
                         {
                             value: infiniteScroll.fetchSettings("keepHistory"),
-                            label: `<div class="unmargin text-center text-bold">Requires a page reload</div>`,
+                            label: "<b>Preserve Scroll History</b><br />Load all result pages up to the current one (Infinite Scroll)",
+                            width: 2,
                         },
                         async (data) => { await infiniteScroll.pushSettings("keepHistory", data); }
                     ),
+                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
 
                     Form.hr(3),
 
-                    Form.subheader("Auto-Upvote Favorites", "Automatically upvote a post when adding it to the favorites", 2),
                     Form.checkbox(
-                        { value: postViewer.fetchSettings("upvoteOnFavorite") },
+                        {
+                            value: postViewer.fetchSettings("upvoteOnFavorite"),
+                            label: "<b>Auto-Upvote Favorites</b><br />Automatically upvote a post when adding it to the favorites",
+                            width: 3,
+                        },
                         async (data) => { await postViewer.pushSettings("upvoteOnFavorite", data); }
                     ),
                     Form.spacer(3),
 
-                    Form.subheader("Quick Rescale", "Click on a post image to cycle through scaling options", 2),
                     Form.checkbox(
-                        { value: imageScaler.fetchSettings("clickScale") },
+                        {
+                            value: imageScaler.fetchSettings("clickScale"),
+                            label: "<b>Quick Rescale</b><br />Click on a post image to cycle through scaling options",
+                            width: 3,
+                        },
                         async (data) => { await imageScaler.pushSettings("clickScale", data); }
                     ),
                     Form.spacer(3),
 
-                    Form.subheader("Remember Collapsed Tag Categories", "Preserve the minimized state of the tag categories in the sidebar", 2),
                     Form.checkbox(
-                        { value: searchUtilities.fetchSettings("collapseCategories") },
+                        {
+                            value: searchUtilities.fetchSettings("collapseCategories"),
+                            label: "<b>Remember Collapsed Tag Categories</b><br />Preserve the minimized state of the tag categories in the sidebar",
+                            width: 3,
+                        },
                         async (data) => { await searchUtilities.pushSettings("collapseCategories", data); }
                     ),
                     Form.spacer(3),
 
-                    Form.subheader("Quick Blacklist", "Click X next to the tag in the sidebar to add it to the blacklist", 2),
                     Form.checkbox(
-                        { value: blacklistEnhancer.fetchSettings("quickaddTags") },
+                        {
+                            value: blacklistEnhancer.fetchSettings("quickaddTags"),
+                            label: "<b>Quick Blacklist</b><br />Click X next to the tag in the sidebar to add it to the blacklist",
+                            width: 3,
+                        },
                         async (data) => { await blacklistEnhancer.pushSettings("quickaddTags", data); }
                     ),
                     Form.spacer(3),
 
-                    Form.subheader("Forum Notifications", "Red dot on the Forum tab in the header if there are new posts", 2),
                     Form.checkbox(
                         {
                             value: headerCustomizer.fetchSettings("forumUpdateDot"),
-                            label: `<div class="unmargin text-center text-bold">Requires a page reload</div>`,
+                            label: "<b>Forum Notifications</b><br />Red dot on the Forum tab in the header if there are new posts",
+                            width: 2,
                         },
                         async (data) => { await headerCustomizer.pushSettings("forumUpdateDot", data); }
                     ),
+                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
                     Form.spacer(3),
 
                 ]),
@@ -461,7 +502,7 @@ export class SettingsController extends RE6Module {
                 Form.header("Download Customizer"),
                 Form.div({ value: `<div class="notice float-right">Download individual files</div>`, width: 2 }),
 
-                Form.subheader("File name", "", 1),
+                Form.text("<b>File name</b>"),
                 Form.input(
                     { value: downloadCustomizer.fetchSettings("template"), width: 2 },
                     async (data) => {
@@ -486,7 +527,7 @@ export class SettingsController extends RE6Module {
 
                 // Mass Downloader
                 Form.accordionTab({ name: "mass", label: "Mass Downloader", subheader: "Download files from the search page", columns: 3, width: 3 }, [
-                    Form.subheader("Archive name", "", 1),
+                    Form.text("<b>Archive name</b>"),
                     Form.input(
                         { value: massDownloader.fetchSettings("template"), width: 2 },
                         async (data) => { await massDownloader.pushSettings("template", data); }
@@ -497,15 +538,21 @@ export class SettingsController extends RE6Module {
                     }),
                     Form.spacer(3),
 
-                    Form.subheader("Auto Download", "The archive will be downloaded automatically after being created", 2),
                     Form.checkbox(
-                        { value: massDownloader.fetchSettings("autoDownloadArchive") },
+                        {
+                            value: massDownloader.fetchSettings("autoDownloadArchive"),
+                            label: "<b>Auto Download</b><br />The archive will be downloaded automatically after being created",
+                            width: 3,
+                        },
                         async (data) => { await massDownloader.pushSettings("autoDownloadArchive", data); }
                     ),
 
-                    Form.subheader("Fixed Interface", "The downloader interface will remain on the screen as you scroll", 2),
                     Form.checkbox(
-                        { value: massDownloader.fetchSettings("fixedSection") },
+                        {
+                            value: massDownloader.fetchSettings("fixedSection"),
+                            label: "<b>Fixed Interface</b><br />The downloader interface will remain on the screen as you scroll",
+                            width: 3,
+                        },
                         async (data) => {
                             await massDownloader.pushSettings("fixedSection", data);
                             massDownloader.toggleFixedSection();
@@ -516,7 +563,7 @@ export class SettingsController extends RE6Module {
 
                 // Fav Downloader
                 Form.accordionTab({ name: "fav", label: "Favorites Downloader", subheader: "Download all favorites at once", columns: 3, width: 3 }, [
-                    Form.subheader("Archive name", "", 1),
+                    Form.text("<b>Archive name</b>"),
                     Form.input(
                         { value: favDownloader.fetchSettings("template"), width: 2 },
                         async (data) => { await favDownloader.pushSettings("template", data); }
@@ -527,15 +574,21 @@ export class SettingsController extends RE6Module {
                     }),
                     Form.spacer(3),
 
-                    Form.subheader("Auto Download", "The archive will be downloaded automatically after being created", 2),
                     Form.checkbox(
-                        { value: favDownloader.fetchSettings("autoDownloadArchive") },
+                        {
+                            value: favDownloader.fetchSettings("autoDownloadArchive"),
+                            label: "<b>Auto Download</b><br />The archive will be downloaded automatically after being created",
+                            width: 3,
+                        },
                         async (data) => { await favDownloader.pushSettings("autoDownloadArchive", data); }
                     ),
 
-                    Form.subheader("Fixed Interface", "The downloader interface will remain on the screen as you scroll", 2),
                     Form.checkbox(
-                        { value: favDownloader.fetchSettings("fixedSection") },
+                        {
+                            value: favDownloader.fetchSettings("fixedSection"),
+                            label: "<b>Fixed Interface</b><br />The downloader interface will remain on the screen as you scroll",
+                            width: 3,
+                        },
                         async (data) => {
                             await favDownloader.pushSettings("fixedSection", data);
                             favDownloader.toggleFixedSection();
@@ -546,7 +599,7 @@ export class SettingsController extends RE6Module {
 
                 // Pool Downloader
                 Form.accordionTab({ name: "pool", label: "Pool Downloader", subheader: "Download image pools or sets", columns: 3, width: 3 }, [
-                    Form.subheader("Archive name", "", 1),
+                    Form.text("<b>Archive name</b>"),
                     Form.input(
                         { value: poolDownloader.fetchSettings("template"), width: 2 },
                         async (data) => { await poolDownloader.pushSettings("template", data); }
@@ -559,9 +612,12 @@ export class SettingsController extends RE6Module {
                     ]),
                     Form.spacer(3),
 
-                    Form.subheader("Auto Download", "The archive will be downloaded automatically after being created", 2),
                     Form.checkbox(
-                        { value: poolDownloader.fetchSettings("autoDownloadArchive") },
+                        {
+                            value: poolDownloader.fetchSettings("autoDownloadArchive"),
+                            label: "<b>Auto Download</b><br />The archive will be downloaded automatically after being created",
+                            width: 3,
+                        },
                         async (data) => { await poolDownloader.pushSettings("autoDownloadArchive", data); }
                     ),
 
@@ -791,9 +847,13 @@ export class SettingsController extends RE6Module {
             const module = modules.get(moduleName);
 
             return [
-                Form.subheader(label, description, 2),
                 Form.checkbox(
-                    { name: moduleName + "-enabled", value: module.fetchSettings("enabled") },
+                    {
+                        name: moduleName + "-enabled",
+                        value: module.fetchSettings("enabled"),
+                        label: `<b>${label}</b><br />${description}`,
+                        width: 3,
+                    },
                     (data) => {
                         module.pushSettings("enabled", data);
                         module.setEnabled(data);
@@ -918,7 +978,7 @@ export class SettingsController extends RE6Module {
             Form.section({ name: "reset", columns: 3, width: 3 }, [
                 Form.header("Reset Modules", 3),
 
-                Form.subheader("Everything", "Delete settings for all modules. <b>This cannot be undone.</b>", 2),
+                Form.text(`<b>Everything</b><br />Delete settings for all modules. <b>This cannot be undone.</b>`, 2),
                 Form.button(
                     { value: "Clear" },
                     () => {
@@ -929,14 +989,14 @@ export class SettingsController extends RE6Module {
                     }
                 ),
 
-                Form.subheader("Module", "Reset a specific module", 2),
+                Form.text(`<b>Module</b><br />Reset a specific module`, 2),
                 Form.select(
                     { value: selectedModule },
                     moduleSelector,
                     (data) => { selectedModule = data; }
                 ),
 
-                Form.spacer(2),
+                Form.text(`<div class="text-bold">Requires a page reload</div>`, 2),
                 Form.button(
                     { value: "Reset" },
                     () => {
@@ -945,9 +1005,6 @@ export class SettingsController extends RE6Module {
                     }
                 ),
 
-                Form.spacer(2),
-                Form.text(`<div class="text-center text-bold">Requires a page reload</div>`),
-
                 Form.hr(3),
             ]),
 
@@ -955,17 +1012,23 @@ export class SettingsController extends RE6Module {
             Form.section({ name: "debug", columns: 3, width: 3 }, [
                 Form.header("Debugging Tools", 3),
 
-                Form.subheader("Console Output", "Enable debug messages in the console log", 2),
                 Form.checkbox(
-                    { value: Debug.isEnabled() },
+                    {
+                        value: Debug.isEnabled(),
+                        label: `<b>Debug Mode</b><br />Enable debug messages in the console log`,
+                        width: 3,
+                    },
                     (data) => {
                         Debug.setEnabled(data);
                     }
                 ),
 
-                Form.subheader("Connections Log", "Logs all outbound connections in the console", 2),
                 Form.checkbox(
-                    { value: Debug.isConnectLogEnabled() },
+                    {
+                        value: Debug.isConnectLogEnabled(),
+                        label: `<b>Connections Log</b><br />Logs all outbound connections in the console`,
+                        width: 3,
+                    },
                     (data) => {
                         Debug.setConnectLogEnabled(data);
                     }

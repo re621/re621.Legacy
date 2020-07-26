@@ -653,12 +653,23 @@ export class Form implements DomStructure {
         return new FormElement($element, undefined, $label);
     }
 
-    public static text(text: string, width = 1): FormElement {
-        return Form.div({ value: text, width: width });
+    /**
+     * Alias for `Form.div` with streamlined options
+     * @param text Div contents
+     * @param width Wrapper width
+     */
+    public static text(text: string, width = 1, wrapper?: string): FormElement {
+        return Form.div({ value: text, width: width, wrapper: wrapper });
     }
 
+    /**
+     * Alias for `Form.div` with some pre-built markup
+     * @param header First line of the header
+     * @param subheader Second line of the header
+     * @param width Wrapper width
+     */
     public static subheader(header: string, subheader: string, width = 1): FormElement {
-        return Form.div({ value: `<b>${header}</b><br />${subheader}`, width: width });
+        return Form.div({ value: `<b>${header}</b><br />${subheader}`, width: width, wrapper: "subheader" });
     }
 
     /**
