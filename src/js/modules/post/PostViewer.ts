@@ -84,8 +84,8 @@ export class PostViewer extends RE6Module {
                 "href": "#",
             })
             .addClass("button btn-neutral")
-            .appendTo($noteToggleCountainer)
             .html(this.fetchSettings("hideNotes") ? "Notes: Off" : "Notes: On")
+            .appendTo($noteToggleCountainer)
             .on("click", (event) => {
                 event.preventDefault();
                 this.toggleNotes();

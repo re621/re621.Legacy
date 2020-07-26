@@ -277,16 +277,11 @@ class FormattingHelper {
         // - Editing State Tabs
         this.$toggleTabs = $("<div>")
             .addClass("comment-tabs")
+            .html(`
+                <a class="toggle-editing active">Write</a>
+                <a class="toggle-preview">Preview</a>
+            `)
             .appendTo($bar);
-        $("<a>")
-            .html("Write")
-            .addClass("toggle-editing")
-            .addClass("active")
-            .appendTo(this.$toggleTabs);
-        $("<a>")
-            .html("Preview")
-            .addClass("toggle-preview")
-            .appendTo(this.$toggleTabs);
 
         this.$toggleTabs.find("a").click(e => {
             e.preventDefault();

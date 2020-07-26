@@ -60,10 +60,12 @@ export class MassDownloader extends RE6Module {
         super.create();
 
         this.section = $("<section>")
-            .attr("id", "downloader-box")
-            .attr("data-fixed", this.fetchSettings("fixedSection") + "")
+            .attr({
+                "id": "downloader-box",
+                "data-fixed": this.fetchSettings("fixedSection") + ""
+            })
+            .html("<h1>Download</h1>")
             .appendTo("aside#sidebar");
-        $("<h1>").html("Download").appendTo(this.section);
 
         // Toggles the downloader UI
         this.selectButton = $("<a>")
@@ -90,13 +92,11 @@ export class MassDownloader extends RE6Module {
         // Contains general info about the download
         this.infoText = $("<div>")
             .addClass("download-info")
-            .html("")
             .appendTo(this.section);
 
         // Contains info about currently downloaded files
         this.infoFile = $("<div>")
             .addClass("download-file")
-            .html("")
             .appendTo(this.section);
 
 

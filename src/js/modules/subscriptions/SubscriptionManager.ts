@@ -376,9 +376,9 @@ export class SubscriptionManager extends RE6Module {
             let currentlySubbed = true;
             const heart = $("<i>").addClass("fas fa-heart");
             $("<a>")
+                .addClass("sub-manage-unsub")
                 .append(heart)
                 .appendTo(output)
-                .addClass("sub-manage-unsub")
                 .on("click", async (event): Promise<void> => {
                     event.preventDefault();
                     const subData = await instance.fetchSettings<Subscription>("data", true);
@@ -673,15 +673,9 @@ export class SubscriptionManager extends RE6Module {
      * Should be inserted at the very beginning of the stack, actual sorting is done by CSS
      */
     private createCacheDivider(): JQuery<HTMLElement> {
-        const $content = $("<div>")
-            .addClass("subscription-update notice notice-cached");
-
-        $("<div>")
-            .addClass("subscription-update-title")
-            .html("Older Updates")
-            .appendTo($content);
-
-        return $content;
+        return $("<div>")
+            .addClass("subscription-update notice notice-cached")
+            .html(`<div class="subscription-update-title">Older Updates</div>`);
     }
 
     /**
