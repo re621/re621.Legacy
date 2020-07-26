@@ -476,11 +476,10 @@ export class SettingsController extends RE6Module {
                         {
                             value: headerCustomizer.fetchSettings("forumUpdateDot"),
                             label: "<b>Forum Notifications</b><br />Red dot on the Forum tab in the header if there are new posts",
-                            width: 2,
+                            width: 3,
                         },
-                        async (data) => { await headerCustomizer.pushSettings("forumUpdateDot", data); }
+                        async (data) => { await headerCustomizer.toggleForumDot(data); }
                     ),
-                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
                     Form.spacer(3),
 
                 ]),

@@ -116,13 +116,8 @@ export class HeaderCustomizer extends RE6Module {
         this.$menu.addClass("custom");
 
         // Fetch stored data
-        this.fetchSettings("tabs").forEach((value: HeaderTab) => {
-            this.createTabElement({
-                name: value.name,
-                title: value.title,
-                href: value.href,
-            });
-        });
+        for (const value of this.fetchSettings<HeaderTab[]>("tabs"))
+            this.createTabElement(value);
 
         this.$menu.sortable({
             axis: "x",
@@ -248,31 +243,36 @@ export class HeaderCustomizer extends RE6Module {
         this.updateTabModal.disable();
     }
 
+    /** Toggles the red dot next to the forum tab */
+    public async toggleForumDot(state: boolean): Promise<boolean> {
+        this.$menu.attr("data-forumdot", "" + state);
+        return this.pushSettings("forumUpdateDot", state);
+    }
+
     /**
      * Creates a new styled tab
      * @param config Tab configuration
      */
-    private createTabElement(config: HeaderTab, triggerUpdate?: boolean): HeaderTabElement {
+    private createTabElement(config: HeaderTab, triggerUpdate = false): HeaderTabElement {
         config = this.parseHeaderTabConfig(config);
-        if (triggerUpdate === undefined) triggerUpdate = false;
 
         const $tab = $(`<li>`)
-            .attr("data-name", config.name)
-            .attr("data-title", config.title)
-            .attr("data-href", config.href)
-            .appendTo("menu.main");
+            .attr({
+                "data-name": config.name,
+                "data-title": config.title,
+                "data-href": config.href
+            })
+            .appendTo(this.$menu);
         const $link = $("<a>")
             .html(this.processTabVariables(config.name))
-            .attr("title", this.processTabVariables(config.title))
             .appendTo($tab);
 
-        if (config.href != "")
-            $link.attr("href", this.processTabVariables(config.href));
-        if (config.href === "/forum_topics" && this.fetchSettings("forumUpdateDot") && this.hasForumUpdates)
+        if (config.title !== "") $link.attr("title", this.processTabVariables(config.title));
+        if (config.href !== "") $link.attr("href", this.processTabVariables(config.href));
+
+        if (config.href === "/forum_topics" && this.hasForumUpdates)
             $link.addClass("tab-has-updates");
 
-        if (config.controls) { $tab.addClass("configurable"); }
-        if (config.class) { $tab.addClass(config.class); }
         if (triggerUpdate) { this.saveNavbarSettings(); }
 
         if (Page.getURL().pathname.includes(this.processTabVariables(config.href).split("?")[0])) {
@@ -290,9 +290,6 @@ export class HeaderCustomizer extends RE6Module {
         if (config.name === undefined) config.name = "New Tab";
         if (config.href === undefined) config.href = "";
         if (config.title === undefined) config.title = "";
-
-        if (config.class === undefined) config.class = "";
-        if (config.controls === undefined) config.controls = true;
 
         return config;
     }
@@ -381,9 +378,4 @@ interface HeaderTab {
     href?: string;
     /** Hover text */
     title?: string;
-
-    /** Extra class to append to the tab */
-    class?: string;
-    /** Should the tab have controls in editing mode */
-    controls?: boolean;
 }
