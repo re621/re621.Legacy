@@ -64,7 +64,7 @@ export class ImageScaler extends RE6Module {
             ]
         );
 
-        resizeButtonContainer.append(resizeForm.get());
+        resizeButtonContainer.append(resizeForm.render());
         this.resizeSelector = resizeForm.getInputList().get("scale");
 
         this.resizeSelector.change(async (event, save) => {

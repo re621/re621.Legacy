@@ -40,7 +40,7 @@ export class SubscriptionManager extends RE6Module {
     private modal: Modal;
 
     /** Tabs inside the modal window */
-    private tabs: Tabbed;
+    private tabs: JQuery<HTMLElement>;
 
     public constructor() {
         super();
@@ -152,12 +152,12 @@ export class SubscriptionManager extends RE6Module {
             content.push({ name: data.tabElement, content: data.content });
             tabIndex++;
         });
-        content.push({ name: "Info", content: this.buildInfoPage().get() });
+        content.push({ name: "Info", content: this.buildInfoPage().render() });
 
         this.tabs = new Tabbed({
             name: "notifications-tabs",
             content: content
-        });
+        }).render();
 
         // Create the modal
         this.modal = new Modal({
@@ -165,7 +165,7 @@ export class SubscriptionManager extends RE6Module {
             triggers: [{ element: this.$openSubsButton }],
             escapable: false,
             reserveHeight: true,
-            content: this.tabs.get(),
+            content: this.tabs,
             position: { my: "right top", at: "right top" }
         });
 
@@ -194,19 +194,19 @@ export class SubscriptionManager extends RE6Module {
                 let index = 0;
                 for (const sub of this.trackers) {
                     if (parseInt(sub[1].tabElement.attr("data-updates")) > 0) {
-                        this.tabs.get().tabs("option", "active", index);
+                        this.tabs.tabs("option", "active", index);
                         break;
                     }
                     index++;
                 }
             }
-            this.clearTabNotification(this.tabs.get().tabs("option", "active"));
+            this.clearTabNotification(this.tabs.tabs("option", "active"));
             window.setTimeout(() => {
-                this.clearTabNotification(this.tabs.get().tabs("option", "active"));
+                this.clearTabNotification(this.tabs.tabs("option", "active"));
             }, 1000);
         });
 
-        this.tabs.get().on("tabsactivate.onUpdate", (event, tabProperties) => {
+        this.tabs.on("tabsactivate.onUpdate", (event, tabProperties) => {
             if (SubscriptionManager.updateInProgress) return;
             this.clearTabNotification(tabProperties.newTab.index());
         });
@@ -480,7 +480,7 @@ export class SubscriptionManager extends RE6Module {
         this.refreshHeaderNotifications();
 
         if (this.modal.isOpen()) {
-            const activeTab = this.tabs.get().tabs("option", "active");
+            const activeTab = this.tabs.tabs("option", "active");
             window.setTimeout(() => { this.clearTabNotification(activeTab); }, 1000);
         }
     }
@@ -506,7 +506,7 @@ export class SubscriptionManager extends RE6Module {
         this.refreshHeaderNotifications();
 
         if (this.modal.isOpen()) {
-            const activeTab = this.tabs.get().tabs("option", "active");
+            const activeTab = this.tabs.tabs("option", "active");
             window.setTimeout(() => { this.clearTabNotification(activeTab); }, 1000);
         }
     }
@@ -680,7 +680,6 @@ export class SubscriptionManager extends RE6Module {
 
     /**
      * Creates a subscription update element based on the provided data and the subscription's definition
-     * // TODO Fix this
      * @param timeStamp Time when the update was created
      * @param data Update data
      * @param actions Subscription definition
