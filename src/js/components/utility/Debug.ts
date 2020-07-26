@@ -4,23 +4,24 @@ export class Debug {
 
     private static enabled: boolean;
     private static connect: boolean;
+    private static perform: boolean;
 
     /** Initialize the debug logger */
     public static async init(): Promise<boolean> {
         Debug.enabled = await XM.Storage.getValue("re621.debug.enabled", false);
         Debug.connect = await XM.Storage.getValue("re621.debug.connect", false);
+        Debug.perform = await XM.Storage.getValue("re621.debug.perform", false);
         return Promise.resolve(true);
     }
 
-    /** Returns true if the debug messages are enabled, false otherwise */
-    public static isEnabled(): boolean {
-        return Debug.enabled;
+    public static getState(type: "enabled" | "connect" | "perform"): boolean {
+        return Debug[type];
     }
 
-    /** Enables or disables the debug message output */
-    public static setEnabled(enabled: boolean): void {
-        this.enabled = enabled;
-        XM.Storage.setValue("re621.debug.enabled", enabled);
+    public static setState(type: "enabled" | "connect" | "perform", enabled: boolean): void {
+        Debug[type] = enabled;
+        if (enabled) XM.Storage.setValue("re621.debug." + type, enabled);
+        else XM.Storage.deleteValue("re621.debug." + type);
     }
 
     /** Logs the provided data into the console log if debug is enabled */
@@ -28,20 +29,19 @@ export class Debug {
         if (Debug.enabled) console.log(...data);
     }
 
-    /** Returns true if connections log is enabled, false otherwise */
-    public static isConnectLogEnabled(): boolean {
-        return Debug.connect;
-    }
-
-    /** Enables or disables the connect log output */
-    public static setConnectLogEnabled(enabled: boolean): void {
-        this.connect = enabled;
-        XM.Storage.setValue("re621.debug.connect", enabled);
-    }
-
     /** Logs the provided data into the console log if connections logging is enabled */
     public static connectLog(...data: any[]): void {
         if (Debug.connect) console.log("CONNECT", ...data);
+    }
+
+    /** Logs the provided data into the console log if performance logging is enabled */
+    public static perfStart(input: string): void {
+        if (Debug.perform) console.time(input);
+    }
+
+    /** Logs the provided data into the console log if performance logging is enabled */
+    public static perfEnd(input: string): void {
+        if (Debug.perform) console.timeEnd(input);
     }
 
 }

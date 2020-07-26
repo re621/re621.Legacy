@@ -950,7 +950,7 @@ export class SettingsController extends RE6Module {
                 ]),
 
                 // eSix Extended
-                Form.section({ name: "esix", columns: 3, width: 3, wrapper: Debug.isEnabled() ? undefined : "display-none" }, [
+                Form.section({ name: "esix", columns: 3, width: 3, wrapper: Debug.getState("enabled") ? undefined : "display-none" }, [
                     Form.header("eSix Extended"),
                     Form.div({ value: `<div class="notice float-right">Import the settings from eSix Extended (Legacy)</div>`, width: 2 }),
 
@@ -1016,23 +1016,34 @@ export class SettingsController extends RE6Module {
 
                 Form.checkbox(
                     {
-                        value: Debug.isEnabled(),
+                        value: Debug.getState("enabled"),
                         label: `<b>Debug Mode</b><br />Enable debug messages in the console log`,
                         width: 3,
                     },
                     (data) => {
-                        Debug.setEnabled(data);
+                        Debug.setState("enabled", data);
                     }
                 ),
 
                 Form.checkbox(
                     {
-                        value: Debug.isConnectLogEnabled(),
+                        value: Debug.getState("connect"),
                         label: `<b>Connections Log</b><br />Logs all outbound connections in the console`,
                         width: 3,
                     },
                     (data) => {
-                        Debug.setConnectLogEnabled(data);
+                        Debug.setState("connect", data);
+                    }
+                ),
+
+                Form.checkbox(
+                    {
+                        value: Debug.getState("perform"),
+                        label: `<b>Performance Metrics</b><br />Write script performance analysis into the console log`,
+                        width: 3,
+                    },
+                    (data) => {
+                        Debug.setState("perform", data);
                     }
                 ),
             ]),
