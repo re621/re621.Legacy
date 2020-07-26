@@ -12,21 +12,25 @@
     }
 }
 
+$form-col-label: 5rem;
+$form-col-input: 10rem;
+$form-gap: 0.5rem;
+
 form.form-section,
 form-section {
     display: grid;
-    grid-column-gap: 0.5rem;
-    grid-row-gap: 0.5rem;
+    grid-column-gap: $form-gap;
+    grid-row-gap: $form-gap;
 
     @include form-element;
 
-    &[columns="1"] { grid-template-columns: 5rem 10rem; }
-    &[columns="2"] { grid-template-columns: 5rem 10rem 5rem 10rem; }
-    &[columns="3"] { grid-template-columns: 5rem 10rem 5rem 10rem 5rem 10rem; }
+    &[columns="1"] { grid-template-columns: $form-col-label $form-col-input; }
+    &[columns="2"] { grid-template-columns: $form-col-label $form-col-input $form-col-label $form-col-input; }
+    &[columns="3"] { grid-template-columns: $form-col-label $form-col-input $form-col-label $form-col-input $form-col-label $form-col-input; }
 
-    &[formspan="1"] { width: 15.5rem; } // 15 + 0.5 rem for 1 column gap
-    &[formspan="2"] { width: 31.5rem; } // 30 + 1.5 rem for 3 column gaps
-    &[formspan="3"] { width: 47.5rem; } // 45 + 2.5 rem for 5 column gaps
+    &[formspan="1"] { width: $form-col-label + $form-col-input + $form-gap; }               // 15 + 0.5 rem for 1 column gap
+    &[formspan="2"] { width: (($form-col-label + $form-col-input) * 2) + ($form-gap * 3); } // 30 + 1.5 rem for 3 column gaps
+    &[formspan="3"] { width: (($form-col-label + $form-col-input) * 3) + ($form-gap * 5); } // 45 + 2.5 rem for 5 column gaps
 }
 
 form.form-section > label,
@@ -104,6 +108,10 @@ form-section > form-input {
         text-transform: uppercase;
         font-family: monospace;
         font-size: 1.3em;
+    }
+
+    &.fileinput input[type=file] {
+        width: stretch;
     }
 
     // Icon Selector
@@ -255,6 +263,59 @@ form-section > form-collapse {
         color: unset;
         border: 0;
         padding: 0.25rem 0.75rem;
+    }
+
+}
+
+/* Accordion */
+form-accordion {
+    display: block;
+    justify-content: space-between;
+    align-items: center;
+
+    margin: 0 -0.75rem 0 -0.75rem !important;
+    width: stretch;
+
+    @include form-element;
+
+    & > form-header {
+        display: block;
+        border: unset !important;
+        border-bottom: 1px solid #ffffff11 !important;
+        background: #ffffff05 !important;
+        color: unset !important;
+        font-weight: unset !important;
+        font-size: 1.16667em;
+        outline: 0;
+        padding: 0.25rem 0.5rem;
+        cursor: pointer;
+
+        span.form-collapse-subheader {
+            float: right;
+            font-size: 70%;
+            padding: 0.25rem;
+        }
+
+        span.form-collapse-badge {
+            float: right;
+            width: 2rem;
+            padding: 0 0.5rem;
+            margin-right: 0.25rem;
+            border-radius: 0.5rem;
+            background: #00000030;
+            box-shadow: inset 0 0 5px 0px #00000050;
+            font-weight: bold;
+            text-align: center;
+        }
+    }
+
+    & > form-section.collapse-content {
+        height: unset !important;
+        background: #ffffff05;
+        border-bottom: 1px solid #ffffff11 !important;
+        color: unset;
+        border: 0;
+        padding: 1rem 0.75rem;
     }
 
 }

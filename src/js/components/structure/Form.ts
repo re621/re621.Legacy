@@ -145,6 +145,72 @@ export class Form implements DomStructure {
      * @param options Section configuration
      * @param content Form elements
      */
+    public static accordion(options?: SectionOptions & { active?: boolean | number; collapsible?: boolean }, content?: FormAccordionElement[]): FormElement {
+        if (!options.name) options.name = FormUtils.getUniqueID();
+
+        let $label: JQuery<HTMLElement>;
+        if (options.label)
+            $label = FormUtils.makeLabel(options.name, options.label);
+
+        const $element = $("<form-accordion>")
+            .toggleClass(options.wrapper, options.wrapper)
+            .attr({
+                "id": options.name,
+                "labeled": options.label !== undefined,
+                "columns": options.columns || 1,
+                "colspan": options.width || options.columns || 1,
+            });
+
+        return new FormElement($element, undefined, $label, content, undefined, (postElement) => {
+            postElement.accordion({
+                active: options.active,
+                animate: false,
+                collapsible: options.collapsible === true,
+                header: "form-header",
+            });
+            console.log(postElement.accordion("option", "active"));
+
+            // Accordions fail to properly show visible elements
+            postElement.find("form-section[aria-hidden=false]").css("display", "");
+        });
+    }
+
+    public static accordionTab(options?: SectionOptions & { badge?: JQuery<HTMLElement>; subheader?: string }, content?: FormElement[]): FormElement {
+        if (!options.name) options.name = FormUtils.getUniqueID();
+
+        const $label = $("<form-header>")
+            .attr("for", options.name)
+            .html(options.label || "TITLE_ERROR");
+
+        if (options.subheader)
+            $("<span>")
+                .addClass("form-collapse-subheader")
+                .append(options.subheader)
+                .appendTo($label);
+
+        if (options.badge)
+            $("<span>")
+                .addClass("form-collapse-badge")
+                .append(options.badge)
+                .appendTo($label);
+
+        const $element = $("<form-section>")
+            .addClass("collapse-content")
+            .attr({
+                "id": options.name,
+                "labeled": options.label !== undefined,
+                "columns": options.columns || 1,
+                "colspan": options.width || options.columns || 1,
+            });
+
+        return new FormElement($element, undefined, $label, content);
+    }
+
+    /**
+     * Creates a collapsable section FormElement based on the provided parameters  
+     * @param options Section configuration
+     * @param content Form elements
+     */
     public static collapse(options?: SectionOptions & { title?: string; badge?: JQuery<HTMLElement>; collapsed?: boolean }, content?: FormElement[]): FormElement {
         if (!options.name) options.name = FormUtils.getUniqueID();
 
@@ -363,7 +429,7 @@ export class Form implements DomStructure {
 
         const $element = FormUtils
             .makeInputWrapper(options.label, options.wrapper, options.width)
-            .addClass("keyinput");
+            .addClass("fileinput");
 
         const $input = $("<input>")
             .attr({
@@ -587,6 +653,14 @@ export class Form implements DomStructure {
         return new FormElement($element, undefined, $label);
     }
 
+    public static text(text: string, width = 1): FormElement {
+        return Form.div({ value: text, width: width });
+    }
+
+    public static subheader(header: string, subheader: string, width = 1): FormElement {
+        return Form.div({ value: `<b>${header}</b><br />${subheader}`, width: width });
+    }
+
     /**
      * Creates an hr FormElement based on the provided parameters  
      * @param width Element width
@@ -650,19 +724,40 @@ class FormUtils {
 
 export class FormElement {
 
-    private created: boolean;               // Used for caching, true if build() has been called before
-    private element: JQuery<HTMLElement>;   // Container element
-    private input: JQuery<HTMLElement>;     // Actual form element, if it exists
-    private label: JQuery<HTMLElement>;     // Input label, if it exists
-    private content: FormElement[];         // Additional elements to be appended
-    private container: JQuery<HTMLElement>; // Container to which content elements are added
+    private created: boolean;
 
-    public constructor(element: JQuery<HTMLElement>, input?: JQuery<HTMLElement>, label?: JQuery<HTMLElement>, content?: FormElement[], container?: JQuery<HTMLElement>) {
-        this.element = element;
+    private wrapper: JQuery<HTMLElement>;
+    private input: JQuery<HTMLElement>;
+    private label: JQuery<HTMLElement>;
+    private content: FormElement[];
+    private container: JQuery<HTMLElement>;
+    private postProcessing: Function;
+
+    /**
+     * Constructs a form element based on provided data.  
+     * Only the `wrapper` parameter is required, everything else is optional.
+     * @param wrapper Element that wraps the rest of the inputs
+     * @param input Input element, if there is one
+     * @param label Input label, if there is one
+     * @param content Contains other FormElements that need to be built and appended to this element
+     * @param container Container object for content. If omitted, defaults to wrapper
+     * @param postProcessing Function to run after the object has been built. Takes the wrapper as a parameter.
+     */
+    public constructor(
+        wrapper: JQuery<HTMLElement>,
+        input?: JQuery<HTMLElement>,
+        label?: JQuery<HTMLElement>,
+        content?: FormElement[],
+        container?: JQuery<HTMLElement>,
+        postProcessing?: (wrapper: JQuery<HTMLElement>) => void) {
+
+        this.wrapper = wrapper;
         this.input = input;
         this.label = label;
         this.content = content ? content : [];
-        this.container = container ? container : element;
+        this.container = container ? container : wrapper;
+
+        this.postProcessing = postProcessing ? postProcessing : (): void => { return; };
     }
 
     public getInput(): JQuery<HTMLElement> {
@@ -682,25 +777,39 @@ export class FormElement {
     public build(parentID: string, force = false): JQuery<HTMLElement>[] {
         if (force || !this.created) {
             for (const entry of this.content) {
-                for (const childElem of entry.build(parentID + "-" + this.element.attr("id"), force))
+                for (const childElem of entry.build(parentID + "-" + this.wrapper.attr("id"), force))
                     childElem.appendTo(this.container);
             }
-            this.created = true;
 
             if (this.label !== undefined) this.label.attr("for", parentID + "-" + this.label.attr("for"));
             if (this.input !== undefined) this.input.attr("id", parentID + "-" + this.input.attr("id"));
-            if (this.element.is("form-input"))
-                for (const label of this.element.find("> label")) {
-                    const $subLabel = $(label);
-                    $subLabel.attr("for", parentID + "-" + $subLabel.attr("for"));
+            switch (this.wrapper.prop("tagName")) {
+                case "FORM-INPUT": {
+                    for (const label of this.wrapper.find("> label")) {
+                        const $subLabel = $(label);
+                        $subLabel.attr("for", parentID + "-" + $subLabel.attr("for"));
+                    }
+                    break;
                 }
+                case "FORM-SECTION":
+                case "FORM-ACCORDION": {
+                    this.wrapper.attr("id", parentID + "-" + this.wrapper.attr("id"));
+                    break;
+                }
+            }
+
+            this.postProcessing(this.wrapper);
+
+            this.created = true;
         }
 
-        if (this.label) return [this.label, this.element];
-        else return [this.element];
+        if (this.label) return [this.label, this.wrapper];
+        else return [this.wrapper];
     }
 
 }
+
+class FormAccordionElement extends FormElement { }
 
 interface SectionOptions {
     name?: string;
