@@ -265,6 +265,20 @@ export class SettingsController extends RE6Module {
                     Form.spacer(2),
                     Form.text(`<div class="unmargin text-center text-bold">Requires a page reload</div>`),
 
+                    // Preserve Hover Text
+                    Form.checkbox(
+                        {
+                            value: thumbnailEnhancer.fetchSettings("preserveHoverText"),
+                            label: "<b>Preserve Hover Text</b><br />Restores text displayed when hovering over the thumbnail",
+                            width: 2,
+                        },
+                        async (data) => {
+                            await thumbnailEnhancer.pushSettings("preserveHoverText", data);
+                        }
+                    ),
+                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
+                    Form.spacer(3),
+
                     // Thumbnail Scaling
                     Form.checkbox(
                         {
@@ -356,7 +370,7 @@ export class SettingsController extends RE6Module {
 
                     ]),
 
-
+                    // Voting Buttons
                     Form.checkbox(
                         {
                             value: thumbnailEnhancer.fetchSettings("vote"),
@@ -370,7 +384,7 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3),
 
-
+                    // Ribbons
                     Form.checkbox(
                         {
                             value: thumbnailEnhancer.fetchSettings("ribbons"),
@@ -400,22 +414,10 @@ export class SettingsController extends RE6Module {
                             if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleRelationRibbons(data);
                         }
                     ),
-                    Form.spacer(3),
-
-                    Form.checkbox(
-                        {
-                            value: thumbnailEnhancer.fetchSettings("preserveHoverText"),
-                            label: "<b>Preserve Hover Text</b><br />Restores text displayed when hovering over the thumbnail",
-                            width: 2,
-                        },
-                        async (data) => {
-                            await thumbnailEnhancer.pushSettings("preserveHoverText", data);
-                        }
-                    ),
-                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
 
                 ]),
 
+                // Miscellaneous
                 Form.accordionTab({ name: "misc", label: "Other", columns: 3, width: 3 }, [
 
                     Form.checkbox(
