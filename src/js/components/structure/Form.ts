@@ -26,13 +26,15 @@ export class Form implements DomStructure {
      */
     public constructor(options?: SectionOptions, content?: FormElement[], onSubmit?: FormSubmitEvent) {
         if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.columns) options.columns = 1;
+        if (!options.width) options.width = options.columns;
 
         this.element = $("<form>")
             .addClass("form-section" + (options.wrapper ? " " + options.wrapper : ""))
             .attr({
                 "id": options.name,
-                "columns": options.columns || 1,
-                "formspan": options.width || options.columns || 1,
+                "columns": options.columns !== 1 ? options.columns : null,
+                "formspan": options.width !== 1 ? options.width : null,
             })
             .on("submit", (event) => {
                 event.preventDefault();
@@ -123,6 +125,8 @@ export class Form implements DomStructure {
      */
     public static section(options?: SectionOptions, content?: FormElement[]): FormElement {
         if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.columns) options.columns = 1;
+        if (!options.width) options.width = options.columns;
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -132,9 +136,9 @@ export class Form implements DomStructure {
             .toggleClass(options.wrapper, options.wrapper)
             .attr({
                 "id": options.name,
-                "labeled": options.label !== undefined,
-                "columns": options.columns || 1,
-                "colspan": options.width || options.columns || 1,
+                "labeled": options.label !== undefined ? "" : null,
+                "columns": options.columns !== 1 ? options.columns : null,
+                "colspan": options.width !== 1 ? options.width : null,
             });
 
         return new FormElement($element, undefined, $label, content);
@@ -147,6 +151,8 @@ export class Form implements DomStructure {
      */
     public static accordion(options?: SectionOptions & { active?: boolean | number; collapsible?: boolean }, content?: FormAccordionElement[]): FormElement {
         if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.columns) options.columns = 1;
+        if (!options.width) options.width = options.columns;
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -156,9 +162,9 @@ export class Form implements DomStructure {
             .toggleClass(options.wrapper, options.wrapper)
             .attr({
                 "id": options.name,
-                "labeled": options.label !== undefined,
-                "columns": options.columns || 1,
-                "colspan": options.width || options.columns || 1,
+                "labeled": options.label !== undefined ? "" : null,
+                "columns": options.columns !== 1 ? options.columns : null,
+                "colspan": options.width !== 1 ? options.width : null,
             });
 
         return new FormElement($element, undefined, $label, content, undefined, (postElement) => {
@@ -176,6 +182,8 @@ export class Form implements DomStructure {
 
     public static accordionTab(options?: SectionOptions & { badge?: JQuery<HTMLElement>; subheader?: string }, content?: FormElement[]): FormElement {
         if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.columns) options.columns = 1;
+        if (!options.width) options.width = options.columns;
 
         const $label = $("<form-header>")
             .attr("for", options.name)
@@ -197,9 +205,9 @@ export class Form implements DomStructure {
             .addClass("collapse-content")
             .attr({
                 "id": options.name,
-                "labeled": options.label !== undefined,
-                "columns": options.columns || 1,
-                "colspan": options.width || options.columns || 1,
+                "labeled": options.label !== undefined ? "" : null,
+                "columns": options.columns !== 1 ? options.columns : null,
+                "colspan": options.width !== 1 ? options.width : null,
             });
 
         return new FormElement($element, undefined, $label, content);
@@ -212,6 +220,8 @@ export class Form implements DomStructure {
      */
     public static collapse(options?: SectionOptions & { title?: string; badge?: JQuery<HTMLElement>; collapsed?: boolean }, content?: FormElement[]): FormElement {
         if (!options.name) options.name = FormUtils.getUniqueID();
+        if (!options.columns) options.columns = 1;
+        if (!options.width) options.width = options.columns;
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -236,9 +246,9 @@ export class Form implements DomStructure {
         const container = $("<form-section>")
             .addClass("collapse-content")
             .attr({
-                "labeled": options.label !== undefined,
-                "columns": options.columns || 1,
-                "colspan": options.width || options.columns || 1,
+                "labeled": options.label !== undefined ? "" : null,
+                "columns": options.columns !== 1 ? options.columns : null,
+                "colspan": options.width !== 1 ? options.width : null,
             })
             .appendTo($element);
 
@@ -721,12 +731,12 @@ class FormUtils {
             .html(text);
     }
 
-    public static makeInputWrapper(label: string, wrapper: string, width: number): JQuery<HTMLElement> {
+    public static makeInputWrapper(label: string, wrapper: string, width = 1): JQuery<HTMLElement> {
         return $("<form-input>")
             .addClass(wrapper ? " " + wrapper : "")
             .attr({
-                "labeled": label !== undefined,
-                "colspan": width || 1
+                "labeled": label !== undefined ? "" : null,
+                "colspan": width !== 1 ? width : null,
             });
     }
 

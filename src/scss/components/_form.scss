@@ -1,11 +1,12 @@
 /* Generated Form Styles */
 
 @mixin form-element {
-    &[labeled=true] {
+    &[labeled] {
         &[colspan="2"] { grid-column: span 3; }
         &[colspan="3"] { grid-column: span 5; }
     }
-    &:not([labeled=true]) {
+    &:not([labeled]) {
+        &:not([colspan]),
         &[colspan="1"] { grid-column: span 2; }
         &[colspan="2"] { grid-column: span 4; }
         &[colspan="3"] { grid-column: span 6; }
@@ -24,10 +25,15 @@ form-section {
 
     @include form-element;
 
+    &:not([columns]),
     &[columns="1"] { grid-template-columns: $form-col-label $form-col-input; }
     &[columns="2"] { grid-template-columns: $form-col-label $form-col-input $form-col-label $form-col-input; }
     &[columns="3"] { grid-template-columns: $form-col-label $form-col-input $form-col-label $form-col-input $form-col-label $form-col-input; }
+}
 
+form.form-section {
+
+    &:not([formspan]),
     &[formspan="1"] { width: $form-col-label + $form-col-input + $form-gap; }               // 15 + 0.5 rem for 1 column gap
     &[formspan="2"] { width: (($form-col-label + $form-col-input) * 2) + ($form-gap * 3); } // 30 + 1.5 rem for 3 column gaps
     &[formspan="3"] { width: (($form-col-label + $form-col-input) * 3) + ($form-gap * 5); } // 45 + 2.5 rem for 5 column gaps
