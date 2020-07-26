@@ -1,13 +1,13 @@
 import { XM } from "../api/XM";
 import { Hotkeys } from "../data/Hotkeys";
 import { Util } from "../utility/Util";
-import { DomStructure } from "./DomStructure";
+import { PreparedStructure } from "./PreparedStructure";
 
 /**
  * Form Engine v.2.0  
  * Simplifies the process of creating complex, visually consistent forms.
  */
-export class Form implements DomStructure {
+export class Form implements PreparedStructure {
 
     private static inputTimeout = 500;          // Typing timeout on text input fields
 
@@ -53,7 +53,7 @@ export class Form implements DomStructure {
      * Builds and returns the form DOM element
      * @param force If true, ignores any cached data and rebuilds the structure from scratch
      */
-    public get(force = false): JQuery<HTMLElement> {
+    public render(force = false): JQuery<HTMLElement> {
         if (this.created && !force) { return this.element; }
 
         // Build form elements
@@ -115,7 +115,7 @@ export class Form implements DomStructure {
         return new Form(
             { columns: width, width: width },
             [Form.spacer(width)]
-        ).get();
+        ).render();
     }
 
     /**

@@ -1,5 +1,5 @@
 import { Util } from "../utility/Util";
-import { DomStructure } from "./DomStructure";
+import { PreparedStructure } from "./PreparedStructure";
 
 export class Modal {
 
@@ -69,7 +69,7 @@ export class Modal {
                 if (modalOpened) return;
                 modalOpened = true;
                 this.$modal.html("");
-                this.$modal.append(config.structure.get());
+                this.$modal.append(config.structure.render());
             });
         }
 
@@ -251,7 +251,7 @@ interface ModalConfig {
      * Optional. The modal content is replaced with this generated structure when the window is open.  
      * If used, the content parameter is used as a placeholder to properly size and center the window.
      */
-    structure?: DomStructure;
+    structure?: PreparedStructure;
 
     /** List of JQuery object & event name pairs that trigger the modal opening */
     triggers?: ModalTrigger[];

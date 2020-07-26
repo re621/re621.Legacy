@@ -1,11 +1,11 @@
 import { Util } from "../utility/Util";
-import { DomStructure } from "./DomStructure";
+import { PreparedStructure } from "./PreparedStructure";
 
 /**
  * Tabbed  
  * Relateively easy tabbed content, powered by CSS
  */
-export class Tabbed implements DomStructure {
+export class Tabbed implements PreparedStructure {
 
     private id: string;
     private config: TabbedConfig;
@@ -20,7 +20,7 @@ export class Tabbed implements DomStructure {
      * Creates a JQuery-UI tab element based on the provided configuration
      * @param clearCache If true, clears cache and re-creates the element from scratch
      */
-    public get(clearCache = false): JQuery<HTMLElement> {
+    public render(clearCache = false): JQuery<HTMLElement> {
         if (this.$container !== undefined && !clearCache)
             return this.$container;
 
@@ -40,7 +40,7 @@ export class Tabbed implements DomStructure {
                 .appendTo(this.$container);
 
             if (entry.content) elem.append(entry.content);
-            if (entry.structure) elem.append(entry.structure.get());
+            if (entry.structure) elem.append(entry.structure.render());
         });
 
         this.$container.tabs({
@@ -79,7 +79,7 @@ export interface TabContent {
     content?: JQuery<HTMLElement>;
 
     /** If specified, the content parameter is ignored, replaced by this DomStructure */
-    structure?: DomStructure;
+    structure?: PreparedStructure;
 
     /** If true, strips the top margins so that a Tabbed object could be fitted in it */
     tabbable?: boolean;
