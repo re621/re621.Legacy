@@ -168,7 +168,6 @@ export class Form implements DomStructure {
                 collapsible: options.collapsible === true,
                 header: "form-header",
             });
-            console.log(postElement.accordion("option", "active"));
 
             // Accordions fail to properly show visible elements
             postElement.find("form-section[aria-hidden=false]").css("display", "");
