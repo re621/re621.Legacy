@@ -432,6 +432,19 @@ export class SettingsController extends RE6Module {
 
                     Form.hr(3),
 
+                    Form.text("<b>Persistent Tags</b>"),
+                    Form.input(
+                        {
+                            value: searchUtilities.fetchSettings("persistentTags"),
+                            width: 2,
+                        },
+                        async (data) => { await searchUtilities.pushSettings("persistentTags", data); }
+                    ),
+                    Form.text(`Tags added to every search, used to emulate server-side blacklisting`, 2),
+                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
+
+                    Form.hr(3),
+
                     Form.checkbox(
                         {
                             value: postViewer.fetchSettings("upvoteOnFavorite"),

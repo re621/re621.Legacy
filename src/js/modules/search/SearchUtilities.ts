@@ -5,7 +5,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 export class SearchUtilities extends RE6Module {
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.post]);
+        super([PageDefintion.search, PageDefintion.post, PageDefintion.favorites]);
         this.registerHotkeys(
             { keys: "hotkeyFocusSearch", fnct: this.focusSearchbar },
             { keys: "hotkeyRandomPost", fnct: this.randomPost },
@@ -36,6 +36,8 @@ export class SearchUtilities extends RE6Module {
 
             collapseCategories: true,
             categoryData: [],
+
+            persistentTags: "",
 
             hotkeyFocusSearch: "q",
             hotkeyRandomPost: "r",
@@ -73,6 +75,19 @@ export class SearchUtilities extends RE6Module {
         if (this.fetchSettings("collapseCategories") === true && Page.matches(PageDefintion.post)) {
             this.collapseTagCategories();
         }
+
+        // Append custom string to searches
+        const persistentTags = this.fetchSettings<string>("persistentTags").trim().toLowerCase();
+        if (persistentTags !== "" && Page.matches([PageDefintion.search, PageDefintion.post, PageDefintion.favorites])) {
+            const $tagInput = $("input#tags");
+            $tagInput.val(($tagInput.val() + "").replace(persistentTags, ""));
+
+            $("section#search-box form").on("submit", () => {
+                $tagInput.val($tagInput.val() + " " + persistentTags);
+                return true;
+            });
+        }
+
     }
 
     /**
