@@ -381,8 +381,8 @@ export class SettingsController extends RE6Module {
                             await thumbnailEnhancer.pushSettings("ribbons", data);
                             if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleStatusRibbons(data);
 
-                            $("input#optgeneral-thumb-advanced-relations-ribbons").prop("disabled", !data);
-                            $("input#optgeneral-thumb-advanced-relations-ribbons").parent().toggleClass("input-disabled", !data);
+                            $("input#optgeneral-gencollapse-thumb-relations-ribbons").prop("disabled", !data);
+                            $("input#optgeneral-gencollapse-thumb-relations-ribbons").parent().toggleClass("input-disabled", !data);
                         }
                     ),
                     Form.spacer(3),
