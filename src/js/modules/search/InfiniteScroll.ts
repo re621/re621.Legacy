@@ -176,14 +176,15 @@ export class InfiniteScroll extends RE6Module {
                 const element = PostHtml.create(json, options.lazyload, upscaleMode === ThumbnailPerformanceMode.Always);
                 const post = new Post(element);
 
-                //only append the post if it has image data
-                //if it does not it is part of the anon blacklist
+                // Only append the post if it has image data
+                // If it does not, it is part of the anon blacklist
                 if (post.getImageURL() !== undefined) {
-                    //Add post to the list of posts currently visible
-                    //This is important because InstantSearch relies on it
+
+                    // Add post to the list of posts currently visible
+                    // All modules using fetchPosts() rely on this
                     Post.appendPost(post);
 
-                    //Apply blacklist before appending, to prevent image loading
+                    // Apply blacklist before appending, to prevent image loading
                     post.applyBlacklist();
 
                     this.$postContainer.append(element);
