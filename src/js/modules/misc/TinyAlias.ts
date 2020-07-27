@@ -198,7 +198,6 @@ export class TinyAlias extends RE6Module {
     /** Handles the tag checking */
     private async handleCheckButton($input: JQuery<HTMLElement>): Promise<void> {
         const tag = this.prepareTag($input.val().toString());
-        console.log("checking " + tag);
         if (this.tagAlreadyAdded(tag)) {
             this.$infoText
                 .html("Tag has already been added")

@@ -17,14 +17,6 @@ export class SearchUtilities extends RE6Module {
             { keys: "hotkeySwitchModeAddSet", fnct: this.switchModeAddSet },
             { keys: "hotkeySwitchModeRemSet", fnct: this.switchModeRemSet },
         );
-
-        $("select#mode-box-mode").on("change", () => {
-            console.log("trigger 1");
-        });
-
-        $("select#mode-box-mode").on("change.danbooru", () => {
-            console.log("trigger 2");
-        });
     }
 
     public getDefaultSettings(): Settings {

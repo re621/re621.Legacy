@@ -441,7 +441,6 @@ export class SubscriptionManager extends RE6Module {
             if (syncData === null) await Sync.upload();
             else {
                 const time = new Date(syncData["timestamp"] + "Z").getTime();
-                console.log(time, Sync.timestamp, time > Sync.timestamp);
                 if (time > Sync.timestamp) {
                     Debug.log("SYNC: downloading remote")
                     await ModuleController.get(CommentTracker).pushSettings("data", syncData.data.CommentTracker);
