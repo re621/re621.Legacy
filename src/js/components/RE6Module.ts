@@ -20,6 +20,16 @@ export class RE6Module {
     private constraint: RegExp[] = [];
     private hotkeys: Hotkey[] = [];
 
+    /**
+     * Established basic module configuration.  
+     * Do not initialize the module in the constructor.
+     * - `prepare()` is used to fetch settings and load data
+     * - `create()`  contains DOM manipulation and event listeners
+     * - `destroy()` must undo everything done in create()
+     * @param constraint Which pages this module should run on? Accepts RegEx, but the use of `PageDefinition` constans is encouraged.
+     * @param waitForDOM If true, waits for the page to finish loading before executing `create()`.
+     * @param settingsTag Override for the name of the settings variable. Defaults to the class name.
+     */
     public constructor(constraint?: RegExp | RegExp[], waitForDOM = false, settingsTag?: string) {
         if (constraint === undefined) this.constraint = [];
         else if (constraint instanceof RegExp) this.constraint.push(constraint);

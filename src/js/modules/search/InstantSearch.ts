@@ -12,7 +12,7 @@ export class InstantSearch extends RE6Module {
     private $searchbox: JQuery<HTMLElement>;
 
     public constructor() {
-        super(PageDefintion.search);
+        super(PageDefintion.search, true);
     }
 
     /**

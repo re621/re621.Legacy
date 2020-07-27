@@ -17,7 +17,7 @@ export class BlacklistEnhancer extends RE6Module {
     private static $list: JQuery<HTMLElement>;
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.post]);
+        super([PageDefintion.search, PageDefintion.post], true);
     }
 
     /**

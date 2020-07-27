@@ -16,7 +16,7 @@ export class ImageScaler extends RE6Module {
     private resizeSelector: JQuery<HTMLElement>;
 
     public constructor() {
-        super(PageDefintion.post);
+        super(PageDefintion.post, true);
         this.registerHotkeys(
             { keys: "hotkeyScale", fnct: () => { this.setScale(); } }
         );

@@ -13,7 +13,7 @@ export class DownloadCustomizer extends RE6Module {
     private link: JQuery<HTMLElement>;
 
     public constructor() {
-        super(PageDefintion.post);
+        super(PageDefintion.post, true);
     }
 
     /**

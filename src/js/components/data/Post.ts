@@ -83,11 +83,9 @@ export class Post {
      */
     public static getViewingPost(): ViewingPost {
         const posts = this.fetchPosts();
-        if (posts[0] instanceof ViewingPost) {
+        if (posts[0] instanceof ViewingPost)
             return posts[0] as ViewingPost;
-        } else {
-            return undefined;
-        }
+        return undefined;
     }
 
     public static createPreviewUrlFromMd5(md5: string): string {

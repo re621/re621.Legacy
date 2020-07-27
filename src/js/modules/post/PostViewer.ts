@@ -12,7 +12,7 @@ export class PostViewer extends RE6Module {
     private post: ViewingPost;
 
     public constructor() {
-        super(PageDefintion.post);
+        super(PageDefintion.post, true);
         this.registerHotkeys(
             { keys: "hotkeyUpvote", fnct: this.triggerUpvote },
             { keys: "hotkeyDownvote", fnct: this.triggerDownvote },

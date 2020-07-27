@@ -27,14 +27,16 @@ export class User {
         this.userid = parseInt($ref.attr("data-user-id")) || 0;
         this.level = $ref.attr("data-user-level-string") || "Guest";
 
-        const filters = $("head meta[name=blacklisted-tags]").attr("content");
-        const blacklistEnabled = $("#disable-all-blacklists").is(":visible");
+        $(() => {
+            const filters = $("head meta[name=blacklisted-tags]").attr("content");
+            const blacklistEnabled = $("#disable-all-blacklists").is(":visible");
 
-        if (filters !== undefined) {
-            for (const filter of JSON.parse(filters)) {
-                this.addBlacklistFilter(filter, blacklistEnabled);
+            if (filters !== undefined) {
+                for (const filter of JSON.parse(filters)) {
+                    this.addBlacklistFilter(filter, blacklistEnabled);
+                }
             }
-        }
+        });
     }
 
     /**
@@ -114,7 +116,6 @@ export class User {
      */
     public static async getCurrentSettings(): Promise<APICurrentUser> {
         return E621.Users.find(this.getUserID()).first<APICurrentUser>().then((response) => {
-            console.log(response);
             return Promise.resolve(response);
         });
     }
