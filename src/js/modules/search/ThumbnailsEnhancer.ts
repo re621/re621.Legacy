@@ -20,6 +20,9 @@ export enum ThumbnailClickAction {
 
 export class ThumbnailEnhancer extends RE6Module {
 
+    private postsWrapper: JQuery<HTMLElement>;
+    private postsLoading: JQuery<HTMLElement>;
+
     private postContainer: JQuery<HTMLElement>;
 
     private static zoomPaused = false;
@@ -54,6 +57,21 @@ export class ThumbnailEnhancer extends RE6Module {
         };
     }
 
+    public async prepare(): Promise<void> {
+        await super.prepare();
+
+        this.postsWrapper = $("div#posts")
+            .addClass("display-none-important");
+        this.postsLoading = $("<div>")
+            .attr("id", "postContainerOverlay")
+            .html(`
+                <span>
+                    <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+                </span>
+            `)
+            .insertBefore(this.postsWrapper);
+    }
+
     public create(): void {
         super.create();
 
@@ -81,6 +99,9 @@ export class ThumbnailEnhancer extends RE6Module {
 
         this.toggleStatusRibbons(this.fetchSettings("ribbons"));
         this.toggleRelationRibbons(this.fetchSettings("relRibbons"));
+
+        this.postsLoading.addClass("display-none-important");
+        this.postsWrapper.removeClass("display-none-important");
 
         ThumbnailEnhancer.on("pauseHoverActions.main", (event, zoomPaused) => {
             if (typeof zoomPaused === "undefined") return;
@@ -190,10 +211,9 @@ export class ThumbnailEnhancer extends RE6Module {
     public static async modifyThumbnail($article: JQuery<HTMLElement>, upscaleMode = ThumbnailPerformanceMode.Hover, clickAction = ThumbnailClickAction.NewTab, preserveHoverText: boolean): Promise<void> {
 
         /* Create the structure */
-        const $link = $article.find<HTMLElement>("a.preview-box"),
+        const $link = $article.find<HTMLElement>("a").first(),
             postID = parseInt($article.attr("data-id")),
             $img = $article.find("img"),
-            $picture = $article.find("picture"),
             $imgData = $img.attr("title") ? $img.attr("title").split("\n").slice(0, -2) : [];     // Replace if the post date is added for the data-attributes.
 
         $article.find("source").remove();                               // If we ever have to worry about mobile users, this will need to be addressed.
@@ -201,7 +221,17 @@ export class ThumbnailEnhancer extends RE6Module {
         if (!preserveHoverText) $img.removeAttr("title");
         $img.attr("alt", "#" + $article.attr("data-id"));
 
+        // Sometimes, the image might not be wrapped in a picture tag properly
+        // This is most common on comment pages and the like
+        // If that bug gets fixed, this code can be removed
+        let $picture = $article.find("picture");
+        if ($picture.length == 0) {
+            const $img = $article.find("img");
+            $picture = $("<picture>").insertAfter($img).append($img);
+        }
+
         // Loading icon
+        $link.addClass("preview-box");
         $("<div>")
             .addClass("preview-load")
             .html(`<i class="fas fa-circle-notch fa-2x fa-spin"></i>`)
