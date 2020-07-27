@@ -8,7 +8,7 @@ export class CustomFlagger extends RE6Module {
     private static filters: Map<string, FilterPair>;
 
     public constructor() {
-        super([PageDefintion.post, PageDefintion.search, PageDefintion.favorites, PageDefintion.popular]);
+        super([PageDefintion.post, PageDefintion.search, PageDefintion.favorites, PageDefintion.popular], true);
     }
 
     protected getDefaultSettings(): Settings {
@@ -76,6 +76,15 @@ export class CustomFlagger extends RE6Module {
      * @param post Post to check
      */
     public static async modifyThumbnail(post: Post): Promise<void> {
+        // Sometimes, the image might not be wrapped in a picture tag properly
+        // This is most common on comment pages and the like
+        // If that bug gets fixed, this code can be removed
+        let $picture = post.getDomElement().find("picture");
+        if ($picture.length == 0) {
+            const $img = post.getDomElement().find("img");
+            $picture = $("<picture>").insertAfter($img).append($img);
+        }
+
         // Create a flag container
         const flagContainer = $("<div>")
             .addClass("flag-container")

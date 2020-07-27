@@ -25,7 +25,7 @@ export class ThumbnailEnhancer extends RE6Module {
     private static zoomPaused = false;
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.popular, PageDefintion.favorites, PageDefintion.comments]);
+        super([PageDefintion.search, PageDefintion.popular, PageDefintion.favorites, PageDefintion.comments], true);
     }
 
     protected getDefaultSettings(): Settings {

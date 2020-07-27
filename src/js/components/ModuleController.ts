@@ -25,7 +25,9 @@ export class ModuleController {
                 this.modules.set(moduleClass.prototype.constructor.name, moduleInstance);
                 await moduleInstance.prepare();
                 if (moduleInstance.canInitialize()) {
-                    moduleInstance.create();
+                    if (moduleInstance.isWaitingForDOM()) $(() => { moduleInstance.create(); });
+                    else moduleInstance.create();
+
                     activeModules++;
                 }
             } catch (error) { ErrorHandler.error(moduleClass, error.stack, "init"); }

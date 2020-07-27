@@ -16,46 +16,33 @@ export class DomUtilities {
      * Returns a promise that is fulfilled when all DOM is created
      */
     public static async createStructure(): Promise<void> {
-        return this.prepareStructure().then(this.buildStructure);
-    }
+        return new Promise(async (resolve, reject) => {
+            try { await DomUtilities.elementReady("head", DomUtilities.addStylesheets); }
+            catch (error) { ErrorHandler.error("DOM", error.stack, "styles"); }
 
-    /**
-     * Builds elements that would make the page jump around.  
-     * They should be loaded as soon as their parent element exists.
-     */
-    private static async prepareStructure(): Promise<any> {
-        try { await DomUtilities.elementReady("head", DomUtilities.addStylesheets); }
-        catch (error) { ErrorHandler.error("DOM", error.stack, "styles"); }
+            let stage = "prepare";
+            try {
 
-        // This is terrible for performance, so keep the number of these to a minimum
-        try {
-            const promises: Promise<any>[] = [];
-            promises.push(DomUtilities.elementReady("head", DomUtilities.injectChromeScript));
-            promises.push(DomUtilities.elementReady("body", DomUtilities.createThemes));
-            promises.push(DomUtilities.elementReady("div#page", DomUtilities.createModalContainer));
-            promises.push(DomUtilities.elementReady("menu.main", DomUtilities.createHeader));
-            return Promise.all(promises);
-        } catch (error) {
-            ErrorHandler.error("DOM", error.stack, "prepare");
-            return Promise.reject();
-        }
-    }
+                // This is terrible for performance, so keep the number of these to a minimum
+                const promises: Promise<any>[] = [];
+                promises.push(DomUtilities.elementReady("head", DomUtilities.injectChromeScript));
+                promises.push(DomUtilities.elementReady("body", DomUtilities.createThemes));
+                promises.push(DomUtilities.elementReady("div#page", DomUtilities.createModalContainer));
+                promises.push(DomUtilities.elementReady("menu.main", DomUtilities.createHeader));
 
-    /**
-     * Build the less important elements that can wait until the page fully loads.  
-     * This function mainly exists for the sake of performance issues caused by prepareStructure()
-     */
-    private static async buildStructure(): Promise<void> {
-        return new Promise((resolve) => {
-            $(() => {
-                try {
+                Promise.all(promises).then(() => {
+                    stage = "build";
                     DomUtilities.createSearchbox();
                     DomUtilities.createTagList();
                     DomUtilities.createFormattedTextareas();
-                    DomUtilities.createPostPreviews();
-                } catch (error) { ErrorHandler.error("DOM", error.stack, "build"); }
-                resolve();
-            });
+                    resolve();
+                });
+
+            } catch (error) {
+                ErrorHandler.error("DOM", error.stack, stage);
+                reject();
+                return;
+            }
         });
     }
 
@@ -197,24 +184,6 @@ export class DomUtilities {
                 .insertBefore($textarea)
                 .append($textarea);
         }
-    }
-
-    /**
-     * Wraps all post-previews in ThumbnailEnhancer-readable structures
-     */
-    private static createPostPreviews(): void {
-        const thumbnails = $("div#page").find("article.post-preview, div.post-preview").get();
-        for (const thumb of thumbnails) {
-            const $thumb = $(thumb);
-            $thumb.find("a").first().addClass("preview-box");
-
-            // Sometimes, the image might not be wrapped in a picture tag properly
-            // This is most common on comment pages and the like
-            // If that bug gets fixed, this code can be removed
-            const $img = $thumb.find("img");
-            if ($thumb.find("picture").length == 0)
-                $("<picture>").insertAfter($img).append($img);
-        };
     }
 
     /**

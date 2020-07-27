@@ -12,6 +12,7 @@ export class RE6Module {
 
     private settingsTag: string;
     private settings: Settings;
+    private waitForDOM: boolean;
 
     private enabled: boolean;
     private initialized = false;
@@ -19,10 +20,12 @@ export class RE6Module {
     private constraint: RegExp[] = [];
     private hotkeys: Hotkey[] = [];
 
-    public constructor(constraint?: RegExp | RegExp[], settingsTag?: string) {
+    public constructor(constraint?: RegExp | RegExp[], waitForDOM = false, settingsTag?: string) {
         if (constraint === undefined) this.constraint = [];
         else if (constraint instanceof RegExp) this.constraint.push(constraint);
         else this.constraint = constraint;
+
+        this.waitForDOM = waitForDOM;
 
         if (settingsTag) this.settingsTag = settingsTag;
         else this.settingsTag = this.constructor.name;
@@ -46,6 +49,11 @@ export class RE6Module {
     /** Returns the settings tag for this module */
     public getSettingsTag(): string {
         return this.settingsTag;
+    }
+
+    /** If true, delay module creation until the DOM is ready */
+    public isWaitingForDOM(): boolean {
+        return this.waitForDOM
     }
 
     /**
