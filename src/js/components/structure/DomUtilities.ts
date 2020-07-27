@@ -196,11 +196,12 @@ export class DomUtilities {
         return new Promise(async (resolve, reject) => {
             let timeout = 0;
             while ($(element).length == 0 && timeout < (1000 * 10)) {
-                await new Promise((resolve) => { window.setTimeout(() => { resolve(); }, 100) });
-                timeout += 100;
+                await new Promise((resolve) => { window.setTimeout(() => { resolve(); }, 250) });
+                timeout += 250;
             }
 
-            if ($(element).length > 0) { callback(); resolve(); }
+            if ($(element).length > 0)
+                window.setTimeout(() => { callback(); resolve(); }, 250)
             else reject();
         });
     }
