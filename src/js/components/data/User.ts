@@ -1,7 +1,5 @@
 import { E621 } from "../api/E621";
 import { APICurrentUser } from "../api/responses/APIUser";
-import { Post } from "./Post";
-import { PostFilter } from "./PostFilter";
 
 /**
  * User  
@@ -17,8 +15,6 @@ export class User {
 
     private level: string;
 
-    private blacklist = new Map<string, PostFilter>();
-
     public constructor() {
         const $ref = $("body");
 
@@ -26,17 +22,6 @@ export class User {
         this.username = $ref.attr("data-user-name") || "Anonymous";
         this.userid = parseInt($ref.attr("data-user-id")) || 0;
         this.level = $ref.attr("data-user-level-string") || "Guest";
-
-        $(() => {
-            const filters = $("head meta[name=blacklisted-tags]").attr("content");
-            const blacklistEnabled = $("#disable-all-blacklists").is(":visible");
-
-            if (filters !== undefined) {
-                for (const filter of JSON.parse(filters)) {
-                    this.addBlacklistFilter(filter, blacklistEnabled);
-                }
-            }
-        });
     }
 
     /**
@@ -69,46 +54,6 @@ export class User {
      */
     public static getLevel(): string {
         return this.getInstance().level;
-    }
-
-    /**
-     * Returns the parsed blacklist filters
-     * @returns PostFilter[] A array of the users current filters
-     */
-    public static getBlacklist(): Map<string, PostFilter> {
-        return this.getInstance().blacklist;
-    }
-
-    public static getTotalBlacklistMatches(): number {
-        const filtered = new Set<number>();
-        for (const filter of this.getBlacklist().values()) {
-            for (const id of filter.getMatchesIds()) {
-                filtered.add(id);
-            }
-        }
-        return filtered.size;
-    }
-
-    /**
-     * Saves the passed blacklist to the users e6 account
-     * and refreshes the currently visible posts
-     * @param filter the string which should be turned into a PostFilter
-     * @param enabled wether or not the filter should be enabled after creation
-     */
-    public addBlacklistFilter(filter: string, enabled = true): void {
-        let postFilter = this.blacklist.get(filter);
-        if (postFilter === undefined) {
-            postFilter = new PostFilter(filter, enabled);
-            this.blacklist.set(filter, postFilter);
-        }
-        const posts = Post.fetchPosts();
-        for (const post of posts) {
-            postFilter.addPost(post, false);
-        }
-    }
-
-    public removeBlacklistFilter(filter: string): void {
-        this.blacklist.delete(filter);
     }
 
     /**
