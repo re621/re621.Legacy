@@ -26,7 +26,7 @@ import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
 import { CustomFlagger, FlagDefinition } from "../search/CustomFlagger";
 import { InfiniteScroll } from "../search/InfiniteScroll";
 import { SearchUtilities } from "../search/SearchUtilities";
-import { ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
+import { FavSyncState, ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
 import { ForumTracker } from "../subscriptions/ForumTracker";
 import { PoolTracker } from "../subscriptions/PoolTracker";
 import { SubscriptionManager } from "../subscriptions/SubscriptionManager";
@@ -414,6 +414,7 @@ export class SettingsController extends RE6Module {
                             } while (result.length == 320);
 
                             thumbnailEnhancer.setFavCache(cache);
+                            await thumbnailEnhancer.pushSettings("favSyncState", FavSyncState.Finished);
                             status.html(`<i class="far fa-check-circle"></i> Cache reloaded: ${thumbnailEnhancer.getFavCacheSize()} entries`);
 
                             input.prop("disabled", "false");
@@ -424,11 +425,19 @@ export class SettingsController extends RE6Module {
                                     .html(`<i class="fas fa-circle-notch fa-spin"></i> Initializing . . .`)
                                     .attr("id", "favcache-status")
                                     .appendTo(element);
-                                const userData = await User.getCurrentSettings();
-                                if (userData.favorite_count !== thumbnailEnhancer.getFavCacheSize())
+
+                                let state = thumbnailEnhancer.fetchSettings("favSyncState");
+
+                                if (state === FavSyncState.Unknown) {
+                                    const userData = await User.getCurrentSettings();
+                                    state = userData.favorite_count === thumbnailEnhancer.getFavCacheSize() ? FavSyncState.Finished : FavSyncState.Required;
+                                    await thumbnailEnhancer.pushSettings("favSyncState", state);
+                                }
+
+                                if (state === FavSyncState.Required)
                                     $status.html(`
                                         <i class="far fa-times-circle"></i> 
-                                        <span style="color:gold">Reset required</span>: cache integity failed (${thumbnailEnhancer.getFavCacheSize()} / ${userData.favorite_count})
+                                        <span style="color:gold">Reset required</span>: Favorites cache integrity failed)
                                     `);
                                 else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified`)
                             },

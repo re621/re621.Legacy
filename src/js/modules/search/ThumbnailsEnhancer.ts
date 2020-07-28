@@ -19,6 +19,12 @@ export enum ThumbnailClickAction {
     CopyID = "copyid",
 }
 
+export enum FavSyncState {
+    Unknown = 0,
+    Required = 1,
+    Finished = 2,
+}
+
 export class ThumbnailEnhancer extends RE6Module {
 
     private postsWrapper: JQuery<HTMLElement>;      // div#posts Hidden on start to hide page reflows
@@ -46,6 +52,7 @@ export class ThumbnailEnhancer extends RE6Module {
 
             vote: true,
             fav: false,
+            favSyncState: FavSyncState.Unknown,
 
             crop: true,
             cropSize: "150px",
