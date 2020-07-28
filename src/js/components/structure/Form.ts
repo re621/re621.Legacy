@@ -667,12 +667,10 @@ export class Form implements PreparedStructure {
                 case "object": {
                     break;
                 }
-                case "boolean":
-                    options.value = options.value + "";
                 default: {
                     $input
-                        .attr("checked", options.value)
-                        .attr("defval", options.value);
+                        .prop("checked", options.value)
+                        .attr("defval", options.value + "");
                 }
             }
         }
