@@ -108,6 +108,15 @@ class APIEndpoint {
         );
     }
 
+    public async delete(data?: string | APIQuery, delay?: number): Promise<any> {
+        return this.queue.createRequest(this.getParsedPath(), "", "DELETE", this.queryToString(data, true), this.name, this.getNode(), delay).then(
+            (data) => {
+                return Promise.resolve(data);
+            },
+            (error) => { return Promise.reject(error); }
+        );
+    }
+
     /** Returns the endpoint path, accounting for the possible parameter */
     private getParsedPath(): string {
         if (this.param === "") return this.path + (this.extension.length > 0 ? "." + this.extension : "");
@@ -236,7 +245,7 @@ export class E621 {
      * @param data Data to POST
      * @param delay How quickly the next request can be sent, in ms
      */
-    public async createRequest(path: string, query: string, method: "GET" | "POST", requestBody: string, endpoint: string, node: NodeType, delay: number): Promise<any> {
+    public async createRequest(path: string, query: string, method: "GET" | "POST" | "DELETE", requestBody: string, endpoint: string, node: NodeType, delay: number): Promise<any> {
         if (delay === undefined) delay = E621.requestRateLimit;
         else if (delay < 500) delay = 500;
 
@@ -251,7 +260,8 @@ export class E621 {
             mode: "cors"
         };
 
-        if (method === "POST") { requestInfo.body = requestBody + ((requestBody.length > 0) ? "&" : "") + "authenticity_token=" + encodeURIComponent(this.authToken); }
+        if (method === "POST" || method === "DELETE")
+            requestInfo.body = requestBody + ((requestBody.length > 0) ? "&" : "") + "authenticity_token=" + encodeURIComponent(this.authToken);
         query = query + (query.length > 0 ? "&" : "") + "_client=" + encodeURIComponent(window["re621"]["useragent"]);
 
         const entry = new Request(location.origin + "/" + path + "?" + query, requestInfo);
