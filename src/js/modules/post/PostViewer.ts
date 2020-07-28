@@ -3,6 +3,7 @@ import { PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
 
 /**
  * Add various symbols to the tilebar depending on the posts state
@@ -99,9 +100,17 @@ export class PostViewer extends RE6Module {
         $bottomNotices.insertAfter($("#search-box"));
 
         // Listen to favorites button click
-        $("button#add-fav-button").on("click", () => {
-            if (!this.fetchSettings("upvoteOnFavorite")) return;
-            Danbooru.Post.vote(Post.getViewingPost().getId(), 1, true);
+        $("#add-fav-button").on("click", () => {
+            console.log("click1");
+            if (this.fetchSettings("upvoteOnFavorite"))
+                Danbooru.Post.vote(Post.getViewingPost().getId(), 1, true);
+
+            ThumbnailEnhancer.trigger("favorite", { id: this.post.getId(), action: true });
+        });
+
+        $("#remove-fav-button").on("click", () => {
+            console.log("click2");
+            ThumbnailEnhancer.trigger("favorite", { id: this.post.getId(), action: false });
         });
     }
 

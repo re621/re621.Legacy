@@ -24,6 +24,7 @@ export class ModuleController {
                 const moduleInstance = moduleClass.getInstance();
                 this.modules.set(moduleClass.prototype.constructor.name, moduleInstance);
                 await moduleInstance.prepare();
+                await moduleInstance.execute();
                 if (moduleInstance.canInitialize()) {
                     if (moduleInstance.isWaitingForDOM()) {
                         $(() => {

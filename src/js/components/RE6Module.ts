@@ -90,6 +90,9 @@ export class RE6Module {
         this.initialized = false;
     }
 
+    /** Code run regardless of the initialization state */
+    public async execute(): Promise<void> { return; }
+
     /**
      * Returns the module's current state
      * @returns True if the module is enabled, false otherwise

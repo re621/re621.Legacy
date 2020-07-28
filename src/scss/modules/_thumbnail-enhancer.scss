@@ -111,12 +111,21 @@ div.post-preview {
                 margin: 0.125rem 0;
                 border-radius: 6px 0 0 6px;
                 outline: 0;
+                width: 1rem;
+
+                &.score-favorite {
+                    background: #c3a816;
+                }
             }
         }
 
         &.loading div.preview-extras {
             display: none;
         }
+    }
+
+    &[data-is-favorited=true] .post-score-faves {
+        color: #c3a816;
     }
 }
 

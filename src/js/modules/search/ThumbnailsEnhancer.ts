@@ -1,4 +1,5 @@
 import { Danbooru } from "../../components/api/Danbooru";
+import { E621 } from "../../components/api/E621";
 import { XM } from "../../components/api/XM";
 import { PageDefintion } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
@@ -20,10 +21,12 @@ export enum ThumbnailClickAction {
 
 export class ThumbnailEnhancer extends RE6Module {
 
-    private postsWrapper: JQuery<HTMLElement>;
-    private postsLoading: JQuery<HTMLElement>;
+    private postsWrapper: JQuery<HTMLElement>;      // div#posts Hidden on start to hide page reflows
+    private postsLoading: JQuery<HTMLElement>;      // Placeholder with some loading animations
 
-    private postContainer: JQuery<HTMLElement>;
+    private postContainer: JQuery<HTMLElement>;     // Element containing posts - div#page used for compatibility
+
+    private static favoritesList: Set<number>;
 
     private static zoomPaused = false;
 
@@ -115,12 +118,24 @@ export class ThumbnailEnhancer extends RE6Module {
             }
 
             ThumbnailEnhancer.zoomPaused = zoomPaused;
-        })
+        });
     }
 
     public destroy(): void {
         super.destroy();
         ThumbnailEnhancer.off("pauseHoverActions.main")
+    }
+
+    public async execute(): Promise<void> {
+        ThumbnailEnhancer.favoritesList = new Set<number>(JSON.parse(window.localStorage.getItem("re621.favorites") || "[]"));
+        console.log(ThumbnailEnhancer.favoritesList);
+
+        ThumbnailEnhancer.on("favorite.main", (event, data) => {
+            ThumbnailEnhancer.favoritesList = new Set<number>(JSON.parse(window.localStorage.getItem("re621.favorites") || "[]"));
+            if (data.action) ThumbnailEnhancer.favoritesList.add(data.id);
+            else ThumbnailEnhancer.favoritesList.delete(data.id);
+            window.localStorage.setItem("re621.favorites", JSON.stringify(Array.from(ThumbnailEnhancer.favoritesList)));
+        });
     }
 
     /**
@@ -237,6 +252,10 @@ export class ThumbnailEnhancer extends RE6Module {
             .html(`<i class="fas fa-circle-notch fa-2x fa-spin"></i>`)
             .appendTo($link);
 
+        // Favorite state
+        let isFavorited = ThumbnailEnhancer.favoritesList.has(postID);
+        $article.attr("data-is-favorited", isFavorited + "");
+
         // States and Ribbons
         $picture.addClass("picture-container");
 
@@ -299,31 +318,51 @@ export class ThumbnailEnhancer extends RE6Module {
         const $voteUp = $("<button>")           // Upvote
             .attr("href", "#")
             .html(`<i class="far fa-thumbs-up"></i>`)
-            .addClass("button score-neutral voteButton post-vote-up-" + postID)
+            .addClass("button voteButton post-vote-up-" + postID + " score-neutral")
             .appendTo($voteBox);
         const $voteDown = $("<button>")        // Downvote
             .attr("href", "#")
             .html(`<i class="far fa-thumbs-down"></i>`)
-            .addClass("button score-neutral voteButton post-vote-down-" + postID)
+            .addClass("button voteButton post-vote-down-" + postID + " score-neutral")
             .appendTo($voteBox);
         const $favorite = $("<button>")        // Favorite
             .attr("href", "#")
             .html(`<i class="far fa-star"></i>`)
-            .addClass("button score-neutral voteButton")
-            .css("display", "none")
+            .addClass("button voteButton post-favorite-" + postID + " " + (isFavorited ? "score-favorite" : "score-neutral"))
             .appendTo($voteBox);
 
+        let buttonBlock = false;
         $voteUp.click((event) => {
             event.preventDefault();
+            if (buttonBlock) return;
+            buttonBlock = true;
             Danbooru.Post.vote(postID, 1);
+            buttonBlock = false;
         });
         $voteDown.click((event) => {
             event.preventDefault();
+            if (buttonBlock) return;
+            buttonBlock = true;
             Danbooru.Post.vote(postID, -1);
+            buttonBlock = false;
         });
-        $favorite.click((event) => {
+        $favorite.click(async (event) => {
             event.preventDefault();
-            alert("sike, it does not work");
+            if (buttonBlock) return;
+            buttonBlock = true;
+            if (isFavorited) {
+                isFavorited = false;
+                E621.Favorites.find(postID).delete();
+                ThumbnailEnhancer.trigger("favorite", { id: postID, action: false });
+                $favorite.addClass("score-neutral").removeClass("score-favorite");
+            } else {
+                isFavorited = true;
+                E621.Favorites.post({ "post_id": postID });
+                ThumbnailEnhancer.trigger("favorite", { id: postID, action: true });
+                $favorite.addClass("score-favorite").removeClass("score-neutral");
+            }
+            $article.attr("data-is-favorited", isFavorited + "");
+            buttonBlock = false;
         })
 
 
