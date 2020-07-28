@@ -287,9 +287,23 @@ export class Form implements PreparedStructure {
             .appendTo($element);
 
         if (options.value !== undefined) {
-            $input
-                .val(options.value)
-                .attr("defval", options.value);
+            switch (typeof options.value) {
+                case "function": {
+                    options.value($input);
+                    break;
+                }
+                case "object": {
+                    $input.val(options.value.text());
+                    break;
+                }
+                case "boolean":
+                    options.value = options.value + "";
+                default: {
+                    $input
+                        .val(options.value)
+                        .attr("defval", options.value);
+                }
+            }
         }
 
         if (options.pattern) { $input.attr("pattern", options.pattern); }
@@ -331,8 +345,27 @@ export class Form implements PreparedStructure {
                 "readonly": "",
             })
             .addClass("bg-section color-text")
-            .val(options.value)
             .appendTo($element);
+
+        if (options.value !== undefined) {
+            switch (typeof options.value) {
+                case "function": {
+                    options.value($input);
+                    break;
+                }
+                case "object": {
+                    $input.val(options.value.text());
+                    break;
+                }
+                case "boolean":
+                    options.value = options.value + "";
+                default: {
+                    $input
+                        .val(options.value)
+                        .attr("defval", options.value);
+                }
+            }
+        }
 
         const $copybutton = $("<button>")
             .attr({
@@ -377,8 +410,27 @@ export class Form implements PreparedStructure {
                 "readonly": "",
             })
             .addClass("bg-section color-text")
-            .val(options.value)
             .appendTo($element);
+
+        if (options.value !== undefined) {
+            switch (typeof options.value) {
+                case "function": {
+                    options.value($input);
+                    break;
+                }
+                case "object": {
+                    $input.val(options.value.text());
+                    break;
+                }
+                case "boolean":
+                    options.value = options.value + "";
+                default: {
+                    $input
+                        .val(options.value)
+                        .attr("defval", options.value);
+                }
+            }
+        }
 
         const $recordbutton = $("<button>")
             .attr({
@@ -474,8 +526,27 @@ export class Form implements PreparedStructure {
                 "name": options.name,
             })
             .css("display", "none")
-            .val(options.value)
             .appendTo($element);
+
+        if (options.value !== undefined) {
+            switch (typeof options.value) {
+                case "function": {
+                    options.value($input);
+                    break;
+                }
+                case "object": {
+                    $input.val(options.value.text());
+                    break;
+                }
+                case "boolean":
+                    options.value = options.value + "";
+                default: {
+                    $input
+                        .val(options.value)
+                        .attr("defval", options.value);
+                }
+            }
+        }
 
         const $selectContainer = $("<div>")
             .addClass("icon-picker")
@@ -534,8 +605,28 @@ export class Form implements PreparedStructure {
                 "type": options.type ? options.type : "button",
             })
             .addClass("button btn-neutral")
-            .html(options.value)
             .appendTo($element);
+
+        if (options.value !== undefined) {
+            switch (typeof options.value) {
+                case "function": {
+                    options.value($input);
+                    break;
+                }
+                case "object": {
+                    $input.append(options.value);
+                    break;
+                }
+                case "number":
+                case "boolean":
+                    options.value = options.value + "";
+                default: {
+                    $input
+                        .html(options.value)
+                        .attr("defval", options.value);
+                }
+            }
+        }
 
         if (changed !== undefined)
             $input.on("click", (event) => {
@@ -565,8 +656,26 @@ export class Form implements PreparedStructure {
                 "type": "checkbox",
             })
             .addClass("switch")
-            .attr("checked", options.value)
             .appendTo($element);
+
+        if (options.value !== undefined) {
+            switch (typeof options.value) {
+                case "function": {
+                    options.value($input);
+                    break;
+                }
+                case "object": {
+                    break;
+                }
+                case "boolean":
+                    options.value = options.value + "";
+                default: {
+                    $input
+                        .attr("checked", options.value)
+                        .attr("defval", options.value);
+                }
+            }
+        }
 
         $("<label>")
             .attr("for", options.name)
@@ -614,9 +723,23 @@ export class Form implements PreparedStructure {
             $("<option>").val(key).text(content[key]).appendTo($input);
         }
         if (options.value !== undefined) {
-            $input
-                .val(options.value)
-                .attr("defval", options.value);
+            switch (typeof options.value) {
+                case "function": {
+                    options.value($input);
+                    break;
+                }
+                case "object": {
+                    $input.val(options.value.text());
+                    break;
+                }
+                case "boolean":
+                    options.value = options.value + "";
+                default: {
+                    $input
+                        .val(options.value)
+                        .attr("defval", options.value);
+                }
+            }
         }
 
         if (changed !== undefined)
@@ -656,8 +779,28 @@ export class Form implements PreparedStructure {
         const $element = FormUtils
             .makeInputWrapper(options.label, options.wrapper, options.width)
             .addClass("text-div")
-            .attr("id", options.name)
-            .append(options.value);
+            .attr("id", options.name);
+
+        if (options.value !== undefined) {
+            switch (typeof options.value) {
+                case "function": {
+                    options.value($element);
+                    break;
+                }
+                case "object": {
+                    $element.append(options.value.text());
+                    break;
+                }
+                case "number":
+                case "boolean":
+                    options.value = options.value + "";
+                default: {
+                    $element
+                        .html(options.value)
+                        .attr("defval", options.value);
+                }
+            }
+        }
 
         return new FormElement($element, undefined, $label);
     }
@@ -831,7 +974,7 @@ interface SectionOptions {
 interface ElementOptions {
     name?: string;
     label?: string;
-    value?: any;
+    value?: string | boolean | number | JQuery<HTMLElement> | ElementInputValue;
     width?: number;
     wrapper?: string;
 }
@@ -840,6 +983,8 @@ interface InputElementOptions extends ElementOptions {
     required?: boolean;
     pattern?: string;
 }
+
+type ElementInputValue = (element: JQuery<HTMLElement>) => void;
 
 type FormSubmitEvent = (values: any, form: Form) => void;
 type InputChangeEvent = (value: any, input: JQuery<HTMLElement>) => void;
