@@ -45,6 +45,7 @@ export class ThumbnailEnhancer extends RE6Module {
             zoomContextual: true,
 
             vote: true,
+            fav: false,
 
             crop: true,
             cropSize: "150px",
@@ -128,7 +129,6 @@ export class ThumbnailEnhancer extends RE6Module {
 
     public async execute(): Promise<void> {
         ThumbnailEnhancer.favoritesList = new Set<number>(JSON.parse(window.localStorage.getItem("re621.favorites") || "[]"));
-        console.log(ThumbnailEnhancer.favoritesList);
 
         ThumbnailEnhancer.on("favorite.main", (event, data) => {
             ThumbnailEnhancer.favoritesList = new Set<number>(JSON.parse(window.localStorage.getItem("re621.favorites") || "[]"));
@@ -216,6 +216,20 @@ export class ThumbnailEnhancer extends RE6Module {
      */
     public toggleRelationRibbons(state = true): void {
         this.postContainer.attr("data-thumb-rel-ribbons", state + "");
+    }
+
+    public getFavCache(): Set<number> {
+        return ThumbnailEnhancer.favoritesList;
+    }
+
+    public setFavCache(cache: Set<number>): void {
+        ThumbnailEnhancer.favoritesList = cache;
+        window.localStorage.setItem("re621.favorites", JSON.stringify(Array.from(ThumbnailEnhancer.favoritesList)));
+    }
+
+    /** Returns the size of the favorites cache */
+    public getFavCacheSize(): number {
+        return ThumbnailEnhancer.favoritesList.size;
     }
 
     /**

@@ -101,7 +101,6 @@ export class PostViewer extends RE6Module {
 
         // Listen to favorites button click
         $("#add-fav-button").on("click", () => {
-            console.log("click1");
             if (this.fetchSettings("upvoteOnFavorite"))
                 Danbooru.Post.vote(Post.getViewingPost().getId(), 1, true);
 
@@ -109,7 +108,6 @@ export class PostViewer extends RE6Module {
         });
 
         $("#remove-fav-button").on("click", () => {
-            console.log("click2");
             ThumbnailEnhancer.trigger("favorite", { id: this.post.getId(), action: false });
         });
     }

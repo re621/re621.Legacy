@@ -1,5 +1,6 @@
 import { E621 } from "../../components/api/E621";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
+import { APIPost } from "../../components/api/responses/APIPost";
 import { XM } from "../../components/api/XM";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { User } from "../../components/data/User";
@@ -382,6 +383,58 @@ export class SettingsController extends RE6Module {
                             thumbnailEnhancer.toggleHoverVote(data);
                         }
                     ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: thumbnailEnhancer.fetchSettings("fav"),
+                            label: "<b>Favorite Button</b><br />Adds a +favorite button when hovering over a thumbnail",
+                            width: 3,
+                        },
+                        async (data) => {
+                            $("#optgeneral-gencollapse-thumb-favcache").toggleClass("display-none", !data);
+                            await thumbnailEnhancer.pushSettings("vote", data);
+                        }
+                    ),
+                    Form.section({ name: "favcache", columns: 3, width: 3, wrapper: thumbnailEnhancer.fetchSettings("fav") ? undefined : "display-none" }, [
+                        Form.subheader("Reset Favorites Cache", "", 2),
+                        Form.button({ name: "reset", value: "Reset", }, async (data, input) => {
+                            input.prop("disabled", "true");
+
+                            const status = $("#favcache-status").html(`<i class="fas fa-circle-notch fa-spin"></i> Processing favorites`);
+                            const cache = new Set<number>();
+                            let result: APIPost[] = [],
+                                page = 0;
+
+                            do {
+                                page++;
+                                result = await E621.Posts.get<APIPost>({ tags: `fav:${User.getUsername()} status:any`, page: page, limit: 320 }, 500);
+                                status.html(`<i class="fas fa-circle-notch fa-spin"></i> Processing favorites: ${cache.size} results`);
+                                for (const entry of result) cache.add(entry.id);
+                            } while (result.length == 320);
+
+                            thumbnailEnhancer.setFavCache(cache);
+                            status.html(`<i class="far fa-check-circle"></i> Cache reloaded: ${thumbnailEnhancer.getFavCacheSize()} entries`);
+
+                            input.prop("disabled", "false");
+                        }),
+                        Form.div({
+                            value: async (element) => {
+                                const $status = $("<div>")
+                                    .html(`<i class="fas fa-circle-notch fa-spin"></i> Initializing . . .`)
+                                    .attr("id", "favcache-status")
+                                    .appendTo(element);
+                                const userData = await User.getCurrentSettings();
+                                if (userData.favorite_count !== thumbnailEnhancer.getFavCacheSize())
+                                    $status.html(`
+                                        <i class="far fa-times-circle"></i> 
+                                        <span style="color:gold">Reset required</span>: cache integity failed (${thumbnailEnhancer.getFavCacheSize()} / ${userData.favorite_count})
+                                    `);
+                                else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified`)
+                            },
+                            width: 3,
+                        }),
+                    ]),
                     Form.spacer(3),
 
                     // Ribbons
