@@ -223,7 +223,7 @@ export class SubscriptionManager extends RE6Module {
 
             if (await this.updateRequired()) SubscriptionManager.trigger("update");
             else SubscriptionManager.trigger("timerRefresh");
-        }, TIME_PERIOD.MINUTE);
+        }, Util.Time.MINUTE);
     }
 
     /**
@@ -258,7 +258,7 @@ export class SubscriptionManager extends RE6Module {
 
                 Form.div({ value: "Update Interval" }),
                 Form.select(
-                    { value: this.fetchSettings("updateInterval") / TIME_PERIOD.HOUR },
+                    { value: this.fetchSettings("updateInterval") / Util.Time.HOUR },
                     {
                         // "0.1": "6 minutes",
                         "0.5": "30 minutes",
@@ -268,7 +268,7 @@ export class SubscriptionManager extends RE6Module {
                         "24": "24 hours",
                     },
                     async (data) => {
-                        await this.pushSettings("updateInterval", parseFloat(data) * TIME_PERIOD.HOUR);
+                        await this.pushSettings("updateInterval", parseFloat(data) * Util.Time.HOUR);
                         SubscriptionManager.trigger("timerRefresh");
                     }
                 ),
@@ -277,7 +277,7 @@ export class SubscriptionManager extends RE6Module {
 
                 Form.div({ value: "Cache Expiration" }),
                 Form.select(
-                    { value: this.fetchSettings("cacheMaxAge") / TIME_PERIOD.WEEK },
+                    { value: this.fetchSettings("cacheMaxAge") / Util.Time.WEEK },
                     {
                         "0": "Never",
                         "7": "1 week",
@@ -286,7 +286,7 @@ export class SubscriptionManager extends RE6Module {
                         "24": "6 months",
                     },
                     async (data) => {
-                        await this.pushSettings("cacheMaxAge", parseInt(data) * TIME_PERIOD.WEEK);
+                        await this.pushSettings("cacheMaxAge", parseInt(data) * Util.Time.WEEK);
                         SubscriptionManager.trigger("timerRefresh");
                     }
                 ),
@@ -852,11 +852,3 @@ interface TrackerData {
     /** Tab contents */
     content?: JQuery<HTMLElement>;
 }
-
-enum TIME_PERIOD {
-    SECOND = 1000,
-    MINUTE = 60 * TIME_PERIOD.SECOND,
-    HOUR = 60 * TIME_PERIOD.MINUTE,
-    DAY = 24 * TIME_PERIOD.HOUR,
-    WEEK = 7 * TIME_PERIOD.DAY,
-};

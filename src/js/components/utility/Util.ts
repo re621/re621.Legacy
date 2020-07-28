@@ -1,11 +1,21 @@
 import { XM } from "../api/XM";
 
+enum TIME_PERIOD {
+    SECOND = 1000,
+    MINUTE = 60 * TIME_PERIOD.SECOND,
+    HOUR = 60 * TIME_PERIOD.MINUTE,
+    DAY = 24 * TIME_PERIOD.HOUR,
+    WEEK = 7 * TIME_PERIOD.DAY,
+};
+
 /**
  * Common utilities used in other modules
  */
 export class Util {
 
     private static uniqueIDs: string[] = [];
+
+    public static Time = TIME_PERIOD;
 
     /**
      * Converts time from absolute format to relative (i.e. "5 minutes ago")
