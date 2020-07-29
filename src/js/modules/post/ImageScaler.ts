@@ -3,7 +3,6 @@ import { PageDefintion } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { Form } from "../../components/structure/Form";
 
 /**
  * Handles scaling post images in an intelligent way
@@ -49,29 +48,27 @@ export class ImageScaler extends RE6Module {
         const resizeButtonContainer = $("#image-resize-cycle").empty();
         this.setImageSize(this.fetchSettings("size"));
 
-        const resizeForm = new Form({ name: "resize-image", columns: 2, width: 2 },
-            [
-                Form.select(
-                    { name: "scale", value: this.fetchSettings("size") },
-                    {
-                        "sample": "Sample",
-                        "fit-vertical": "Fill Screen",
-                        "fit-horizontal": "Fit Horizontally",
-                        "original": "Original",
-                    }
-                ),
-                Form.div({ value: `<a href="` + this.post.getImageURL() + `" class="button btn-neutral" id="fullsize-image">Fullscreen</a>` }),
-            ]
-        );
+        this.resizeSelector = $("<select>")
+            .html(`
+                <option value="sample">Sample</option>
+                <option value="fit-vertical">Fill Screen</option>
+                <option value="fit-horizontal">Fit Horizontally</option>
+                <option value="original">Original</option>
+            `)
+            .val(this.fetchSettings("size"))
+            .addClass("button btn-neutral")
+            .appendTo(resizeButtonContainer)
+            .change(async (event, save) => {
+                const size = $(event.target).val() + "";
+                this.setImageSize(size);
+                if (save !== false) await this.pushSettings("size", size);
+            });
 
-        resizeButtonContainer.append(resizeForm.render());
-        this.resizeSelector = resizeForm.getInputList().get("scale");
-
-        this.resizeSelector.change(async (event, save) => {
-            const size = $(event.target).val() + "";
-            this.setImageSize(size);
-            if (save !== false) await this.pushSettings("size", size);
-        });
+        $("<a>")
+            .attr("href", this.post.getImageURL())
+            .addClass("button btn-neutral")
+            .html("Fullscreen")
+            .appendTo(resizeButtonContainer);
 
         this.image.click(async () => {
             if (!this.fetchSettings("clickScale") || await Danbooru.Note.TranslationMode.active()) return;

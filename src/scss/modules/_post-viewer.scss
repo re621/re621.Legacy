@@ -11,46 +11,31 @@ div#image-and-nav {
 
 // Image Toolbar
 section#image-extra-controls {
-    display: inline-grid !important;
-    grid-template-columns: max-content max-content max-content max-content max-content auto;
-    margin: 0.5rem 0;
-    grid-column-gap: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0.25rem 0;
 
-    div {
-        margin: 0;
+    & > div {
+        margin: 0.25rem 0.5rem 0.25rem 0;
+        &:last-child { margin-right: 0; }
+    }
+
+    div.image-vote-buttons > a > span {
+        font-size: 1rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    div#image-add-links > a {
+        margin-right: 0.5rem;
+        &:last-child { margin-right: 0; }
     }
 
     div#image-resize-cycle {
-        form.grid-form {
-            width: unset;
-            margin: 0.25rem 0;
+        select {
+            margin-right: 0.5rem;
+            vertical-align: unset;
+            cursor: pointer;
         }
-    }
-
-    div#image-add-links {
-        margin-left: 0.25rem;
-
-        a {
-            margin: 0.25rem;
-        }
-    }
-
-    div#image-score-links,
-    div.fav-buttons>button,
-    div.fav-buttons>button::after,
-    div#image-download-link a,
-    div#image-add-links a,
-    div#image-toggle-notes a,
-    div#image-resize-cycle select,
-    div#image-resize-cycle a {
-        display: inline-flex;
-        align-items: center;
-        height: 2rem;
-
-        font-size: 1rem;
-        padding: 0rem 0.5rem !important;
-        border-radius: 4px;
-        line-height: 1.25em;
     }
 }
 
