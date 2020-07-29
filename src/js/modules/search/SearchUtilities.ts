@@ -113,24 +113,19 @@ export class SearchUtilities extends RE6Module {
      * Records which tag categories the user has collapsed.
      */
     private async collapseTagCategories(): Promise<void> {
-        let storedCats: string[] = await this.fetchSettings("categoryData", true);
-        $("section#tag-list .tag-list-header").each((index, element) => {
+        let storedCats = new Set<string>(await this.fetchSettings<string[]>("categoryData", true));
+        for (const element of $("section#tag-list .tag-list-header").get()) {
             const $header = $(element),
                 cat = $header.attr("data-category");
-            if (storedCats.indexOf(cat) !== -1) $header.get(0).click();
+            if (storedCats.has(cat)) $header.get(0).click();
 
             $header.on("click.danbooru", async () => {
-                storedCats = await this.fetchSettings("categoryData", true);
-                if ($header.hasClass("hidden-category")) {
-                    storedCats.push(cat);
-                } else {
-                    const index = storedCats.indexOf(cat);
-                    if (index !== -1) storedCats.splice(index, 1);
-                }
-                await this.pushSettings("categoryData", storedCats);
+                storedCats = new Set<string>(await this.fetchSettings<string[]>("categoryData", true));
+                if ($header.hasClass("hidden-category")) storedCats.add(cat);
+                else storedCats.delete(cat);
+                await this.pushSettings("categoryData", Array.from(storedCats));
             });
-        });
-
+        }
     }
 
     /** Sets the focus on the search bar */
