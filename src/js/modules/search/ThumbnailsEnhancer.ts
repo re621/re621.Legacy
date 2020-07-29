@@ -379,7 +379,7 @@ export class ThumbnailEnhancer extends RE6Module {
             buttonBlock = true;
             if (isFavorited) {
                 isFavorited = false;
-                E621.Favorites.find(postID).delete();
+                E621.Favorite.id(postID).delete();
                 ThumbnailEnhancer.trigger("favorite", { id: postID, action: false });
                 $favorite.addClass("score-neutral").removeClass("score-favorite");
             } else {

@@ -7,50 +7,52 @@ import { Debug } from "../utility/Debug";
 
 // Don't forget to update the name in the E621 aliases below
 const ENDPOINT_DEFS: EndpointDefinition[] = [
-    { name: "posts", path: "posts", node: { list: "posts", id: "post" } },
-    { name: "tags", path: "tags", },
-    { name: "tag_aliases", path: "tag_aliases", },
-    { name: "tag_implications", path: "tag_implications", },
+    { name: "posts", path: "posts.json", node: "posts" },
+    { name: "post", path: "posts/%ID%.json", node: "post" },
+    { name: "post_votes", path: "posts/%ID%/votes.json" },
+    { name: "tags", path: "tags.json" },
+    { name: "tag", path: "tags/%ID%.json" },
+    { name: "tag_aliases", path: "tag_aliases.json" },
+    { name: "tag_implications", path: "tag_implications.json" },
 
-    { name: "notes", path: "notes", },
-    { name: "favorites", path: "favorites", node: { list: "posts" } },
-    { name: "pools", path: "pools", },
-    { name: "sets", path: "post_sets", },
+    { name: "notes", path: "notes.json" },
+    { name: "favorites", path: "favorites.json", node: "posts" },
+    { name: "favorite", path: "favorites/%ID%.json" },
+    { name: "pools", path: "pools.json" },
+    { name: "pool", path: "pools/%ID%.json" },
+    { name: "sets", path: "post_sets.json" },
 
-    { name: "users", path: "users", },
-    { name: "blips", path: "blips", },
-    { name: "wiki_pages", path: "wiki_pages", },
+    { name: "users", path: "users.json" },
+    { name: "user", path: "user/%ID%.json" },
+    { name: "blips", path: "blips.json" },
+    { name: "wiki_pages", path: "wiki_pages.json" },
 
-    { name: "comments", path: "comments", },
-    { name: "forum_posts", path: "forum_posts", },
-    { name: "forum_topics", path: "forum_topics", },
+    { name: "comments", path: "comments.json" },
+    { name: "comment", path: "comment/%ID%.json" },
+    { name: "forum_posts", path: "forum_posts.json" },
+    { name: "forum_post", path: "forum_posts/%ID%.json" },
+    { name: "forum_topics", path: "forum_topics.json" },
+    { name: "forum_topic", path: "forum_topics/%ID%.json" },
 
-    { name: "dtext_preview", path: "dtext_preview", extension: "", },
+    { name: "dtext_preview", path: "dtext_preview" },
 ];
 
 class APIEndpoint {
 
     private queue: E621;
     private path: string;
-    private extension: string;
 
     private name: string;
-    private nodeDef: NodeDefinition;
-    private nodeCur: NodeType;
+    private node: string;
 
-    private param = "";
+    private param: string;
 
     public constructor(queue: E621, endpoint: EndpointDefinition) {
         this.queue = queue;
         this.path = endpoint.path;
 
-        if (endpoint.extension === undefined) this.extension = "json";
-        else if (endpoint.extension.length > 0) this.extension = endpoint.extension;
-        else this.extension = "";
-
         this.name = endpoint.name;
-        this.nodeDef = endpoint.node === undefined ? {} : endpoint.node;
-        this.nodeCur = "list";
+        this.node = endpoint.node;
     }
 
     /**
@@ -58,9 +60,8 @@ class APIEndpoint {
      * For example, to GET /users/12345.json, use E621.User.spec("12345").get(...);
      * @param param 
      */
-    public find(param: any): APIEndpoint {
-        this.param = encodeURIComponent(param);
-        this.nodeCur = "id";
+    public id(param: string | number): APIEndpoint {
+        this.param = param + "";
         return this;
     }
 
@@ -70,7 +71,7 @@ class APIEndpoint {
      * @param delay Optional delay override, in milliseconds
      */
     public async get<T extends APIResponse>(query?: string | APIQuery, delay?: number): Promise<T[]> {
-        return this.queue.createRequest(this.getParsedPath(), this.queryToString(query), "GET", "", this.name, this.getNode(), delay).then(
+        return this.queue.createRequest(this.getParsedPath(), this.queryToString(query), "GET", "", this.name, this.node, delay).then(
             (response) => {
                 const result = this.formatData<T>(response[0], response[2]);
                 return Promise.resolve(result);
@@ -100,7 +101,7 @@ class APIEndpoint {
      * @param delay Optional delay override, in milliseconds
      */
     public async post(data?: string | APIQuery, delay?: number): Promise<any> {
-        return this.queue.createRequest(this.getParsedPath(), "", "POST", this.queryToString(data, true), this.name, this.getNode(), delay).then(
+        return this.queue.createRequest(this.getParsedPath(), "", "POST", this.queryToString(data, true), this.name, this.node, delay).then(
             (data) => {
                 return Promise.resolve(data);
             },
@@ -109,7 +110,7 @@ class APIEndpoint {
     }
 
     public async delete(data?: string | APIQuery, delay?: number): Promise<any> {
-        return this.queue.createRequest(this.getParsedPath(), "", "DELETE", this.queryToString(data, true), this.name, this.getNode(), delay).then(
+        return this.queue.createRequest(this.getParsedPath(), "", "DELETE", this.queryToString(data, true), this.name, this.node, delay).then(
             (data) => {
                 return Promise.resolve(data);
             },
@@ -119,10 +120,12 @@ class APIEndpoint {
 
     /** Returns the endpoint path, accounting for the possible parameter */
     private getParsedPath(): string {
-        if (this.param === "") return this.path + (this.extension.length > 0 ? "." + this.extension : "");
-        const newPath = this.path + "/" + this.param + (this.extension.length > 0 ? "." + this.extension : "");
-        this.param = "";
-        return newPath;
+        if (this.param) {
+            const output = this.path.replace(/%ID%/g, this.param);
+            this.param = undefined;     // Clear the param to avoid contaminating the next query
+            return output;
+        }
+        return this.path;
     }
 
     /** Converts APIQuery into a raw string */
@@ -135,7 +138,6 @@ class APIEndpoint {
 
         const queryString = [];
         keys.forEach((key) => {
-            if (key.includes("search")) this.nodeCur = "search";
             let value = query[key];
             if (Array.isArray(value)) value = (value as string[]).join("+");
 
@@ -149,22 +151,12 @@ class APIEndpoint {
     }
 
     /**
-     * Returns the current node type, then resets it to the default state, to avoid conflicts.
-     */
-    private getNode(): NodeType {
-        const node = this.nodeCur;
-        this.nodeCur = "list";
-        return node;
-    }
-
-    /**
      * Returns the correct data node depending on the endpoint's definition and parameter
      * @param data Data to select the node from
      * @param hasParam Whether or not the endpoint had a parameter
      */
-    private formatData<T extends APIResponse>(data: any, node: NodeType): T[] {
-        const selectedNode = this.nodeDef[node];
-        if (selectedNode !== undefined && selectedNode !== "") data = data[selectedNode];
+    private formatData<T extends APIResponse>(data: any, node: string): T[] {
+        if (node !== undefined) data = data[node];
 
         if (Array.isArray(data)) return data as T[];
         else return [data as T];
@@ -196,25 +188,34 @@ export class E621 {
     private endpoints = {};
 
     // Endpoint Aliases
-    public static Posts: APIEndpoint = E621.getEndpoint("posts");
-    public static Tags: APIEndpoint = E621.getEndpoint("tags");
-    public static TagAliases: APIEndpoint = E621.getEndpoint("tag_aliases");
-    public static TagImplications: APIEndpoint = E621.getEndpoint("tag_implications");
+    public static Posts = E621.getEndpoint("posts");
+    public static Post = E621.getEndpoint("post");
+    public static PostVotes = E621.getEndpoint("post_votes");
+    public static Tags = E621.getEndpoint("tags");
+    public static Tag = E621.getEndpoint("tag");
+    public static TagAliases = E621.getEndpoint("tag_aliases");
+    public static TagImplications = E621.getEndpoint("tag_implications");
 
-    public static Notes: APIEndpoint = E621.getEndpoint("notes");
-    public static Favorites: APIEndpoint = E621.getEndpoint("favorites");
-    public static Pools: APIEndpoint = E621.getEndpoint("pools");
-    public static Sets: APIEndpoint = E621.getEndpoint("sets");
+    public static Notes = E621.getEndpoint("notes");
+    public static Favorites = E621.getEndpoint("favorites");
+    public static Favorite = E621.getEndpoint("favorite");
+    public static Pools = E621.getEndpoint("pools");
+    public static Pool = E621.getEndpoint("pool");
+    public static Sets = E621.getEndpoint("sets");
 
-    public static Users: APIEndpoint = E621.getEndpoint("users");
-    public static Blips: APIEndpoint = E621.getEndpoint("blips");
-    public static Wiki: APIEndpoint = E621.getEndpoint("wiki_pages");
+    public static Users = E621.getEndpoint("users");
+    public static User = E621.getEndpoint("user");
+    public static Blips = E621.getEndpoint("blips");
+    public static Wiki = E621.getEndpoint("wiki_pages");
 
-    public static Comments: APIEndpoint = E621.getEndpoint("comments");
-    public static ForumPosts: APIEndpoint = E621.getEndpoint("forum_posts");
-    public static ForumTopics: APIEndpoint = E621.getEndpoint("forum_topics");
+    public static Comments = E621.getEndpoint("comments");
+    public static Comment = E621.getEndpoint("comment");
+    public static ForumPosts = E621.getEndpoint("forum_posts");
+    public static ForumPost = E621.getEndpoint("forum_post");
+    public static ForumTopics = E621.getEndpoint("forum_topics");
+    public static ForumTopic = E621.getEndpoint("forum_topic");
 
-    public static DTextPreview: APIEndpoint = E621.getEndpoint("dtext_preview");
+    public static DTextPreview = E621.getEndpoint("dtext_preview");
 
     /** Constructor - should be kept private */
     private constructor() {
@@ -245,7 +246,7 @@ export class E621 {
      * @param data Data to POST
      * @param delay How quickly the next request can be sent, in ms
      */
-    public async createRequest(path: string, query: string, method: "GET" | "POST" | "DELETE", requestBody: string, endpoint: string, node: NodeType, delay: number): Promise<any> {
+    public async createRequest(path: string, query: string, method: "GET" | "POST" | "DELETE", requestBody: string, endpoint: string, node: string, delay: number): Promise<any> {
         if (delay === undefined) delay = E621.requestRateLimit;
         else if (delay < 500) delay = 500;
 
@@ -332,8 +333,8 @@ export class E621 {
     }
 }
 
-/** Describes an API endpoint */
 interface EndpointDefinition {
+
     /**
      * **name** - irrelevant, as long as it's unique  
      * ex. posts, forum_posts, comments, etc
@@ -342,7 +343,9 @@ interface EndpointDefinition {
 
     /**
      * **path** - endpoint path, without origin or extension  
-     * ex. posts, forum_posts, comments, etc.
+     * ex. posts.json, forum_posts.json, comments.json, etc.  
+     * May include %ID% that is replaced by a user-provided variable.
+     * ex. posts/%ID%.json
      */
     path: string;
 
@@ -350,28 +353,9 @@ interface EndpointDefinition {
      * **node** - defined special cases for endpoint nodes  
      * Mainly used to get rid of the wrapper around posts results
      */
-    node?: NodeDefinition;
+    node?: string;
 
-    /**
-     * **extension** - endpoint extension, usually `json`.  
-     * Leave blank for endpoints with no extension, like dtext_preview
-     */
-    extension?: string;
 }
-
-/**
- * Specifies which node to look for in various situations.  
- * - list: default, normal output
- * - id: usage of find()
- * - search: usage of search[] in a query
- */
-interface NodeDefinition {
-    list?: string;
-    id?: string;
-    search?: string;
-}
-
-type NodeType = "list" | "id" | "search";
 
 /**
  * Any number of query strings to be passed to the endpoint.
@@ -396,5 +380,5 @@ interface QueueItem {
     endpoint: string;
 
     /** Whether or not the endpoint had parameters */
-    node: NodeType;
+    node: string;
 }

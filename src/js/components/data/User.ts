@@ -60,7 +60,7 @@ export class User {
      * @returns the users e6 site settings
      */
     public static async getCurrentSettings(): Promise<APICurrentUser> {
-        return E621.Users.find(this.getUserID()).first<APICurrentUser>().then((response) => {
+        return E621.User.id(this.getUserID()).first<APICurrentUser>().then((response) => {
             return Promise.resolve(response);
         });
     }
@@ -74,7 +74,7 @@ export class User {
         for (const key of Object.keys(data)) {
             json["user[" + key + "]"] = data[key];
         }
-        await E621.Users.find(this.getUserID()).post(json);
+        await E621.User.id(this.getUserID()).post(json);
     }
 
     public static getInstance(): User {

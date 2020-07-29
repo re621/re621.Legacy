@@ -324,7 +324,7 @@ export class TinyAlias extends RE6Module {
         };
 
         // First data query
-        let jsonData = await E621.Tags.find(tag).get<APITag>("", 500);
+        let jsonData = await E621.Tag.id(tag).get<APITag>("", 500);
         if (jsonData.length == 0 || jsonData[0].name === "invalid_tag") {
             result.isInvalid = true;
             return result;
@@ -345,7 +345,7 @@ export class TinyAlias extends RE6Module {
             }
 
             // Getting alias data
-            jsonData = await E621.Tags.find(encodeURIComponent(result.realName)).get<APITag>("", 500);
+            jsonData = await E621.Tag.id(encodeURIComponent(result.realName)).get<APITag>("", 500);
             result.count = jsonData[0].post_count;
         }
 
