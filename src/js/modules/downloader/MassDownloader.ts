@@ -100,7 +100,7 @@ export class MassDownloader extends RE6Module {
             .appendTo(this.section);
 
 
-        this.container = $("div#posts-container")
+        this.container = $("#posts-container")
             .selectable({
                 autoRefresh: false,
                 filter: "article.post-preview",

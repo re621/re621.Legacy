@@ -91,7 +91,7 @@ export class PostViewer extends RE6Module {
                 event.preventDefault();
                 this.toggleNotes();
             });
-        $("div#note-container")
+        $("#note-container")
             .css("display", "")
             .attr("data-hidden", this.fetchSettings("hideNotes"));
 
@@ -148,10 +148,10 @@ export class PostViewer extends RE6Module {
             hideNotes = module.fetchSettings("hideNotes");
 
         if (hideNotes) {
-            $("div#note-container").attr("data-hidden", "false");
+            $("#note-container").attr("data-hidden", "false");
             $("a#image-note-button").html("Notes: ON");
         } else {
-            $("div#note-container").attr("data-hidden", "true");
+            $("#note-container").attr("data-hidden", "true");
             $("a#image-note-button").html("Notes: OFF");
         }
 
@@ -160,7 +160,7 @@ export class PostViewer extends RE6Module {
 
     /** Toggles the note editing interface */
     private async switchNewNote(): Promise<void> {
-        $("div#note-container").attr("data-hidden", "false");
+        $("#note-container").attr("data-hidden", "false");
         $("a#image-note-button").html("Notes: ON");
         await ModuleController.get(PostViewer).pushSettings("hideNotes", false);
 

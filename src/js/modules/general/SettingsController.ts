@@ -94,7 +94,7 @@ export class SettingsController extends RE6Module {
                 await this.pushSettings("lastVersionCheck", Util.Time.now());
                 await this.pushSettings("changelog", releases.current.body);
 
-                $("div#changelog-list").html(Util.quickParseMarkdown(releases.current.body));
+                $("#changelog-list").html(Util.quickParseMarkdown(releases.current.body));
                 $("#project-update-button").attr("data-available", (releases.latest.name !== releases.current.name) + "");
             })();
         }
@@ -1168,7 +1168,7 @@ export class SettingsController extends RE6Module {
         /** Import module settings from file */
         function importFromFile(data: any): void {
             if (!data) return;
-            const $info = $("div#file-import-status").html("Loading . . .");
+            const $info = $("#file-import-status").html("Loading . . .");
 
             const reader = new FileReader();
             reader.readAsText(data, "UTF-8");
@@ -1196,7 +1196,7 @@ export class SettingsController extends RE6Module {
         /** Import eSix Extended Settings from File */
         function importE6FromFile(data): void {
             if (!data) return;
-            const $info = $("div#file-esix-status").html("Loading . . .");
+            const $info = $("#file-esix-status").html("Loading . . .");
 
             const reader = new FileReader();
             reader.readAsText(data, "UTF-8");
@@ -1252,7 +1252,7 @@ export class SettingsController extends RE6Module {
 
         /** Import eSix Extended Settings from LocalStorage */
         async function importE6FromLocalStorage(): Promise<void> {
-            const $info = $("div#localstorage-esix-status").html("Loading . . .");
+            const $info = $("#localstorage-esix-status").html("Loading . . .");
 
             if (localStorage.getItem("poolSubscriptions") !== null) {
                 await this.importPoolData(JSON.parse(localStorage.getItem("poolSubscriptions")), $info);

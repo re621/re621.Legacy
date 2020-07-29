@@ -23,7 +23,7 @@ export class Modal {
             .appendTo("div#modal-container")
             .dialog({
                 autoOpen: false,
-                appendTo: "div#modal-container",
+                appendTo: "#modal-container",
 
                 closeOnEscape: config.escapable,
                 draggable: config.draggable,
@@ -36,8 +36,8 @@ export class Modal {
                 position: {
                     my: config.position.my,
                     at: config.position.at,
-                    of: $("div#modal-container"),
-                    within: $("div#modal-container"),
+                    of: $("#modal-container"),
+                    within: $("#modal-container"),
                     collision: "none",
                 },
 

@@ -70,7 +70,7 @@ export class PoolDownloader extends RE6Module {
 
         const container = $(base)
             .addClass("pool-container");
-        const overview = $("div#a-show")
+        const overview = $("#a-show")
             .addClass("pool-overview");
 
         // Toggle Button

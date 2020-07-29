@@ -66,7 +66,7 @@ export class ThumbnailEnhancer extends RE6Module {
     public async prepare(): Promise<void> {
         await super.prepare();
 
-        this.postsWrapper = $("div#posts")
+        this.postsWrapper = $("#posts")
             .addClass("display-none-important");
         this.postsLoading = $("<div>")
             .attr("id", "postContainerOverlay")
@@ -81,7 +81,7 @@ export class ThumbnailEnhancer extends RE6Module {
     public create(): void {
         super.create();
 
-        this.postContainer = $("div#page");
+        this.postContainer = $("#page");
 
         const upscaleMode = this.fetchSettings<ThumbnailPerformanceMode>("upscale"),
             clickAction = this.fetchSettings<ThumbnailClickAction>("clickAction"),
@@ -112,10 +112,10 @@ export class ThumbnailEnhancer extends RE6Module {
 
         ThumbnailEnhancer.on("pauseHoverActions.main", (event, zoomPaused) => {
             if (typeof zoomPaused === "undefined") return;
-            if (zoomPaused) $("div#page").attr({ "data-thumb-zoom": "false", "data-thumb-vote": "false", });
+            if (zoomPaused) $("#page").attr({ "data-thumb-zoom": "false", "data-thumb-vote": "false", });
             else {
                 const module = ModuleController.get(ThumbnailEnhancer);
-                $("div#page").attr({
+                $("#page").attr({
                     "data-thumb-zoom": module.fetchSettings("zoom"),
                     "data-thumb-vote": module.fetchSettings("vote"),
                 });
