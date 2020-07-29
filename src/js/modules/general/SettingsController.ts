@@ -394,6 +394,7 @@ export class SettingsController extends RE6Module {
                         async (data) => {
                             $("#optgeneral-gencollapse-thumb-favcache").toggleClass("display-none", !data);
                             await thumbnailEnhancer.pushSettings("fav", data);
+                            thumbnailEnhancer.toggleHoverFav(data);
                         }
                     ),
                     Form.section({ name: "favcache", columns: 3, width: 3, wrapper: thumbnailEnhancer.fetchSettings("fav") ? undefined : "display-none" }, [

@@ -37,8 +37,7 @@ div.post-preview {
         box-shadow: 0px 0px 0px 5px #ffffff60;
     }
 
-    &>a.preview-box,
-    &>div.preview>a.preview-box {
+    a.preview-box {
         display: inline-block;
         color: white;
 
@@ -301,6 +300,13 @@ div#page[data-thumb-vote=true] {
                 display: grid;
             }
         }
+    }
+}
+
+div#page:not([data-thumb-fav=true]) {
+
+    div.preview-voting > button.favButton {
+        display: none;
     }
 }
 

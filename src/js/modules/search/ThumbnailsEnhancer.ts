@@ -97,6 +97,7 @@ export class ThumbnailEnhancer extends RE6Module {
         this.toggleZoomContextual(this.fetchSettings("zoomContextual"));
 
         this.toggleHoverVote(this.fetchSettings("vote"));
+        this.toggleHoverFav(this.fetchSettings("fav"));
 
         this.toggleThumbCrop(this.fetchSettings("crop"));
         this.setThumbSize(this.fetchSettings("cropSize"));
@@ -165,11 +166,19 @@ export class ThumbnailEnhancer extends RE6Module {
     }
 
     /**
-     * Enables the zoom-on-hover functionality
+     * Enables the voting buttons when hovering over the thumbnails
      * @param state True to enable, false to disable
      */
     public toggleHoverVote(state = true): void {
         this.postContainer.attr("data-thumb-vote", state + "");
+    }
+
+    /**
+     * Enables the favorite buttons when hovering over the thumbnails
+     * @param state True to enable, false to disable
+     */
+    public toggleHoverFav(state = true): void {
+        this.postContainer.attr("data-thumb-fav", state + "");
     }
 
     /**
@@ -220,10 +229,12 @@ export class ThumbnailEnhancer extends RE6Module {
         this.postContainer.attr("data-thumb-rel-ribbons", state + "");
     }
 
+    /** Returns the saved favorites cache */
     public getFavCache(): Set<number> {
         return ThumbnailEnhancer.favoritesList;
     }
 
+    /** Sets and saves the favorites cache */
     public setFavCache(cache: Set<number>): void {
         ThumbnailEnhancer.favoritesList = cache;
         window.localStorage.setItem("re621.favorites", JSON.stringify(Array.from(ThumbnailEnhancer.favoritesList)));
@@ -344,7 +355,7 @@ export class ThumbnailEnhancer extends RE6Module {
         const $favorite = $("<button>")        // Favorite
             .attr("href", "#")
             .html(`<i class="far fa-star"></i>`)
-            .addClass("button voteButton post-favorite-" + postID + " " + (isFavorited ? "score-favorite" : "score-neutral"))
+            .addClass("button voteButton favButton post-favorite-" + postID + " " + (isFavorited ? "score-favorite" : "score-neutral"))
             .appendTo($voteBox);
 
         let buttonBlock = false;
