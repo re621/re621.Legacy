@@ -332,11 +332,13 @@ export class SettingsController extends RE6Module {
 
                         Form.hr(3),
 
-                        Form.checkbox(
+                        Form.subheader("Zoom on Hover", "Increases the size of the thumbnail when hovering over it", 2),
+                        Form.select(
+                            { value: thumbnailEnhancer.fetchSettings("zoom") },
                             {
-                                value: thumbnailEnhancer.fetchSettings("zoom"),
-                                label: "<b>Zoom on Hover</b><br />Increases the size of the thumbnail when hovering over it",
-                                width: 3,
+                                "true": "Enabled",
+                                "false": "Disabled",
+                                "onshift": "Holding Shift",
                             },
                             async (data) => {
                                 await thumbnailEnhancer.pushSettings("zoom", data);

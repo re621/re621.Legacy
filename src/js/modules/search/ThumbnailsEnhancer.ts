@@ -19,6 +19,12 @@ export enum ThumbnailClickAction {
     CopyID = "copyid",
 }
 
+export enum ThumbnailZoomMode {
+    Enabled = "true",       // converted from the old boolean flag
+    Disabled = "false",     // names preserved for compatibility
+    OnShift = "onshift",
+}
+
 export class ThumbnailEnhancer extends RE6Module {
 
     private postsWrapper: JQuery<HTMLElement>;      // div#posts Hidden on start to hide page reflows
@@ -40,7 +46,7 @@ export class ThumbnailEnhancer extends RE6Module {
 
             upscale: ThumbnailPerformanceMode.Hover,
 
-            zoom: false,
+            zoom: ThumbnailZoomMode.Disabled,
             zoomScale: "2",
             zoomContextual: true,
 
@@ -65,6 +71,10 @@ export class ThumbnailEnhancer extends RE6Module {
 
     public async prepare(): Promise<void> {
         await super.prepare();
+
+        console.log(typeof this.fetchSettings("zoom"));
+        if (typeof this.fetchSettings("zoom") == "boolean")
+            await this.pushSettings("zoom", this.fetchSettings("zoom") + "");
 
         this.postsWrapper = $("#posts")
             .addClass("display-none-important");
@@ -145,8 +155,29 @@ export class ThumbnailEnhancer extends RE6Module {
      * Enables the zoom-on-hover functionality
      * @param state True to enable, false to disable
      */
-    public toggleHoverZoom(state = true): void {
-        this.postContainer.attr("data-thumb-zoom", state + "");
+    public toggleHoverZoom(state = ThumbnailZoomMode.Disabled): void {
+        this.postContainer.attr("data-thumb-zoom", state);
+
+        // Remove listeners potentially left over from previous state
+        $(document)
+            .off("keydown.re621.thumbnailzoom")
+            .off("keyup.re621.thumbnailzoom");
+
+        if (state !== ThumbnailZoomMode.OnShift) return;
+
+        // Listen for shifte press and hold to switch to zoom mode
+        let keydown = false;
+        $(document)
+            .on("keydown.re621.thumbnailzoom", null, "shift", () => {
+                if (keydown) return;
+                keydown = true;
+                console.log("keydown");
+                this.postContainer.attr("data-thumb-zoom", ThumbnailZoomMode.Enabled);
+            })
+            .on("keyup.re621.thumbnailzoom", null, "shift", () => {
+                keydown = false;
+                this.postContainer.attr("data-thumb-zoom", ThumbnailZoomMode.OnShift);
+            });
     }
 
     /**

@@ -699,7 +699,7 @@ export class Form implements PreparedStructure {
      * @param content Select options data
      * @param changed Input change callback
      */
-    public static select(options?: ElementOptions, content?: { [name: string]: any }, changed?: InputChangeEvent): FormElement {
+    public static select(options?: ElementOptions, content?: SelectOptionSet | SelectOptionFunction, changed?: InputChangeEvent): FormElement {
         if (!options.name) options.name = Util.makeUniqueID();
 
         let $label: JQuery<HTMLElement>;
@@ -717,8 +717,10 @@ export class Form implements PreparedStructure {
             .addClass("button btn-neutral")
             .appendTo($element);
 
-        for (const key in content) {
-            $("<option>").val(key).text(content[key]).appendTo($input);
+        if (content !== undefined) {
+            if (typeof content === "function") content = content();
+            for (const key in content)
+                $("<option>").val(key).text(content[key]).appendTo($input);
         }
         if (options.value !== undefined) {
             switch (typeof options.value) {
@@ -981,6 +983,9 @@ interface InputElementOptions extends ElementOptions {
     required?: boolean;
     pattern?: string;
 }
+
+type SelectOptionSet = { [name: string]: any }
+type SelectOptionFunction = () => SelectOptionSet;
 
 type ElementInputValue = (element: JQuery<HTMLElement>) => void;
 
