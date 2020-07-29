@@ -26,7 +26,7 @@ import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
 import { CustomFlagger, FlagDefinition } from "../search/CustomFlagger";
 import { InfiniteScroll } from "../search/InfiniteScroll";
 import { SearchUtilities } from "../search/SearchUtilities";
-import { FavSyncState, ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
+import { ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
 import { ForumTracker } from "../subscriptions/ForumTracker";
 import { PoolTracker } from "../subscriptions/PoolTracker";
 import { SubscriptionManager } from "../subscriptions/SubscriptionManager";
@@ -393,7 +393,7 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             $("#optgeneral-gencollapse-thumb-favcache").toggleClass("display-none", !data);
-                            await thumbnailEnhancer.pushSettings("vote", data);
+                            await thumbnailEnhancer.pushSettings("fav", data);
                         }
                     ),
                     Form.section({ name: "favcache", columns: 3, width: 3, wrapper: thumbnailEnhancer.fetchSettings("fav") ? undefined : "display-none" }, [
@@ -414,7 +414,10 @@ export class SettingsController extends RE6Module {
                             } while (result.length == 320);
 
                             thumbnailEnhancer.setFavCache(cache);
-                            await thumbnailEnhancer.pushSettings("favSyncState", FavSyncState.Finished);
+                            await thumbnailEnhancer.pushSettings({
+                                "favSync": Util.Time.now(),
+                                "favReq": false,
+                            });
                             status.html(`<i class="far fa-check-circle"></i> Cache reloaded: ${thumbnailEnhancer.getFavCacheSize()} entries`);
 
                             input.prop("disabled", "false");
@@ -426,20 +429,22 @@ export class SettingsController extends RE6Module {
                                     .attr("id", "favcache-status")
                                     .appendTo(element);
 
-                                let state = thumbnailEnhancer.fetchSettings("favSyncState");
-
-                                if (state === FavSyncState.Unknown) {
-                                    const userData = await User.getCurrentSettings();
-                                    state = userData.favorite_count === thumbnailEnhancer.getFavCacheSize() ? FavSyncState.Finished : FavSyncState.Required;
-                                    await thumbnailEnhancer.pushSettings("favSyncState", state);
+                                const now = Util.Time.now();
+                                let updateRequired = thumbnailEnhancer.fetchSettings("favReq");
+                                if (now - thumbnailEnhancer.fetchSettings("favSync") > Util.Time.DAY) {
+                                    updateRequired = (await User.getCurrentSettings()).favorite_count !== thumbnailEnhancer.getFavCacheSize();
+                                    thumbnailEnhancer.pushSettings({
+                                        "favSync": now,
+                                        "favReq": updateRequired,
+                                    });
                                 }
 
-                                if (state === FavSyncState.Required)
+                                if (updateRequired)
                                     $status.html(`
                                         <i class="far fa-times-circle"></i> 
-                                        <span style="color:gold">Reset required</span>: Favorites cache integrity failed)
+                                        <span style="color:gold">Reset required</span>: Favorites cache integrity failed
                                     `);
-                                else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified`)
+                                else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified: ${thumbnailEnhancer.getFavCacheSize()} entries`)
                             },
                             width: 3,
                         }),
