@@ -206,7 +206,7 @@ export class UpdateCache {
             .fetchSettings(["cacheMaxAge", "cacheSize"]);
 
         // If cacheMaxAge is set to never, its value is 0
-        const ageLimit = params.cacheMaxAge === 0 ? 0 : new Date().getTime() - params.cacheMaxAge;
+        const ageLimit = params.cacheMaxAge === 0 ? 0 : Util.Time.now() - params.cacheMaxAge;
 
         const uniqueKeys = [];
         this.index.forEach((timestamp) => {

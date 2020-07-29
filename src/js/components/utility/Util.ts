@@ -8,6 +8,14 @@ enum TIME_PERIOD {
     WEEK = 7 * TIME_PERIOD.DAY,
 };
 
+namespace TIME_PERIOD {
+
+    /** Returns current timestamp. Alias for `new Date().getTime();` */
+    export function now(): number {
+        return new Date().getTime();
+    }
+}
+
 /**
  * Common utilities used in other modules
  */
@@ -249,14 +257,6 @@ export class Util {
         while (Util.uniqueIDs.includes(uniqueID));
         Util.uniqueIDs.push(uniqueID);
         return uniqueID;
-    }
-
-    /**
-     * Shorthand for `new Date().getTime()`
-     * @returns Current timestamp
-     */
-    public static getTime(): number {
-        return new Date().getTime();
     }
 
     /**

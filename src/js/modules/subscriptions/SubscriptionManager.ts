@@ -413,7 +413,7 @@ export class SubscriptionManager extends RE6Module {
      */
     private async updateRequired(): Promise<boolean> {
         const time = await this.fetchSettings(["lastUpdate", "updateStarted", "now", "updateInterval"], true);
-        if (time.now === undefined) time.now = Util.getTime();  // "now" setting is used for debugging purposes only
+        if (time.now === undefined) time.now = Util.Time.now();  // "now" setting is used for debugging purposes only
 
         return Promise.resolve(
             !SubscriptionManager.updateInProgress                                                                   // Update process isn't running already
@@ -425,7 +425,7 @@ export class SubscriptionManager extends RE6Module {
     /** Loads new subscription data into tracker cache */
     private async executeUpdateEvent(): Promise<void> {
         SubscriptionManager.updateInProgress = true;
-        const now = Util.getTime(),
+        const now = Util.Time.now(),
             prevUpdate = await this.fetchSettings("lastUpdate", true);
         await this.pushSettings("lastUpdate", now);
         await this.pushSettings("updateStarted", now);
@@ -529,7 +529,7 @@ export class SubscriptionManager extends RE6Module {
 
         /** Formats the next update timestamp into a readable date */
         function getNextUpdateText(lastUpdate: number, updateInterval: number): string {
-            const now = Util.getTime();
+            const now = Util.Time.now();
 
             if (SubscriptionManager.updateInProgress) return "In progress . . .";
             else if (lastUpdate === 0) return Util.timeAgo(now + updateInterval);
