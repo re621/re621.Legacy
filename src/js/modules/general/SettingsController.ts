@@ -374,6 +374,7 @@ export class SettingsController extends RE6Module {
                     // Voting Buttons
                     Form.checkbox(
                         {
+                            name: "votebutton",
                             value: thumbnailEnhancer.fetchSettings("vote"),
                             label: "<b>Voting Buttons</b><br />Adds voting buttons when hovering over a thumbnail",
                             width: 3,
@@ -381,15 +382,27 @@ export class SettingsController extends RE6Module {
                         async (data) => {
                             await thumbnailEnhancer.pushSettings("vote", data);
                             thumbnailEnhancer.toggleHoverVote(data);
+
+                            const favcheck = $("input#optgeneral-gencollapse-thumb-favbutton")
+
+                            if (!data && favcheck.is(":checked"))
+                                favcheck[0].click();
+
+                            favcheck
+                                .prop("disabled", !data)
+                                .parent()
+                                .toggleClass("input-disabled", !data);
                         }
                     ),
                     Form.spacer(3),
 
                     Form.checkbox(
                         {
+                            name: "favbutton",
                             value: thumbnailEnhancer.fetchSettings("fav"),
                             label: "<b>Favorite Button</b><br />Adds a +favorite button when hovering over a thumbnail",
                             width: 3,
+                            wrapper: (thumbnailEnhancer.fetchSettings("ribbons") ? undefined : "input-disabled"),
                         },
                         async (data) => {
                             $("#optgeneral-gencollapse-thumb-favcache").toggleClass("display-none", !data);
@@ -463,8 +476,10 @@ export class SettingsController extends RE6Module {
                             await thumbnailEnhancer.pushSettings("ribbons", data);
                             if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleStatusRibbons(data);
 
-                            $("input#optgeneral-gencollapse-thumb-relations-ribbons").prop("disabled", !data);
-                            $("input#optgeneral-gencollapse-thumb-relations-ribbons").parent().toggleClass("input-disabled", !data);
+                            $("input#optgeneral-gencollapse-thumb-relations-ribbons")
+                                .prop("disabled", !data)
+                                .parent()
+                                .toggleClass("input-disabled", !data);
                         }
                     ),
                     Form.spacer(3),
