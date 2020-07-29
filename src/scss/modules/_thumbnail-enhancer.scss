@@ -123,7 +123,7 @@ div.post-preview {
         }
     }
 
-    &[data-is-favorited=true] .post-score-faves {
+    .post-score-faves {
         color: #c3a816;
     }
 }
@@ -303,12 +303,38 @@ div#page[data-thumb-vote=true] {
     }
 }
 
+// Favorite Button
+div#page[data-thumb-fav=true] {
+
+    article.post-preview[data-is-favorited=true] {
+        div.desc {
+            position: relative;
+    
+            &::before {
+                content: unicode("f005");
+                font-family: "Font Awesome 5 Free";
+                color: #c3a816;
+                font-size: 1.5rem;
+    
+                position: absolute;
+                left: 0.25rem;
+                bottom: 0.5rem;
+                
+                opacity: 0.5;
+            }
+        }
+    }
+
+}
+
 div#page:not([data-thumb-fav=true]) {
 
     div.preview-voting > button.favButton {
         display: none;
     }
 }
+
+
 
 // Zoom on Hover
 div#page.mode-view,
