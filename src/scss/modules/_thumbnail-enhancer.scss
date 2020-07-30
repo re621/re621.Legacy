@@ -313,12 +313,23 @@ div#page[data-thumb-fav=true] {
             &::before {
                 content: unicode("f005");
                 font-family: "Font Awesome 5 Free";
-                font-size: 0.9rem;
+                font-size: 1.25rem;
                 color: #c3a816;
+                background: inherit;
 
+                display: flex;
+                align-items: center;
+                justify-content: end;
                 position: absolute;
-                left: 0.5rem;
-                bottom: 0rem;
+                left: 0;
+                bottom: 0;
+                
+                width: 3rem;
+                height: 2rem;
+                padding-top: 1rem;
+                padding-left: 0.125rem;
+                
+                clip-path: ellipse(2.5rem 2.25rem at 0 100%);
             }
         }
     }
