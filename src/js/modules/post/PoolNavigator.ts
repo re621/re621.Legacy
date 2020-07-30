@@ -86,11 +86,14 @@ export class PoolNavigator extends RE6Module {
         }
 
         // Pool-navs
-        $("#pool-nav > ul > li").each((index, element) => {
+        for (const element of $("#pool-nav").find("ul > li").get()) {
             this.navbars.push({ type: "pool", element: $(element), checkbox: undefined, });
-        });
+        }
 
         // Set-navs
+        for (const element of $("#set-nav").find("ul > li").get()) {
+            this.navbars.push({ type: "set", element: $(element), checkbox: undefined, });
+        };
 
         // Create checkboxes
         this.navbars.forEach((nav, index) => {
@@ -119,11 +122,15 @@ export class PoolNavigator extends RE6Module {
         if (this.navbars.length == 1) {
             this.navbars[0].checkbox.parent().addClass("vis-hidden");
         }
+
+        // Tweak the "first-last" links
+        $("#nav-links").find(".first").each((index, element) => { $(element).html("&laquo;"); });
+        $("#nav-links").find(".last").each((index, element) => { $(element).html("&raquo;"); });
     }
 }
 
 interface PostNav {
-    type: "search" | "pool";
+    type: "search" | "pool" | "set";
     element: JQuery<HTMLElement>;
     checkbox: JQuery<HTMLElement>;
 }
