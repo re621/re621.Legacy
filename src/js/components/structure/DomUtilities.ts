@@ -27,8 +27,8 @@ export class DomUtilities {
                 const promises: Promise<any>[] = [];
                 promises.push(DomUtilities.elementReady("head", DomUtilities.injectChromeScript));
                 promises.push(DomUtilities.elementReady("body", DomUtilities.createThemes));
-                promises.push(DomUtilities.elementReady("div#page", DomUtilities.createModalContainer));
-                promises.push(DomUtilities.elementReady("menu.main", DomUtilities.createHeader));
+                promises.push(DomUtilities.elementReady("#page", DomUtilities.createModalContainer));
+                promises.push(DomUtilities.elementReady("#nav", DomUtilities.createHeader));
 
                 Promise.all(promises).then(() => {
                     stage = "build";
@@ -95,18 +95,21 @@ export class DomUtilities {
         const $menuContainer = $("nav#nav");
         const $menuMain = $("menu.main");
 
-        if ($("nav#nav menu").length < 2) {
+        if ($("#nav").find("menu").length < 2) {
             $menuContainer.append(`<menu>`);
         }
 
-        const $menuLogo = $("<menu>").addClass("logo desktop-only").html(`<a href="/" data-ytta-id="-">` + Page.getSiteName() + `</a>`);
-        $menuContainer.prepend($menuLogo);
+        // Replace the logo in menu.main with a separate element
+        $("<menu>")
+            .addClass("logo desktop-only")
+            .html(`<a href="/" data-ytta-id="-">` + Page.getSiteName() + `</a>`)
+            .prependTo($menuContainer);
         $menuMain.find("a[href='/']").remove();
 
-        const $menuExtra = $("<menu>").addClass("extra");
-        $menuMain.after($menuExtra);
-
-        $("menu:last-child").addClass("submenu");
+        // Add a section for re621 settings buttons
+        $("<menu>")
+            .addClass("extra")
+            .insertAfter($menuMain);
 
         $menuContainer.addClass("grid");
     }
