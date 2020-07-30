@@ -23,12 +23,12 @@ const ENDPOINT_DEFS: EndpointDefinition[] = [
     { name: "sets", path: "post_sets.json" },
 
     { name: "users", path: "users.json" },
-    { name: "user", path: "user/%ID%.json" },
+    { name: "user", path: "users/%ID%.json" },
     { name: "blips", path: "blips.json" },
     { name: "wiki_pages", path: "wiki_pages.json" },
 
     { name: "comments", path: "comments.json" },
-    { name: "comment", path: "comment/%ID%.json" },
+    { name: "comment", path: "comments/%ID%.json" },
     { name: "forum_posts", path: "forum_posts.json" },
     { name: "forum_post", path: "forum_posts/%ID%.json" },
     { name: "forum_topics", path: "forum_topics.json" },
