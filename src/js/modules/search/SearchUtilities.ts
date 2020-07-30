@@ -143,8 +143,14 @@ export class SearchUtilities extends RE6Module {
     private switchModeEdit(): void { SearchUtilities.switchMode("edit"); }
     private switchModeAddFav(): void { SearchUtilities.switchMode("add-fav"); }
     private switchModeRemFav(): void { SearchUtilities.switchMode("remove-fav"); }
-    private switchModeAddSet(): void { SearchUtilities.switchMode("add-to-set"); }
-    private switchModeRemSet(): void { SearchUtilities.switchMode("remove-from-set"); }
+    private switchModeAddSet(): void {
+        SearchUtilities.switchMode("add-to-set");
+        $("#set-id").focus();
+    }
+    private switchModeRemSet(): void {
+        SearchUtilities.switchMode("remove-from-set");
+        $("#set-id").focus();
+    }
 
     private static switchMode(mode: string): void {
         $("select#mode-box-mode").val(mode);
