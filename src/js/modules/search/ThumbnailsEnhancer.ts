@@ -27,9 +27,7 @@ export enum ThumbnailZoomMode {
 
 export class ThumbnailEnhancer extends RE6Module {
 
-    private postsWrapper: JQuery<HTMLElement>;      // div#posts Hidden on start to hide page reflows
-    private postsLoading: JQuery<HTMLElement>;      // Placeholder with some loading animations
-
+    private postsLoading: JQuery<HTMLElement>;      // Overlay to mask posts reflow
     private postContainer: JQuery<HTMLElement>;     // Element containing posts - div#page used for compatibility
 
     private static favoritesList: Set<number>;
@@ -76,8 +74,6 @@ export class ThumbnailEnhancer extends RE6Module {
         if (typeof this.fetchSettings("zoom") == "boolean")
             await this.pushSettings("zoom", this.fetchSettings("zoom") + "");
 
-        this.postsWrapper = $("#posts")
-            .addClass("display-none-important");
         this.postsLoading = $("<div>")
             .attr("id", "postContainerOverlay")
             .html(`
@@ -85,7 +81,7 @@ export class ThumbnailEnhancer extends RE6Module {
                     <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
                 </span>
             `)
-            .insertBefore(this.postsWrapper);
+            .insertBefore("#posts");
     }
 
     public create(): void {
@@ -118,7 +114,6 @@ export class ThumbnailEnhancer extends RE6Module {
         this.toggleRelationRibbons(this.fetchSettings("relRibbons"));
 
         this.postsLoading.addClass("display-none-important");
-        this.postsWrapper.removeClass("display-none-important");
 
         ThumbnailEnhancer.on("pauseHoverActions.main", (event, zoomPaused) => {
             if (typeof zoomPaused === "undefined") return;

@@ -9,8 +9,14 @@ div#page div#c-favorites div#posts {
 }
 
 div#postContainerOverlay {
-    width: 100%;
-    height: 50vh;
+    position: absolute;
+    top: -0.5rem;
+    left: -1rem;
+    right: -0.5rem;
+    bottom: -0.5rem;
+    z-index: 10000;
+    backdrop-filter: blur(0.5rem);
+    border-radius: 6px;
 
     span {
         display: block;
