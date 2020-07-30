@@ -385,7 +385,7 @@ export class ThumbnailEnhancer extends RE6Module {
         const $favorite = $("<button>")        // Favorite
             .attr("href", "#")
             .html(`<i class="far fa-star"></i>`)
-            .addClass("button voteButton favButton post-favorite-" + postID + " " + (isFavorited ? "score-favorite" : "score-neutral"))
+            .addClass("button voteButton favButton post-favorite-" + postID + " score-neutral" + (isFavorited ? " score-favorite" : ""))
             .appendTo($voteBox);
 
         let buttonBlock = false;
@@ -411,12 +411,12 @@ export class ThumbnailEnhancer extends RE6Module {
                 isFavorited = false;
                 E621.Favorite.id(postID).delete();
                 ThumbnailEnhancer.trigger("favorite", { id: postID, action: false });
-                $favorite.addClass("score-neutral").removeClass("score-favorite");
+                $favorite.removeClass("score-favorite");
             } else {
                 isFavorited = true;
                 E621.Favorites.post({ "post_id": postID });
                 ThumbnailEnhancer.trigger("favorite", { id: postID, action: true });
-                $favorite.addClass("score-favorite").removeClass("score-neutral");
+                $favorite.addClass("score-favorite");
             }
             $article.attr("data-is-favorited", isFavorited + "");
             buttonBlock = false;

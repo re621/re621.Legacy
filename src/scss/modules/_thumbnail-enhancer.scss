@@ -42,6 +42,7 @@ div.post-preview {
         color: white;
 
         outline: 0;
+        width: 100%;
 
         position: relative;
 
@@ -96,24 +97,33 @@ div.post-preview {
         }
 
         div.preview-voting {
-            display: none;
+            display: block;
             position: absolute;
-            left: -2rem;
-            top: 0;
+            z-index: 100;
             bottom: 0;
-            grid-template-rows: repeat(auto-fill, minmax(25%, 2rem));
-            margin-top: 0.25rem;
-            z-index: 90;
+            left: 0;
+            right: 0;
+            white-space: nowrap;
+
+            visibility: hidden;
 
             button.voteButton {
-                box-sizing: content-box;
-                margin: 0.125rem 0;
-                border-radius: 6px 0 0 6px;
-                outline: 0;
-                width: 1rem;
+                margin: 0 0.25rem;
+                padding: 0.25rem 0.75rem 0rem;
+                border-radius: 0.75rem 0.75rem 0 0;
+                box-shadow: 0 -5px 10px #ffffff10;
 
                 &.score-favorite {
-                    background: #c3a816;
+                    color: #c3a816;
+                }
+
+                &.favButton {
+                    position: absolute;
+                    left: -0.25rem;
+                    bottom: -1.06rem;
+                    padding: 0.25rem 0.35rem 0.125rem 0.125rem !important;
+                    border-radius: 0 0.75rem 0 0 !important;
+                    font-size: 1rem;
                 }
             }
         }
@@ -125,6 +135,9 @@ div.post-preview {
 
     .post-score-faves {
         color: #c3a816;
+    }
+    .post-score-extras {
+        display: none;
     }
 }
 
@@ -297,7 +310,7 @@ div#page[data-thumb-vote=true] {
         &>a.preview-box,
         &>div.preview>a.preview-box {
             div.preview-voting {
-                display: grid;
+                visibility: visible;
             }
         }
     }
@@ -307,30 +320,8 @@ div#page[data-thumb-vote=true] {
 div#page[data-thumb-fav=true] {
 
     article.post-preview[data-is-favorited=true] {
-        div.desc {
-            position: relative;
-    
-            &::before {
-                content: unicode("f005");
-                font-family: "Font Awesome 5 Free";
-                font-size: 1.25rem;
-                color: #c3a816;
-                background: inherit;
-
-                display: flex;
-                align-items: center;
-                justify-content: end;
-                position: absolute;
-                left: 0;
-                bottom: 0;
-                
-                width: 3rem;
-                height: 2rem;
-                padding-top: 1rem;
-                padding-left: 0.125rem;
-                
-                clip-path: ellipse(2.5rem 2.25rem at 0 100%);
-            }
+        button.voteButton.favButton {
+            visibility: visible;
         }
     }
 
