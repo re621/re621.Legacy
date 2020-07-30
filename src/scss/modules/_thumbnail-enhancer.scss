@@ -106,14 +106,18 @@ div.post-preview {
             display: block;
             position: absolute;
             z-index: 100;
-            bottom: 0;
+            bottom: -1rem;
             left: 0;
             right: 0;
+            height: 1rem;
             white-space: nowrap;
 
             visibility: hidden;
 
             button.voteButton {
+                position: relative;
+                bottom: 1.5rem;
+
                 margin: 0 0.25rem;
                 padding: 0.25rem 0.75rem 0rem;
                 border-radius: 0.75rem 0.75rem 0 0;
@@ -126,7 +130,7 @@ div.post-preview {
                 &.favButton {
                     position: absolute;
                     left: -0.25rem;
-                    bottom: -1.06rem;
+                    bottom: 0;
                     padding: 0.25rem 0.35rem 0.125rem 0.125rem !important;
                     border-radius: 0 0.75rem 0 0 !important;
                     font-size: 1rem;
@@ -139,11 +143,15 @@ div.post-preview {
         }
     }
 
-    .post-score-faves {
-        color: #c3a816;
-    }
-    .post-score-extras {
-        display: none;
+    div.desc {
+        height: 1rem;
+
+        .post-score-faves {
+            color: #c3a816;
+        }
+        .post-score-extras {
+            display: none;
+        }
     }
 }
 

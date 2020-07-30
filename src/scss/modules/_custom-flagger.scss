@@ -21,32 +21,58 @@ textarea#settings-flags-defs {
 /** Post page view **/
 div.custom-flag {
     font-family: monospace;
-    font-size: 1.1em;
+    font-size: 1.2em;
     margin: 0.25rem 0;
+    padding-left: 0.6rem;
 
     span.custom-flag-title {
-        background: maroon;
-        border-radius: 0.25rem;
-        padding: 0.125rem 0.5rem;
+        position: relative;
+        background-color: var(--flag-color, #666666);
+        padding: 0.125rem 0.6rem 0.125rem 0.3rem;
+    
+        &:before {
+            content: "";
+            position: absolute;
+            left: -0.6rem;
+            bottom: 0;
+            border-left: 0.6rem solid transparent;
+            border-top: 0.6rem solid var(--flag-color, #666666);
+            border-bottom: 0.6rem solid var(--flag-color, #666666);
+        }
     }
 }
 
 /** Search page view **/
 div.flag-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
     position: absolute;
     bottom: 0;
-    left: 0;
+    right: 0;
+
+    width: stretch;
+    overflow: hidden;
 
     span.custom-flag-thumb {
+        background-color: var(--flag-color, #666666);
         margin: 0.125rem;
         display: block;
         height: 1rem;
         font-size: 0.75em;
         width: 1em;
-        border-radius: 0.75em;
-        overflow: hidden;
         padding: 0 0.125rem;
-        box-shadow: 0 0 5px 0px #000;
+        position: relative;
+
+        &:before {
+            content: "";
+            position: absolute;
+            left: -0.5rem;
+            border-left: 0.5rem solid transparent;
+            border-top: 0.5rem solid var(--flag-color, #666666);
+            border-bottom: 0.5rem solid var(--flag-color, #666666);
+        }
 
         &:hover {
             width: unset;

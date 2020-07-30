@@ -58,7 +58,7 @@ export class CustomFlagger extends RE6Module {
             if (!entry.filter.matchesPost(viewingPost)) return;
             $("<div>")
                 .addClass("custom-flag")
-                .html(`<span class="custom-flag-title" style="background-color: ${entry.data.color}">${entry.data.name}</span> ${entry.data.tags}`)
+                .html(`<span class="custom-flag-title" style="--flag-color: ${entry.data.color}">${entry.data.name}</span> ${entry.data.tags}`)
                 .appendTo(flagContainer);
             activeFlags++;
         });
@@ -97,7 +97,7 @@ export class CustomFlagger extends RE6Module {
             $("<span>")
                 .addClass("custom-flag-thumb")
                 .html(entry.data.name)
-                .css("background-color", entry.data.color)
+                .css("--flag-color", entry.data.color)
                 .appendTo(flagContainer);
         });
     }
