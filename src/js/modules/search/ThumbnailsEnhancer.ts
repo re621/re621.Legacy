@@ -74,6 +74,9 @@ export class ThumbnailEnhancer extends RE6Module {
         if (typeof this.fetchSettings("zoom") == "boolean")
             await this.pushSettings("zoom", this.fetchSettings("zoom") + "");
 
+        // Only add a loading screen on appropriate pages
+        if (!this.pageMatchesFilter()) return;
+
         this.postsLoading = $("<div>")
             .attr("id", "postContainerOverlay")
             .html(`

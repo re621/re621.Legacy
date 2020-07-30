@@ -70,7 +70,7 @@ export class RE6Module {
      * Evaluates whether the module should be executed.
      * @returns true if the page matches the constraint, false otherwise.
      */
-    private pageMatchesFilter(): boolean {
+    public pageMatchesFilter(): boolean {
         return this.constraint.length == 0 || Page.matches(this.constraint);
     }
 
