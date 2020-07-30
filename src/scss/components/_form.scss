@@ -230,7 +230,8 @@ form-section > form-input {
     // Disabled Inputs
     &.input-disabled {
         color: #666666 !important;
-        & > select { color: #666666 !important; }
+        & > select,
+        & > input { color: #666666 !important; }
     }
 
     // End of Input Container

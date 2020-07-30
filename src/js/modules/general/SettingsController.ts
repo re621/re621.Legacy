@@ -315,27 +315,45 @@ export class SettingsController extends RE6Module {
                         ),
                         Form.spacer(3),
 
-                        Form.subheader("Image Ratio", "Height to width ratio of the image", 2),
-                        Form.input(
-                            { value: thumbnailEnhancer.fetchSettings("cropRatio"), pattern: "^(([01](\\.\\d+)?)|2)$" },
-                            async (data, input) => {
-                                if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
-                                await thumbnailEnhancer.pushSettings("cropRatio", data);
-                                thumbnailEnhancer.setThumbRatio(data);
-                            }
-                        ),
-                        Form.spacer(3),
-
                         Form.checkbox(
                             {
+                                name: "croppreserveratio",
                                 value: thumbnailEnhancer.fetchSettings("cropPreserveRatio"),
                                 label: "<b>Preserve Ratio</b><br />Keep the image ratio of the original image",
                                 width: 3,
                             },
                             async (data) => {
                                 await thumbnailEnhancer.pushSettings("cropPreserveRatio", data);
-                                $("input#advanced-crop-ratio").prop('disabled', data);
                                 thumbnailEnhancer.toggleThumbPreserveRatio(data);
+
+                                $("#optgeneral-gencollapse-thumb-scalingconf-cropratio-desc").toggleClass("input-disabled", data);
+                                $("#optgeneral-gencollapse-thumb-scalingconf-cropratio")
+                                    .prop("disabled", data)
+                                    .parent()
+                                    .toggleClass("input-disabled", data);
+                            }
+                        ),
+                        Form.spacer(3),
+
+                        Form.subheader(
+                            "Image Ratio",
+                            "Height to width ratio of the image",
+                            2,
+                            "cropratio-desc",
+                            thumbnailEnhancer.fetchSettings("cropPreserveRatio") ? "input-disabled" : undefined,
+                        ),
+                        Form.input(
+                            {
+                                name: "cropratio",
+                                value: thumbnailEnhancer.fetchSettings("cropRatio"),
+                                pattern: "^(([01](\\.\\d+)?)|2)$",
+                                wrapper: thumbnailEnhancer.fetchSettings("cropPreserveRatio") ? "input-disabled" : undefined,
+                                disabled: thumbnailEnhancer.fetchSettings("cropPreserveRatio"),
+                            },
+                            async (data, input) => {
+                                if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                                await thumbnailEnhancer.pushSettings("cropRatio", data);
+                                thumbnailEnhancer.setThumbRatio(data);
                             }
                         ),
 
@@ -346,7 +364,8 @@ export class SettingsController extends RE6Module {
                             "Increases the size of the thumbnail when hovering over it",                                                        // line 2
                             2,                                                                                                                  // width
                             "hoverzoom-desc",                                                                                                   // name
-                            thumbnailEnhancer.fetchSettings("upscale") === ThumbnailPerformanceMode.Disabled ? "input-disabled" : undefined),   // wrapper
+                            thumbnailEnhancer.fetchSettings("upscale") === ThumbnailPerformanceMode.Disabled ? "input-disabled" : undefined,   // wrapper
+                        ),
                         Form.select(
                             {
                                 name: "hoverzoom",
