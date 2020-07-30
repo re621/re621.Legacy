@@ -352,7 +352,7 @@ export class ThumbnailEnhancer extends RE6Module {
         // Description box that only shows up on hover
         const $extrasBox = $("<div>")
             .addClass("bg-highlight preview-extras")
-            .appendTo($link);
+            .appendTo($picture);
 
         if ($imgData[4] === undefined) $("<span>").html("Score: ?").appendTo($extrasBox);
         else $("<span>").html($imgData[4]).appendTo($extrasBox);

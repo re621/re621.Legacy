@@ -26,8 +26,7 @@ div#postContainerOverlay {
     }
 }
 
-article.post-preview,
-div.post-preview {
+.post-preview {
     overflow: visible;
 
     box-shadow: none;
@@ -74,34 +73,6 @@ div.post-preview {
             display: flex;
         }
 
-        div.preview-extras {
-            display: none;
-
-            flex-flow: wrap;
-            justify-content: center;
-
-            opacity: 0.9;
-            font-size: 0.8rem;
-            line-height: 1rem;
-            font-weight: bold;
-
-            width: stretch;
-            position: absolute;
-            overflow-wrap: break-word;
-            cursor: default;
-
-            min-width: fit-content;
-
-            span {
-                margin: 0 0.25rem;
-                white-space: nowrap;
-
-                &>span {
-                    cursor: pointer;
-                }
-            }
-        }
-
         div.preview-voting {
             display: block;
             position: absolute;
@@ -140,6 +111,34 @@ div.post-preview {
 
         &.loading div.preview-extras {
             display: none;
+        }
+    }
+
+    div.preview-extras {
+        display: none;
+
+        flex-flow: wrap;
+        justify-content: center;
+
+        opacity: 0.9;
+        font-size: 0.8rem;
+        line-height: 1rem;
+        font-weight: bold;
+
+        width: stretch;
+        position: absolute;
+        overflow-wrap: break-word;
+        cursor: default;
+
+        min-width: fit-content;
+
+        span {
+            margin: 0 0.25rem;
+            white-space: nowrap;
+
+            &>span {
+                cursor: pointer;
+            }
         }
     }
 
@@ -358,44 +357,40 @@ div#page div#a-popular {
     &[data-thumb-zoom=true] div#posts-container,
     &[data-thumb-zoom=true] div#c-favorites div#posts {
 
-        article.post-preview.loaded:hover,
-        div.post-preview.loaded:hover {
+        .post-preview.loaded:hover {
             position: relative;
             overflow: visible;
 
-            &>a.preview-box,
-            &>div.preview>a.preview-box {
-                transform: translate(-50%, -50%);
-
+            a.preview-box {
                 position: absolute;
-                left: 50%;
-                top: 50%;
+                left: -50%;
                 z-index: 10;
 
                 min-width: 100%;
-                min-height: 100%;
 
+                width: fit-content;
+    
                 &::before {
                     display: none;
                 }
-
+    
                 img {
                     object-fit: cover;
                     width: unset;
                     height: unset;
-
+    
                     max-width: calc(var(--thumbnail-size, 150px) * var(--thumbnail-zoom, 2));
                     max-height: calc(calc(var(--thumbnail-size, 150px) * var(--thumbnail-ratio, 1.3)) * var(--thumbnail-zoom, 2));
-
+    
                     min-width: 100%;
                     min-height: 100%;
                 }
-
-                div.preview-extras {
-                    display: flex;
-                }
             }
-
+    
+            div.preview-extras {
+                display: flex;
+            }
+    
             div.desc {
                 display: none;
             }
