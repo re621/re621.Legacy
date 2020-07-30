@@ -793,7 +793,7 @@ export class Form implements PreparedStructure {
                     break;
                 }
                 case "object": {
-                    $element.append(options.value.text());
+                    $element.append(options.value);
                     break;
                 }
                 case "number":
