@@ -284,6 +284,7 @@ export class Form implements PreparedStructure {
                 "name": options.name,
             })
             .addClass("bg-section color-text")
+            .prop("disabled", options.disabled == true)
             .appendTo($element);
 
         if (options.value !== undefined) {
@@ -499,6 +500,7 @@ export class Form implements PreparedStructure {
                 "id": options.name,
             })
             .addClass("bg-section color-text")
+            .prop("disabled", options.disabled == true)
             .appendTo($element);
 
         if (changed !== undefined) {
@@ -605,6 +607,7 @@ export class Form implements PreparedStructure {
                 "type": options.type ? options.type : "button",
             })
             .addClass("button btn-neutral")
+            .prop("disabled", options.disabled == true)
             .appendTo($element);
 
         if (options.value !== undefined) {
@@ -656,6 +659,7 @@ export class Form implements PreparedStructure {
                 "type": "checkbox",
             })
             .addClass("switch")
+            .prop("disabled", options.disabled == true)
             .appendTo($element);
 
         if (options.value !== undefined) {
@@ -715,6 +719,7 @@ export class Form implements PreparedStructure {
                 "name": options.name,
             })
             .addClass("button btn-neutral")
+            .prop("disabled", options.disabled == true)
             .appendTo($element);
 
         if (content !== undefined) {
@@ -820,8 +825,8 @@ export class Form implements PreparedStructure {
      * @param subheader Second line of the header
      * @param width Wrapper width
      */
-    public static subheader(header: string, subheader: string, width = 1): FormElement {
-        return Form.div({ value: `<b>${header}</b><br />${subheader}`, width: width, wrapper: "subheader" });
+    public static subheader(header: string, subheader: string, width = 1, name?: string, wrapper?: string): FormElement {
+        return Form.div({ value: `<b>${header}</b><br />${subheader}`, width: width, wrapper: "subheader" + (wrapper ? " " + wrapper : ""), name: name });
     }
 
     /**
@@ -937,6 +942,9 @@ export class FormElement {
             if (this.input !== undefined) this.input.attr("id", parentID + "-" + this.input.attr("id"));
             switch (this.wrapper.prop("tagName")) {
                 case "FORM-INPUT": {
+                    if (this.wrapper.attr("id"))
+                        this.wrapper.attr("id", parentID + "-" + this.wrapper.attr("id"));
+
                     for (const label of this.wrapper.find("> label")) {
                         const $subLabel = $(label);
                         $subLabel.attr("for", parentID + "-" + $subLabel.attr("for"));
@@ -964,19 +972,31 @@ export class FormElement {
 class FormAccordionElement extends FormElement { }
 
 interface SectionOptions {
+    /** Element ID, unique to the current scope */
     name?: string;
+    /** Input label text */
     label?: string;
+    /** Number of columns within the section, between 1 and 3 */
     columns?: number;
+    /** Column span, between 1 and 3 */
     width?: number;
+    /** Wrapper class, usually applied to <form-input> */
     wrapper?: string;
 }
 
 interface ElementOptions {
+    /** Element ID, unique to the current scope */
     name?: string;
+    /** Input label text */
     label?: string;
+    /** Input value, if applicable */
     value?: string | boolean | number | JQuery<HTMLElement> | ElementInputValue;
+    /** Column span, between 1 and 3 */
     width?: number;
+    /** Wrapper class, usually applied to <form-input> */
     wrapper?: string;
+    /** Whether the input should be disabled */
+    disabled?: boolean;
 }
 
 interface InputElementOptions extends ElementOptions {

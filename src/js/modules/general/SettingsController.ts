@@ -26,7 +26,7 @@ import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
 import { CustomFlagger, FlagDefinition } from "../search/CustomFlagger";
 import { InfiniteScroll } from "../search/InfiniteScroll";
 import { SearchUtilities } from "../search/SearchUtilities";
-import { ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
+import { ThumbnailEnhancer, ThumbnailPerformanceMode } from "../search/ThumbnailsEnhancer";
 import { ForumTracker } from "../subscriptions/ForumTracker";
 import { PoolTracker } from "../subscriptions/PoolTracker";
 import { SubscriptionManager } from "../subscriptions/SubscriptionManager";
@@ -245,7 +245,16 @@ export class SettingsController extends RE6Module {
                             "hover": "On Hover",
                             "always": "Always",
                         },
-                        async (data) => { await thumbnailEnhancer.pushSettings("upscale", data); }
+                        async (data) => {
+                            await thumbnailEnhancer.pushSettings("upscale", data);
+
+                            const zoomDisabled = data === ThumbnailPerformanceMode.Disabled;
+                            $("#optgeneral-gencollapse-thumb-scalingconf-hoverzoom-desc").toggleClass("input-disabled", zoomDisabled);
+                            $("#optgeneral-gencollapse-thumb-scalingconf-hoverzoom")
+                                .prop("disabled", zoomDisabled)
+                                .parent()
+                                .toggleClass("input-disabled", zoomDisabled);
+                        }
                     ),
                     Form.spacer(2),
                     Form.text(`<div class="unmargin text-center text-bold">Requires a page reload</div>`),
@@ -332,9 +341,19 @@ export class SettingsController extends RE6Module {
 
                         Form.hr(3),
 
-                        Form.subheader("Zoom on Hover", "Increases the size of the thumbnail when hovering over it", 2),
+                        Form.subheader(
+                            "Zoom on Hover",                                                                                                    // line 1
+                            "Increases the size of the thumbnail when hovering over it",                                                        // line 2
+                            2,                                                                                                                  // width
+                            "hoverzoom-desc",                                                                                                   // name
+                            thumbnailEnhancer.fetchSettings("upscale") === ThumbnailPerformanceMode.Disabled ? "input-disabled" : undefined),   // wrapper
                         Form.select(
-                            { value: thumbnailEnhancer.fetchSettings("zoom") },
+                            {
+                                name: "hoverzoom",
+                                value: thumbnailEnhancer.fetchSettings("zoom"),
+                                wrapper: thumbnailEnhancer.fetchSettings("upscale") === ThumbnailPerformanceMode.Disabled ? "input-disabled" : undefined,
+                                disabled: thumbnailEnhancer.fetchSettings("upscale") === ThumbnailPerformanceMode.Disabled,
+                            },
                             {
                                 "true": "Enabled",
                                 "false": "Disabled",
@@ -404,7 +423,8 @@ export class SettingsController extends RE6Module {
                             value: thumbnailEnhancer.fetchSettings("fav"),
                             label: "<b>Favorite Button</b><br />Adds a +favorite button when hovering over a thumbnail",
                             width: 3,
-                            wrapper: (thumbnailEnhancer.fetchSettings("ribbons") ? undefined : "input-disabled"),
+                            wrapper: (thumbnailEnhancer.fetchSettings("vote") ? undefined : "input-disabled"),
+                            disabled: !thumbnailEnhancer.fetchSettings("vote"),
                         },
                         async (data) => {
                             $("#optgeneral-gencollapse-thumb-favcache").toggleClass("display-none", !data);
@@ -493,6 +513,7 @@ export class SettingsController extends RE6Module {
                             label: "<b>Relations Ribbons</b><br />Display ribbons for parent/child relationships",
                             width: 3,
                             wrapper: (thumbnailEnhancer.fetchSettings("ribbons") ? undefined : "input-disabled"),
+                            disabled: !thumbnailEnhancer.fetchSettings("ribbons"),
                         },
                         async (data) => {
                             await thumbnailEnhancer.pushSettings("relRibbons", data);

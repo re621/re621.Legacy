@@ -72,7 +72,7 @@ export class ThumbnailEnhancer extends RE6Module {
     public async prepare(): Promise<void> {
         await super.prepare();
 
-        console.log(typeof this.fetchSettings("zoom"));
+        // Compatibility fix - old setting was a boolean flag
         if (typeof this.fetchSettings("zoom") == "boolean")
             await this.pushSettings("zoom", this.fetchSettings("zoom") + "");
 
@@ -171,7 +171,6 @@ export class ThumbnailEnhancer extends RE6Module {
             .on("keydown.re621.thumbnailzoom", null, "shift", () => {
                 if (keydown) return;
                 keydown = true;
-                console.log("keydown");
                 this.postContainer.attr("data-thumb-zoom", ThumbnailZoomMode.Enabled);
             })
             .on("keyup.re621.thumbnailzoom", null, "shift", () => {
