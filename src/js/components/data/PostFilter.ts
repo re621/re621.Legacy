@@ -1,3 +1,4 @@
+import { PostRating } from "../api/responses/APIPost";
 import { Post } from "./Post";
 import { Tag } from "./Tag";
 
@@ -56,7 +57,7 @@ export class PostFilter {
                     result = this.compareNumbers(post.getId(), id, filter.comparable);
                     break;
                 case PostFilterType.Rating:
-                    const rating = content;
+                    const rating = PostRating.fromValue(content);
                     result = post.getRating() === rating;
                     break;
                 case PostFilterType.Score:

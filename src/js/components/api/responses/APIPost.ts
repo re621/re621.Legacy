@@ -83,14 +83,18 @@ export enum PostRating {
     Explicit = "e"
 }
 
+enum PostRatingAliases {
+    "s" = PostRating.Safe,
+    "safe" = PostRating.Safe,
+    "q" = PostRating.Questionable,
+    "questionable" = PostRating.Questionable,
+    "e" = PostRating.Explicit,
+    "explicit" = PostRating.Explicit,
+}
+
 export namespace PostRating {
     export function fromValue(value: string): PostRating {
-        for (const key of Object.keys(PostRating)) {
-            if (PostRating[key] === value) {
-                return PostRating[key];
-            }
-        }
-        return undefined;
+        return PostRatingAliases[value];
     }
 
     export function toString(postRating: PostRating): string {
