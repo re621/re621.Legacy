@@ -14,23 +14,13 @@ namespace TIME_PERIOD {
     export function now(): number {
         return new Date().getTime();
     }
-}
-
-/**
- * Common utilities used in other modules
- */
-export class Util {
-
-    private static uniqueIDs: string[] = [];
-
-    public static Time = TIME_PERIOD;
 
     /**
      * Converts time from absolute format to relative (i.e. "5 minutes ago")
      * @param time Time to process
      * @returns Relative time string
      */
-    public static timeAgo(time: number | string | Date): string {
+    export function ago(time: number | string | Date): string {
         switch (typeof time) {
             case 'string':
                 time = +new Date(time);
@@ -78,6 +68,17 @@ export class Util {
             }
         return time + "";
     }
+
+}
+
+/**
+ * Common utilities used in other modules
+ */
+export class Util {
+
+    private static uniqueIDs: string[] = [];
+
+    public static Time = TIME_PERIOD;
 
     /**
      * Downloads the provided object as a JSON file

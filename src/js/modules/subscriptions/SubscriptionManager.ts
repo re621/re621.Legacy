@@ -25,7 +25,7 @@ export class SubscriptionManager extends RE6Module {
     private static updateInProgress = false;
 
     /** This much time must pass before the script assumes that a previous update failed. */
-    private static updateTimeout = 60 * 1000;
+    private static updateTimeout = Util.Time.MINUTE * 5;
 
     /** Map of active subscription modules */
     private trackers = new Map<string, TrackerData>();
@@ -417,9 +417,10 @@ export class SubscriptionManager extends RE6Module {
         if (time.now === undefined) time.now = Util.Time.now();  // "now" setting is used for debugging purposes only
 
         return Promise.resolve(
-            !SubscriptionManager.updateInProgress                                                                   // Update process isn't running already
-            && (time.now - time.lastUpdate) >= time.updateInterval                                                  // Update interval passed
-            && (time.updateStarted === 0 || time.now - time.updateStarted >= SubscriptionManager.updateTimeout)     // Previous update completed or failed
+            !SubscriptionManager.updateInProgress && (                                                              // Update process isn't running already
+                (time.now - time.lastUpdate) >= time.updateInterval ||                                              // Update interval passed
+                (time.updateStarted !== 0 && time.now - time.updateStarted >= SubscriptionManager.updateTimeout)    // Previous update completed or failed
+            )
         );
     }
 
@@ -428,7 +429,6 @@ export class SubscriptionManager extends RE6Module {
         SubscriptionManager.updateInProgress = true;
         const now = Util.Time.now(),
             prevUpdate = await this.fetchSettings("lastUpdate", true);
-        await this.pushSettings("lastUpdate", now);
         await this.pushSettings("updateStarted", now);
         SubscriptionManager.trigger("timerRefresh");
 
@@ -454,26 +454,35 @@ export class SubscriptionManager extends RE6Module {
             }
         }
 
-        this.trackers.forEach(async (trackerData) => {
-            Debug.log("SubM: redrawing [update]");
-            trackerData.tabElement.attr("data-updates", "0");
-            trackerData.tabElement.attr("data-loading", "true");
-            trackerData.content[0].innerHTML = "";
-            const status = $("<div>")
-                .addClass("subscription-load-status")
-                .html("Loading . . .")
-                .appendTo(trackerData.content);
+        const updateThreads: Promise<any>[] = [];
+        for (const trackerData of this.trackers.values()) {
+            updateThreads.push(new Promise(async (resolve) => {
+                Debug.log("SubM: redrawing [update]");
+                trackerData.tabElement.attr("data-updates", "0");
+                trackerData.tabElement.attr("data-loading", "true");
+                trackerData.content[0].innerHTML = "";
+                const status = $("<div>")
+                    .addClass("subscription-load-status")
+                    .html("Loading . . .")
+                    .appendTo(trackerData.content);
 
-            const cache = trackerData.instance.getCache();
-            await cache.load();
-            await cache.update(prevUpdate, status);
+                const cache = trackerData.instance.getCache();
+                await cache.load();
+                await cache.update(prevUpdate, status);
 
-            trackerData.tabElement.attr("data-loading", "false");
-            this.executeReloadEvent(trackerData);
-        });
+                trackerData.tabElement.attr("data-loading", "false");
+                await this.executeReloadEvent(trackerData);
+                resolve();
+            }));
+        }
+
+        await Promise.all(updateThreads);
 
         SubscriptionManager.updateInProgress = false;
-        await this.pushSettings("updateStarted", 0);
+        await this.pushSettings({
+            "lastUpdate": now,
+            "updateStarted": 0,
+        });
         SubscriptionManager.trigger("timerRefresh");
 
         this.$openSubsButton.attr("data-loading", "false");
@@ -514,28 +523,30 @@ export class SubscriptionManager extends RE6Module {
     /** Reloads the timers on the info page */
     private async executeTimerRefreshEvent(): Promise<void> {
         this.refreshSettings();
-        const time = await this.fetchSettings(["lastUpdate", "updateInterval"], true);
+        const time = await this.fetchSettings(["lastUpdate", "updateInterval", "updateStarted"], true);
 
-        $("span#subscriptions-lastupdate").html(getLastUpdateText(time.lastUpdate));
-        $("span#subscriptions-nextupdate").html(getNextUpdateText(time.lastUpdate, time.updateInterval));
+        $("span#subscriptions-lastupdate").html(getLastUpdateText(time.lastUpdate, time.updateStarted));
+        $("span#subscriptions-nextupdate").html(getNextUpdateText(time.lastUpdate, time.updateInterval, time.updateStarted));
 
         $("i#subscription-action-update").toggleClass("fa-spin", SubscriptionManager.updateInProgress);
 
         /** Formats the last update timestamp into a readable date */
-        function getLastUpdateText(lastUpdate: number): string {
+        function getLastUpdateText(lastUpdate: number, updateStarted: number): string {
             if (SubscriptionManager.updateInProgress) return "In progress . . .";
+            else if (updateStarted !== 0) return Util.Time.ago(updateStarted) + " (interrupted)";
             else if (lastUpdate === 0) return "Never";
-            else return Util.timeAgo(lastUpdate);
+            else return Util.Time.ago(lastUpdate);
         }
 
         /** Formats the next update timestamp into a readable date */
-        function getNextUpdateText(lastUpdate: number, updateInterval: number): string {
+        function getNextUpdateText(lastUpdate: number, updateInterval: number, updateStarted: number): string {
             const now = Util.Time.now();
 
             if (SubscriptionManager.updateInProgress) return "In progress . . .";
-            else if (lastUpdate === 0) return Util.timeAgo(now + updateInterval);
+            if (updateStarted !== 0) return Util.Time.ago(updateStarted + SubscriptionManager.updateTimeout + Util.Time.MINUTE);
+            else if (lastUpdate === 0) return Util.Time.ago(now + updateInterval);
             else if ((lastUpdate + updateInterval) < now) return "Less than a minute";
-            else return Util.timeAgo(lastUpdate + updateInterval + (60 * 1000));
+            else return Util.Time.ago(lastUpdate + updateInterval + Util.Time.MINUTE);
         }
     }
 
@@ -690,7 +701,7 @@ export class SubscriptionManager extends RE6Module {
             cache = subscription.instance.getCache();
 
         const $content = $("<div>").addClass("subscription-update" + (data.new ? " new" : ""));
-        const timeAgo = Util.timeAgo(timestamp);
+        const timeAgo = Util.Time.ago(timestamp);
         const timeString = new Date(timestamp).toLocaleString();
 
         // ===== Create Elements =====

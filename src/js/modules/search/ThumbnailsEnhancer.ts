@@ -550,7 +550,7 @@ export class ThumbnailEnhancer extends RE6Module {
 
         function parseDate(input: string): string {
             const date = new Date(input.split(": ").pop().replace(" ", "T").replace(" ", ""));
-            return `<span title="` + date.toLocaleString() + `">` + Util.timeAgo(date) + `</span>`;
+            return `<span title="` + date.toLocaleString() + `">` + Util.Time.ago(date) + `</span>`;
         }
 
         function resolveRatio(force = false): void {
