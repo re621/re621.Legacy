@@ -2,6 +2,7 @@ import { E621 } from "../../components/api/E621";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { XM } from "../../components/api/XM";
+import { FavoriteCache } from "../../components/data/FavoriteCache";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
@@ -459,23 +460,22 @@ export class SettingsController extends RE6Module {
                             input.prop("disabled", "true");
 
                             const status = $("#favcache-status").html(`<i class="fas fa-circle-notch fa-spin"></i> Processing favorites`);
-                            const cache = new Set<number>();
+                            FavoriteCache.clear();
                             let result: APIPost[] = [],
                                 page = 0;
 
                             do {
                                 page++;
                                 result = await E621.Posts.get<APIPost>({ tags: `fav:${User.getUsername()} status:any`, page: page, limit: 320 }, 500);
-                                status.html(`<i class="fas fa-circle-notch fa-spin"></i> Processing favorites: ${cache.size} results`);
-                                for (const entry of result) cache.add(entry.id);
+                                for (const entry of result) FavoriteCache.add(entry.id);
+                                status.html(`<i class="fas fa-circle-notch fa-spin"></i> Processing favorites: ${FavoriteCache.size()} results`);
                             } while (result.length == 320);
 
-                            thumbnailEnhancer.setFavCache(cache);
                             await thumbnailEnhancer.pushSettings({
                                 "favSync": Util.Time.now(),
                                 "favReq": false,
                             });
-                            status.html(`<i class="far fa-check-circle"></i> Cache reloaded: ${thumbnailEnhancer.getFavCacheSize()} entries`);
+                            status.html(`<i class="far fa-check-circle"></i> Cache reloaded: ${FavoriteCache.size()} entries`);
 
                             input.prop("disabled", "false");
                         }),
@@ -489,7 +489,7 @@ export class SettingsController extends RE6Module {
                                 const now = Util.Time.now();
                                 let updateRequired = thumbnailEnhancer.fetchSettings("favReq");
                                 if (now - thumbnailEnhancer.fetchSettings("favSync") > Util.Time.DAY) {
-                                    updateRequired = (await User.getCurrentSettings()).favorite_count !== thumbnailEnhancer.getFavCacheSize();
+                                    updateRequired = (await User.getCurrentSettings()).favorite_count !== FavoriteCache.size();
                                     thumbnailEnhancer.pushSettings({
                                         "favSync": now,
                                         "favReq": updateRequired,
@@ -501,7 +501,7 @@ export class SettingsController extends RE6Module {
                                         <i class="far fa-times-circle"></i> 
                                         <span style="color:gold">Reset required</span>: Favorites cache integrity failed
                                     `);
-                                else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified: ${thumbnailEnhancer.getFavCacheSize()} entries`)
+                                else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified: ${FavoriteCache.size()} entries`)
                             },
                             width: 3,
                         }),

@@ -1,6 +1,7 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { E621 } from "../../components/api/E621";
 import { XM } from "../../components/api/XM";
+import { FavoriteCache } from "../../components/data/FavoriteCache";
 import { PageDefintion } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -29,8 +30,6 @@ export class ThumbnailEnhancer extends RE6Module {
 
     private postsLoading: JQuery<HTMLElement>;      // Overlay to mask posts reflow
     private postContainer: JQuery<HTMLElement>;     // Element containing posts - div#page used for compatibility
-
-    private static favoritesList: Set<number>;
 
     private static zoomPaused = false;
 
@@ -136,17 +135,6 @@ export class ThumbnailEnhancer extends RE6Module {
     public destroy(): void {
         super.destroy();
         ThumbnailEnhancer.off("pauseHoverActions.main")
-    }
-
-    public async execute(): Promise<void> {
-        ThumbnailEnhancer.favoritesList = new Set<number>(JSON.parse(window.localStorage.getItem("re621.favorites") || "[]"));
-
-        ThumbnailEnhancer.on("favorite.main", (event, data) => {
-            ThumbnailEnhancer.favoritesList = new Set<number>(JSON.parse(window.localStorage.getItem("re621.favorites") || "[]"));
-            if (data.action) ThumbnailEnhancer.favoritesList.add(data.id);
-            else ThumbnailEnhancer.favoritesList.delete(data.id);
-            window.localStorage.setItem("re621.favorites", JSON.stringify(Array.from(ThumbnailEnhancer.favoritesList)));
-        });
     }
 
     /**
@@ -257,22 +245,6 @@ export class ThumbnailEnhancer extends RE6Module {
         this.postContainer.attr("data-thumb-rel-ribbons", state + "");
     }
 
-    /** Returns the saved favorites cache */
-    public getFavCache(): Set<number> {
-        return ThumbnailEnhancer.favoritesList;
-    }
-
-    /** Sets and saves the favorites cache */
-    public setFavCache(cache: Set<number>): void {
-        ThumbnailEnhancer.favoritesList = cache;
-        window.localStorage.setItem("re621.favorites", JSON.stringify(Array.from(ThumbnailEnhancer.favoritesList)));
-    }
-
-    /** Returns the size of the favorites cache */
-    public getFavCacheSize(): number {
-        return ThumbnailEnhancer.favoritesList.size;
-    }
-
     /**
      * Converts the thumbnail into an enhancer-ready format
      * @param $article JQuery element `article.post-preview`
@@ -308,7 +280,7 @@ export class ThumbnailEnhancer extends RE6Module {
             .appendTo($link);
 
         // Favorite state
-        let isFavorited = ThumbnailEnhancer.favoritesList.has(postID);
+        let isFavorited = FavoriteCache.has(postID);
         $article.attr("data-is-favorited", isFavorited + "");
 
         // States and Ribbons
@@ -408,12 +380,12 @@ export class ThumbnailEnhancer extends RE6Module {
             if (isFavorited) {
                 isFavorited = false;
                 E621.Favorite.id(postID).delete();
-                ThumbnailEnhancer.trigger("favorite", { id: postID, action: false });
+                FavoriteCache.remove(postID);
                 $favorite.removeClass("score-favorite");
             } else {
                 isFavorited = true;
                 E621.Favorites.post({ "post_id": postID });
-                ThumbnailEnhancer.trigger("favorite", { id: postID, action: true });
+                FavoriteCache.add(postID);
                 $favorite.addClass("score-favorite");
             }
             $article.attr("data-is-favorited", isFavorited + "");

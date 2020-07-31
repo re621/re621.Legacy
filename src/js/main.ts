@@ -4,6 +4,7 @@
  */
 
 // Load Modules
+import { FavoriteCache } from "./components/data/FavoriteCache";
 import { ModuleController } from "./components/ModuleController";
 import { DomUtilities } from "./components/structure/DomUtilities";
 import { Debug } from "./components/utility/Debug";
@@ -81,6 +82,8 @@ DomUtilities.createStructure().then(async () => {
     await Debug.init();
     await Patcher.run();
     await Sync.init();
+
+    await FavoriteCache.init();
 
     // This code is pretty fragile. It's also what makes the rest of the project work.
     // It is dependent on the previous step, which runs when the document fully loads
