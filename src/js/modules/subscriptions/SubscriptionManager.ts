@@ -244,14 +244,14 @@ export class SubscriptionManager extends RE6Module {
             Form.section({ name: "settings", columns: 2, width: 2 }, [
                 Form.div({ value: "Cache Size" }),
                 Form.input(
-                    { value: this.fetchSettings("cacheSize"), pattern: "^(1?[0-9][0-9]|200)$" },
+                    { value: this.fetchSettings("cacheSize"), pattern: "^([1-9][0-9]|[12][0-9]{2}|3[01][0-9]|320)$" },
                     async (data, input) => {
                         if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
                         await this.pushSettings("cacheSize", parseInt(data));
                     }
                 ),
                 Form.div({
-                    value: `<div class="unmargin">Number of items kept in the update cache. Must be at least 10, but no more than 200. Large values may lead to performance drops.</div>`,
+                    value: `<div class="unmargin">Number of items kept in the update cache. Must be at least 10, but no more than 320. Large values may lead to performance drops.</div>`,
                     width: 2
                 }),
                 Form.spacer(2),
