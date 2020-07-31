@@ -1,4 +1,5 @@
 import { PostRating } from "../api/responses/APIPost";
+import { FavoriteCache } from "./FavoriteCache";
 import { Post } from "./Post";
 import { Tag } from "./Tag";
 
@@ -49,27 +50,26 @@ export class PostFilter {
             const content = filter.content;
             switch (filter.type) {
                 case PostFilterType.Flag:
-                    const flags = content;
-                    result = post.getFlags() === flags;
+                    // TODO I don't think that this is right
+                    result = post.getFlags() === content;
                     break;
                 case PostFilterType.Id:
-                    const id = parseInt(content);
-                    result = this.compareNumbers(post.getId(), id, filter.comparable);
+                    result = this.compareNumbers(post.getId(), parseInt(content), filter.comparable);
                     break;
                 case PostFilterType.Rating:
-                    const rating = PostRating.fromValue(content);
-                    result = post.getRating() === rating;
+                    result = post.getRating() === PostRating.fromValue(content);
                     break;
                 case PostFilterType.Score:
-                    const score = parseInt(content);
-                    result = this.compareNumbers(post.getScoreCount(), score, filter.comparable);
+                    result = this.compareNumbers(post.getScoreCount(), parseInt(content), filter.comparable);
                     break;
                 case PostFilterType.Tags:
                     result = this.tagsMatchesFilter(post, content);
                     break;
                 case PostFilterType.Uploader:
-                    const uploader = content;
-                    result = post.getUploaderID() === parseInt(uploader);
+                    result = post.getUploaderID() === parseInt(content);
+                    break;
+                case PostFilterType.Fav:
+                    result = FavoriteCache.has(post.getId());
                     break;
             }
             //invert the result, depending on if the filter started with a -
@@ -157,7 +157,8 @@ export enum PostFilterType {
     Score = "score:",
     Rating = "rating:",
     Uploader = "uplaoder:",
-    Flag = "flag:"
+    Flag = "flag:",
+    Fav = "fav:",
 }
 
 export namespace PostFilterType {
