@@ -1,6 +1,5 @@
 import { E621 } from "../../components/api/E621";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
-import { APIPost } from "../../components/api/responses/APIPost";
 import { XM } from "../../components/api/XM";
 import { FavoriteCache } from "../../components/data/FavoriteCache";
 import { Hotkeys } from "../../components/data/Hotkeys";
@@ -449,12 +448,7 @@ export class SettingsController extends RE6Module {
                             await thumbnailEnhancer.pushSettings("vote", data);
                             if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleHoverVote(data);
 
-                            const favcheck = $("input#optgeneral-gencollapse-thumb-favbutton")
-
-                            if (!data && favcheck.is(":checked"))
-                                favcheck[0].click();
-
-                            favcheck
+                            $("input#optgeneral-gencollapse-thumb-favbutton")
                                 .prop("disabled", !data)
                                 .parent()
                                 .toggleClass("input-disabled", !data);
@@ -472,63 +466,10 @@ export class SettingsController extends RE6Module {
                             disabled: !thumbnailEnhancer.fetchSettings("vote"),
                         },
                         async (data) => {
-                            $("#optgeneral-gencollapse-thumb-favcache").toggleClass("display-none", !data);
                             await thumbnailEnhancer.pushSettings("fav", data);
                             if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleHoverFav(data);
                         }
                     ),
-                    Form.section({ name: "favcache", columns: 3, width: 3, wrapper: thumbnailEnhancer.fetchSettings("fav") ? undefined : "display-none" }, [
-                        Form.subheader("Reset Favorites Cache", "", 2),
-                        Form.button({ name: "reset", value: "Reset", }, async (data, input) => {
-                            input.prop("disabled", "true");
-
-                            const status = $("#favcache-status").html(`<i class="fas fa-circle-notch fa-spin"></i> Processing favorites`);
-                            FavoriteCache.clear();
-                            let result: APIPost[] = [],
-                                page = 0;
-
-                            do {
-                                page++;
-                                result = await E621.Posts.get<APIPost>({ tags: `fav:${User.getUsername()} status:any`, page: page, limit: 320 }, 500);
-                                for (const entry of result) FavoriteCache.add(entry.id);
-                                status.html(`<i class="fas fa-circle-notch fa-spin"></i> Processing favorites: ${FavoriteCache.size()} results`);
-                            } while (result.length == 320);
-
-                            await thumbnailEnhancer.pushSettings({
-                                "favSync": Util.Time.now(),
-                                "favReq": false,
-                            });
-                            status.html(`<i class="far fa-check-circle"></i> Cache reloaded: ${FavoriteCache.size()} entries`);
-
-                            input.prop("disabled", "false");
-                        }),
-                        Form.div({
-                            value: async (element) => {
-                                const $status = $("<div>")
-                                    .html(`<i class="fas fa-circle-notch fa-spin"></i> Initializing . . .`)
-                                    .attr("id", "favcache-status")
-                                    .appendTo(element);
-
-                                const now = Util.Time.now();
-                                let updateRequired = thumbnailEnhancer.fetchSettings("favReq");
-                                if (now - thumbnailEnhancer.fetchSettings("favSync") > Util.Time.DAY) {
-                                    updateRequired = (await User.getCurrentSettings()).favorite_count !== FavoriteCache.size();
-                                    thumbnailEnhancer.pushSettings({
-                                        "favSync": now,
-                                        "favReq": updateRequired,
-                                    });
-                                }
-
-                                if (updateRequired)
-                                    $status.html(`
-                                        <i class="far fa-times-circle"></i> 
-                                        <span style="color:gold">Reset required</span>: Favorites cache integrity failed
-                                    `);
-                                else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified: ${FavoriteCache.size()} entries`)
-                            },
-                            width: 3,
-                        }),
-                    ]),
                     Form.spacer(3),
 
                     // Ribbons
@@ -1089,126 +1030,174 @@ export class SettingsController extends RE6Module {
         return new Form({ name: "optmisc", columns: 3, width: 3 }, [
             Form.header("Miscellaneous", 3),
 
-            Form.section({ name: "export", columns: 3, width: 3 }, [
+            Form.accordion({ name: "misccollapse", columns: 3, width: 3, active: 0 }, [
 
-                // Import from File
-                Form.section({ name: "file", columns: 3, width: 3 }, [
-                    Form.header("Import / Export from file"),
-                    Form.div({ value: `<div class="notice float-right">Import subscription data from file</div>`, width: 2 }),
+                Form.accordionTab({ name: "cache", label: "Cache", columns: 3, width: 3 }, [
 
-                    Form.text("Export to File"),
-                    Form.button(
-                        { value: "Export", width: 2 },
-                        () => { exportToFile(); }
-                    ),
+                    Form.section({ name: "favcache", columns: 3, width: 3 }, [
 
-                    Form.text("Import from File"),
-                    Form.file(
-                        { accept: "json", width: 2 },
-                        (data) => { importFromFile(data); }
-                    ),
+                        Form.div({
+                            value: `<b>Favorites Cache</b><br />Recorded to minimize the number of API calls`,
+                            width: 2,
+                        }),
+                        Form.button({ name: "reset", value: "Reset", }, async (data, input) => {
+                            input.prop("disabled", true);
+                            await FavoriteCache.sync($("#favcache-status"));
+                            input.prop("disabled", false);
+                        }),
 
-                    Form.spacer(),
-                    Form.div({ value: `<div id="file-import-status" class="unmargin"></div>`, label: " ", width: 3 }),
+                        Form.div({
+                            value: async (element) => {
+                                const $status = $("<div>")
+                                    .attr("id", "favcache-status")
+                                    .html(`<i class="fas fa-circle-notch fa-spin"></i> Initializing . . .`)
+                                    .appendTo(element);
+
+                                if (await FavoriteCache.isSyncRequired())
+                                    $status.html(`
+                                        <i class="far fa-times-circle"></i> 
+                                        <span style="color:gold">Reset required</span>: Cache integrity failure
+                                    `);
+                                else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified: ${FavoriteCache.size()} entries`)
+                            },
+                            width: 2,
+                        }),
+                        Form.div({
+                            value: (element) => {
+                                const lastUpdate = FavoriteCache.getSyncTime();
+                                if (lastUpdate) element.html(Util.Time.format(lastUpdate));
+                                else element.html("");
+                            },
+                            wrapper: "text-center input-disabled",
+                        })
+
+                    ]),
+                    Form.spacer(3),
+
                 ]),
 
-                // eSix Extended
-                Form.section({ name: "esix", columns: 3, width: 3, wrapper: Debug.getState("enabled") ? undefined : "display-none" }, [
-                    Form.header("eSix Extended"),
-                    Form.div({ value: `<div class="notice float-right">Import the settings from eSix Extended (Legacy)</div>`, width: 2 }),
+                Form.accordionTab({ name: "export", label: "Import / Export", columns: 3, width: 3 }, [
 
-                    // From File
-                    Form.text("Select File"),
-                    Form.file(
-                        { accept: "json", width: 2 },
-                        (data) => { importE6FromFile(data); }
-                    ),
-                    Form.spacer(),
-                    Form.div({ value: `<div id="file-esix-status" class="unmargin"></div>`, label: " ", width: 3 }),
+                    // Import from File
+                    Form.section({ name: "file", columns: 3, width: 3 }, [
+                        Form.header("Import / Export from file"),
+                        Form.div({ value: `<div class="notice float-right">Import subscription data from file</div>`, width: 2 }),
 
-                    // From LocalStorage
-                    Form.text("From LocalStorage"),
-                    Form.button(
-                        { value: "Load", width: 2 },
-                        () => { importE6FromLocalStorage(); }
-                    ),
-                    Form.spacer(),
-                    Form.div({ value: `<div id="localstorage-esix-status" class="unmargin"></div>`, label: " ", width: 3 }),
+                        Form.text("Export to File"),
+                        Form.button(
+                            { value: "Export", width: 2 },
+                            () => { exportToFile(); }
+                        ),
+
+                        Form.text("Import from File"),
+                        Form.file(
+                            { accept: "json", width: 2 },
+                            (data) => { importFromFile(data); }
+                        ),
+
+                        Form.spacer(),
+                        Form.div({ value: `<div id="file-import-status" class="unmargin"></div>`, label: " ", width: 3 }),
+                    ]),
+
+                    // eSix Extended
+                    Form.section({ name: "esix", columns: 3, width: 3, wrapper: Debug.getState("enabled") ? undefined : "display-none" }, [
+                        Form.header("eSix Extended"),
+                        Form.div({ value: `<div class="notice float-right">Import the settings from eSix Extended (Legacy)</div>`, width: 2 }),
+
+                        // From File
+                        Form.text("Select File"),
+                        Form.file(
+                            { accept: "json", width: 2 },
+                            (data) => { importE6FromFile(data); }
+                        ),
+                        Form.spacer(),
+                        Form.div({ value: `<div id="file-esix-status" class="unmargin"></div>`, label: " ", width: 3 }),
+
+                        // From LocalStorage
+                        Form.text("From LocalStorage"),
+                        Form.button(
+                            { value: "Load", width: 2 },
+                            () => { importE6FromLocalStorage(); }
+                        ),
+                        Form.spacer(),
+                        Form.div({ value: `<div id="localstorage-esix-status" class="unmargin"></div>`, label: " ", width: 3 }),
+                    ]),
+
                 ]),
 
-                Form.hr(3),
-            ]),
+                // Reset Configuration
+                Form.accordionTab({ name: "reset", label: "Reset Modules", columns: 3, width: 3 }, [
 
-            // Reset Configuration
-            Form.section({ name: "reset", columns: 3, width: 3 }, [
-                Form.header("Reset Modules", 3),
-
-                Form.text(`<b>Everything</b><br />Delete settings for all modules. <b>This cannot be undone.</b>`, 2),
-                Form.button(
-                    { value: "Clear" },
-                    () => {
-                        if (confirm("Are you absolutely sure?")) {
-                            ModuleController.getAll().forEach((module) => { module.clearSettings(); });
-                            location.reload();
+                    Form.text(`<b>Everything</b><br />Delete settings for all modules. <b>This cannot be undone.</b>`, 2),
+                    Form.button(
+                        { value: "Clear" },
+                        () => {
+                            if (confirm("Are you absolutely sure?")) {
+                                ModuleController.getAll().forEach((module) => { module.clearSettings(); });
+                                location.reload();
+                            }
                         }
-                    }
-                ),
+                    ),
+                    Form.spacer(3),
 
-                Form.text(`<b>Module</b><br />Reset a specific module`, 2),
-                Form.select(
-                    { value: selectedModule },
-                    moduleSelector,
-                    (data) => { selectedModule = data; }
-                ),
+                    Form.text(`<b>Module</b><br />Reset a specific module`, 2),
+                    Form.select(
+                        { value: selectedModule },
+                        moduleSelector,
+                        (data) => { selectedModule = data; }
+                    ),
 
-                Form.text(`<div class="text-bold">Requires a page reload</div>`, 2),
-                Form.button(
-                    { value: "Reset" },
-                    () => {
-                        if (selectedModule === "none") return;
-                        ModuleController.get(selectedModule).clearSettings();
-                    }
-                ),
+                    Form.text(`<div class="text-bold">Requires a page reload</div>`, 2),
+                    Form.button(
+                        { value: "Reset" },
+                        () => {
+                            if (selectedModule === "none") return;
+                            ModuleController.get(selectedModule).clearSettings();
+                        }
+                    ),
+                    Form.spacer(3),
 
-                Form.hr(3),
-            ]),
+                ]),
 
-            // Debug Settings
-            Form.section({ name: "debug", columns: 3, width: 3 }, [
-                Form.header("Debugging Tools", 3),
+                // Debug Settings
+                Form.accordionTab({ name: "debug", label: "Debugging Tools", columns: 3, width: 3 }, [
 
-                Form.checkbox(
-                    {
-                        value: Debug.getState("enabled"),
-                        label: `<b>Debug Mode</b><br />Enable debug messages in the console log`,
-                        width: 3,
-                    },
-                    (data) => {
-                        Debug.setState("enabled", data);
-                    }
-                ),
+                    Form.checkbox(
+                        {
+                            value: Debug.getState("enabled"),
+                            label: `<b>Debug Mode</b><br />Enable debug messages in the console log`,
+                            width: 3,
+                        },
+                        (data) => {
+                            Debug.setState("enabled", data);
+                        }
+                    ),
+                    Form.spacer(3),
 
-                Form.checkbox(
-                    {
-                        value: Debug.getState("connect"),
-                        label: `<b>Connections Log</b><br />Logs all outbound connections in the console`,
-                        width: 3,
-                    },
-                    (data) => {
-                        Debug.setState("connect", data);
-                    }
-                ),
+                    Form.checkbox(
+                        {
+                            value: Debug.getState("connect"),
+                            label: `<b>Connections Log</b><br />Logs all outbound connections in the console`,
+                            width: 3,
+                        },
+                        (data) => {
+                            Debug.setState("connect", data);
+                        }
+                    ),
+                    Form.spacer(3),
 
-                Form.checkbox(
-                    {
-                        value: Debug.getState("perform"),
-                        label: `<b>Performance Metrics</b><br />Write script performance analysis into the console log`,
-                        width: 3,
-                    },
-                    (data) => {
-                        Debug.setState("perform", data);
-                    }
-                ),
+                    Form.checkbox(
+                        {
+                            value: Debug.getState("perform"),
+                            label: `<b>Performance Metrics</b><br />Write script performance analysis into the console log`,
+                            width: 3,
+                        },
+                        (data) => {
+                            Debug.setState("perform", data);
+                        }
+                    ),
+                    Form.spacer(3),
+                ]),
             ]),
         ]);
 
