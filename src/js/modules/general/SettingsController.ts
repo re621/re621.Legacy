@@ -40,6 +40,8 @@ import { Miscellaneous } from "./Miscellaneous";
  */
 export class SettingsController extends RE6Module {
 
+    private openSettingsButton: JQuery<HTMLElement>;
+
     public constructor() {
         super();
         this.registerHotkeys(
@@ -47,14 +49,30 @@ export class SettingsController extends RE6Module {
         );
     }
 
+    public getDefaultSettings(): Settings {
+        return {
+            enabled: true,
+
+            hotkeyOpenSettings: "",
+
+            newVersionAvailable: false,
+            changelog: "",
+        };
+    }
+
     public create(): void {
 
         // Create a button in the header
-        const openSettingsButton = DomUtilities.addSettingsButton({
+        this.openSettingsButton = DomUtilities.addSettingsButton({
             id: "header-button-settings",
             name: `<i class="fas fa-wrench"></i>`,
             title: "Settings",
             tabClass: "float-right",
+            attr: {
+                "data-loading": "false",
+                "data-updates": "0",
+            },
+            linkClass: "update-notification",
         });
 
         // Establish the settings window contents
@@ -67,7 +85,17 @@ export class SettingsController extends RE6Module {
                 { name: "Hotkeys", structure: this.createHotkeysTab() },
                 { name: "Features", structure: this.createFeaturesTab() },
                 // { name: "Sync", structure: this.createSyncTab() },
-                { name: "Other", structure: this.createMiscTab() },
+                {
+                    name: $("<a>")
+                        .attr({
+                            "data-loading": "false",
+                            "data-updates": "0",
+                            "id": "conf-tab-util",
+                        })
+                        .addClass("update-notification")
+                        .html("Utilities"),
+                    structure: this.createMiscTab()
+                },
                 { name: "About", structure: this.createAboutTab() },
             ]
         });
@@ -75,7 +103,7 @@ export class SettingsController extends RE6Module {
         // Create the modal
         new Modal({
             title: "Settings",
-            triggers: [{ element: openSettingsButton }],
+            triggers: [{ element: this.openSettingsButton }],
             escapable: false,
             fixed: true,
             reserveHeight: true,
@@ -103,16 +131,11 @@ export class SettingsController extends RE6Module {
         }
     }
 
-    public getDefaultSettings(): Settings {
-        return {
-            enabled: true,
-
-            hotkeyOpenSettings: "",
-
-            newVersionAvailable: false,
-            lastVersionCheck: 0,
-            changelog: "",
-        };
+    private setNotifications(count = 0, loading = false): void {
+        this.openSettingsButton.attr({
+            "data-loading": loading + "",
+            "data-updates": count,
+        });
     }
 
     /** Creates the general settings tab */
