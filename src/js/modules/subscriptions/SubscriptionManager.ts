@@ -268,6 +268,7 @@ export class SubscriptionManager extends RE6Module {
                         "24": "24 hours",
                     },
                     async (data) => {
+                        if (data < (Util.Time.MINUTE * 30)) data = Util.Time.MINUTE * 30;
                         await this.pushSettings("updateInterval", parseFloat(data) * Util.Time.HOUR);
                         SubscriptionManager.trigger("timerRefresh");
                     }
