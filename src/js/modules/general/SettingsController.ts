@@ -829,9 +829,9 @@ export class SettingsController extends RE6Module {
             Form.div({
                 value: `
                 <b>Custom Flags</b> allow you to automatically highlight posts that match specified tags. For example:<br />
-                <pre>-solo -duo -group -zero_pictured</pre>: posts that do not inlcude character count tags.<br />
+                <pre>-solo -duo -group -zero_pictured</pre>: posts that do not include character count tags.<br />
                 <pre>tagcount:&lt;5</pre>: posts with less than 5 tags<br />
-                Flag names must be unique. Duplicate tag strings are allowed, by their corresponding flag may not display.`,
+                Flag names must be unique. Duplicate tag strings are allowed, but their corresponding flag may not display.`,
                 width: 3
             }),
         ]);
