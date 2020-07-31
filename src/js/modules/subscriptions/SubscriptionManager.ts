@@ -737,7 +737,12 @@ export class SubscriptionManager extends RE6Module {
                 "title": actions.updateText(data) + "\n" + timeAgo + "\n" + timeString
             })
             .addClass("lazyload")
-            .on("error", () => { if (actions.imageRemoveOnError) $content.remove(); });
+            .on("error", () => {
+                if (!actions.imageRemoveOnError) return;
+                $content.remove();
+                cache.deleteItem(timestamp);
+                cache.save();
+            });
 
         if (actions.imageHref === undefined) $image.appendTo($imageDiv);
         else {
