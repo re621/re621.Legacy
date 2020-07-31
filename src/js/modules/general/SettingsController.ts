@@ -298,7 +298,7 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await thumbnailEnhancer.pushSettings("crop", data);
-                            thumbnailEnhancer.toggleThumbCrop(data);
+                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleThumbCrop(data);
                         }
                     ),
 
@@ -310,7 +310,7 @@ export class SettingsController extends RE6Module {
                             async (data, input) => {
                                 if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
                                 await thumbnailEnhancer.pushSettings("cropSize", data);
-                                thumbnailEnhancer.setThumbSize(data);
+                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.setThumbSize(data);
                             }
                         ),
                         Form.spacer(3),
@@ -324,7 +324,7 @@ export class SettingsController extends RE6Module {
                             },
                             async (data) => {
                                 await thumbnailEnhancer.pushSettings("cropPreserveRatio", data);
-                                thumbnailEnhancer.toggleThumbPreserveRatio(data);
+                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleThumbPreserveRatio(data);
 
                                 $("#optgeneral-gencollapse-thumb-scalingconf-cropratio-desc").toggleClass("input-disabled", data);
                                 $("#optgeneral-gencollapse-thumb-scalingconf-cropratio")
@@ -353,7 +353,7 @@ export class SettingsController extends RE6Module {
                             async (data, input) => {
                                 if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
                                 await thumbnailEnhancer.pushSettings("cropRatio", data);
-                                thumbnailEnhancer.setThumbRatio(data);
+                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.setThumbRatio(data);
                             }
                         ),
 
@@ -380,7 +380,7 @@ export class SettingsController extends RE6Module {
                             },
                             async (data) => {
                                 await thumbnailEnhancer.pushSettings("zoom", data);
-                                thumbnailEnhancer.toggleHoverZoom(data);
+                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleHoverZoom(data);
                             }
                         ),
                         Form.spacer(3),
@@ -391,7 +391,7 @@ export class SettingsController extends RE6Module {
                             async (data, input) => {
                                 if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
                                 await thumbnailEnhancer.pushSettings("zoomScale", data);
-                                thumbnailEnhancer.setZoomScale(data);
+                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.setZoomScale(data);
                             }
                         ),
                         Form.spacer(3),
@@ -404,7 +404,7 @@ export class SettingsController extends RE6Module {
                             },
                             async (data) => {
                                 await thumbnailEnhancer.pushSettings("zoomContextual", data);
-                                thumbnailEnhancer.toggleZoomContextual(data);
+                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleZoomContextual(data);
                             }
                         ),
                         Form.spacer(3),
@@ -421,7 +421,7 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await thumbnailEnhancer.pushSettings("vote", data);
-                            thumbnailEnhancer.toggleHoverVote(data);
+                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleHoverVote(data);
 
                             const favcheck = $("input#optgeneral-gencollapse-thumb-favbutton")
 
@@ -448,7 +448,7 @@ export class SettingsController extends RE6Module {
                         async (data) => {
                             $("#optgeneral-gencollapse-thumb-favcache").toggleClass("display-none", !data);
                             await thumbnailEnhancer.pushSettings("fav", data);
-                            thumbnailEnhancer.toggleHoverFav(data);
+                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleHoverFav(data);
                         }
                     ),
                     Form.section({ name: "favcache", columns: 3, width: 3, wrapper: thumbnailEnhancer.fetchSettings("fav") ? undefined : "display-none" }, [
