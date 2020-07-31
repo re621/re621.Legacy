@@ -12,7 +12,7 @@ export class InstantSearch extends RE6Module {
     private $searchbox: JQuery<HTMLElement>;
 
     public constructor() {
-        super(PageDefintion.search);
+        super(PageDefintion.search, true);
     }
 
     /**
@@ -76,8 +76,8 @@ export class InstantSearch extends RE6Module {
     protected createDOM(): void {
         const $section = $("<section>")
             .attr("id", "re-instantsearch")
+            .html("<h1>Filter</h1>")
             .insertAfter("section#search-box");
-        $("<h1>").html("Filter").appendTo($section);
         const $searchForm = $("<form>").appendTo($section);
 
         this.$searchbox = $("<input>")

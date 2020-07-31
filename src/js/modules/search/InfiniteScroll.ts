@@ -7,7 +7,7 @@ import { Post } from "../../components/data/Post";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
-import { CustomFlagger, FlagDefinition } from "./CustomFlagger";
+import { CustomFlagger } from "./CustomFlagger";
 import { InstantSearch } from "./InstantSearch";
 import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } from "./ThumbnailsEnhancer";
 
@@ -168,8 +168,7 @@ export class InfiniteScroll extends RE6Module {
         const thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer),
             upscaleMode = thumbnailEnhancer.fetchSettings<ThumbnailPerformanceMode>("upscale"),
             clickAction = thumbnailEnhancer.fetchSettings<ThumbnailClickAction>("clickAction"),
-            preserveHoverText = thumbnailEnhancer.fetchSettings<boolean>("preserveHoverText"),
-            flagData = ModuleController.get(CustomFlagger).fetchSettings<FlagDefinition[]>("flags");
+            preserveHoverText = thumbnailEnhancer.fetchSettings<boolean>("preserveHoverText");
 
         const promises: Promise<void>[] = [];
         for (const json of posts) {
@@ -177,20 +176,21 @@ export class InfiniteScroll extends RE6Module {
                 const element = PostHtml.create(json, options.lazyload, upscaleMode === ThumbnailPerformanceMode.Always);
                 const post = new Post(element);
 
-                //only append the post if it has image data
-                //if it does not it is part of the anon blacklist
+                // Only append the post if it has image data
+                // If it does not, it is part of the anon blacklist
                 if (post.getImageURL() !== undefined) {
-                    //Add post to the list of posts currently visible
-                    //This is important because InstantSearch relies on it
+
+                    // Add post to the list of posts currently visible
+                    // All modules using fetchPosts() rely on this
                     Post.appendPost(post);
 
-                    //Apply blacklist before appending, to prevent image loading
+                    // Apply blacklist before appending, to prevent image loading
                     post.applyBlacklist();
 
                     this.$postContainer.append(element);
 
                     ThumbnailEnhancer.modifyThumbnail(element, upscaleMode, clickAction, preserveHoverText);
-                    CustomFlagger.modifyThumbnail(element, flagData);
+                    CustomFlagger.modifyThumbnail(post);
                 }
 
                 resolve();

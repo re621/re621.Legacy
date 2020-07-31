@@ -102,6 +102,7 @@ export const PageDefintion = {
     popular: /^\/explore\/posts\/popular.?/,
     favorites: /^\/favorites\/?.*/,
     wiki: /^\/wiki_pages\/[0-9]+/,
+    wikiNA: /^\/wiki_pages\/show_or_new.*/,
     comments: /^\/comments\??.*/g,
     settings: /^\/users\/\d+\/edit$/g,
 };

@@ -56,10 +56,12 @@ export class FavDownloader extends RE6Module {
         super.create();
 
         this.section = $("<section>")
-            .attr("id", "fav-downloader-box")
-            .attr("data-fixed", this.fetchSettings("fixedSection") + "")
+            .attr({
+                "id": "fav-downloader-box",
+                "data-fixed": this.fetchSettings("fixedSection") + "",
+            })
+            .html(`<h1>Download</h1>`)
             .appendTo("aside#sidebar");
-        $("<h1>").html("Download").appendTo(this.section);
 
         const usernameMatch = /^(?:.*\s)?fav:([^\s]+)\s.*$/g.exec($("input#tags").val() + "");
         if (usernameMatch == null || usernameMatch[1] == undefined) return;
@@ -68,8 +70,7 @@ export class FavDownloader extends RE6Module {
         // Download all files
         this.actButton = $("<a>")
             .html("Download All")
-            .addClass("pool-download-button")
-            .addClass("button btn-neutral")
+            .addClass("pool-download-button button btn-neutral")
             .appendTo(this.section)
             .on("click", (event) => {
                 event.preventDefault();
@@ -79,13 +80,11 @@ export class FavDownloader extends RE6Module {
         // Contains general info about the download
         this.infoText = $("<div>")
             .addClass("download-info")
-            .html("")
             .appendTo(this.section);
 
         // Contains info about currently downloaded files
         this.infoFile = $("<div>")
             .addClass("download-file")
-            .html("")
             .appendTo(this.section);
     }
 

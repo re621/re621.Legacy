@@ -1,4 +1,5 @@
 import { Danbooru } from "../../components/api/Danbooru";
+import { Blacklist } from "../../components/data/Blacklist";
 import { PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
 import { PostFilter } from "../../components/data/PostFilter";
@@ -17,7 +18,7 @@ export class BlacklistEnhancer extends RE6Module {
     private static $list: JQuery<HTMLElement>;
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.post]);
+        super([PageDefintion.search, PageDefintion.post], true);
     }
 
     /**
@@ -50,7 +51,7 @@ export class BlacklistEnhancer extends RE6Module {
         $disableAllButton
             .off("click.danbooru")
             .on("click.re621", () => {
-                for (const filter of User.getBlacklist().values())
+                for (const filter of Blacklist.get().values())
                     filter.setEnabled(false);
                 BlacklistEnhancer.applyBlacklist();
                 $disableAllButton.hide();
@@ -59,7 +60,7 @@ export class BlacklistEnhancer extends RE6Module {
         $enableAllbutton
             .off("click.danbooru")
             .on("click.re621", () => {
-                for (const filter of User.getBlacklist().values())
+                for (const filter of Blacklist.get().values())
                     filter.setEnabled(true);
                 BlacklistEnhancer.applyBlacklist();
                 $disableAllButton.show();
@@ -112,11 +113,11 @@ export class BlacklistEnhancer extends RE6Module {
 
         if (currentBlacklist.indexOf(tagname) === -1) {
             currentBlacklist.push(tagname);
-            User.getInstance().addBlacklistFilter(tagname);
+            Blacklist.createFilter(tagname);
             Danbooru.notice("Adding " + tagname + " to blacklist");
         } else {
             currentBlacklist = currentBlacklist.filter(e => e !== tagname);
-            User.getInstance().removeBlacklistFilter(tagname);
+            Blacklist.deleteFilter(tagname);
             Danbooru.notice("Removing " + tagname + " from blacklist");
         }
         await User.setSettings({ blacklisted_tags: currentBlacklist.join("\n") });
@@ -143,7 +144,7 @@ export class BlacklistEnhancer extends RE6Module {
         // Remove already added entries
         BlacklistEnhancer.$list.html("");
 
-        const blacklist = User.getBlacklist();
+        const blacklist = Blacklist.get();
 
         let filtered = new Set<number>();
         for (const [filterString, filter] of blacklist.entries()) {

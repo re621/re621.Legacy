@@ -33,16 +33,9 @@ export class XMConnect {
 
                         URL.revokeObjectURL(response["responseURL"]);
                     }
-                    // console.log(response);
                     details[response.event](response);
                 });
             });
-        /*
-        .then((response: GMxmlHttpRequestChromeEvent) => {
-            if (details.responseType === "arraybuffer")
-                response.response = new Uint8Array(Object.values(response.response)).buffer;
-            details[response.event](response);
-        }); */
     };
 
     /**

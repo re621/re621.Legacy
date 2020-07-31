@@ -61,7 +61,9 @@ header#top {
             padding: 6px 10px;
         }
 
-        menu.submenu {
+        // Technically, this would be menu.submenu
+        // But sometimes, that class gets added to the wrong element
+        menu:last-child {
             grid-row: 2;
             grid-column: 1;
             grid-area: 2 / 1 / 2 / 4;
@@ -140,6 +142,7 @@ div#c-favorites div#a-index {
     section#content {
         margin-left: unset;
         padding-left: unset;
+        position: relative;
     }
 }
 

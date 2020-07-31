@@ -5,7 +5,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 export class SearchUtilities extends RE6Module {
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.post]);
+        super([PageDefintion.search, PageDefintion.post, PageDefintion.favorites]);
         this.registerHotkeys(
             { keys: "hotkeyFocusSearch", fnct: this.focusSearchbar },
             { keys: "hotkeyRandomPost", fnct: this.randomPost },
@@ -17,14 +17,6 @@ export class SearchUtilities extends RE6Module {
             { keys: "hotkeySwitchModeAddSet", fnct: this.switchModeAddSet },
             { keys: "hotkeySwitchModeRemSet", fnct: this.switchModeRemSet },
         );
-
-        $("select#mode-box-mode").on("change", () => {
-            console.log("trigger 1");
-        });
-
-        $("select#mode-box-mode").on("change.danbooru", () => {
-            console.log("trigger 2");
-        });
     }
 
     public getDefaultSettings(): Settings {
@@ -36,6 +28,8 @@ export class SearchUtilities extends RE6Module {
 
             collapseCategories: true,
             categoryData: [],
+
+            persistentTags: "",
 
             hotkeyFocusSearch: "q",
             hotkeyRandomPost: "r",
@@ -73,6 +67,19 @@ export class SearchUtilities extends RE6Module {
         if (this.fetchSettings("collapseCategories") === true && Page.matches(PageDefintion.post)) {
             this.collapseTagCategories();
         }
+
+        // Append custom string to searches
+        const persistentTags = this.fetchSettings<string>("persistentTags").trim().toLowerCase();
+        if (persistentTags !== "" && Page.matches([PageDefintion.search, PageDefintion.post, PageDefintion.favorites])) {
+            const $tagInput = $("input#tags");
+            $tagInput.val(($tagInput.val() + "").replace(persistentTags, ""));
+
+            $("section#search-box form").on("submit", () => {
+                $tagInput.val($tagInput.val() + " " + persistentTags);
+                return true;
+            });
+        }
+
     }
 
     /**
@@ -106,24 +113,19 @@ export class SearchUtilities extends RE6Module {
      * Records which tag categories the user has collapsed.
      */
     private async collapseTagCategories(): Promise<void> {
-        let storedCats: string[] = await this.fetchSettings("categoryData", true);
-        $("section#tag-list .tag-list-header").each((index, element) => {
+        let storedCats = new Set<string>(await this.fetchSettings<string[]>("categoryData", true));
+        for (const element of $("section#tag-list .tag-list-header").get()) {
             const $header = $(element),
                 cat = $header.attr("data-category");
-            if (storedCats.indexOf(cat) !== -1) $header.get(0).click();
+            if (storedCats.has(cat)) $header.get(0).click();
 
             $header.on("click.danbooru", async () => {
-                storedCats = await this.fetchSettings("categoryData", true);
-                if ($header.hasClass("hidden-category")) {
-                    storedCats.push(cat);
-                } else {
-                    const index = storedCats.indexOf(cat);
-                    if (index !== -1) storedCats.splice(index, 1);
-                }
-                await this.pushSettings("categoryData", storedCats);
+                storedCats = new Set<string>(await this.fetchSettings<string[]>("categoryData", true));
+                if ($header.hasClass("hidden-category")) storedCats.add(cat);
+                else storedCats.delete(cat);
+                await this.pushSettings("categoryData", Array.from(storedCats));
             });
-        });
-
+        }
     }
 
     /** Sets the focus on the search bar */
@@ -141,8 +143,14 @@ export class SearchUtilities extends RE6Module {
     private switchModeEdit(): void { SearchUtilities.switchMode("edit"); }
     private switchModeAddFav(): void { SearchUtilities.switchMode("add-fav"); }
     private switchModeRemFav(): void { SearchUtilities.switchMode("remove-fav"); }
-    private switchModeAddSet(): void { SearchUtilities.switchMode("add-to-set"); }
-    private switchModeRemSet(): void { SearchUtilities.switchMode("remove-from-set"); }
+    private switchModeAddSet(): void {
+        SearchUtilities.switchMode("add-to-set");
+        $("#set-id").focus();
+    }
+    private switchModeRemSet(): void {
+        SearchUtilities.switchMode("remove-from-set");
+        $("#set-id").focus();
+    }
 
     private static switchMode(mode: string): void {
         $("select#mode-box-mode").val(mode);

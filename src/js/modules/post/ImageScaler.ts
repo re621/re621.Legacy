@@ -3,14 +3,6 @@ import { PageDefintion } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { Form } from "../../components/structure/Form";
-
-const IMAGE_SIZES = [
-    { value: "sample", name: "Sample" },
-    { value: "fit-vertical", name: "Fill Screen" },
-    { value: "fit-horizontal", name: "Fit Horizontally" },
-    { value: "original", name: "Original" },
-];
 
 /**
  * Handles scaling post images in an intelligent way
@@ -23,7 +15,7 @@ export class ImageScaler extends RE6Module {
     private resizeSelector: JQuery<HTMLElement>;
 
     public constructor() {
-        super(PageDefintion.post);
+        super(PageDefintion.post, true);
         this.registerHotkeys(
             { keys: "hotkeyScale", fnct: () => { this.setScale(); } }
         );
@@ -56,35 +48,27 @@ export class ImageScaler extends RE6Module {
         const resizeButtonContainer = $("#image-resize-cycle").empty();
         this.setImageSize(this.fetchSettings("size"));
 
-        const resizeForm = new Form(
-            {
-                id: "resize-image",
-                parent: "#image-resize-cycle",
-                columns: 2,
-            },
-            [
-                {
-                    id: "scale",
-                    type: "select",
-                    data: IMAGE_SIZES,
-                    value: this.fetchSettings("size"),
-                },
-                {
-                    id: "fullsize",
-                    type: "div",
-                    value: `<a href="` + this.post.getImageURL() + `" class="button btn-neutral" id="fullsize-image">Fullscreen</a>`,
-                }
-            ]
-        );
+        this.resizeSelector = $("<select>")
+            .html(`
+                <option value="sample">Sample</option>
+                <option value="fit-vertical">Fill Screen</option>
+                <option value="fit-horizontal">Fit Horizontally</option>
+                <option value="original">Original</option>
+            `)
+            .val(this.fetchSettings("size"))
+            .addClass("button btn-neutral")
+            .appendTo(resizeButtonContainer)
+            .change(async (event, save) => {
+                const size = $(event.target).val() + "";
+                this.setImageSize(size);
+                if (save !== false) await this.pushSettings("size", size);
+            });
 
-        resizeButtonContainer.append(resizeForm.get());
-        this.resizeSelector = resizeForm.getInputList().get("scale");
-
-        this.resizeSelector.change(async (event, save) => {
-            const size = $(event.target).val() + "";
-            this.setImageSize(size);
-            if (save !== false) await this.pushSettings("size", size);
-        });
+        $("<a>")
+            .attr("href", this.post.getImageURL())
+            .addClass("button btn-neutral")
+            .html("Fullscreen")
+            .appendTo(resizeButtonContainer);
 
         this.image.click(async () => {
             if (!this.fetchSettings("clickScale") || await Danbooru.Note.TranslationMode.active()) return;

@@ -8,8 +8,25 @@ div#page div#c-favorites div#posts {
     justify-content: space-between;
 }
 
-article.post-preview,
-div.post-preview {
+div#postContainerOverlay {
+    position: absolute;
+    top: -0.5rem;
+    left: -1rem;
+    right: -0.5rem;
+    bottom: -0.5rem;
+    z-index: 10000;
+    backdrop-filter: blur(0.5rem);
+    border-radius: 6px;
+
+    span {
+        display: block;
+        text-align: center;
+        padding-top: 25vh;
+        font-size: 3rem;
+    }
+}
+
+.post-preview {
     overflow: visible;
 
     box-shadow: none;
@@ -25,12 +42,12 @@ div.post-preview {
         box-shadow: 0px 0px 0px 5px #ffffff60;
     }
 
-    &>a.preview-box,
-    &>div.preview>a.preview-box {
+    a.preview-box {
         display: inline-block;
         color: white;
 
         outline: 0;
+        width: 100%;
 
         position: relative;
 
@@ -56,53 +73,82 @@ div.post-preview {
             display: flex;
         }
 
-        div.preview-extras {
-            display: none;
-
-            flex-flow: wrap;
-            justify-content: center;
-
-            opacity: 0.9;
-            font-size: 0.8rem;
-            line-height: 1rem;
-            font-weight: bold;
-
-            width: stretch;
+        div.preview-voting {
+            display: block;
             position: absolute;
-            overflow-wrap: break-word;
-            cursor: default;
+            z-index: 100;
+            bottom: -1rem;
+            left: 0;
+            right: 0;
+            height: 1rem;
+            white-space: nowrap;
 
-            min-width: fit-content;
+            visibility: hidden;
 
-            span {
+            button.voteButton {
+                position: relative;
+                bottom: 1.5rem;
+
                 margin: 0 0.25rem;
-                white-space: nowrap;
+                padding: 0.25rem 0.75rem 0rem;
+                border-radius: 0.75rem 0.75rem 0 0;
+                box-shadow: 0 -5px 10px #ffffff10;
 
-                &>span {
-                    cursor: pointer;
+                &.score-favorite {
+                    color: #c3a816;
+                }
+
+                &.favButton {
+                    position: absolute;
+                    left: -0.25rem;
+                    bottom: 0;
+                    padding: 0.25rem 0.35rem 0.125rem 0.125rem !important;
+                    border-radius: 0 0.75rem 0 0 !important;
+                    font-size: 1rem;
                 }
             }
         }
 
-        div.preview-voting {
+        &.loading div.preview-extras {
             display: none;
-            position: absolute;
-            left: -2rem;
-            top: 0;
-            bottom: 0;
-            grid-template-rows: repeat(auto-fill, minmax(25%, 2rem));
-            margin-top: 0.25rem;
-            z-index: 90;
+        }
+    }
 
-            button.voteButton {
-                box-sizing: content-box;
-                margin: 0.125rem 0;
-                border-radius: 6px 0 0 6px;
-                outline: 0;
+    div.preview-extras {
+        display: none;
+
+        flex-flow: wrap;
+        justify-content: center;
+
+        opacity: 0.9;
+        font-size: 0.8rem;
+        line-height: 1rem;
+        font-weight: bold;
+
+        width: stretch;
+        position: absolute;
+        overflow-wrap: break-word;
+        cursor: default;
+
+        min-width: fit-content;
+
+        span {
+            margin: 0 0.25rem;
+            white-space: nowrap;
+
+            &>span {
+                cursor: pointer;
             }
         }
+    }
 
-        &.loading div.preview-extras {
+    div.desc {
+        height: 1rem;
+
+        .post-score-faves {
+            color: #c3a816;
+        }
+        .post-score-extras {
             display: none;
         }
     }
@@ -277,11 +323,31 @@ div#page[data-thumb-vote=true] {
         &>a.preview-box,
         &>div.preview>a.preview-box {
             div.preview-voting {
-                display: grid;
+                visibility: visible;
             }
         }
     }
 }
+
+// Favorite Button
+div#page[data-thumb-fav=true] {
+
+    article.post-preview[data-is-favorited=true] {
+        button.voteButton.favButton {
+            visibility: visible;
+        }
+    }
+
+}
+
+div#page:not([data-thumb-fav=true]) {
+
+    div.preview-voting > button.favButton {
+        display: none;
+    }
+}
+
+
 
 // Zoom on Hover
 div#page.mode-view,
@@ -291,49 +357,49 @@ div#page div#a-popular {
     &[data-thumb-zoom=true] div#posts-container,
     &[data-thumb-zoom=true] div#c-favorites div#posts {
 
-        article.post-preview.loaded:hover,
-        div.post-preview.loaded:hover {
+        .post-preview.loaded:hover {
             position: relative;
             overflow: visible;
 
-            &>a.preview-box,
-            &>div.preview>a.preview-box {
-                transform: translate(-50%, -50%);
-
+            a.preview-box {
                 position: absolute;
-                left: 50%;
-                top: 50%;
+                left: -50%;
                 z-index: 10;
 
                 min-width: 100%;
-                min-height: 100%;
 
+                width: fit-content;
+    
                 &::before {
                     display: none;
                 }
-
+    
                 img {
                     object-fit: cover;
                     width: unset;
                     height: unset;
-
+    
                     max-width: calc(var(--thumbnail-size, 150px) * var(--thumbnail-zoom, 2));
                     max-height: calc(calc(var(--thumbnail-size, 150px) * var(--thumbnail-ratio, 1.3)) * var(--thumbnail-zoom, 2));
-
+    
                     min-width: 100%;
                     min-height: 100%;
                 }
-
-                div.preview-extras {
-                    display: flex;
-                }
             }
-
+    
+            div.preview-extras {
+                display: flex;
+            }
+    
             div.desc {
                 display: none;
             }
         }
     }
+}
+
+div#favcache-status {
+    padding-left: 1.5rem;
 }
 
 // Replace Placeholder Images

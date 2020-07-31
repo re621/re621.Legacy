@@ -1,16 +1,26 @@
 import { XM } from "../api/XM";
 
-/**
- * Common utilities used in other modules
- */
-export class Util {
+enum TIME_PERIOD {
+    SECOND = 1000,
+    MINUTE = 60 * TIME_PERIOD.SECOND,
+    HOUR = 60 * TIME_PERIOD.MINUTE,
+    DAY = 24 * TIME_PERIOD.HOUR,
+    WEEK = 7 * TIME_PERIOD.DAY,
+};
+
+namespace TIME_PERIOD {
+
+    /** Returns current timestamp. Alias for `new Date().getTime();` */
+    export function now(): number {
+        return new Date().getTime();
+    }
 
     /**
      * Converts time from absolute format to relative (i.e. "5 minutes ago")
      * @param time Time to process
      * @returns Relative time string
      */
-    public static timeAgo(time: number | string | Date): string {
+    export function ago(time: number | string | Date): string {
         switch (typeof time) {
             case 'string':
                 time = +new Date(time);
@@ -58,6 +68,17 @@ export class Util {
             }
         return time + "";
     }
+
+}
+
+/**
+ * Common utilities used in other modules
+ */
+export class Util {
+
+    private static uniqueIDs: string[] = [];
+
+    public static Time = TIME_PERIOD;
 
     /**
      * Downloads the provided object as a JSON file
@@ -160,7 +181,7 @@ export class Util {
      * @param altMode Alternative mode
      * @returns Array of smaller arrays of specified size
      */
-    public static chunkArray(input: any[], size: number, altMode = false): any[] {
+    public static chunkArray<T>(input: T[], size: number, altMode = false): T[][] {
         const result = [];
         if (altMode) {
             result[0] = input.slice(0, size);
@@ -214,7 +235,7 @@ export class Util {
 
     /**
      * Creates a random string of letters, to be used as an ID.  
-     * Don't rely on this for anything important.
+     * Collisions may occur; use `makeUniqueID()` if that is a concern.
      * @param length String length
      */
     public static makeID(length = 8): string {
@@ -227,11 +248,37 @@ export class Util {
     }
 
     /**
-     * Shorthand for `new Date().getTime()`
-     * @returns Current timestamp
+     * Creates a random string of letters, to be used as an ID.  
+     * Unlike `makeID()`, the results are cached to prevent collisions.
+     * @param length String length
      */
-    public static getTime(): number {
-        return new Date().getTime();
+    public static makeUniqueID(length = 8): string {
+        let uniqueID: string;
+        do { uniqueID = Util.makeID(length); }
+        while (Util.uniqueIDs.includes(uniqueID));
+        Util.uniqueIDs.push(uniqueID);
+        return uniqueID;
+    }
+
+    /**
+     * Formats the provided date as a string in YYYY-MM-DD HH:SS format
+     * @param date Date to format. If none is provided, formats current date
+     */
+    public static formatTime(date = new Date()): string {
+        const parts = {
+            year: "" + date.getFullYear(),
+            month: "" + (date.getMonth() + 1),
+            day: "" + date.getDate(),
+            hours: "" + date.getHours(),
+            minutes: "" + date.getMinutes(),
+            seconds: "" + date.getSeconds(),
+        }
+
+        for (const id in parts) {
+            if (parts[id].length < 2) parts[id] = "0" + parts[id];
+        }
+
+        return parts.year + "-" + parts.month + "-" + parts.day + " " + parts.hours + ":" + parts.minutes + ":" + parts.seconds;
     }
 
     /**

@@ -20,7 +20,6 @@ export class HeaderCustomizer extends RE6Module {
 
     private addTabButton: JQuery<HTMLElement>;
     private addTabModal: Modal;
-    private addTabForm: Form;
 
     // Temporary workaround for forum updates notification
     private hasForumUpdates: boolean;
@@ -89,35 +88,6 @@ export class HeaderCustomizer extends RE6Module {
         this.createDOM();
 
         // Configuration Form Listeners
-        this.addTabForm.get().on("re621:form:submit", (event, data) => {
-            event.preventDefault();
-            this.addTab({
-                name: data.get("name"),
-                title: data.get("title"),
-                href: data.get("href"),
-            });
-            this.addTabForm.reset();
-        });
-
-        this.updateTabForm.get().on("re621:form:submit", (event, data) => {
-            event.preventDefault();
-            this.updateTab(
-                this.updateTabModal.getActiveTrigger().parent(),
-                {
-                    name: data.get("name"),
-                    title: data.get("title"),
-                    href: data.get("href"),
-                }
-            );
-            this.updateTabModal.close();
-        });
-
-        this.updateTabForm.getInputList().get("delete").click(event => {
-            event.preventDefault();
-            this.deleteTab(this.updateTabModal.getActiveTrigger().parent());
-            this.updateTabModal.close();
-        });
-
         this.addTabModal.getElement().on("dialogopen", () => { this.enableEditingMode(); });
         this.addTabModal.getElement().on("dialogclose", () => { this.disableEditingMode(); });
     }
@@ -146,12 +116,8 @@ export class HeaderCustomizer extends RE6Module {
         this.$menu.addClass("custom");
 
         // Fetch stored data
-        this.fetchSettings("tabs").forEach(value => {
-            this.createTabElement({
-                name: value.name,
-                href: value.href,
-            });
-        });
+        for (const value of this.fetchSettings<HeaderTab[]>("tabs"))
+            this.createTabElement(value);
 
         this.$menu.sortable({
             axis: "x",
@@ -174,51 +140,73 @@ export class HeaderCustomizer extends RE6Module {
             tabClass: "float-left",
         });
 
-        this.addTabForm = new Form(
-            {
-                id: "header-addtab",
-                parent: "div#modal-container",
-            },
+        const newTabForm = new Form(
+            { name: "header-customizer-new" },
             [
-                { id: "name", label: "Name", type: "input", required: true, pattern: "[\\S ]+", },
-                { id: "title", label: "Hover", type: "input" },
-                { id: "href", label: "Link", type: "input" },
-                { id: "submit", value: "Submit", type: "submit", stretch: "column" },
-                { id: "help-hr", type: "hr" },
-                { id: "help-var", value: "Available variables:", type: "div" },
-                { id: "help-var-userid", label: "Unique ID", value: "%userid%", type: "copy" },
-                { id: "help-var-username", label: "Username", value: "%username%", type: "copy" },
-                { id: "info-hr", type: "hr" },
-                { id: "info-div", value: "Drag-and-drop tabs to re-arrange.<br />Click on a tab to edit it.", type: "div" },
-            ]
+                Form.input({ label: "Name", name: "name", value: "", required: true, pattern: "[\\S ]+" }),
+                Form.input({ label: "Hover", value: "", name: "title" }),
+                Form.input({ label: "Link", value: "", name: "href" }),
+                Form.button({ value: "Submit", type: "submit" }),
+                Form.hr(),
+                Form.div({ value: "Available variables:" }),
+                Form.copy({ label: "Unique ID", value: "%userid%" }),
+                Form.copy({ label: "Username", value: "%username%" }),
+                Form.hr(),
+                Form.div({ value: "Drag-and-drop tabs to re-arrange.<br />Click on a tab to edit it." }),
+            ],
+            (values, form) => {
+                this.addTab({
+                    name: values["name"],
+                    title: values["title"],
+                    href: values["href"],
+                });
+                form.reset();
+            }
         );
 
         this.addTabModal = new Modal({
             title: "Add Tab",
             triggers: [{ element: this.addTabButton }],
-            content: this.addTabForm.get(),
+            content: Form.placeholder(),
+            structure: newTabForm,
             position: { my: "right top", at: "right top" }
         });
 
         // Tab Update Interface
         this.updateTabForm = new Form(
-            {
-                id: "header-updatetab",
-                parent: "div#modal-container",
-            },
+            { name: "header-customizer-update" },
             [
-                { id: "name", label: "Name", type: "input", required: true, pattern: "[\\S ]+", },
-                { id: "title", label: "Hover", type: "input" },
-                { id: "href", label: "Link", type: "input" },
-                { id: "delete", value: "Delete", type: "button" },
-                { id: "submit", value: "Update", type: "submit" },
-            ]
+                Form.input({ label: "Name", name: "name", value: "", required: true, pattern: "[\\S ]+" }),
+                Form.input({ label: "Hover", value: "", name: "title" }),
+                Form.input({ label: "Link", value: "", name: "href" }),
+                Form.button(
+                    { value: "Delete", type: "button" },
+                    () => {
+                        this.deleteTab(this.updateTabModal.getActiveTrigger().parent());
+                        this.updateTabModal.close();
+                    }
+                ),
+                Form.button({ value: "Update", type: "submit" }),
+            ],
+            (values, form) => {
+                this.updateTab(
+                    this.updateTabModal.getActiveTrigger().parent(),
+                    {
+                        name: values["name"],
+                        title: values["title"],
+                        href: values["href"],
+                    }
+                );
+                this.updateTabModal.close();
+                form.reset();
+            }
         );
 
         this.updateTabModal = new Modal({
             title: "Update Tab",
             triggers: [{ element: $("menu.main li a") }],
-            content: this.updateTabForm.get(),
+            content: Form.placeholder(),
+            structure: this.updateTabForm,
             position: { my: "center top", at: "center top" },
             triggerMulti: true,
             disabled: true,
@@ -255,31 +243,36 @@ export class HeaderCustomizer extends RE6Module {
         this.updateTabModal.disable();
     }
 
+    /** Toggles the red dot next to the forum tab */
+    public async toggleForumDot(state: boolean): Promise<boolean> {
+        this.$menu.attr("data-forumdot", "" + state);
+        return this.pushSettings("forumUpdateDot", state);
+    }
+
     /**
      * Creates a new styled tab
      * @param config Tab configuration
      */
-    private createTabElement(config: HeaderTab, triggerUpdate?: boolean): HeaderTabElement {
+    private createTabElement(config: HeaderTab, triggerUpdate = false): HeaderTabElement {
         config = this.parseHeaderTabConfig(config);
-        if (triggerUpdate === undefined) triggerUpdate = false;
 
         const $tab = $(`<li>`)
-            .attr("data-name", config.name)
-            .attr("data-title", config.title)
-            .attr("data-href", config.href)
-            .appendTo("menu.main");
+            .attr({
+                "data-name": config.name,
+                "data-title": config.title,
+                "data-href": config.href
+            })
+            .appendTo(this.$menu);
         const $link = $("<a>")
             .html(this.processTabVariables(config.name))
-            .attr("title", this.processTabVariables(config.title))
             .appendTo($tab);
 
-        if (config.href != "")
-            $link.attr("href", this.processTabVariables(config.href));
-        if (config.href === "/forum_topics" && this.fetchSettings("forumUpdateDot") && this.hasForumUpdates)
+        if (config.title !== "") $link.attr("title", this.processTabVariables(config.title));
+        if (config.href !== "") $link.attr("href", this.processTabVariables(config.href));
+
+        if (config.href === "/forum_topics" && this.hasForumUpdates)
             $link.addClass("tab-has-updates");
 
-        if (config.controls) { $tab.addClass("configurable"); }
-        if (config.class) { $tab.addClass(config.class); }
         if (triggerUpdate) { this.saveNavbarSettings(); }
 
         if (Page.getURL().pathname.includes(this.processTabVariables(config.href).split("?")[0])) {
@@ -297,9 +290,6 @@ export class HeaderCustomizer extends RE6Module {
         if (config.name === undefined) config.name = "New Tab";
         if (config.href === undefined) config.href = "";
         if (config.title === undefined) config.title = "";
-
-        if (config.class === undefined) config.class = "";
-        if (config.controls === undefined) config.controls = true;
 
         return config;
     }
@@ -367,6 +357,7 @@ export class HeaderCustomizer extends RE6Module {
         await this.pushSettings("tabs", tabData);
     }
 
+    /** Emulates a click on the header tab with the specified index */
     private static openTabNum(num: number): void {
         const tabs = ModuleController.get(HeaderCustomizer).$menu.find<HTMLElement>("li > a");
         if (num > tabs.length) return;
@@ -387,9 +378,4 @@ interface HeaderTab {
     href?: string;
     /** Hover text */
     title?: string;
-
-    /** Extra class to append to the tab */
-    class?: string;
-    /** Should the tab have controls in editing mode */
-    controls?: boolean;
 }

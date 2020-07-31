@@ -5,7 +5,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
-import { Tabbed } from "../../components/structure/Tabbed";
+import { Tabbed, TabContent } from "../../components/structure/Tabbed";
 import { Debug } from "../../components/utility/Debug";
 import { Sync } from "../../components/utility/Sync";
 import { Util } from "../../components/utility/Util";
@@ -25,7 +25,7 @@ export class SubscriptionManager extends RE6Module {
     private static updateInProgress = false;
 
     /** This much time must pass before the script assumes that a previous update failed. */
-    private static updateTimeout = 60 * 1000;
+    private static updateTimeout = Util.Time.MINUTE * 5;
 
     /** Map of active subscription modules */
     private trackers = new Map<string, TrackerData>();
@@ -40,7 +40,7 @@ export class SubscriptionManager extends RE6Module {
     private modal: Modal;
 
     /** Tabs inside the modal window */
-    private tabs: Tabbed;
+    private tabs: JQuery<HTMLElement>;
 
     public constructor() {
         super();
@@ -117,7 +117,7 @@ export class SubscriptionManager extends RE6Module {
         });
 
         // Create structure for the subscription interface
-        const content = [];
+        const content: TabContent[] = [];
 
         let tabIndex = 0;
         this.trackers.forEach((data, name) => {
@@ -149,15 +149,15 @@ export class SubscriptionManager extends RE6Module {
             // Create subscribe buttons
             this.addSubscribeButtons(data.instance);
 
-            content.push({ name: data.tabElement, page: data.content });
+            content.push({ name: data.tabElement, content: data.content });
             tabIndex++;
         });
-        content.push({ name: "Info", page: this.buildInfoPage().get() });
+        content.push({ name: "Info", content: this.buildInfoPage().render() });
 
         this.tabs = new Tabbed({
             name: "notifications-tabs",
             content: content
-        });
+        }).render();
 
         // Create the modal
         this.modal = new Modal({
@@ -165,7 +165,7 @@ export class SubscriptionManager extends RE6Module {
             triggers: [{ element: this.$openSubsButton }],
             escapable: false,
             reserveHeight: true,
-            content: this.tabs.get(),
+            content: this.tabs,
             position: { my: "right top", at: "right top" }
         });
 
@@ -194,19 +194,19 @@ export class SubscriptionManager extends RE6Module {
                 let index = 0;
                 for (const sub of this.trackers) {
                     if (parseInt(sub[1].tabElement.attr("data-updates")) > 0) {
-                        this.tabs.get().tabs("option", "active", index);
+                        this.tabs.tabs("option", "active", index);
                         break;
                     }
                     index++;
                 }
             }
-            this.clearTabNotification(this.tabs.get().tabs("option", "active"));
+            this.clearTabNotification(this.tabs.tabs("option", "active"));
             window.setTimeout(() => {
-                this.clearTabNotification(this.tabs.get().tabs("option", "active"));
+                this.clearTabNotification(this.tabs.tabs("option", "active"));
             }, 1000);
         });
 
-        this.tabs.get().on("tabsactivate.onUpdate", (event, tabProperties) => {
+        this.tabs.on("tabsactivate.onUpdate", (event, tabProperties) => {
             if (SubscriptionManager.updateInProgress) return;
             this.clearTabNotification(tabProperties.newTab.index());
         });
@@ -223,81 +223,92 @@ export class SubscriptionManager extends RE6Module {
 
             if (await this.updateRequired()) SubscriptionManager.trigger("update");
             else SubscriptionManager.trigger("timerRefresh");
-        }, TIME_PERIOD.MINUTE);
+        }, Util.Time.MINUTE);
     }
 
     /**
      * Builds a subscription settings page, containing various controls
      */
     private buildInfoPage(): Form {
-        return new Form({ id: "subscriptions-controls", columns: 2, parent: "div#modal-container" }, [
+        return new Form({ name: "subscriptions-controls", columns: 2, width: 2 }, [
             // List and manage active subscriptions
             Form.header("Subscriptions"),
             makeSubSection(this.getTracker("TagTracker").instance, 2),
             makeSubSection(this.getTracker("PoolTracker").instance, 1),
             makeSubSection(this.getTracker("ForumTracker").instance, 1),
             makeSubSection(this.getTracker("CommentTracker").instance, 2),
-            Form.hr(),
+            Form.hr(2),
 
             // Settings
             Form.header("Settings"),
-            Form.section({ id: "settings", columns: 2 }, [
+            Form.section({ name: "settings", columns: 2, width: 2 }, [
+                Form.div({ value: "Cache Size" }),
                 Form.input(
-                    "cache-size", this.fetchSettings("cacheSize"), "Cache Size", "column", { pattern: "^(1?[0-9][0-9]|200)$" },
-                    async (event, data) => {
-                        if (!(event.target as HTMLInputElement).checkValidity()) return;
+                    { value: this.fetchSettings("cacheSize"), pattern: "^([1-9][0-9]|[12][0-9]{2}|3[01][0-9]|320)$" },
+                    async (data, input) => {
+                        if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
                         await this.pushSettings("cacheSize", parseInt(data));
                     }
                 ),
-                Form.spacer("column"),
-                Form.div(`<div class="unmargin">Number of items kept in the update cache. Must be at least 10, but no more than 200. Large values may lead to performance drops.</div>`, "mid"),
-                Form.spacer("mid"),
+                Form.div({
+                    value: `<div class="unmargin">Number of items kept in the update cache. Must be at least 10, but no more than 320. Large values may lead to performance drops.</div>`,
+                    width: 2
+                }),
+                Form.spacer(2),
 
+                Form.div({ value: "Update Interval" }),
                 Form.select(
-                    "update-interval", this.fetchSettings("updateInterval") / TIME_PERIOD.HOUR, "Update Interval",
-                    [
-                        { value: 0.5, name: "30 minutes" },
-                        { value: 1, name: "1 hour" },
-                        { value: 6, name: "6 hours" },
-                        { value: 12, name: "12 hours" },
-                        { value: 24, name: "24 hours" },
-                    ],
-                    "mid",
-                    async (event, data) => {
-                        await this.pushSettings("updateInterval", parseFloat(data) * TIME_PERIOD.HOUR);
+                    { value: this.fetchSettings("updateInterval") / Util.Time.HOUR },
+                    {
+                        // "0.1": "6 minutes",
+                        "0.5": "30 minutes",
+                        "1": "1 hour",
+                        "6": "6 hours",
+                        "12": "12 hours",
+                        "24": "24 hours",
+                    },
+                    async (data) => {
+                        if (data < (Util.Time.MINUTE * 30)) data = Util.Time.MINUTE * 30;
+                        await this.pushSettings("updateInterval", parseFloat(data) * Util.Time.HOUR);
                         SubscriptionManager.trigger("timerRefresh");
                     }
                 ),
-                Form.div(`<div class="unmargin">How often should the subscriptions be checked for updates.</div>`, "mid"),
-                Form.spacer("mid"),
+                Form.div({ value: `<div class="unmargin">How often should the subscriptions be checked for updates.</div>`, width: 2 }),
+                Form.spacer(2),
 
+                Form.div({ value: "Cache Expiration" }),
                 Form.select(
-                    "update-expiration", this.fetchSettings("cacheMaxAge") / TIME_PERIOD.WEEK, "Cache expiration",
-                    [
-                        { value: 0, name: "Never" },
-                        { value: 7, name: "1 week" },
-                        { value: 2, name: "2 weeks" },
-                        { value: 4, name: "1 month" },
-                        { value: 24, name: "6 months" },
-                    ],
-                    "mid",
-                    async (event, data) => {
-                        await this.pushSettings("cacheMaxAge", parseInt(data) * TIME_PERIOD.WEEK);
+                    { value: this.fetchSettings("cacheMaxAge") / Util.Time.WEEK },
+                    {
+                        "0": "Never",
+                        "7": "1 week",
+                        "2": "2 weeks",
+                        "4": "1 month",
+                        "24": "6 months",
+                    },
+                    async (data) => {
+                        await this.pushSettings("cacheMaxAge", parseInt(data) * Util.Time.WEEK);
                         SubscriptionManager.trigger("timerRefresh");
                     }
                 ),
-                Form.div(`<div class="unmargin">Updates older than this are removed automatically</div>`, "mid"),
+                Form.div({ value: `<div class="unmargin">Updates older than this are removed automatically</div>`, width: 2 }),
 
             ]),
-            Form.hr(),
+            Form.hr(2),
 
             // Status and Controls
-            Form.section({ id: "status", columns: 2 }, [
-                Form.header("Other"),
-                Form.div($("<span>").attr("id", "subscriptions-lastupdate").html("Initializing . . ."), "mid", "Last Update:"),
-                Form.div($("<span>").attr("id", "subscriptions-nextupdate").html("Initializing . . ."), "mid", "Next Update:"),
+            Form.section({ name: "status", columns: 2 }, [
+                Form.header("Other", 2),
+
+                Form.div({ value: "Last Update" }),
+                Form.div({ value: $("<span>").attr("id", "subscriptions-lastupdate").html("Initializing . . .") }),
+
+                Form.div({ value: "Next Update" }),
+                Form.div({ value: $("<span>").attr("id", "subscriptions-nextupdate").html("Initializing . . .") }),
+
                 Form.button(
-                    "triggerupdate", `<i class="fas fa-sync-alt fa-xs fa-spin" id="subscription-action-update"></i> Manual Update`, undefined, "column", () => {
+                    { value: `<i class="fas fa-sync-alt fa-xs fa-spin" id="subscription-action-update"></i> Manual Update` },
+                    () => {
                         if (SubscriptionManager.updateInProgress) {
                             Danbooru.notice("Update is already in progress");
                             return;
@@ -306,28 +317,56 @@ export class SubscriptionManager extends RE6Module {
                         SubscriptionManager.trigger("update");
                     }
                 ),
+
                 Form.button(
-                    "clear-cache", "Clear Cache", undefined, "column", () => {
+                    { value: "Clear Cache" },
+                    () => {
                         this.trackers.forEach(async (subscription) => {
                             await subscription.instance.getCache().clear();
                             subscription.content[0].innerHTML = "";
                         });
                     }
                 ),
-            ], undefined, "mid"),
+            ]),
         ]);
 
         /** Creates a form section that lists currently subscribed items */
         function makeSubSection(instance: SubscriptionTracker, columns: number): FormElement {
             const $subsSection = $("<div>").addClass("subscriptions-manage-list col-" + columns),
-                data = instance.fetchSettings<Subscription>("data");
-            Object.keys(data).forEach((key) => {
-                formatSubSectionEntry(instance, key, data[key]).appendTo($subsSection);
-            });
+                $badge = $("<span>");
 
-            return Form.subsection({ id: Util.makeID(), columns: 2, collapseBadge: Object.keys(data).length }, instance.getName(), [
-                Form.div($subsSection, "mid"),
-            ], undefined, "mid");
+            executeSubUpdateEvent();
+
+            XM.Storage.addListener(
+                "re621." + instance.getSettingsTag(),
+                () => {
+                    Debug.log(`SubM: Subscriptions updated`);
+                    executeSubUpdateEvent();
+                }
+            );
+
+            return Form.collapse({ title: instance.getName(), columns: 2, width: 2, badge: $badge }, [
+                Form.div({ value: $subsSection, width: 2 }),
+            ]);
+
+            async function executeSubUpdateEvent(): Promise<void> {
+                const subData = await instance.fetchSettings<Subscription>("data", true);
+                $subsSection.html("");
+                sortSubscriptionKeys(subData).forEach((key) => {
+                    formatSubSectionEntry(instance, key, subData[key]).appendTo($subsSection);
+                });
+                $badge.html(Object.keys(subData).length + "");
+            }
+
+            function sortSubscriptionKeys(unordered: any): string[] {
+                return Object.keys(unordered)
+                    .sort((a, b) => {
+                        const aName = unordered[a].name ? unordered[a].name.toLowerCase() : "zzz_undefined";
+                        const bName = unordered[b].name ? unordered[b].name.toLowerCase() : "zzz_undefined";
+                        if (aName == bName) return 0;
+                        return aName < bName ? -1 : 1;
+                    });
+            }
         }
 
         /** Creates and returns an entry for the `makeSubSection()` method */
@@ -338,9 +377,9 @@ export class SubscriptionManager extends RE6Module {
             let currentlySubbed = true;
             const heart = $("<i>").addClass("fas fa-heart");
             $("<a>")
+                .addClass("sub-manage-unsub")
                 .append(heart)
                 .appendTo(output)
-                .addClass("sub-manage-unsub")
                 .on("click", async (event): Promise<void> => {
                     event.preventDefault();
                     const subData = await instance.fetchSettings<Subscription>("data", true);
@@ -375,21 +414,21 @@ export class SubscriptionManager extends RE6Module {
      */
     private async updateRequired(): Promise<boolean> {
         const time = await this.fetchSettings(["lastUpdate", "updateStarted", "now", "updateInterval"], true);
-        if (time.now === undefined) time.now = Util.getTime();  // "now" setting is used for debugging purposes only
+        if (time.now === undefined) time.now = Util.Time.now();  // "now" setting is used for debugging purposes only
 
         return Promise.resolve(
-            !SubscriptionManager.updateInProgress                                                                   // Update process isn't running already
-            && (time.now - time.lastUpdate) >= time.updateInterval                                                  // Update interval passed
-            && (time.updateStarted === 0 || time.now - time.updateStarted >= SubscriptionManager.updateTimeout)     // Previous update completed or failed
+            !SubscriptionManager.updateInProgress && (                                                              // Update process isn't running already
+                (time.now - time.lastUpdate) >= time.updateInterval ||                                              // Update interval passed
+                (time.updateStarted !== 0 && time.now - time.updateStarted >= SubscriptionManager.updateTimeout)    // Previous update completed or failed
+            )
         );
     }
 
     /** Loads new subscription data into tracker cache */
     private async executeUpdateEvent(): Promise<void> {
         SubscriptionManager.updateInProgress = true;
-        const now = Util.getTime(),
+        const now = Util.Time.now(),
             prevUpdate = await this.fetchSettings("lastUpdate", true);
-        await this.pushSettings("lastUpdate", now);
         await this.pushSettings("updateStarted", now);
         SubscriptionManager.trigger("timerRefresh");
 
@@ -403,7 +442,6 @@ export class SubscriptionManager extends RE6Module {
             if (syncData === null) await Sync.upload();
             else {
                 const time = new Date(syncData["timestamp"] + "Z").getTime();
-                console.log(time, Sync.timestamp, time > Sync.timestamp);
                 if (time > Sync.timestamp) {
                     Debug.log("SYNC: downloading remote")
                     await ModuleController.get(CommentTracker).pushSettings("data", syncData.data.CommentTracker);
@@ -416,33 +454,42 @@ export class SubscriptionManager extends RE6Module {
             }
         }
 
-        this.trackers.forEach(async (trackerData) => {
-            Debug.log("SubM: redrawing [update]");
-            trackerData.tabElement.attr("data-updates", "0");
-            trackerData.tabElement.attr("data-loading", "true");
-            trackerData.content[0].innerHTML = "";
-            const status = $("<div>")
-                .addClass("subscription-load-status")
-                .html("Loading . . .")
-                .appendTo(trackerData.content);
+        const updateThreads: Promise<any>[] = [];
+        for (const trackerData of this.trackers.values()) {
+            updateThreads.push(new Promise(async (resolve) => {
+                Debug.log("SubM: redrawing [update]");
+                trackerData.tabElement.attr("data-updates", "0");
+                trackerData.tabElement.attr("data-loading", "true");
+                trackerData.content[0].innerHTML = "";
+                const status = $("<div>")
+                    .addClass("subscription-load-status")
+                    .html("Loading . . .")
+                    .appendTo(trackerData.content);
 
-            const cache = trackerData.instance.getCache();
-            await cache.load();
-            await cache.update(prevUpdate, status);
+                const cache = trackerData.instance.getCache();
+                await cache.load();
+                await cache.update(prevUpdate, status);
 
-            trackerData.tabElement.attr("data-loading", "false");
-            this.executeReloadEvent(trackerData);
-        });
+                trackerData.tabElement.attr("data-loading", "false");
+                await this.executeReloadEvent(trackerData);
+                resolve();
+            }));
+        }
+
+        await Promise.all(updateThreads);
 
         SubscriptionManager.updateInProgress = false;
-        await this.pushSettings("updateStarted", 0);
+        await this.pushSettings({
+            "lastUpdate": now,
+            "updateStarted": 0,
+        });
         SubscriptionManager.trigger("timerRefresh");
 
         this.$openSubsButton.attr("data-loading", "false");
         this.refreshHeaderNotifications();
 
         if (this.modal.isOpen()) {
-            const activeTab = this.tabs.get().tabs("option", "active");
+            const activeTab = this.tabs.tabs("option", "active");
             window.setTimeout(() => { this.clearTabNotification(activeTab); }, 1000);
         }
     }
@@ -468,7 +515,7 @@ export class SubscriptionManager extends RE6Module {
         this.refreshHeaderNotifications();
 
         if (this.modal.isOpen()) {
-            const activeTab = this.tabs.get().tabs("option", "active");
+            const activeTab = this.tabs.tabs("option", "active");
             window.setTimeout(() => { this.clearTabNotification(activeTab); }, 1000);
         }
     }
@@ -476,28 +523,30 @@ export class SubscriptionManager extends RE6Module {
     /** Reloads the timers on the info page */
     private async executeTimerRefreshEvent(): Promise<void> {
         this.refreshSettings();
-        const time = await this.fetchSettings(["lastUpdate", "updateInterval"], true);
+        const time = await this.fetchSettings(["lastUpdate", "updateInterval", "updateStarted"], true);
 
-        $("span#subscriptions-lastupdate").html(getLastUpdateText(time.lastUpdate));
-        $("span#subscriptions-nextupdate").html(getNextUpdateText(time.lastUpdate, time.updateInterval));
+        $("span#subscriptions-lastupdate").html(getLastUpdateText(time.lastUpdate, time.updateStarted));
+        $("span#subscriptions-nextupdate").html(getNextUpdateText(time.lastUpdate, time.updateInterval, time.updateStarted));
 
         $("i#subscription-action-update").toggleClass("fa-spin", SubscriptionManager.updateInProgress);
 
         /** Formats the last update timestamp into a readable date */
-        function getLastUpdateText(lastUpdate: number): string {
+        function getLastUpdateText(lastUpdate: number, updateStarted: number): string {
             if (SubscriptionManager.updateInProgress) return "In progress . . .";
+            else if (updateStarted !== 0) return Util.Time.ago(updateStarted) + " (interrupted)";
             else if (lastUpdate === 0) return "Never";
-            else return Util.timeAgo(lastUpdate);
+            else return Util.Time.ago(lastUpdate);
         }
 
         /** Formats the next update timestamp into a readable date */
-        function getNextUpdateText(lastUpdate: number, updateInterval: number): string {
-            const now = Util.getTime();
+        function getNextUpdateText(lastUpdate: number, updateInterval: number, updateStarted: number): string {
+            const now = Util.Time.now();
 
             if (SubscriptionManager.updateInProgress) return "In progress . . .";
-            else if (lastUpdate === 0) return Util.timeAgo(now + updateInterval);
+            if (updateStarted !== 0) return Util.Time.ago(updateStarted + SubscriptionManager.updateTimeout + Util.Time.MINUTE);
+            else if (lastUpdate === 0) return Util.Time.ago(now + updateInterval);
             else if ((lastUpdate + updateInterval) < now) return "Less than a minute";
-            else return Util.timeAgo(lastUpdate + updateInterval + (60 * 1000));
+            else return Util.Time.ago(lastUpdate + updateInterval + Util.Time.MINUTE);
         }
     }
 
@@ -580,10 +629,6 @@ export class SubscriptionManager extends RE6Module {
                 processing = true;
 
                 execSubscribe(id, $subscribeButton, $unsubscribeButton, $element)
-                    .then(() => {
-                        if (Sync.enabled) return Sync.upload();
-                        return Promise.resolve();
-                    })
                     .then(() => { processing = false; });
             });
             $unsubscribeButton.click(async (event) => {
@@ -593,10 +638,6 @@ export class SubscriptionManager extends RE6Module {
                 processing = true;
 
                 execUnsubscribe(id, $subscribeButton, $unsubscribeButton)
-                    .then(() => {
-                        if (Sync.enabled) return Sync.upload();
-                        return Promise.resolve();
-                    })
                     .then(() => { processing = false; });
             });
         }
@@ -605,8 +646,12 @@ export class SubscriptionManager extends RE6Module {
             subscriptionData = await instance.fetchSettings("data", true);
             subscriptionData[id] = { name: instance.getSubscriberName($element), };
 
+            subscriptionData = sortSubscriptions(subscriptionData);
+
             $subscribeButton.addClass("display-none");
             $unsubscribeButton.removeClass("display-none");
+
+            if (Sync.enabled) await Sync.upload();
 
             return instance.pushSettings("data", subscriptionData);
         }
@@ -615,10 +660,22 @@ export class SubscriptionManager extends RE6Module {
             subscriptionData = await instance.fetchSettings("data", true);
             delete subscriptionData[id];
 
+            subscriptionData = sortSubscriptions(subscriptionData);
+
             $subscribeButton.removeClass("display-none");
             $unsubscribeButton.addClass("display-none");
 
+            if (Sync.enabled) await Sync.upload();
+
             return instance.pushSettings("data", subscriptionData);
+        }
+
+        function sortSubscriptions(unordered: any): any {
+            const ordered = {};
+            Object.keys(unordered).sort().forEach(function (key) {
+                ordered[key] = unordered[key];
+            });
+            return ordered;
         }
     }
 
@@ -627,20 +684,13 @@ export class SubscriptionManager extends RE6Module {
      * Should be inserted at the very beginning of the stack, actual sorting is done by CSS
      */
     private createCacheDivider(): JQuery<HTMLElement> {
-        const $content = $("<div>")
-            .addClass("subscription-update notice notice-cached");
-
-        $("<div>")
-            .addClass("subscription-update-title")
-            .html("Older Updates")
-            .appendTo($content);
-
-        return $content;
+        return $("<div>")
+            .addClass("subscription-update notice notice-cached")
+            .html(`<div class="subscription-update-title">Older Updates</div>`);
     }
 
     /**
      * Creates a subscription update element based on the provided data and the subscription's definition
-     * // TODO Fix this
      * @param timeStamp Time when the update was created
      * @param data Update data
      * @param actions Subscription definition
@@ -651,7 +701,7 @@ export class SubscriptionManager extends RE6Module {
             cache = subscription.instance.getCache();
 
         const $content = $("<div>").addClass("subscription-update" + (data.new ? " new" : ""));
-        const timeAgo = Util.timeAgo(timestamp);
+        const timeAgo = Util.Time.ago(timestamp);
         const timeString = new Date(timestamp).toLocaleString();
 
         // ===== Create Elements =====
@@ -814,11 +864,3 @@ interface TrackerData {
     /** Tab contents */
     content?: JQuery<HTMLElement>;
 }
-
-enum TIME_PERIOD {
-    SECOND = 1000,
-    MINUTE = 60 * TIME_PERIOD.SECOND,
-    HOUR = 60 * TIME_PERIOD.MINUTE,
-    DAY = 24 * TIME_PERIOD.HOUR,
-    WEEK = 7 * TIME_PERIOD.DAY,
-};

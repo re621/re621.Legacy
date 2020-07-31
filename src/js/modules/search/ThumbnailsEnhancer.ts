@@ -1,4 +1,5 @@
 import { Danbooru } from "../../components/api/Danbooru";
+import { E621 } from "../../components/api/E621";
 import { XM } from "../../components/api/XM";
 import { PageDefintion } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
@@ -18,14 +19,23 @@ export enum ThumbnailClickAction {
     CopyID = "copyid",
 }
 
+export enum ThumbnailZoomMode {
+    Enabled = "true",       // converted from the old boolean flag
+    Disabled = "false",     // names preserved for compatibility
+    OnShift = "onshift",
+}
+
 export class ThumbnailEnhancer extends RE6Module {
 
-    private postContainer: JQuery<HTMLElement>;
+    private postsLoading: JQuery<HTMLElement>;      // Overlay to mask posts reflow
+    private postContainer: JQuery<HTMLElement>;     // Element containing posts - div#page used for compatibility
+
+    private static favoritesList: Set<number>;
 
     private static zoomPaused = false;
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.popular, PageDefintion.favorites, PageDefintion.comments]);
+        super([PageDefintion.search, PageDefintion.popular, PageDefintion.favorites, PageDefintion.comments], true);
     }
 
     protected getDefaultSettings(): Settings {
@@ -34,11 +44,14 @@ export class ThumbnailEnhancer extends RE6Module {
 
             upscale: ThumbnailPerformanceMode.Hover,
 
-            zoom: false,
+            zoom: ThumbnailZoomMode.Disabled,
             zoomScale: "2",
             zoomContextual: true,
 
             vote: true,
+            fav: false,
+            favSync: 0,         // last favorites cache integrity check
+            favReq: true,       // does the favcache need to be updated
 
             crop: true,
             cropSize: "150px",
@@ -54,10 +67,30 @@ export class ThumbnailEnhancer extends RE6Module {
         };
     }
 
+    public async prepare(): Promise<void> {
+        await super.prepare();
+
+        // Compatibility fix - old setting was a boolean flag
+        if (typeof this.fetchSettings("zoom") == "boolean")
+            await this.pushSettings("zoom", this.fetchSettings("zoom") + "");
+
+        // Only add a loading screen on appropriate pages
+        if (!this.pageMatchesFilter()) return;
+
+        this.postsLoading = $("<div>")
+            .attr("id", "postContainerOverlay")
+            .html(`
+                <span>
+                    <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+                </span>
+            `)
+            .insertBefore("#posts");
+    }
+
     public create(): void {
         super.create();
 
-        this.postContainer = $("div#page");
+        this.postContainer = $("#page");
 
         const upscaleMode = this.fetchSettings<ThumbnailPerformanceMode>("upscale"),
             clickAction = this.fetchSettings<ThumbnailClickAction>("clickAction"),
@@ -73,6 +106,7 @@ export class ThumbnailEnhancer extends RE6Module {
         this.toggleZoomContextual(this.fetchSettings("zoomContextual"));
 
         this.toggleHoverVote(this.fetchSettings("vote"));
+        this.toggleHoverFav(this.fetchSettings("fav"));
 
         this.toggleThumbCrop(this.fetchSettings("crop"));
         this.setThumbSize(this.fetchSettings("cropSize"));
@@ -82,19 +116,21 @@ export class ThumbnailEnhancer extends RE6Module {
         this.toggleStatusRibbons(this.fetchSettings("ribbons"));
         this.toggleRelationRibbons(this.fetchSettings("relRibbons"));
 
+        this.postsLoading.addClass("display-none-important");
+
         ThumbnailEnhancer.on("pauseHoverActions.main", (event, zoomPaused) => {
             if (typeof zoomPaused === "undefined") return;
-            if (zoomPaused) $("div#page").attr({ "data-thumb-zoom": "false", "data-thumb-vote": "false", });
+            if (zoomPaused) $("#page").attr({ "data-thumb-zoom": "false", "data-thumb-vote": "false", });
             else {
                 const module = ModuleController.get(ThumbnailEnhancer);
-                $("div#page").attr({
+                $("#page").attr({
                     "data-thumb-zoom": module.fetchSettings("zoom"),
                     "data-thumb-vote": module.fetchSettings("vote"),
                 });
             }
 
             ThumbnailEnhancer.zoomPaused = zoomPaused;
-        })
+        });
     }
 
     public destroy(): void {
@@ -102,12 +138,43 @@ export class ThumbnailEnhancer extends RE6Module {
         ThumbnailEnhancer.off("pauseHoverActions.main")
     }
 
+    public async execute(): Promise<void> {
+        ThumbnailEnhancer.favoritesList = new Set<number>(JSON.parse(window.localStorage.getItem("re621.favorites") || "[]"));
+
+        ThumbnailEnhancer.on("favorite.main", (event, data) => {
+            ThumbnailEnhancer.favoritesList = new Set<number>(JSON.parse(window.localStorage.getItem("re621.favorites") || "[]"));
+            if (data.action) ThumbnailEnhancer.favoritesList.add(data.id);
+            else ThumbnailEnhancer.favoritesList.delete(data.id);
+            window.localStorage.setItem("re621.favorites", JSON.stringify(Array.from(ThumbnailEnhancer.favoritesList)));
+        });
+    }
+
     /**
      * Enables the zoom-on-hover functionality
      * @param state True to enable, false to disable
      */
-    public toggleHoverZoom(state = true): void {
-        this.postContainer.attr("data-thumb-zoom", state + "");
+    public toggleHoverZoom(state = ThumbnailZoomMode.Disabled): void {
+        this.postContainer.attr("data-thumb-zoom", state);
+
+        // Remove listeners potentially left over from previous state
+        $(document)
+            .off("keydown.re621.thumbnailzoom")
+            .off("keyup.re621.thumbnailzoom");
+
+        if (state !== ThumbnailZoomMode.OnShift) return;
+
+        // Listen for shifte press and hold to switch to zoom mode
+        let keydown = false;
+        $(document)
+            .on("keydown.re621.thumbnailzoom", null, "shift", () => {
+                if (keydown) return;
+                keydown = true;
+                this.postContainer.attr("data-thumb-zoom", ThumbnailZoomMode.Enabled);
+            })
+            .on("keyup.re621.thumbnailzoom", null, "shift", () => {
+                keydown = false;
+                this.postContainer.attr("data-thumb-zoom", ThumbnailZoomMode.OnShift);
+            });
     }
 
     /**
@@ -127,11 +194,19 @@ export class ThumbnailEnhancer extends RE6Module {
     }
 
     /**
-     * Enables the zoom-on-hover functionality
+     * Enables the voting buttons when hovering over the thumbnails
      * @param state True to enable, false to disable
      */
     public toggleHoverVote(state = true): void {
         this.postContainer.attr("data-thumb-vote", state + "");
+    }
+
+    /**
+     * Enables the favorite buttons when hovering over the thumbnails
+     * @param state True to enable, false to disable
+     */
+    public toggleHoverFav(state = true): void {
+        this.postContainer.attr("data-thumb-fav", state + "");
     }
 
     /**
@@ -182,6 +257,22 @@ export class ThumbnailEnhancer extends RE6Module {
         this.postContainer.attr("data-thumb-rel-ribbons", state + "");
     }
 
+    /** Returns the saved favorites cache */
+    public getFavCache(): Set<number> {
+        return ThumbnailEnhancer.favoritesList;
+    }
+
+    /** Sets and saves the favorites cache */
+    public setFavCache(cache: Set<number>): void {
+        ThumbnailEnhancer.favoritesList = cache;
+        window.localStorage.setItem("re621.favorites", JSON.stringify(Array.from(ThumbnailEnhancer.favoritesList)));
+    }
+
+    /** Returns the size of the favorites cache */
+    public getFavCacheSize(): number {
+        return ThumbnailEnhancer.favoritesList.size;
+    }
+
     /**
      * Converts the thumbnail into an enhancer-ready format
      * @param $article JQuery element `article.post-preview`
@@ -190,7 +281,7 @@ export class ThumbnailEnhancer extends RE6Module {
     public static async modifyThumbnail($article: JQuery<HTMLElement>, upscaleMode = ThumbnailPerformanceMode.Hover, clickAction = ThumbnailClickAction.NewTab, preserveHoverText: boolean): Promise<void> {
 
         /* Create the structure */
-        const $link = $article.find<HTMLElement>("a.preview-box"),
+        const $link = $article.find<HTMLElement>("a").first(),
             postID = parseInt($article.attr("data-id")),
             $img = $article.find("img"),
             $imgData = $img.attr("title") ? $img.attr("title").split("\n").slice(0, -2) : [];     // Replace if the post date is added for the data-attributes.
@@ -200,15 +291,25 @@ export class ThumbnailEnhancer extends RE6Module {
         if (!preserveHoverText) $img.removeAttr("title");
         $img.attr("alt", "#" + $article.attr("data-id"));
 
-        // Image not wrapped in picture - usually on comment pages and the like
+        // Sometimes, the image might not be wrapped in a picture tag properly
+        // This is most common on comment pages and the like
+        // If that bug gets fixed, this code can be removed
         let $picture = $article.find("picture");
-        if ($picture.length == 0) $picture = $("<picture>").insertAfter($img).append($img);
+        if ($picture.length == 0) {
+            const $img = $article.find("img");
+            $picture = $("<picture>").insertAfter($img).append($img);
+        }
 
         // Loading icon
+        $link.addClass("preview-box");
         $("<div>")
             .addClass("preview-load")
             .html(`<i class="fas fa-circle-notch fa-2x fa-spin"></i>`)
             .appendTo($link);
+
+        // Favorite state
+        let isFavorited = ThumbnailEnhancer.favoritesList.has(postID);
+        $article.attr("data-is-favorited", isFavorited + "");
 
         // States and Ribbons
         $picture.addClass("picture-container");
@@ -254,7 +355,7 @@ export class ThumbnailEnhancer extends RE6Module {
         // Description box that only shows up on hover
         const $extrasBox = $("<div>")
             .addClass("bg-highlight preview-extras")
-            .appendTo($link);
+            .appendTo($picture);
 
         if ($imgData[4] === undefined) $("<span>").html("Score: ?").appendTo($extrasBox);
         else $("<span>").html($imgData[4]).appendTo($extrasBox);
@@ -272,31 +373,51 @@ export class ThumbnailEnhancer extends RE6Module {
         const $voteUp = $("<button>")           // Upvote
             .attr("href", "#")
             .html(`<i class="far fa-thumbs-up"></i>`)
-            .addClass("button score-neutral voteButton post-vote-up-" + postID)
+            .addClass("button voteButton post-vote-up-" + postID + " score-neutral")
             .appendTo($voteBox);
         const $voteDown = $("<button>")        // Downvote
             .attr("href", "#")
             .html(`<i class="far fa-thumbs-down"></i>`)
-            .addClass("button score-neutral voteButton post-vote-down-" + postID)
+            .addClass("button voteButton post-vote-down-" + postID + " score-neutral")
             .appendTo($voteBox);
         const $favorite = $("<button>")        // Favorite
             .attr("href", "#")
             .html(`<i class="far fa-star"></i>`)
-            .addClass("button score-neutral voteButton")
-            .css("display", "none")
+            .addClass("button voteButton favButton post-favorite-" + postID + " score-neutral" + (isFavorited ? " score-favorite" : ""))
             .appendTo($voteBox);
 
+        let buttonBlock = false;
         $voteUp.click((event) => {
             event.preventDefault();
+            if (buttonBlock) return;
+            buttonBlock = true;
             Danbooru.Post.vote(postID, 1);
+            buttonBlock = false;
         });
         $voteDown.click((event) => {
             event.preventDefault();
+            if (buttonBlock) return;
+            buttonBlock = true;
             Danbooru.Post.vote(postID, -1);
+            buttonBlock = false;
         });
-        $favorite.click((event) => {
+        $favorite.click(async (event) => {
             event.preventDefault();
-            alert("sike, it does not work");
+            if (buttonBlock) return;
+            buttonBlock = true;
+            if (isFavorited) {
+                isFavorited = false;
+                E621.Favorite.id(postID).delete();
+                ThumbnailEnhancer.trigger("favorite", { id: postID, action: false });
+                $favorite.removeClass("score-favorite");
+            } else {
+                isFavorited = true;
+                E621.Favorites.post({ "post_id": postID });
+                ThumbnailEnhancer.trigger("favorite", { id: postID, action: true });
+                $favorite.addClass("score-favorite");
+            }
+            $article.attr("data-is-favorited", isFavorited + "");
+            buttonBlock = false;
         })
 
 
@@ -429,7 +550,7 @@ export class ThumbnailEnhancer extends RE6Module {
 
         function parseDate(input: string): string {
             const date = new Date(input.split(": ").pop().replace(" ", "T").replace(" ", ""));
-            return `<span title="` + date.toLocaleString() + `">` + Util.timeAgo(date) + `</span>`;
+            return `<span title="` + date.toLocaleString() + `">` + Util.Time.ago(date) + `</span>`;
         }
 
         function resolveRatio(force = false): void {

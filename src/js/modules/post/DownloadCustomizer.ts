@@ -13,7 +13,7 @@ export class DownloadCustomizer extends RE6Module {
     private link: JQuery<HTMLElement>;
 
     public constructor() {
-        super(PageDefintion.post);
+        super(PageDefintion.post, true);
     }
 
     /**
@@ -36,7 +36,7 @@ export class DownloadCustomizer extends RE6Module {
 
         this.post = Post.getViewingPost();
 
-        this.link = $("div#image-download-link a");
+        this.link = $("#image-download-link").find("a").first();
         this.refreshDownloadLink();
 
         this.link.click(event => {

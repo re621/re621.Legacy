@@ -6,53 +6,53 @@ import { Modal } from "../../components/structure/Modal";
 import { Prompt } from "../../components/structure/Prompt";
 
 // Avaliable icons for formatting buttons
-const iconDefinitions = [
-    { value: "spacer", name: "&nbsp;" },
+const iconDefinitions = {
+    "spacer": "&nbsp;",
 
-    { value: "bold", name: "&#x" + "f032" },
-    { value: "italic", name: "&#x" + "f033" },
-    { value: "strikethrough", name: "&#x" + "f0cc" },
-    { value: "underscore", name: "&#x" + "f0cd" },
-    { value: "superscript", name: "&#x" + "f12b" },
-    { value: "subscript", name: "&#x" + "f12c" },
-    { value: "spoiler", name: "&#x" + "f29e" },
-    { value: "color", name: "&#x" + "f53f" },
-    { value: "code", name: "&#x" + "f121" },
-    { value: "heading", name: "&#x" + "f1dc" },
-    { value: "quote", name: "&#x" + "f10e" },
-    { value: "section", name: "&#x" + "f103" },
-    { value: "tag", name: "&#x" + "f02b" },
+    "bold": "&#x" + "f032",
+    "italic": "&#x" + "f033",
+    "strikethrough": "&#x" + "f0cc",
+    "underscore": "&#x" + "f0cd",
+    "superscript": "&#x" + "f12b",
+    "subscript": "&#x" + "f12c",
+    "spoiler": "&#x" + "f29e",
+    "color": "&#x" + "f53f",
+    "code": "&#x" + "f121",
+    "heading": "&#x" + "f1dc",
+    "quote": "&#x" + "f10e",
+    "section": "&#x" + "f103",
+    "tag": "&#x" + "f02b",
 
-    { value: "wiki", name: "&#x" + "f002" },
-    { value: "keyboard", name: "&#x" + "f11c" },
-    { value: "link", name: "&#x" + "f0c1" },
-    { value: "unlink", name: "&#x" + "f127" },
-    { value: "link_prompt", name: "&#x" + "f35d" },
-    { value: "lemon", name: "&#x" + "f094" },
-    { value: "pepper", name: "&#x" + "f816" },
-    { value: "drumstick", name: "&#x" + "f6d7" },
-    { value: "magic", name: "&#x" + "f0d0" },
-    { value: "clipboard", name: "&#x" + "f328" },
-    { value: "paperclip", name: "&#x" + "f0c6" },
-    { value: "fountainpen", name: "&#x" + "f5ad" },
-    { value: "comment", name: "&#x" + "f27a" },
-    { value: "bell", name: "&#x" + "f0f3" },
+    "wiki": "&#x" + "f002",
+    "keyboard": "&#x" + "f11c",
+    "link": "&#x" + "f0c1",
+    "unlink": "&#x" + "f127",
+    "link_prompt": "&#x" + "f35d",
+    "lemon": "&#x" + "f094",
+    "pepper": "&#x" + "f816",
+    "drumstick": "&#x" + "f6d7",
+    "magic": "&#x" + "f0d0",
+    "clipboard": "&#x" + "f328",
+    "paperclip": "&#x" + "f0c6",
+    "fountainpen": "&#x" + "f5ad",
+    "comment": "&#x" + "f27a",
+    "bell": "&#x" + "f0f3",
 
-    { value: "bullhorn", name: "&#x" + "f0a1" },
-    { value: "heart", name: "&#x" + "f004" },
-    { value: "plus-square", name: "&#x" + "f0fe" },
-    { value: "minus-square", name: "&#x" + "f146" },
-    { value: "baby", name: "&#x" + "f77c" },
-    { value: "scales", name: "&#x" + "f24e" },
-    { value: "chart-pie", name: "&#x" + "f200" },
-    { value: "dice", name: "&#x" + "f522" },
-    { value: "hotdog", name: "&#x" + "f80f" },
-    { value: "leaf", name: "&#x" + "f06c" },
-    { value: "paper-plane", name: "&#x" + "f1d8" },
-    { value: "anchor", name: "&#x" + "f13d" },
-    { value: "crown", name: "&#x" + "f521" },
-    { value: "crow", name: "&#x" + "f520" },
-];
+    "bullhorn": "&#x" + "f0a1",
+    "heart": "&#x" + "f004",
+    "plus-square": "&#x" + "f0fe",
+    "minus-square": "&#x" + "f146",
+    "baby": "&#x" + "f77c",
+    "scales": "&#x" + "f24e",
+    "chart-pie": "&#x" + "f200",
+    "dice": "&#x" + "f522",
+    "hotdog": "&#x" + "f80f",
+    "leaf": "&#x" + "f06c",
+    "paper-plane": "&#x" + "f1d8",
+    "anchor": "&#x" + "f13d",
+    "crown": "&#x" + "f521",
+    "crow": "&#x" + "f520",
+};
 
 export class FormattingManager extends RE6Module {
 
@@ -203,22 +203,43 @@ class FormattingHelper {
 
         // Create the Button Editing Modal
         const $editButtonsForm = new Form(
-            { id: "dtext-edit-button-" + this.id, parent: "div#modal-container", columns: 2, },
+            { name: "dtext-edit-button-" + this.id, columns: 2, width: 2 },
             [
-                { id: "name", type: "input", label: "Name", stretch: "mid", },
-                { id: "icon", type: "icon", label: "Icon", data: iconDefinitions, stretch: "mid", },
-                { id: "text", type: "input", label: "Content", stretch: "mid", },
-                { id: "delete", type: "button", value: "Delete", stretch: "column", },
-                { id: "update", type: "submit", value: "Update", stretch: "column", },
-                { id: "hr", type: "hr", stretch: "mid", },
-                { id: "vartext", type: "div", value: "Available variables:", stretch: "mid", },
-                { id: "var-select", label: "Selected text", value: "%selection%", type: "copy", stretch: "mid", },
-                { id: "var-prompt", label: "Prompt for input", value: "%prompt%", type: "copy", stretch: "mid", },
-            ]);
+                Form.input({ name: "name", label: "Name", width: 2 }),
+                Form.icon({ name: "icon", label: "Icon", width: 2 }, iconDefinitions),
+                Form.input({ name: "text", label: "Content", width: 2 }),
+
+                Form.button(
+                    { name: "delete", value: "Delete" },
+                    async () => {
+                        this.deleteButton(this.$editButtonsModal.getActiveTrigger().parent());
+                        this.$editButtonsModal.close();
+                    }
+                ),
+                Form.button({ name: "update", value: "Update", type: "submit" }),
+
+                Form.hr(2),
+
+                Form.div({ value: "Available variables:", width: 2 }),
+                Form.copy({ label: "Selection", value: "%selection%", width: 2 }),
+                Form.copy({ label: "Prompt", value: "%prompt%", width: 2 }),
+            ],
+            async (values) => {
+                this.updateButton(
+                    this.$editButtonsModal.getActiveTrigger().parent(),
+                    {
+                        name: values["name"],
+                        icon: values["icon"],
+                        text: values["text"],
+                    }
+                );
+                this.$editButtonsModal.close();
+            });
 
         this.$editButtonsModal = new Modal({
             title: "Edit Button",
-            content: $editButtonsForm.get(),
+            content: Form.placeholder(),
+            structure: $editButtonsForm,
             triggers: [],
             triggerMulti: true,
             fixed: true,
@@ -232,25 +253,6 @@ class FormattingHelper {
             $updateTabInputs.get("name").val($button.attr("data-name"));
             $updateTabInputs.get("icon").val($button.attr("data-icon")).trigger("re621:form:update");
             $updateTabInputs.get("text").val($button.attr("data-text"));
-        });
-
-        $editButtonsForm.get().on("re621:form:submit", (event, data) => {
-            event.preventDefault();
-            this.updateButton(
-                this.$editButtonsModal.getActiveTrigger().parent(),
-                {
-                    name: data.get("name"),
-                    icon: data.get("icon"),
-                    text: data.get("text"),
-                }
-            );
-            this.$editButtonsModal.close();
-        });
-
-        $editButtonsForm.getInputList().get("delete").click(event => {
-            event.preventDefault();
-            this.deleteButton(this.$editButtonsModal.getActiveTrigger().parent());
-            this.$editButtonsModal.close();
         });
 
         // Fill the Toolbar Buttons
@@ -275,16 +277,11 @@ class FormattingHelper {
         // - Editing State Tabs
         this.$toggleTabs = $("<div>")
             .addClass("comment-tabs")
+            .html(`
+                <a class="toggle-editing active">Write</a>
+                <a class="toggle-preview">Preview</a>
+            `)
             .appendTo($bar);
-        $("<a>")
-            .html("Write")
-            .addClass("toggle-editing")
-            .addClass("active")
-            .appendTo(this.$toggleTabs);
-        $("<a>")
-            .html("Preview")
-            .addClass("toggle-preview")
-            .appendTo(this.$toggleTabs);
 
         this.$toggleTabs.find("a").click(e => {
             e.preventDefault();
@@ -321,38 +318,41 @@ class FormattingHelper {
 
         // - New Button Process
         const newFormatForm = new Form(
-            { id: "dtext-custom-button-" + this.id, parent: "div#modal-container", columns: 2, },
+            { name: "dtext-custom-button-" + this.id, columns: 2, width: 2 },
             [
-                { id: "name", type: "input", label: "Name", stretch: "mid", },
-                { id: "icon", type: "icon", label: "Icon", data: iconDefinitions, stretch: "mid", },
-                { id: "text", type: "input", label: "Content", stretch: "mid", },
-                { id: "icon-spacer", type: "div", value: " ", stretch: "column", },
-                { id: "create", type: "submit", value: "Create", stretch: "column", },
-                { id: "hr", type: "hr", stretch: "mid", },
-                { id: "vartext", type: "div", value: "Available variables:", stretch: "mid", },
-                { id: "var-select", label: "Selected text", value: "%selection%", type: "copy", stretch: "mid", },
-                { id: "var-prompt", label: "Prompt for input", value: "%prompt%", type: "copy", stretch: "mid", },
-            ]);
+                Form.input({ name: "name", label: "Name", width: 2 }),
+                Form.icon({ name: "icon", label: "Icon", width: 2 }, iconDefinitions),
+                Form.input({ name: "text", label: "Content", width: 2 }),
+
+                Form.spacer(),
+                Form.button({ name: "submit", value: "Create", type: "submit" }),
+
+                Form.hr(2),
+
+                Form.div({ value: "Available variables:", width: 2 }),
+                Form.copy({ label: "Selection", value: "%selection%", width: 2 }),
+                Form.copy({ label: "Prompt", value: "%prompt%", width: 2 }),
+            ],
+            (values) => {
+                const buttonData = this.createButton({
+                    name: values["name"],
+                    icon: values["icon"],
+                    text: values["text"],
+                });
+                buttonData.box.appendTo(this.$formatButtonsDrawer);
+
+                newFormatForm.reset();
+                newFormatModal.close();
+                this.saveButtons();
+            }
+        );
 
         const newFormatModal = new Modal({
             title: "New Custom Button",
-            content: newFormatForm.get(),
+            content: Form.placeholder(),
+            structure: newFormatForm,
             triggers: [{ element: $newFormatButton }],
             fixed: true,
-        });
-
-        newFormatForm.get().on("re621:form:submit", (event, data) => {
-            event.preventDefault();
-            const buttonData = this.createButton({
-                name: data.get("name"),
-                icon: data.get("icon"),
-                text: data.get("text"),
-            });
-            buttonData.box.appendTo(this.$formatButtonsDrawer);
-
-            newFormatForm.reset();
-            newFormatModal.close();
-            this.saveButtons();
         });
 
         // - Drawer Container Element
@@ -545,10 +545,8 @@ class FormattingHelper {
      * @param name Icon name
      */
     private getIcon(name: string): string {
-        for (const icon of iconDefinitions) {
-            if (icon.value === name) { return icon.name; }
-        }
-        return "";
+        // TODO Fix this
+        return iconDefinitions[name] || "";
     }
 
     /**

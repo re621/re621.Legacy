@@ -1,6 +1,7 @@
 import { XM } from "../api/XM";
 import { RE6Module } from "../RE6Module";
 import { Modal } from "../structure/Modal";
+import { Patcher } from "./Patcher";
 
 export class ErrorHandler {
 
@@ -13,15 +14,18 @@ export class ErrorHandler {
 
     private constructor() {
         const $contentWrapper = $("<div>")
-            .append("<p>RE621 has encountered an error during script execution.</p>")
-            .append(`<p>Please, report this message, including the error log below, through the <a href="` + window["re621"]["links"]["issues"] + `">issue tracker</a>, or in the <a href="` + window["re621"]["links"]["forum"] + `">forum thread</a>.</p>`);
+            .html(`
+                <p>RE621 has encountered an error during script execution.</p>
+                <p>Please, report this message, including the error log below, through the <a href="${window["re621"]["links"]["issues"]}">issue tracker</a>, or in the <a href="${window["re621"]["links"]["forum"]}">forum thread</a>.</p>
+            `);
 
         this.feedback = $("<textarea>")
             .addClass("error-feedback bg-section color-text")
             .val(
-                window["re621"]["name"] + ` v.` + window["re621"]["version"] + `-` + window["re621"]["build"] + ` for ` + XM.info().scriptHandler + ` v.` + XM.info().version + `\n` +
-                window.navigator.userAgent + `\n`
+                `${window["re621"]["name"]} v.${window["re621"]["version"]}-${window["re621"]["build"]}-${Patcher.version} for ${XM.info().scriptHandler} v.${XM.info().version}\n` +
+                `${window.navigator.userAgent}\n`
             )
+            .prop("readonly", true)
             .appendTo($contentWrapper);
 
         this.trigger = $("<a>");

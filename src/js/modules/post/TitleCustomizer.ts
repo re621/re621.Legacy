@@ -11,7 +11,7 @@ export class TitleCustomizer extends RE6Module {
     private post: ViewingPost;
 
     public constructor() {
-        super(PageDefintion.post);
+        super(PageDefintion.post, true);
     }
 
     /**

@@ -20,7 +20,6 @@ export class ForumTracker extends RE6Module implements SubscriptionTracker {
         return {
             enabled: true,
             data: {},
-            cache: {},
         };
     }
 
@@ -63,7 +62,7 @@ export class ForumTracker extends RE6Module implements SubscriptionTracker {
     }
 
     public getButtonAttachment(): JQuery<HTMLElement> {
-        if (Page.matches(PageDefintion.forumPost)) return $("div#c-forum-topics").first();
+        if (Page.matches(PageDefintion.forumPost)) return $("#c-forum-topics").first();
         else return $();
     }
 

@@ -198,7 +198,6 @@ export class TinyAlias extends RE6Module {
     /** Handles the tag checking */
     private async handleCheckButton($input: JQuery<HTMLElement>): Promise<void> {
         const tag = this.prepareTag($input.val().toString());
-        console.log("checking " + tag);
         if (this.tagAlreadyAdded(tag)) {
             this.$infoText
                 .html("Tag has already been added")
@@ -248,16 +247,7 @@ export class TinyAlias extends RE6Module {
         this.tagAlreadyChecked = true;
 
         // Looking for the wiki page
-        E621.Wiki.get<APIWikiPage>({ "search[title]": encodeURIComponent(tagInfo.realName) }, 500).then((data) => {
-            const wikiPage = data[0];
-
-            // Wiki page does not exist
-            if (wikiPage === undefined || wikiPage.title !== tagInfo.realName) return;
-            // Input text changed
-            if (tag !== this.prepareTag($input.val().toString())) return;
-
-            this.$infoText.append(` <a href="/wiki_pages/${wikiPage.id}">wiki</a>`);
-        });
+        this.$infoText.append(` <a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tagInfo.realName)}">wiki</a>`);
 
         this.$infoText.attr("data-state", "done");
         return;
@@ -334,7 +324,7 @@ export class TinyAlias extends RE6Module {
         };
 
         // First data query
-        let jsonData = await E621.Tags.find(tag).get<APITag>("", 500);
+        let jsonData = await E621.Tag.id(tag).get<APITag>("", 500);
         if (jsonData.length == 0 || jsonData[0].name === "invalid_tag") {
             result.isInvalid = true;
             return result;
@@ -355,7 +345,7 @@ export class TinyAlias extends RE6Module {
             }
 
             // Getting alias data
-            jsonData = await E621.Tags.find(encodeURIComponent(result.realName)).get<APITag>("", 500);
+            jsonData = await E621.Tag.id(encodeURIComponent(result.realName)).get<APITag>("", 500);
             result.count = jsonData[0].post_count;
         }
 

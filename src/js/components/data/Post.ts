@@ -1,7 +1,8 @@
 import { PostHtml } from "../api/PostHtml";
 import { APIPost, PostRating } from "../api/responses/APIPost";
+import { Blacklist } from "./Blacklist";
+import { Page, PageDefintion } from "./Page";
 import { TagTypes } from "./Tag";
-import { User } from "./User";
 
 /**
  * Collects basic info for a post.
@@ -39,7 +40,7 @@ export class Post {
             this.htmlElement = PostHtml.create(element);
         }
 
-        for (const filter of User.getBlacklist().values()) {
+        for (const filter of Blacklist.get().values()) {
             filter.addPost(this, false);
         }
 
@@ -54,7 +55,9 @@ export class Post {
             const imageContainer = $("section#image-container");
             this.initalPosts = [];
             if (imageContainer.length === 0) {
-                const previews = $("div#posts-container").children(".post-preview").get();
+                const previews = Page.matches(PageDefintion.favorites)              // Thumbnails are not wrapped in a container on the favorites page
+                    ? $("#posts").children(".post-preview").get()                   // If that bug gets fixed, this code could be simplified
+                    : $("#posts-container").children(".post-preview").get();
                 for (const preview of previews) this.initalPosts.push(new Post($(preview)));
             } else this.initalPosts.push(new ViewingPost(imageContainer));
 
@@ -80,11 +83,9 @@ export class Post {
      */
     public static getViewingPost(): ViewingPost {
         const posts = this.fetchPosts();
-        if (posts[0] instanceof ViewingPost) {
+        if (posts[0] instanceof ViewingPost)
             return posts[0] as ViewingPost;
-        } else {
-            return undefined;
-        }
+        return undefined;
     }
 
     public static createPreviewUrlFromMd5(md5: string): string {
@@ -111,7 +112,7 @@ export class Post {
      * Checks if the post is found in an activated blacklist filter
      */
     public matchesBlacklist(ignoreDisabled = false): boolean {
-        for (const filter of User.getBlacklist().values()) {
+        for (const filter of Blacklist.get().values()) {
             if (filter.matchesPost(this, ignoreDisabled)) {
                 return true;
             }

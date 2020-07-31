@@ -1,8 +1,10 @@
 import { Danbooru } from "../../components/api/Danbooru";
+import { E621 } from "../../components/api/E621";
 import { PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
 
 /**
  * Add various symbols to the tilebar depending on the posts state
@@ -12,7 +14,7 @@ export class PostViewer extends RE6Module {
     private post: ViewingPost;
 
     public constructor() {
-        super(PageDefintion.post);
+        super(PageDefintion.post, true);
         this.registerHotkeys(
             { keys: "hotkeyUpvote", fnct: this.triggerUpvote },
             { keys: "hotkeyDownvote", fnct: this.triggerDownvote },
@@ -26,6 +28,8 @@ export class PostViewer extends RE6Module {
 
             { keys: "hotkeyAddSet", fnct: this.addSet },
             { keys: "hotkeyAddPool", fnct: this.addPool },
+
+            { keys: "hotkeyAddSetLatest", fnct: this.addSetLatest, },
         );
     }
 
@@ -36,21 +40,23 @@ export class PostViewer extends RE6Module {
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
-            hotkeyUpvote: "w",
-            hotkeyDownvote: "s",
+            hotkeyUpvote: "w",          // vote up on the current post
+            hotkeyDownvote: "s",        // vote down on the current post
 
-            hotkeyFavorite: "f",
-            hotkeyAddFavorite: "",
-            hotkeyRemoveFavorite: "",
+            hotkeyFavorite: "f",        // toggle the favorite state of the post
+            hotkeyAddFavorite: "",      // add current post to favorites
+            hotkeyRemoveFavorite: "",   // remove current post from favorites
 
-            hotkeyHideNotes: "o",
-            hotkeyNewNote: "p",
+            hotkeyHideNotes: "o",       // toggle note visibility
+            hotkeyNewNote: "p",         // add new note
 
-            hotkeyAddSet: "",
-            hotkeyAddPool: "",
+            hotkeyAddSet: "",           // open the "add to set" dialogue
+            hotkeyAddPool: "",          // open the "add to pool" dialogue
 
-            upvoteOnFavorite: true,
-            hideNotes: false,
+            hotkeyAddSetLatest: "",     // add current post to the latest used set
+
+            upvoteOnFavorite: true,     // add an upvote when adding the post to favorites
+            hideNotes: false,           // should the notes be hidden by default
         };
     }
 
@@ -84,13 +90,13 @@ export class PostViewer extends RE6Module {
                 "href": "#",
             })
             .addClass("button btn-neutral")
-            .appendTo($noteToggleCountainer)
             .html(this.fetchSettings("hideNotes") ? "Notes: Off" : "Notes: On")
+            .appendTo($noteToggleCountainer)
             .on("click", (event) => {
                 event.preventDefault();
                 this.toggleNotes();
             });
-        $("div#note-container")
+        $("#note-container")
             .css("display", "")
             .attr("data-hidden", this.fetchSettings("hideNotes"));
 
@@ -99,9 +105,15 @@ export class PostViewer extends RE6Module {
         $bottomNotices.insertAfter($("#search-box"));
 
         // Listen to favorites button click
-        $("button#add-fav-button").on("click", () => {
-            if (!this.fetchSettings("upvoteOnFavorite")) return;
-            Danbooru.Post.vote(Post.getViewingPost().getId(), 1, true);
+        $("#add-fav-button").on("click", () => {
+            if (this.fetchSettings("upvoteOnFavorite"))
+                Danbooru.Post.vote(Post.getViewingPost().getId(), 1, true);
+
+            ThumbnailEnhancer.trigger("favorite", { id: this.post.getId(), action: true });
+        });
+
+        $("#remove-fav-button").on("click", () => {
+            ThumbnailEnhancer.trigger("favorite", { id: this.post.getId(), action: false });
         });
     }
 
@@ -141,10 +153,10 @@ export class PostViewer extends RE6Module {
             hideNotes = module.fetchSettings("hideNotes");
 
         if (hideNotes) {
-            $("div#note-container").attr("data-hidden", "false");
+            $("#note-container").attr("data-hidden", "false");
             $("a#image-note-button").html("Notes: ON");
         } else {
-            $("div#note-container").attr("data-hidden", "true");
+            $("#note-container").attr("data-hidden", "true");
             $("a#image-note-button").html("Notes: OFF");
         }
 
@@ -153,7 +165,7 @@ export class PostViewer extends RE6Module {
 
     /** Toggles the note editing interface */
     private async switchNewNote(): Promise<void> {
-        $("div#note-container").attr("data-hidden", "false");
+        $("#note-container").attr("data-hidden", "false");
         $("a#image-note-button").html("Notes: ON");
         await ModuleController.get(PostViewer).pushSettings("hideNotes", false);
 
@@ -163,7 +175,18 @@ export class PostViewer extends RE6Module {
     /** Opens the dialog to add the post to the set */
     private addSet(): void {
         $("a#set")[0].click();
+    }
 
+    /** Adds the current post to the latest added set */
+    private addSetLatest(): void {
+        const lastSet = parseInt(window.localStorage.getItem("set"));
+        if (!lastSet) return;
+
+        E621.SetAddPost.id(lastSet).post({ "post_ids[]": [Post.getViewingPost().getId()] }).then((response) => {
+            if (response[1] == 201)
+                Danbooru.notice(`<a href="/post_sets/${response[0].id}">${response[0].name}</a>: Post Added (${response[0].post_count} total)`);
+            else Danbooru.error(`Error occured while adding the post to set: ${response[1]}`);
+        });
     }
 
     /** Opens the dialog to add the post to the pool */

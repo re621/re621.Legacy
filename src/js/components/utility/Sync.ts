@@ -109,7 +109,7 @@ export class Sync {
                 headers: { "User-Agent": window["re621"]["useragent"] },
                 data: JSON.stringify({
                     "userID": Sync.userID,
-                    "timestamp": new Date().getTime(),
+                    "timestamp": Util.Time.now(),
                     "data": {
                         "CommentTracker": ModuleController.get(CommentTracker).fetchSettings("data"),
                         "ForumTracker": ModuleController.get(ForumTracker).fetchSettings("data"),

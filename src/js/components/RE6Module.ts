@@ -12,6 +12,7 @@ export class RE6Module {
 
     private settingsTag: string;
     private settings: Settings;
+    private waitForDOM: boolean;
 
     private enabled: boolean;
     private initialized = false;
@@ -19,10 +20,22 @@ export class RE6Module {
     private constraint: RegExp[] = [];
     private hotkeys: Hotkey[] = [];
 
-    public constructor(constraint?: RegExp | RegExp[], settingsTag?: string) {
+    /**
+     * Established basic module configuration.  
+     * Do not initialize the module in the constructor.
+     * - `prepare()` is used to fetch settings and load data
+     * - `create()`  contains DOM manipulation and event listeners
+     * - `destroy()` must undo everything done in create()
+     * @param constraint Which pages this module should run on? Accepts RegEx, but the use of `PageDefinition` constans is encouraged.
+     * @param waitForDOM If true, waits for the page to finish loading before executing `create()`.
+     * @param settingsTag Override for the name of the settings variable. Defaults to the class name.
+     */
+    public constructor(constraint?: RegExp | RegExp[], waitForDOM = false, settingsTag?: string) {
         if (constraint === undefined) this.constraint = [];
         else if (constraint instanceof RegExp) this.constraint.push(constraint);
         else this.constraint = constraint;
+
+        this.waitForDOM = waitForDOM;
 
         if (settingsTag) this.settingsTag = settingsTag;
         else this.settingsTag = this.constructor.name;
@@ -48,11 +61,16 @@ export class RE6Module {
         return this.settingsTag;
     }
 
+    /** If true, delay module creation until the DOM is ready */
+    public isWaitingForDOM(): boolean {
+        return this.waitForDOM
+    }
+
     /**
      * Evaluates whether the module should be executed.
      * @returns true if the page matches the constraint, false otherwise.
      */
-    private pageMatchesFilter(): boolean {
+    public pageMatchesFilter(): boolean {
         return this.constraint.length == 0 || Page.matches(this.constraint);
     }
 
@@ -71,6 +89,9 @@ export class RE6Module {
     public destroy(): void {
         this.initialized = false;
     }
+
+    /** Code run regardless of the initialization state */
+    public async execute(): Promise<void> { return; }
 
     /**
      * Returns the module's current state
@@ -272,30 +293,30 @@ export class RE6Module {
 
     /**
      * Attach a handler function for the specified event to the module
-     * @param event Event selector
+     * @param name Event selector
      * @param callback Handler function
      */
-    public static on(event: string, callback: (event: JQuery.TriggeredEvent, data: any) => void): void {
-        $(document).on("re621.module." + this.getInstance().constructor.name + "." + event, (event, data) => {
+    public static on(name: string, callback: (event: JQuery.TriggeredEvent, data: any) => void): void {
+        $(document).on("re621.module." + this.getInstance().constructor.name + "." + name, (event, data) => {
             callback(event, data);
         });
     }
 
     /**
      * Detaches all handlers from the specified module event
-     * @param event Event selector
+     * @param name Event selector
      */
-    public static off(event: string): void {
-        $(document).off("re621.module." + this.getInstance().constructor.name + "." + event);
+    public static off(name: string): void {
+        $(document).off("re621.module." + this.getInstance().constructor.name + "." + name);
     }
 
     /**
      * Execute all handlers for the specified module event
-     * @param event Event selector
+     * @param name Event selector
      * @param data Event data
      */
-    public static trigger(event: string, data?: any): void {
-        $(document).trigger("re621.module." + this.getInstance().constructor.name + "." + event, data);
+    public static trigger(name: string, data?: any): void {
+        $(document).trigger("re621.module." + this.getInstance().constructor.name + "." + name, data);
     }
 
 }

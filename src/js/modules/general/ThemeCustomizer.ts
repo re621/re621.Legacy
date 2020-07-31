@@ -9,8 +9,6 @@ import { Modal } from "../../components/structure/Modal";
  */
 export class ThemeCustomizer extends RE6Module {
 
-    private themeCustomizerForm: Form;
-
     /**
      * Returns a set of default settings values
      * @returns Default settings
@@ -39,49 +37,46 @@ export class ThemeCustomizer extends RE6Module {
         });
 
         // === Establish the settings window contents
-        this.themeCustomizerForm = new Form({ "id": "theme-customizer", "parent": "div#modal-container" }, [
+        const form = new Form({ name: "theme-customizer" }, [
             Form.select(
-                "main", window.localStorage.getItem("theme") || "hexagon", "Theme",
-                [
-                    { value: "hexagon", name: "Hexagon" },
-                    { value: "pony", name: "Pony" },
-                    { value: "bloodlust", name: "Bloodlust" },
-                    { value: "serpent", name: "Serpent" },
-                    { value: "hotdog", name: "Hotdog" },
-                ],
-                undefined,
-                async (event, data) => {
+                { label: "Theme", value: window.localStorage.getItem("theme") || "hexagon", },
+                {
+                    "hexagon": "Hexagon",
+                    "pony": "Pony",
+                    "bloodlust": "Bloodlust",
+                    "serpent": "Serpent",
+                    "hotdog": "Hotdog",
+                },
+                (data) => {
                     window.localStorage.setItem("theme", data);
                     $("body").attr("data-th-main", data);
                 }
             ),
             Form.select(
-                "extra", window.localStorage.getItem("theme-extra") || "hexagons", "Extras",
-                [
-                    { value: "none", name: "None" },
-                    { value: "autumn", name: "Autumn" },
-                    { value: "winter", name: "Winter" },
-                    { value: "spring", name: "Spring" },
-                    { value: "aurora", name: "Aurora" },
-                    { value: "hexagons", name: "Hexagons" },
-                    { value: "space", name: "Space" },
-                    { value: "stars", name: "Stars" },
-                ],
-                undefined,
-                async (event, data) => {
+                { label: "Extras", value: window.localStorage.getItem("theme-extra") || "hexagons", },
+                {
+                    "none": "None",
+                    "autumn": "Autumn",
+                    "winter": "Winter",
+                    "spring": "Spring",
+                    "aurora": "Aurora",
+                    "hexagons": "Hexagons",
+                    "space": "Space",
+                    "stars": "Stars",
+                },
+                (data) => {
                     window.localStorage.setItem("theme-extra", data);
                     $("body").attr("data-th-extra", data);
                 }
             ),
             Form.select(
-                "nav", window.localStorage.getItem("theme-nav") || "top", "Post Navbar",
-                [
-                    { value: "top", name: "Top" },
-                    { value: "bottom", name: "Bottom" },
-                    { value: "none", name: "None" },
-                ],
-                undefined,
-                async (event, data) => {
+                { label: "Post Navbar", value: window.localStorage.getItem("theme-nav") || "top", },
+                {
+                    "top": "Top",
+                    "bottom": "Bottom",
+                    "none": "None",
+                },
+                (data) => {
                     window.localStorage.setItem("theme-nav", data);
                     $("body").attr("data-th-nav", data);
                 }
@@ -92,7 +87,8 @@ export class ThemeCustomizer extends RE6Module {
         new Modal({
             title: "Themes",
             triggers: [{ element: openCustomizerButton }],
-            content: this.themeCustomizerForm.get(),
+            content: Form.placeholder(),
+            structure: form,
             position: { my: "right top", at: "right top" }
         });
     }

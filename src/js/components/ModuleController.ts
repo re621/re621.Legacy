@@ -1,4 +1,5 @@
 import { RE6Module } from "./RE6Module";
+import { Debug } from "./utility/Debug";
 import { ErrorHandler } from "./utility/ErrorHandler";
 
 export class ModuleController {
@@ -14,18 +15,31 @@ export class ModuleController {
     public static async register(moduleList: any | any[]): Promise<number> {
         if (!Array.isArray(moduleList)) moduleList = [moduleList];
 
+        Debug.perfStart("re621.total");
+
         let activeModules = 0;
         for (const moduleClass of moduleList) {
+            Debug.perfStart(moduleClass.prototype.constructor.name);
             try {
                 const moduleInstance = moduleClass.getInstance();
                 this.modules.set(moduleClass.prototype.constructor.name, moduleInstance);
                 await moduleInstance.prepare();
+                await moduleInstance.execute();
                 if (moduleInstance.canInitialize()) {
-                    moduleInstance.create();
+                    if (moduleInstance.isWaitingForDOM()) {
+                        $(() => {
+                            try { moduleInstance.create(); }
+                            catch (error) { ErrorHandler.error(moduleClass, error.stack, "init"); }
+                        });
+                    } else moduleInstance.create();
+
                     activeModules++;
                 }
             } catch (error) { ErrorHandler.error(moduleClass, error.stack, "init"); }
+            Debug.perfEnd(moduleClass.prototype.constructor.name);
         }
+
+        Debug.perfEnd("re621.total");
 
         return Promise.resolve(activeModules);
     }

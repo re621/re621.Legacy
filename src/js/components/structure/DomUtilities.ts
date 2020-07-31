@@ -16,46 +16,33 @@ export class DomUtilities {
      * Returns a promise that is fulfilled when all DOM is created
      */
     public static async createStructure(): Promise<void> {
-        return this.prepareStructure().then(this.buildStructure);
-    }
+        return new Promise(async (resolve, reject) => {
+            try { await DomUtilities.elementReady("head", DomUtilities.addStylesheets); }
+            catch (error) { ErrorHandler.error("DOM", error.stack, "styles"); }
 
-    /**
-     * Builds elements that would make the page jump around.  
-     * They should be loaded as soon as their parent element exists.
-     */
-    private static async prepareStructure(): Promise<any> {
-        try { await DomUtilities.elementReady("head", DomUtilities.addStylesheets); }
-        catch (error) { ErrorHandler.error("DOM", error.stack, "styles"); }
+            let stage = "prepare";
+            try {
 
-        // This is terrible for performance, so keep the number of these to a minimum
-        try {
-            const promises: Promise<any>[] = [];
-            promises.push(DomUtilities.elementReady("head", DomUtilities.injectChromeScript));
-            promises.push(DomUtilities.elementReady("body", DomUtilities.createThemes));
-            promises.push(DomUtilities.elementReady("div#page", DomUtilities.createModalContainer));
-            promises.push(DomUtilities.elementReady("menu.main", DomUtilities.createHeader));
-            return Promise.all(promises);
-        } catch (error) {
-            ErrorHandler.error("DOM", error.stack, "prepare");
-            return Promise.reject();
-        }
-    }
+                // This is terrible for performance, so keep the number of these to a minimum
+                const promises: Promise<any>[] = [];
+                promises.push(DomUtilities.elementReady("head", DomUtilities.injectChromeScript));
+                promises.push(DomUtilities.elementReady("body", DomUtilities.createThemes));
+                promises.push(DomUtilities.elementReady("#page", DomUtilities.createModalContainer));
+                promises.push(DomUtilities.elementReady("#nav", DomUtilities.createHeader));
 
-    /**
-     * Build the less important elements that can wait until the page fully loads.  
-     * This function mainly exists for the sake of performance issues caused by prepareStructure()
-     */
-    private static async buildStructure(): Promise<void> {
-        return new Promise((resolve) => {
-            $(() => {
-                try {
+                Promise.all(promises).then(() => {
+                    stage = "build";
                     DomUtilities.createSearchbox();
                     DomUtilities.createTagList();
                     DomUtilities.createFormattedTextareas();
-                    DomUtilities.createPostPreviews();
-                } catch (error) { ErrorHandler.error("DOM", error.stack, "build"); }
-                resolve();
-            });
+                    resolve();
+                });
+
+            } catch (error) {
+                ErrorHandler.error("DOM", error.stack, stage);
+                reject();
+                return;
+            }
         });
     }
 
@@ -108,18 +95,21 @@ export class DomUtilities {
         const $menuContainer = $("nav#nav");
         const $menuMain = $("menu.main");
 
-        if ($("nav#nav menu").length < 2) {
+        if ($("#nav").find("menu").length < 2) {
             $menuContainer.append(`<menu>`);
         }
 
-        const $menuLogo = $("<menu>").addClass("logo desktop-only").html(`<a href="/" data-ytta-id="-">` + Page.getSiteName() + `</a>`);
-        $menuContainer.prepend($menuLogo);
+        // Replace the logo in menu.main with a separate element
+        $("<menu>")
+            .addClass("logo desktop-only")
+            .html(`<a href="/" data-ytta-id="-">` + Page.getSiteName() + `</a>`)
+            .prependTo($menuContainer);
         $menuMain.find("a[href='/']").remove();
 
-        const $menuExtra = $("<menu>").addClass("extra");
-        $menuMain.after($menuExtra);
-
-        $("menu:last-child").addClass("submenu");
+        // Add a section for re621 settings buttons
+        $("<menu>")
+            .addClass("extra")
+            .insertAfter($menuMain);
 
         $menuContainer.addClass("grid");
     }
@@ -200,16 +190,6 @@ export class DomUtilities {
     }
 
     /**
-     * Wraps all post-previews in ThumbnailEnhancer-readable structures
-     */
-    private static createPostPreviews(): void {
-        const thumbnails = $("div#page").find("article.post-preview, div.post-preview").get();
-        for (const thumb of thumbnails) {
-            $(thumb).find("a").first().addClass("preview-box");
-        };
-    }
-
-    /**
      * Fires the callback as soon as the specified element exists.  
      * Runs every 250ms, and gives up after 10 seconds
      * @param element Selector to search for
@@ -219,11 +199,12 @@ export class DomUtilities {
         return new Promise(async (resolve, reject) => {
             let timeout = 0;
             while ($(element).length == 0 && timeout < (1000 * 10)) {
-                await new Promise((resolve) => { window.setTimeout(() => { resolve(); }, 100) });
-                timeout += 100;
+                await new Promise((resolve) => { window.setTimeout(() => { resolve(); }, 250) });
+                timeout += 250;
             }
 
-            if ($(element).length > 0) { callback(); resolve(); }
+            if ($(element).length > 0)
+                window.setTimeout(() => { callback(); resolve(); }, 250)
             else reject();
         });
     }
@@ -266,18 +247,11 @@ export class DomUtilities {
     public static addStyle(css: string): JQuery<HTMLElement> {
         return $("<style>")
             .attr({
-                "id": getID(),
+                "id": Util.makeUniqueID(),
                 "type": "text/css"
             })
             .html(css)
             .appendTo("head");
-
-        function getID(): string {
-            let id: string;
-            do { id = Util.makeID(); }
-            while ($("style#" + id).length > 0);
-            return id;
-        }
     };
 
     /**

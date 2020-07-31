@@ -83,14 +83,18 @@ export enum PostRating {
     Explicit = "e"
 }
 
+enum PostRatingAliases {
+    "s" = PostRating.Safe,
+    "safe" = PostRating.Safe,
+    "q" = PostRating.Questionable,
+    "questionable" = PostRating.Questionable,
+    "e" = PostRating.Explicit,
+    "explicit" = PostRating.Explicit,
+}
+
 export namespace PostRating {
     export function fromValue(value: string): PostRating {
-        for (const key of Object.keys(PostRating)) {
-            if (PostRating[key] === value) {
-                return PostRating[key];
-            }
-        }
-        return undefined;
+        return PostRatingAliases[value];
     }
 
     export function toString(postRating: PostRating): string {
@@ -136,23 +140,27 @@ export namespace APIPost {
         return flags.join(" ");
     }
 
+    /**
+     * Returns an APIPost based on the provided DOM element.  
+     * Note that this method is limited depending on the data properties of the source.  
+     * @param $element Post-preview element
+     */
     export function fromDomElement($element: JQuery<HTMLElement>): APIPost {
+
+        // File details
         let md5: string;
-        const deletedUrl = "/images/deleted-preview.png";
-        if ($element.attr("data-md5")) {
-            md5 = $element.attr("data-md5");
-        } else if ($element.attr("data-file-url")) {
+        if ($element.attr("data-md5")) md5 = $element.attr("data-md5");
+        else if ($element.attr("data-file-url"))
             md5 = $element.attr("data-file-url").substring(36, 68);
-        }
         const ext = $element.attr("data-file-ext");
+
+        // Score
         let score: number;
-        if ($element.attr("data-score")) {
-            score = parseInt($element.attr("data-score"));
-        }
-        else if ($element.find(".post-score-score").length !== 0) {
+        if ($element.attr("data-score")) score = parseInt($element.attr("data-score"));
+        else if ($element.find(".post-score-score").length !== 0)
             score = parseInt($element.find(".post-score-score").first().html().substring(1));
-        }
-        const result: APIPost = {
+
+        return {
             error: "",
             id: parseInt($element.attr("data-id")),
             change_seq: -1,
@@ -166,7 +174,7 @@ export namespace APIPost {
                 width: -1,
                 md5: md5,
                 size: -1,
-                url: md5 === undefined ? deletedUrl : `https://static1.e621.net/data/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.${ext}`
+                url: $element.attr("data-file-url") ? $element.attr("data-file-url") : getFileName(md5),
             },
             flags: {
                 deleted: false,
@@ -174,31 +182,31 @@ export namespace APIPost {
                 note_locked: false,
                 pending: false,
                 rating_locked: false,
-                status_locked: false
+                status_locked: false,
             },
             locked_tags: [],
             pools: [],
             preview: {
                 height: -1,
                 width: -1,
-                url: md5 === undefined ? deletedUrl : `https://static1.e621.net/data/preview/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`
+                url: $element.attr("data-preview-file-url") ? $element.attr("data-preview-file-url") : getFileName(md5, "preview"),
             },
             rating: PostRating.fromValue($element.attr("data-rating")),
             relationships: {
                 children: [],
                 has_active_children: false,
-                has_children: false
+                has_children: false,
             },
             sample: {
                 has: true,
                 height: -1,
                 width: -1,
-                url: md5 === undefined ? deletedUrl : `https://static1.e621.net/data/sample/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`
+                url: $element.attr("data-large-file-url") ? $element.attr("data-large-file-url") : getFileName(md5, "sample"),
             },
             score: {
                 down: 0,
                 total: score,
-                up: 0
+                up: 0,
             },
             sources: [],
             tags: {
@@ -209,11 +217,22 @@ export namespace APIPost {
                 invalid: [],
                 lore: [],
                 meta: [],
-                species: []
+                species: [],
             },
             updated_at: "",
             uploader_id: parseInt($element.attr("data-uploader-id")),
+        };
+
+        /**
+         * Returns the appropriate filename based on the provided md5
+         * @param md5 MD5 of the file. If undefined, a "deleted file" placeholder is returned.
+         * @param prefix File prefix, i.e. "preview", "sample", etc.
+         */
+        function getFileName(md5: string, prefix?: string): string {
+            if (md5 === undefined) return "/images/deleted-preview.png";
+            if (prefix) return `https://static1.e621.net/data/${prefix}/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`;
+            return `https://static1.e621.net/data/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`
         }
-        return result;
+
     }
 }

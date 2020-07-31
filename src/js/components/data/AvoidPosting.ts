@@ -1,5 +1,6 @@
 import { E621 } from "../api/E621";
 import { APITagImplication } from "../api/responses/APITagImplication";
+import { Util } from "../utility/Util";
 
 /**
  * Manages the Avoid Posted list
@@ -19,7 +20,7 @@ export class AvoidPosting {
 
         // Cache has not been fetched, but a copy has been stored earlier
         const storedCache = JSON.parse(window.localStorage.getItem("re621.dnp.cache") || `{ "expires": 0, "content": [] }`) as StoredCache;
-        if (storedCache.expires > new Date().getTime()) {
+        if (storedCache.expires > Util.Time.now()) {
             this.cache = storedCache.content;
             this.cacheReady = true;
             return Promise.resolve(this.cache);
@@ -37,7 +38,7 @@ export class AvoidPosting {
         window.localStorage.setItem(
             "re621.dnp.cache",
             JSON.stringify({
-                "expires": (new Date().getTime() + this.cacheLife),
+                "expires": (Util.Time.now() + this.cacheLife),
                 "content": this.cache,
             })
         );

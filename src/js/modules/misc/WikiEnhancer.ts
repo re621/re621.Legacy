@@ -1,5 +1,5 @@
 import { XM } from "../../components/api/XM";
-import { Page, PageDefintion } from "../../components/data/Page";
+import { PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
@@ -7,10 +7,8 @@ import { RE6Module, Settings } from "../../components/RE6Module";
  */
 export class WikiEnhancer extends RE6Module {
 
-    private $buttonCopy: JQuery<HTMLElement>;
-
     public constructor() {
-        super(PageDefintion.wiki);
+        super([PageDefintion.wiki, PageDefintion.wikiNA]);
     }
 
     protected getDefaultSettings(): Settings {
@@ -20,28 +18,23 @@ export class WikiEnhancer extends RE6Module {
     public create(): void {
         super.create();
         const $title = $("#wiki-page-title");
-        const removeThis = ["Artist: ", "Copyright: ", "Character: ", "Species: ", "Meta: ", "Lore: "];
-        let tagName = $title.text().trim();
-        for (const string of removeThis) {
-            tagName = tagName.replace(string, "");
-        }
-        tagName = tagName.replace(/ /g, "_");
-        Page.setQueryParameter("title", tagName);
-        this.$buttonCopy = $("<button>")
+        const tagName = $title.text().trim()
+            .replace(/^((Species|Character|Copyright|Artist|Lore|Meta): )/g, "")
+            .replace(/ /g, "_");
+
+        $("<button>")
             .attr("id", "wiki-page-copy-tag")
             .addClass("button btn-neutral border-highlight border-left")
+            .html(`<i class="far fa-copy"></i>`)
+            .appendTo($title)
             .on("click", () => {
                 XM.Util.setClipboard(tagName);
             });
-        $("<i>")
-            .addClass("far fa-copy")
-            .appendTo(this.$buttonCopy);
-        this.$buttonCopy.appendTo($title);
     }
 
     public destroy(): void {
         if (!this.isInitialized()) return;
         super.destroy();
-        this.$buttonCopy.remove();
+        $("#wiki-page-copy-tag").remove();
     }
 }

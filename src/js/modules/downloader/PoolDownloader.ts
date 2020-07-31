@@ -70,7 +70,7 @@ export class PoolDownloader extends RE6Module {
 
         const container = $(base)
             .addClass("pool-container");
-        const overview = $("div#a-show")
+        const overview = $("#a-show")
             .addClass("pool-overview");
 
         // Toggle Button
@@ -92,21 +92,19 @@ export class PoolDownloader extends RE6Module {
 
         this.section = $("<section>")
             .attr("id", "pool-downloader-box")
+            .html("<h1>Download</h1>")
             .appendTo(sidebar);
-        $("<h1>").html("Download").appendTo(this.section);
 
         // Processes selected files
 
         // Contains general info about the download
         this.infoText = $("<div>")
             .addClass("download-info")
-            .html("")
             .appendTo(this.section);
 
         // Contains info about currently downloaded files
         this.infoFile = $("<div>")
             .addClass("download-file")
-            .html("")
             .appendTo(this.section);
     }
 
