@@ -130,7 +130,7 @@ export class TagTracker extends RE6Module implements SubscriptionTracker {
             }
 
             const post: APIPost = apiResult[key];
-            Debug.log(`TgT: ${post.id} ${Util.formatTime(new Date(post.created_at))}`);
+            Debug.log(`TgT: ${post.id} ${Util.Time.format(new Date(post.created_at))}`);
 
             // Only add posts that match the blacklist
             if (new Post(post).matchesBlacklist(true)) {
