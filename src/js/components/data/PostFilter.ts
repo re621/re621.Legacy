@@ -50,8 +50,7 @@ export class PostFilter {
             const content = filter.content;
             switch (filter.type) {
                 case PostFilterType.Flag:
-                    // TODO I don't think that this is right
-                    result = post.getFlags() === content;
+                    result = post.getFlagsSet().has(content);
                     break;
                 case PostFilterType.Id:
                     result = this.compareNumbers(post.getId(), parseInt(content), filter.comparable);
@@ -157,7 +156,7 @@ export enum PostFilterType {
     Score = "score:",
     Rating = "rating:",
     Uploader = "uplaoder:",
-    Flag = "flag:",
+    Flag = "status:",
     Fav = "fav:",
 }
 

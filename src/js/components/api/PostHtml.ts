@@ -9,7 +9,7 @@ export class PostHtml {
             .attr({
                 "id": "post_" + json.id,
                 "data-id": json.id,
-                "data-flags": this.getFlags(json).join(" "),
+                "data-flags": APIPost.getFlagString(json),
                 "data-tags": allTags,
                 "data-rating": json.rating,
                 "data-uploader-id": json.uploader_id,
@@ -89,7 +89,7 @@ export class PostHtml {
                 break;
         }
 
-        for (const flag of this.getFlags(json))
+        for (const flag of APIPost.getFlagSet(json))
             result.push("post-status-" + flag);
 
         if (json.relationships.has_active_children)
@@ -98,14 +98,6 @@ export class PostHtml {
         if (json.relationships.parent_id !== null)
             result.push("post-status-has-parent");
 
-        return result;
-    }
-
-    private static getFlags(json: APIPost): string[] {
-        const result = [];
-        if (json.flags.deleted) result.push("deleted");
-        if (json.flags.flagged) result.push("flagged");
-        if (json.flags.pending) result.push("pending");
         return result;
     }
 
