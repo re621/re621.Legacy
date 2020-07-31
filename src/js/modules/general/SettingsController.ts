@@ -84,15 +84,17 @@ export class SettingsController extends RE6Module {
         });
 
         // Start up the version checker
-        if (Util.Time.now() - (1000 * 60 * 60) > this.fetchSettings("lastVersionCheck")) {
+        if (Sync.infoUpdate + Util.Time.HOUR < Util.Time.now()) {
 
             const releases = { latest: null, current: null };
             (async (): Promise<void> => {
                 releases.latest = JSON.parse(await Util.userscriptRequest("https://api.github.com/repos/re621/re621/releases/latest"));
                 releases.current = JSON.parse(await Util.userscriptRequest("https://api.github.com/repos/re621/re621/releases/tags/" + window["re621"]["version"]));
                 await this.pushSettings("newVersionAvailable", releases.latest.name !== releases.current.name);
-                await this.pushSettings("lastVersionCheck", Util.Time.now());
                 await this.pushSettings("changelog", releases.current.body);
+
+                Sync.infoUpdate = Util.Time.now();
+                await Sync.saveSettings();
 
                 $("#changelog-list").html(Util.quickParseMarkdown(releases.current.body));
                 $("#project-update-button").attr("data-available", (releases.latest.name !== releases.current.name) + "");

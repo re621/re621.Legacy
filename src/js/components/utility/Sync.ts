@@ -11,10 +11,12 @@ declare const UAParser: any;
 
 export class Sync {
 
-    public static enabled: boolean;
-    public static userID: string;
-    public static version: string | boolean;
-    public static timestamp: number;
+    public static enabled: boolean;             // whether synchronization is enabled
+    public static userID: string;               // unique user ID
+    public static version: string | boolean;    // current script version
+    public static timestamp: number;            // last time data was synchronized
+
+    public static infoUpdate: number;           // last time changelog info was fetched
 
     public static async init(): Promise<any> {
         // Load settings
@@ -24,6 +26,8 @@ export class Sync {
         Sync.userID = typeof settings["userID"] === "undefined" ? "-1" : settings["userID"];
         Sync.version = typeof settings["version"] === "undefined" ? "0.0.1" : settings["version"];
         Sync.timestamp = typeof settings["timestamp"] === "undefined" ? 0 : settings["timestamp"];
+
+        Sync.infoUpdate = typeof settings["infoUpdate"] === "undefined" ? 0 : settings["infoUpdate"];
 
         // Validate registration
         if (Sync.userID === "-1") {
@@ -42,6 +46,11 @@ export class Sync {
 
         // Log environment data
         if (Sync.version !== false && Util.versionCompare(Sync.version as string, window["re621"]["version"]) !== 0) {
+
+            // Force the changelog to be updated on script update
+            Sync.infoUpdate = 0;
+
+            // Refresh the environment data on the backend
             await XM.Connect.xmlHttpPromise({
                 method: "POST",
                 url: "https://re621.bitwolfy.com/sync/report",
@@ -63,6 +72,7 @@ export class Sync {
             userID: Sync.userID,
             version: Sync.version,
             timestamp: Sync.timestamp,
+            infoUpdate: Sync.infoUpdate,
         });
     }
 
