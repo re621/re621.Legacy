@@ -51,6 +51,7 @@ div.flag-container {
     position: absolute;
     bottom: 0;
     right: 0;
+    z-index: 110;
 
     width: stretch;
     overflow: hidden;
