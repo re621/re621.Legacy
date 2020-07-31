@@ -1,4 +1,5 @@
 import { XM } from "../api/XM";
+import { UtilID } from "./UtilID";
 import { UtilTime } from "./UtilTime";
 
 /**
@@ -6,9 +7,9 @@ import { UtilTime } from "./UtilTime";
  */
 export class Util {
 
-    private static uniqueIDs: string[] = [];
-
     public static Time = UtilTime;
+
+    public static ID = UtilID;
 
     /**
      * Downloads the provided object as a JSON file
@@ -149,33 +150,6 @@ export class Util {
             .replace(/\[color\]([\s\S]*)\[\/color\]/g, "<span>$1</span>")       // Color
 
         return input;
-    }
-
-    /**
-     * Creates a random string of letters, to be used as an ID.  
-     * Collisions may occur; use `makeUniqueID()` if that is a concern.
-     * @param length String length
-     */
-    public static makeID(length = 8): string {
-        let result = '';
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', charLength = chars.length;
-        for (let i = 0; i < length; i++) {
-            result += chars.charAt(Math.floor(Math.random() * charLength));
-        }
-        return result;
-    }
-
-    /**
-     * Creates a random string of letters, to be used as an ID.  
-     * Unlike `makeID()`, the results are cached to prevent collisions.
-     * @param length String length
-     */
-    public static makeUniqueID(length = 8): string {
-        let uniqueID: string;
-        do { uniqueID = Util.makeID(length); }
-        while (Util.uniqueIDs.includes(uniqueID));
-        Util.uniqueIDs.push(uniqueID);
-        return uniqueID;
     }
 
     /**

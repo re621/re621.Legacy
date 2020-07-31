@@ -12,7 +12,7 @@ export class Tabbed implements PreparedStructure {
     private $container: JQuery<HTMLElement>;
 
     constructor(config: TabbedConfig) {
-        this.id = Util.makeUniqueID();
+        this.id = Util.ID.make();
         this.config = config;
     }
 

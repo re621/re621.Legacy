@@ -247,7 +247,7 @@ export class DomUtilities {
     public static addStyle(css: string): JQuery<HTMLElement> {
         return $("<style>")
             .attr({
-                "id": Util.makeUniqueID(),
+                "id": Util.ID.make(),
                 "type": "text/css"
             })
             .html(css)

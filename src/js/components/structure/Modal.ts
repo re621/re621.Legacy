@@ -12,7 +12,7 @@ export class Modal {
     private $activeTrigger: JQuery<HTMLElement>;
 
     public constructor(config: ModalConfig) {
-        this.id = Util.makeUniqueID();
+        this.id = Util.ID.make();
         this.config = this.validateConfig(config);
 
         // Create the DOM structure for the modal window
