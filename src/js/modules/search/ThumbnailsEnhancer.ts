@@ -1,7 +1,7 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { E621 } from "../../components/api/E621";
 import { XM } from "../../components/api/XM";
-import { FavoriteCache } from "../../components/data/FavoriteCache";
+import { FavoriteCache } from "../../components/cache/FavoriteCache";
 import { PageDefintion } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";

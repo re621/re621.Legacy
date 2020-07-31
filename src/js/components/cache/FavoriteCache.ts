@@ -1,7 +1,7 @@
 import { E621 } from "../api/E621";
 import { APIPost } from "../api/responses/APIPost";
+import { User } from "../data/User";
 import { Util } from "../utility/Util";
-import { User } from "./User";
 
 export class FavoriteCache {
 

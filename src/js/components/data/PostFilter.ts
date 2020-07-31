@@ -1,5 +1,5 @@
 import { PostRating } from "../api/responses/APIPost";
-import { FavoriteCache } from "./FavoriteCache";
+import { FavoriteCache } from "../cache/FavoriteCache";
 import { Post } from "./Post";
 import { Tag } from "./Tag";
 

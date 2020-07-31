@@ -1,6 +1,6 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { E621 } from "../../components/api/E621";
-import { FavoriteCache } from "../../components/data/FavoriteCache";
+import { FavoriteCache } from "../../components/cache/FavoriteCache";
 import { PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
 import { ModuleController } from "../../components/ModuleController";

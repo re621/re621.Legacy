@@ -47,6 +47,14 @@ export class AvoidPosting {
         return Promise.resolve(this.cache);
     }
 
+    public static getSyncTime(): number {
+        return parseInt(window.localStorage.getItem("re621.favcache.sync")) || 0;
+    }
+
+    public static isSyncRequired(): boolean {
+        return false;
+    }
+
     /**
      * Returns true if the provided tag name is on the DNP list, false otherwise
      * @param name Tag name

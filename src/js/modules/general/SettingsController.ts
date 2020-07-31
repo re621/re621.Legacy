@@ -1,7 +1,7 @@
 import { E621 } from "../../components/api/E621";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
-import { FavoriteCache } from "../../components/data/FavoriteCache";
+import { FavoriteCache } from "../../components/cache/FavoriteCache";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
