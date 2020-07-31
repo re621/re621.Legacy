@@ -1,18 +1,7 @@
 
 export class FavoriteCache {
 
-    private static cache: Set<number>;
-
-    public static init(): void {
-        FavoriteCache.cache = new Set<number>(JSON.parse(window.localStorage.getItem("re621.favorites") || "[]"));
-
-        $(document).on("re621.favorite.main", (event, data) => {
-            FavoriteCache.cache = new Set<number>(JSON.parse(window.localStorage.getItem("re621.favorites") || "[]"));
-            if (data.action) FavoriteCache.cache.add(data.id);
-            else FavoriteCache.cache.delete(data.id);
-            window.localStorage.setItem("re621.favorites", JSON.stringify(Array.from(FavoriteCache.cache)));
-        });
-    }
+    private static cache: Set<number> = new Set<number>(JSON.parse(window.localStorage.getItem("re621.favorites") || "[]"));
 
     private static save(): void {
         window.localStorage.setItem("re621.favorites", JSON.stringify(Array.from(FavoriteCache.cache)));
