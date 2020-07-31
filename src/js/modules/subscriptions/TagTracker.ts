@@ -102,46 +102,43 @@ export class TagTracker extends RE6Module implements SubscriptionTracker {
 
         status.append(`<div>. . . sending an API request</div>`);
         const storedSubChunks = Util.chunkArray(Object.keys(storedSubs), this.subBatchSize);
-        const apiChunks: APIPost[][] = [];
+        const apiResult: { [timestamp: number]: APIPost } = {};
         for (const [index, chunk] of storedSubChunks.entries()) {
             if (storedSubChunks.length > 1) status.append(`<div>&nbsp; &nbsp; &nbsp; - processing batch #${index}</div>`);
-            apiChunks.push(await E621.Posts.get<APIPost>({ "tags": chunk.map(el => "~" + el).join("+"), "limit": 320 }, 500));
-        }
-
-        Debug.log("posts from " + Util.formatTime(new Date(lastUpdate)));
-        Debug.log(apiChunks);
-        status.append(`<div>. . . formatting output</div>`);
-        const postLimit = ModuleController.get(SubscriptionManager).fetchSettings<number>("cacheSize")
-        for (const apiData of apiChunks) {
-            for (const post of apiData) {
-                Debug.log(
-                    "TgT:",
-                    post.id,
-                    Util.formatTime(new Date(post.created_at)),
-                    new Date(post.created_at).getTime() > lastUpdate ? "new" : "old"
-                );
-
-                // Stop loading updates if they will get trimmed from the cache anyways
-                if (Object.keys(results).length > postLimit) {
-                    Debug.log("TgT: postlimit");
-                    break;
-                }
+            if (index == 10) status.append(`<div><span style="color:gold">warning</span> connection throttled</div>`)
+            for (const post of await E621.Posts.get<APIPost>({ "tags": chunk.map(el => "~" + el).join("+"), "limit": 320 }, index < 10 ? 500 : 1000)) {
+                const timestamp = new Date(post.created_at).getTime();
 
                 // Posts are ordered by upload date, with newest first
                 // Thus, if one post fails the age check, so will any that follow
-                if (new Date(post.created_at).getTime() < lastUpdate) {
-                    Debug.log("TgT: lastupdate");
-                    break;
-                }
+                if (timestamp < lastUpdate) break;
 
-                // Only add posts that match the blacklist
-                if (new Post(post).matchesBlacklist(true)) {
-                    Debug.log("TgT: blacklist");
-                    continue;
-                }
-
-                results[new Date(post.created_at).getTime()] = await this.formatPostUpdate(post);
+                // Collisions are technically possible, but incredibly unlikely
+                apiResult[timestamp] = post;
             }
+        }
+
+        Debug.log(apiResult);
+        status.append(`<div>. . . formatting output</div>`);
+        const postLimit = ModuleController.get(SubscriptionManager).fetchSettings<number>("cacheSize")
+        for (const key of Object.keys(apiResult).sort()) {
+
+            // Stop loading updates if they will get trimmed from the cache anyways
+            if (Object.keys(results).length > postLimit) {
+                Debug.log("TgT: postlimit");
+                break;
+            }
+
+            const post: APIPost = apiResult[key];
+            Debug.log(`TgT: ${post.id} ${Util.formatTime(new Date(post.created_at))}`);
+
+            // Only add posts that match the blacklist
+            if (new Post(post).matchesBlacklist(true)) {
+                Debug.log("TgT: blacklist");
+                continue;
+            }
+
+            results[new Date(post.created_at).getTime()] = await this.formatPostUpdate(post);
         }
 
         status.append(`<div>. . . outputting results</div>`);
