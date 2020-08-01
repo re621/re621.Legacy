@@ -17,8 +17,7 @@ export class Patcher {
 
         // Patch 1 - Version 1.3.5
         // The subscription modules were renamed to make the overall structure more clear.
-        // Cache was removed from the module settings to prevent event listeners from being
-        // triggered needlessly.
+        // Cache was removed from the module settings to prevent event listeners from being triggered needlessly.
         if (Patcher.version < 1) {
             for (const type of ["Comment", "Forum", "Pool", "Tag"]) {
                 const entry = await XM.Storage.getValue("re621." + type + "Subscriptions", undefined);
@@ -71,6 +70,13 @@ export class Patcher {
             }
 
             Patcher.version = 3;
+        }
+
+        // Patch 4 - Version 1.3.15
+        // Favorites and DNP cache local storage variable names were changed
+        if (Patcher.version < 4) {
+            window.localStorage.removeItem("re621.favorites");
+            window.localStorage.removeItem("re621.dnp.cache");
         }
 
         Debug.log(`Patcher: ${counter} records changed`)

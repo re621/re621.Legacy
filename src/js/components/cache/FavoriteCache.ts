@@ -17,7 +17,7 @@ export class FavoriteCache {
         window.localStorage.setItem("re621.favcache.data", JSON.stringify(Array.from(FavoriteCache.getCache())));
     }
 
-    public static clear(): void {
+    private static clear(): void {
         FavoriteCache.cache = new Set();
         FavoriteCache.save();
     }
@@ -42,7 +42,9 @@ export class FavoriteCache {
         return true;
     }
 
-    public static async sync(status: JQuery<HTMLElement>): Promise<number> {
+    public static async update(status?: JQuery<HTMLElement>): Promise<number> {
+        if (!status) status = $("<span>");
+
         FavoriteCache.clear();
         let result: APIPost[] = [],
             page = 0;
@@ -57,24 +59,24 @@ export class FavoriteCache {
 
         status.html(`<i class="far fa-check-circle"></i> Cache reloaded: ${FavoriteCache.size()} entries`);
 
-        window.localStorage.setItem("re621.favcache.sync", Util.Time.now() + "")
-        window.localStorage.setItem("re621.favcache.req", "false");
+        window.localStorage.setItem("re621.favcache.update", Util.Time.now() + "")
+        window.localStorage.setItem("re621.favcache.invalid", "false");
 
         return Promise.resolve(FavoriteCache.size());
     }
 
-    public static getSyncTime(): number {
+    public static getUpdateTime(): number {
         return parseInt(window.localStorage.getItem("re621.favcache.sync")) || 0;
     }
 
-    public static async isSyncRequired(): Promise<boolean> {
-        if (FavoriteCache.getSyncTime() + Util.Time.DAY < Util.Time.now()) {
+    public static async isUpdateRequired(): Promise<boolean> {
+        if (FavoriteCache.getUpdateTime() + Util.Time.DAY < Util.Time.now()) {
             const updateRequired = (await User.getCurrentSettings()).favorite_count !== FavoriteCache.size();
-            window.localStorage.setItem("re621.favcache.req", updateRequired + "");
-            window.localStorage.setItem("re621.favcache.sync", Util.Time.now() + "");
+            window.localStorage.setItem("re621.favcache.update", Util.Time.now() + "");
+            window.localStorage.setItem("re621.favcache.invalid", updateRequired + "");
             return Promise.resolve(updateRequired);
         }
-        return Promise.resolve(window.localStorage.getItem("re621.favcache.req") == "true");
+        return Promise.resolve(window.localStorage.getItem("re621.favcache.invalid") == "true");
     }
 
 }

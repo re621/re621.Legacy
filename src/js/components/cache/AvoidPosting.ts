@@ -2,72 +2,65 @@ import { E621 } from "../api/E621";
 import { APITagImplication } from "../api/responses/APITagImplication";
 import { Util } from "../utility/Util";
 
-/**
- * Manages the Avoid Posted list
- */
 export class AvoidPosting {
 
-    /* How often should the DNP cache be updated */
-    private static cacheLife = 24 * 60 * 60 * 1000; // daily
+    private static cache: Set<string>;
 
-    private static cache: string[];
-    private static cacheReady = false;
+    private static getCache(): Set<string> {
+        if (typeof AvoidPosting.cache === "undefined")
+            AvoidPosting.cache = new Set<string>(JSON.parse(window.localStorage.getItem("re621.dnpcache.data") || "[]"))
+        return AvoidPosting.cache;
+    }
 
-    /** Returns the cached DNP data. */
-    private static async getCache(): Promise<string[]> {
-        // Cache has already been fetched
-        if (this.cacheReady) return Promise.resolve(this.cache);
+    private static save(): void {
+        window.localStorage.setItem("re621.dnpcache.data", JSON.stringify(Array.from(AvoidPosting.getCache())));
+    }
 
-        // Cache has not been fetched, but a copy has been stored earlier
-        const storedCache = JSON.parse(window.localStorage.getItem("re621.dnp.cache") || `{ "expires": 0, "content": [] }`) as StoredCache;
-        if (storedCache.expires > Util.Time.now()) {
-            this.cache = storedCache.content;
-            this.cacheReady = true;
-            return Promise.resolve(this.cache);
-        }
+    private static clear(): void {
+        AvoidPosting.cache = new Set();
+        AvoidPosting.save();
+    }
 
-        // Cache does not exist, or has expired
-        this.cache = [];
-        let lookup: APITagImplication[], page = 1;
+    public static size(): number {
+        return AvoidPosting.getCache().size;
+    }
+
+    public static has(tag: string): boolean {
+        return AvoidPosting.getCache().has(tag);
+    }
+
+    private static add(tag: string): void {
+        AvoidPosting.getCache().add(tag);
+        AvoidPosting.save();
+    }
+
+    public static async update(status?: JQuery<HTMLElement>): Promise<number> {
+        if (!status) status = $("<span>");
+
+        AvoidPosting.clear();
+        let result: APITagImplication[] = [],
+            page = 0;
+
         do {
-            lookup = await E621.TagImplications.get<APITagImplication>({ "search[consequent_name]": "avoid_posting", "limit": "320", "page": page });
-            lookup.forEach((entry) => { this.cache.push(entry["antecedent_name"]); })
             page++;
-        } while (lookup.length === 320);
+            status.html(`<i class="fas fa-circle-notch fa-spin"></i> Processing favorites: batch ${page} / ?`)
+            result = await E621.TagImplications.get<APITagImplication>({ "search[consequent_name]": "avoid_posting", page: page, limit: 320 }, 500);
+            for (const entry of result) AvoidPosting.add(entry["antecedent_name"]);
+        } while (result.length == 320);
 
-        window.localStorage.setItem(
-            "re621.dnp.cache",
-            JSON.stringify({
-                "expires": (Util.Time.now() + this.cacheLife),
-                "content": this.cache,
-            })
-        );
+        status.html(`<i class="far fa-check-circle"></i> Cache reloaded: ${AvoidPosting.size()} entries`);
 
-        this.cacheReady = true;
-        return Promise.resolve(this.cache);
+        window.localStorage.setItem("re621.dnpcache.update", Util.Time.now() + "")
+
+        return Promise.resolve(AvoidPosting.size());
     }
 
-    public static getSyncTime(): number {
-        return parseInt(window.localStorage.getItem("re621.favcache.sync")) || 0;
+    public static getUpdateTime(): number {
+        return parseInt(window.localStorage.getItem("re621.dnpcache.update")) || 0;
     }
 
-    public static isSyncRequired(): boolean {
-        return false;
+    public static isUpdateRequired(): boolean {
+        return AvoidPosting.getUpdateTime() + Util.Time.DAY < Util.Time.now();
     }
 
-    /**
-     * Returns true if the provided tag name is on the DNP list, false otherwise
-     * @param name Tag name
-     */
-    public static async contains(name: string): Promise<boolean> {
-        return this.getCache().then((cache) => {
-            return Promise.resolve(cache.includes(name));
-        });
-    }
-
-}
-
-interface StoredCache {
-    expires: number;
-    content: string[];
 }

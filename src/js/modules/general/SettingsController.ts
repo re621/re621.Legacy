@@ -1,6 +1,7 @@
 import { E621 } from "../../components/api/E621";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
+import { AvoidPosting } from "../../components/cache/AvoidPosting";
 import { FavoriteCache } from "../../components/cache/FavoriteCache";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { User } from "../../components/data/User";
@@ -1042,7 +1043,7 @@ export class SettingsController extends RE6Module {
                         }),
                         Form.button({ name: "reset", value: "Reset", }, async (data, input) => {
                             input.prop("disabled", true);
-                            await FavoriteCache.sync($("#favcache-status"));
+                            await FavoriteCache.update($("#favcache-status"));
                             input.prop("disabled", false);
                         }),
 
@@ -1053,10 +1054,10 @@ export class SettingsController extends RE6Module {
                                     .html(`<i class="fas fa-circle-notch fa-spin"></i> Initializing . . .`)
                                     .appendTo(element);
 
-                                if (await FavoriteCache.isSyncRequired())
+                                if (await FavoriteCache.isUpdateRequired())
                                     $status.html(`
                                         <i class="far fa-times-circle"></i> 
-                                        <span style="color:gold">Reset required</span>: Cache integrity failure
+                                        <span style="color:gold">Reset required</span>: Cache integrity failure (${FavoriteCache.size()})
                                     `);
                                 else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified: ${FavoriteCache.size()} entries`)
                             },
@@ -1064,7 +1065,7 @@ export class SettingsController extends RE6Module {
                         }),
                         Form.div({
                             value: (element) => {
-                                const lastUpdate = FavoriteCache.getSyncTime();
+                                const lastUpdate = FavoriteCache.getUpdateTime();
                                 if (lastUpdate) element.html(Util.Time.format(lastUpdate));
                                 else element.html("");
                             },
@@ -1073,6 +1074,44 @@ export class SettingsController extends RE6Module {
 
                     ]),
                     Form.spacer(3),
+
+                    Form.section({ name: "dnpcache", columns: 3, width: 3 }, [
+
+                        Form.div({
+                            value: `<b>Avoid Posting List</b><br />Used to speed up TinyAlias tag checking`,
+                            width: 2,
+                        }),
+                        Form.button({ name: "reset", value: "Reset", }, async (data, input) => {
+                            input.prop("disabled", "true");
+                            await AvoidPosting.update($("#dnpcache-status"));
+                            input.prop("disabled", "false");
+                        }),
+                        Form.div({
+                            value: async (element) => {
+                                const $status = $("<div>")
+                                    .attr("id", "dnpcache-status")
+                                    .html(`<i class="fas fa-circle-notch fa-spin"></i> Initializing . . .`)
+                                    .appendTo(element);
+
+                                if (AvoidPosting.size() == 0)
+                                    $status.html(`
+                                        <i class="far fa-times-circle"></i> 
+                                        <span style="color:gold">Reset required</span>: Cache integrity failure (${AvoidPosting.size()})
+                                    `);
+                                else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified: ${AvoidPosting.size()} entries`)
+                            },
+                            width: 2,
+                        }),
+                        Form.div({
+                            value: (element) => {
+                                const lastUpdate = AvoidPosting.getUpdateTime();
+                                if (lastUpdate) element.html(Util.Time.format(lastUpdate));
+                                else element.html("");
+                            },
+                            wrapper: "text-center input-disabled",
+                        })
+
+                    ]),
 
                 ]),
 
