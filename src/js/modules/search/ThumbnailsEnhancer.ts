@@ -339,58 +339,61 @@ export class ThumbnailEnhancer extends RE6Module {
         else $("<span>").html(parseDate($imgData[2])).appendTo($extrasBox);
 
         // Voting Buttons
+        let buttonBlock = false;
         const $voteBox = $("<div>")
             .addClass("preview-voting")
             .appendTo($link);
-        const $voteUp = $("<button>")           // Upvote
+
+        $("<button>")                           // Upvote
             .attr("href", "#")
             .html(`<i class="far fa-thumbs-up"></i>`)
-            .addClass("button voteButton post-vote-up-" + postID + " score-neutral")
-            .appendTo($voteBox);
-        const $voteDown = $("<button>")        // Downvote
+            .addClass("button voteButton vote post-vote-up-" + postID + " score-neutral")
+            .appendTo($voteBox)
+            .click((event) => {
+                event.preventDefault();
+                if (buttonBlock) return;
+                buttonBlock = true;
+                Danbooru.Post.vote(postID, 1);
+                buttonBlock = false;
+            });
+
+
+        $("<button>")                           // Downvote
             .attr("href", "#")
             .html(`<i class="far fa-thumbs-down"></i>`)
-            .addClass("button voteButton post-vote-down-" + postID + " score-neutral")
-            .appendTo($voteBox);
+            .addClass("button voteButton vote post-vote-down-" + postID + " score-neutral")
+            .appendTo($voteBox)
+            .click((event) => {
+                event.preventDefault();
+                if (buttonBlock) return;
+                buttonBlock = true;
+                Danbooru.Post.vote(postID, -1);
+                buttonBlock = false;
+            });
+
         const $favorite = $("<button>")        // Favorite
             .attr("href", "#")
             .html(`<i class="far fa-star"></i>`)
-            .addClass("button voteButton favButton post-favorite-" + postID + " score-neutral" + (isFavorited ? " score-favorite" : ""))
-            .appendTo($voteBox);
-
-        let buttonBlock = false;
-        $voteUp.click((event) => {
-            event.preventDefault();
-            if (buttonBlock) return;
-            buttonBlock = true;
-            Danbooru.Post.vote(postID, 1);
-            buttonBlock = false;
-        });
-        $voteDown.click((event) => {
-            event.preventDefault();
-            if (buttonBlock) return;
-            buttonBlock = true;
-            Danbooru.Post.vote(postID, -1);
-            buttonBlock = false;
-        });
-        $favorite.click(async (event) => {
-            event.preventDefault();
-            if (buttonBlock) return;
-            buttonBlock = true;
-            if (isFavorited) {
-                isFavorited = false;
-                E621.Favorite.id(postID).delete();
-                FavoriteCache.remove(postID);
-                $favorite.removeClass("score-favorite");
-            } else {
-                isFavorited = true;
-                E621.Favorites.post({ "post_id": postID });
-                FavoriteCache.add(postID);
-                $favorite.addClass("score-favorite");
-            }
-            $article.attr("data-is-favorited", isFavorited + "");
-            buttonBlock = false;
-        })
+            .addClass("button voteButton fav post-favorite-" + postID + " score-neutral" + (isFavorited ? " score-favorite" : ""))
+            .appendTo($voteBox)
+            .click(async (event) => {
+                event.preventDefault();
+                if (buttonBlock) return;
+                buttonBlock = true;
+                if (isFavorited) {
+                    isFavorited = false;
+                    E621.Favorite.id(postID).delete();
+                    FavoriteCache.remove(postID);
+                    $favorite.removeClass("score-favorite");
+                } else {
+                    isFavorited = true;
+                    E621.Favorites.post({ "post_id": postID });
+                    FavoriteCache.add(postID);
+                    $favorite.addClass("score-favorite");
+                }
+                $article.attr("data-is-favorited", isFavorited + "");
+                buttonBlock = false;
+            })
 
 
         /* Handle double-click */

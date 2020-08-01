@@ -1,6 +1,7 @@
 import { E621 } from "../../components/api/E621";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
+import { GMxmlHttpRequestResponse } from "../../components/api/XMConnect";
 import { AvoidPosting } from "../../components/cache/AvoidPosting";
 import { FavoriteCache } from "../../components/cache/FavoriteCache";
 import { Hotkeys } from "../../components/data/Hotkeys";
@@ -118,8 +119,8 @@ export class SettingsController extends RE6Module {
 
             const releases = { latest: null, current: null };
             (async (): Promise<void> => {
-                releases.latest = JSON.parse(await Util.userscriptRequest("https://api.github.com/repos/re621/re621/releases/latest"));
-                releases.current = JSON.parse(await Util.userscriptRequest("https://api.github.com/repos/re621/re621/releases/tags/" + window["re621"]["version"]));
+                releases.latest = await getGithubData("latest");
+                releases.current = await getGithubData("tags/" + window["re621"]["version"]);
                 await this.pushSettings("newVersionAvailable", releases.latest.name !== releases.current.name);
                 await this.pushSettings("changelog", releases.current.body);
 
@@ -129,6 +130,13 @@ export class SettingsController extends RE6Module {
                 $("#changelog-list").html(Util.quickParseMarkdown(releases.current.body));
                 $("#project-update-button").attr("data-available", (releases.latest.name !== releases.current.name) + "");
             })();
+
+            async function getGithubData(node: string): Promise<any> {
+                return XM.Connect.xmlHttpPromise({ url: "https://api.github.com/repos/re621/re621/releases/" + node, method: "GET" }).then(
+                    (response: GMxmlHttpRequestResponse) => { return Promise.resolve(JSON.parse(response.responseText)); },
+                    () => { throw Error("Failed to fetch Github release data"); }
+                );
+            }
         }
     }
 
@@ -454,23 +462,17 @@ export class SettingsController extends RE6Module {
                         async (data) => {
                             await thumbnailEnhancer.pushSettings("vote", data);
                             if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleHoverVote(data);
-
-                            $("input#optgeneral-gencollapse-thumb-favbutton")
-                                .prop("disabled", !data)
-                                .parent()
-                                .toggleClass("input-disabled", !data);
                         }
                     ),
                     Form.spacer(3),
 
+                    // Favorite Button
                     Form.checkbox(
                         {
                             name: "favbutton",
                             value: thumbnailEnhancer.fetchSettings("fav"),
                             label: "<b>Favorite Button</b><br />Adds a +favorite button when hovering over a thumbnail",
-                            width: 3,
-                            wrapper: (thumbnailEnhancer.fetchSettings("vote") ? undefined : "input-disabled"),
-                            disabled: !thumbnailEnhancer.fetchSettings("vote"),
+                            width: 3
                         },
                         async (data) => {
                             await thumbnailEnhancer.pushSettings("fav", data);
@@ -589,7 +591,10 @@ export class SettingsController extends RE6Module {
                             label: "<b>Forum Notifications</b><br />Red dot on the Forum tab in the header if there are new posts",
                             width: 3,
                         },
-                        async (data) => { await headerCustomizer.toggleForumDot(data); }
+                        async (data) => {
+                            headerCustomizer.toggleForumDot(data);
+                            await headerCustomizer.pushSettings("forumUpdateDot", data)
+                        }
                     ),
                     Form.spacer(3),
 
@@ -1274,7 +1279,7 @@ export class SettingsController extends RE6Module {
             });
 
             Promise.all(promises).then((response) => {
-                console.log(response);
+                Debug.log(response);
 
                 const storedData = { "meta": "re621/1.0" };
                 response.forEach((data) => {
@@ -1282,7 +1287,7 @@ export class SettingsController extends RE6Module {
                     if (storedData[data.name]["cache"]) storedData[data.name]["cache"] = {};
                 });
 
-                Util.downloadJSON(storedData, "re621-" + User.getUsername() + "-userdata");
+                Util.downloadAsJSON(storedData, "re621-" + User.getUsername() + "-userdata");
             })
         }
 

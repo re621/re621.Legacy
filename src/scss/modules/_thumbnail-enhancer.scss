@@ -83,8 +83,6 @@ div#postContainerOverlay {
             height: 1rem;
             white-space: nowrap;
 
-            visibility: hidden;
-
             button.voteButton {
                 position: relative;
                 bottom: 1.5rem;
@@ -98,7 +96,7 @@ div#postContainerOverlay {
                     color: #c3a816;
                 }
 
-                &.favButton {
+                &.fav {
                     position: absolute;
                     left: -0.25rem;
                     bottom: 0;
@@ -314,39 +312,28 @@ div#page {
 
 }
 
+
 // Voting Buttons
-div#page[data-thumb-vote=true] {
+div#page[data-thumb-vote=true] .post-preview {
+    button.voteButton.vote { visibility: hidden; }
+    &:hover button.voteButton.vote { visibility: visible; }
+}
 
-    article.post-preview:hover,
-    div.post-preview:hover {
-
-        &>a.preview-box,
-        &>div.preview>a.preview-box {
-            div.preview-voting {
-                visibility: visible;
-            }
-        }
-    }
+div#page:not([data-thumb-vote=true]) .post-preview {
+    button.voteButton.vote { visibility: hidden; }
 }
 
 // Favorite Button
-div#page[data-thumb-fav=true] {
-
-    article.post-preview[data-is-favorited=true] {
-        button.voteButton.favButton {
-            visibility: visible;
-        }
-    }
+div#page[data-thumb-fav=true] .post-preview {
+    button.voteButton.fav { visibility: hidden; }
+    &:hover button.voteButton.fav,
+    &[data-is-favorited=true] button.voteButton.fav { visibility: visible; }
 
 }
 
-div#page:not([data-thumb-fav=true]) {
-
-    div.preview-voting > button.favButton {
-        display: none;
-    }
+div#page:not([data-thumb-fav=true]) .post-preview {
+    button.voteButton.fav { visibility: hidden; }
 }
-
 
 
 // Zoom on Hover
