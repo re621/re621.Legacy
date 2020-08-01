@@ -41,6 +41,7 @@ import { Miscellaneous } from "./Miscellaneous";
 export class SettingsController extends RE6Module {
 
     private openSettingsButton: JQuery<HTMLElement>;
+    private utilTabButton: JQuery<HTMLElement>;
 
     public constructor() {
         super();
@@ -86,7 +87,7 @@ export class SettingsController extends RE6Module {
                 { name: "Features", structure: this.createFeaturesTab() },
                 // { name: "Sync", structure: this.createSyncTab() },
                 {
-                    name: $("<a>")
+                    name: this.utilTabButton = $("<a>")
                         .attr({
                             "data-loading": "false",
                             "data-updates": "0",
@@ -131,11 +132,16 @@ export class SettingsController extends RE6Module {
         }
     }
 
-    private setNotifications(count = 0, loading = false): void {
-        this.openSettingsButton.attr({
-            "data-loading": loading + "",
-            "data-updates": count,
-        });
+    private pushNotificationsCount(count = 0): void {
+        this.openSettingsButton.attr(
+            "data-updates",
+            (parseInt(this.openSettingsButton.attr("data-updates")) || 0) + count
+        );
+
+        this.utilTabButton.attr(
+            "data-updates",
+            (parseInt(this.utilTabButton.attr("data-updates")) || 0) + count
+        );
     }
 
     /** Creates the general settings tab */
@@ -1027,6 +1033,9 @@ export class SettingsController extends RE6Module {
         });
         let selectedModule = "none";
 
+        let favcacheUpdated = true,
+            dnpcacheUpdated = true;
+
         // Create the settings form
         return new Form({ name: "optmisc", columns: 3, width: 3 }, [
             Form.header("Miscellaneous", 3),
@@ -1045,6 +1054,10 @@ export class SettingsController extends RE6Module {
                             input.prop("disabled", true);
                             await FavoriteCache.update($("#favcache-status"));
                             input.prop("disabled", false);
+
+                            if (favcacheUpdated) return;
+                            favcacheUpdated = true;
+                            this.pushNotificationsCount(-1);
                         }),
 
                         Form.div({
@@ -1054,12 +1067,14 @@ export class SettingsController extends RE6Module {
                                     .html(`<i class="fas fa-circle-notch fa-spin"></i> Initializing . . .`)
                                     .appendTo(element);
 
-                                if (await FavoriteCache.isUpdateRequired())
+                                if (await FavoriteCache.isUpdateRequired()) {
                                     $status.html(`
                                         <i class="far fa-times-circle"></i> 
                                         <span style="color:gold">Reset required</span>: Cache integrity failure (${FavoriteCache.size()})
                                     `);
-                                else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified: ${FavoriteCache.size()} entries`)
+                                    this.pushNotificationsCount(1);
+                                    favcacheUpdated = false;
+                                } else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified: ${FavoriteCache.size()} entries`)
                             },
                             width: 2,
                         }),
@@ -1070,7 +1085,7 @@ export class SettingsController extends RE6Module {
                                 else element.html("");
                             },
                             wrapper: "text-center input-disabled",
-                        })
+                        }),
 
                     ]),
                     Form.spacer(3),
@@ -1085,6 +1100,10 @@ export class SettingsController extends RE6Module {
                             input.prop("disabled", "true");
                             await AvoidPosting.update($("#dnpcache-status"));
                             input.prop("disabled", "false");
+
+                            if (dnpcacheUpdated) return;
+                            dnpcacheUpdated = false;
+                            this.pushNotificationsCount(-1);
                         }),
                         Form.div({
                             value: async (element) => {
@@ -1093,12 +1112,15 @@ export class SettingsController extends RE6Module {
                                     .html(`<i class="fas fa-circle-notch fa-spin"></i> Initializing . . .`)
                                     .appendTo(element);
 
-                                if (AvoidPosting.size() == 0)
+                                if (AvoidPosting.size() == 0) {
                                     $status.html(`
                                         <i class="far fa-times-circle"></i> 
                                         <span style="color:gold">Reset required</span>: Cache integrity failure (${AvoidPosting.size()})
                                     `);
-                                else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified: ${AvoidPosting.size()} entries`)
+
+                                    this.pushNotificationsCount(1);
+                                    dnpcacheUpdated = true;
+                                } else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified: ${AvoidPosting.size()} entries`)
                             },
                             width: 2,
                         }),
