@@ -1285,7 +1285,7 @@ export class SettingsController extends RE6Module {
             });
 
             Promise.all(promises).then((response) => {
-                console.log(response);
+                Debug.log(response);
 
                 const storedData = { "meta": "re621/1.0" };
                 response.forEach((data) => {
@@ -1293,7 +1293,7 @@ export class SettingsController extends RE6Module {
                     if (storedData[data.name]["cache"]) storedData[data.name]["cache"] = {};
                 });
 
-                Util.downloadJSON(storedData, "re621-" + User.getUsername() + "-userdata");
+                Util.downloadAsJSON(storedData, "re621-" + User.getUsername() + "-userdata");
             })
         }
 

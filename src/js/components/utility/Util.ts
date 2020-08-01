@@ -12,17 +12,18 @@ export class Util {
 
     /**
      * Downloads the provided object as a JSON file
-     * @param exportObj Object to download
-     * @param exportName File name
+     * @param data Object to download
+     * @param file File name
      */
-    public static downloadJSON(exportObj, exportName): void {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 4));
-        const downloadAnchorNode = document.createElement("a");
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", exportName + ".json");
-        document.body.appendChild(downloadAnchorNode); // required for firefox
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
+    public static downloadAsJSON(data: any, file: string): void {
+        $("<a>")
+            .attr({
+                "download": file + ".json",
+                "href": "data:application/json," + encodeURIComponent(JSON.stringify(data, null, 4)),
+            })
+            .appendTo("body")
+            .click(function () { $(this).remove(); })
+        [0].click();
     }
 
     /**
