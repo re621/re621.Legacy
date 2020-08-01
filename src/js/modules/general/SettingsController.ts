@@ -1112,6 +1112,9 @@ export class SettingsController extends RE6Module {
                                     .html(`<i class="fas fa-circle-notch fa-spin"></i> Initializing . . .`)
                                     .appendTo(element);
 
+                                if (AvoidPosting.getUpdateTime() == 0)
+                                    await AvoidPosting.update();
+
                                 if (AvoidPosting.size() == 0) {
                                     $status.html(`
                                         <i class="far fa-times-circle"></i> 
