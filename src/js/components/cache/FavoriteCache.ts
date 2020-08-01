@@ -66,7 +66,7 @@ export class FavoriteCache {
     }
 
     public static getUpdateTime(): number {
-        return parseInt(window.localStorage.getItem("re621.favcache.sync")) || 0;
+        return parseInt(window.localStorage.getItem("re621.favcache.update")) || 0;
     }
 
     public static async isUpdateRequired(): Promise<boolean> {
