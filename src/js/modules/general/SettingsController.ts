@@ -462,23 +462,17 @@ export class SettingsController extends RE6Module {
                         async (data) => {
                             await thumbnailEnhancer.pushSettings("vote", data);
                             if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleHoverVote(data);
-
-                            $("input#optgeneral-gencollapse-thumb-favbutton")
-                                .prop("disabled", !data)
-                                .parent()
-                                .toggleClass("input-disabled", !data);
                         }
                     ),
                     Form.spacer(3),
 
+                    // Favorite Button
                     Form.checkbox(
                         {
                             name: "favbutton",
                             value: thumbnailEnhancer.fetchSettings("fav"),
                             label: "<b>Favorite Button</b><br />Adds a +favorite button when hovering over a thumbnail",
-                            width: 3,
-                            wrapper: (thumbnailEnhancer.fetchSettings("vote") ? undefined : "input-disabled"),
-                            disabled: !thumbnailEnhancer.fetchSettings("vote"),
+                            width: 3
                         },
                         async (data) => {
                             await thumbnailEnhancer.pushSettings("fav", data);
