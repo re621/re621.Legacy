@@ -1,4 +1,3 @@
-import { XM } from "../api/XM";
 import { UtilID } from "./UtilID";
 import { UtilTime } from "./UtilTime";
 
@@ -24,69 +23,6 @@ export class Util {
         document.body.appendChild(downloadAnchorNode); // required for firefox
         downloadAnchorNode.click();
         downloadAnchorNode.remove();
-    }
-
-    /**
-     * Returns the data at the specified location as a string.  
-     * The location's domain MUST be listed in a @connect field in the script header.
-     * @deprecated Should be replaced with XM.Connect.xmlHttpPromise
-     * @param url Page URL
-     * @returns string Page data
-     */
-    public static async userscriptRequest(url: string): Promise<string> {
-        return new Promise(resolve => {
-            XM.Connect.xmlHttpRequest({
-                method: "GET",
-                url: url,
-                headers: { "User-Agent": window["re621"]["useragent"] },
-                onload: res => { resolve(res.responseText); }
-            });
-        });
-    }
-
-    /**
-     * Returns the image at the specified location as a blob.  
-     * The location's domain MUST be listed in a @connect field in the script header.
-     * @deprecated Should be replaced with XM.Connect.xmlHttpPromise
-     * @param url Image URL
-     * @returns blob Image data
-     */
-    public static async getImageBlob(url: string): Promise<Blob> {
-        return new Promise((resolve) => {
-            XM.Connect.xmlHttpRequest({
-                method: "GET",
-                url: url,
-                headers: { "User-Agent": window["re621"]["useragent"] },
-                responseType: "blob",
-                onload: (result) => { resolve(result.response as Blob); }
-            });
-        });
-    }
-
-    /**
-     * Returns the image at the specified location as a data-url.  
-     * This is used to bypass e621's restrictions on external files.
-     * The location's domain MUST be listed in a @connect field in the script header.
-     * @deprecated Should be replaced with XM.Connect.xmlHttpPromise
-     * @param url Image URL
-     * @returns string Data-URL
-     */
-    public static async getImageAsDataURL(url: string): Promise<string> {
-        return new Promise((resolve) => {
-            XM.Connect.xmlHttpRequest({
-                method: "GET",
-                url: url,
-                headers: { "User-Agent": window["re621"]["useragent"] },
-                responseType: "blob",
-                onload: (result) => {
-                    const reader = new FileReader();
-                    reader.onloadend = function (): void {
-                        resolve(reader.result.toString());
-                    };
-                    reader.readAsDataURL(result.response as Blob);
-                }
-            });
-        });
     }
 
     /**
