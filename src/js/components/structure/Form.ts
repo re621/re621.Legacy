@@ -25,7 +25,7 @@ export class Form implements PreparedStructure {
      * @param onSubmit Form submittion callback
      */
     public constructor(options?: SectionOptions, content?: FormElement[], onSubmit?: FormSubmitEvent) {
-        if (!options.name) options.name = Util.makeUniqueID();
+        if (!options.name) options.name = Util.ID.make();
         if (!options.columns) options.columns = 1;
         if (!options.width) options.width = options.columns;
 
@@ -124,7 +124,7 @@ export class Form implements PreparedStructure {
      * @param content Form elements
      */
     public static section(options?: SectionOptions, content?: FormElement[]): FormElement {
-        if (!options.name) options.name = Util.makeUniqueID();
+        if (!options.name) options.name = Util.ID.make();
         if (!options.columns) options.columns = 1;
         if (!options.width) options.width = options.columns;
 
@@ -150,7 +150,7 @@ export class Form implements PreparedStructure {
      * @param content Form elements
      */
     public static accordion(options?: SectionOptions & { active?: boolean | number; collapsible?: boolean }, content?: FormAccordionElement[]): FormElement {
-        if (!options.name) options.name = Util.makeUniqueID();
+        if (!options.name) options.name = Util.ID.make();
         if (!options.columns) options.columns = 1;
         if (!options.width) options.width = options.columns;
 
@@ -181,7 +181,7 @@ export class Form implements PreparedStructure {
     }
 
     public static accordionTab(options?: SectionOptions & { badge?: JQuery<HTMLElement>; subheader?: string }, content?: FormElement[]): FormElement {
-        if (!options.name) options.name = Util.makeUniqueID();
+        if (!options.name) options.name = Util.ID.make();
         if (!options.columns) options.columns = 1;
         if (!options.width) options.width = options.columns;
 
@@ -219,7 +219,7 @@ export class Form implements PreparedStructure {
      * @param content Form elements
      */
     public static collapse(options?: SectionOptions & { title?: string; badge?: JQuery<HTMLElement>; collapsed?: boolean }, content?: FormElement[]): FormElement {
-        if (!options.name) options.name = Util.makeUniqueID();
+        if (!options.name) options.name = Util.ID.make();
         if (!options.columns) options.columns = 1;
         if (!options.width) options.width = options.columns;
 
@@ -268,7 +268,7 @@ export class Form implements PreparedStructure {
      * @param changed Input change callback
      */
     public static input(options?: InputElementOptions, changed?: InputChangeEvent): FormElement {
-        if (!options.name) options.name = Util.makeUniqueID();
+        if (!options.name) options.name = Util.ID.make();
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -329,7 +329,7 @@ export class Form implements PreparedStructure {
      * @param options Element configuration
      */
     public static copy(options?: ElementOptions): FormElement {
-        if (!options.name) options.name = Util.makeUniqueID();
+        if (!options.name) options.name = Util.ID.make();
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -394,7 +394,7 @@ export class Form implements PreparedStructure {
      * @param options Element configuration
      */
     public static key(options?: ElementOptions, changed?: InputChangeEvent): FormElement {
-        if (!options.name) options.name = Util.makeUniqueID();
+        if (!options.name) options.name = Util.ID.make();
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -483,7 +483,7 @@ export class Form implements PreparedStructure {
      * @param options Element configuration
      */
     public static file(options?: ElementOptions & { accept: string }, changed?: InputChangeEvent): FormElement {
-        if (!options.name) options.name = Util.makeUniqueID();
+        if (!options.name) options.name = Util.ID.make();
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -513,7 +513,7 @@ export class Form implements PreparedStructure {
     }
 
     public static icon(options?: ElementOptions, content?: { [name: string]: any }, changed?: InputChangeEvent): FormElement {
-        if (!options.name) options.name = Util.makeUniqueID();
+        if (!options.name) options.name = Util.ID.make();
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -592,7 +592,7 @@ export class Form implements PreparedStructure {
      * @param changed Input change callback
      */
     public static button(options?: ElementOptions & { "type"?: "submit" | "button" }, changed?: InputChangeEvent): FormElement {
-        if (!options.name) options.name = Util.makeUniqueID();
+        if (!options.name) options.name = Util.ID.make();
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -646,7 +646,7 @@ export class Form implements PreparedStructure {
      * @param changed Input change callback
      */
     public static checkbox(options?: ElementOptions, changed?: InputChangeEvent): FormElement {
-        if (!options.name) options.name = Util.makeUniqueID();
+        if (!options.name) options.name = Util.ID.make();
 
         const $element = FormUtils
             .makeInputWrapper(undefined, options.wrapper, options.width)
@@ -704,7 +704,7 @@ export class Form implements PreparedStructure {
      * @param changed Input change callback
      */
     public static select(options?: ElementOptions, content?: SelectOptionSet | SelectOptionFunction, changed?: InputChangeEvent): FormElement {
-        if (!options.name) options.name = Util.makeUniqueID();
+        if (!options.name) options.name = Util.ID.make();
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -762,7 +762,7 @@ export class Form implements PreparedStructure {
         const $element = FormUtils.makeInputWrapper(undefined, undefined, width);
 
         $("<h3>")
-            .attr("id", Util.makeUniqueID())
+            .attr("id", Util.ID.make())
             .addClass("color-text")
             .html(text)
             .appendTo($element);
@@ -775,7 +775,7 @@ export class Form implements PreparedStructure {
      * @param options Element configuration
      */
     public static div(options?: ElementOptions): FormElement {
-        if (!options.name) options.name = Util.makeUniqueID();
+        if (!options.name) options.name = Util.ID.make();
 
         let $label: JQuery<HTMLElement>;
         if (options.label)
@@ -837,7 +837,7 @@ export class Form implements PreparedStructure {
         const $element = FormUtils.makeInputWrapper(undefined, undefined, width);
 
         $("<hr>")
-            .attr("id", Util.makeUniqueID())
+            .attr("id", Util.ID.make())
             .addClass("color-text-muted")
             .appendTo($element);
 
@@ -852,7 +852,7 @@ export class Form implements PreparedStructure {
         const $element = FormUtils.makeInputWrapper(undefined, undefined, width);
 
         $("<div>")
-            .attr("id", Util.makeUniqueID())
+            .attr("id", Util.ID.make())
             .html("&nbsp;")
             .appendTo($element);
 

@@ -525,8 +525,12 @@ export class SubscriptionManager extends RE6Module {
         this.refreshSettings();
         const time = await this.fetchSettings(["lastUpdate", "updateInterval", "updateStarted"], true);
 
-        $("span#subscriptions-lastupdate").html(getLastUpdateText(time.lastUpdate, time.updateStarted));
-        $("span#subscriptions-nextupdate").html(getNextUpdateText(time.lastUpdate, time.updateInterval, time.updateStarted));
+        $("span#subscriptions-lastupdate")
+            .attr("title", getLastUpdateTime(time.lastUpdate, time.updateStarted))
+            .html(getLastUpdateText(time.lastUpdate, time.updateStarted));
+        $("span#subscriptions-nextupdate")
+            .attr("title", getNextUpdateTime(time.lastUpdate, time.updateInterval, time.updateStarted))
+            .html(getNextUpdateText(time.lastUpdate, time.updateInterval, time.updateStarted));
 
         $("i#subscription-action-update").toggleClass("fa-spin", SubscriptionManager.updateInProgress);
 
@@ -538,6 +542,13 @@ export class SubscriptionManager extends RE6Module {
             else return Util.Time.ago(lastUpdate);
         }
 
+        function getLastUpdateTime(lastUpdate: number, updateStarted: number): string {
+            if (SubscriptionManager.updateInProgress) return "";
+            else if (updateStarted !== 0) return Util.Time.format(updateStarted);
+            else if (lastUpdate === 0) return "";
+            else return Util.Time.format(lastUpdate);
+        }
+
         /** Formats the next update timestamp into a readable date */
         function getNextUpdateText(lastUpdate: number, updateInterval: number, updateStarted: number): string {
             const now = Util.Time.now();
@@ -547,6 +558,15 @@ export class SubscriptionManager extends RE6Module {
             else if (lastUpdate === 0) return Util.Time.ago(now + updateInterval);
             else if ((lastUpdate + updateInterval) < now) return "Less than a minute";
             else return Util.Time.ago(lastUpdate + updateInterval + Util.Time.MINUTE);
+        }
+        function getNextUpdateTime(lastUpdate: number, updateInterval: number, updateStarted: number): string {
+            const now = Util.Time.now();
+
+            if (SubscriptionManager.updateInProgress) return "";
+            if (updateStarted !== 0) return Util.Time.format(updateStarted + SubscriptionManager.updateTimeout);
+            else if (lastUpdate === 0) return Util.Time.format(now + updateInterval);
+            else if ((lastUpdate + updateInterval) < now) return "";
+            else return Util.Time.format(lastUpdate + updateInterval);
         }
     }
 
@@ -644,6 +664,12 @@ export class SubscriptionManager extends RE6Module {
 
         async function execSubscribe(id: string, $subscribeButton: JQuery<HTMLElement>, $unsubscribeButton: JQuery<HTMLElement>, $element: JQuery<HTMLElement>): Promise<boolean> {
             subscriptionData = await instance.fetchSettings("data", true);
+
+            if (Object.keys(subscriptionData).length >= instance.maxSubscriptions) {
+                Danbooru.error(`Error: Maximum number of subscriptions reached (${instance.maxSubscriptions})`);
+                return Promise.resolve(false);
+            }
+
             subscriptionData[id] = { name: instance.getSubscriberName($element), };
 
             subscriptionData = sortSubscriptions(subscriptionData);
@@ -717,7 +743,12 @@ export class SubscriptionManager extends RE6Module {
                 "title": actions.updateText(data) + "\n" + timeAgo + "\n" + timeString
             })
             .addClass("lazyload")
-            .on("error", () => { if (actions.imageRemoveOnError) $content.remove(); });
+            .on("error", () => {
+                if (!actions.imageRemoveOnError) return;
+                $content.remove();
+                cache.deleteItem(timestamp);
+                cache.save();
+            });
 
         if (actions.imageHref === undefined) $image.appendTo($imageDiv);
         else {

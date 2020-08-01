@@ -74,7 +74,7 @@ export class XMChrome {
 
         function makeRequestID(): string {
             let id: string;
-            do { id = Util.makeID(); }
+            do { id = Util.ID.make(8, false); }
             while (XMChrome.requests.includes(id));
             XMChrome.requests.push(id);
             return id;

@@ -3,7 +3,7 @@ import { E621 } from "../../components/api/E621";
 import { APITag } from "../../components/api/responses/APITag";
 import { APITagAlias } from "../../components/api/responses/APITagAlias";
 import { APIWikiPage } from "../../components/api/responses/APIWikiPage";
-import { AvoidPosting } from "../../components/data/AvoidPosting";
+import { AvoidPosting } from "../../components/cache/AvoidPosting";
 import { PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Modal } from "../../components/structure/Modal";
@@ -239,7 +239,8 @@ export class TinyAlias extends RE6Module {
         }
 
         // Checking for DNP implications
-        if (await AvoidPosting.contains(tag) || (tagInfo.isAliased && await AvoidPosting.contains(tagInfo.realName))) {
+        if (AvoidPosting.isUpdateRequired()) await AvoidPosting.update();
+        if (AvoidPosting.has(tag) || (tagInfo.isAliased && AvoidPosting.has(tagInfo.realName))) {
             this.$infoText.append(`: ` + tag + ` is on <a href="/wiki_pages/85">DNP</a> list`);
         }
 

@@ -128,16 +128,18 @@ export namespace APIPost {
 
     export function getFlagString(post: APIPost): string {
         const flags = [];
-        if (post.flags.deleted) {
-            flags.push("deleted");
-        }
-        if (post.flags.flagged) {
-            flags.push("flagged");
-        }
-        if (post.flags.pending) {
-            flags.push("pending");
-        }
+        if (post.flags.deleted) flags.push("deleted");
+        if (post.flags.flagged) flags.push("flagged");
+        if (post.flags.pending) flags.push("pending");
         return flags.join(" ");
+    }
+
+    export function getFlagSet(post: APIPost): Set<string> {
+        const flags: Set<string> = new Set();
+        if (post.flags.deleted) flags.add("deleted");
+        if (post.flags.flagged) flags.add("flagged");
+        if (post.flags.pending) flags.add("pending");
+        return flags;
     }
 
     /**
@@ -160,6 +162,9 @@ export namespace APIPost {
         else if ($element.find(".post-score-score").length !== 0)
             score = parseInt($element.find(".post-score-score").first().html().substring(1));
 
+        // Flags
+        const flagString = $element.attr("data-flags");
+
         return {
             error: "",
             id: parseInt($element.attr("data-id")),
@@ -177,10 +182,10 @@ export namespace APIPost {
                 url: $element.attr("data-file-url") ? $element.attr("data-file-url") : getFileName(md5),
             },
             flags: {
-                deleted: false,
-                flagged: false,
+                deleted: flagString.includes("deleted"),
+                flagged: flagString.includes("flagged"),
                 note_locked: false,
-                pending: false,
+                pending: flagString.includes("pending"),
                 rating_locked: false,
                 status_locked: false,
             },

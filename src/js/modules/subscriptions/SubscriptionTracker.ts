@@ -52,6 +52,13 @@ export interface SubscriptionTracker extends RE6Module {
     subBatchSize: number;
 
     /**
+     * Absolute maximum number of subscriptions the tracker can have.  
+     * This is done to limit the length of request chains to a reasonable number.
+     * The general guideline is to have less than 30 batches in total.
+     */
+    maxSubscriptions: number;
+
+    /**
      * Returns the update cache for this subscription module
      */
     getCache(): UpdateCache;

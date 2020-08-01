@@ -26,7 +26,7 @@ export class MassDownloader extends RE6Module {
     private batchOverSize = true;
 
     // Value used to make downloaded file names unique
-    private fileTimestamp: string = Util.getDatetimeShort();
+    private fileTimestamp: string = Util.Time.getDatetimeShort();
     private downloadIndex = 1;
 
     // Interface elements

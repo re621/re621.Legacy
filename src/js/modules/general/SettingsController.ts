@@ -1,7 +1,8 @@
 import { E621 } from "../../components/api/E621";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
-import { APIPost } from "../../components/api/responses/APIPost";
 import { XM } from "../../components/api/XM";
+import { AvoidPosting } from "../../components/cache/AvoidPosting";
+import { FavoriteCache } from "../../components/cache/FavoriteCache";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
@@ -39,6 +40,9 @@ import { Miscellaneous } from "./Miscellaneous";
  */
 export class SettingsController extends RE6Module {
 
+    private openSettingsButton: JQuery<HTMLElement>;
+    private utilTabButton: JQuery<HTMLElement>;
+
     public constructor() {
         super();
         this.registerHotkeys(
@@ -46,14 +50,30 @@ export class SettingsController extends RE6Module {
         );
     }
 
+    public getDefaultSettings(): Settings {
+        return {
+            enabled: true,
+
+            hotkeyOpenSettings: "",
+
+            newVersionAvailable: false,
+            changelog: "",
+        };
+    }
+
     public create(): void {
 
         // Create a button in the header
-        const openSettingsButton = DomUtilities.addSettingsButton({
+        this.openSettingsButton = DomUtilities.addSettingsButton({
             id: "header-button-settings",
             name: `<i class="fas fa-wrench"></i>`,
             title: "Settings",
             tabClass: "float-right",
+            attr: {
+                "data-loading": "false",
+                "data-updates": "0",
+            },
+            linkClass: "update-notification",
         });
 
         // Establish the settings window contents
@@ -66,7 +86,17 @@ export class SettingsController extends RE6Module {
                 { name: "Hotkeys", structure: this.createHotkeysTab() },
                 { name: "Features", structure: this.createFeaturesTab() },
                 // { name: "Sync", structure: this.createSyncTab() },
-                { name: "Other", structure: this.createMiscTab() },
+                {
+                    name: this.utilTabButton = $("<a>")
+                        .attr({
+                            "data-loading": "false",
+                            "data-updates": "0",
+                            "id": "conf-tab-util",
+                        })
+                        .addClass("update-notification")
+                        .html("Utilities"),
+                    structure: this.createMiscTab()
+                },
                 { name: "About", structure: this.createAboutTab() },
             ]
         });
@@ -74,7 +104,7 @@ export class SettingsController extends RE6Module {
         // Create the modal
         new Modal({
             title: "Settings",
-            triggers: [{ element: openSettingsButton }],
+            triggers: [{ element: this.openSettingsButton }],
             escapable: false,
             fixed: true,
             reserveHeight: true,
@@ -84,15 +114,17 @@ export class SettingsController extends RE6Module {
         });
 
         // Start up the version checker
-        if (Util.Time.now() - (1000 * 60 * 60) > this.fetchSettings("lastVersionCheck")) {
+        if (Sync.infoUpdate + Util.Time.HOUR < Util.Time.now()) {
 
             const releases = { latest: null, current: null };
             (async (): Promise<void> => {
                 releases.latest = JSON.parse(await Util.userscriptRequest("https://api.github.com/repos/re621/re621/releases/latest"));
                 releases.current = JSON.parse(await Util.userscriptRequest("https://api.github.com/repos/re621/re621/releases/tags/" + window["re621"]["version"]));
                 await this.pushSettings("newVersionAvailable", releases.latest.name !== releases.current.name);
-                await this.pushSettings("lastVersionCheck", Util.Time.now());
                 await this.pushSettings("changelog", releases.current.body);
+
+                Sync.infoUpdate = Util.Time.now();
+                await Sync.saveSettings();
 
                 $("#changelog-list").html(Util.quickParseMarkdown(releases.current.body));
                 $("#project-update-button").attr("data-available", (releases.latest.name !== releases.current.name) + "");
@@ -100,16 +132,16 @@ export class SettingsController extends RE6Module {
         }
     }
 
-    public getDefaultSettings(): Settings {
-        return {
-            enabled: true,
+    private pushNotificationsCount(count = 0): void {
+        this.openSettingsButton.attr(
+            "data-updates",
+            (parseInt(this.openSettingsButton.attr("data-updates")) || 0) + count
+        );
 
-            hotkeyOpenSettings: "",
-
-            newVersionAvailable: false,
-            lastVersionCheck: 0,
-            changelog: "",
-        };
+        this.utilTabButton.attr(
+            "data-updates",
+            (parseInt(this.utilTabButton.attr("data-updates")) || 0) + count
+        );
     }
 
     /** Creates the general settings tab */
@@ -298,7 +330,7 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await thumbnailEnhancer.pushSettings("crop", data);
-                            thumbnailEnhancer.toggleThumbCrop(data);
+                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleThumbCrop(data);
                         }
                     ),
 
@@ -310,7 +342,7 @@ export class SettingsController extends RE6Module {
                             async (data, input) => {
                                 if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
                                 await thumbnailEnhancer.pushSettings("cropSize", data);
-                                thumbnailEnhancer.setThumbSize(data);
+                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.setThumbSize(data);
                             }
                         ),
                         Form.spacer(3),
@@ -324,7 +356,7 @@ export class SettingsController extends RE6Module {
                             },
                             async (data) => {
                                 await thumbnailEnhancer.pushSettings("cropPreserveRatio", data);
-                                thumbnailEnhancer.toggleThumbPreserveRatio(data);
+                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleThumbPreserveRatio(data);
 
                                 $("#optgeneral-gencollapse-thumb-scalingconf-cropratio-desc").toggleClass("input-disabled", data);
                                 $("#optgeneral-gencollapse-thumb-scalingconf-cropratio")
@@ -353,7 +385,7 @@ export class SettingsController extends RE6Module {
                             async (data, input) => {
                                 if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
                                 await thumbnailEnhancer.pushSettings("cropRatio", data);
-                                thumbnailEnhancer.setThumbRatio(data);
+                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.setThumbRatio(data);
                             }
                         ),
 
@@ -380,7 +412,7 @@ export class SettingsController extends RE6Module {
                             },
                             async (data) => {
                                 await thumbnailEnhancer.pushSettings("zoom", data);
-                                thumbnailEnhancer.toggleHoverZoom(data);
+                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleHoverZoom(data);
                             }
                         ),
                         Form.spacer(3),
@@ -391,7 +423,7 @@ export class SettingsController extends RE6Module {
                             async (data, input) => {
                                 if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
                                 await thumbnailEnhancer.pushSettings("zoomScale", data);
-                                thumbnailEnhancer.setZoomScale(data);
+                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.setZoomScale(data);
                             }
                         ),
                         Form.spacer(3),
@@ -404,7 +436,7 @@ export class SettingsController extends RE6Module {
                             },
                             async (data) => {
                                 await thumbnailEnhancer.pushSettings("zoomContextual", data);
-                                thumbnailEnhancer.toggleZoomContextual(data);
+                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleZoomContextual(data);
                             }
                         ),
                         Form.spacer(3),
@@ -421,14 +453,9 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await thumbnailEnhancer.pushSettings("vote", data);
-                            thumbnailEnhancer.toggleHoverVote(data);
+                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleHoverVote(data);
 
-                            const favcheck = $("input#optgeneral-gencollapse-thumb-favbutton")
-
-                            if (!data && favcheck.is(":checked"))
-                                favcheck[0].click();
-
-                            favcheck
+                            $("input#optgeneral-gencollapse-thumb-favbutton")
                                 .prop("disabled", !data)
                                 .parent()
                                 .toggleClass("input-disabled", !data);
@@ -446,64 +473,10 @@ export class SettingsController extends RE6Module {
                             disabled: !thumbnailEnhancer.fetchSettings("vote"),
                         },
                         async (data) => {
-                            $("#optgeneral-gencollapse-thumb-favcache").toggleClass("display-none", !data);
                             await thumbnailEnhancer.pushSettings("fav", data);
-                            thumbnailEnhancer.toggleHoverFav(data);
+                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleHoverFav(data);
                         }
                     ),
-                    Form.section({ name: "favcache", columns: 3, width: 3, wrapper: thumbnailEnhancer.fetchSettings("fav") ? undefined : "display-none" }, [
-                        Form.subheader("Reset Favorites Cache", "", 2),
-                        Form.button({ name: "reset", value: "Reset", }, async (data, input) => {
-                            input.prop("disabled", "true");
-
-                            const status = $("#favcache-status").html(`<i class="fas fa-circle-notch fa-spin"></i> Processing favorites`);
-                            const cache = new Set<number>();
-                            let result: APIPost[] = [],
-                                page = 0;
-
-                            do {
-                                page++;
-                                result = await E621.Posts.get<APIPost>({ tags: `fav:${User.getUsername()} status:any`, page: page, limit: 320 }, 500);
-                                status.html(`<i class="fas fa-circle-notch fa-spin"></i> Processing favorites: ${cache.size} results`);
-                                for (const entry of result) cache.add(entry.id);
-                            } while (result.length == 320);
-
-                            thumbnailEnhancer.setFavCache(cache);
-                            await thumbnailEnhancer.pushSettings({
-                                "favSync": Util.Time.now(),
-                                "favReq": false,
-                            });
-                            status.html(`<i class="far fa-check-circle"></i> Cache reloaded: ${thumbnailEnhancer.getFavCacheSize()} entries`);
-
-                            input.prop("disabled", "false");
-                        }),
-                        Form.div({
-                            value: async (element) => {
-                                const $status = $("<div>")
-                                    .html(`<i class="fas fa-circle-notch fa-spin"></i> Initializing . . .`)
-                                    .attr("id", "favcache-status")
-                                    .appendTo(element);
-
-                                const now = Util.Time.now();
-                                let updateRequired = thumbnailEnhancer.fetchSettings("favReq");
-                                if (now - thumbnailEnhancer.fetchSettings("favSync") > Util.Time.DAY) {
-                                    updateRequired = (await User.getCurrentSettings()).favorite_count !== thumbnailEnhancer.getFavCacheSize();
-                                    thumbnailEnhancer.pushSettings({
-                                        "favSync": now,
-                                        "favReq": updateRequired,
-                                    });
-                                }
-
-                                if (updateRequired)
-                                    $status.html(`
-                                        <i class="far fa-times-circle"></i> 
-                                        <span style="color:gold">Reset required</span>: Favorites cache integrity failed
-                                    `);
-                                else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified: ${thumbnailEnhancer.getFavCacheSize()} entries`)
-                            },
-                            width: 3,
-                        }),
-                    ]),
                     Form.spacer(3),
 
                     // Ribbons
@@ -829,9 +802,9 @@ export class SettingsController extends RE6Module {
             Form.div({
                 value: `
                 <b>Custom Flags</b> allow you to automatically highlight posts that match specified tags. For example:<br />
-                <pre>-solo -duo -group -zero_pictured</pre>: posts that do not inlcude character count tags.<br />
+                <pre>-solo -duo -group -zero_pictured</pre>: posts that do not include character count tags.<br />
                 <pre>tagcount:&lt;5</pre>: posts with less than 5 tags<br />
-                Flag names must be unique. Duplicate tag strings are allowed, by their corresponding flag may not display.`,
+                Flag names must be unique. Duplicate tag strings are allowed, but their corresponding flag may not display.`,
                 width: 3
             }),
         ]);
@@ -1060,130 +1033,235 @@ export class SettingsController extends RE6Module {
         });
         let selectedModule = "none";
 
+        let favcacheUpdated = true,
+            dnpcacheUpdated = true;
+
         // Create the settings form
         return new Form({ name: "optmisc", columns: 3, width: 3 }, [
             Form.header("Miscellaneous", 3),
 
-            Form.section({ name: "export", columns: 3, width: 3 }, [
+            Form.accordion({ name: "misccollapse", columns: 3, width: 3, active: 0 }, [
 
-                // Import from File
-                Form.section({ name: "file", columns: 3, width: 3 }, [
-                    Form.header("Import / Export from file"),
-                    Form.div({ value: `<div class="notice float-right">Import subscription data from file</div>`, width: 2 }),
+                Form.accordionTab({ name: "cache", label: "Cache", columns: 3, width: 3 }, [
 
-                    Form.text("Export to File"),
-                    Form.button(
-                        { value: "Export", width: 2 },
-                        () => { exportToFile(); }
-                    ),
+                    Form.section({ name: "favcache", columns: 3, width: 3 }, [
 
-                    Form.text("Import from File"),
-                    Form.file(
-                        { accept: "json", width: 2 },
-                        (data) => { importFromFile(data); }
-                    ),
+                        Form.div({
+                            value: `<b>Favorites Cache</b><br />Recorded to minimize the number of API calls`,
+                            width: 2,
+                        }),
+                        Form.button({ name: "reset", value: "Reset", }, async (data, input) => {
+                            input.prop("disabled", true);
+                            await FavoriteCache.update($("#favcache-status"));
+                            input.prop("disabled", false);
 
-                    Form.spacer(),
-                    Form.div({ value: `<div id="file-import-status" class="unmargin"></div>`, label: " ", width: 3 }),
+                            if (favcacheUpdated) return;
+                            favcacheUpdated = true;
+                            this.pushNotificationsCount(-1);
+                        }),
+
+                        Form.div({
+                            value: async (element) => {
+                                const $status = $("<div>")
+                                    .attr("id", "favcache-status")
+                                    .html(`<i class="fas fa-circle-notch fa-spin"></i> Initializing . . .`)
+                                    .appendTo(element);
+
+                                if (await FavoriteCache.isUpdateRequired()) {
+                                    $status.html(`
+                                        <i class="far fa-times-circle"></i> 
+                                        <span style="color:gold">Reset required</span>: Cache integrity failure (${FavoriteCache.size()})
+                                    `);
+                                    this.pushNotificationsCount(1);
+                                    favcacheUpdated = false;
+                                } else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified: ${FavoriteCache.size()} entries`)
+                            },
+                            width: 2,
+                        }),
+                        Form.div({
+                            value: (element) => {
+                                const lastUpdate = FavoriteCache.getUpdateTime();
+                                if (lastUpdate) element.html(Util.Time.format(lastUpdate));
+                                else element.html("");
+                            },
+                            wrapper: "text-center input-disabled",
+                        }),
+
+                    ]),
+                    Form.spacer(3),
+
+                    Form.section({ name: "dnpcache", columns: 3, width: 3 }, [
+
+                        Form.div({
+                            value: `<b>Avoid Posting List</b><br />Used to speed up TinyAlias tag checking`,
+                            width: 2,
+                        }),
+                        Form.button({ name: "reset", value: "Reset", }, async (data, input) => {
+                            input.prop("disabled", "true");
+                            await AvoidPosting.update($("#dnpcache-status"));
+                            input.prop("disabled", "false");
+
+                            if (dnpcacheUpdated) return;
+                            dnpcacheUpdated = false;
+                            this.pushNotificationsCount(-1);
+                        }),
+                        Form.div({
+                            value: async (element) => {
+                                const $status = $("<div>")
+                                    .attr("id", "dnpcache-status")
+                                    .html(`<i class="fas fa-circle-notch fa-spin"></i> Initializing . . .`)
+                                    .appendTo(element);
+
+                                if (AvoidPosting.getUpdateTime() == 0)
+                                    await AvoidPosting.update();
+
+                                if (AvoidPosting.size() == 0) {
+                                    $status.html(`
+                                        <i class="far fa-times-circle"></i> 
+                                        <span style="color:gold">Reset required</span>: Cache integrity failure (${AvoidPosting.size()})
+                                    `);
+
+                                    this.pushNotificationsCount(1);
+                                    dnpcacheUpdated = true;
+                                } else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified: ${AvoidPosting.size()} entries`)
+                            },
+                            width: 2,
+                        }),
+                        Form.div({
+                            value: (element) => {
+                                const lastUpdate = AvoidPosting.getUpdateTime();
+                                if (lastUpdate) element.html(Util.Time.format(lastUpdate));
+                                else element.html("");
+                            },
+                            wrapper: "text-center input-disabled",
+                        })
+
+                    ]),
+
                 ]),
 
-                // eSix Extended
-                Form.section({ name: "esix", columns: 3, width: 3, wrapper: Debug.getState("enabled") ? undefined : "display-none" }, [
-                    Form.header("eSix Extended"),
-                    Form.div({ value: `<div class="notice float-right">Import the settings from eSix Extended (Legacy)</div>`, width: 2 }),
+                Form.accordionTab({ name: "export", label: "Import / Export", columns: 3, width: 3 }, [
 
-                    // From File
-                    Form.text("Select File"),
-                    Form.file(
-                        { accept: "json", width: 2 },
-                        (data) => { importE6FromFile(data); }
-                    ),
-                    Form.spacer(),
-                    Form.div({ value: `<div id="file-esix-status" class="unmargin"></div>`, label: " ", width: 3 }),
+                    // Import from File
+                    Form.section({ name: "file", columns: 3, width: 3 }, [
+                        Form.header("Import / Export from file"),
+                        Form.div({ value: `<div class="notice float-right">Import subscription data from file</div>`, width: 2 }),
 
-                    // From LocalStorage
-                    Form.text("From LocalStorage"),
-                    Form.button(
-                        { value: "Load", width: 2 },
-                        () => { importE6FromLocalStorage(); }
-                    ),
-                    Form.spacer(),
-                    Form.div({ value: `<div id="localstorage-esix-status" class="unmargin"></div>`, label: " ", width: 3 }),
+                        Form.text("Export to File"),
+                        Form.button(
+                            { value: "Export", width: 2 },
+                            () => { exportToFile(); }
+                        ),
+
+                        Form.text("Import from File"),
+                        Form.file(
+                            { accept: "json", width: 2 },
+                            (data) => { importFromFile(data); }
+                        ),
+
+                        Form.spacer(),
+                        Form.div({ value: `<div id="file-import-status" class="unmargin"></div>`, label: " ", width: 3 }),
+                    ]),
+
+                    // eSix Extended
+                    Form.section({ name: "esix", columns: 3, width: 3, wrapper: Debug.getState("enabled") ? undefined : "display-none" }, [
+                        Form.header("eSix Extended"),
+                        Form.div({ value: `<div class="notice float-right">Import the settings from eSix Extended (Legacy)</div>`, width: 2 }),
+
+                        // From File
+                        Form.text("Select File"),
+                        Form.file(
+                            { accept: "json", width: 2 },
+                            (data) => { importE6FromFile(data); }
+                        ),
+                        Form.spacer(),
+                        Form.div({ value: `<div id="file-esix-status" class="unmargin"></div>`, label: " ", width: 3 }),
+
+                        // From LocalStorage
+                        Form.text("From LocalStorage"),
+                        Form.button(
+                            { value: "Load", width: 2 },
+                            () => { importE6FromLocalStorage(); }
+                        ),
+                        Form.spacer(),
+                        Form.div({ value: `<div id="localstorage-esix-status" class="unmargin"></div>`, label: " ", width: 3 }),
+                    ]),
+
                 ]),
 
-                Form.hr(3),
-            ]),
+                // Reset Configuration
+                Form.accordionTab({ name: "reset", label: "Reset Modules", columns: 3, width: 3 }, [
 
-            // Reset Configuration
-            Form.section({ name: "reset", columns: 3, width: 3 }, [
-                Form.header("Reset Modules", 3),
-
-                Form.text(`<b>Everything</b><br />Delete settings for all modules. <b>This cannot be undone.</b>`, 2),
-                Form.button(
-                    { value: "Clear" },
-                    () => {
-                        if (confirm("Are you absolutely sure?")) {
-                            ModuleController.getAll().forEach((module) => { module.clearSettings(); });
-                            location.reload();
+                    Form.text(`<b>Everything</b><br />Delete settings for all modules. <b>This cannot be undone.</b>`, 2),
+                    Form.button(
+                        { value: "Clear" },
+                        () => {
+                            if (confirm("Are you absolutely sure?")) {
+                                ModuleController.getAll().forEach((module) => { module.clearSettings(); });
+                                location.reload();
+                            }
                         }
-                    }
-                ),
+                    ),
+                    Form.spacer(3),
 
-                Form.text(`<b>Module</b><br />Reset a specific module`, 2),
-                Form.select(
-                    { value: selectedModule },
-                    moduleSelector,
-                    (data) => { selectedModule = data; }
-                ),
+                    Form.text(`<b>Module</b><br />Reset a specific module`, 2),
+                    Form.select(
+                        { value: selectedModule },
+                        moduleSelector,
+                        (data) => { selectedModule = data; }
+                    ),
 
-                Form.text(`<div class="text-bold">Requires a page reload</div>`, 2),
-                Form.button(
-                    { value: "Reset" },
-                    () => {
-                        if (selectedModule === "none") return;
-                        ModuleController.get(selectedModule).clearSettings();
-                    }
-                ),
+                    Form.text(`<div class="text-bold">Requires a page reload</div>`, 2),
+                    Form.button(
+                        { value: "Reset" },
+                        () => {
+                            if (selectedModule === "none") return;
+                            ModuleController.get(selectedModule).clearSettings();
+                        }
+                    ),
+                    Form.spacer(3),
 
-                Form.hr(3),
-            ]),
+                ]),
 
-            // Debug Settings
-            Form.section({ name: "debug", columns: 3, width: 3 }, [
-                Form.header("Debugging Tools", 3),
+                // Debug Settings
+                Form.accordionTab({ name: "debug", label: "Debugging Tools", columns: 3, width: 3 }, [
 
-                Form.checkbox(
-                    {
-                        value: Debug.getState("enabled"),
-                        label: `<b>Debug Mode</b><br />Enable debug messages in the console log`,
-                        width: 3,
-                    },
-                    (data) => {
-                        Debug.setState("enabled", data);
-                    }
-                ),
+                    Form.checkbox(
+                        {
+                            value: Debug.getState("enabled"),
+                            label: `<b>Debug Mode</b><br />Enable debug messages in the console log`,
+                            width: 3,
+                        },
+                        (data) => {
+                            Debug.setState("enabled", data);
+                        }
+                    ),
+                    Form.spacer(3),
 
-                Form.checkbox(
-                    {
-                        value: Debug.getState("connect"),
-                        label: `<b>Connections Log</b><br />Logs all outbound connections in the console`,
-                        width: 3,
-                    },
-                    (data) => {
-                        Debug.setState("connect", data);
-                    }
-                ),
+                    Form.checkbox(
+                        {
+                            value: Debug.getState("connect"),
+                            label: `<b>Connections Log</b><br />Logs all outbound connections in the console`,
+                            width: 3,
+                        },
+                        (data) => {
+                            Debug.setState("connect", data);
+                        }
+                    ),
+                    Form.spacer(3),
 
-                Form.checkbox(
-                    {
-                        value: Debug.getState("perform"),
-                        label: `<b>Performance Metrics</b><br />Write script performance analysis into the console log`,
-                        width: 3,
-                    },
-                    (data) => {
-                        Debug.setState("perform", data);
-                    }
-                ),
+                    Form.checkbox(
+                        {
+                            value: Debug.getState("perform"),
+                            label: `<b>Performance Metrics</b><br />Write script performance analysis into the console log`,
+                            width: 3,
+                        },
+                        (data) => {
+                            Debug.setState("perform", data);
+                        }
+                    ),
+                    Form.spacer(3),
+                ]),
             ]),
         ]);
 

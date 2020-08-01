@@ -89,6 +89,8 @@ export class TagTracker extends RE6Module implements SubscriptionTracker {
 
     public subBatchSize = 40;
 
+    public maxSubscriptions = 1200;
+
     public getCache(): UpdateCache {
         return this.cache;
     }
@@ -130,7 +132,7 @@ export class TagTracker extends RE6Module implements SubscriptionTracker {
             }
 
             const post: APIPost = apiResult[key];
-            Debug.log(`TgT: ${post.id} ${Util.formatTime(new Date(post.created_at))}`);
+            Debug.log(`TgT: ${post.id} ${Util.Time.format(new Date(post.created_at))}`);
 
             // Only add posts that match the blacklist
             if (new Post(post).matchesBlacklist(true)) {

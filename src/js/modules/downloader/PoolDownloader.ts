@@ -26,7 +26,7 @@ export class PoolDownloader extends RE6Module {
     private batchOverSize = true;
 
     // Value used to make downloaded file names unique
-    private fileTimestamp: string = Util.getDatetimeShort();
+    private fileTimestamp: string = Util.Time.getDatetimeShort();
 
     // If there are several batches in the download, a number will be appended to the end
     private downloadIndex = 1;

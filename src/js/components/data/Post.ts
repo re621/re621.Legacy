@@ -225,6 +225,7 @@ export class Post {
 
     public hasSound(): boolean { return this.getTags().indexOf("sound") !== -1 }
     public getFlags(): string { return APIPost.getFlagString(this.apiElement); }
+    public getFlagsSet(): Set<string> { return APIPost.getFlagSet(this.apiElement); }
 }
 
 
