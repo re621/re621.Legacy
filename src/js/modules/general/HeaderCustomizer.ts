@@ -87,6 +87,9 @@ export class HeaderCustomizer extends RE6Module {
         this.$menu = $("menu.main");
         this.createDOM();
 
+        // Toggle the forum update dot
+        this.toggleForumDot(this.fetchSettings("forumUpdateDot"));
+
         // Configuration Form Listeners
         this.addTabModal.getElement().on("dialogopen", () => { this.enableEditingMode(); });
         this.addTabModal.getElement().on("dialogclose", () => { this.disableEditingMode(); });
@@ -244,9 +247,8 @@ export class HeaderCustomizer extends RE6Module {
     }
 
     /** Toggles the red dot next to the forum tab */
-    public async toggleForumDot(state: boolean): Promise<boolean> {
+    public toggleForumDot(state: boolean): void {
         this.$menu.attr("data-forumdot", "" + state);
-        return this.pushSettings("forumUpdateDot", state);
     }
 
     /**

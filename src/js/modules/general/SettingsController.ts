@@ -589,7 +589,10 @@ export class SettingsController extends RE6Module {
                             label: "<b>Forum Notifications</b><br />Red dot on the Forum tab in the header if there are new posts",
                             width: 3,
                         },
-                        async (data) => { await headerCustomizer.toggleForumDot(data); }
+                        async (data) => {
+                            headerCustomizer.toggleForumDot(data);
+                            await headerCustomizer.pushSettings("forumUpdateDot", data)
+                        }
                     ),
                     Form.spacer(3),
 
