@@ -82,6 +82,8 @@ export class ForumTracker extends RE6Module implements SubscriptionTracker {
 
     public subBatchSize = 100;
 
+    public maxSubscriptions = 500;
+
     public getCache(): UpdateCache {
         return this.cache;
     }

@@ -664,6 +664,12 @@ export class SubscriptionManager extends RE6Module {
 
         async function execSubscribe(id: string, $subscribeButton: JQuery<HTMLElement>, $unsubscribeButton: JQuery<HTMLElement>, $element: JQuery<HTMLElement>): Promise<boolean> {
             subscriptionData = await instance.fetchSettings("data", true);
+
+            if (Object.keys(subscriptionData).length >= instance.maxSubscriptions) {
+                Danbooru.error(`Error: Maximum number of subscriptions reached (${instance.maxSubscriptions})`);
+                return Promise.resolve(false);
+            }
+
             subscriptionData[id] = { name: instance.getSubscriberName($element), };
 
             subscriptionData = sortSubscriptions(subscriptionData);

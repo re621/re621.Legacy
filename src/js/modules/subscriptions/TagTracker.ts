@@ -89,6 +89,8 @@ export class TagTracker extends RE6Module implements SubscriptionTracker {
 
     public subBatchSize = 40;
 
+    public maxSubscriptions = 1200;
+
     public getCache(): UpdateCache {
         return this.cache;
     }
