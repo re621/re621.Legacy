@@ -60,7 +60,7 @@ export class AvoidPosting {
     }
 
     public static isUpdateRequired(): boolean {
-        return AvoidPosting.getUpdateTime() + Util.Time.DAY < Util.Time.now();
+        return (AvoidPosting.getUpdateTime() + Util.Time.DAY < Util.Time.now()) || AvoidPosting.size() == 0;
     }
 
 }
