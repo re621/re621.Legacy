@@ -1079,7 +1079,7 @@ export class SettingsController extends RE6Module {
                                     `);
                                     this.pushNotificationsCount(1);
                                     favcacheUpdated = false;
-                                } else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified: ${FavoriteCache.size()} entries`)
+                                } else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified`)
                             },
                             width: 2,
                         }),
@@ -1128,7 +1128,7 @@ export class SettingsController extends RE6Module {
 
                                     this.pushNotificationsCount(1);
                                     dnpcacheUpdated = true;
-                                } else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified: ${AvoidPosting.size()} entries`)
+                                } else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified`)
                             },
                             width: 2,
                         }),
