@@ -1072,10 +1072,12 @@ export class SettingsController extends RE6Module {
                                     .html(`<i class="fas fa-circle-notch fa-spin"></i> Initializing . . .`)
                                     .appendTo(element);
 
-                                if (await FavoriteCache.isUpdateRequired()) {
+                                if (!FavoriteCache.isEnabled()) {
+                                    $status.html(`<i class="far fa-times-circle"></i> Cache disabled`);
+                                } else if (await FavoriteCache.isUpdateRequired()) {
                                     $status.html(`
                                         <i class="far fa-times-circle"></i> 
-                                        <span style="color:gold">Reset required</span>: Cache integrity failure (${FavoriteCache.size()})
+                                        <span style="color:gold">Reset required</span>: Cache integrity failure
                                     `);
                                     this.pushNotificationsCount(1);
                                     favcacheUpdated = false;
@@ -1091,6 +1093,19 @@ export class SettingsController extends RE6Module {
                             },
                             wrapper: "text-center input-disabled",
                         }),
+
+                        Form.checkbox(
+                            {
+                                value: !FavoriteCache.isEnabled(),
+                                label: "<b>Disable Favorite Caching</b><br />All systems that deal with favorites will become non-functional",
+                                width: 2,
+                            },
+                            (data) => {
+                                FavoriteCache.setEnabled(!data);
+                                FavoriteCache.clear();
+                            }
+                        ),
+                        Form.text(`<div class="text-center text-bold">Requires a page reload</div>`),
 
                     ]),
                     Form.spacer(3),
@@ -1123,7 +1138,7 @@ export class SettingsController extends RE6Module {
                                 if (AvoidPosting.size() == 0) {
                                     $status.html(`
                                         <i class="far fa-times-circle"></i> 
-                                        <span style="color:gold">Reset required</span>: Cache integrity failure (${AvoidPosting.size()})
+                                        <span style="color:gold">Reset required</span>: Cache integrity failure
                                     `);
 
                                     this.pushNotificationsCount(1);
