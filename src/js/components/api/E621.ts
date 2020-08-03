@@ -267,7 +267,10 @@ export class E621 {
         };
 
         if (method === "POST" || method === "DELETE") {
-            if (this.authToken == undefined) this.authToken = $("head meta[name=csrf-token]").attr("content");
+            if (this.authToken == undefined) {
+                Debug.log("authToken is undefined, regenerating");
+                this.authToken = $("head meta[name=csrf-token]").attr("content");
+            }
             requestInfo.body = requestBody + ((requestBody.length > 0) ? "&" : "") + "authenticity_token=" + encodeURIComponent(this.authToken);
         }
         query = query + (query.length > 0 ? "&" : "") + "_client=" + encodeURIComponent(window["re621"]["useragent"]);

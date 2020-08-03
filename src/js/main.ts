@@ -76,6 +76,10 @@ const subscriptions = [
     CommentTracker,
 ];
 
+// Show the script version in the console
+console.log(`${window["re621"]["name"]} v.${window["re621"]["version"]} build ${window["re621"]["build"]}`);
+
+// Create the basic DOM structure
 DomUtilities.createStructure().then(async () => {
 
     await Debug.init();
