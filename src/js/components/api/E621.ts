@@ -284,7 +284,7 @@ export class E621 {
 
                 // This happens if you search for an item that does not exist through a query
                 // Posts endpoint does not count, because it is one special little snowflake.
-                if (data[endpoint] !== undefined && endpoint !== "posts") data = [];
+                if (data[endpoint] !== undefined && !["posts", "post"].includes(endpoint)) data = [];
 
                 // "Normal" error handling
                 if (data["error"] === undefined) resolve([data, status, node]);
