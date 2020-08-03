@@ -4,6 +4,7 @@
 // Path is the endpoint address, without https://e621.net/
 
 import { Debug } from "../utility/Debug";
+import { Util } from "../utility/Util";
 
 // Don't forget to update the name in the E621 aliases below
 const ENDPOINT_DEFS: EndpointDefinition[] = [
@@ -304,33 +305,50 @@ export class E621 {
         while (this.queue.length > 0) {
             const item = this.queue.shift();
             Debug.connectLog(item.request.url);
-            const request = await fetch(item.request);
+            await new Promise(async (resolve) => {
+                fetch(item.request).then(
+                    async (response) => {
+                        if (response.ok) {
+                            let responseText = await response.text();
+                            if (!responseText) responseText = "[]";
 
-            if (request.ok) {
-                let responseText = await request.text();
-                if (!responseText) responseText = "[]";
-
-                this.emitter.trigger(
-                    "api.re621.result-" + item.index,
-                    [
-                        JSON.parse(responseText),
-                        request.status,
-                        item.endpoint,
-                        item.node,
-                    ]
+                            this.emitter.trigger(
+                                "api.re621.result-" + item.index,
+                                [
+                                    JSON.parse(responseText),
+                                    response.status,
+                                    item.endpoint,
+                                    item.node,
+                                ]
+                            );
+                        } else {
+                            this.emitter.trigger(
+                                "api.re621.result-" + item.index,
+                                [
+                                    { error: response.status + " " + response.statusText },
+                                    response.status,
+                                    item.endpoint,
+                                    item.node,
+                                ]
+                            );
+                        }
+                        resolve();
+                    },
+                    (error) => {
+                        this.emitter.trigger(
+                            "api.re621.result-" + item.index,
+                            [
+                                { error: error[1] + " " + error[0].error },
+                                error[1],
+                                item.endpoint,
+                                item.node,
+                            ]
+                        );
+                        resolve();
+                    }
                 );
-            } else {
-                this.emitter.trigger(
-                    "api.re621.result-" + item.index,
-                    [
-                        { "error": request.status + " " + request.statusText },
-                        request.status,
-                        item.endpoint,
-                        item.node,
-                    ]
-                );
-            }
-            await new Promise((resolve) => { setTimeout(() => { resolve(); }, item.delay) });
+            });
+            await Util.sleep(item.delay);
         }
 
         this.processing = false;

@@ -182,11 +182,16 @@ export class PostViewer extends RE6Module {
         const lastSet = parseInt(window.localStorage.getItem("set"));
         if (!lastSet) return;
 
-        E621.SetAddPost.id(lastSet).post({ "post_ids[]": [Post.getViewingPost().getId()] }).then((response) => {
-            if (response[1] == 201)
-                Danbooru.notice(`<a href="/post_sets/${response[0].id}">${response[0].name}</a>: Post Added (${response[0].post_count} total)`);
-            else Danbooru.error(`Error occured while adding the post to set: ${response[1]}`);
-        });
+        E621.SetAddPost.id(lastSet).post({ "post_ids[]": [Post.getViewingPost().getId()] }).then(
+            (response) => {
+                if (response[1] == 201)
+                    Danbooru.notice(`<a href="/post_sets/${response[0].id}">${response[0].name}</a>: Post Added (${response[0].post_count} total)`);
+                else Danbooru.error(`Error occured while adding the post to set: ${response[1]}`);
+            },
+            (error) => {
+                Danbooru.error(`Error occured while adding the post to set: ${error[1]}`);
+            }
+        );
     }
 
     /** Opens the dialog to add the post to the pool */

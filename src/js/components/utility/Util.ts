@@ -27,6 +27,14 @@ export class Util {
     }
 
     /**
+     * Returns a promise that is fulfilled after the specified time period elapses
+     * @param time Time period, in milliseconds
+     */
+    public static async sleep(time: number): Promise<void> {
+        return new Promise((resolve) => { setTimeout(() => { resolve(); }, time) });
+    }
+
+    /**
      * Split the array into chunks of specified size.  
      * If `altMode` is set to true, splits array into two parts.  
      * - [0] is the size specified by the `size` argument  
