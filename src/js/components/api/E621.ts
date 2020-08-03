@@ -266,8 +266,10 @@ export class E621 {
             mode: "cors"
         };
 
-        if (method === "POST" || method === "DELETE")
+        if (method === "POST" || method === "DELETE") {
+            if (this.authToken == undefined) this.authToken = $("head meta[name=csrf-token]").attr("content");
             requestInfo.body = requestBody + ((requestBody.length > 0) ? "&" : "") + "authenticity_token=" + encodeURIComponent(this.authToken);
+        }
         query = query + (query.length > 0 ? "&" : "") + "_client=" + encodeURIComponent(window["re621"]["useragent"]);
 
         const entry = new Request(location.origin + "/" + path + "?" + query, requestInfo);
