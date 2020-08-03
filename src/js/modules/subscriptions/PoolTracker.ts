@@ -132,8 +132,9 @@ export class PoolTracker extends RE6Module implements SubscriptionTracker {
     private async formatPoolUpdate(value: APIPool, subSettings: Subscription): Promise<UpdateContent> {
         const poolInfo = subSettings[value.id];
         if (poolInfo.md5 === undefined) {
-            const post = (await E621.Post.id(value.post_ids[0]).get<APIPost>())[0];
-            poolInfo.md5 = post.file.ext === "swf" ? "" : post.file.md5;
+            const lookup = (await E621.Post.id(value.post_ids[0]).get<APIPost>());
+            if (lookup.length == 0) poolInfo.md5 = "";
+            else poolInfo.md5 = lookup[0].file.ext === "swf" ? "" : lookup[0].file.md5;
         }
         return {
             id: value.id,

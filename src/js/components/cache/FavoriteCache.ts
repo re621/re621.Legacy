@@ -6,6 +6,18 @@ import { Util } from "../utility/Util";
 export class FavoriteCache {
 
     private static cache: Set<number>;
+    private static enabled: boolean;
+
+    public static isEnabled(): boolean {
+        if (typeof FavoriteCache.enabled == "undefined")
+            FavoriteCache.enabled = window.localStorage.getItem("re621.favcache.enabled") !== "false";
+        return FavoriteCache.enabled;
+    }
+
+    public static setEnabled(state: boolean): void {
+        FavoriteCache.enabled = state;
+        window.localStorage.setItem("re621.favcache.enabled", state + "");
+    }
 
     /**
      * Returns the set containing cached items.  
@@ -13,7 +25,9 @@ export class FavoriteCache {
      */
     private static getCache(): Set<number> {
         if (typeof FavoriteCache.cache === "undefined")
-            FavoriteCache.cache = new Set<number>(JSON.parse(window.localStorage.getItem("re621.favcache.data") || "[]"))
+            FavoriteCache.cache = FavoriteCache.isEnabled()
+                ? new Set<number>(JSON.parse(window.localStorage.getItem("re621.favcache.data") || "[]"))
+                : new Set();
         return FavoriteCache.cache;
     }
 
@@ -23,9 +37,11 @@ export class FavoriteCache {
     }
 
     /** Permanently removes all data from cache */
-    private static clear(): void {
+    public static clear(): void {
         FavoriteCache.cache = new Set();
         FavoriteCache.save();
+        window.localStorage.removeItem("re621.favcache.update");
+        window.localStorage.removeItem("re621.favcache.invalid");
     }
 
     /** Returns the number of items in the cache */
@@ -40,6 +56,7 @@ export class FavoriteCache {
 
     /** Adds the provided item to cache */
     public static add(post: number): void {
+        if (!FavoriteCache.isEnabled()) return;
         FavoriteCache.getCache().add(post);
         FavoriteCache.save();
     }
@@ -50,7 +67,7 @@ export class FavoriteCache {
      * @returns true if the item was present in the cache, false otherwise
      */
     public static remove(post: number): boolean {
-        if (!FavoriteCache.has(post)) return false;
+        if (!FavoriteCache.isEnabled() || !FavoriteCache.has(post)) return false;
         FavoriteCache.getCache().delete(post);
         FavoriteCache.save();
         return true;

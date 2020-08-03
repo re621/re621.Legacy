@@ -87,10 +87,21 @@ div#postContainerOverlay {
                 position: relative;
                 bottom: 1.5rem;
 
-                margin: 0 0.25rem;
+                margin: 0;
                 padding: 0.25rem 0.75rem 0rem;
-                border-radius: 0.75rem 0.75rem 0 0;
+                border-radius: 0;
                 box-shadow: 0 -5px 10px #ffffff10;
+
+                &.vote {
+                    &:nth-child(1) {
+                        border-right: 1px solid #666;
+                        border-top-left-radius: 0.75rem;
+                    }
+                    &:nth-child(2) {
+                        border-left: 1px solid #666;
+                        border-top-right-radius: 0.75rem;
+                    }
+                }
 
                 &.score-favorite {
                     color: #c3a816;
@@ -98,7 +109,7 @@ div#postContainerOverlay {
 
                 &.fav {
                     position: absolute;
-                    left: -0.25rem;
+                    left: -0;
                     bottom: 0;
                     padding: 0.25rem 0.35rem 0.125rem 0.125rem !important;
                     border-radius: 0 0.75rem 0 0 !important;
@@ -244,26 +255,14 @@ div#page {
             $rel-children: forestgreen;
             $rel-parent: yellow;
 
-            &.thumb-ribbon-flagged span {
-                background: $status-flagged;
-            }
-
-            &.thumb-ribbon-pending span {
-                background: $status-pending;
-            }
-
+            &.thumb-ribbon-flagged span { background: $status-flagged; }
+            &.thumb-ribbon-pending span { background: $status-pending; }
             &.thumb-ribbon-flagged.thumb-ribbon-pending span {
                 background: linear-gradient(90deg, $status-flagged 50%, $status-pending 50%);
             }
 
-            &.thumb-ribbon-has-children span {
-                background: $rel-children;
-            }
-
-            &.thumb-ribbon-has-parent span {
-                background: $rel-parent;
-            }
-
+            &.thumb-ribbon-has-children span { background: $rel-children; }
+            &.thumb-ribbon-has-parent span { background: $rel-parent; }
             &.thumb-ribbon-has-children.thumb-ribbon-has-parent span {
                 background: linear-gradient(90deg, $rel-parent 50%, $rel-children 50%);
             }
