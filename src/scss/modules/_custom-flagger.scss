@@ -51,14 +51,14 @@ div.flag-container {
     position: absolute;
     bottom: 0;
     right: 0;
-    z-index: 110;
+    // z-index: 110;
 
     width: stretch;
     overflow: hidden;
 
     span.custom-flag-thumb {
         background-color: var(--flag-color, #666666);
-        margin: 0.125rem;
+        margin: 0.125rem 0;
         display: block;
         height: 1rem;
         font-size: 0.75em;

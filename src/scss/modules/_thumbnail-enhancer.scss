@@ -255,26 +255,14 @@ div#page {
             $rel-children: forestgreen;
             $rel-parent: yellow;
 
-            &.thumb-ribbon-flagged span {
-                background: $status-flagged;
-            }
-
-            &.thumb-ribbon-pending span {
-                background: $status-pending;
-            }
-
+            &.thumb-ribbon-flagged span { background: $status-flagged; }
+            &.thumb-ribbon-pending span { background: $status-pending; }
             &.thumb-ribbon-flagged.thumb-ribbon-pending span {
                 background: linear-gradient(90deg, $status-flagged 50%, $status-pending 50%);
             }
 
-            &.thumb-ribbon-has-children span {
-                background: $rel-children;
-            }
-
-            &.thumb-ribbon-has-parent span {
-                background: $rel-parent;
-            }
-
+            &.thumb-ribbon-has-children span { background: $rel-children; }
+            &.thumb-ribbon-has-parent span { background: $rel-parent; }
             &.thumb-ribbon-has-children.thumb-ribbon-has-parent span {
                 background: linear-gradient(90deg, $rel-parent 50%, $rel-children 50%);
             }
