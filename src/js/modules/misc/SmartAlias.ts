@@ -1,5 +1,6 @@
 import { E621 } from "../../components/api/E621";
 import { APITag } from "../../components/api/responses/APITag";
+import { APITagAlias } from "../../components/api/responses/APITagAlias";
 import { AvoidPosting } from "../../components/cache/AvoidPosting";
 import { PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -137,8 +138,32 @@ export class SmartAlias extends RE6Module {
         }
 
         // Step 2
+        // Replace aliased tag names with their consequent versions
+        for (const batch of Util.chunkArray(tagsList, 40)) {
+            for (const result of await E621.TagAliases.get<APITagAlias>({ "search[antecedent_name]": batch.join("+"), limit: 1000 }, 500)) {
+
+                const currentName = result.antecedent_name,
+                    trueName = result.consequent_name;
+
+                // Replace the original name in the list
+                tagsList.delete(currentName);
+
+                const entries = findTagElement($container, currentName);
+                const dnp = AvoidPosting.has(trueName);
+                if (!dnp && entries.length == 1) tagsList.add(trueName);
+
+                entries
+                    .attr({
+                        "name": trueName,
+                        "state": dnp ? "dnp" : ((entries.length > 1) ? "duplicate" : "loading"),
+                    })
+                    .html(getTagContent(trueName, dnp, (entries.length > 1)));
+            }
+        }
+
+        // Step 3
         // Verify that the remaining tags are valid by querring the API and delete the ones that are found from the list
-        for (const batch of Util.chunkArray(Array.from(tagsList), 100)) {
+        for (const batch of Util.chunkArray(tagsList, 100)) {
             for (const result of await E621.Tags.get<APITag>({ "search[name]": batch.join(","), limit: 100 }, 500)) {
                 findTagElement($container, result.name)
                     .attr("state", "success")
@@ -147,7 +172,7 @@ export class SmartAlias extends RE6Module {
             }
         }
 
-        // Step 3
+        // Step 4
         // Tags that were not removed from the list must be invalid
         for (const invalidTag of tagsList) {
             findTagElement($container, invalidTag)
