@@ -17,6 +17,7 @@ import { HeaderCustomizer } from "./modules/general/HeaderCustomizer";
 import { Miscellaneous } from "./modules/general/Miscellaneous";
 import { SettingsController } from "./modules/general/SettingsController";
 import { ThemeCustomizer } from "./modules/general/ThemeCustomizer";
+import { SmartAlias } from "./modules/misc/SmartAlias";
 import { TinyAlias } from "./modules/misc/TinyAlias";
 import { WikiEnhancer } from "./modules/misc/WikiEnhancer";
 import { DownloadCustomizer } from "./modules/post/DownloadCustomizer";
@@ -59,6 +60,7 @@ const loadOrder = [
     BlacklistEnhancer,
 
     TinyAlias,
+    SmartAlias,
     WikiEnhancer,
 
     FavDownloader,

@@ -1,0 +1,59 @@
+
+smart-alias {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    width: inherit;
+    margin: 0.25rem 0;
+    padding: 0.25rem;
+
+    font-family: monospace;
+    font-size: 1.05rem;
+
+    border: 1px solid #666;
+    border-radius: 0.25rem;
+
+    smart-tag {
+        position: relative;
+        padding-left: 1.125rem;
+
+        &[state=error] { color: lightcoral; }
+        &[state=duplicate] { color: aqua; }
+        &[state=dnp] { color: gold; }
+
+        &::before {
+            content: "";
+            display: block;
+            line-height: 1;
+
+            font-family: "Font Awesome 5 Free";
+            font-weight: 400;
+            font-size: 0.7rem;
+            color: white;
+
+            position: absolute;
+            left: 0;
+            top: 0.165rem;
+        }
+
+        &[state=success]::before {
+            content: unicode("f058"); // fa-check-circle
+        }
+
+        &[state=error]::before,
+        &[state=dnp]::before {
+            content: unicode("f057"); // fa-times-circle
+        }
+
+        &[state=duplicate]::before {
+            content: unicode("f059"); // fa-question-circle
+        }
+
+        &[state=loading]::before {
+            content: unicode("f1ce"); // fa-circle-notch
+            font-weight: 700;
+            animation: fa-spin 2s infinite linear;
+        }
+
+    }
+}
