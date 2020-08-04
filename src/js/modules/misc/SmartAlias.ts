@@ -19,6 +19,9 @@ export class SmartAlias extends RE6Module {
         "#post_themes",
     ];
 
+    // Prevents multiple form executions
+    private processingInput = false;
+
     public constructor() {
         super([PageDefintion.upload, PageDefintion.post, PageDefintion.search]);
     }
@@ -61,15 +64,14 @@ export class SmartAlias extends RE6Module {
 
             // Okay, this is incomprehensibly dumb
             // But there is no way to catch e621's autocomplte working without this
-            let inputFocusInterval: number;     // Checks if the input has changed
-            let inputChangeTimeout: number;     // Checks if the user has stopped typing
-            let processingInput = false;        // Prevent multiple API calls
+            let inputFocusInterval: number;         // Checks if the input has changed
             $textarea.on("focus", () => {
-                let inputValue = getInputValue();
-                inputFocusInterval = setInterval(() => {
+                console.log("focus in");
 
-                    // Previous contents are still processing
-                    if (processingInput) return;
+                let inputChangeTimeout: number;     // Checks if the user has stopped typing
+                let inputValue = getInputValue();   // Input value on the previous iteration
+
+                inputFocusInterval = setInterval(() => {
 
                     // Input value has not changed
                     if (getInputValue() === inputValue) return;
@@ -77,29 +79,28 @@ export class SmartAlias extends RE6Module {
 
                     // Input value is blank
                     if (inputValue === "") {
-                        // TODO Handle blank textarea
+                        $container.html("");
                         clearTimeout(inputChangeTimeout)
                         return;
                     }
 
-                    processingInput = true;
-
-                    // User has stopped typing
+                    // User is typing
                     if (inputChangeTimeout) clearTimeout(inputChangeTimeout);
-                    inputChangeTimeout = window.setTimeout(async () => {
-                        await this.handleTagInput($textarea, $container);
-                        processingInput = false;
+
+                    inputChangeTimeout = window.setTimeout(() => {
+                        console.log("user stopped typing");
+                        this.handleTagInput($textarea, $container);
                     }, 500);
                 }, 500);
 
-            }).on("focusout", () => { clearInterval(inputFocusInterval); });
+            }).on("focusout", () => {
+                console.log("focus out");
+                clearInterval(inputFocusInterval);
+            });
 
             // First call, in case the input area is not blank
             // i.e. on post page, or in editing mode
-            processingInput = true;
-            this.handleTagInput($textarea, $container).then(() => {
-                processingInput = false;
-            });
+            this.handleTagInput($textarea, $container);
 
             function getInputValue(): string {
                 return $textarea.val().toString().trim();
@@ -108,6 +109,8 @@ export class SmartAlias extends RE6Module {
     }
 
     private async handleTagInput($textarea: JQuery<HTMLElement>, $container: JQuery<HTMLElement>): Promise<void> {
+        if (this.processingInput) return;
+        this.processingInput = true;
 
         // Prepare the necessary tools
         if (AvoidPosting.isUpdateRequired()) await AvoidPosting.update();
@@ -179,6 +182,9 @@ export class SmartAlias extends RE6Module {
                 .attr("state", "error")
                 .append(` invalid tag`);
         }
+
+        // Finish and clean up
+        this.processingInput = false;
 
         /** Returns an array of tags in the textarea */
         function getTagList($textarea: JQuery<HTMLElement>): string[] {
