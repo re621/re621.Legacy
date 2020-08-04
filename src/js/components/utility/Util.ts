@@ -45,7 +45,8 @@ export class Util {
      * @param altMode Alternative mode
      * @returns Array of smaller arrays of specified size
      */
-    public static chunkArray<T>(input: T[], size: number, altMode = false): T[][] {
+    public static chunkArray<T>(input: T[] | Set<T>, size: number, altMode = false): T[][] {
+        if (!Array.isArray(input)) input = Array.from(input);
         const result = [];
         if (altMode) {
             result[0] = input.slice(0, size);
