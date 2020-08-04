@@ -19,9 +19,6 @@ export class SmartAlias extends RE6Module {
         "#post_themes",
     ];
 
-    // Prevents multiple form executions
-    private processingInput = false;
-
     public constructor() {
         super([PageDefintion.upload, PageDefintion.post, PageDefintion.search]);
     }
@@ -56,46 +53,40 @@ export class SmartAlias extends RE6Module {
             }, 100);
         });
 
-        // This assumes that there is only one tag input per page
-        // If there are more... well, this whole things needs to be rewritten
+        // Initializes SmartAlias for all appropriate inputs
         for (const inputElement of $(SmartAlias.inputSelector.join(", ")).get()) {
             const $textarea = $(inputElement);
-            const $container = $("<smart-alias>").insertAfter($textarea);
+            const $container = $("<smart-alias>")
+                .attr("state", "ready")
+                .data("input", getInputValue())
+                .insertAfter($textarea);
 
             // Okay, this is incomprehensibly dumb
             // But there is no way to catch e621's autocomplte working without this
             let inputFocusInterval: number;         // Checks if the input has changed
             $textarea.on("focus", () => {
-                console.log("focus in");
 
                 let inputChangeTimeout: number;     // Checks if the user has stopped typing
-                let inputValue = getInputValue();   // Input value on the previous iteration
 
                 inputFocusInterval = setInterval(() => {
 
                     // Input value has not changed
-                    if (getInputValue() === inputValue) return;
-                    inputValue = getInputValue();
-
-                    // Input value is blank
-                    if (inputValue === "") {
-                        $container.html("");
-                        clearTimeout(inputChangeTimeout)
-                        return;
-                    }
+                    if (getInputValue() === $container.data("input")) return;
+                    $container.data("input", getInputValue());
 
                     // User is typing
                     if (inputChangeTimeout) clearTimeout(inputChangeTimeout);
 
                     inputChangeTimeout = window.setTimeout(() => {
-                        console.log("user stopped typing");
                         this.handleTagInput($textarea, $container);
-                    }, 500);
+                    }, 1000);
                 }, 500);
 
             }).on("focusout", () => {
-                console.log("focus out");
                 clearInterval(inputFocusInterval);
+                if (getInputValue() == $container.data("input")) return;
+                $container.data("input", getInputValue());
+                this.handleTagInput($textarea, $container);
             });
 
             // First call, in case the input area is not blank
@@ -109,19 +100,26 @@ export class SmartAlias extends RE6Module {
     }
 
     private async handleTagInput($textarea: JQuery<HTMLElement>, $container: JQuery<HTMLElement>): Promise<void> {
-        if (this.processingInput) return;
-        this.processingInput = true;
+        if ($container.attr("state") !== "ready") return;
+        $container.attr("state", "loading");
 
         // Prepare the necessary tools
         if (AvoidPosting.isUpdateRequired()) await AvoidPosting.update();
         $container.html("");
 
-        Debug.log(getTagList($textarea));
+        // Skip the rest if the textarea is empty
+        const textareaContent = getTagList($textarea);
+        Debug.log(textareaContent);
+        if (textareaContent.length == 0) {
+            $container.attr("state", "ready");
+            return;
+        }
+
 
         // Step 1
         // Create the structure and filter out tags that fail DNP immediately
         const tagsList: Set<string> = new Set();
-        for (const tagName of getTagList($textarea)) {
+        for (const tagName of textareaContent) {
             const dnp = AvoidPosting.has(tagName);
             if (!dnp) tagsList.add(tagName);
 
@@ -142,8 +140,12 @@ export class SmartAlias extends RE6Module {
 
         // Step 2
         // Replace aliased tag names with their consequent versions
+        const invalidTags: Set<string> = new Set();     // tags aliased to `invalid_tag`
         for (const batch of Util.chunkArray(tagsList, 40)) {
             for (const result of await E621.TagAliases.get<APITagAlias>({ "search[antecedent_name]": batch.join("+"), limit: 1000 }, 500)) {
+
+                // Don't apply pending or inactive aliases
+                if (result.status !== "active") continue;
 
                 const currentName = result.antecedent_name,
                     trueName = result.consequent_name;
@@ -151,6 +153,13 @@ export class SmartAlias extends RE6Module {
                 // Replace the original name in the list
                 tagsList.delete(currentName);
 
+                // Don't replace tags aliased to `invalid_tag`
+                if (trueName == "invalid_tag") {
+                    invalidTags.add(currentName);
+                    continue;
+                }
+
+                // Replace the existing tag with the parent one in the SmartAlias window
                 const entries = findTagElement($container, currentName);
                 const dnp = AvoidPosting.has(trueName);
                 if (!dnp && entries.length == 1) tagsList.add(trueName);
@@ -162,9 +171,12 @@ export class SmartAlias extends RE6Module {
                     })
                     .html(getTagContent(trueName, dnp, (entries.length > 1)));
 
+                // Replace the existing tag with the parent one in the textbox
+                const regex = new RegExp("(^| )(" + currentName + ")( |$)", "gi");
                 $textarea.val((index, currentValue) => {
-                    return currentValue.replace(new RegExp("(^| )(" + currentName + ")( |$)", "gi"), "$1" + trueName + "$3");
+                    return currentValue.replace(regex, "$1" + trueName + "$3");
                 });
+                $container.data("input", $container.data("input").replace(regex, "$1" + trueName + "$3"));
             }
         }
 
@@ -181,20 +193,20 @@ export class SmartAlias extends RE6Module {
 
         // Step 4
         // Tags that were not removed from the list must be invalid
-        for (const invalidTag of tagsList) {
-            findTagElement($container, invalidTag)
+        for (const tagName of [...tagsList, ...invalidTags]) {
+            findTagElement($container, tagName)
                 .attr("state", "error")
                 .append(` invalid tag`);
         }
 
         // Finish and clean up
-        this.processingInput = false;
+        $container.attr("state", "ready");
 
         /** Returns an array of tags in the textarea */
         function getTagList($textarea: JQuery<HTMLElement>): string[] {
             return $textarea
                 .val().toString().trim()
-                .replace(/\r?\n|\r/g, "")
+                .replace(/\r?\n|\r/g, " ")
                 .split(" ")
                 .filter((el) => { return el != null && el != ""; });
         }
