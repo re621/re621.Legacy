@@ -161,6 +161,10 @@ export class SmartAlias extends RE6Module {
                         "state": dnp ? "dnp" : ((entries.length > 1) ? "duplicate" : "loading"),
                     })
                     .html(getTagContent(trueName, dnp, (entries.length > 1)));
+
+                $textarea.val((index, currentValue) => {
+                    return currentValue.replace(new RegExp("(^| )(" + currentName + ")( |$)", "gi"), "$1" + trueName + "$3");
+                });
             }
         }
 
