@@ -3,12 +3,20 @@ import { APITag } from "../../components/api/responses/APITag";
 import { AvoidPosting } from "../../components/cache/AvoidPosting";
 import { PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
 
 export class SmartAlias extends RE6Module {
 
-    private $textarea: JQuery<HTMLElement>;
-    private $container: JQuery<HTMLElement>;
+    // Elements to which smart alias instances are to be attached
+    private static inputSelector = [
+        "#post_tags",
+        "#post_tag_string",
+        "#post_characters",
+        "#post_sexes",
+        "#post_bodyTypes",
+        "#post_themes",
+    ];
 
     public constructor() {
         super([PageDefintion.upload, PageDefintion.post, PageDefintion.search]);
@@ -24,10 +32,12 @@ export class SmartAlias extends RE6Module {
     public destroy(): void {
         if (!this.isInitialized()) return;
         super.destroy();
-        this.$textarea
-            .off("focus.re621.smart-alias")
-            .off("focusout.re621.smart-alias");
-        this.$container.remove();
+        for (const inputElement of $("textarea#post_tags, textarea#post_tag_string").get()) {
+            $(inputElement)
+                .off("focus.re621.smart-alias")
+                .off("focusout.re621.smart-alias");
+        }
+        $("smart-alias").remove();
     }
 
     public create(): void {
@@ -44,59 +54,74 @@ export class SmartAlias extends RE6Module {
 
         // This assumes that there is only one tag input per page
         // If there are more... well, this whole things needs to be rewritten
-        this.$textarea = $("textarea#post_tags, textarea#post_tag_string").first();
-        this.$container = $("<smart-alias>").insertAfter(this.$textarea);
+        for (const inputElement of $(SmartAlias.inputSelector.join(", ")).get()) {
+            const $textarea = $(inputElement);
+            const $container = $("<smart-alias>").insertAfter($textarea);
 
-        // Okay, this is incomprehensibly dumb
-        // But there is no way to catch e621's autocomplte working without this
-        let inputFocusInterval: number;     // Checks if the input has changed
-        let inputChangeTimeout: number;     // Checks if the user has stopped typing
-        this.$textarea.on("focus", () => {
-            let inputValue = this.getInputValue();
-            inputFocusInterval = setInterval(() => {
+            // Okay, this is incomprehensibly dumb
+            // But there is no way to catch e621's autocomplte working without this
+            let inputFocusInterval: number;     // Checks if the input has changed
+            let inputChangeTimeout: number;     // Checks if the user has stopped typing
+            let processingInput = false;        // Prevent multiple API calls
+            $textarea.on("focus", () => {
+                let inputValue = getInputValue();
+                inputFocusInterval = setInterval(() => {
 
-                // Input value has changed
-                if (this.getInputValue() === inputValue) return;
-                inputValue = this.getInputValue();
+                    // Previous contents are still processing
+                    if (processingInput) return;
 
-                // Input value is not blank
-                if (inputValue === "") {
-                    // TODO Handle blank textarea
-                    clearTimeout(inputChangeTimeout)
-                    return;
-                }
+                    // Input value has not changed
+                    if (getInputValue() === inputValue) return;
+                    inputValue = getInputValue();
 
-                // User has stopped typing
-                if (inputChangeTimeout) clearTimeout(inputChangeTimeout);
-                inputChangeTimeout = window.setTimeout(() => {
-                    // TODO Handle input values
-                    this.handleTagInput();
+                    // Input value is blank
+                    if (inputValue === "") {
+                        // TODO Handle blank textarea
+                        clearTimeout(inputChangeTimeout)
+                        return;
+                    }
+
+                    processingInput = true;
+
+                    // User has stopped typing
+                    if (inputChangeTimeout) clearTimeout(inputChangeTimeout);
+                    inputChangeTimeout = window.setTimeout(async () => {
+                        await this.handleTagInput($textarea, $container);
+                        processingInput = false;
+                    }, 500);
                 }, 500);
-            }, 500);
 
-        }).on("focusout", () => { clearInterval(inputFocusInterval); });
+            }).on("focusout", () => { clearInterval(inputFocusInterval); });
 
+            // First call, in case the input area is not blank
+            // i.e. on post page, or in editing mode
+            processingInput = true;
+            this.handleTagInput($textarea, $container).then(() => {
+                processingInput = false;
+            });
+
+            function getInputValue(): string {
+                return $textarea.val().toString().trim();
+            }
+        }
     }
 
-    private getInputValue(): string {
-        return this.$textarea.val().toString().trim();
-    }
-
-    private async handleTagInput(): Promise<void> {
-        // TODO Make sure only one instance of this function runs at one time
+    private async handleTagInput($textarea: JQuery<HTMLElement>, $container: JQuery<HTMLElement>): Promise<void> {
 
         // Prepare the necessary tools
         if (AvoidPosting.isUpdateRequired()) await AvoidPosting.update();
-        this.$container.html("");
+        $container.html("");
+
+        Debug.log(getTagList($textarea));
 
         // Step 1
         // Create the structure and filter out tags that fail DNP immediately
         const tagsList: Set<string> = new Set();
-        for (const tagName of this.getInputValue().split(" ")) {
+        for (const tagName of getTagList($textarea)) {
             const dnp = AvoidPosting.has(tagName);
             if (!dnp) tagsList.add(tagName);
 
-            const duplicate = find(tagName);
+            const duplicate = findTagElement($container, tagName);
             duplicate
                 .html(getTagContent(tagName, dnp, (duplicate.length !== 0)))
                 .attr("state", "duplicate");
@@ -108,14 +133,14 @@ export class SmartAlias extends RE6Module {
                     "state": dnp ? "dnp" : ((duplicate.length !== 0) ? "duplicate" : "loading"),
                 })
                 .html(getTagContent(tagName, dnp, (duplicate.length !== 0)))
-                .appendTo(this.$container);
+                .appendTo($container);
         }
 
         // Step 2
         // Verify that the remaining tags are valid by querring the API and delete the ones that are found from the list
         for (const batch of Util.chunkArray(Array.from(tagsList), 100)) {
             for (const result of await E621.Tags.get<APITag>({ "search[name]": batch.join(","), limit: 100 }, 500)) {
-                find(result.name)
+                findTagElement($container, result.name)
                     .attr("state", "success")
                     .append(` ${result.post_count}`);
                 tagsList.delete(result.name);
@@ -125,16 +150,26 @@ export class SmartAlias extends RE6Module {
         // Step 3
         // Tags that were not removed from the list must be invalid
         for (const invalidTag of tagsList) {
-            find(invalidTag)
+            findTagElement($container, invalidTag)
                 .attr("state", "error")
                 .append(` invalid tag`);
         }
 
-        /** Finds a smart tag by its name attribute */
-        function find(name: string): JQuery<HTMLElement> {
-            return $(`smart-tag[name=${name}]`);
+        /** Returns an array of tags in the textarea */
+        function getTagList($textarea: JQuery<HTMLElement>): string[] {
+            return $textarea
+                .val().toString().trim()
+                .replace(/\r?\n|\r/g, "")
+                .split(" ")
+                .filter((el) => { return el != null && el != ""; });
         }
 
+        /** Finds a smart tag by its name attribute */
+        function findTagElement($container: JQuery<HTMLElement>, name: string): JQuery<HTMLElement> {
+            return $container.find(`smart-tag[name="${name}"]`);
+        }
+
+        /** Creates the inner html of a tag element */
         function getTagContent(tagName: string, dnp: boolean, duplicate: boolean): string {
             let result = `<a href="/wiki_pages/show_or_new?title=${tagName}">${tagName}</a>`;
             if (dnp) result += ` avoid posting`;
