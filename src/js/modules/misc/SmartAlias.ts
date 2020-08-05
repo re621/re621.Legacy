@@ -20,7 +20,8 @@ export class SmartAlias extends RE6Module {
     ];
 
     public constructor() {
-        super([PageDefintion.upload, PageDefintion.post, PageDefintion.search]);
+        // Uses TinyAlias settings for compatibility
+        super([PageDefintion.upload, PageDefintion.post, PageDefintion.search], true, "TinyAlias");
     }
 
     protected getDefaultSettings(): Settings {
@@ -108,11 +109,30 @@ export class SmartAlias extends RE6Module {
         $container.html("");
 
         // Skip the rest if the textarea is empty
-        const textareaContent = getTagList($textarea);
+        let textareaContent = getTagList($textarea);
         Debug.log(textareaContent);
         if (textareaContent.length == 0) {
             $container.attr("state", "ready");
             return;
+        }
+
+        // Step 0
+        // Replace all aliases with their contents
+        const aliasData = this.fetchSettings<AliasData>("data");
+        if (Object.keys(aliasData).length > 0) {
+            $textarea.val((index, currentValue) => {
+                for (const [alias, data] of Object.entries(this.fetchSettings<AliasData>("data"))) {
+                    currentValue = currentValue.replace(
+                        new RegExp("(^| )(" + alias + ")( |\n|$)", "gi"),
+                        "$1" + data + "$3"
+                    );
+                }
+                return currentValue;
+            });
+            $container.data("input", $textarea.val().toString().trim());
+
+            // Regenerate the tag list
+            textareaContent = getTagList($textarea);
         }
 
 
@@ -172,7 +192,7 @@ export class SmartAlias extends RE6Module {
                     .html(getTagContent(trueName, dnp, (entries.length > 1)));
 
                 // Replace the existing tag with the parent one in the textbox
-                const regex = new RegExp("(^| )(" + currentName + ")( |$)", "gi");
+                const regex = new RegExp("(^| )(" + currentName + ")( |\n|$)", "gi");
                 $textarea.val((index, currentValue) => {
                     return currentValue.replace(regex, "$1" + trueName + "$3");
                 });
@@ -226,4 +246,8 @@ export class SmartAlias extends RE6Module {
 
     }
 
+}
+
+export interface AliasData {
+    [name: string]: string;
 }

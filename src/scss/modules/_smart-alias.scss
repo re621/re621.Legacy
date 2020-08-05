@@ -1,4 +1,18 @@
+/* Smart Alias Styles */
 
+// Settings Interface
+div#alias-list-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    grid-column-gap: 0.5rem;
+    grid-row-gap: 0.5rem;
+
+    input {
+        height: fit-content;
+    }
+}
+
+// Tag Info Interface
 smart-alias {
     display: grid;
     grid-template-columns: 1fr 1fr;

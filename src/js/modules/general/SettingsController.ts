@@ -19,6 +19,7 @@ import { Util } from "../../components/utility/Util";
 import { FavDownloader } from "../downloader/FavDownloader";
 import { MassDownloader } from "../downloader/MassDownloader";
 import { PoolDownloader } from "../downloader/PoolDownloader";
+import { AliasData, SmartAlias } from "../misc/SmartAlias";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { ImageScaler } from "../post/ImageScaler";
 import { PoolNavigator } from "../post/PoolNavigator";
@@ -84,6 +85,7 @@ export class SettingsController extends RE6Module {
                 { name: "General", structure: this.createGeneralTab() },
                 { name: "Downloads", structure: this.createDownloadsTab() },
                 { name: "Custom Flags", structure: this.createFlagsTab() },
+                { name: "Smart Alias", structure: this.createAliasTab() },
                 { name: "Hotkeys", structure: this.createHotkeysTab() },
                 { name: "Features", structure: this.createFeaturesTab() },
                 // { name: "Sync", structure: this.createSyncTab() },
@@ -854,6 +856,84 @@ export class SettingsController extends RE6Module {
                 });
 
             return flagContainer;
+        }
+    }
+
+    /** Creates the SmartAlias settings tab */
+    private createAliasTab(): Form {
+        const smartAlias = ModuleController.get(SmartAlias);
+
+        const aliasContainer = $("<div>")
+            .attr("id", "alias-list-container");
+        const aliasData = smartAlias.fetchSettings<AliasData>("data");
+        for (const alias of Object.keys(aliasData)) {
+            makeAliasInput(aliasContainer, alias, aliasData[alias]);
+        }
+
+        return new Form({ name: "optalias", columns: 3, width: 3 }, [
+
+            Form.header("Alias Definitions", 2),
+            Form.button(
+                { value: "New Alias" },
+                async () => {
+                    makeAliasInput(aliasContainer, "", "");
+                }
+            ),
+            Form.div({ value: aliasContainer, width: 3 }),
+
+            Form.button(
+                { value: "Save" },
+                async () => {
+                    const confirmBox = $("span#defs-confirm").html("Saving . . .");
+
+                    const defData: AliasData = {};
+                    const defInputs = $(aliasContainer).find("input").get();
+
+                    for (const nameInput of defInputs) {
+                        const $nameInput = $(nameInput),
+                            aliasName = $nameInput.val().toString().trim(),
+                            aliasData = $("#" + $nameInput.attr("id") + "-data").first().val().toString().trim();
+
+                        if (aliasName.length == 0) continue;
+                        if (aliasData.length == 0) continue;
+
+                        defData[aliasName] = aliasData;
+                    }
+
+                    await smartAlias.pushSettings("data", defData);
+                    confirmBox.html("Settings Saved");
+                    window.setTimeout(() => { confirmBox.html(""); }, 1000);
+                }
+            ),
+            Form.div({ value: `<span id="defs-confirm"></span>` }),
+
+            Form.div({
+                value: `
+                <b>Custom Flags</b> allow you to automatically highlight posts that match specified tags. For example:<br />
+                <pre>-solo -duo -group -zero_pictured</pre>: posts that do not include character count tags.<br />
+                <pre>tagcount:&lt;5</pre>: posts with less than 5 tags<br />
+                Flag names must be unique. Duplicate tag strings are allowed, but their corresponding flag may not display.`,
+                width: 3
+            }),
+        ]);
+
+        function makeAliasInput(container: JQuery<HTMLElement>, name: string, data: string): void {
+            const inputID = Util.ID.make();
+            $("<input>")
+                .attr({
+                    id: inputID,
+                    placeholder: "Alias Name",
+                })
+                .val(name)
+                .appendTo(container);
+
+            $("<textarea>")
+                .attr({
+                    id: inputID + "-data",
+                    placeholder: "Tags"
+                })
+                .val(data)
+                .appendTo(container);
         }
     }
 
