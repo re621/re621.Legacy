@@ -30,9 +30,9 @@ smart-alias {
         position: relative;
         padding: 0.075rem 0 0.075rem 1.35rem;
 
-        &[state=error] { color: lightcoral; }
-        &[state=duplicate] { color: aqua; }
-        &[state=dnp] { color: gold; }
+        &[symbol=error] { color: lightcoral; }
+        &[symbol=duplicate] { color: aqua; }
+        &[symbol=dnp] { color: gold; }
 
         &::before {
             content: "";
@@ -49,20 +49,20 @@ smart-alias {
             top: 0.25rem;
         }
 
-        &[state=success]::before {
+        &[symbol=success]::before {
             content: unicode("f058"); // fa-check-circle
         }
 
-        &[state=error]::before,
-        &[state=dnp]::before {
+        &[symbol=error]::before,
+        &[symbol=dnp]::before {
             content: unicode("f057"); // fa-times-circle
         }
 
-        &[state=duplicate]::before {
+        &[symbol=duplicate]::before {
             content: unicode("f059"); // fa-question-circle
         }
 
-        &[state=loading]::before {
+        &[symbol=loading]::before {
             content: unicode("f1ce"); // fa-circle-notch
             font-weight: 700;
             animation: fa-spin 2s infinite linear;

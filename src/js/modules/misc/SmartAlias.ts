@@ -183,30 +183,25 @@ export class SmartAlias extends RE6Module {
 
 
         // Step 2
-        // Create the structure and filter out tags that fail DNP immediately
+        // Create the structure for absent tags
         const tagsList: Set<string> = new Set();
         for (const tagName of tagDiff) {
-            const dnp = AvoidPosting.has(tagName);
-            if (!dnp) tagsList.add(tagName);
-
-            const duplicate = findTagElement($container, tagName);
-            duplicate
-                .html(getTagContent(tagName, dnp, (duplicate.length !== 0)))
-                .attr("state", "duplicate");
-            if (duplicate.length !== 0) tagsList.delete(tagName);
+            tagsList.add(tagName);
 
             $("<smart-tag>")
                 .attr({
                     "name": tagName,
-                    "state": dnp ? "dnp" : ((duplicate.length !== 0) ? "duplicate" : "loading"),
+                    "symbol": "loading",
+                    "status": "",
+                    "text": "",
                 })
-                .html(getTagContent(tagName, dnp, (duplicate.length !== 0)))
+                .html(`<a href="/wiki_pages/show_or_new?title=${tagName}">${tagName}</a>`)
                 .appendTo($container);
         }
 
 
         // Step 3
-        // Rebuild the structure to properly show loading
+        // Rebuild the structure to follow the same order as the tags in texarea
         const $temp = $("<div>");
         for (const tagName of newTags)
             findTagElement($container, tagName).first().appendTo($temp);
@@ -236,16 +231,9 @@ export class SmartAlias extends RE6Module {
                 }
 
                 // Replace the existing tag with the parent one in the SmartAlias window
-                const entries = findTagElement($container, currentName);
-                const dnp = AvoidPosting.has(trueName);
-                if (!dnp && entries.length == 1) tagsList.add(trueName);
-
-                entries
-                    .attr({
-                        "name": trueName,
-                        "state": dnp ? "dnp" : ((entries.length > 1) ? "duplicate" : "loading"),
-                    })
-                    .html(getTagContent(trueName, dnp, (entries.length > 1)));
+                findTagElement($container, currentName)
+                    .attr({ "name": trueName })
+                    .html(`<a href="/wiki_pages/show_or_new?title=${trueName}">${trueName}</a>`);
 
                 // Replace the existing tag with the parent one in the textbox
                 const regex = new RegExp("(^| )(" + currentName + ")( |\n|$)", "gi");
@@ -257,8 +245,9 @@ export class SmartAlias extends RE6Module {
         }
 
         // Regenerate the tag list, again
+        newTags = SmartAlias.getInputTags($textarea)
         $container.data({
-            "tags": SmartAlias.getInputTags($textarea),
+            "tags": newTags,
             "xval": SmartAlias.getInputString($textarea),
         });
 
@@ -268,8 +257,10 @@ export class SmartAlias extends RE6Module {
         for (const batch of Util.chunkArray(tagsList, 100)) {
             for (const result of await E621.Tags.get<APITag>({ "search[name]": batch.join(","), limit: 100 }, 500)) {
                 findTagElement($container, result.name)
-                    .attr("state", "success")
-                    .append(` ${result.post_count}`);
+                    .attr({
+                        "status": "success",
+                        "text": result.post_count,
+                    });
                 tagsList.delete(result.name);
             }
         }
@@ -279,8 +270,26 @@ export class SmartAlias extends RE6Module {
         // Tags that were not removed from the list must be invalid
         for (const tagName of [...tagsList, ...invalidTags]) {
             findTagElement($container, tagName)
-                .attr("state", "error")
-                .append(` invalid tag`);
+                .attr({
+                    "status": "error",
+                    "text": "invalid tag",
+                });
+        }
+
+
+        // Step 7
+        // Check for duplicates
+        for (const tagName of new Set(newTags)) {
+            const lookup = findTagElement($container, tagName);
+            if (AvoidPosting.has(tagName)) lookup
+                .html(`<a href="/wiki_pages/show_or_new?title=${tagName}">${tagName}</a> avoid posting`)
+                .attr("symbol", "dnp");
+            else if (lookup.length > 1) lookup
+                .html(`<a href="/wiki_pages/show_or_new?title=${tagName}">${tagName}</a> duplicate tag`)
+                .attr("symbol", "duplicate");
+            else lookup
+                .html(`<a href="/wiki_pages/show_or_new?title=${tagName}">${tagName}</a> ${lookup.attr("text")}`)
+                .attr("symbol", lookup.attr("status"));
         }
 
 
@@ -300,14 +309,6 @@ export class SmartAlias extends RE6Module {
             return [...newTags.reduce((acc, v) => acc.set(v, (acc.get(v) || 0) - 1),
                 oldTags.reduce((acc, v) => acc.set(v, (acc.get(v) || 0) + 1), new Map())
             )].reduce((acc, [v, count]) => acc.concat(Array(Math.abs(count)).fill(v)), []);
-        }
-
-        /** Creates the inner html of a tag element */
-        function getTagContent(tagName: string, dnp: boolean, duplicate: boolean): string {
-            let result = `<a href="/wiki_pages/show_or_new?title=${tagName}">${tagName}</a>`;
-            if (dnp) result += ` avoid posting`;
-            else if (duplicate) result += ` duplicate tag`;
-            return result;
         }
 
     }
