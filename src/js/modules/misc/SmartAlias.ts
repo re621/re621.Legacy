@@ -2,7 +2,7 @@ import { E621 } from "../../components/api/E621";
 import { APITag } from "../../components/api/responses/APITag";
 import { APITagAlias } from "../../components/api/responses/APITagAlias";
 import { AvoidPosting } from "../../components/cache/AvoidPosting";
-import { PageDefintion } from "../../components/data/Page";
+import { Page, PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
@@ -24,7 +24,7 @@ export class SmartAlias extends RE6Module {
 
     public constructor() {
         // Uses TinyAlias settings for compatibility
-        super([PageDefintion.upload, PageDefintion.post, PageDefintion.search], true, "TinyAlias");
+        super([PageDefintion.upload, PageDefintion.post, PageDefintion.search, PageDefintion.favorites], true, "TinyAlias");
     }
 
     protected getDefaultSettings(): Settings {
@@ -76,7 +76,7 @@ export class SmartAlias extends RE6Module {
 
                     // Fast check to see if input changed
                     if ($container.data("xval") === SmartAlias.getInputString($textarea)) return;
-                    $container.data("xval", SmartAlias.getInputString($textarea))
+                    $container.data("xval", SmartAlias.getInputString($textarea));
 
                     // User is typing
                     clearTimeout(inputChangeTimeout);
@@ -89,9 +89,18 @@ export class SmartAlias extends RE6Module {
             }).on("focusout", () => {
                 clearInterval(inputFocusInterval);
                 if ($container.data("xval") === SmartAlias.getInputString($textarea)) return;
-                $container.data("xval", SmartAlias.getInputString($textarea))
+                $container.data("xval", SmartAlias.getInputString($textarea));
                 this.handleTagInput($textarea, $container);
             });
+
+            // On search pages, in the editing mode, reload container when the user clicks on a thumbnail
+            if (Page.matches([PageDefintion.search, PageDefintion.favorites])) {
+                $("article.post-preview").on("click.danbooru", () => {
+                    if ($container.data("xval") === SmartAlias.getInputString($textarea)) return;
+                    $container.data("xval", SmartAlias.getInputString($textarea));
+                    this.handleTagInput($textarea, $container);
+                })
+            }
 
             // First call, in case the input area is not blank
             // i.e. on post page, or in editing mode
@@ -178,25 +187,37 @@ export class SmartAlias extends RE6Module {
                 "tags": newTags,
                 "xval": SmartAlias.getInputString($textarea),
             });
-            Debug.log("dif", tagDiff);
         }
 
 
         // Step 2
-        // Create the structure for absent tags
+        // Create elements for tags that are missing, and remove the ones that are gone
         const tagsList: Set<string> = new Set();
         for (const tagName of tagDiff) {
-            tagsList.add(tagName);
+            const tagLookup = findTags($container, tagName);
+            let count = tagLookup.length;
+            const reqCount = Util.getArrayIndexes(newTags, tagName).length;
+            if (count == 0) tagsList.add(tagName);
 
-            $("<smart-tag>")
-                .attr({
-                    "name": tagName,
-                    "symbol": "loading",
-                    "status": "",
-                    "text": "",
-                })
-                .html(`<a href="/wiki_pages/show_or_new?title=${tagName}">${tagName}</a>`)
-                .appendTo($container);
+            while (count < reqCount) {
+                if (tagLookup.length > 0)
+                    tagLookup.last().clone().appendTo($container);
+                else $("<smart-tag>")
+                    .attr({
+                        "name": tagName,
+                        "symbol": "loading",
+                        "status": "",
+                        "text": "",
+                    })
+                    .html(`<a href="/wiki_pages/show_or_new?title=${tagName}">${tagName}</a>`)
+                    .appendTo($container);
+                count++;
+            }
+            while (count > reqCount && count > 1) {
+                findTags($container, tagName).last().remove();
+                count--;
+            }
+
         }
 
 
@@ -204,9 +225,18 @@ export class SmartAlias extends RE6Module {
         // Rebuild the structure to follow the same order as the tags in texarea
         const $temp = $("<div>");
         for (const tagName of newTags)
-            findTagElement($container, tagName).first().appendTo($temp);
+            findTags($container, tagName).first()
+                .removeClass("display-none")
+                .appendTo($temp);
+        $container.children()
+            .addClass("display-none")
+            .appendTo($temp);
         $container.html("");
         $temp.children().appendTo($container);
+        $temp.remove();
+
+        // Scroll to the bottom of the div
+        $container.scrollTop($container[0].scrollHeight - $container[0].clientHeight);
 
 
         // Step 4
@@ -231,7 +261,7 @@ export class SmartAlias extends RE6Module {
                 }
 
                 // Replace the existing tag with the parent one in the SmartAlias window
-                findTagElement($container, currentName)
+                findTags($container, currentName)
                     .attr({ "name": trueName })
                     .html(`<a href="/wiki_pages/show_or_new?title=${trueName}">${trueName}</a>`);
 
@@ -256,7 +286,7 @@ export class SmartAlias extends RE6Module {
         // Verify that the remaining tags are valid by querring the API and delete the ones that are found from the list
         for (const batch of Util.chunkArray(tagsList, 100)) {
             for (const result of await E621.Tags.get<APITag>({ "search[name]": batch.join(","), limit: 100 }, 500)) {
-                findTagElement($container, result.name)
+                findTags($container, result.name)
                     .attr({
                         "status": "success",
                         "text": result.post_count,
@@ -269,7 +299,7 @@ export class SmartAlias extends RE6Module {
         // Step 6
         // Tags that were not removed from the list must be invalid
         for (const tagName of [...tagsList, ...invalidTags]) {
-            findTagElement($container, tagName)
+            findTags($container, tagName)
                 .attr({
                     "status": "error",
                     "text": "invalid tag",
@@ -280,7 +310,7 @@ export class SmartAlias extends RE6Module {
         // Step 7
         // Check for duplicates
         for (const tagName of new Set(newTags)) {
-            const lookup = findTagElement($container, tagName);
+            const lookup = findTags($container, tagName);
             if (AvoidPosting.has(tagName)) lookup
                 .html(`<a href="/wiki_pages/show_or_new?title=${tagName}">${tagName}</a> avoid posting`)
                 .attr("symbol", "dnp");
@@ -297,18 +327,18 @@ export class SmartAlias extends RE6Module {
         $container.attr("state", "ready");
 
 
-        /** Finds a smart tag by its name attribute */
-        function findTagElement($container: JQuery<HTMLElement>, name: string): JQuery<HTMLElement> {
+        /** Finds a tag element by its name attribute */
+        function findTags($container: JQuery<HTMLElement>, name: string): JQuery<HTMLElement> {
             return $container.find(`smart-tag[name="${name}"]`);
         }
 
         /** Returns a list of tags that have been added since last update */
-        function getTagDiff(newTags: string[], oldTags: string[]): string[] {
+        function getTagDiff(newTags: string[], oldTags: string[]): Set<string> {
             // This must be some kind of witchcraft.
             // I don't understand any of this. None.
-            return [...newTags.reduce((acc, v) => acc.set(v, (acc.get(v) || 0) - 1),
+            return new Set([...newTags.reduce((acc, v) => acc.set(v, (acc.get(v) || 0) - 1),
                 oldTags.reduce((acc, v) => acc.set(v, (acc.get(v) || 0) + 1), new Map())
-            )].reduce((acc, [v, count]) => acc.concat(Array(Math.abs(count)).fill(v)), []);
+            )].reduce((acc, [v, count]) => acc.concat(Array(Math.abs(count)).fill(v)), []));
         }
 
     }

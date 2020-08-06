@@ -15,10 +15,11 @@ div#alias-list-container {
 // Tag Info Interface
 smart-alias {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fill, 16rem);
 
     width: inherit;
     margin: 0.25rem 0;
+    overflow: hidden scroll;
 
     font-family: monospace;
     font-size: 1.05rem;
@@ -26,9 +27,12 @@ smart-alias {
     border: 1px solid #666;
     border-radius: 0.25rem;
 
+    @include scrollbars;
+
     smart-tag {
         position: relative;
         padding: 0.075rem 0 0.075rem 1.35rem;
+        line-break: anywhere;
 
         &[symbol=error] { color: lightcoral; }
         &[symbol=duplicate] { color: aqua; }
@@ -69,4 +73,9 @@ smart-alias {
         }
 
     }
+}
+
+// Limit the height for the editing mode
+#c-favorites smart-alias, #c-posts smart-alias{
+    max-height: 10rem;
 }

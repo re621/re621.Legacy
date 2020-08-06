@@ -59,6 +59,21 @@ export class Util {
     }
 
     /**
+     * Returns the indexes of all instances of the specified value in an array
+     * @param input Array to search
+     * @param value Value to look for
+     * @returns Array of number indexes
+     */
+    public static getArrayIndexes<T>(input: T[], value: T): number[] {
+        const indexes: number[] = [];
+        let i = 0;
+        for (; i < input.length; i++) {
+            if (input[i] === value) indexes.push(i);
+        }
+        return indexes;
+    }
+
+    /**
      * Limited markdown parser. Don't rely on this thing to be any good, replace with an actual library if really necessary.
      * @param input Markdown input
      * @returns HTML output
