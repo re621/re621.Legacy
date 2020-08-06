@@ -35,6 +35,7 @@ export class Miscellaneous extends RE6Module {
 
             stickySearchbox: true,
             stickyHeader: false,
+            stickyEditBox: true,
 
             avatarClick: true,
 
@@ -60,6 +61,10 @@ export class Miscellaneous extends RE6Module {
         }
 
         this.createStickyHeader(this.fetchSettings("stickyHeader"));
+
+        if (Page.matches([PageDefintion.search, PageDefintion.favorites])) {
+            this.createStickyEditBox(this.fetchSettings("stickyEditBox"));
+        }
 
         // Double-clicking avatars
         this.handleAvatarClick(this.fetchSettings("avatarClick"));
@@ -112,6 +117,14 @@ export class Miscellaneous extends RE6Module {
      */
     public createStickyHeader(state = true): void {
         $("body").attr("data-sticky-header", state + "");
+    }
+
+    /**
+     * Makes the quick tags form stick to the page when scrolling down
+     * @param state True to stick, false to unstick
+     */
+    public createStickyEditBox(state = true): void {
+        $("body").attr("data-sticky-editbox", state + "");
     }
 
     /**

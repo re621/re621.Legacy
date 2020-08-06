@@ -92,6 +92,16 @@ body[data-sticky-header=true] {
     }
 }
 
+// Stickify the quick tags form
+body[data-sticky-editbox=true] {
+    div#quick-edit-div {
+        position: sticky;
+        top: 0;
+        z-index: 400;
+    }
+}
+
+
 /* Gridify the sidebar */
 div#c-posts div#a-index,
 div#c-posts div#a-show,

@@ -273,6 +273,19 @@ export class SettingsController extends RE6Module {
                             miscellaneous.createStickySearchbox(data);
                         }
                     ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: miscellaneous.fetchSettings("stickyEditBox"),
+                            label: "<b>Fixed Edit Form</b><br />Make the quick tags form stick to the top when scrolling",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await miscellaneous.pushSettings("stickyEditBox", data);
+                            miscellaneous.createStickyEditBox(data);
+                        }
+                    ),
                 ]),
 
                 // Thumbnail Enhancer
