@@ -72,3 +72,18 @@ smart-alias {
 #c-favorites smart-alias, #c-posts smart-alias{
     max-height: 6.75rem;
 }
+
+// Tag counter
+smart-tag-counter {
+    display: block;
+    position: relative;
+    pointer-events: none;
+
+    height: 1rem;
+    margin-top: -1rem;
+    padding: 0 1rem;
+
+    font-family: monospace;
+    color: #666;
+    text-align: right;
+}

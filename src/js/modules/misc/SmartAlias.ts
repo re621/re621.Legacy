@@ -84,6 +84,8 @@ export class SmartAlias extends RE6Module {
             const $container = $("<smart-alias>")
                 .attr("ready", "true")
                 .insertAfter($textarea);
+            const $counter = $("<smart-tag-counter>")
+                .insertAfter($textarea);
 
             // Wait for the user to stop typing before processing
             let typingTimeout: number;
@@ -105,6 +107,14 @@ export class SmartAlias extends RE6Module {
                     window.clearInterval(typingTimeout);
                     this.handleTagInput($textarea, $container);
                 }, 1000);
+            });
+
+            // Update the tag counter
+            let updateTimeout: number;
+            $textarea.on("input", () => {
+                if (updateTimeout) return;
+                updateTimeout = window.setTimeout(() => { updateTimeout = 0; }, 500);
+                $counter.html(SmartAlias.getInputTags($textarea).length + "");
             });
 
             // On search pages, in the editing mode, reload container when the user clicks on a thumbnail
