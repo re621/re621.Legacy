@@ -69,7 +69,8 @@ smart-alias {
 }
 
 // Limit the height for the editing mode
-#c-favorites smart-alias, #c-posts smart-alias{
+#c-posts #a-index smart-alias,
+#c-favorites #a-index smart-alias {
     max-height: 6.75rem;
 }
 
