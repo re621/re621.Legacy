@@ -39,6 +39,7 @@ export class SmartAlias extends RE6Module {
 
             quickTagsForm: true,
             replaceAliasedTags: true,
+            fixCommonTypos: false,
             minPostsWarning: 20,
 
             data: "",
@@ -165,6 +166,16 @@ export class SmartAlias extends RE6Module {
         // Prepare the necessary tools
         if (AvoidPosting.isUpdateRequired()) await AvoidPosting.update();
 
+        // Fix typos
+        if (this.fetchSettings<boolean>("fixCommonTypos")) {
+            $textarea.val((index, currentValue) => {
+                return (currentValue
+                    .toLowerCase()
+                    .replace(/\-/g, "_"))
+                    + ((currentValue.length == 0 || currentValue.endsWith(" ")) ? "" : " ");
+            });
+        }
+
         // Get the tags from the textarea
         const inputString = SmartAlias.getInputString($textarea);
         let tags = SmartAlias.getInputTags(inputString);
@@ -184,7 +195,6 @@ export class SmartAlias extends RE6Module {
         // Step 1
         // Replace custom aliases with their contents
         // This is probably overcomplicated to all hell
-        // TODO Don't reload alias data from the file every time, cache it instead
         const aliasCacheRaw = await this.fetchSettings<string>("data", true);
         if (aliasCacheRaw.length !== SmartAlias.aliasCacheLength) {
             SmartAlias.aliasCache = SmartAlias.getAliasData(aliasCacheRaw);
@@ -292,8 +302,10 @@ export class SmartAlias extends RE6Module {
         // Step 4
         // Replace all known e6 aliases with their consequent versions to avoid unnecessary API calls
         if (this.fetchSettings("replaceAliasedTags")) {
+            console.log(SmartAlias.tagAliases);
             $textarea.val((index, currentValue) => {
                 for (const [antecedent, consequent] of Object.entries(SmartAlias.tagAliases)) {
+                    console.log("`" + getTagRegex(antecedent) + "`");
                     currentValue = currentValue.replace(
                         getTagRegex(antecedent),
                         "$1" + consequent + "$3"
@@ -370,7 +382,9 @@ export class SmartAlias extends RE6Module {
          * @param input Input, as a single string, an array, or a set
          */
         function getTagRegex(input: string | string[] | Set<string>): RegExp {
-            input = [...input];
+            if (typeof input == "string") input = [input];
+            else input = [...input];
+
             for (let i = 0; i < input.length; i++)
                 input[i] = input[i]
                     .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
@@ -391,12 +405,18 @@ export class SmartAlias extends RE6Module {
 
             if (tagOrder !== TagOrder.Default) tags = tags.sort();
 
-            for (const tagName of tags) {
+            // console.log(SmartAlias.tagData);
+
+            for (let tagName of tags) {
+
+                let displayName = tagName;  // text to be displayed in the link
+                if (SmartAlias.tagAliases[tagName] != undefined)
+                    tagName = SmartAlias.tagAliases[tagName];
 
                 const data = SmartAlias.tagData[tagName];
                 const isLoading = loading.has(tagName);
 
-                // console.log("triggering on " + tagName, data);
+                // console.log("drawing " + tagName, data);
 
                 // Tags that are currently loading will not have the necessary data.
                 // For all other tags, lacking data means that an error has occurred
@@ -405,7 +425,6 @@ export class SmartAlias extends RE6Module {
                 let symbol: string,         // font-awesome icon in front of the line
                     color: string,          // color of the non-link text
                     text: string;           // text after the link
-                let displayName = tagName;  // text to be displayed in the link
 
                 if (isLoading) {
                     symbol = "loading";
@@ -427,7 +446,7 @@ export class SmartAlias extends RE6Module {
                     symbol = "info";
                     color = "warning";
                     text = "ambiguous";
-                    displayName = tagName.replace("_(disambiguation)", "");
+                    displayName = displayName.replace("_(disambiguation)", "");
                 } else if (data.count == 0 || data.count < minPostsWarning) {
                     symbol = "error";
                     color = "warning";

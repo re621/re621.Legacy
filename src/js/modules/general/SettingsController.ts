@@ -911,6 +911,16 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3),
 
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("fixCommonTypos"),
+                            label: `<b>Fix Common Typos</b><br />Correct several common typos in the tag fields`,
+                            width: 3,
+                        },
+                        (data) => { smartAlias.pushSettings("fixCommonTypos", data); }
+                    ),
+                    Form.spacer(3),
+
                     Form.subheader("Tag Display Order", "How the tags should be arranged in the display box", 2),
                     Form.select(
                         { value: smartAlias.fetchSettings("tagOrder"), },
