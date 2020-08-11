@@ -887,7 +887,6 @@ export class SettingsController extends RE6Module {
                 // Validator Configuration
                 Form.accordionTab({ name: "validatior", label: "Validator Configuration", columns: 3, width: 3 }, [
 
-
                     Form.checkbox(
                         {
                             value: smartAlias.fetchSettings("quickTagsForm"),
@@ -909,6 +908,18 @@ export class SettingsController extends RE6Module {
                             width: 3,
                         },
                         (data) => { smartAlias.pushSettings("replaceAliasedTags", data); }
+                    ),
+                    Form.spacer(3),
+
+                    Form.subheader("Tag Display Order", "How the tags should be arranged in the display box", 2),
+                    Form.select(
+                        { value: smartAlias.fetchSettings("tagOrder"), },
+                        {
+                            "default": "Original",
+                            "alphabetical": "Alphabetical",
+                            "grouped": "Grouped by Category",
+                        },
+                        (data) => { smartAlias.pushSettings("tagOrder", data); }
                     ),
                     Form.spacer(3),
 

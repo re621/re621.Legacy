@@ -66,6 +66,20 @@ smart-alias {
         }
 
     }
+
+    // Grouped by category
+    &.grouped smart-tag {
+        order: 6;
+
+        &.category-1 { order: 1; }  // artist
+        &.category-3 { order: 3; }  // copyright
+        &.category-4 { order: 4; }  // character
+        &.category-5 { order: 5; }  // species
+        // rest of the tags
+        &.category-7 { order: 7; }  // meta
+        &.category-8 { order: 8; }  // lore
+        
+    }
 }
 
 // Limit the height for the editing mode

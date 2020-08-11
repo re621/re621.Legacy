@@ -35,6 +35,8 @@ export class SmartAlias extends RE6Module {
         return {
             enabled: true,
 
+            tagOrder: TagOrder.Default,
+
             quickTagsForm: true,
             replaceAliasedTags: true,
             minPostsWarning: 20,
@@ -166,7 +168,6 @@ export class SmartAlias extends RE6Module {
         // Get the tags from the textarea
         const inputString = SmartAlias.getInputString($textarea);
         let tags = SmartAlias.getInputTags(inputString);
-        const minPostsWarning = this.fetchSettings("minPostsWarning");
 
         // Skip the rest if the textarea is empty
         if (tags.length == 0) {
@@ -174,6 +175,10 @@ export class SmartAlias extends RE6Module {
             $container.attr("ready", "true");
             return;
         }
+
+        // Get the settings
+        const minPostsWarning = this.fetchSettings<number>("minPostsWarning"),
+            tagOrder = this.fetchSettings<TagOrder>("tagOrder");
 
 
         // Step 1
@@ -243,7 +248,7 @@ export class SmartAlias extends RE6Module {
         }
 
         // Redraw the container to indicate loading
-        redrawContainerContents($container, tags, minPostsWarning, lookup);
+        redrawContainerContents($container, tags, minPostsWarning, tagOrder, lookup);
 
 
         // Step 3
@@ -338,7 +343,7 @@ export class SmartAlias extends RE6Module {
         // Step 6
         // Redraw the tag data output container
         // console.log("data", SmartAlias.tagData);
-        redrawContainerContents($container, tags, minPostsWarning);
+        redrawContainerContents($container, tags, minPostsWarning, tagOrder);
 
 
         // Step 7
@@ -379,8 +384,12 @@ export class SmartAlias extends RE6Module {
          * @param tags Tags to display
          * @param loading Tags to mark as loading
          */
-        function redrawContainerContents($container: JQuery<HTMLElement>, tags: string[], minPostsWarning: number, loading = new Set<string>()): void {
-            $container.html("");
+        function redrawContainerContents($container: JQuery<HTMLElement>, tags: string[], minPostsWarning: number, tagOrder: TagOrder, loading = new Set<string>()): void {
+            $container
+                .html("")
+                .toggleClass("grouped", tagOrder == TagOrder.Grouped);
+
+            if (tagOrder !== TagOrder.Default) tags = tags.sort();
 
             for (const tagName of tags) {
 
@@ -523,4 +532,20 @@ interface Tag {
 
 interface TagAlias {
     [name: string]: string;
+}
+
+enum TagOrder {
+    Default = "default",
+    Alphabetical = "alphabetical",
+    Grouped = "grouped",
+}
+
+namespace TagOrder {
+
+    export function fromString(input: string): TagOrder {
+        for (const value of Object.values(TagOrder))
+            if (value == input) return value;
+        return TagOrder.Default;
+    }
+
 }
