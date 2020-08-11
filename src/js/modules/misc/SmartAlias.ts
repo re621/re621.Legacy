@@ -389,7 +389,7 @@ export class SmartAlias extends RE6Module {
                 input[i] = input[i]
                     .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
                     .replace(/\*/g, "(\\S*)");
-            return new RegExp("(^| )(" + input.join("|") + ")( |\n|$)", "gi");
+            return new RegExp("(^|\n| )(" + input.join("|") + ")( |\n|$)", "gi");
         }
 
         /**
