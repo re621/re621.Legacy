@@ -238,18 +238,10 @@ div#c-favorites div#a-index {
     &[data-shorten-tagnames=true]>ul {
 
         li {
-            span.tag-wrap {
-                display: inline-grid;
-            }
-
+            span.tag-wrap { display: inline-grid; }
             &:hover {
-                span.tag-wrap {
-                    margin-right: 1rem;
-                }
-
-                span.post-count {
-                    display: none;
-                }
+                span.tag-wrap { margin-right: 1rem; }
+                span.post-count { display: none; }
             }
         }
 
@@ -267,6 +259,11 @@ div#c-favorites div#a-index {
                 }
             }
         }
+    }
+
+    &[data-hide-plusminus=true] {
+        a.search-inc-tag,
+        a.search-exl-tag { display: none; }
     }
 }
 

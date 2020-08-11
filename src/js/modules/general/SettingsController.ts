@@ -231,7 +231,7 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await searchUtilities.pushSettings("improveTagCount", data);
-                            searchUtilities.improveTagCount(data);
+                            if (searchUtilities.isInitialized()) searchUtilities.improveTagCount(data);
                         }
                     ),
                     Form.spacer(3),
@@ -244,7 +244,20 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await searchUtilities.pushSettings("shortenTagNames", data);
-                            searchUtilities.shortenTagNames(data);
+                            if (searchUtilities.isInitialized()) searchUtilities.shortenTagNames(data);
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: searchUtilities.fetchSettings("hidePlusMinusIcons"),
+                            label: "<b>Hide + and - Icons</b><br />Remove these icons from view",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await searchUtilities.pushSettings("hidePlusMinusIcons", data);
+                            if (searchUtilities.isInitialized()) searchUtilities.hidePlusMinusIcons(data);
                         }
                     ),
                     Form.spacer(3),

@@ -25,6 +25,7 @@ export class SearchUtilities extends RE6Module {
 
             improveTagCount: true,
             shortenTagNames: true,
+            hidePlusMinusIcons: false,
 
             collapseCategories: true,
             categoryData: [],
@@ -61,6 +62,7 @@ export class SearchUtilities extends RE6Module {
         if (Page.matches([PageDefintion.search, PageDefintion.post])) {
             this.improveTagCount(this.fetchSettings("improveTagCount"));
             this.shortenTagNames(this.fetchSettings("shortenTagNames"));
+            this.hidePlusMinusIcons(this.fetchSettings("hidePlusMinusIcons"));
         }
 
         // Restore the collapsed categories
@@ -107,6 +109,14 @@ export class SearchUtilities extends RE6Module {
      */
     public shortenTagNames(state = true): void {
         $("section#tag-box, section#tag-list").attr("data-shorten-tagnames", state + "");
+    }
+
+    /**
+     * Removes the + and - icons next to the tags
+     * @param state True to remove, false to restore
+     */
+    public hidePlusMinusIcons(state = true): void {
+        $("section#tag-box, section#tag-list").attr("data-hide-plusminus", state + "");
     }
 
     /**
