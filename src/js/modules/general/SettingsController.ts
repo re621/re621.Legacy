@@ -882,53 +882,68 @@ export class SettingsController extends RE6Module {
 
         return new Form({ name: "optalias", columns: 3, width: 3 }, [
 
-            // Validator Configuration
-            Form.section({ name: "validatior", columns: 3, width: 3 }, [
-                Form.header("Validator Configuration", 3),
+            Form.accordion({ name: "aliascollapse", columns: 3, width: 3, active: 0 }, [
+
+                // Validator Configuration
+                Form.accordionTab({ name: "validatior", label: "Validator Configuration", columns: 3, width: 3 }, [
 
 
-                Form.checkbox(
-                    {
-                        value: smartAlias.fetchSettings("quickTagsForm"),
-                        label: `<b>Quick Tags Validation</b><br />Enable SmartAlias validation on the search page editing mode form`,
-                        width: 3,
-                    },
-                    async (data) => {
-                        await smartAlias.pushSettings("quickTagsForm", data);
-                        smartAlias.destroy();
-                        setTimeout(() => { smartAlias.create(); }, 100);
-                    }
-                ),
-                Form.spacer(3),
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("quickTagsForm"),
+                            label: `<b>Quick Tags Validation</b><br />Enable SmartAlias validation on the search page editing mode form`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("quickTagsForm", data);
+                            smartAlias.destroy();
+                            setTimeout(() => { smartAlias.create(); }, 100);
+                        }
+                    ),
+                    Form.spacer(3),
 
-                Form.checkbox(
-                    {
-                        value: smartAlias.fetchSettings("replaceAliasedTags"),
-                        label: `<b>Replace Aliases</b><br />Automatically replace aliased tag names with their consequent version`,
-                        width: 3,
-                    },
-                    (data) => { smartAlias.pushSettings("replaceAliasedTags", data); }
-                ),
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("replaceAliasedTags"),
+                            label: `<b>Replace Aliases</b><br />Automatically replace aliased tag names with their consequent version`,
+                            width: 3,
+                        },
+                        (data) => { smartAlias.pushSettings("replaceAliasedTags", data); }
+                    ),
+                    Form.spacer(3),
 
-            ]),
-            Form.hr(3),
-            Form.spacer(3),
+                    Form.subheader("Minimum Posts Warning", "Highlight tags that have less than the specified number of posts", 2),
+                    Form.input(
+                        {
+                            value: smartAlias.fetchSettings("minPostsWarning"),
+                            width: 1,
+                            pattern: "\\d+",
+                        },
+                        (data, input) => {
+                            if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                            smartAlias.pushSettings("minPostsWarning", data);
+                        }
+                    ),
 
-            // Alias Definitions
-            Form.section({ name: "aliasdef", columns: 3, width: 3 }, [
-                Form.header("Alias Definitions", 3),
-                Form.div({ value: aliasContainer, width: 3 }),
 
-                Form.button(
-                    { value: "Save" },
-                    async () => {
-                        const confirmBox = $("span#defs-confirm").html("Saving . . .");
-                        await smartAlias.pushSettings("data", $("#alias-list-container").val().toString().trim());
-                        confirmBox.html("Settings Saved");
-                        window.setTimeout(() => { confirmBox.html(""); }, 1000);
-                    }
-                ),
-                Form.div({ value: `<span id="defs-confirm"></span>` }),
+                ]),
+
+                // Alias Definitions
+                Form.accordionTab({ name: "aliasdef", label: "Alias Definitions", columns: 3, width: 3 }, [
+                    Form.div({ value: aliasContainer, width: 3 }),
+
+                    Form.button(
+                        { value: "Save" },
+                        async () => {
+                            const confirmBox = $("span#defs-confirm").html("Saving . . .");
+                            await smartAlias.pushSettings("data", $("#alias-list-container").val().toString().trim());
+                            confirmBox.html("Settings Saved");
+                            window.setTimeout(() => { confirmBox.html(""); }, 1000);
+                        }
+                    ),
+                    Form.div({ value: `<span id="defs-confirm"></span>` }),
+                ]),
+
             ]),
         ]);
 

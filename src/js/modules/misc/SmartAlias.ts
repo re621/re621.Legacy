@@ -21,6 +21,9 @@ export class SmartAlias extends RE6Module {
         "#post_themes",
     ];
 
+    private static aliasCache: AliasDefinition[];
+    private static aliasCacheLength: number;
+
     private static tagData: TagData;            // stores tag data for the session - count, valid, dnp, etc
     private static tagAliases: TagAlias;        // stores e621's alias pairs to avoid repeated lookups
 
@@ -34,6 +37,7 @@ export class SmartAlias extends RE6Module {
 
             quickTagsForm: true,
             replaceAliasedTags: true,
+            minPostsWarning: 20,
 
             data: "",
         };
@@ -56,6 +60,10 @@ export class SmartAlias extends RE6Module {
         // Abort the whole thing if the quick tags form is disabled in settings
         if (!this.fetchSettings("quickTagsForm") && Page.matches([PageDefintion.search, PageDefintion.favorites]))
             return;
+
+        const cacheData = this.fetchSettings<string>("data");
+        SmartAlias.aliasCache = SmartAlias.getAliasData(cacheData);
+        SmartAlias.aliasCacheLength = cacheData.length;
 
         SmartAlias.tagData = {};
         SmartAlias.tagAliases = {};
@@ -152,6 +160,7 @@ export class SmartAlias extends RE6Module {
         // Get the tags from the textarea
         const inputString = SmartAlias.getInputString($textarea);
         let tags = SmartAlias.getInputTags(inputString);
+        const minPostsWarning = this.fetchSettings("minPostsWarning");
 
         // Skip the rest if the textarea is empty
         if (tags.length == 0) {
@@ -165,8 +174,13 @@ export class SmartAlias extends RE6Module {
         // Replace custom aliases with their contents
         // This is probably overcomplicated to all hell
         // TODO Don't reload alias data from the file every time, cache it instead
-        const aliasData = SmartAlias.getAliasData(this.fetchSettings<string>("data"));
-        if (aliasData.length > 0) {
+        const aliasCacheRaw = await this.fetchSettings<string>("data", true);
+        if (aliasCacheRaw.length !== SmartAlias.aliasCacheLength) {
+            SmartAlias.aliasCache = SmartAlias.getAliasData(aliasCacheRaw);
+            SmartAlias.aliasCacheLength = aliasCacheRaw.length;
+        }
+
+        if (SmartAlias.aliasCache.length > 0) {
             $textarea.val((index, currentValue) => {
 
                 // Run the the process as many times as needed until no more changes can be made
@@ -175,20 +189,29 @@ export class SmartAlias extends RE6Module {
                     iterations = 0;
                 do {
                     changes = 0;
-                    for (const aliasDef of aliasData) {
+                    for (const aliasDef of SmartAlias.aliasCache) {
 
-                        console.log("/" + getTagRegex(aliasDef.lookup) + "/");
                         currentValue = currentValue.replace(
                             getTagRegex(aliasDef.lookup),
                             (...args) => {  // match, prefix, body, suffix1, suffix2, etc
-                                console.log(args);
                                 changes++;
+
+                                // Replace the wildcards in the output with values
+                                // Starts at fourth position to skip match, prefix, and alias body
+                                // Ends 2 positions before the end to skip number of hits and full string
                                 let output = aliasDef.output;
-                                for (let i = 3; i < args.length - 3; i++) {
-                                    output = output.replace(/\$1/g, args[i]);
+                                for (let i = 3; i < args.length - 3; i++)
+                                    output = output.replace(new RegExp("\\$" + (i - 2), "gi"), args[i]);
+
+                                // Prevent duplicate tags from being added by aliases
+                                const result = new Set<string>();
+                                for (const part of output.split(" ")) {
+                                    if (currentValue.includes(part)) continue;
+                                    result.add(part);
                                 }
-                                console.log(args[1], output, args[args.length - 3], args[1] + output + args[args.length - 3]);
-                                return args[1] + output + args[args.length - 3];
+
+                                if (result.size == 0) return " ";
+                                return args[1] + [...result].join(" ") + args[args.length - 3];
                             }
                         );
 
@@ -214,7 +237,7 @@ export class SmartAlias extends RE6Module {
         }
 
         // Redraw the container to indicate loading
-        redrawContainerContents($container, tags, lookup);
+        redrawContainerContents($container, tags, minPostsWarning, lookup);
 
 
         // Step 3
@@ -308,8 +331,8 @@ export class SmartAlias extends RE6Module {
 
         // Step 6
         // Redraw the tag data output container
-        console.log("data", SmartAlias.tagData);
-        redrawContainerContents($container, tags);
+        // console.log("data", SmartAlias.tagData);
+        redrawContainerContents($container, tags, minPostsWarning);
 
 
         // Step 7
@@ -340,7 +363,7 @@ export class SmartAlias extends RE6Module {
             for (let i = 0; i < input.length; i++)
                 input[i] = input[i]
                     .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
-                    .replace(/\*/, "(\\S*)");
+                    .replace(/\*/g, "(\\S*)");
             return new RegExp("(^| )(" + input.join("|") + ")( |\n|$)", "gi");
         }
 
@@ -350,8 +373,9 @@ export class SmartAlias extends RE6Module {
          * @param tags Tags to display
          * @param loading Tags to mark as loading
          */
-        function redrawContainerContents($container: JQuery<HTMLElement>, tags: string[], loading = new Set<string>()): void {
+        function redrawContainerContents($container: JQuery<HTMLElement>, tags: string[], minPostsWarning: number, loading = new Set<string>()): void {
             $container.html("");
+
             for (const tagName of tags) {
 
                 const data = SmartAlias.tagData[tagName];
@@ -389,7 +413,7 @@ export class SmartAlias extends RE6Module {
                     color = "warning";
                     text = "ambiguous";
                     displayName = tagName.replace("_(disambiguation)", "");
-                } else if (data.count == 0 || data.count < 20) {
+                } else if (data.count == 0 || data.count < minPostsWarning) {
                     symbol = "error";
                     color = "warning";
                     text = data.count + "";
@@ -422,8 +446,10 @@ export class SmartAlias extends RE6Module {
      * @param rawData Raw plaintext data
      */
     public static getAliasData(rawData: string): AliasDefinition[] {
-        const data = rawData.split("\n");
+        const data = rawData.split("\n").reverse();
         const result: AliasDefinition[] = [];
+
+        const aliasList = new Set<string>();
 
         for (const line of data) {
             const parts = line
@@ -433,16 +459,39 @@ export class SmartAlias extends RE6Module {
 
             if (parts.length !== 2) continue;
 
-            result.push({
-                lookup: getParts(parts[0]),
-                output: parts[1].trim(),
-            });
+            const def: AliasDefinition = {
+                lookup: new Set(),
+                output: formatOutput(parts[1]),
+            }
+
+            // This should prevent multiple aliases from being called by the same lookup
+            // Only the last one in the file would be counted.
+            // If an alias has no lookups, it is discarded
+            for (const part of formatLookup(parts[0])) {
+                if (aliasList.has(part)) continue;
+                aliasList.add(part);
+                def.lookup.add(part);
+            }
+
+            if (def.lookup.size == 0) continue;
+
+            result.push(def);
         }
 
         return result;
 
-        function getParts(input: string): Set<string> {
-            return new Set(input.split(" ").filter((e) => e != ""));
+        function formatLookup(input: string): Set<string> {
+            return new Set(
+                input
+                    .split(" ")
+                    .filter((e) => e != "")
+            );
+        }
+
+        function formatOutput(input: string): string {
+            return input
+                .trim()
+                .replace(/\s{2,}/g, " ");
         }
     }
 
