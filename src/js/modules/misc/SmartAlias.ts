@@ -72,7 +72,7 @@ export class SmartAlias extends RE6Module {
 
         // The post editing form gets created programmatically when the editing button is clicked
         // Without this, the module's DOM structure will be deleted
-        $("#post-edit-link").one("click", () => {
+        $("#post-edit-link, .the_secret_switch").one("click", () => {
             this.destroy();
             setTimeout(() => { this.create(); }, 100);
         });
