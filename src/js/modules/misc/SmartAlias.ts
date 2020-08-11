@@ -4,7 +4,6 @@ import { APITagAlias } from "../../components/api/responses/APITagAlias";
 import { AvoidPosting } from "../../components/cache/AvoidPosting";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
 
 export class SmartAlias extends RE6Module {
@@ -22,15 +21,21 @@ export class SmartAlias extends RE6Module {
         "#post_themes",
     ];
 
+    private static tagData: TagData;            // stores tag data for the session - count, valid, dnp, etc
+    private static tagAliases: TagAlias;        // stores e621's alias pairs to avoid repeated lookups
+
     public constructor() {
-        // Uses TinyAlias settings for compatibility
-        super([PageDefintion.upload, PageDefintion.post, PageDefintion.search, PageDefintion.favorites], true, "TinyAlias");
+        super([PageDefintion.upload, PageDefintion.post, PageDefintion.search, PageDefintion.favorites], true);
     }
 
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
-            data: {},
+
+            quickTagsForm: true,
+            replaceAliasedTags: true,
+
+            data: "",
         };
     }
 
@@ -48,8 +53,16 @@ export class SmartAlias extends RE6Module {
     public create(): void {
         super.create();
 
+        // Abort the whole thing if the quick tags form is disabled in settings
+        if (!this.fetchSettings("quickTagsForm") && Page.matches([PageDefintion.search, PageDefintion.favorites]))
+            return;
+
+        SmartAlias.tagData = {};
+        SmartAlias.tagAliases = {};
+
         // Fix for the post editing form glitch
         // Just destroy and rebuild the module, or things get complicated
+        // TODO Is this necessary?
         $("#post-edit-link").one("click", () => {
             this.destroy();
             setTimeout(() => {
@@ -61,50 +74,42 @@ export class SmartAlias extends RE6Module {
         for (const inputElement of $(SmartAlias.inputSelector.join(", ")).get()) {
             const $textarea = $(inputElement);
             const $container = $("<smart-alias>")
-                .attr("state", "ready")
-                .data("xval", SmartAlias.getInputString($textarea))
+                .attr("ready", "true")
                 .insertAfter($textarea);
 
-            // Okay, this is incomprehensibly dumb
-            // But there is no way to catch e621's autocomplte working without this
-            let inputFocusInterval: number;         // Checks if the input has changed
-            $textarea.on("focus", () => {
+            // Wait for the user to stop typing before processing
+            let typingTimeout: number;
+            $textarea.on("input", () => {
 
-                let inputChangeTimeout: number;     // Checks if the user has stopped typing
+                // handleTagInput triggers an input event to properly fill in the data bindings
+                // this ensures that it will not result in an infinite loop
+                if ($textarea.data("vue-event") === "true") {
+                    $textarea.data("vue-event", "false");
+                    return;
+                }
 
-                inputFocusInterval = setInterval(() => {
+                // If the data is currently processing, but the user keeps typing,
+                // check every second to make sure the last input is caught
+                window.clearInterval(typingTimeout);
+                typingTimeout = window.setInterval(() => {
+                    if ($container.attr("ready") !== "true") return;
 
-                    // Fast check to see if input changed
-                    if ($container.data("xval") === SmartAlias.getInputString($textarea)) return;
-                    $container.data("xval", SmartAlias.getInputString($textarea));
-
-                    // User is typing
-                    clearTimeout(inputChangeTimeout);
-
-                    inputChangeTimeout = window.setTimeout(() => {
-                        this.handleTagInput($textarea, $container);
-                    }, 1000);
-                }, 500);
-
-            }).on("focusout", () => {
-                clearInterval(inputFocusInterval);
-                if ($container.data("xval") === SmartAlias.getInputString($textarea)) return;
-                $container.data("xval", SmartAlias.getInputString($textarea));
-                this.handleTagInput($textarea, $container);
+                    window.clearInterval(typingTimeout);
+                    this.handleTagInput($textarea, $container);
+                }, 1000);
             });
 
             // On search pages, in the editing mode, reload container when the user clicks on a thumbnail
+            // Otherwise, the old tags get left behind. Thanks to tag data caching, this should be pretty quick
             if (Page.matches([PageDefintion.search, PageDefintion.favorites])) {
                 $("article.post-preview").on("click.danbooru", () => {
-                    if ($container.data("xval") === SmartAlias.getInputString($textarea)) return;
-                    $container.data("xval", SmartAlias.getInputString($textarea));
-                    this.handleTagInput($textarea, $container);
-                })
+                    this.handleTagInput($textarea, $container, false);
+                });
             }
 
             // First call, in case the input area is not blank
             // i.e. on post page, or in editing mode
-            this.handleTagInput($textarea, $container);
+            this.handleTagInput($textarea, $container, false);
         }
     }
 
@@ -114,6 +119,7 @@ export class SmartAlias extends RE6Module {
      */
     private static getInputString(input: JQuery<HTMLElement>): string {
         return input.val().toString().trim()
+            .toLowerCase()
             .replace(/\r?\n|\r/g, " ")      // strip newlines
             .replace(/(?:\s){2,}/g, " ");    // strip multiple spaces
     }
@@ -130,49 +136,62 @@ export class SmartAlias extends RE6Module {
             .filter((el) => { return el != null && el != ""; });
     }
 
-    private async handleTagInput($textarea: JQuery<HTMLElement>, $container: JQuery<HTMLElement>): Promise<void> {
-        if ($container.attr("state") !== "ready") return;
-        $container.attr("state", "loading");
+    /**
+     * Process the tag string in the textarea, and display appropriate data in the container
+     * @param $textarea Textarea to process
+     * @param $container Display container
+     * @param scrollToBottom If true, the container's viewport will scroll to the very bottom once processed
+     */
+    private async handleTagInput($textarea: JQuery<HTMLElement>, $container: JQuery<HTMLElement>, scrollToBottom = true): Promise<void> {
+        if ($container.attr("ready") !== "true") return;
+        $container.attr("ready", "false");
 
         // Prepare the necessary tools
         if (AvoidPosting.isUpdateRequired()) await AvoidPosting.update();
 
         // Get the tags from the textarea
-        let newTags = SmartAlias.getInputTags($textarea);       // tags currently in the textarea
-        const oldTags = $container.data("tags") || newTags;     // tags in the textarea on the previous run
-        let tagDiff = getTagDiff(newTags, oldTags);             // tags that have been added since
-        $container.data("tags", newTags);
-
-        Debug.log("dif", tagDiff);
+        const inputString = SmartAlias.getInputString($textarea);
+        let tags = SmartAlias.getInputTags(inputString);
 
         // Skip the rest if the textarea is empty
-        if (newTags.length == 0) {
+        if (tags.length == 0) {
             $container.html("");
-            $container.attr("state", "ready");
+            $container.attr("ready", "true");
             return;
         }
 
 
         // Step 1
-        // Replace all aliases with their contents
-        const aliasData = this.fetchSettings<AliasData>("data");
-        if (Object.keys(aliasData).length > 0) {
+        // Replace custom aliases with their contents
+        // This is probably overcomplicated to all hell
+        // TODO Don't reload alias data from the file every time, cache it instead
+        const aliasData = SmartAlias.getAliasData(this.fetchSettings<string>("data"));
+        if (aliasData.length > 0) {
             $textarea.val((index, currentValue) => {
 
                 // Run the the process as many times as needed until no more changes can be made
-                // This should resolve an issue with nested aliases
+                // This should take care of nested aliases while preventing infinite recursion
                 let changes = 0,
                     iterations = 0;
                 do {
                     changes = 0;
-                    for (const [alias, data] of Object.entries(this.fetchSettings<AliasData>("data"))) {
+                    for (const aliasDef of aliasData) {
+
+                        console.log("/" + getTagRegex(aliasDef.lookup) + "/");
                         currentValue = currentValue.replace(
-                            new RegExp("(^| )(" + alias + ")( |\n|$)", "gi"),
-                            (match, prefix, input, suffix) => {
+                            getTagRegex(aliasDef.lookup),
+                            (...args) => {  // match, prefix, body, suffix1, suffix2, etc
+                                console.log(args);
                                 changes++;
-                                return prefix + data + suffix;
+                                let output = aliasDef.output;
+                                for (let i = 3; i < args.length - 3; i++) {
+                                    output = output.replace(/\$1/g, args[i]);
+                                }
+                                console.log(args[1], output, args[args.length - 3], args[1] + output + args[args.length - 3]);
+                                return args[1] + output + args[args.length - 3];
                             }
                         );
+
                     }
                     iterations++;
                 } while (changes != 0 && iterations < SmartAlias.ITERATIONS_LIMIT);
@@ -180,69 +199,29 @@ export class SmartAlias extends RE6Module {
                 return currentValue;
             });
 
-            // Regenerate the tag list
-            newTags = SmartAlias.getInputTags($textarea)
-            tagDiff = getTagDiff(newTags, oldTags);
-            $container.data({
-                "tags": newTags,
-                "xval": SmartAlias.getInputString($textarea),
-            });
+            // Regenerate the tags to account for replacements
+            triggerUpdateEvent($textarea);
+            tags = SmartAlias.getInputTags($textarea);
         }
 
 
         // Step 2
-        // Create elements for tags that are missing, and remove the ones that are gone
-        const tagsList: Set<string> = new Set();
-        for (const tagName of tagDiff) {
-            const tagLookup = findTags($container, tagName);
-            let count = tagLookup.length;
-            const reqCount = Util.getArrayIndexes(newTags, tagName).length;
-            if (count == 0) tagsList.add(tagName);
-
-            while (count < reqCount) {
-                if (tagLookup.length > 0)
-                    tagLookup.last().clone().appendTo($container);
-                else $("<smart-tag>")
-                    .attr({
-                        "name": tagName,
-                        "symbol": "loading",
-                        "status": "",
-                        "text": "",
-                    })
-                    .html(`<a href="/wiki_pages/show_or_new?title=${tagName}">${tagName}</a>`)
-                    .appendTo($container);
-                count++;
-            }
-            while (count > reqCount && count > 1) {
-                findTags($container, tagName).last().remove();
-                count--;
-            }
-
+        // Create a list of tags that need to be looked up in the API
+        const lookup: Set<string> = new Set();
+        for (const tagName of tags) {
+            if (typeof SmartAlias.tagData[tagName] == "undefined")
+                lookup.add(tagName);
         }
+
+        // Redraw the container to indicate loading
+        redrawContainerContents($container, tags, lookup);
 
 
         // Step 3
-        // Rebuild the structure to follow the same order as the tags in texarea
-        const $temp = $("<div>");
-        for (const tagName of newTags)
-            findTags($container, tagName).first()
-                .removeClass("display-none")
-                .appendTo($temp);
-        $container.children()
-            .addClass("display-none")
-            .appendTo($temp);
-        $container.html("");
-        $temp.children().appendTo($container);
-        $temp.remove();
-
-        // Scroll to the bottom of the div
-        $container.scrollTop($container[0].scrollHeight - $container[0].clientHeight);
-
-
-        // Step 4
-        // Replace aliased tag names with their consequent versions
-        const invalidTags: Set<string> = new Set();     // tags aliased to `invalid_tag`
-        for (const batch of Util.chunkArray(tagsList, 40)) {
+        // Check the lookup tags for aliases
+        const invalidTags: Set<string> = new Set(),
+            ambiguousTags: Set<string> = new Set();
+        for (const batch of Util.chunkArray([...lookup].filter((value) => SmartAlias.tagAliases[value] == undefined), 40)) {
             for (const result of await E621.TagAliases.get<APITagAlias>({ "search[antecedent_name]": batch.join("+"), limit: 1000 }, 500)) {
 
                 // Don't apply pending or inactive aliases
@@ -251,100 +230,242 @@ export class SmartAlias extends RE6Module {
                 const currentName = result.antecedent_name,
                     trueName = result.consequent_name;
 
-                // Replace the original name in the list
-                tagsList.delete(currentName);
-
                 // Don't replace tags aliased to `invalid_tag`
-                if (trueName == "invalid_tag") {
+                if (trueName == "invalid_tag" || trueName == "invalid_color") {
                     invalidTags.add(currentName);
                     continue;
                 }
 
-                // Replace the existing tag with the parent one in the SmartAlias window
-                findTags($container, currentName)
-                    .attr({ "name": trueName })
-                    .html(`<a href="/wiki_pages/show_or_new?title=${trueName}">${trueName}</a>`);
+                // Account for ambiguous tags
+                if (trueName.endsWith("_(disambiguation)")) {
+                    ambiguousTags.add(currentName);
+                    // TODO make record of tags that implicate an ambiguous tag, and display them
+                    continue;
+                }
 
-                // Replace the existing tag with the parent one in the textbox
-                const regex = new RegExp("(^| )(" + currentName + ")( |\n|$)", "gi");
-                $textarea.val((index, currentValue) => {
-                    return currentValue.replace(regex, "$1" + trueName + "$3");
-                });
+                // Don't look up tags that have been found already
+                lookup.delete(currentName);
+                if (SmartAlias.tagData[trueName] == undefined)
+                    lookup.add(trueName);
+
+                // Mark down the alias name to be replaced
+                SmartAlias.tagAliases[currentName] = trueName;
 
             }
         }
 
-        // Regenerate the tag list, again
-        newTags = SmartAlias.getInputTags($textarea)
-        $container.data({
-            "tags": newTags,
-            "xval": SmartAlias.getInputString($textarea),
-        });
+
+        // Step 4
+        // Replace all known e6 aliases with their consequent versions to avoid unnecessary API calls
+        if (this.fetchSettings("replaceAliasedTags")) {
+            $textarea.val((index, currentValue) => {
+                for (const [antecedent, consequent] of Object.entries(SmartAlias.tagAliases)) {
+                    currentValue = currentValue.replace(
+                        getTagRegex(antecedent),
+                        "$1" + consequent + "$3"
+                    );
+                }
+
+                return currentValue;
+            });
+
+            // Regenerate the tags to account for replacements
+            triggerUpdateEvent($textarea);
+            tags = SmartAlias.getInputTags($textarea);
+        }
 
 
         // Step 5
-        // Verify that the remaining tags are valid by querring the API and delete the ones that are found from the list
-        for (const batch of Util.chunkArray(tagsList, 100)) {
-            for (const result of await E621.Tags.get<APITag>({ "search[name]": batch.join(","), limit: 100 }, 500)) {
-                findTags($container, result.name)
-                    .attr({
-                        "status": "success",
-                        "text": result.post_count,
-                    });
-                tagsList.delete(result.name);
+        // Look up the tags through the API to make sure they exist
+        // Those that do not get removed from the list must be invalid
+        if (lookup.size > 0) {
+
+            for (const batch of Util.chunkArray(lookup, 100)) {
+                for (const result of await E621.Tags.get<APITag>({ "search[name]": batch.join(","), "search[hide_empty]": false, limit: 100 }, 500)) {
+                    SmartAlias.tagData[result.name] = {
+                        count: result.post_count,
+                        category: result.category,
+                        ambiguous: ambiguousTags.has(result.name),
+                        invalid: invalidTags.has(result.name),
+                        dnp: AvoidPosting.has(result.name),
+                    };
+                    lookup.delete(result.name);
+                }
             }
+
+            for (const tagName of lookup) {
+                SmartAlias.tagData[tagName] = {
+                    count: -1,
+                    category: -1,
+                    ambiguous: false,
+                    invalid: true,
+                    dnp: AvoidPosting.has(tagName),
+                };
+            }
+
         }
 
 
         // Step 6
-        // Tags that were not removed from the list must be invalid
-        for (const tagName of [...tagsList, ...invalidTags]) {
-            findTags($container, tagName)
-                .attr({
-                    "status": "error",
-                    "text": "invalid tag",
-                });
-        }
+        // Redraw the tag data output container
+        console.log("data", SmartAlias.tagData);
+        redrawContainerContents($container, tags);
 
 
         // Step 7
-        // Check for duplicates
-        for (const tagName of new Set(newTags)) {
-            const lookup = findTags($container, tagName);
-            if (AvoidPosting.has(tagName)) lookup
-                .html(`<a href="/wiki_pages/show_or_new?title=${tagName}">${tagName}</a> avoid posting`)
-                .attr("symbol", "dnp");
-            else if (lookup.length > 1) lookup
-                .html(`<a href="/wiki_pages/show_or_new?title=${tagName}">${tagName}</a> duplicate tag`)
-                .attr("symbol", "duplicate");
-            else lookup
-                .html(`<a href="/wiki_pages/show_or_new?title=${tagName}">${tagName}</a> ${lookup.attr("text")}`)
-                .attr("symbol", lookup.attr("status"));
-        }
-
-
         // Finish and clean up
-        $container.attr("state", "ready");
+        if (scrollToBottom)
+            $container.scrollTop($container[0].scrollHeight - $container[0].clientHeight);
+        $container.attr("ready", "true");
 
 
-        /** Finds a tag element by its name attribute */
-        function findTags($container: JQuery<HTMLElement>, name: string): JQuery<HTMLElement> {
-            return $container.find(`smart-tag[name="${name}"]`);
+        /**
+         * Fix for Vue data-attribute binding  
+         * This needs to be executed every time the textare value gets changed
+         * @param $textarea Textarea input
+         */
+        function triggerUpdateEvent($textarea: JQuery<HTMLElement>): void {
+            const e = document.createEvent('HTMLEvents');
+            e.initEvent("input", true, true);
+            $textarea.data("vue-event", "true");
+            $textarea[0].dispatchEvent(e);
         }
 
-        /** Returns a list of tags that have been added since last update */
-        function getTagDiff(newTags: string[], oldTags: string[]): Set<string> {
-            // This must be some kind of witchcraft.
-            // I don't understand any of this. None.
-            return new Set([...newTags.reduce((acc, v) => acc.set(v, (acc.get(v) || 0) - 1),
-                oldTags.reduce((acc, v) => acc.set(v, (acc.get(v) || 0) + 1), new Map())
-            )].reduce((acc, [v, count]) => acc.concat(Array(Math.abs(count)).fill(v)), []));
+        /**
+         * Dynamically creates a regex that should find individual in the textarea
+         * @param input Input, as a single string, an array, or a set
+         */
+        function getTagRegex(input: string | string[] | Set<string>): RegExp {
+            input = [...input];
+            for (let i = 0; i < input.length; i++)
+                input[i] = input[i]
+                    .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+                    .replace(/\*/, "(\\S*)");
+            return new RegExp("(^| )(" + input.join("|") + ")( |\n|$)", "gi");
+        }
+
+        /**
+         * Clears and redraws the information display container
+         * @param $container Container to refresh
+         * @param tags Tags to display
+         * @param loading Tags to mark as loading
+         */
+        function redrawContainerContents($container: JQuery<HTMLElement>, tags: string[], loading = new Set<string>()): void {
+            $container.html("");
+            for (const tagName of tags) {
+
+                const data = SmartAlias.tagData[tagName];
+                const isLoading = loading.has(tagName);
+
+                // console.log("triggering on " + tagName, data);
+
+                // Tags that are currently loading will not have the necessary data.
+                // For all other tags, lacking data means that an error has occurred
+                if (data == undefined && !isLoading) continue;
+
+                let symbol: string,         // font-awesome icon in front of the line
+                    color: string,          // color of the non-link text
+                    text: string;           // text after the link
+                let displayName = tagName;  // text to be displayed in the link
+
+                if (isLoading) {
+                    symbol = "loading";
+                    color = "success";
+                    text = "";
+                } else if (data.dnp) {
+                    symbol = "error";
+                    color = "error";
+                    text = "avoid posting";
+                } else if (Util.getArrayIndexes(tags, tagName).length > 1) {
+                    symbol = "info";
+                    color = "info";
+                    text = "duplicate";
+                } else if (data.invalid) {
+                    symbol = "error";
+                    color = "error";
+                    text = "invalid";
+                } else if (data.ambiguous || tagName.endsWith("_(disambiguation)")) {
+                    symbol = "info";
+                    color = "warning";
+                    text = "ambiguous";
+                    displayName = tagName.replace("_(disambiguation)", "");
+                } else if (data.count == 0 || data.count < 20) {
+                    symbol = "error";
+                    color = "warning";
+                    text = data.count + "";
+                } else {
+                    symbol = "success";
+                    color = "success";
+                    text = data.count + "";
+                }
+
+                // Insert zero-width spaces for better linebreaking
+                displayName = displayName.replace(/_/g, "_&#8203;");
+
+                $("<smart-tag>")
+                    .addClass(isLoading ? "" : "category-" + data.category)
+                    .attr({
+                        "name": tagName,
+                        "symbol": symbol,
+                        "color": color,
+                    })
+                    .html(`<a href="/wiki_pages/show_or_new?title=${tagName}" target="_blank">${displayName}</a> ${text}`)
+                    .appendTo($container);
+            }
         }
 
     }
 
+    /**
+     * Processses the raw text value of the custom alias field and converts it into machine-readable format.  
+     * TODO Optimize this as much as possible
+     * @param rawData Raw plaintext data
+     */
+    public static getAliasData(rawData: string): AliasDefinition[] {
+        const data = rawData.split("\n");
+        const result: AliasDefinition[] = [];
+
+        for (const line of data) {
+            const parts = line
+                .split("#")[0]
+                .trim()
+                .split("->");
+
+            if (parts.length !== 2) continue;
+
+            result.push({
+                lookup: getParts(parts[0]),
+                output: parts[1].trim(),
+            });
+        }
+
+        return result;
+
+        function getParts(input: string): Set<string> {
+            return new Set(input.split(" ").filter((e) => e != ""));
+        }
+    }
+
 }
 
-export interface AliasData {
+interface AliasDefinition {
+    lookup: Set<string>;
+    output: string;
+}
+
+interface TagData {
+    [name: string]: Tag;
+}
+
+interface Tag {
+    count: number;
+    category: number;
+
+    invalid: boolean;
+    ambiguous: boolean;
+    dnp: boolean;
+}
+
+interface TagAlias {
     [name: string]: string;
 }

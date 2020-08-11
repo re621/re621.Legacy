@@ -1,15 +1,10 @@
 /* Smart Alias Styles */
 
 // Settings Interface
-div#alias-list-container {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    grid-column-gap: 0.5rem;
-    grid-row-gap: 0.5rem;
-
-    input {
-        height: fit-content;
-    }
+textarea#alias-list-container {
+    min-height: 40vh;
+    font-family: monospace;
+    font-size: 1.2em;
 }
 
 // Tag Info Interface
@@ -32,11 +27,12 @@ smart-alias {
     smart-tag {
         position: relative;
         padding: 0.075rem 0 0.075rem 1.35rem;
-        line-break: anywhere;
+        // line-break: anywhere;
 
-        &[symbol=error] { color: lightcoral; }
-        &[symbol=duplicate] { color: aqua; }
-        &[symbol=dnp] { color: gold; }
+        &[color=error]      { color: lightcoral; }
+        &[color=info]       { color: aqua; }
+        &[color=warning]    { color: gold; }
+        &[color=success]    { color: inherit; }
 
         &::before {
             content: "";
@@ -53,23 +49,20 @@ smart-alias {
             top: 0.25rem;
         }
 
-        &[symbol=success]::before {
-            content: unicode("f058"); // fa-check-circle
-        }
-
-        &[symbol=error]::before,
-        &[symbol=dnp]::before {
-            content: unicode("f057"); // fa-times-circle
-        }
-
-        &[symbol=duplicate]::before {
-            content: unicode("f059"); // fa-question-circle
-        }
-
         &[symbol=loading]::before {
             content: unicode("f1ce"); // fa-circle-notch
             font-weight: 700;
             animation: fa-spin 2s infinite linear;
+        }
+        &[symbol=error]::before     { content: unicode("f057"); }   // fa-times-circle
+        &[symbol=info]::before      { content: unicode("f059"); }   // fa-question-circle
+        &[symbol=warning]::before   { content: unicode("f192"); }   // fa-dot-circle
+        &[symbol=success]::before   { content: unicode("f058"); }   // fa-check-circle
+
+
+        // Stupid hacky fix, but here we go
+        &.category-3 a:not(:hover) {
+            color: #d8c;
         }
 
     }
@@ -77,5 +70,5 @@ smart-alias {
 
 // Limit the height for the editing mode
 #c-favorites smart-alias, #c-posts smart-alias{
-    max-height: 10rem;
+    max-height: 6.75rem;
 }

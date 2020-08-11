@@ -19,7 +19,7 @@ import { Util } from "../../components/utility/Util";
 import { FavDownloader } from "../downloader/FavDownloader";
 import { MassDownloader } from "../downloader/MassDownloader";
 import { PoolDownloader } from "../downloader/PoolDownloader";
-import { AliasData, SmartAlias } from "../misc/SmartAlias";
+import { SmartAlias } from "../misc/SmartAlias";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { ImageScaler } from "../post/ImageScaler";
 import { PoolNavigator } from "../post/PoolNavigator";
@@ -876,78 +876,62 @@ export class SettingsController extends RE6Module {
     private createAliasTab(): Form {
         const smartAlias = ModuleController.get(SmartAlias);
 
-        const aliasContainer = $("<div>")
-            .attr("id", "alias-list-container");
-        const aliasData = smartAlias.fetchSettings<AliasData>("data");
-        for (const alias of Object.keys(aliasData)) {
-            makeAliasInput(aliasContainer, alias, aliasData[alias]);
-        }
+        const aliasContainer = $("<textarea>")
+            .attr("id", "alias-list-container")
+            .val(smartAlias.fetchSettings<string>("data"));
 
         return new Form({ name: "optalias", columns: 3, width: 3 }, [
 
-            Form.header("Alias Definitions", 2),
-            Form.button(
-                { value: "New Alias" },
-                async () => {
-                    makeAliasInput(aliasContainer, "", "");
-                }
-            ),
-            Form.div({ value: aliasContainer, width: 3 }),
+            // Validator Configuration
+            Form.section({ name: "validatior", columns: 3, width: 3 }, [
+                Form.header("Validator Configuration", 3),
 
-            Form.button(
-                { value: "Save" },
-                async () => {
-                    const confirmBox = $("span#defs-confirm").html("Saving . . .");
 
-                    const defData: AliasData = {};
-                    const defInputs = $(aliasContainer).find("input").get();
-
-                    for (const nameInput of defInputs) {
-                        const $nameInput = $(nameInput),
-                            aliasName = $nameInput.val().toString().trim(),
-                            aliasData = $("#" + $nameInput.attr("id") + "-data").first().val().toString().trim();
-
-                        if (aliasName.length == 0) continue;
-                        if (aliasData.length == 0) continue;
-
-                        defData[aliasName] = aliasData;
+                Form.checkbox(
+                    {
+                        value: smartAlias.fetchSettings("quickTagsForm"),
+                        label: `<b>Quick Tags Validation</b><br />Enable SmartAlias validation on the search page editing mode form`,
+                        width: 3,
+                    },
+                    async (data) => {
+                        await smartAlias.pushSettings("quickTagsForm", data);
+                        smartAlias.destroy();
+                        setTimeout(() => { smartAlias.create(); }, 100);
                     }
+                ),
+                Form.spacer(3),
 
-                    await smartAlias.pushSettings("data", defData);
-                    confirmBox.html("Settings Saved");
-                    window.setTimeout(() => { confirmBox.html(""); }, 1000);
-                }
-            ),
-            Form.div({ value: `<span id="defs-confirm"></span>` }),
+                Form.checkbox(
+                    {
+                        value: smartAlias.fetchSettings("replaceAliasedTags"),
+                        label: `<b>Replace Aliases</b><br />Automatically replace aliased tag names with their consequent version`,
+                        width: 3,
+                    },
+                    (data) => { smartAlias.pushSettings("replaceAliasedTags", data); }
+                ),
 
-            Form.div({
-                value: `
-                <b>Custom Flags</b> allow you to automatically highlight posts that match specified tags. For example:<br />
-                <pre>-solo -duo -group -zero_pictured</pre>: posts that do not include character count tags.<br />
-                <pre>tagcount:&lt;5</pre>: posts with less than 5 tags<br />
-                Flag names must be unique. Duplicate tag strings are allowed, but their corresponding flag may not display.`,
-                width: 3
-            }),
+            ]),
+            Form.hr(3),
+            Form.spacer(3),
+
+            // Alias Definitions
+            Form.section({ name: "aliasdef", columns: 3, width: 3 }, [
+                Form.header("Alias Definitions", 3),
+                Form.div({ value: aliasContainer, width: 3 }),
+
+                Form.button(
+                    { value: "Save" },
+                    async () => {
+                        const confirmBox = $("span#defs-confirm").html("Saving . . .");
+                        await smartAlias.pushSettings("data", $("#alias-list-container").val().toString().trim());
+                        confirmBox.html("Settings Saved");
+                        window.setTimeout(() => { confirmBox.html(""); }, 1000);
+                    }
+                ),
+                Form.div({ value: `<span id="defs-confirm"></span>` }),
+            ]),
         ]);
 
-        function makeAliasInput(container: JQuery<HTMLElement>, name: string, data: string): void {
-            const inputID = Util.ID.make();
-            $("<input>")
-                .attr({
-                    id: inputID,
-                    placeholder: "Alias Name",
-                })
-                .val(name)
-                .appendTo(container);
-
-            $("<textarea>")
-                .attr({
-                    id: inputID + "-data",
-                    placeholder: "Tags"
-                })
-                .val(data)
-                .appendTo(container);
-        }
     }
 
     /** Creates the hotkeys tab */
@@ -1088,7 +1072,7 @@ export class SettingsController extends RE6Module {
 
             ...createInput("FormattingManager", "Formatting Helper", "Fully customizable toolbar for easy DText formatting."),
 
-            ...createInput("TinyAlias", "Tiny Alias", "A more intelligent way to quickly fill out post tags."),
+            ...createInput("SmartAlias", "Smart Alias", "A more intelligent way to quickly fill out post tags."),
         ]);
     }
 
@@ -1206,7 +1190,7 @@ export class SettingsController extends RE6Module {
                     Form.section({ name: "dnpcache", columns: 3, width: 3 }, [
 
                         Form.div({
-                            value: `<b>Avoid Posting List</b><br />Used to speed up TinyAlias tag checking`,
+                            value: `<b>Avoid Posting List</b><br />Used to speed up SmartAlias tag checking`,
                             width: 2,
                         }),
                         Form.button({ name: "reset", value: "Reset", }, async (data, input) => {
