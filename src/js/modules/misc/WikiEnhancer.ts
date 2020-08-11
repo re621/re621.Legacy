@@ -1,5 +1,5 @@
 import { XM } from "../../components/api/XM";
-import { PageDefintion } from "../../components/data/Page";
+import { Page, PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
@@ -8,7 +8,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 export class WikiEnhancer extends RE6Module {
 
     public constructor() {
-        super([PageDefintion.wiki, PageDefintion.wikiNA]);
+        super([PageDefintion.wiki, PageDefintion.wikiNA, PageDefintion.artist]);
     }
 
     protected getDefaultSettings(): Settings {
@@ -17,7 +17,9 @@ export class WikiEnhancer extends RE6Module {
 
     public create(): void {
         super.create();
-        const $title = $("#wiki-page-title");
+        const $title = Page.matches(PageDefintion.artist)
+            ? $("#a-show h1").first()
+            : $("#wiki-page-title");
         const tagName = $title.text().trim()
             .replace(/^((Species|Character|Copyright|Artist|Lore|Meta): )/g, "")
             .replace(/ /g, "_");
