@@ -24,8 +24,8 @@ export class SmartAlias extends RE6Module {
     private static aliasCache: AliasDefinition[];
     private static aliasCacheLength: number;
 
-    private static tagData: TagData;            // stores tag data for the session - count, valid, dnp, etc
-    private static tagAliases: TagAlias;        // stores e621's alias pairs to avoid repeated lookups
+    private static tagData: TagData = {};            // stores tag data for the session - count, valid, dnp, etc
+    private static tagAliases: TagAlias = {};        // stores e621's alias pairs to avoid repeated lookups
 
     public constructor() {
         super([PageDefintion.upload, PageDefintion.post, PageDefintion.search, PageDefintion.favorites], true);
@@ -61,21 +61,17 @@ export class SmartAlias extends RE6Module {
         if (!this.fetchSettings("quickTagsForm") && Page.matches([PageDefintion.search, PageDefintion.favorites]))
             return;
 
-        const cacheData = this.fetchSettings<string>("data");
-        SmartAlias.aliasCache = SmartAlias.getAliasData(cacheData);
-        SmartAlias.aliasCacheLength = cacheData.length;
+        if (typeof SmartAlias.aliasCache == "undefined") {
+            const cacheData = this.fetchSettings<string>("data");
+            SmartAlias.aliasCache = SmartAlias.getAliasData(cacheData);
+            SmartAlias.aliasCacheLength = cacheData.length;
+        }
 
-        SmartAlias.tagData = {};
-        SmartAlias.tagAliases = {};
-
-        // Fix for the post editing form glitch
-        // Just destroy and rebuild the module, or things get complicated
-        // TODO Is this necessary?
+        // The post editing form gets created programmatically when the editing button is clicked
+        // Without this, the module's DOM structure will be deleted
         $("#post-edit-link").one("click", () => {
             this.destroy();
-            setTimeout(() => {
-                this.create();
-            }, 100);
+            setTimeout(() => { this.create(); }, 100);
         });
 
         // Initializes SmartAlias for all appropriate inputs
