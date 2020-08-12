@@ -1027,6 +1027,7 @@ export class SettingsController extends RE6Module {
             subscriptionManager = ModuleController.get(SubscriptionManager),
             searchUtilities = ModuleController.get(SearchUtilities);
 
+        /** Creates and returns two keybind inputs and a label */
         function createInputs(module: RE6Module, label: string, settingsKey: string): FormElement[] {
             const values = module.fetchSettings(settingsKey).split("|");
             const bindings: string[] = [
@@ -1044,6 +1045,42 @@ export class SettingsController extends RE6Module {
                     { value: bindings[1] },
                     async (data) => { await handleRebinding(data, 1); }
                 ),
+            ];
+
+            async function handleRebinding(data: string[], index: 0 | 1): Promise<void> {
+                bindings[index] = data[0];
+                await module.pushSettings(settingsKey, bindings.join("|"));
+                Hotkeys.unregister(data[1]);
+                await module.resetHotkeys();
+            }
+        }
+
+        /** Creates and returns a label, a keybind input, and a text input */
+        function createCustomInputs(module: RE6Module, label: string, dataLabel: string, settingsKey: string, pattern?: string): FormElement[] {
+            const values = module.fetchSettings(settingsKey).split("|"),
+                dataVal = module.fetchSettings(settingsKey + "_data");
+            const bindings: string[] = [
+                values[0] === undefined ? "" : values[0],
+                values[1] === undefined ? "" : values[1],
+            ];
+
+            return [
+                Form.div({ value: label }),
+                Form.key(
+                    { value: bindings[0] },
+                    async (data) => { await handleRebinding(data, 0); }
+                ),
+                Form.input(
+                    {
+                        value: dataVal,
+                        label: dataLabel,
+                        pattern: pattern,
+                    },
+                    async (data, input) => {
+                        if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                        await module.pushSettings(settingsKey + "_data", data)
+                    }
+                )
             ];
 
             async function handleRebinding(data: string[], index: 0 | 1): Promise<void> {
@@ -1081,6 +1118,11 @@ export class SettingsController extends RE6Module {
             ...createInputs(postViewer, "Toggle Current Set", "hotkeyToggleSetLatest"),
             ...createInputs(postViewer, "Add to Current Set", "hotkeyAddSetLatest"),
             ...createInputs(postViewer, "Remove from Current Set", "hotkeyRemoveSetLatest"),
+            Form.spacer(3, true),
+
+            ...createCustomInputs(postViewer, "Add to Set", "Set ID", "hotkeyAddSetCustom1", "\\d+"),
+            ...createCustomInputs(postViewer, "Add to Set", "Set ID", "hotkeyAddSetCustom2", "\\d+"),
+            ...createCustomInputs(postViewer, "Add to Set", "Set ID", "hotkeyAddSetCustom3", "\\d+"),
             Form.hr(3),
 
             // Actions

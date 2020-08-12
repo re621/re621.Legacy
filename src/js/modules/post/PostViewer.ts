@@ -33,6 +33,10 @@ export class PostViewer extends RE6Module {
             { keys: "hotkeyToggleSetLatest", fnct: this.toggleSetLatest, },
             { keys: "hotkeyAddSetLatest", fnct: this.addSetLatest, },
             { keys: "hotkeyRemoveSetLatest", fnct: this.removeSetLatest, },
+
+            { keys: "hotkeyAddSetCustom1", fnct: () => { this.addSetCustom("hotkeyAddSetCustom1_data"); } },
+            { keys: "hotkeyAddSetCustom2", fnct: () => { this.addSetCustom("hotkeyAddSetCustom2_data"); } },
+            { keys: "hotkeyAddSetCustom3", fnct: () => { this.addSetCustom("hotkeyAddSetCustom3_data"); } },
         );
     }
 
@@ -59,6 +63,13 @@ export class PostViewer extends RE6Module {
             hotkeyToggleSetLatest: "",  // toggles the current post's set
             hotkeyAddSetLatest: "",     // adds the current post to the last used set
             hotkeyRemoveSetLatest: "",  // removes the current post from the last used set
+
+            hotkeyAddSetCustom1: "",
+            hotkeyAddSetCustom1_data: "0",
+            hotkeyAddSetCustom2: "",
+            hotkeyAddSetCustom2_data: "0",
+            hotkeyAddSetCustom3: "",
+            hotkeyAddSetCustom3_data: "0",
 
             upvoteOnFavorite: true,     // add an upvote when adding the post to favorites
             hideNotes: false,           // should the notes be hidden by default
@@ -213,6 +224,14 @@ export class PostViewer extends RE6Module {
         }
 
         PostViewer.removeSetPost(lastSet, Post.getViewingPost().getId());
+    }
+
+    /** Adds the current post to the set defined in the config */
+    private addSetCustom(dataKey: string): void {
+        PostViewer.addSetPost(
+            this.fetchSettings<number>(dataKey),
+            Post.getViewingPost().getId()
+        );
     }
 
     /** Opens the dialog to add the post to the pool */
