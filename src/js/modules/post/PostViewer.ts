@@ -1,9 +1,8 @@
 import { Danbooru } from "../../components/api/Danbooru";
-import { E621 } from "../../components/api/E621";
-import { APISet } from "../../components/api/responses/APISet";
 import { FavoriteCache } from "../../components/cache/FavoriteCache";
 import { PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
+import { PostActions } from "../../components/data/PostActions";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
@@ -201,7 +200,7 @@ export class PostViewer extends RE6Module {
             return;
         }
 
-        PostViewer.toggleSetPost(lastSet, Post.getViewingPost().getId());
+        PostActions.toggleSet(lastSet, Post.getViewingPost().getId());
     }
 
     /** Adds the current post to the latest used set */
@@ -212,7 +211,7 @@ export class PostViewer extends RE6Module {
             return;
         }
 
-        PostViewer.addSetPost(lastSet, Post.getViewingPost().getId());
+        PostActions.addSet(lastSet, Post.getViewingPost().getId());
     }
 
     /** Removes the current post frp, the latest used set */
@@ -223,12 +222,12 @@ export class PostViewer extends RE6Module {
             return;
         }
 
-        PostViewer.removeSetPost(lastSet, Post.getViewingPost().getId());
+        PostActions.removeSet(lastSet, Post.getViewingPost().getId());
     }
 
     /** Adds the current post to the set defined in the config */
     private addSetCustom(dataKey: string): void {
-        PostViewer.addSetPost(
+        PostActions.addSet(
             this.fetchSettings<number>(dataKey),
             Post.getViewingPost().getId()
         );
@@ -237,73 +236,6 @@ export class PostViewer extends RE6Module {
     /** Opens the dialog to add the post to the pool */
     private addPool(): void {
         $("a#pool")[0].click();
-    }
-
-    /**
-     * If the posts provided are present in the 
-     * @param setID 
-     * @param postID 
-     */
-    public static async toggleSetPost(setID: number, postID: number): Promise<boolean> {
-        // Fetch set data to see if the post is present
-        const setData = await E621.Set.id(setID).first<APISet>({}, 500);
-        // console.log(setData);
-        if (setData == null) {
-            Danbooru.error(`Error: active set moved or deleted`);
-            return Promise.resolve(false);
-        }
-
-        // If a post is present in the set, remove it. Otherwise, add it.
-        if (setData.post_ids.includes(postID))
-            PostViewer.removeSetPost(setID, postID);
-        else PostViewer.addSetPost(setID, postID);
-    }
-
-    public static addSetPost(setID: number, postID: number): Promise<boolean> {
-        return E621.SetAddPost.id(setID).post({ "post_ids[]": [postID] }, 500).then(
-            (response) => {
-                if (response[1] == 201) {
-                    Danbooru.notice(PostViewer.getSuccessResponse(true, setID, response[0].name, response[0].post_count, postID));
-                    return Promise.resolve(true);
-                }
-
-                Danbooru.error(PostViewer.getErrorResponse(true, response[1]));
-                Danbooru.error(`Error occured while adding the post to set: ${response[1]}`);
-                return Promise.resolve(false);
-            },
-            (error) => {
-                Danbooru.error(PostViewer.getErrorResponse(true, error[1]));
-                Danbooru.error(`Error occured while adding the post to set: ${error[1]}`);
-                return Promise.resolve(false);
-            }
-        );
-    }
-
-    public static removeSetPost(setID: number, postID: number): Promise<boolean> {
-        return E621.SetRemovePost.id(setID).post({ "post_ids[]": [postID] }, 500).then(
-            (response) => {
-                if (response[1] == 201) {
-                    Danbooru.notice(PostViewer.getSuccessResponse(false, setID, response[0].name, response[0].post_count, postID));
-                    return Promise.resolve(true);
-                }
-
-                Danbooru.error(PostViewer.getErrorResponse(false, response[1]));
-                return Promise.resolve(false);
-            },
-            (error) => {
-                Danbooru.error(PostViewer.getErrorResponse(false, error[1]));
-                return Promise.resolve(false);
-            }
-        );
-
-    }
-
-    private static getSuccessResponse(added: boolean, setID: number, setName: string, setTotal: number, post: number): string {
-        return `<a href="/post_sets/${setID}">${setName}</a>: post <a href="/posts/${post}">#${post}</a> ${added ? "added" : "removed"} (${setTotal} total)`
-    }
-
-    private static getErrorResponse(added: boolean, message: string): string {
-        return `Error occured while ${added ? "adding the post to" : "removing the post from"} set: ${message}`;
     }
 
 }

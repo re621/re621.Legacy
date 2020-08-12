@@ -3,11 +3,11 @@ import { E621 } from "../../components/api/E621";
 import { XM } from "../../components/api/XM";
 import { FavoriteCache } from "../../components/cache/FavoriteCache";
 import { PageDefintion } from "../../components/data/Page";
+import { PostActions } from "../../components/data/PostActions";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Util } from "../../components/utility/Util";
-import { PostViewer } from "../post/PostViewer";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
 
 export enum ThumbnailPerformanceMode {
@@ -484,13 +484,13 @@ export class ThumbnailEnhancer extends RE6Module {
                 case ThumbnailClickAction.AddToSet: {
                     const lastSet = parseInt(window.localStorage.getItem("set"));
                     if (!lastSet) Danbooru.error(`Error: no set selected`);
-                    else PostViewer.addSetPost(lastSet, postID);
+                    else PostActions.addSet(lastSet, postID);
                     break;
                 }
                 case ThumbnailClickAction.ToggleSet: {
                     const lastSet = parseInt(window.localStorage.getItem("set"));
                     if (!lastSet) Danbooru.error(`Error: no set selected`);
-                    else PostViewer.toggleSetPost(lastSet, postID);
+                    else PostActions.toggleSet(lastSet, postID);
                     break;
                 }
                 default: {
