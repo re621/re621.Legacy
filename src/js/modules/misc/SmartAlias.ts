@@ -227,7 +227,7 @@ export class SmartAlias extends RE6Module {
                                 // Prevent duplicate tags from being added by aliases
                                 const result = new Set<string>();
                                 for (const part of output.split(" ")) {
-                                    if (currentValue.includes(part)) continue;
+                                    if (getTagRegex(part).test(currentValue)) continue;
                                     result.add(part);
                                 }
 
