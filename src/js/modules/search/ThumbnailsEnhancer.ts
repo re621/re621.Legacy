@@ -7,6 +7,8 @@ import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Util } from "../../components/utility/Util";
+import { PostViewer } from "../post/PostViewer";
+import { BlacklistEnhancer } from "./BlacklistEnhancer";
 
 export enum ThumbnailPerformanceMode {
     Disabled = "disabled",
@@ -18,6 +20,9 @@ export enum ThumbnailClickAction {
     Disabled = "disabled",
     NewTab = "newtab",
     CopyID = "copyid",
+    Blacklist = "blacklist",
+    AddToSet = "addtoset",
+    ToggleSet = "toggleset",
 }
 
 export enum ThumbnailZoomMode {
@@ -32,6 +37,8 @@ export class ThumbnailEnhancer extends RE6Module {
     private postContainer: JQuery<HTMLElement>;     // Element containing posts - div#page used for compatibility
 
     private static zoomPaused = false;
+
+    private static clickAction = "unset";
 
     public constructor() {
         super([PageDefintion.search, PageDefintion.popular, PageDefintion.favorites, PageDefintion.comments], true);
@@ -73,6 +80,8 @@ export class ThumbnailEnhancer extends RE6Module {
         if (typeof this.fetchSettings("zoom") == "boolean")
             await this.pushSettings("zoom", this.fetchSettings("zoom") + "");
 
+        ThumbnailEnhancer.clickAction = this.fetchSettings("clickAction");
+
         // Only add a loading screen on appropriate pages
         if (!this.pageMatchesFilter()) return;
 
@@ -92,12 +101,11 @@ export class ThumbnailEnhancer extends RE6Module {
         this.postContainer = $("#page");
 
         const upscaleMode = this.fetchSettings<ThumbnailPerformanceMode>("upscale"),
-            clickAction = this.fetchSettings<ThumbnailClickAction>("clickAction"),
             preserveHoverText = this.fetchSettings<boolean>("preserveHoverText");
 
         const thumbnails = this.postContainer.find<HTMLElement>("article.post-preview, div.post-preview").get();
         for (const thumb of thumbnails) {
-            ThumbnailEnhancer.modifyThumbnail($(thumb), upscaleMode, clickAction, preserveHoverText);
+            ThumbnailEnhancer.modifyThumbnail($(thumb), upscaleMode, preserveHoverText);
         }
 
         this.toggleHoverZoom(this.fetchSettings("zoom"));
@@ -246,11 +254,28 @@ export class ThumbnailEnhancer extends RE6Module {
     }
 
     /**
+     * Returns the module's click action value
+     */
+    public static getClickAction(): string {
+        return ThumbnailEnhancer.clickAction;
+    }
+
+    /**
+     * Toggles the click action state.  
+     * This function should be used instead of simply setting the config value
+     * @param state Click action value
+     */
+    public static async setClickAction(state: ThumbnailClickAction): Promise<boolean> {
+        ThumbnailEnhancer.clickAction = state;
+        return ModuleController.get(ThumbnailEnhancer).pushSettings("clickAction", state);
+    }
+
+    /**
      * Converts the thumbnail into an enhancer-ready format
      * @param $article JQuery element `article.post-preview`
      * @param upscaleMode If / when to load upscaled versions of the image
      */
-    public static async modifyThumbnail($article: JQuery<HTMLElement>, upscaleMode = ThumbnailPerformanceMode.Hover, clickAction = ThumbnailClickAction.NewTab, preserveHoverText: boolean): Promise<void> {
+    public static async modifyThumbnail($article: JQuery<HTMLElement>, upscaleMode = ThumbnailPerformanceMode.Hover, preserveHoverText: boolean): Promise<void> {
 
         /* Create the structure */
         const $link = $article.find<HTMLElement>("a").first(),
@@ -442,11 +467,36 @@ export class ThumbnailEnhancer extends RE6Module {
             $article.addClass("highlight");
             window.setTimeout(() => $article.removeClass("highlight"), 250);
 
-            if (clickAction === ThumbnailClickAction.NewTab) XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
-            else if (clickAction === ThumbnailClickAction.CopyID) XM.Util.setClipboard($article.attr("data-id"), "text");
-            else {
-                $link.off("click.re621.thumbnail");
-                $link[0].click();
+            switch (ThumbnailEnhancer.clickAction) {
+                case ThumbnailClickAction.NewTab: {
+                    XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
+                    break;
+                }
+                case ThumbnailClickAction.CopyID: {
+                    Danbooru.notice(`Copied post ID to clipboard: <a href="/posts/${postID}" target="_blank">#${postID}</a>`);
+                    XM.Util.setClipboard($article.attr("data-id"), "text");
+                    break;
+                }
+                case ThumbnailClickAction.Blacklist: {
+                    BlacklistEnhancer.toggleBlacklistTag("id:" + postID);
+                    break;
+                }
+                case ThumbnailClickAction.AddToSet: {
+                    const lastSet = parseInt(window.localStorage.getItem("set"));
+                    if (!lastSet) Danbooru.error(`Error: no set selected`);
+                    else PostViewer.addSetPost(lastSet, postID);
+                    break;
+                }
+                case ThumbnailClickAction.ToggleSet: {
+                    const lastSet = parseInt(window.localStorage.getItem("set"));
+                    if (!lastSet) Danbooru.error(`Error: no set selected`);
+                    else PostViewer.toggleSetPost(lastSet, postID);
+                    break;
+                }
+                default: {
+                    $link.off("click.re621.thumbnail");
+                    $link[0].click();
+                }
             }
         });
 

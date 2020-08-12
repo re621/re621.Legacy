@@ -336,13 +336,15 @@ export class SettingsController extends RE6Module {
                             "disabled": "Disabled",
                             "newtab": "Open New Tab",
                             "copyid": "Copy Post ID",
+                            "blacklist": "Add to Blacklist",
+                            "addtoset": "Add to Current Set ",
+                            "toggleset": "Toggle Current Set ",
                         },
                         async (data) => {
-                            await thumbnailEnhancer.pushSettings("clickAction", data);
+                            await ThumbnailEnhancer.setClickAction(data);
                         }
                     ),
-                    Form.spacer(2),
-                    Form.text(`<div class="unmargin text-center text-bold">Requires a page reload</div>`),
+                    Form.spacer(3),
 
                     // Preserve Hover Text
                     Form.checkbox(

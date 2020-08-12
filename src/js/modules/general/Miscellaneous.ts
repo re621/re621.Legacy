@@ -2,7 +2,6 @@ import { E621 } from "../../components/api/E621";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
 import { Page, PageDefintion } from "../../components/data/Page";
-import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { ThumbnailClickAction, ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
@@ -195,7 +194,7 @@ export class Miscellaneous extends RE6Module {
         if (!state) return;
 
         /* Handle double-click */
-        const clickAction = ModuleController.get(ThumbnailEnhancer).fetchSettings("clickAction");
+        const clickAction = ThumbnailEnhancer.getClickAction();
 
         const avatars = $("div.avatar > div > a").get();
         for (const element of avatars) {

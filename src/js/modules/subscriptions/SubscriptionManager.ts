@@ -505,7 +505,7 @@ export class SubscriptionManager extends RE6Module {
         if (cache.getSize() > 0)    // Can be appended anywhere, sorting is done through CSS
             trackerData.content.append(this.createCacheDivider());
 
-        const clickAction = ModuleController.get(ThumbnailEnhancer).fetchSettings("clickAction");
+        const clickAction = ThumbnailEnhancer.getClickAction();
 
         cache.forEach((content, timestamp) => {
             trackerData.content.append(this.createUpdateEntry(timestamp, content, trackerData, clickAction));
@@ -722,7 +722,7 @@ export class SubscriptionManager extends RE6Module {
      * @param actions Subscription definition
      * @param customClass Custom class to add to the element
      */
-    private createUpdateEntry(timestamp: number, data: UpdateContent, subscription: TrackerData, clickAction: ThumbnailClickAction): JQuery<HTMLElement> {
+    private createUpdateEntry(timestamp: number, data: UpdateContent, subscription: TrackerData, clickAction: string): JQuery<HTMLElement> {
         const actions = subscription.instance.updateActions,
             cache = subscription.instance.getCache();
 

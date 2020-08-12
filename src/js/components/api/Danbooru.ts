@@ -120,10 +120,10 @@ export class Danbooru {
 
     }
 
-    public static notice(input: string): void {
+    public static notice(input: string, permanent?: boolean): void {
         if (Danbooru.hasModules())
-            Danbooru.getModules()["notice"](input);
-        else XM.Chrome.execInjectorRequest("Danbooru", "Notice", "notice", [input]);
+            Danbooru.getModules()["notice"](input, permanent);
+        else XM.Chrome.execInjectorRequest("Danbooru", "Notice", "notice", [input, permanent]);
     }
 
     public static error(input: string): void {

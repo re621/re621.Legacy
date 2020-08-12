@@ -9,7 +9,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
 import { CustomFlagger } from "./CustomFlagger";
 import { InstantSearch } from "./InstantSearch";
-import { ThumbnailClickAction, ThumbnailEnhancer, ThumbnailPerformanceMode } from "./ThumbnailsEnhancer";
+import { ThumbnailEnhancer, ThumbnailPerformanceMode } from "./ThumbnailsEnhancer";
 
 /**
  * Gets rid of the default pagination and instead appends new posts
@@ -167,7 +167,6 @@ export class InfiniteScroll extends RE6Module {
 
         const thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer),
             upscaleMode = thumbnailEnhancer.fetchSettings<ThumbnailPerformanceMode>("upscale"),
-            clickAction = thumbnailEnhancer.fetchSettings<ThumbnailClickAction>("clickAction"),
             preserveHoverText = thumbnailEnhancer.fetchSettings<boolean>("preserveHoverText");
 
         const promises: Promise<void>[] = [];
@@ -189,7 +188,7 @@ export class InfiniteScroll extends RE6Module {
 
                     this.$postContainer.append(element);
 
-                    ThumbnailEnhancer.modifyThumbnail(element, upscaleMode, clickAction, preserveHoverText);
+                    ThumbnailEnhancer.modifyThumbnail(element, upscaleMode, preserveHoverText);
                     CustomFlagger.modifyThumbnail(post);
                 }
 
