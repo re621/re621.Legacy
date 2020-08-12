@@ -467,9 +467,13 @@ export class SmartAlias extends RE6Module {
                     color = "warning";
                     text = "ambiguous";
                     displayName = displayName.replace("_(disambiguation)", "");
-                } else if (data.count == 0 || data.count < minPostsWarning) {
+                } else if (data.count == 0) {
                     symbol = "error";
-                    color = "warning";
+                    color = "error";
+                    text = "empty";
+                } else if (data.count < minPostsWarning) {
+                    symbol = "error";
+                    color = "error";
                     text = data.count + "";
                 } else {
                     symbol = "success";
