@@ -24,6 +24,7 @@ const ENDPOINT_DEFS: EndpointDefinition[] = [
     { name: "sets", path: "post_sets.json" },
     { name: "set", path: "post_sets/%ID%.json" },
     { name: "set_add_post", path: "post_sets/%ID%/add_posts.json" },
+    { name: "set_remove_post", path: "post_sets/%ID%/remove_posts.json" },
 
     { name: "users", path: "users.json" },
     { name: "user", path: "users/%ID%.json" },
@@ -208,6 +209,7 @@ export class E621 {
     public static Sets = E621.getEndpoint("sets");
     public static Set = E621.getEndpoint("set");
     public static SetAddPost = E621.getEndpoint("set_add_post");
+    public static SetRemovePost = E621.getEndpoint("set_remove_post");
 
     public static Users = E621.getEndpoint("users");
     public static User = E621.getEndpoint("user");

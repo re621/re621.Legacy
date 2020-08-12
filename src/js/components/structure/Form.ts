@@ -848,16 +848,17 @@ export class Form implements PreparedStructure {
      * Creates an empty spacer element
      * @param width Element width
      */
-    public static spacer(width?: number): FormElement {
+    public static spacer(width?: number, unmargin = false): FormElement {
         const $element = FormUtils.makeInputWrapper(undefined, undefined, width);
 
-        $("<div>")
+        $("<spacer>")
             .attr("id", Util.ID.make())
-            .html("&nbsp;")
+            .toggleClass("unmargin", unmargin)
             .appendTo($element);
 
         return new FormElement($element);
     }
+
 }
 
 class FormUtils {

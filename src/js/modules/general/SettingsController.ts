@@ -1063,13 +1063,19 @@ export class SettingsController extends RE6Module {
             ...createInputs(postViewer, "Toggle Favorite", "hotkeyFavorite"),
             ...createInputs(postViewer, "Add to Favorites", "hotkeyAddFavorite"),
             ...createInputs(postViewer, "Remove From Favorites", "hotkeyRemoveFavorite"),
+            Form.spacer(3, true),
+
             ...createInputs(poolNavigator, "Previous Post", "hotkeyPrev"),
             ...createInputs(poolNavigator, "Next Post", "hotkeyNext"),
             ...createInputs(poolNavigator, "Cycle Navigation", "hotkeyCycle"),
             ...createInputs(imageScaler, "Change Scale", "hotkeyScale"),
+            Form.spacer(3, true),
+
             ...createInputs(postViewer, "Open `Add to Set` Dialog", "hotkeyAddSet"),
             ...createInputs(postViewer, "Open `Add to Pool` Dialog", "hotkeyAddPool"),
-            ...createInputs(postViewer, "Add to Last Used Set", "hotkeyAddSetLatest"),
+            ...createInputs(postViewer, "Toggle Current Set", "hotkeyToggleSetLatest"),
+            ...createInputs(postViewer, "Add to Current Set", "hotkeyAddSetLatest"),
+            ...createInputs(postViewer, "Remove from Current Set", "hotkeyRemoveSetLatest"),
             Form.hr(3),
 
             // Actions
