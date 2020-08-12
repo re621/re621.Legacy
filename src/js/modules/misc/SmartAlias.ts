@@ -24,8 +24,10 @@ export class SmartAlias extends RE6Module {
     private static aliasCache: AliasDefinition[];
     private static aliasCacheLength: number;
 
-    private static tagData: TagData = {};            // stores tag data for the session - count, valid, dnp, etc
-    private static tagAliases: TagAlias = {};        // stores e621's alias pairs to avoid repeated lookups
+    private static tagData: TagData = {};           // stores tag data for the session - count, valid, dnp, etc
+    private static tagAliases: TagAlias = {};       // stores e621's alias pairs to avoid repeated lookups
+
+    private static postPageLockout = false;         // Used to avoid calling the API on every post page
 
     public constructor() {
         super([PageDefintion.upload, PageDefintion.post, PageDefintion.search, PageDefintion.favorites], true);
@@ -46,6 +48,21 @@ export class SmartAlias extends RE6Module {
         };
     }
 
+    public async prepare(): Promise<void> {
+        await super.prepare();
+
+        if (!Page.matches(PageDefintion.post)) return;
+
+        // Only create an instance once the editing form is enabled
+        // This will avoid unnecessary API calls, as well as solve issues with dynamic DOM
+
+        SmartAlias.postPageLockout = true;
+        $("#post-edit-link").one("click.re621", () => {
+            SmartAlias.postPageLockout = false;
+            this.create();
+        });
+    }
+
     public destroy(): void {
         if (!this.isInitialized()) return;
         super.destroy();
@@ -64,15 +81,18 @@ export class SmartAlias extends RE6Module {
         if (!this.fetchSettings("quickTagsForm") && Page.matches([PageDefintion.search, PageDefintion.favorites]))
             return;
 
+        // Only create the structue once the editing form is enabled
+        if (SmartAlias.postPageLockout) return;
+
+        // Establish the data caches
         if (typeof SmartAlias.aliasCache == "undefined") {
             const cacheData = this.fetchSettings<string>("data");
             SmartAlias.aliasCache = SmartAlias.getAliasData(cacheData);
             SmartAlias.aliasCacheLength = cacheData.length;
         }
 
-        // The post editing form gets created programmatically when the editing button is clicked
-        // Without this, the module's DOM structure will be deleted
-        $("#post-edit-link, .the_secret_switch").one("click", () => {
+        // Fix the secret switch breaking the module
+        $(".the_secret_switch").one("click", () => {
             this.destroy();
             setTimeout(() => { this.create(); }, 100);
         });
@@ -302,10 +322,10 @@ export class SmartAlias extends RE6Module {
         // Step 4
         // Replace all known e6 aliases with their consequent versions to avoid unnecessary API calls
         if (this.fetchSettings("replaceAliasedTags")) {
-            console.log(SmartAlias.tagAliases);
+            // console.log(SmartAlias.tagAliases);
             $textarea.val((index, currentValue) => {
                 for (const [antecedent, consequent] of Object.entries(SmartAlias.tagAliases)) {
-                    console.log("`" + getTagRegex(antecedent) + "`");
+                    // console.log("`" + getTagRegex(antecedent) + "`");
                     currentValue = currentValue.replace(
                         getTagRegex(antecedent),
                         "$1" + consequent + "$3"
