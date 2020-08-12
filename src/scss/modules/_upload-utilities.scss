@@ -1,0 +1,90 @@
+
+/* Basic style fixes */
+div#source-container {
+    & > div > button {
+        min-width: 1.5rem;
+    }
+
+    button.source-copy,
+    button.source-link {
+        float: right;
+        margin-left: 0.25rem;
+    }
+}
+
+/* Make the secret upload switch less secret */
+div#c-uploads div#a-new div.the_secret_switch {
+    background: #ffffff10;
+    color: #ffffff60;
+
+    float: right;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.5rem;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &::before {
+        content: unicode("f011"); // fa-check-circle
+
+        font-family: "Font Awesome 5 Free";
+        font-weight: 700;
+
+        font-size: 1.2rem;
+    }
+}
+
+/* Duplicates Checking */
+div#dupes-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 8rem);
+    grid-column-gap: 0.25rem;
+
+    & > .fullspan,
+    & > h3 {
+        grid-column: 1/-1;
+    }
+
+    & > .error {
+        color: darkorange;
+        font-weight: unset;
+    }
+
+    & > div {
+
+        a > img {
+            object-fit: cover;
+            width: 8rem;
+            height: 8rem;
+        }
+
+        loading::before {
+            content: " ";
+            background: red;
+            display: block;
+            height: 0.125rem;
+            width: var(--progress, "0%");
+        }
+
+        span {
+            display: block;
+            text-align: center;
+            height: 1rem;
+            margin-top: -1rem;
+            pointer-events: none;
+            font-family: monospace;
+            overflow: hidden;
+            text-shadow: 0px 0px 5px black;
+        }
+
+    }
+}
+
+/* Reverse Image Search Links */
+div#ris-container {
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: 1rem;
+}

@@ -20,6 +20,7 @@ import { FavDownloader } from "../downloader/FavDownloader";
 import { MassDownloader } from "../downloader/MassDownloader";
 import { PoolDownloader } from "../downloader/PoolDownloader";
 import { SmartAlias } from "../misc/SmartAlias";
+import { UploadUtilities } from "../misc/UploadUtilities";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { ImageScaler } from "../post/ImageScaler";
 import { PoolNavigator } from "../post/PoolNavigator";
@@ -85,7 +86,7 @@ export class SettingsController extends RE6Module {
                 { name: "General", structure: this.createGeneralTab() },
                 { name: "Downloads", structure: this.createDownloadsTab() },
                 { name: "Custom Flags", structure: this.createFlagsTab() },
-                { name: "Smart Alias", structure: this.createAliasTab() },
+                { name: "Smart Alias", structure: this.createUploadsTab() },
                 { name: "Hotkeys", structure: this.createHotkeysTab() },
                 { name: "Features", structure: this.createFeaturesTab() },
                 // { name: "Sync", structure: this.createSyncTab() },
@@ -886,8 +887,9 @@ export class SettingsController extends RE6Module {
     }
 
     /** Creates the SmartAlias settings tab */
-    private createAliasTab(): Form {
-        const smartAlias = ModuleController.get(SmartAlias);
+    private createUploadsTab(): Form {
+        const smartAlias = ModuleController.get(SmartAlias),
+            uploadUtilities = ModuleController.get(UploadUtilities);
 
         const aliasContainer = $("<textarea>")
             .attr("id", "alias-list-container")
@@ -898,7 +900,34 @@ export class SettingsController extends RE6Module {
             Form.accordion({ name: "aliascollapse", columns: 3, width: 3, active: 0 }, [
 
                 // Validator Configuration
-                Form.accordionTab({ name: "validatior", label: "Validator Configuration", columns: 3, width: 3 }, [
+                Form.accordionTab({ name: "validatior", label: "Validation Configuration", columns: 3, width: 3 }, [
+
+                    Form.checkbox(
+                        {
+                            value: uploadUtilities.fetchSettings("checkDuplicates"),
+                            label: `<b>Check Duplicates</b><br />Search for visually similar images on e621 when uploading`,
+                            width: 2,
+                        },
+                        async (data) => {
+                            await uploadUtilities.pushSettings("checkDuplicates", data);
+                        }
+                    ),
+                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: uploadUtilities.fetchSettings("addSourceLinks"),
+                            label: `<b>Source Link Buttons</b><br />Add utility buttons to the upload source inputs`,
+                            width: 2,
+                        },
+                        async (data) => {
+                            await uploadUtilities.pushSettings("addSourceLinks", data);
+                        }
+                    ),
+                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`),
+                    Form.hr(3),
+
 
                     Form.checkbox(
                         {

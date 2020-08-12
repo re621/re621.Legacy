@@ -38,6 +38,7 @@ const ENDPOINT_DEFS: EndpointDefinition[] = [
     { name: "forum_topic", path: "forum_topics/%ID%.json" },
 
     { name: "dtext_preview", path: "dtext_preview" },
+    { name: "iqdb_queries", path: "iqdb_queries.json" },
 ];
 
 class APIEndpoint {
@@ -221,6 +222,7 @@ export class E621 {
     public static ForumTopic = E621.getEndpoint("forum_topic");
 
     public static DTextPreview = E621.getEndpoint("dtext_preview");
+    public static IQDBQueries = E621.getEndpoint("iqdb_queries");
 
     /** Constructor - should be kept private */
     private constructor() {

@@ -18,6 +18,7 @@ import { Miscellaneous } from "./modules/general/Miscellaneous";
 import { SettingsController } from "./modules/general/SettingsController";
 import { ThemeCustomizer } from "./modules/general/ThemeCustomizer";
 import { SmartAlias } from "./modules/misc/SmartAlias";
+import { UploadUtilities } from "./modules/misc/UploadUtilities";
 import { WikiEnhancer } from "./modules/misc/WikiEnhancer";
 import { DownloadCustomizer } from "./modules/post/DownloadCustomizer";
 import { ImageScaler } from "./modules/post/ImageScaler";
@@ -60,6 +61,7 @@ const loadOrder = [
 
     SmartAlias,
     WikiEnhancer,
+    UploadUtilities,
 
     FavDownloader,
     PoolDownloader,

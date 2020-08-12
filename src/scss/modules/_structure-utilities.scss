@@ -299,25 +299,3 @@ div.blacklist-character-counter-box {
 div#c-uploads div#a-new .toggle-button.active {
     background-color: #e8c446 !important;
 }
-
-/* Make the secret upload switch less secret */
-div#c-uploads div#a-new div.the_secret_switch {
-    background: #ffffff44;
-    float: right;
-    width: 3rem;
-    height: 3rem;
-    border-radius: 0.5rem;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    &::before {
-        content: unicode("f011"); // fa-check-circle
-
-        font-family: "Font Awesome 5 Free";
-        font-weight: 700;
-
-        font-size: 1.5rem;
-    }
-}

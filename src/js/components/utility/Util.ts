@@ -114,6 +114,23 @@ export class Util {
     }
 
     /**
+     * Converts a byte number into a formatted string
+     * @param bytes Number
+     * @param decimals Decimal places
+     */
+    public static formatBytes(bytes: number, decimals = 2): string {
+        if (bytes === 0) return "0 B";
+
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + sizes[i];
+    }
+
+    /**
      * Compares two software version numbers (e.g. "1.7.1" or "1.2b").
      *
      * This function was born in http://stackoverflow.com/a/6832721.
