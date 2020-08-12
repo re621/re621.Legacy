@@ -1283,12 +1283,17 @@ export class SettingsController extends RE6Module {
                                 if (!FavoriteCache.isEnabled()) {
                                     $status.html(`<i class="far fa-times-circle"></i> Cache disabled`);
                                 } else if (await FavoriteCache.isUpdateRequired()) {
-                                    $status.html(`
-                                        <i class="far fa-times-circle"></i> 
-                                        <span style="color:gold">Reset required</span>: Cache integrity failure
-                                    `);
-                                    this.pushNotificationsCount(1);
-                                    favcacheUpdated = false;
+
+                                    if (await FavoriteCache.quickUpdate($status)) {
+                                        $status.html(`<i class="far fa-check-circle"></i> Cache recovered (${FavoriteCache.size()} items)`);
+                                    } else {
+                                        $status.html(`
+                                            <i class="far fa-times-circle"></i> 
+                                            <span style="color:gold">Reset required</span>: Cache integrity failure
+                                        `);
+                                        this.pushNotificationsCount(1);
+                                        favcacheUpdated = false;
+                                    }
                                 } else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified`)
                             },
                             width: 2,
