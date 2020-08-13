@@ -37,4 +37,8 @@ header#top nav#nav {
     menu.main.custom[data-editing=true] li {
         background-color: #ffffff40;
     }
+
+    menu.main.custom:not([data-editing=true]) li[data-right=true] {
+        float: right;
+    }
 }

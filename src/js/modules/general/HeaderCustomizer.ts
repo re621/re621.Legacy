@@ -149,6 +149,7 @@ export class HeaderCustomizer extends RE6Module {
                 Form.input({ label: "Name", name: "name", value: "", required: true, pattern: "[\\S ]+" }),
                 Form.input({ label: "Hover", value: "", name: "title" }),
                 Form.input({ label: "Link", value: "", name: "href" }),
+                Form.checkbox({ label: "Attach to the right side", value: false, name: "right" }),
                 Form.button({ value: "Submit", type: "submit" }),
                 Form.hr(),
                 Form.div({ value: "Available variables:" }),
@@ -156,12 +157,14 @@ export class HeaderCustomizer extends RE6Module {
                 Form.copy({ label: "Username", value: "%username%" }),
                 Form.hr(),
                 Form.div({ value: "Drag-and-drop tabs to re-arrange.<br />Click on a tab to edit it." }),
+                Form.div({ value: "Right-aligned tabs will be displayed in a reverse order." }),
             ],
             (values, form) => {
                 this.addTab({
                     name: values["name"],
                     title: values["title"],
                     href: values["href"],
+                    right: values["right"],
                 });
                 form.reset();
             }
@@ -182,6 +185,7 @@ export class HeaderCustomizer extends RE6Module {
                 Form.input({ label: "Name", name: "name", value: "", required: true, pattern: "[\\S ]+" }),
                 Form.input({ label: "Hover", value: "", name: "title" }),
                 Form.input({ label: "Link", value: "", name: "href" }),
+                Form.checkbox({ label: "Attach to the right side", value: false, name: "right" }),
                 Form.button(
                     { value: "Delete", type: "button" },
                     () => {
@@ -192,12 +196,14 @@ export class HeaderCustomizer extends RE6Module {
                 Form.button({ value: "Update", type: "submit" }),
             ],
             (values, form) => {
+                console.log(values);
                 this.updateTab(
                     this.updateTabModal.getActiveTrigger().parent(),
                     {
                         name: values["name"],
                         title: values["title"],
                         href: values["href"],
+                        right: values["right"],
                     }
                 );
                 this.updateTabModal.close();
@@ -232,6 +238,7 @@ export class HeaderCustomizer extends RE6Module {
             $updateTabInputs.get("name").val($tab.attr("data-name"));
             $updateTabInputs.get("title").val($tab.attr("data-title"));
             $updateTabInputs.get("href").val($tab.attr("data-href"));
+            $updateTabInputs.get("right").prop("checked", $tab.attr("data-right") == "true");
         });
     }
 
@@ -262,7 +269,8 @@ export class HeaderCustomizer extends RE6Module {
             .attr({
                 "data-name": config.name,
                 "data-title": config.title,
-                "data-href": config.href
+                "data-href": config.href,
+                "data-right": config.right,
             })
             .appendTo(this.$menu);
         const $link = $("<a>")
@@ -292,6 +300,7 @@ export class HeaderCustomizer extends RE6Module {
         if (config.name === undefined) config.name = "New Tab";
         if (config.href === undefined) config.href = "";
         if (config.title === undefined) config.title = "";
+        if (config.right === undefined) config.right = false;
 
         return config;
     }
@@ -314,9 +323,12 @@ export class HeaderCustomizer extends RE6Module {
     private updateTab($element: JQuery<HTMLElement>, config: HeaderTab): void {
         config = this.parseHeaderTabConfig(config);
         $element
-            .attr("data-name", config.name)
-            .attr("data-title", config.title)
-            .attr("data-href", config.href);
+            .attr({
+                "data-name": config.name,
+                "data-title": config.title,
+                "data-href": config.href,
+                "data-right": config.right,
+            })
         $element.find("a").first()
             .html(this.processTabVariables(config.name))
             .attr("title", this.processTabVariables(config.title))
@@ -354,6 +366,7 @@ export class HeaderCustomizer extends RE6Module {
                 name: $tab.attr("data-name"),
                 title: $tab.attr("data-title"),
                 href: $tab.attr("data-href"),
+                right: $tab.attr("data-right") == "true" ? "true" : undefined
             });
         });
         await this.pushSettings("tabs", tabData);
@@ -380,4 +393,6 @@ interface HeaderTab {
     href?: string;
     /** Hover text */
     title?: string;
+    /** If true, aligns the tab to the right */
+    right?: boolean;
 }

@@ -40,7 +40,8 @@ export class Form implements PreparedStructure {
                 event.preventDefault();
                 const values = {};
                 this.inputList.forEach((input, name) => {
-                    values[name] = input.val().toString();
+                    if (input.attr("type") == "checkbox") values[name] = input.is(":checked");
+                    else values[name] = input.val().toString();
                 });
                 onSubmit(values, this);
             });
