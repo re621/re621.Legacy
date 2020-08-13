@@ -933,14 +933,26 @@ export class SettingsController extends RE6Module {
 
                     Form.checkbox(
                         {
+                            value: smartAlias.fetchSettings("autoLoad"),
+                            label: `<b>Run Automatically</b><br />Either validate tag input as you type, or by pressing a button`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("autoLoad", data);
+                            await smartAlias.reload();
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
                             value: smartAlias.fetchSettings("quickTagsForm"),
                             label: `<b>Quick Tags Validation</b><br />Enable SmartAlias validation on the search page editing mode form`,
                             width: 3,
                         },
                         async (data) => {
                             await smartAlias.pushSettings("quickTagsForm", data);
-                            smartAlias.destroy();
-                            setTimeout(() => { smartAlias.create(); }, 100);
+                            await smartAlias.reload();
                         }
                     ),
                     Form.spacer(3),

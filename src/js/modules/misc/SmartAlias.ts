@@ -37,6 +37,7 @@ export class SmartAlias extends RE6Module {
         return {
             enabled: true,
 
+            autoLoad: true,
             tagOrder: TagOrder.Default,
 
             quickTagsForm: true,
@@ -59,8 +60,22 @@ export class SmartAlias extends RE6Module {
         SmartAlias.postPageLockout = true;
         $("#post-edit-link").one("click.re621", () => {
             SmartAlias.postPageLockout = false;
-            this.create();
+            this.reload();
         });
+    }
+
+    /**
+     * Destroys and re-creates the entire module as a method of reloading it.  
+     * It's stupid, but it's the easiest and hassle-free method of resetting some thigns.
+     */
+    public async reload(): Promise<void> {
+        this.destroy();
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                this.create();
+                resolve();
+            }, 100);
+        })
     }
 
     public destroy(): void {
@@ -72,6 +87,8 @@ export class SmartAlias extends RE6Module {
                 .off("focusout.re621.smart-alias");
         }
         $("smart-alias").remove();
+        $("smart-tag-counter").remove();
+        $("button.smart-alias-validate").remove();
     }
 
     public create(): void {
@@ -92,12 +109,10 @@ export class SmartAlias extends RE6Module {
         }
 
         // Fix the secret switch breaking the module
-        $(".the_secret_switch").one("click", () => {
-            this.destroy();
-            setTimeout(() => { this.create(); }, 100);
-        });
+        $(".the_secret_switch").one("click", () => { this.reload(); });
 
         // Initializes SmartAlias for all appropriate inputs
+        const mode = this.fetchSettings<boolean>("autoLoad");
         for (const inputElement of $(SmartAlias.inputSelector.join(", ")).get()) {
             const $textarea = $(inputElement);
             const $container = $("<smart-alias>")
@@ -106,27 +121,17 @@ export class SmartAlias extends RE6Module {
             const $counter = $("<smart-tag-counter>")
                 .insertAfter($textarea);
 
-            // Wait for the user to stop typing before processing
-            let typingTimeout: number;
-            $textarea.on("input", () => {
+            if (mode) this.manageAutoLoad($textarea, $container);
+            else this.manageManualLoad($textarea, $container)
 
-                // handleTagInput triggers an input event to properly fill in the data bindings
-                // this ensures that it will not result in an infinite loop
-                if ($textarea.data("vue-event") === "true") {
-                    $textarea.data("vue-event", "false");
-                    return;
-                }
-
-                // If the data is currently processing, but the user keeps typing,
-                // check every second to make sure the last input is caught
-                window.clearInterval(typingTimeout);
-                typingTimeout = window.setInterval(() => {
-                    if ($container.attr("ready") !== "true") return;
-
-                    window.clearInterval(typingTimeout);
-                    this.handleTagInput($textarea, $container);
-                }, 1000);
-            });
+            // On search pages, in the editing mode, reload container when the user clicks on a thumbnail
+            // Otherwise, the old tags get left behind. Thanks to tag data caching, this should be pretty quick
+            if (Page.matches([PageDefintion.search, PageDefintion.favorites])) {
+                $("article.post-preview").on("click.danbooru", () => {
+                    if (mode) this.handleTagInput($textarea, $container, false);
+                    else $container.html("");
+                });
+            }
 
             // Update the tag counter
             let updateTimeout: number;
@@ -135,18 +140,6 @@ export class SmartAlias extends RE6Module {
                 updateTimeout = window.setTimeout(() => { updateTimeout = 0; }, 500);
                 $counter.html(SmartAlias.getInputTags($textarea).length + "");
             });
-
-            // On search pages, in the editing mode, reload container when the user clicks on a thumbnail
-            // Otherwise, the old tags get left behind. Thanks to tag data caching, this should be pretty quick
-            if (Page.matches([PageDefintion.search, PageDefintion.favorites])) {
-                $("article.post-preview").on("click.danbooru", () => {
-                    this.handleTagInput($textarea, $container, false);
-                });
-            }
-
-            // First call, in case the input area is not blank
-            // i.e. on post page, or in editing mode
-            this.handleTagInput($textarea, $container, false);
         }
     }
 
@@ -171,6 +164,47 @@ export class SmartAlias extends RE6Module {
         return (typeof input === "string" ? input : SmartAlias.getInputString(input))
             .split(" ")
             .filter((el) => { return el != null && el != ""; });
+    }
+
+    private manageAutoLoad($textarea: JQuery<HTMLElement>, $container: JQuery<HTMLElement>): void {
+
+        // Wait for the user to stop typing before processing
+        let typingTimeout: number;
+        $textarea.on("input", () => {
+
+            // handleTagInput triggers an input event to properly fill in the data bindings
+            // this ensures that it will not result in an infinite loop
+            if ($textarea.data("vue-event") === "true") {
+                $textarea.data("vue-event", "false");
+                return;
+            }
+
+            // If the data is currently processing, but the user keeps typing,
+            // check every second to make sure the last input is caught
+            window.clearInterval(typingTimeout);
+            typingTimeout = window.setInterval(() => {
+                if ($container.attr("ready") !== "true") return;
+
+                window.clearInterval(typingTimeout);
+                this.handleTagInput($textarea, $container);
+            }, 1000);
+        });
+
+        // First call, in case the input area is not blank
+        // i.e. on post page, or in editing mode
+        this.handleTagInput($textarea, $container, false);
+    }
+
+    private manageManualLoad($textarea: JQuery<HTMLElement>, $container: JQuery<HTMLElement>): void {
+
+        $("<button>")
+            .html("Validate")
+            .addClass("smart-alias-validate")
+            .insertBefore($container)
+            .on("click", () => {
+                this.handleTagInput($textarea, $container, false);
+            });
+
     }
 
     /**

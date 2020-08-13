@@ -5,6 +5,7 @@ textarea#alias-list-container {
     min-height: 40vh;
     font-family: monospace;
     font-size: 1.2em;
+    overflow: hidden auto;
 }
 
 // Tag Info Interface
@@ -101,4 +102,28 @@ smart-tag-counter {
     font-family: monospace;
     color: #666;
     text-align: right;
+}
+
+button.smart-alias-validate {
+    display: block;
+
+    margin: 0 auto;
+    padding: 0 1rem;
+
+    background: #ffffff11;
+    border: 1px solid #666;
+    border-top: 0;
+    border-radius: 0 0 0.5rem 0.5rem;
+
+    color: white;
+    font-size: 0.75rem;
+
+    &:hover {
+        background: #ffffff20;
+    }
+}
+
+// Bigger Quick-Tags Textarea
+textarea#post_tag_string {
+    min-height: 6rem;
 }
