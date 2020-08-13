@@ -22,6 +22,11 @@ div#notice {
     z-index: 10000;
 }
 
+// Fix guest warning layering
+div.guest-warning {
+    z-index: 10001;
+}
+
 // Gridify the header
 header#top {
     h1 {
