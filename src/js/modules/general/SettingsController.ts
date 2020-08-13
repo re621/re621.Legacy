@@ -1225,6 +1225,7 @@ export class SettingsController extends RE6Module {
             ...createInputs(postViewer, "Toggle Favorite", "hotkeyFavorite"),
             ...createInputs(postViewer, "Add to Favorites", "hotkeyAddFavorite"),
             ...createInputs(postViewer, "Remove From Favorites", "hotkeyRemoveFavorite"),
+            ...createInputs(imageScaler, "Fullscreen Mode", "hotkeyFullscreen"),
             Form.spacer(3, true),
 
             ...createInputs(poolNavigator, "Previous Post", "hotkeyPrev"),

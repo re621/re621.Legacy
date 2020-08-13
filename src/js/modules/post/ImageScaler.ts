@@ -17,7 +17,8 @@ export class ImageScaler extends RE6Module {
     public constructor() {
         super(PageDefintion.post, true);
         this.registerHotkeys(
-            { keys: "hotkeyScale", fnct: () => { this.setScale(); } }
+            { keys: "hotkeyScale", fnct: () => { this.setScale(); } },
+            { keys: "hotkeyFullscreen", fnct: this.openFullscreen },
         );
     }
 
@@ -28,7 +29,10 @@ export class ImageScaler extends RE6Module {
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
-            hotkeyScale: "v|0",
+
+            hotkeyScale: "v|0",         // cycle through the varous scaling modes
+            hotkeyFullscreen: "",       // open the current post in fullscreen mode
+
             clickScale: true,
 
             size: "fit-vertical",
@@ -65,7 +69,10 @@ export class ImageScaler extends RE6Module {
             });
 
         $("<a>")
-            .attr("href", this.post.getImageURL())
+            .attr({
+                "href": this.post.getImageURL(),
+                "id": "re621-imagescaler-fullscreen",
+            })
             .addClass("button btn-neutral")
             .html("Fullscreen")
             .appendTo(resizeButtonContainer);
@@ -134,6 +141,11 @@ export class ImageScaler extends RE6Module {
         }
 
         Danbooru.Note.Box.scale_all();
+    }
+
+    /** Opens the post in fullscreen mode */
+    private openFullscreen(): void {
+        $("#re621-imagescaler-fullscreen")[0].click();
     }
 
 }
