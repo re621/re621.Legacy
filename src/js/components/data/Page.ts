@@ -92,6 +92,7 @@ export class Page {
 }
 
 export const PageDefintion = {
+    title: /^(\/)?$/,
     search: /^\/posts\/?$/,
     post: /^\/posts\/\d+\/?(show_seq)?$/,
     upload: /\/uploads\/new\/?/,

@@ -174,6 +174,19 @@ export class SettingsController extends RE6Module {
                 // Title Customizer
                 Form.accordionTab({ name: "layout", label: "Layout", columns: 3, width: 3 }, [
 
+                    Form.div({ value: "<b>Main Page</b><br />Reroute the title page to the one specified", width: 2 }),
+                    Form.select(
+                        { value: Util.LS.getItem("re621.mainpage") || "default" },
+                        {
+                            "default": "Default",
+                            "posts": "Posts",
+                            "forum_topics": "Forums",
+                            "blips": "Blips",
+                        },
+                        (value) => { Util.LS.setItem("re621.mainpage", value); }
+                    ),
+                    Form.spacer(3, true),
+
                     Form.input(
                         {
                             name: "template", value: titleCustomizer.fetchSettings("template"),
@@ -194,7 +207,7 @@ export class SettingsController extends RE6Module {
                         Form.copy({ value: "%species%", label: "Species" }),
                         Form.copy({ value: "%meta%", label: "Meta" }),
                     ]),
-                    Form.spacer(3),
+                    Form.spacer(3, true),
 
                     Form.checkbox(
                         { value: titleCustomizer.fetchSettings("symbolsEnabled"), label: "<b>Title Icons</b>", width: 3 },

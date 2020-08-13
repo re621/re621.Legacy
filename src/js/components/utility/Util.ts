@@ -7,8 +7,8 @@ import { UtilTime } from "./UtilTime";
 export class Util {
 
     public static Time = UtilTime;
-
     public static ID = UtilID;
+    public static LS = window.localStorage;
 
     /**
      * Downloads the provided object as a JSON file
