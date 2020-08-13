@@ -44,6 +44,7 @@ export class SmartAlias extends RE6Module {
             replaceAliasedTags: true,
             fixCommonTypos: false,
             minPostsWarning: 20,
+            compactOutput: false,
 
             data: "",
         };
@@ -97,6 +98,9 @@ export class SmartAlias extends RE6Module {
         // Abort the whole thing if the quick tags form is disabled in settings
         if (!this.fetchSettings("quickTagsForm") && Page.matches([PageDefintion.search, PageDefintion.favorites]))
             return;
+
+        // Toggle the data-attribute necessary for the compact form
+        this.setCompactOutput(this.fetchSettings("compactOutput"));
 
         // Only create the structue once the editing form is enabled
         if (SmartAlias.postPageLockout) return;
@@ -585,6 +589,14 @@ export class SmartAlias extends RE6Module {
                 .trim()
                 .replace(/\s{2,}/g, " ");
         }
+    }
+
+    /**
+     * Toggles the compact form styles
+     * @param state True for compact, false for expanded
+     */
+    public setCompactOutput(state = false): void {
+        $("#page").attr("data-smartalias-compact", state + "");
     }
 
 }

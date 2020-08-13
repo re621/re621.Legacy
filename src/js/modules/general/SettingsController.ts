@@ -1001,6 +1001,19 @@ export class SettingsController extends RE6Module {
                             smartAlias.pushSettings("minPostsWarning", data);
                         }
                     ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("compactOutput"),
+                            label: `<b>Compact Display</b><br />Limit the tag information section to a set height`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("compactOutput", data);
+                            smartAlias.setCompactOutput(data);
+                        }
+                    ),
 
 
                 ]),
