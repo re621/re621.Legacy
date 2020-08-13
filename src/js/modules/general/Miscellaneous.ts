@@ -98,7 +98,7 @@ export class Miscellaneous extends RE6Module {
     /** Emulated clicking on "Edit" tab */
     private openEditTab(): void {
         if (Page.matches(PageDefintion.post)) {
-            $("menu#post-sections > li > a[href$=edit]")[0].click();
+            window.setTimeout(() => { $("#post-edit-link")[0].click(); }, 100);
         }
     }
 
