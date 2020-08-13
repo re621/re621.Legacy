@@ -87,8 +87,10 @@ export class Form implements PreparedStructure {
     public reset(): void {
         this.inputList.forEach((input) => {
             const defval = input.attr("defval");
-            if (defval !== undefined)
-                input.val(defval);
+            if (defval !== undefined) {
+                if (input.attr("type") == "checkbox") input.prop("checked", defval == "true");
+                else input.val(defval);
+            }
         });
     }
 

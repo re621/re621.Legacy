@@ -4,6 +4,7 @@ header#top nav#nav {
     menu.main.custom {
         padding: 0;
         align-self: center;
+        display: inline-flex;
 
         li {
             position: relative;
@@ -15,6 +16,24 @@ header#top nav#nav {
             &>a {
                 padding: 0 0.5rem;
                 outline: 0;
+            }
+        }
+
+        &[data-editing=true] {
+            li[align=true] {
+                background-color: #ffaf9940;
+            }
+        }
+
+        &:not([data-editing=true]) {
+            li:not([align=true]) {
+                order: 10;
+            }
+            li[align=true] {
+                order: 20;
+                &.margined {
+                    margin-left: auto;
+                }
             }
         }
 

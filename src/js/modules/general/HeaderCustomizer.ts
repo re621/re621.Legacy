@@ -84,8 +84,37 @@ export class HeaderCustomizer extends RE6Module {
     public create(): void {
         super.create();
 
+        // Check for forum updates before the structure changes
+        this.hasForumUpdates = $("li#nav-forum").hasClass("forum-updated");
+
+        // Create the structure and store the old navbar for later
         this.$menu = $("menu.main");
-        this.createDOM();
+        this.$oldMenu = $("<div>").css("display", "none").appendTo("body");
+        this.$menu.children().appendTo(this.$oldMenu);
+        this.$menu.addClass("custom");
+
+        // Load stored data
+        for (const value of this.fetchSettings<HeaderTab[]>("tabs"))
+            this.createTabElement(value);
+        this.reloadTabMargins();
+
+        this.$menu.sortable({
+            axis: "x",
+            containment: "parent",
+            helper: "clone",
+            forceHelperSize: true,
+            opacity: 0.75,
+            cursor: "grabbing",
+
+            disabled: true,
+
+            update: () => {
+                this.reloadTabMargins();
+                this.saveNavbarSettings();
+            },
+        });
+
+        this.createConfigInterface();
 
         // Toggle the forum update dot
         this.toggleForumDot(this.fetchSettings("forumUpdateDot"));
@@ -106,34 +135,11 @@ export class HeaderCustomizer extends RE6Module {
         this.updateTabModal.destroy();
 
         this.$oldMenu.children().appendTo(this.$menu);
+        this.$oldMenu.remove();
     }
 
-    /**
-     * Builds basic structure for the module
-     */
-    private createDOM(): void {
-        this.hasForumUpdates = $("li#nav-forum").hasClass("forum-updated");
-
-        this.$oldMenu = $("<div>").css("display", "none").appendTo("body");
-        this.$menu.children().appendTo(this.$oldMenu);
-        this.$menu.addClass("custom");
-
-        // Fetch stored data
-        for (const value of this.fetchSettings<HeaderTab[]>("tabs"))
-            this.createTabElement(value);
-
-        this.$menu.sortable({
-            axis: "x",
-            containment: "parent",
-            helper: "clone",
-            forceHelperSize: true,
-            opacity: 0.75,
-            cursor: "grabbing",
-
-            disabled: true,
-
-            update: () => { this.saveNavbarSettings(); },
-        });
+    /** Creates the configuration forms and modals */
+    private createConfigInterface(): void {
 
         // === Tab Configuration Interface
         this.addTabButton = DomUtilities.addSettingsButton({
@@ -157,7 +163,6 @@ export class HeaderCustomizer extends RE6Module {
                 Form.copy({ label: "Username", value: "%username%" }),
                 Form.hr(),
                 Form.div({ value: "Drag-and-drop tabs to re-arrange.<br />Click on a tab to edit it." }),
-                Form.div({ value: "Right-aligned tabs will be displayed in a reverse order." }),
             ],
             (values, form) => {
                 this.addTab({
@@ -167,6 +172,7 @@ export class HeaderCustomizer extends RE6Module {
                     right: values["right"],
                 });
                 form.reset();
+                this.reloadTabMargins();
             }
         );
 
@@ -196,7 +202,6 @@ export class HeaderCustomizer extends RE6Module {
                 Form.button({ value: "Update", type: "submit" }),
             ],
             (values, form) => {
-                console.log(values);
                 this.updateTab(
                     this.updateTabModal.getActiveTrigger().parent(),
                     {
@@ -208,6 +213,7 @@ export class HeaderCustomizer extends RE6Module {
                 );
                 this.updateTabModal.close();
                 form.reset();
+                this.reloadTabMargins();
             }
         );
 
@@ -235,10 +241,10 @@ export class HeaderCustomizer extends RE6Module {
             const $tab = this.updateTabModal.getActiveTrigger().parent();
             const $updateTabInputs = this.updateTabForm.getInputList();
 
-            $updateTabInputs.get("name").val($tab.attr("data-name"));
-            $updateTabInputs.get("title").val($tab.attr("data-title"));
-            $updateTabInputs.get("href").val($tab.attr("data-href"));
-            $updateTabInputs.get("right").prop("checked", $tab.attr("data-right") == "true");
+            $updateTabInputs.get("name").val($tab.data("tab.name"));
+            $updateTabInputs.get("title").val($tab.data("tab.title"));
+            $updateTabInputs.get("href").val($tab.data("tab.href"));
+            $updateTabInputs.get("right").prop("checked", $tab.data("tab.right"));
         });
     }
 
@@ -266,12 +272,13 @@ export class HeaderCustomizer extends RE6Module {
         config = this.parseHeaderTabConfig(config);
 
         const $tab = $(`<li>`)
-            .attr({
-                "data-name": config.name,
-                "data-title": config.title,
-                "data-href": config.href,
-                "data-right": config.right,
+            .data({
+                "tab.name": config.name,
+                "tab.title": config.title,
+                "tab.href": config.href,
+                "tab.right": config.right,
             })
+            .attr("align", config.right ? "true" : undefined)
             .appendTo(this.$menu);
         const $link = $("<a>")
             .html(this.processTabVariables(config.name))
@@ -285,7 +292,7 @@ export class HeaderCustomizer extends RE6Module {
 
         if (triggerUpdate) { this.saveNavbarSettings(); }
 
-        if (Page.getURL().pathname.includes(this.processTabVariables(config.href).split("?")[0])) {
+        if (config.href.trim() !== "" && Page.getURL().pathname.includes(this.processTabVariables(config.href).split("?")[0])) {
             $tab.addClass("bg-foreground");
         }
 
@@ -323,12 +330,14 @@ export class HeaderCustomizer extends RE6Module {
     private updateTab($element: JQuery<HTMLElement>, config: HeaderTab): void {
         config = this.parseHeaderTabConfig(config);
         $element
-            .attr({
-                "data-name": config.name,
-                "data-title": config.title,
-                "data-href": config.href,
-                "data-right": config.right,
+            .data({
+                "tab.name": config.name,
+                "tab.title": config.title,
+                "tab.href": config.href,
+                "tab.right": config.right,
             })
+            .removeAttr("align")
+            .attr("align", config.right ? "true" : undefined);
         $element.find("a").first()
             .html(this.processTabVariables(config.name))
             .attr("title", this.processTabVariables(config.title))
@@ -363,13 +372,18 @@ export class HeaderCustomizer extends RE6Module {
         this.$menu.find("li").each(function (i, element) {
             const $tab = $(element);
             tabData.push({
-                name: $tab.attr("data-name"),
-                title: $tab.attr("data-title"),
-                href: $tab.attr("data-href"),
-                right: $tab.attr("data-right") == "true" ? "true" : undefined
+                name: formatVal($tab.data("tab.name")),
+                title: formatVal($tab.data("tab.title")),
+                href: formatVal($tab.data("tab.href")),
+                right: $tab.data("tab.right") ? true : undefined,
             });
         });
         await this.pushSettings("tabs", tabData);
+
+        function formatVal(value: string): string {
+            if (value) return value;
+            return undefined;
+        }
     }
 
     /** Emulates a click on the header tab with the specified index */
@@ -377,6 +391,14 @@ export class HeaderCustomizer extends RE6Module {
         const tabs = ModuleController.get(HeaderCustomizer).$menu.find<HTMLElement>("li > a");
         if (num > tabs.length) return;
         tabs[num].click();
+    }
+
+    /** Refreshes the right-aligned tabs to have propper margins */
+    private reloadTabMargins(): void {
+        this.$menu.children("li").removeClass("margined");
+        this.$menu.find("li[align=true]")
+            .first()
+            .addClass("margined");
     }
 
 }
