@@ -495,6 +495,20 @@ export class SettingsController extends RE6Module {
 
                     ]),
 
+                    Form.checkbox(
+                        {
+                            value: thumbnailEnhancer.fetchSettings("autoPlayGIFs"),
+                            label: "<b>Auto-Play GIFs</b><br />If disabled, animated GIFs will only play on hover",
+                            width: 2,
+                        },
+                        async (data) => {
+                            await thumbnailEnhancer.pushSettings("autoPlayGIFs", data);
+                            if (thumbnailEnhancer.isInitialized()) ThumbnailEnhancer.setAutoPlayGIFs(data);
+                        }
+                    ),
+                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
+                    Form.spacer(3),
+
                     // Voting Buttons
                     Form.checkbox(
                         {

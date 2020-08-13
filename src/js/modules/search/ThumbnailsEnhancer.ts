@@ -10,6 +10,8 @@ import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Util } from "../../components/utility/Util";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
 
+declare const Freezeframe: any;
+
 export enum ThumbnailPerformanceMode {
     Disabled = "disabled",
     Hover = "hover",
@@ -39,6 +41,7 @@ export class ThumbnailEnhancer extends RE6Module {
     private static zoomPaused = false;
 
     private static clickAction = "unset";
+    private static autoPlayGIFs = false;
 
     public constructor() {
         super([PageDefintion.search, PageDefintion.popular, PageDefintion.favorites, PageDefintion.comments], true);
@@ -64,6 +67,8 @@ export class ThumbnailEnhancer extends RE6Module {
             cropRatio: "0.9",
             cropPreserveRatio: false,
 
+            autoPlayGIFs: true,
+
             ribbons: true,
             relRibbons: true,
 
@@ -81,6 +86,7 @@ export class ThumbnailEnhancer extends RE6Module {
             await this.pushSettings("zoom", this.fetchSettings("zoom") + "");
 
         ThumbnailEnhancer.clickAction = this.fetchSettings("clickAction");
+        ThumbnailEnhancer.autoPlayGIFs = this.fetchSettings("autoPlayGIFs");
 
         // Only add a loading screen on appropriate pages
         if (!this.pageMatchesFilter()) return;
@@ -268,6 +274,11 @@ export class ThumbnailEnhancer extends RE6Module {
     public static async setClickAction(state: ThumbnailClickAction): Promise<boolean> {
         ThumbnailEnhancer.clickAction = state;
         return ModuleController.get(ThumbnailEnhancer).pushSettings("clickAction", state);
+    }
+
+    /** If set to false, gifs will only animate on hover */
+    public static setAutoPlayGIFs(state: boolean): void {
+        ThumbnailEnhancer.autoPlayGIFs = state;
     }
 
     /**
@@ -527,9 +538,39 @@ export class ThumbnailEnhancer extends RE6Module {
             if ($article.attr("data-file-ext") === "swf") $picture.addClass("flash");
             if ($article.attr("data-flags") === "deleted") $picture.addClass("deleted");
 
-        } else {
-            // Add dynamically-loaded highres thumbnails
+        } else if ($article.attr("data-file-ext") === "gif" && upscaleMode === ThumbnailPerformanceMode.Always && !ThumbnailEnhancer.autoPlayGIFs) {
 
+            // Upscale GIFs on hover
+
+            const sampleURL = $article.attr("data-large-file-url");
+
+            resolveRatio();
+
+            let timer: number;
+            $article.on("mouseenter", () => {
+                if (ThumbnailEnhancer.zoomPaused) return;
+
+                // only load sample after a bit of waiting
+                // this prevents loading images just by hovering over them to get to another one
+                timer = window.setTimeout(() => {
+                    if ($img.attr("data-src") == sampleURL) return;
+
+                    $link.addClass("loading");
+                    $img.attr("data-src", sampleURL)
+                        .addClass("lazyload")
+                        .one("lazyloaded", () => {
+                            $link.removeClass("loading");
+                            $article.addClass("loaded");
+                        });
+                }, 200);
+            });
+            $article.on("mouseleave", () => {
+                window.clearTimeout(timer);
+            });
+
+        } else {
+
+            // Add dynamically-loaded highres thumbnails
             const sampleURL = $article.attr("data-large-file-url");
 
             if (upscaleMode === ThumbnailPerformanceMode.Hover) {
