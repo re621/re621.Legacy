@@ -946,19 +946,6 @@ export class SettingsController extends RE6Module {
 
                     Form.checkbox(
                         {
-                            value: smartAlias.fetchSettings("quickTagsForm"),
-                            label: `<b>Quick Tags Validation</b><br />Enable SmartAlias validation on the search page editing mode form`,
-                            width: 3,
-                        },
-                        async (data) => {
-                            await smartAlias.pushSettings("quickTagsForm", data);
-                            await smartAlias.reload();
-                        }
-                    ),
-                    Form.spacer(3),
-
-                    Form.checkbox(
-                        {
                             value: smartAlias.fetchSettings("replaceAliasedTags"),
                             label: `<b>Replace Aliases</b><br />Automatically replace aliased tag names with their consequent version`,
                             width: 3,
@@ -1015,6 +1002,101 @@ export class SettingsController extends RE6Module {
                         }
                     ),
 
+                ]),
+
+                Form.accordionTab({ name: "aliasref", label: "Validated Inputs", columns: 3, width: 3 }, [
+
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("quickTagsForm"),
+                            label: `<b>Quick Tags</b><br />SmartAlias validation on the search page editing mode form`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("quickTagsForm", data);
+                            await smartAlias.reload();
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("editTagsForm"),
+                            label: `<b>Post Editing</b><br />SmartAlias validation on the individual post editing form`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("editTagsForm", data);
+                            await smartAlias.reload();
+                        }
+                    ),
+                    Form.hr(3),
+
+                    Form.header("Upload Page"),
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("uploadCharactersForm"),
+                            label: `<b>Artist Tags</b>`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("uploadCharactersForm", data);
+                            await smartAlias.reload();
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("uploadSexesForm"),
+                            label: `<b>Characters</b>`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("uploadSexesForm", data);
+                            await smartAlias.reload();
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("uploadBodyTypesForm"),
+                            label: `<b>Species</b>`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("uploadBodyTypesForm", data);
+                            await smartAlias.reload();
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("uploadThemesForm"),
+                            label: `<b>Themes</b>`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("uploadThemesForm", data);
+                            await smartAlias.reload();
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("uploadTagsForm"),
+                            label: `<b>Other Tags</b>`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("uploadTagsForm", data);
+                            await smartAlias.reload();
+                        }
+                    ),
+                    Form.spacer(3),
 
                 ]),
 

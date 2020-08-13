@@ -12,14 +12,16 @@ export class SmartAlias extends RE6Module {
     private static ITERATIONS_LIMIT = 10;
 
     // Elements to which smart alias instances are to be attached
-    private static inputSelector = [
-        "#post_tags",
-        "#post_tag_string",
-        "#post_characters",
-        "#post_sexes",
-        "#post_bodyTypes",
-        "#post_themes",
-    ];
+    private static inputSelector = new Set([
+        "#post_tag_string",     // editing form tags
+
+        // Yes, this is correct
+        "#post_characters",     // artist
+        "#post_sexes",          // characters
+        "#post_bodyTypes",      // body types
+        "#post_themes",         // themes
+        "#post_tags",           // other tags
+    ]);
 
     private static aliasCache: AliasDefinition[];
     private static aliasCacheLength: number;
@@ -41,6 +43,14 @@ export class SmartAlias extends RE6Module {
             tagOrder: TagOrder.Default,
 
             quickTagsForm: true,
+            editTagsForm: true,
+
+            uploadCharactersForm: true,
+            uploadSexesForm: true,
+            uploadBodyTypesForm: true,
+            uploadThemesForm: true,
+            uploadTagsForm: true,
+
             replaceAliasedTags: true,
             fixCommonTypos: false,
             minPostsWarning: 20,
@@ -99,6 +109,10 @@ export class SmartAlias extends RE6Module {
         if (!this.fetchSettings("quickTagsForm") && Page.matches([PageDefintion.search, PageDefintion.favorites]))
             return;
 
+        // Abort execution on the post page if it's disabled anyways
+        if (!this.fetchSettings("editTagsForm") && Page.matches(PageDefintion.post))
+            return;
+
         // Toggle the data-attribute necessary for the compact form
         this.setCompactOutput(this.fetchSettings("compactOutput"));
 
@@ -115,9 +129,18 @@ export class SmartAlias extends RE6Module {
         // Fix the secret switch breaking the module
         $(".the_secret_switch").one("click", () => { this.reload(); });
 
+        // Detect enabled inputs
+        const inputs = new Set(Array.from(SmartAlias.inputSelector));
+        const enabledInputs = this.fetchSettings(["uploadCharactersForm", "uploadSexesForm", "uploadBodyTypesForm", "uploadThemesForm", "uploadTagsForm"]);
+        if (!enabledInputs.uploadCharactersForm) inputs.delete("#post_characters");
+        if (!enabledInputs.uploadSexesForm) inputs.delete("#post_sexes");
+        if (!enabledInputs.uploadBodyTypesForm) inputs.delete("#post_bodyTypes");
+        if (!enabledInputs.uploadThemesForm) inputs.delete("#post_themes");
+        if (!enabledInputs.uploadTagsForm) inputs.delete("#post_tags");
+
         // Initializes SmartAlias for all appropriate inputs
         const mode = this.fetchSettings<boolean>("autoLoad");
-        for (const inputElement of $(SmartAlias.inputSelector.join(", ")).get()) {
+        for (const inputElement of $([...inputs].join(", ")).get()) {
             const $textarea = $(inputElement);
             const $container = $("<smart-alias>")
                 .attr("ready", "true")
