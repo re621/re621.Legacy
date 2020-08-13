@@ -439,6 +439,12 @@ export class ThumbnailEnhancer extends RE6Module {
                 $("#mode-box-mode").val() !== "view"
             ) { return; }
 
+            // Handle the meta-key presses
+            if (event.ctrlKey || event.metaKey) {
+                XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
+                return;
+            }
+
             event.preventDefault();
 
             dbclickTimer = window.setTimeout(() => {
@@ -452,6 +458,8 @@ export class ThumbnailEnhancer extends RE6Module {
             if (
                 // Ignore mouse clicks which are not left clicks
                 (event.button !== 0) ||
+                // Ignore meta-key presses
+                (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) ||
                 // Stop keeping track of double clicks if the zoom is paused
                 (ThumbnailEnhancer.zoomPaused) ||
                 // Make sure the click does not get triggered on the voting buttons

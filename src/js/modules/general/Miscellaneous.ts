@@ -203,7 +203,13 @@ export class Miscellaneous extends RE6Module {
             let prevent = false;
 
             $link.on("click.re621.thumbnail", (event) => {
-                if (event.button !== 0) { return; }
+                if (
+                    // Ignore mouse clicks which are not left clicks
+                    (event.button !== 0) ||
+                    // Ignore meta-key presses
+                    (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)
+                ) { return; }
+
                 event.preventDefault();
 
                 dbclickTimer = window.setTimeout(() => {
@@ -214,7 +220,12 @@ export class Miscellaneous extends RE6Module {
                     prevent = false;
                 }, 200);
             }).on("dblclick.re621.thumbnail", (event) => {
-                if (event.button !== 0) { return; }
+                if (
+                    // Ignore mouse clicks which are not left clicks
+                    (event.button !== 0) ||
+                    // Ignore meta-key presses
+                    (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)
+                ) { return; }
 
                 event.preventDefault();
                 window.clearTimeout(dbclickTimer);
