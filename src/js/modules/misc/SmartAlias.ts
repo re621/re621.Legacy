@@ -67,12 +67,18 @@ export class SmartAlias extends RE6Module {
 
         // Only create an instance once the editing form is enabled
         // This will avoid unnecessary API calls, as well as solve issues with dynamic DOM
+        if (!$("#post_tag_string").is(":visible")) {
 
-        SmartAlias.postPageLockout = true;
-        $("#post-edit-link").one("click.re621", () => {
-            SmartAlias.postPageLockout = false;
-            this.reload();
-        });
+            // This is dumb, but it works
+            // If the editing form is visible when the script loads, skip this whole thing
+            // This fixes an issue with SmartAlias not loading if the editing form is opened before page loads
+
+            SmartAlias.postPageLockout = true;
+            $("#post-edit-link").one("click.re621", () => {
+                SmartAlias.postPageLockout = false;
+                this.reload();
+            });
+        }
     }
 
     /**
