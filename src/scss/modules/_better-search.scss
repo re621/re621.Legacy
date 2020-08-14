@@ -2,7 +2,7 @@
 
 section#content {
 
-    post-loading {
+    search-loading {
         display: flex;
         position: absolute;
         top: 0;
@@ -13,37 +13,69 @@ section#content {
         align-items: center;
     }
 
-    post-content {
+    search-content {
         display: grid;
-        grid-template-columns: repeat(auto-fill, 154px);
+        grid-template-columns: repeat(auto-fill, max(var(--img-width, 150px), 150px));
         grid-column-gap: 0.25rem;
         grid-row-gap: 0.5rem;
         justify-content: space-between;
     }
 
-    &[loading=true] post-content { display: none; }
+    &[loading=true] search-content { display: none; }
     &:not([loading=true]) post-loading { display: none; }
 
 }
 
-post-content > post {
+search-content > post {
     display: flex;
     justify-content: center;
+    align-self: self-start;
     flex-flow: column;
 
     background: #00000040;
 
-    border-radius: 0.25rem 0.255rem 0 0;
-    overflow: hidden;
+    border-radius: 0.25rem;
+    position: relative;
 
     & > a {
         display: flex;
         justify-content: center;
-
         width: 100%;
-        height: 100%;
+        position: relative;
+
+        img { align-self: flex-end; }
     }
 
+    // Loading overlay
+    & > a > post-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+
+        color: white;
+        text-shadow: 0 0 10px black;
+
+        & > i.fas {
+            width: 2rem;
+            height: 2rem;
+            font-size: 2rem;
+            line-height: 2rem;
+            text-align: center;
+            vertical-align: middle;
+        }
+    }
+
+    &:not([state=loading]) post-loading {
+        display: none;
+    }
+
+    // Description section - upvotes, favorites, comment count, rating
     post-info {
         display: flex;
         width: 100%;
@@ -53,16 +85,143 @@ post-content > post {
         box-sizing: border-box;
 
         background: #ffffff25;
+        font-size: 90%;
 
         & > span:not(:last-child) {
             margin-right: 0.5rem;
         }
 
-        span.post-info-score {
-            &.score-positive::before { content: "↑"; }
-            &.score-negative::before { content: "↓"; }
-            &.score-neutral::before { content: "↕"; }
+        span::before {
+            content: " ";
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
         }
 
+        span.post-info-score {
+            &.score-positive::before { content: unicode("f30c"); }  // long-arrow-alt-up
+            &.score-negative::before { content: unicode("f309"); }  // long-arrow-alt-down
+            &.score-neutral::before { content: unicode("f338"); }   // arrows-alt-v
+        }
+
+        span.post-info-favorites {
+            color: #c3a816;
+            &::before { content: unicode("f004");  }                // heart
+        }
+
+        span.post-info-comments {
+            &::before {
+                content: "C";
+                font-family: unset;
+            }
+        }
+
+        span.post-info-rating {
+            text-transform: uppercase;
+            &.rating-e { color: #e45f5f; }
+            &.rating-q { color: #ffe666; }
+            &.rating-s { color: #3e9e49; }
+        }
+
+    }
+}
+
+
+/* Thumbnail Resizing */
+search-content > post  {
+
+    img {
+        width: max(var(--img-width, 150px), 150px);
+        height: calc(max(var(--img-width, 150px), 150px) * var(--img-ratio, 1));
+        object-fit: cover;
+        max-height: 50vh;
+    }
+
+}
+
+
+/* Animation Badges */
+search-content > post {
+
+    &[animated=true] > a::before {
+        content: "ANIM";
+        background-color: #222222aa;
+        border: 1px solid #66666655;
+        color: #fff;
+        position: absolute;
+        left: -0.25rem;
+        top: 0.75rem;
+        text-align: center;
+        border-radius: 0.25rem;
+        padding: 0 0.125rem;
+        font-size: 0.6em;
+        font-weight: 700;
+    }
+
+    &[animated=true][filetype=webm] { content: "WEBM"; }
+    &[animated=true][filetype=gif] { content: "GIF"; }
+
+}
+
+
+/* Image Ribbons */
+search-content > post img-ribbons {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 0;
+
+    & > ribbon {
+        position: absolute;
+        width: 1rem;
+        height: 1rem;
+        overflow: hidden;
+        display: block;
+
+        box-shadow: 0 0 10px -4px black;
+
+        $status-flagged: orangered;
+        $status-pending: blue;
+        $rel-children: forestgreen;
+        $rel-parent: goldenrod;
+
+        & > span {
+            display: block;
+            position: absolute;
+            top: -0.6rem;
+            height: 1rem;
+            width: 2rem;
+            background: white;
+            transform-origin: bottom;
+            cursor: pointer;
+        }
+
+        &.right {
+            right: 0;
+            span {
+                transform: rotate(45deg);
+                right: -0.6rem;
+            }
+        }
+
+        &.left {
+            left: 0;
+            span {
+                transform: rotate(-45deg);
+                left: -0.6rem;
+            }
+        }
+
+        &.has-children span { background: $rel-children; }
+        &.has-parent span { background: $rel-parent; }
+        &.has-children.thumb-ribbon-has-parent span {
+            background: linear-gradient(90deg, $rel-parent 50%, $rel-children 50%);
+        }
+
+        &.is-flagged span { background: $status-flagged; }
+        &.is-pending span { background: $status-pending; }
+        &.is-flagged.is-pending span {
+            background: linear-gradient(90deg, $status-flagged 50%, $status-pending 50%);
+        }
     }
 }

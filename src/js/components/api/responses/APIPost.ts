@@ -126,6 +126,10 @@ export namespace APIPost {
         return APIPost.getTags(post).join(" ");
     }
 
+    export function getTagSet(post: APIPost): Set<string> {
+        return new Set(APIPost.getTags(post));
+    }
+
     export function getFlagString(post: APIPost): string {
         const flags = [];
         if (post.flags.deleted) flags.push("deleted");

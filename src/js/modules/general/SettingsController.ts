@@ -26,6 +26,7 @@ import { ImageScaler } from "../post/ImageScaler";
 import { PoolNavigator } from "../post/PoolNavigator";
 import { PostViewer } from "../post/PostViewer";
 import { TitleCustomizer } from "../post/TitleCustomizer";
+import { BetterSearch, ImageLoadMethod } from "../search/BetterSearch";
 import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
 import { CustomFlagger, FlagDefinition } from "../search/CustomFlagger";
 import { InfiniteScroll } from "../search/InfiniteScroll";
@@ -165,7 +166,8 @@ export class SettingsController extends RE6Module {
             infiniteScroll = ModuleController.get(InfiniteScroll),
             thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer),
             headerCustomizer = ModuleController.get(HeaderCustomizer),
-            searchUtilities = ModuleController.get(SearchUtilities);
+            searchUtilities = ModuleController.get(SearchUtilities),
+            betterSearch = ModuleController.get(BetterSearch);
 
         return new Form({ name: "optgeneral", columns: 3, width: 3 }, [
 
@@ -321,16 +323,17 @@ export class SettingsController extends RE6Module {
                     // Upscaling
                     Form.subheader("Hi-Res Thumbnails", "Replace 150x150 thumbnails with high-resolution ones", 2),
                     Form.select(
-                        { value: thumbnailEnhancer.fetchSettings("upscale"), },
+                        { value: betterSearch.fetchSettings("imageLoadMethod"), },
                         {
                             "disabled": "Disabled",
                             "hover": "On Hover",
                             "always": "Always",
                         },
                         async (data) => {
-                            await thumbnailEnhancer.pushSettings("upscale", data);
+                            await betterSearch.pushSettings("imageLoadMethod", data);
+                            betterSearch.refresh();
 
-                            const zoomDisabled = data === ThumbnailPerformanceMode.Disabled;
+                            const zoomDisabled = data === ImageLoadMethod.Disabled;
                             $("#optgeneral-gencollapse-thumb-scalingconf-hoverzoom-desc").toggleClass("input-disabled", zoomDisabled);
                             $("#optgeneral-gencollapse-thumb-scalingconf-hoverzoom")
                                 .prop("disabled", zoomDisabled)
@@ -338,13 +341,26 @@ export class SettingsController extends RE6Module {
                                 .toggleClass("input-disabled", zoomDisabled);
                         }
                     ),
-                    Form.spacer(2),
-                    Form.text(`<div class="unmargin text-center text-bold">Requires a page reload</div>`),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("autoPlayGIFs"),
+                            label: "<b>Auto-Play GIFs</b><br />If disabled, animated GIFs will only play on hover",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("autoPlayGIFs", data);
+                            if (thumbnailEnhancer.isInitialized()) ThumbnailEnhancer.setAutoPlayGIFs(data);
+                            betterSearch.refresh();
+                        }
+                    ),
+                    Form.spacer(3),
 
                     // Double-click
                     Form.subheader("Double-Click Action", "Action taken when a thumbnail is double-clicked", 2),
                     Form.select(
-                        { value: thumbnailEnhancer.fetchSettings("clickAction") },
+                        { value: betterSearch.fetchSettings("clickAction") },
                         {
                             "disabled": "Disabled",
                             "newtab": "Open New Tab",
@@ -354,7 +370,8 @@ export class SettingsController extends RE6Module {
                             "toggleset": "Toggle Current Set ",
                         },
                         async (data) => {
-                            await ThumbnailEnhancer.setClickAction(data);
+                            await betterSearch.pushSettings("clickAction", data);
+                            betterSearch.refresh();
                         }
                     ),
                     Form.spacer(3),
@@ -362,82 +379,87 @@ export class SettingsController extends RE6Module {
                     // Preserve Hover Text
                     Form.checkbox(
                         {
-                            value: thumbnailEnhancer.fetchSettings("preserveHoverText"),
+                            value: betterSearch.fetchSettings("hoverTags"),
                             label: "<b>Preserve Hover Text</b><br />Restores text displayed when hovering over the thumbnail",
-                            width: 2,
-                        },
-                        async (data) => {
-                            await thumbnailEnhancer.pushSettings("preserveHoverText", data);
-                        }
-                    ),
-                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
-                    Form.spacer(3),
-
-                    // Thumbnail Scaling
-                    Form.checkbox(
-                        {
-                            value: thumbnailEnhancer.fetchSettings("crop"),
-                            label: "<b>Thumbnail Rescaling</b><br />Resize thumbnail images according to settings below",
                             width: 3,
                         },
                         async (data) => {
-                            await thumbnailEnhancer.pushSettings("crop", data);
-                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleThumbCrop(data);
+                            await betterSearch.pushSettings("hoverTags", data);
+                            betterSearch.refresh();
                         }
                     ),
+                    Form.spacer(3),
 
                     Form.collapse({ name: "scalingconf", columns: 3, width: 3, title: "Scaling Options", collapsed: true }, [
 
-                        Form.subheader("Thumbnail Size", "Thumbnail width, in px, em, or rem", 2),
-                        Form.input(
-                            { value: thumbnailEnhancer.fetchSettings("cropSize"), pattern: "^\\d{2,3}(px|rem|em)$" },
-                            async (data, input) => {
-                                if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
-                                await thumbnailEnhancer.pushSettings("cropSize", data);
-                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.setThumbSize(data);
-                            }
-                        ),
-                        Form.spacer(3),
-
+                        // Thumbnail Scaling
                         Form.checkbox(
                             {
-                                name: "croppreserveratio",
-                                value: thumbnailEnhancer.fetchSettings("cropPreserveRatio"),
-                                label: "<b>Preserve Ratio</b><br />Keep the image ratio of the original image",
+                                value: betterSearch.fetchSettings("imageSizeChange"),
+                                label: "<b>Thumbnail Rescaling</b><br />Resize thumbnail images according to settings below",
                                 width: 3,
                             },
                             async (data) => {
-                                await thumbnailEnhancer.pushSettings("cropPreserveRatio", data);
-                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleThumbPreserveRatio(data);
-
-                                $("#optgeneral-gencollapse-thumb-scalingconf-cropratio-desc").toggleClass("input-disabled", data);
-                                $("#optgeneral-gencollapse-thumb-scalingconf-cropratio")
-                                    .prop("disabled", data)
-                                    .parent()
-                                    .toggleClass("input-disabled", data);
+                                await betterSearch.pushSettings("imageSizeChange", data);
+                                betterSearch.updateContentSettings();
+                                betterSearch.refresh(); // TODO Is this necessary
                             }
                         ),
-                        Form.spacer(3),
+                        Form.spacer(3, true),
+
+                        Form.subheader("Thumbnail Size", "Thumbnail width, in px, em, or rem", 2),
+                        Form.input(
+                            { value: betterSearch.fetchSettings("imageWidth"), pattern: "^\\d{2,3}(px|rem|em)$" },
+                            async (data, input) => {
+                                if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                                await betterSearch.pushSettings("imageWidth", data);
+                                betterSearch.updateContentSettings();
+                                betterSearch.refresh();
+                            }
+                        ),
+                        Form.spacer(3, true),
+
+                        Form.checkbox(
+                            {
+                                name: "cropimages",
+                                value: betterSearch.fetchSettings("imageRatioChange"),
+                                label: "<b>Crop Images</b><br />Restrict image size to the specified ratio",
+                                width: 3,
+                            },
+                            async (data) => {
+                                await betterSearch.pushSettings("imageRatioChange", data);
+                                betterSearch.updateContentSettings();
+                                betterSearch.refresh();
+
+                                $("#optgeneral-gencollapse-thumb-scalingconf-cropratio-desc").toggleClass("input-disabled", !data);
+                                $("#optgeneral-gencollapse-thumb-scalingconf-cropratio")
+                                    .prop("disabled", !data)
+                                    .parent()
+                                    .toggleClass("input-disabled", !data);
+                            }
+                        ),
+                        Form.spacer(3, true),
 
                         Form.subheader(
                             "Image Ratio",
                             "Height to width ratio of the image",
                             2,
                             "cropratio-desc",
-                            thumbnailEnhancer.fetchSettings("cropPreserveRatio") ? "input-disabled" : undefined,
+                            betterSearch.fetchSettings("imageRatioChange") ? undefined : "input-disabled",
                         ),
                         Form.input(
                             {
                                 name: "cropratio",
-                                value: thumbnailEnhancer.fetchSettings("cropRatio"),
+                                value: betterSearch.fetchSettings("imageRatio"),
                                 pattern: "^(([01](\\.\\d+)?)|2)$",
-                                wrapper: thumbnailEnhancer.fetchSettings("cropPreserveRatio") ? "input-disabled" : undefined,
-                                disabled: thumbnailEnhancer.fetchSettings("cropPreserveRatio"),
+                                wrapper: betterSearch.fetchSettings("imageRatioChange") ? undefined : "input-disabled",
+                                disabled: !betterSearch.fetchSettings("imageRatioChange"),
                             },
                             async (data, input) => {
                                 if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
-                                await thumbnailEnhancer.pushSettings("cropRatio", data);
-                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.setThumbRatio(data);
+                                await betterSearch.pushSettings("imageRatio", data);
+                                betterSearch.updateContentSettings();
+                                betterSearch.refresh();
                             }
                         ),
 
@@ -448,7 +470,7 @@ export class SettingsController extends RE6Module {
                             "Increases the size of the thumbnail when hovering over it",                                                        // line 2
                             2,                                                                                                                  // width
                             "hoverzoom-desc",                                                                                                   // name
-                            thumbnailEnhancer.fetchSettings("upscale") === ThumbnailPerformanceMode.Disabled ? "input-disabled" : undefined,   // wrapper
+                            thumbnailEnhancer.fetchSettings("upscale") === ThumbnailPerformanceMode.Disabled ? "input-disabled" : undefined,    // wrapper
                         ),
                         Form.select(
                             {
@@ -494,20 +516,6 @@ export class SettingsController extends RE6Module {
                         Form.spacer(3),
 
                     ]),
-
-                    Form.checkbox(
-                        {
-                            value: thumbnailEnhancer.fetchSettings("autoPlayGIFs"),
-                            label: "<b>Auto-Play GIFs</b><br />If disabled, animated GIFs will only play on hover",
-                            width: 2,
-                        },
-                        async (data) => {
-                            await thumbnailEnhancer.pushSettings("autoPlayGIFs", data);
-                            if (thumbnailEnhancer.isInitialized()) ThumbnailEnhancer.setAutoPlayGIFs(data);
-                        }
-                    ),
-                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
-                    Form.spacer(3),
 
                     // Voting Buttons
                     Form.checkbox(
