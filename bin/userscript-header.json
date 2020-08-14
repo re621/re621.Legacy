@@ -4,6 +4,9 @@
     "version": "%VERSION%",
     "description": "%DESCRIPTION%",
     "author": "%AUTHOR%",
+    "license": "GPL-3.0-only",
+    "supportURL": "%SUPPORT%",
+    "homepageURL": "%HOMEPAGE%",
     "match": [
         "https://e621.net/*",
         "https://e926.net/*"
@@ -16,7 +19,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.3.0/jszip.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js",
         "https://cdn.jsdelivr.net/npm/jquery.hotkeys@0.1.0/jquery.hotkeys.min.js",
-        "https://cdn.jsdelivr.net/gh/re621/re621-lib@1.0.0/lazysizes/lazysizes.min.js",
+        "https://cdn.jsdelivr.net/gh/re621/re621-lib@c8a82094eefeefdd4389538f87022bacdcf5c459/lazysizes/lazysizes.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.2.0/plugins/unload/ls.unload.min.js",
         "https://cdn.jsdelivr.net/npm/ua-parser-js@0.7.21/src/ua-parser.min.js"
     ],

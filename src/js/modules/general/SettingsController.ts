@@ -1668,7 +1668,7 @@ export class SettingsController extends RE6Module {
             const $info = $("#file-import-status").html("Loading . . .");
 
             const reader = new FileReader();
-            reader.readAsText(data, "UTF-8");
+            reader.readAsText(data[0], "UTF-8");
             reader.onload = function (event): void {
                 const parsedData = JSON.parse(event.target.result.toString());
 
