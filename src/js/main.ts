@@ -27,6 +27,7 @@ import { ImageScaler } from "./modules/post/ImageScaler";
 import { PoolNavigator } from "./modules/post/PoolNavigator";
 import { PostViewer } from "./modules/post/PostViewer";
 import { TitleCustomizer } from "./modules/post/TitleCustomizer";
+import { BetterSearch } from "./modules/search/BetterSearch";
 import { BlacklistEnhancer } from "./modules/search/BlacklistEnhancer";
 import { CustomFlagger } from "./modules/search/CustomFlagger";
 import { InfiniteScroll } from "./modules/search/InfiniteScroll";
@@ -51,6 +52,8 @@ const loadOrder = [
     PoolNavigator,
     PostViewer,
     TitleCustomizer,
+
+    BetterSearch,
 
     CustomFlagger,
     InfiniteScroll,

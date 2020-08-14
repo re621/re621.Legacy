@@ -20,7 +20,7 @@ export class InstantSearch extends RE6Module {
      * @returns Default settings
      */
     protected getDefaultSettings(): Settings {
-        return { enabled: true };
+        return { enabled: false };
     }
 
     /**

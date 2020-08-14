@@ -49,7 +49,7 @@ export class ThumbnailEnhancer extends RE6Module {
 
     protected getDefaultSettings(): Settings {
         return {
-            enabled: true,
+            enabled: false,
 
             upscale: ThumbnailPerformanceMode.Hover,
 

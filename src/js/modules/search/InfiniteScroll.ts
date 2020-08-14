@@ -38,7 +38,7 @@ export class InfiniteScroll extends RE6Module {
      */
     protected getDefaultSettings(): Settings {
         return {
-            enabled: true,
+            enabled: false,
             keepHistory: false,
         };
     }

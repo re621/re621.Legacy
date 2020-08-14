@@ -13,7 +13,7 @@ export class CustomFlagger extends RE6Module {
 
     protected getDefaultSettings(): Settings {
         return {
-            enabled: true,
+            enabled: false,
             flags: [
                 //    { name: "CHARS", color: "#800000", tags: "-solo -duo -group -zero_pictured" },
                 //    { name: "TAGS", color: "#008000", tags: "tagcount:<5" },
