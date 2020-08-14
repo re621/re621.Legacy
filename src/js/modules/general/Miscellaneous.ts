@@ -2,7 +2,6 @@ import { E621 } from "../../components/api/E621";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
 import { Page, PageDefintion } from "../../components/data/Page";
-import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { ThumbnailClickAction, ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
@@ -99,7 +98,7 @@ export class Miscellaneous extends RE6Module {
     /** Emulated clicking on "Edit" tab */
     private openEditTab(): void {
         if (Page.matches(PageDefintion.post)) {
-            $("menu#post-sections > li > a[href$=edit]")[0].click();
+            window.setTimeout(() => { $("#post-edit-link")[0].click(); }, 100);
         }
     }
 
@@ -195,7 +194,7 @@ export class Miscellaneous extends RE6Module {
         if (!state) return;
 
         /* Handle double-click */
-        const clickAction = ModuleController.get(ThumbnailEnhancer).fetchSettings("clickAction");
+        const clickAction = ThumbnailEnhancer.getClickAction();
 
         const avatars = $("div.avatar > div > a").get();
         for (const element of avatars) {
@@ -204,7 +203,13 @@ export class Miscellaneous extends RE6Module {
             let prevent = false;
 
             $link.on("click.re621.thumbnail", (event) => {
-                if (event.button !== 0) { return; }
+                if (
+                    // Ignore mouse clicks which are not left clicks
+                    (event.button !== 0) ||
+                    // Ignore meta-key presses
+                    (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)
+                ) { return; }
+
                 event.preventDefault();
 
                 dbclickTimer = window.setTimeout(() => {
@@ -215,7 +220,12 @@ export class Miscellaneous extends RE6Module {
                     prevent = false;
                 }, 200);
             }).on("dblclick.re621.thumbnail", (event) => {
-                if (event.button !== 0) { return; }
+                if (
+                    // Ignore mouse clicks which are not left clicks
+                    (event.button !== 0) ||
+                    // Ignore meta-key presses
+                    (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)
+                ) { return; }
 
                 event.preventDefault();
                 window.clearTimeout(dbclickTimer);

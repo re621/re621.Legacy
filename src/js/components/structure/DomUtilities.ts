@@ -100,9 +100,10 @@ export class DomUtilities {
         }
 
         // Replace the logo in menu.main with a separate element
+        const titlePageRouting = Util.LS.getItem("re621.mainpage") || "default";
         $("<menu>")
             .addClass("logo desktop-only")
-            .html(`<a href="/" data-ytta-id="-">` + Page.getSiteName() + `</a>`)
+            .html(`<a href="${titlePageRouting == "default" ? "/" : "/" + titlePageRouting}" data-ytta-id="-">` + Page.getSiteName() + `</a>`)
             .prependTo($menuContainer);
         $menuMain.find("a[href='/']").remove();
 

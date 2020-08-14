@@ -5,8 +5,12 @@ import { Util } from "../utility/Util";
 
 export class FavoriteCache {
 
+    private static checkOverride = false;       // force cache validation on page load
+
     private static cache: Set<number>;
     private static enabled: boolean;
+
+    private static storedFavNumber: number;     // number of favorites on e621, not in cache
 
     public static isEnabled(): boolean {
         if (typeof FavoriteCache.enabled == "undefined")
@@ -55,10 +59,10 @@ export class FavoriteCache {
     }
 
     /** Adds the provided item to cache */
-    public static add(post: number): void {
+    public static add(post: number, save = true): void {
         if (!FavoriteCache.isEnabled()) return;
         FavoriteCache.getCache().add(post);
-        FavoriteCache.save();
+        if (save) FavoriteCache.save();
     }
 
     /**
@@ -89,15 +93,40 @@ export class FavoriteCache {
             page++;
             status.html(`<i class="fas fa-circle-notch fa-spin"></i> Processing favorites: batch ${page} / ${totalPages}`)
             result = await E621.Posts.get<APIPost>({ tags: `fav:${User.getUsername()} status:any`, page: page, limit: 320 }, 1000);
-            for (const entry of result) FavoriteCache.add(entry.id);
+            for (const entry of result) FavoriteCache.add(entry.id, false);
         } while (result.length == 320);
 
+        FavoriteCache.save();
         status.html(`<i class="far fa-check-circle"></i> Cache reloaded: ${FavoriteCache.size()} entries`);
 
         window.localStorage.setItem("re621.favcache.update", Util.Time.now() + "")
         window.localStorage.setItem("re621.favcache.invalid", "false");
 
         return Promise.resolve(FavoriteCache.size());
+    }
+
+    /**
+     * Attempt to recover from a cache integrity failure by fetching the newest page of favorites
+     * @param status DOM element for the status messages
+     */
+    public static async quickUpdate(status?: JQuery<HTMLElement>): Promise<boolean> {
+        if (!status) status = $("<span>");
+
+        status.html(`<i class="fas fa-circle-notch fa-spin"></i> Attempting recovery . . .`);
+        for (const entry of await E621.Favorites.get<APIPost>({ user_id: `${User.getUserID()}`, limit: 320 }, 1000))
+            FavoriteCache.add(entry.id, false);
+
+        FavoriteCache.save();
+        status.html(`<i class="far fa-check-circle"></i> Recovery complete: ${FavoriteCache.size()} entries`);
+
+        if ((await FavoriteCache.getStoredFavNumber()) == FavoriteCache.size()) {
+
+            window.localStorage.setItem("re621.favcache.update", Util.Time.now() + "")
+            window.localStorage.setItem("re621.favcache.invalid", "false");
+
+            return Promise.resolve(true);
+        }
+        return Promise.resolve(false);
     }
 
     /** Returns the timestamp for the last time cache state was verified */
@@ -107,13 +136,19 @@ export class FavoriteCache {
 
     /** Returns true if the cache needs to be reloaded */
     public static async isUpdateRequired(): Promise<boolean> {
-        if (FavoriteCache.getUpdateTime() + Util.Time.DAY < Util.Time.now()) {
-            const updateRequired = (await User.getCurrentSettings()).favorite_count !== FavoriteCache.size();
+        if (FavoriteCache.checkOverride || FavoriteCache.getUpdateTime() + Util.Time.DAY < Util.Time.now()) {
+            const updateRequired = (await FavoriteCache.getStoredFavNumber()) !== FavoriteCache.size();
             window.localStorage.setItem("re621.favcache.update", Util.Time.now() + "");
             window.localStorage.setItem("re621.favcache.invalid", updateRequired + "");
             return Promise.resolve(updateRequired);
         }
         return Promise.resolve(window.localStorage.getItem("re621.favcache.invalid") == "true");
+    }
+
+    public static async getStoredFavNumber(force = false): Promise<number> {
+        if (force || FavoriteCache.storedFavNumber == undefined)
+            FavoriteCache.storedFavNumber = (await User.getCurrentSettings()).favorite_count;
+        return Promise.resolve(FavoriteCache.storedFavNumber);
     }
 
 }

@@ -220,6 +220,14 @@ form-section > form-input {
         }
     }
 
+    // Spacer {
+    & > spacer {
+        display: block;
+        height: 1em;
+
+        &.unmargin { height: 0; }
+    }
+
     // HR
     & > hr {
         width: 100%;

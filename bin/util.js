@@ -33,7 +33,9 @@ module.exports = {
             .replace(/%VERSHORT%/g, package.version.replace(/\.\d+$/g, ""))
             .replace(/%BUILD%/g, this.getBuildTime())
             .replace(/%HOMEPAGE%/g, package.homepage)
-            .replace(/%GITHUB%/g, package.github);
+            .replace(/%GITHUB%/g, package.github)
+            .replace(/%SUPPORT%/g, package.bugs.url)
+            .replace(/%HOMEPAGE%/g, package.homepage);
     },
 
 }

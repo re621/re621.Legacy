@@ -54,7 +54,7 @@ const fnDanbooru = {
         },
     },
     "Notice": {
-        "notice": (input: string): void => { Danbooru.notice(input); },
+        "notice": (input: string, permanent: boolean): void => { Danbooru.notice(input, permanent); },
         "error": (input: string): void => { Danbooru.error(input); },
     },
 };

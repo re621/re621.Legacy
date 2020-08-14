@@ -85,7 +85,7 @@ export class BlacklistEnhancer extends RE6Module {
                     .prependTo($container)
                     .click((event) => {
                         event.preventDefault();
-                        this.toggleBlacklistTag($container.parent().attr("data-tag"));
+                        BlacklistEnhancer.toggleBlacklistTag($container.parent().attr("data-tag"));
                     });
             });
         }
@@ -107,22 +107,27 @@ export class BlacklistEnhancer extends RE6Module {
      * Adds or removes a tag from the user's blacklist
      * @param tagname Name of the tag to toggle
      */
-    private async toggleBlacklistTag(tagname: string): Promise<void> {
-        Danbooru.notice("Getting current blacklist");
+    public static async toggleBlacklistTag(tagName: string): Promise<void> {
         let currentBlacklist = (await User.getCurrentSettings()).blacklisted_tags.split("\n");
 
-        if (currentBlacklist.indexOf(tagname) === -1) {
-            currentBlacklist.push(tagname);
-            Blacklist.createFilter(tagname);
-            Danbooru.notice("Adding " + tagname + " to blacklist");
+        if (currentBlacklist.indexOf(tagName) === -1) {
+            currentBlacklist.push(tagName);
+            Blacklist.createFilter(tagName);
+            Danbooru.notice(`Adding ${getTagLink(tagName)} to blacklist`);
         } else {
-            currentBlacklist = currentBlacklist.filter(e => e !== tagname);
-            Blacklist.deleteFilter(tagname);
-            Danbooru.notice("Removing " + tagname + " from blacklist");
+            currentBlacklist = currentBlacklist.filter(e => e !== tagName);
+            Blacklist.deleteFilter(tagName);
+            Danbooru.notice(`Removing ${getTagLink(tagName)} from blacklist`);
         }
         await User.setSettings({ blacklisted_tags: currentBlacklist.join("\n") });
-        Danbooru.notice("Done!");
-        BlacklistEnhancer.applyBlacklist();
+        await BlacklistEnhancer.applyBlacklist();
+
+        return Promise.resolve();
+
+        function getTagLink(tagName: string): string {
+            if (tagName.startsWith("id:")) return `<a href="/posts/${tagName.substr(3)}" target="_blank">${tagName}</a>`;
+            return `<a href="/wiki_pages/show_or_new?title=${tagName}">${tagName}</a>`;
+        }
     }
 
     /**

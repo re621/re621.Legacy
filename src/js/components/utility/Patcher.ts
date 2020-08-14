@@ -83,6 +83,33 @@ export class Patcher {
 
                 Patcher.version = 4;
             }
+
+            // Patch 5 - Version 1.3.19
+            // TinyAlias was replaced with SmartAlias, migrating the settings
+            case 4: {
+                const taConf = await XM.Storage.getValue("re621.TinyAlias", undefined)
+                if (taConf !== undefined && taConf.data !== undefined) {
+                    // Convert the data into a newline-separated string
+                    let output = "";
+                    for (const [key, value] of Object.entries(taConf.data)) {
+                        output += `${key} -> ${value}\n`;
+                        counter++;
+                    }
+
+                    // Append the imported data to SmartAlias configuraiton
+                    const saConf = await XM.Storage.getValue("re621.SmartAlias", { data: "" });
+                    saConf.data = saConf.data +
+                        (saConf.data == "" ? "" : "\n\n") +
+                        "# Imported from TinyAlias\n" +
+                        output;
+                    await XM.Storage.setValue("re621.SmartAlias", saConf);
+
+                    // Clean up the TinyAlias config
+                    await XM.Storage.deleteValue("re621.TinyAlias");
+                }
+
+                Patcher.version = 5;
+            }
         }
 
         Debug.log(`Patcher: ${counter} records changed`)

@@ -12,20 +12,24 @@ export class SmartAlias extends RE6Module {
     private static ITERATIONS_LIMIT = 10;
 
     // Elements to which smart alias instances are to be attached
-    private static inputSelector = [
-        "#post_tags",
-        "#post_tag_string",
-        "#post_characters",
-        "#post_sexes",
-        "#post_bodyTypes",
-        "#post_themes",
-    ];
+    private static inputSelector = new Set([
+        "#post_tag_string",     // editing form tags
+
+        // Yes, this is correct
+        "#post_characters",     // artist
+        "#post_sexes",          // characters
+        "#post_bodyTypes",      // body types
+        "#post_themes",         // themes
+        "#post_tags",           // other tags
+    ]);
 
     private static aliasCache: AliasDefinition[];
     private static aliasCacheLength: number;
 
-    private static tagData: TagData = {};            // stores tag data for the session - count, valid, dnp, etc
-    private static tagAliases: TagAlias = {};        // stores e621's alias pairs to avoid repeated lookups
+    private static tagData: TagData = {};           // stores tag data for the session - count, valid, dnp, etc
+    private static tagAliases: TagAlias = {};       // stores e621's alias pairs to avoid repeated lookups
+
+    private static postPageLockout = false;         // Used to avoid calling the API on every post page
 
     public constructor() {
         super([PageDefintion.upload, PageDefintion.post, PageDefintion.search, PageDefintion.favorites], true);
@@ -35,15 +39,60 @@ export class SmartAlias extends RE6Module {
         return {
             enabled: true,
 
+            autoLoad: true,
             tagOrder: TagOrder.Default,
 
             quickTagsForm: true,
+            editTagsForm: true,
+
+            uploadCharactersForm: true,
+            uploadSexesForm: true,
+            uploadBodyTypesForm: true,
+            uploadThemesForm: true,
+            uploadTagsForm: true,
+
             replaceAliasedTags: true,
             fixCommonTypos: false,
             minPostsWarning: 20,
+            compactOutput: false,
 
             data: "",
         };
+    }
+
+    public async prepare(): Promise<void> {
+        await super.prepare();
+
+        if (!Page.matches(PageDefintion.post)) return;
+
+        // Only create an instance once the editing form is enabled
+        // This will avoid unnecessary API calls, as well as solve issues with dynamic DOM
+        if (!$("#post_tag_string").is(":visible")) {
+
+            // This is dumb, but it works
+            // If the editing form is visible when the script loads, skip this whole thing
+            // This fixes an issue with SmartAlias not loading if the editing form is opened before page loads
+
+            SmartAlias.postPageLockout = true;
+            $("#post-edit-link").one("click.re621", () => {
+                SmartAlias.postPageLockout = false;
+                this.reload();
+            });
+        }
+    }
+
+    /**
+     * Destroys and re-creates the entire module as a method of reloading it.  
+     * It's stupid, but it's the easiest and hassle-free method of resetting some thigns.
+     */
+    public async reload(): Promise<void> {
+        this.destroy();
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                this.create();
+                resolve();
+            }, 100);
+        })
     }
 
     public destroy(): void {
@@ -55,6 +104,8 @@ export class SmartAlias extends RE6Module {
                 .off("focusout.re621.smart-alias");
         }
         $("smart-alias").remove();
+        $("smart-tag-counter").remove();
+        $("button.smart-alias-validate").remove();
     }
 
     public create(): void {
@@ -64,21 +115,38 @@ export class SmartAlias extends RE6Module {
         if (!this.fetchSettings("quickTagsForm") && Page.matches([PageDefintion.search, PageDefintion.favorites]))
             return;
 
+        // Abort execution on the post page if it's disabled anyways
+        if (!this.fetchSettings("editTagsForm") && Page.matches(PageDefintion.post))
+            return;
+
+        // Toggle the data-attribute necessary for the compact form
+        this.setCompactOutput(this.fetchSettings("compactOutput"));
+
+        // Only create the structue once the editing form is enabled
+        if (SmartAlias.postPageLockout) return;
+
+        // Establish the data caches
         if (typeof SmartAlias.aliasCache == "undefined") {
             const cacheData = this.fetchSettings<string>("data");
             SmartAlias.aliasCache = SmartAlias.getAliasData(cacheData);
             SmartAlias.aliasCacheLength = cacheData.length;
         }
 
-        // The post editing form gets created programmatically when the editing button is clicked
-        // Without this, the module's DOM structure will be deleted
-        $("#post-edit-link, .the_secret_switch").one("click", () => {
-            this.destroy();
-            setTimeout(() => { this.create(); }, 100);
-        });
+        // Fix the secret switch breaking the module
+        $(".the_secret_switch").one("click", () => { this.reload(); });
+
+        // Detect enabled inputs
+        const inputs = new Set(Array.from(SmartAlias.inputSelector));
+        const enabledInputs = this.fetchSettings(["uploadCharactersForm", "uploadSexesForm", "uploadBodyTypesForm", "uploadThemesForm", "uploadTagsForm"]);
+        if (!enabledInputs.uploadCharactersForm) inputs.delete("#post_characters");
+        if (!enabledInputs.uploadSexesForm) inputs.delete("#post_sexes");
+        if (!enabledInputs.uploadBodyTypesForm) inputs.delete("#post_bodyTypes");
+        if (!enabledInputs.uploadThemesForm) inputs.delete("#post_themes");
+        if (!enabledInputs.uploadTagsForm) inputs.delete("#post_tags");
 
         // Initializes SmartAlias for all appropriate inputs
-        for (const inputElement of $(SmartAlias.inputSelector.join(", ")).get()) {
+        const mode = this.fetchSettings<boolean>("autoLoad");
+        for (const inputElement of $([...inputs].join(", ")).get()) {
             const $textarea = $(inputElement);
             const $container = $("<smart-alias>")
                 .attr("ready", "true")
@@ -86,27 +154,17 @@ export class SmartAlias extends RE6Module {
             const $counter = $("<smart-tag-counter>")
                 .insertAfter($textarea);
 
-            // Wait for the user to stop typing before processing
-            let typingTimeout: number;
-            $textarea.on("input", () => {
+            if (mode) this.manageAutoLoad($textarea, $container);
+            else this.manageManualLoad($textarea, $container)
 
-                // handleTagInput triggers an input event to properly fill in the data bindings
-                // this ensures that it will not result in an infinite loop
-                if ($textarea.data("vue-event") === "true") {
-                    $textarea.data("vue-event", "false");
-                    return;
-                }
-
-                // If the data is currently processing, but the user keeps typing,
-                // check every second to make sure the last input is caught
-                window.clearInterval(typingTimeout);
-                typingTimeout = window.setInterval(() => {
-                    if ($container.attr("ready") !== "true") return;
-
-                    window.clearInterval(typingTimeout);
-                    this.handleTagInput($textarea, $container);
-                }, 1000);
-            });
+            // On search pages, in the editing mode, reload container when the user clicks on a thumbnail
+            // Otherwise, the old tags get left behind. Thanks to tag data caching, this should be pretty quick
+            if (Page.matches([PageDefintion.search, PageDefintion.favorites])) {
+                $("article.post-preview").on("click.danbooru", () => {
+                    if (mode) this.handleTagInput($textarea, $container, false);
+                    else $container.html("");
+                });
+            }
 
             // Update the tag counter
             let updateTimeout: number;
@@ -115,18 +173,6 @@ export class SmartAlias extends RE6Module {
                 updateTimeout = window.setTimeout(() => { updateTimeout = 0; }, 500);
                 $counter.html(SmartAlias.getInputTags($textarea).length + "");
             });
-
-            // On search pages, in the editing mode, reload container when the user clicks on a thumbnail
-            // Otherwise, the old tags get left behind. Thanks to tag data caching, this should be pretty quick
-            if (Page.matches([PageDefintion.search, PageDefintion.favorites])) {
-                $("article.post-preview").on("click.danbooru", () => {
-                    this.handleTagInput($textarea, $container, false);
-                });
-            }
-
-            // First call, in case the input area is not blank
-            // i.e. on post page, or in editing mode
-            this.handleTagInput($textarea, $container, false);
         }
     }
 
@@ -151,6 +197,47 @@ export class SmartAlias extends RE6Module {
         return (typeof input === "string" ? input : SmartAlias.getInputString(input))
             .split(" ")
             .filter((el) => { return el != null && el != ""; });
+    }
+
+    private manageAutoLoad($textarea: JQuery<HTMLElement>, $container: JQuery<HTMLElement>): void {
+
+        // Wait for the user to stop typing before processing
+        let typingTimeout: number;
+        $textarea.on("input", () => {
+
+            // handleTagInput triggers an input event to properly fill in the data bindings
+            // this ensures that it will not result in an infinite loop
+            if ($textarea.data("vue-event") === "true") {
+                $textarea.data("vue-event", "false");
+                return;
+            }
+
+            // If the data is currently processing, but the user keeps typing,
+            // check every second to make sure the last input is caught
+            window.clearInterval(typingTimeout);
+            typingTimeout = window.setInterval(() => {
+                if ($container.attr("ready") !== "true") return;
+
+                window.clearInterval(typingTimeout);
+                this.handleTagInput($textarea, $container);
+            }, 1000);
+        });
+
+        // First call, in case the input area is not blank
+        // i.e. on post page, or in editing mode
+        this.handleTagInput($textarea, $container, false);
+    }
+
+    private manageManualLoad($textarea: JQuery<HTMLElement>, $container: JQuery<HTMLElement>): void {
+
+        $("<button>")
+            .html("Validate")
+            .addClass("smart-alias-validate")
+            .insertBefore($container)
+            .on("click", () => {
+                this.handleTagInput($textarea, $container, false);
+            });
+
     }
 
     /**
@@ -227,7 +314,7 @@ export class SmartAlias extends RE6Module {
                                 // Prevent duplicate tags from being added by aliases
                                 const result = new Set<string>();
                                 for (const part of output.split(" ")) {
-                                    if (currentValue.includes(part)) continue;
+                                    if (getTagRegex(part).test(currentValue)) continue;
                                     result.add(part);
                                 }
 
@@ -302,10 +389,10 @@ export class SmartAlias extends RE6Module {
         // Step 4
         // Replace all known e6 aliases with their consequent versions to avoid unnecessary API calls
         if (this.fetchSettings("replaceAliasedTags")) {
-            console.log(SmartAlias.tagAliases);
+            // console.log(SmartAlias.tagAliases);
             $textarea.val((index, currentValue) => {
                 for (const [antecedent, consequent] of Object.entries(SmartAlias.tagAliases)) {
-                    console.log("`" + getTagRegex(antecedent) + "`");
+                    // console.log("`" + getTagRegex(antecedent) + "`");
                     currentValue = currentValue.replace(
                         getTagRegex(antecedent),
                         "$1" + consequent + "$3"
@@ -447,9 +534,13 @@ export class SmartAlias extends RE6Module {
                     color = "warning";
                     text = "ambiguous";
                     displayName = displayName.replace("_(disambiguation)", "");
-                } else if (data.count == 0 || data.count < minPostsWarning) {
+                } else if (data.count == 0) {
                     symbol = "error";
-                    color = "warning";
+                    color = "error";
+                    text = "empty";
+                } else if (data.count < minPostsWarning) {
+                    symbol = "error";
+                    color = "error";
                     text = data.count + "";
                 } else {
                     symbol = "success";
@@ -527,6 +618,14 @@ export class SmartAlias extends RE6Module {
                 .trim()
                 .replace(/\s{2,}/g, " ");
         }
+    }
+
+    /**
+     * Toggles the compact form styles
+     * @param state True for compact, false for expanded
+     */
+    public setCompactOutput(state = false): void {
+        $("#page").attr("data-smartalias-compact", state + "");
     }
 
 }

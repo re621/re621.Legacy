@@ -40,7 +40,8 @@ export class Form implements PreparedStructure {
                 event.preventDefault();
                 const values = {};
                 this.inputList.forEach((input, name) => {
-                    values[name] = input.val().toString();
+                    if (input.attr("type") == "checkbox") values[name] = input.is(":checked");
+                    else values[name] = input.val().toString();
                 });
                 onSubmit(values, this);
             });
@@ -86,8 +87,10 @@ export class Form implements PreparedStructure {
     public reset(): void {
         this.inputList.forEach((input) => {
             const defval = input.attr("defval");
-            if (defval !== undefined)
-                input.val(defval);
+            if (defval !== undefined) {
+                if (input.attr("type") == "checkbox") input.prop("checked", defval == "true");
+                else input.val(defval);
+            }
         });
     }
 
@@ -848,16 +851,17 @@ export class Form implements PreparedStructure {
      * Creates an empty spacer element
      * @param width Element width
      */
-    public static spacer(width?: number): FormElement {
+    public static spacer(width?: number, unmargin = false): FormElement {
         const $element = FormUtils.makeInputWrapper(undefined, undefined, width);
 
-        $("<div>")
+        $("<spacer>")
             .attr("id", Util.ID.make())
-            .html("&nbsp;")
+            .toggleClass("unmargin", unmargin)
             .appendTo($element);
 
         return new FormElement($element);
     }
+
 }
 
 class FormUtils {

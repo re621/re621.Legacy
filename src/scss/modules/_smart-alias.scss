@@ -5,6 +5,7 @@ textarea#alias-list-container {
     min-height: 40vh;
     font-family: monospace;
     font-size: 1.2em;
+    overflow: hidden auto;
 }
 
 // Tag Info Interface
@@ -14,15 +15,13 @@ smart-alias {
 
     width: inherit;
     margin: 0.25rem 0;
-    overflow: hidden scroll;
+    overflow: hidden;
 
     font-family: monospace;
     font-size: 1.05rem;
 
     border: 1px solid #666;
     border-radius: 0.25rem;
-
-    @include scrollbars;
 
     smart-tag {
         position: relative;
@@ -84,8 +83,11 @@ smart-alias {
 
 // Limit the height for the editing mode
 #c-posts #a-index smart-alias,
-#c-favorites #a-index smart-alias {
+#c-favorites #a-index smart-alias,
+#page[data-smartalias-compact=true] smart-alias {
     max-height: 6.75rem;
+    overflow: hidden scroll;
+    @include scrollbars;
 }
 
 // Tag counter
@@ -101,4 +103,28 @@ smart-tag-counter {
     font-family: monospace;
     color: #666;
     text-align: right;
+}
+
+button.smart-alias-validate {
+    display: block;
+
+    margin: 0 auto;
+    padding: 0 1rem;
+
+    background: #ffffff11;
+    border: 1px solid #666;
+    border-top: 0;
+    border-radius: 0 0 0.5rem 0.5rem;
+
+    color: white;
+    font-size: 0.75rem;
+
+    &:hover {
+        background: #ffffff20;
+    }
+}
+
+// Bigger Quick-Tags Textarea
+textarea#post_tag_string {
+    min-height: 6rem;
 }

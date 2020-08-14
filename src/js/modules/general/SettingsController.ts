@@ -174,6 +174,19 @@ export class SettingsController extends RE6Module {
                 // Title Customizer
                 Form.accordionTab({ name: "layout", label: "Layout", columns: 3, width: 3 }, [
 
+                    Form.div({ value: "<b>Main Page</b><br />Reroute the title page to the one specified", width: 2 }),
+                    Form.select(
+                        { value: Util.LS.getItem("re621.mainpage") || "default" },
+                        {
+                            "default": "Default",
+                            "posts": "Posts",
+                            "forum_topics": "Forums",
+                            "blips": "Blips",
+                        },
+                        (value) => { Util.LS.setItem("re621.mainpage", value); }
+                    ),
+                    Form.spacer(3, true),
+
                     Form.input(
                         {
                             name: "template", value: titleCustomizer.fetchSettings("template"),
@@ -194,7 +207,7 @@ export class SettingsController extends RE6Module {
                         Form.copy({ value: "%species%", label: "Species" }),
                         Form.copy({ value: "%meta%", label: "Meta" }),
                     ]),
-                    Form.spacer(3),
+                    Form.spacer(3, true),
 
                     Form.checkbox(
                         { value: titleCustomizer.fetchSettings("symbolsEnabled"), label: "<b>Title Icons</b>", width: 3 },
@@ -336,13 +349,15 @@ export class SettingsController extends RE6Module {
                             "disabled": "Disabled",
                             "newtab": "Open New Tab",
                             "copyid": "Copy Post ID",
+                            "blacklist": "Add to Blacklist",
+                            "addtoset": "Add to Current Set ",
+                            "toggleset": "Toggle Current Set ",
                         },
                         async (data) => {
-                            await thumbnailEnhancer.pushSettings("clickAction", data);
+                            await ThumbnailEnhancer.setClickAction(data);
                         }
                     ),
-                    Form.spacer(2),
-                    Form.text(`<div class="unmargin text-center text-bold">Requires a page reload</div>`),
+                    Form.spacer(3),
 
                     // Preserve Hover Text
                     Form.checkbox(
@@ -479,6 +494,20 @@ export class SettingsController extends RE6Module {
                         Form.spacer(3),
 
                     ]),
+
+                    Form.checkbox(
+                        {
+                            value: thumbnailEnhancer.fetchSettings("autoPlayGIFs"),
+                            label: "<b>Auto-Play GIFs</b><br />If disabled, animated GIFs will only play on hover",
+                            width: 2,
+                        },
+                        async (data) => {
+                            await thumbnailEnhancer.pushSettings("autoPlayGIFs", data);
+                            if (thumbnailEnhancer.isInitialized()) ThumbnailEnhancer.setAutoPlayGIFs(data);
+                        }
+                    ),
+                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
+                    Form.spacer(3),
 
                     // Voting Buttons
                     Form.checkbox(
@@ -931,14 +960,13 @@ export class SettingsController extends RE6Module {
 
                     Form.checkbox(
                         {
-                            value: smartAlias.fetchSettings("quickTagsForm"),
-                            label: `<b>Quick Tags Validation</b><br />Enable SmartAlias validation on the search page editing mode form`,
+                            value: smartAlias.fetchSettings("autoLoad"),
+                            label: `<b>Run Automatically</b><br />Either validate tag input as you type, or by pressing a button`,
                             width: 3,
                         },
                         async (data) => {
-                            await smartAlias.pushSettings("quickTagsForm", data);
-                            smartAlias.destroy();
-                            setTimeout(() => { smartAlias.create(); }, 100);
+                            await smartAlias.pushSettings("autoLoad", data);
+                            await smartAlias.reload();
                         }
                     ),
                     Form.spacer(3),
@@ -987,7 +1015,115 @@ export class SettingsController extends RE6Module {
                             smartAlias.pushSettings("minPostsWarning", data);
                         }
                     ),
+                    Form.spacer(3),
 
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("compactOutput"),
+                            label: `<b>Compact Display</b><br />Limit the tag information section to a set height`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("compactOutput", data);
+                            smartAlias.setCompactOutput(data);
+                        }
+                    ),
+
+                ]),
+
+                Form.accordionTab({ name: "aliasref", label: "Validated Inputs", columns: 3, width: 3 }, [
+
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("quickTagsForm"),
+                            label: `<b>Quick Tags</b><br />SmartAlias validation on the search page editing mode form`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("quickTagsForm", data);
+                            await smartAlias.reload();
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("editTagsForm"),
+                            label: `<b>Post Editing</b><br />SmartAlias validation on the individual post editing form`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("editTagsForm", data);
+                            await smartAlias.reload();
+                        }
+                    ),
+                    Form.hr(3),
+
+                    Form.header("Upload Page"),
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("uploadCharactersForm"),
+                            label: `<b>Artist Tags</b>`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("uploadCharactersForm", data);
+                            await smartAlias.reload();
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("uploadSexesForm"),
+                            label: `<b>Characters</b>`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("uploadSexesForm", data);
+                            await smartAlias.reload();
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("uploadBodyTypesForm"),
+                            label: `<b>Species</b>`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("uploadBodyTypesForm", data);
+                            await smartAlias.reload();
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("uploadThemesForm"),
+                            label: `<b>Themes</b>`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("uploadThemesForm", data);
+                            await smartAlias.reload();
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("uploadTagsForm"),
+                            label: `<b>Other Tags</b>`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("uploadTagsForm", data);
+                            await smartAlias.reload();
+                        }
+                    ),
+                    Form.spacer(3),
 
                 ]),
 
@@ -1005,6 +1141,9 @@ export class SettingsController extends RE6Module {
                         }
                     ),
                     Form.div({ value: `<span id="defs-confirm"></span>` }),
+                    Form.div({
+                        value: `<div class="float-right">[ <a href="https://github.com/re621/re621/wiki/SmartAlias">syntax help</a> ]</div>`
+                    })
                 ]),
 
             ]),
@@ -1022,6 +1161,7 @@ export class SettingsController extends RE6Module {
             subscriptionManager = ModuleController.get(SubscriptionManager),
             searchUtilities = ModuleController.get(SearchUtilities);
 
+        /** Creates and returns two keybind inputs and a label */
         function createInputs(module: RE6Module, label: string, settingsKey: string): FormElement[] {
             const values = module.fetchSettings(settingsKey).split("|");
             const bindings: string[] = [
@@ -1049,6 +1189,42 @@ export class SettingsController extends RE6Module {
             }
         }
 
+        /** Creates and returns a label, a keybind input, and a text input */
+        function createCustomInputs(module: RE6Module, label: string, dataLabel: string, settingsKey: string, pattern?: string): FormElement[] {
+            const values = module.fetchSettings(settingsKey).split("|"),
+                dataVal = module.fetchSettings(settingsKey + "_data");
+            const bindings: string[] = [
+                values[0] === undefined ? "" : values[0],
+                values[1] === undefined ? "" : values[1],
+            ];
+
+            return [
+                Form.div({ value: label }),
+                Form.key(
+                    { value: bindings[0] },
+                    async (data) => { await handleRebinding(data, 0); }
+                ),
+                Form.input(
+                    {
+                        value: dataVal,
+                        label: dataLabel,
+                        pattern: pattern,
+                    },
+                    async (data, input) => {
+                        if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                        await module.pushSettings(settingsKey + "_data", data)
+                    }
+                )
+            ];
+
+            async function handleRebinding(data: string[], index: 0 | 1): Promise<void> {
+                bindings[index] = data[0];
+                await module.pushSettings(settingsKey, bindings.join("|"));
+                Hotkeys.unregister(data[1]);
+                await module.resetHotkeys();
+            }
+        }
+
         return new Form({ name: "opthotkeys", columns: 3, width: 3 }, [
             // Listing
             Form.header("Listing", 3),
@@ -1063,13 +1239,25 @@ export class SettingsController extends RE6Module {
             ...createInputs(postViewer, "Toggle Favorite", "hotkeyFavorite"),
             ...createInputs(postViewer, "Add to Favorites", "hotkeyAddFavorite"),
             ...createInputs(postViewer, "Remove From Favorites", "hotkeyRemoveFavorite"),
+            ...createInputs(imageScaler, "Fullscreen Mode", "hotkeyFullscreen"),
+            Form.spacer(3, true),
+
             ...createInputs(poolNavigator, "Previous Post", "hotkeyPrev"),
             ...createInputs(poolNavigator, "Next Post", "hotkeyNext"),
             ...createInputs(poolNavigator, "Cycle Navigation", "hotkeyCycle"),
             ...createInputs(imageScaler, "Change Scale", "hotkeyScale"),
+            Form.spacer(3, true),
+
             ...createInputs(postViewer, "Open `Add to Set` Dialog", "hotkeyAddSet"),
             ...createInputs(postViewer, "Open `Add to Pool` Dialog", "hotkeyAddPool"),
-            ...createInputs(postViewer, "Add to Last Used Set", "hotkeyAddSetLatest"),
+            ...createInputs(postViewer, "Toggle Current Set", "hotkeyToggleSetLatest"),
+            ...createInputs(postViewer, "Add to Current Set", "hotkeyAddSetLatest"),
+            ...createInputs(postViewer, "Remove from Current Set", "hotkeyRemoveSetLatest"),
+            Form.spacer(3, true),
+
+            ...createCustomInputs(postViewer, "Add to Set", "Set ID", "hotkeyAddSetCustom1", "\\d+"),
+            ...createCustomInputs(postViewer, "Add to Set", "Set ID", "hotkeyAddSetCustom2", "\\d+"),
+            ...createCustomInputs(postViewer, "Add to Set", "Set ID", "hotkeyAddSetCustom3", "\\d+"),
             Form.hr(3),
 
             // Actions
@@ -1230,12 +1418,17 @@ export class SettingsController extends RE6Module {
                                 if (!FavoriteCache.isEnabled()) {
                                     $status.html(`<i class="far fa-times-circle"></i> Cache disabled`);
                                 } else if (await FavoriteCache.isUpdateRequired()) {
-                                    $status.html(`
-                                        <i class="far fa-times-circle"></i> 
-                                        <span style="color:gold">Reset required</span>: Cache integrity failure
-                                    `);
-                                    this.pushNotificationsCount(1);
-                                    favcacheUpdated = false;
+
+                                    if (await FavoriteCache.quickUpdate($status)) {
+                                        $status.html(`<i class="far fa-check-circle"></i> Cache recovered (${FavoriteCache.size()} items)`);
+                                    } else {
+                                        $status.html(`
+                                            <i class="far fa-times-circle"></i> 
+                                            <span style="color:gold">Reset required</span>: Cache integrity failure
+                                        `);
+                                        this.pushNotificationsCount(1);
+                                        favcacheUpdated = false;
+                                    }
                                 } else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified`)
                             },
                             width: 2,
@@ -1467,7 +1660,7 @@ export class SettingsController extends RE6Module {
             const $info = $("#file-import-status").html("Loading . . .");
 
             const reader = new FileReader();
-            reader.readAsText(data, "UTF-8");
+            reader.readAsText(data[0], "UTF-8");
             reader.onload = function (event): void {
                 const parsedData = JSON.parse(event.target.result.toString());
 

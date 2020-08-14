@@ -1,8 +1,8 @@
 import { Danbooru } from "../../components/api/Danbooru";
-import { E621 } from "../../components/api/E621";
 import { FavoriteCache } from "../../components/cache/FavoriteCache";
 import { PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
+import { PostActions } from "../../components/data/PostActions";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
@@ -29,7 +29,13 @@ export class PostViewer extends RE6Module {
             { keys: "hotkeyAddSet", fnct: this.addSet },
             { keys: "hotkeyAddPool", fnct: this.addPool },
 
+            { keys: "hotkeyToggleSetLatest", fnct: this.toggleSetLatest, },
             { keys: "hotkeyAddSetLatest", fnct: this.addSetLatest, },
+            { keys: "hotkeyRemoveSetLatest", fnct: this.removeSetLatest, },
+
+            { keys: "hotkeyAddSetCustom1", fnct: () => { this.addSetCustom("hotkeyAddSetCustom1_data"); } },
+            { keys: "hotkeyAddSetCustom2", fnct: () => { this.addSetCustom("hotkeyAddSetCustom2_data"); } },
+            { keys: "hotkeyAddSetCustom3", fnct: () => { this.addSetCustom("hotkeyAddSetCustom3_data"); } },
         );
     }
 
@@ -53,7 +59,16 @@ export class PostViewer extends RE6Module {
             hotkeyAddSet: "",           // open the "add to set" dialogue
             hotkeyAddPool: "",          // open the "add to pool" dialogue
 
-            hotkeyAddSetLatest: "",     // add current post to the latest used set
+            hotkeyToggleSetLatest: "",  // toggles the current post's set
+            hotkeyAddSetLatest: "",     // adds the current post to the last used set
+            hotkeyRemoveSetLatest: "",  // removes the current post from the last used set
+
+            hotkeyAddSetCustom1: "",
+            hotkeyAddSetCustom1_data: "0",
+            hotkeyAddSetCustom2: "",
+            hotkeyAddSetCustom2_data: "0",
+            hotkeyAddSetCustom3: "",
+            hotkeyAddSetCustom3_data: "0",
 
             upvoteOnFavorite: true,     // add an upvote when adding the post to favorites
             hideNotes: false,           // should the notes be hidden by default
@@ -177,20 +192,44 @@ export class PostViewer extends RE6Module {
         $("a#set")[0].click();
     }
 
-    /** Adds the current post to the latest added set */
+    /** Adds or removes the current post from the latest used set */
+    private toggleSetLatest(): void {
+        const lastSet = parseInt(window.localStorage.getItem("set"));
+        if (!lastSet) {
+            Danbooru.error(`Error: no set selected`);
+            return;
+        }
+
+        PostActions.toggleSet(lastSet, Post.getViewingPost().getId());
+    }
+
+    /** Adds the current post to the latest used set */
     private addSetLatest(): void {
         const lastSet = parseInt(window.localStorage.getItem("set"));
-        if (!lastSet) return;
+        if (!lastSet) {
+            Danbooru.error(`Error: no set selected`);
+            return;
+        }
 
-        E621.SetAddPost.id(lastSet).post({ "post_ids[]": [Post.getViewingPost().getId()] }).then(
-            (response) => {
-                if (response[1] == 201)
-                    Danbooru.notice(`<a href="/post_sets/${response[0].id}">${response[0].name}</a>: Post Added (${response[0].post_count} total)`);
-                else Danbooru.error(`Error occured while adding the post to set: ${response[1]}`);
-            },
-            (error) => {
-                Danbooru.error(`Error occured while adding the post to set: ${error[1]}`);
-            }
+        PostActions.addSet(lastSet, Post.getViewingPost().getId());
+    }
+
+    /** Removes the current post frp, the latest used set */
+    private removeSetLatest(): void {
+        const lastSet = parseInt(window.localStorage.getItem("set"));
+        if (!lastSet) {
+            Danbooru.error(`Error: no set selected`);
+            return;
+        }
+
+        PostActions.removeSet(lastSet, Post.getViewingPost().getId());
+    }
+
+    /** Adds the current post to the set defined in the config */
+    private addSetCustom(dataKey: string): void {
+        PostActions.addSet(
+            this.fetchSettings<number>(dataKey),
+            Post.getViewingPost().getId()
         );
     }
 

@@ -4,11 +4,13 @@
  */
 
 // Load Modules
+import { Page, PageDefintion } from "./components/data/Page";
 import { ModuleController } from "./components/ModuleController";
 import { DomUtilities } from "./components/structure/DomUtilities";
 import { Debug } from "./components/utility/Debug";
 import { Patcher } from "./components/utility/Patcher";
 import { Sync } from "./components/utility/Sync";
+import { Util } from "./components/utility/Util";
 import { FavDownloader } from "./modules/downloader/FavDownloader";
 import { MassDownloader } from "./modules/downloader/MassDownloader";
 import { PoolDownloader } from "./modules/downloader/PoolDownloader";
@@ -80,6 +82,12 @@ const subscriptions = [
 
 // Show the script version in the console
 console.log(`${window["re621"]["name"]} v.${window["re621"]["version"]} build ${window["re621"]["build"]}`);
+
+// Reroute the title page before everything else loads
+if (Page.matches(PageDefintion.title)) {
+    const page = Util.LS.getItem("re621.mainpage");
+    if (page && page !== "default") window.location.replace("/" + page);
+}
 
 // Create the basic DOM structure
 DomUtilities.createStructure().then(async () => {
