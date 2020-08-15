@@ -100,20 +100,7 @@ export class MassDownloader extends RE6Module {
             .appendTo(this.section);
 
 
-        this.container = $("#posts-container")
-            .selectable({
-                autoRefresh: false,
-                filter: "article.post-preview",
-                selected: function (event, ui) {
-                    $(ui.selected)
-                        .toggleClass("download-item")
-                        .attr("data-state", "ready");
-                }
-            });
-
-        InfiniteScroll.on("pageLoad.MassDownloader", () => {
-            this.container.selectable("refresh");
-        });
+        this.container = $("#posts-container");
     }
 
     public destroy(): void {
@@ -138,15 +125,29 @@ export class MassDownloader extends RE6Module {
 
             this.container
                 .attr("data-downloading", "true")
-                .selectable("refresh")
-                .selectable("enable");
+                .selectable({
+                    autoRefresh: false,
+                    filter: "article.post-preview",
+                    selected: function (event, ui) {
+                        $(ui.selected)
+                            .toggleClass("download-item")
+                            .attr("data-state", "ready");
+                    }
+                });
+
+            InfiniteScroll.on("pageLoad.MassDownloader", () => {
+                this.container.selectable("refresh");
+            });
+
         } else {
             this.selectButton.html("Select");
             this.section.attr("data-interface", "false");
 
             this.container
                 .attr("data-downloading", "false")
-                .selectable("disable");
+                .selectable("destroy");
+
+            InfiniteScroll.off("pageLoad.MassDownloader");
         }
     }
 

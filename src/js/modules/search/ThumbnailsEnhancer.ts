@@ -433,91 +433,91 @@ export class ThumbnailEnhancer extends RE6Module {
 
 
         /* Handle double-click */
-        let dbclickTimer: number;
-        const delay = 200;
-        let prevent = false;
+        if (ThumbnailEnhancer.clickAction !== ThumbnailClickAction.Disabled) {
+            let dbclickTimer: number;
+            const delay = 200;
+            let prevent = false;
 
-        //Make it so that the doubleclick prevents the normal click event
-        $link.on("click.re621.thumbnail", (event) => {
-            if (
-                // Ignore mouse clicks which are not left clicks
-                (event.button !== 0) ||
-                // Stop keeping track of double clicks if the zoom is paused
-                (ThumbnailEnhancer.zoomPaused) ||
-                // Make sure the click does not get triggered on the voting buttons
-                ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton")) ||
-                // Only use double-click actions in the view mode
-                $("#mode-box-mode").val() !== "view"
-            ) { return; }
+            //Make it so that the doubleclick prevents the normal click event
+            $link.on("click.re621.thumbnail", (event) => {
+                console.log("click");
 
-            // Handle the meta-key presses
-            if (event.ctrlKey || event.metaKey) {
-                XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
-                return;
-            }
+                if (
+                    // Ignore mouse clicks which are not left clicks
+                    (event.button !== 0) ||
+                    // Ignore meta-key presses
+                    (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) ||
+                    // Stop keeping track of double clicks if the zoom is paused
+                    (ThumbnailEnhancer.zoomPaused) ||
+                    // Make sure the click does not get triggered on the voting buttons
+                    ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton")) ||
+                    // Only use double-click actions in the view mode
+                    $("#mode-box-mode").val() !== "view"
+                ) { return; }
 
-            event.preventDefault();
+                event.preventDefault();
 
-            dbclickTimer = window.setTimeout(() => {
-                if (!prevent) {
-                    $link.off("click.re621.thumbnail");
-                    $link[0].click();
-                }
-                prevent = false;
-            }, delay);
-        }).on("dblclick.re621.thumbnail", (event) => {
-            if (
-                // Ignore mouse clicks which are not left clicks
-                (event.button !== 0) ||
-                // Ignore meta-key presses
-                (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) ||
-                // Stop keeping track of double clicks if the zoom is paused
-                (ThumbnailEnhancer.zoomPaused) ||
-                // Make sure the click does not get triggered on the voting buttons
-                ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton")) ||
-                // Only use double-click actions in the view mode
-                $("#mode-box-mode").val() !== "view"
-            ) { return; }
+                dbclickTimer = window.setTimeout(() => {
+                    if (!prevent) {
+                        $link.off("click.re621.thumbnail");
+                        $link[0].click();
+                    }
+                    prevent = false;
+                }, delay);
+            }).on("dblclick.re621.thumbnail", (event) => {
+                if (
+                    // Ignore mouse clicks which are not left clicks
+                    (event.button !== 0) ||
+                    // Ignore meta-key presses
+                    (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) ||
+                    // Stop keeping track of double clicks if the zoom is paused
+                    (ThumbnailEnhancer.zoomPaused) ||
+                    // Make sure the click does not get triggered on the voting buttons
+                    ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton")) ||
+                    // Only use double-click actions in the view mode
+                    $("#mode-box-mode").val() !== "view"
+                ) { return; }
 
-            event.preventDefault();
-            window.clearTimeout(dbclickTimer);
-            prevent = true;
+                event.preventDefault();
+                window.clearTimeout(dbclickTimer);
+                prevent = true;
 
-            $article.addClass("highlight");
-            window.setTimeout(() => $article.removeClass("highlight"), 250);
+                $article.addClass("highlight");
+                window.setTimeout(() => $article.removeClass("highlight"), 250);
 
-            switch (ThumbnailEnhancer.clickAction) {
-                case ThumbnailClickAction.NewTab: {
-                    XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
-                    break;
+                switch (ThumbnailEnhancer.clickAction) {
+                    case ThumbnailClickAction.NewTab: {
+                        XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
+                        break;
+                    }
+                    case ThumbnailClickAction.CopyID: {
+                        Danbooru.notice(`Copied post ID to clipboard: <a href="/posts/${postID}" target="_blank">#${postID}</a>`);
+                        XM.Util.setClipboard($article.attr("data-id"), "text");
+                        break;
+                    }
+                    case ThumbnailClickAction.Blacklist: {
+                        BlacklistEnhancer.toggleBlacklistTag("id:" + postID);
+                        break;
+                    }
+                    case ThumbnailClickAction.AddToSet: {
+                        const lastSet = parseInt(window.localStorage.getItem("set"));
+                        if (!lastSet) Danbooru.error(`Error: no set selected`);
+                        else PostActions.addSet(lastSet, postID);
+                        break;
+                    }
+                    case ThumbnailClickAction.ToggleSet: {
+                        const lastSet = parseInt(window.localStorage.getItem("set"));
+                        if (!lastSet) Danbooru.error(`Error: no set selected`);
+                        else PostActions.toggleSet(lastSet, postID);
+                        break;
+                    }
+                    default: {
+                        $link.off("click.re621.thumbnail");
+                        $link[0].click();
+                    }
                 }
-                case ThumbnailClickAction.CopyID: {
-                    Danbooru.notice(`Copied post ID to clipboard: <a href="/posts/${postID}" target="_blank">#${postID}</a>`);
-                    XM.Util.setClipboard($article.attr("data-id"), "text");
-                    break;
-                }
-                case ThumbnailClickAction.Blacklist: {
-                    BlacklistEnhancer.toggleBlacklistTag("id:" + postID);
-                    break;
-                }
-                case ThumbnailClickAction.AddToSet: {
-                    const lastSet = parseInt(window.localStorage.getItem("set"));
-                    if (!lastSet) Danbooru.error(`Error: no set selected`);
-                    else PostActions.addSet(lastSet, postID);
-                    break;
-                }
-                case ThumbnailClickAction.ToggleSet: {
-                    const lastSet = parseInt(window.localStorage.getItem("set"));
-                    if (!lastSet) Danbooru.error(`Error: no set selected`);
-                    else PostActions.toggleSet(lastSet, postID);
-                    break;
-                }
-                default: {
-                    $link.off("click.re621.thumbnail");
-                    $link[0].click();
-                }
-            }
-        });
+            });
+        }
 
 
         /* Load the larger images */
