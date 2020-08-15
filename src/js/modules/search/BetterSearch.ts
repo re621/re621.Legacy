@@ -119,7 +119,7 @@ export class BetterSearch extends RE6Module {
             // Load the image and its basic info
             this.$zoomBlock.attr("status", "loading");
             this.$zoomImage
-                .attr("src", $article.data("file.original"))
+                .attr("src", $article.data(this.fetchSettings("zoomFull") ? "file.original" : "file.sample"))
                 .one("load", () => {
                     this.$zoomBlock.attr("status", "ready");
                     $article.removeAttr("loading");

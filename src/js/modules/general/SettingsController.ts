@@ -341,7 +341,7 @@ export class SettingsController extends RE6Module {
                                 .toggleClass("input-disabled", zoomDisabled);
                         }
                     ),
-                    Form.spacer(3),
+                    Form.spacer(3, true),
 
                     Form.checkbox(
                         {
@@ -354,7 +354,7 @@ export class SettingsController extends RE6Module {
                             if (betterSearch.isInitialized()) betterSearch.updateContentStructure();
                         }
                     ),
-                    Form.spacer(3),
+                    Form.spacer(3, true),
 
                     // Double-click
                     Form.subheader("Double-Click Action", "Action taken when a thumbnail is double-clicked", 2),
@@ -373,7 +373,7 @@ export class SettingsController extends RE6Module {
                             if (betterSearch.isInitialized()) betterSearch.updateContentStructure();
                         }
                     ),
-                    Form.spacer(3),
+                    Form.spacer(3, true),
 
                     // Preserve Hover Text
                     Form.checkbox(
@@ -387,7 +387,7 @@ export class SettingsController extends RE6Module {
                             if (betterSearch.isInitialized()) betterSearch.updateContentStructure();
                         }
                     ),
-                    Form.spacer(3),
+                    Form.spacer(3, true),
 
                     Form.collapse({ name: "scalingconf", columns: 3, width: 3, title: "Scaling Options", collapsed: true }, [
 
@@ -494,18 +494,30 @@ export class SettingsController extends RE6Module {
 
                         Form.checkbox(
                             {
+                                value: betterSearch.fetchSettings("zoomFull"),
+                                label: "<b>Large Images</b><br />Load the zoomed-in preview at the original resolution",
+                                width: 3,
+                            },
+                            async (data) => {
+                                await betterSearch.pushSettings("zoomFull", data);
+                            }
+                        ),
+                        Form.spacer(3, true),
+
+                        Form.checkbox(
+                            {
                                 value: betterSearch.fetchSettings("zoomTags"),
                                 label: "<b>Show Tags</b><br />Display the list of posts's tags under the zoom-in image",
                                 width: 3,
                             },
                             async (data) => {
                                 await betterSearch.pushSettings("zoomTags", data);
-                                if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                             }
                         ),
                         Form.spacer(3, true),
 
                     ]),
+                    Form.spacer(3, true),
 
                     // Voting Buttons
                     Form.checkbox(
