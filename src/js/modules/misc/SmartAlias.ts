@@ -258,8 +258,7 @@ export class SmartAlias extends RE6Module {
             $textarea.val((index, currentValue) => {
                 return (currentValue
                     .toLowerCase()
-                    .replace(/\-/g, "_"))
-                    + ((currentValue.length == 0 || currentValue.endsWith(" ")) ? "" : " ");
+                    .replace(/\-/g, "_"));
             });
         }
 
