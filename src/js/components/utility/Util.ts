@@ -1,4 +1,5 @@
 import { UtilID } from "./UtilID";
+import { UtilMath } from "./UtilMath";
 import { UtilTime } from "./UtilTime";
 
 /**
@@ -8,6 +9,7 @@ export class Util {
 
     public static Time = UtilTime;
     public static ID = UtilID;
+    public static Math = UtilMath;
     public static LS = window.localStorage;
 
     /**

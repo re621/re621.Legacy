@@ -38,6 +38,7 @@ export class BetterSearch extends RE6Module {
             imageRatio: "0.9",                              // Ratio to conform to
 
             zoomMode: ImageZoomMode.Disabled,               // How should the hover zoom be triggered
+            zoomFull: false,                                // Load full-sized (original) image instead of a sampled one
             zoomTags: false,                                // Show a list of tags under the zoomed-in image
 
             hoverTags: false,                               // If true, adds a hover text to the image containing all of its tags
@@ -115,6 +116,7 @@ export class BetterSearch extends RE6Module {
             const $article = $("#post_" + data)
                 .attr("loading", "true");
 
+            // Load the image and its basic info
             this.$zoomBlock.attr("status", "loading");
             this.$zoomImage
                 .attr("src", $article.data("file.original"))
@@ -124,38 +126,31 @@ export class BetterSearch extends RE6Module {
                 });
             this.$zoomInfo.html(`${$article.data("img.width")} x ${$article.data("img.height")}, ${Util.formatBytes($article.data("file.size"))}`);
 
-            if (this.fetchSettings("zoomTags")) this.$zoomTags.html([...$article.data("tags")].sort().join(" "));
-            else this.$zoomTags.html("");
+            // Append the tags block
+            if (this.fetchSettings("zoomTags"))
+                this.$zoomTags.html([...$article.data("tags")].sort().join(" "));
 
+            // Listen for mouse movements to move the preview accordingly
             let throttled = false;
             $(document).on("mousemove.re621.zoom", (event) => {
+
+                // Throttle the mousemove events to 40 frames per second
+                // Anything less than 30 feels choppy, but performance is a concern
                 if (throttled) return;
                 throttled = true;
                 window.setTimeout(() => { throttled = false }, 25);
 
-                const width = viewport.width(),
+                const imgHeight = this.$zoomBlock.height(),
                     cursorX = event.pageX,
                     cursorY = event.pageY - viewport.scrollTop();
 
-                // which side of the screen the cursor is on, true for left, false for right
-                if (cursorX < (width / 2)) {
-                    this.$zoomBlock.css({
-                        "left": `${cursorX + 100}px`,
-                        "right": "",
-                    });
-                } else {
-                    this.$zoomBlock.css({
-                        "left": "",
-                        "right": `${((width - cursorX) + 100)}px`,
-                    });
-                }
-
-                const imgHeight = this.$zoomBlock.height();
-                let top = cursorY - (imgHeight / 2);
-                if (top < 10) top = 10;
-                else if (top > (viewport.height() - imgHeight - 10)) top = (viewport.height() - imgHeight - 10);
+                const left = (cursorX < (viewport.width() / 2))
+                    ? cursorX + 100                                 // left side of the screen
+                    : cursorX - this.$zoomBlock.width() - 100;      // right side
+                const top = Util.Math.clamp(cursorY - (imgHeight / 2), 10, (viewport.height() - imgHeight - 10));
 
                 this.$zoomBlock.css({
+                    "left": `${left}px`,
                     "top": `${top}px`,
                 });
 
@@ -163,20 +158,20 @@ export class BetterSearch extends RE6Module {
         });
         BetterSearch.on("zoom.stop", (event, data) => {
             $(document).off("mousemove.re621.zoom");
+
+            // Reset the preview window
             this.$zoomBlock
                 .attr("status", "waiting")
                 .css({
                     "left": 0,
-                    "right": "",
                     "top": "100vh",
                 });
             this.$zoomInfo.html("");
-            this.$zoomImage
-                .attr("src", DomUtilities.getPlaceholderImage());
+            this.$zoomImage.attr("src", DomUtilities.getPlaceholderImage());
             this.$zoomTags.html("");
 
-            $("#post_" + data)
-                .removeAttr("loading");
+            // If the post was loading, remove the spinner
+            $("#post_" + data).removeAttr("loading");
         });
     }
 

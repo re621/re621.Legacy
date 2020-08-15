@@ -414,7 +414,7 @@ export class PostUtilities {
     public static getHoverText($article: JQuery<HTMLElement>, html = false): string {
         const br = html ? "<br>\n" : "\n";
         return `` +
-            `#${$article.data("id")}, posted on: ${Util.Time.format($article.data("date"))} (${$article.data("date.ago")})${br}` +
+            `Post #${$article.data("id")}, posted on: ${Util.Time.format($article.data("date"))} (${$article.data("date.ago")})${br}` +
             `${[...$article.data("tags.artist"), ...$article.data("tags.copyright")].join(" ")}${br}` +
             `${[...$article.data("tags.character"), ...$article.data("tags.species")].join(" ")}${br}` +
             `${[...$article.data("tags.general"), ...$article.data("tags.invalid"), $article.data("tags.lore"), ...$article.data("tags.meta")].join(" ")}${br}` +
