@@ -331,7 +331,7 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await betterSearch.pushSettings("imageLoadMethod", data);
-                            betterSearch.refresh();
+                            if (betterSearch.isInitialized()) betterSearch.updateContentStructure();
 
                             const zoomDisabled = data === ImageLoadMethod.Disabled;
                             $("#optgeneral-gencollapse-thumb-scalingconf-hoverzoom-desc").toggleClass("input-disabled", zoomDisabled);
@@ -351,8 +351,7 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await betterSearch.pushSettings("autoPlayGIFs", data);
-                            if (thumbnailEnhancer.isInitialized()) ThumbnailEnhancer.setAutoPlayGIFs(data);
-                            betterSearch.refresh();
+                            if (betterSearch.isInitialized()) betterSearch.updateContentStructure();
                         }
                     ),
                     Form.spacer(3),
@@ -371,7 +370,7 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await betterSearch.pushSettings("clickAction", data);
-                            betterSearch.refresh();
+                            if (betterSearch.isInitialized()) betterSearch.updateContentStructure();
                         }
                     ),
                     Form.spacer(3),
@@ -385,7 +384,7 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await betterSearch.pushSettings("hoverTags", data);
-                            betterSearch.refresh();
+                            if (betterSearch.isInitialized()) betterSearch.updateContentStructure();
                         }
                     ),
                     Form.spacer(3),
@@ -401,8 +400,7 @@ export class SettingsController extends RE6Module {
                             },
                             async (data) => {
                                 await betterSearch.pushSettings("imageSizeChange", data);
-                                betterSearch.updateContentSettings();
-                                betterSearch.refresh(); // TODO Is this necessary
+                                if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                             }
                         ),
                         Form.spacer(3, true),
@@ -413,8 +411,7 @@ export class SettingsController extends RE6Module {
                             async (data, input) => {
                                 if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
                                 await betterSearch.pushSettings("imageWidth", data);
-                                betterSearch.updateContentSettings();
-                                betterSearch.refresh();
+                                if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                             }
                         ),
                         Form.spacer(3, true),
@@ -428,8 +425,10 @@ export class SettingsController extends RE6Module {
                             },
                             async (data) => {
                                 await betterSearch.pushSettings("imageRatioChange", data);
-                                betterSearch.updateContentSettings();
-                                betterSearch.refresh();
+                                if (betterSearch.isInitialized()) {
+                                    betterSearch.updateContentHeader();
+                                    betterSearch.updateContentStructure();
+                                }
 
                                 $("#optgeneral-gencollapse-thumb-scalingconf-cropratio-desc").toggleClass("input-disabled", !data);
                                 $("#optgeneral-gencollapse-thumb-scalingconf-cropratio")
@@ -458,8 +457,10 @@ export class SettingsController extends RE6Module {
                             async (data, input) => {
                                 if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
                                 await betterSearch.pushSettings("imageRatio", data);
-                                betterSearch.updateContentSettings();
-                                betterSearch.refresh();
+                                if (betterSearch.isInitialized()) {
+                                    betterSearch.updateContentHeader();
+                                    betterSearch.updateContentStructure();
+                                }
                             }
                         ),
 
@@ -489,7 +490,7 @@ export class SettingsController extends RE6Module {
                                 if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleHoverZoom(data);
                             }
                         ),
-                        Form.spacer(3),
+                        Form.spacer(3, true),
 
                         Form.subheader("Zoom scale", "The ratio of the enlarged thumbnail to its original size", 2),
                         Form.input(
@@ -500,7 +501,7 @@ export class SettingsController extends RE6Module {
                                 if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.setZoomScale(data);
                             }
                         ),
-                        Form.spacer(3),
+                        Form.spacer(3, true),
 
                         Form.checkbox(
                             {
@@ -513,7 +514,7 @@ export class SettingsController extends RE6Module {
                                 if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleZoomContextual(data);
                             }
                         ),
-                        Form.spacer(3),
+                        Form.spacer(3, true),
 
                     ]),
 
@@ -521,63 +522,55 @@ export class SettingsController extends RE6Module {
                     Form.checkbox(
                         {
                             name: "votebutton",
-                            value: thumbnailEnhancer.fetchSettings("vote"),
+                            value: betterSearch.fetchSettings("buttonsVote"),
                             label: "<b>Voting Buttons</b><br />Adds voting buttons when hovering over a thumbnail",
                             width: 3,
                         },
                         async (data) => {
-                            await thumbnailEnhancer.pushSettings("vote", data);
-                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleHoverVote(data);
+                            await betterSearch.pushSettings("buttonsVote", data);
+                            if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                         }
                     ),
-                    Form.spacer(3),
+                    Form.spacer(3, true),
 
                     // Favorite Button
                     Form.checkbox(
                         {
                             name: "favbutton",
-                            value: thumbnailEnhancer.fetchSettings("fav"),
+                            value: betterSearch.fetchSettings("buttonsFav"),
                             label: "<b>Favorite Button</b><br />Adds a +favorite button when hovering over a thumbnail",
                             width: 3
                         },
                         async (data) => {
-                            await thumbnailEnhancer.pushSettings("fav", data);
-                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleHoverFav(data);
+                            await betterSearch.pushSettings("buttonsFav", data);
+                            if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                         }
                     ),
-                    Form.spacer(3),
+                    Form.spacer(3, true),
 
                     // Ribbons
                     Form.checkbox(
                         {
-                            value: thumbnailEnhancer.fetchSettings("ribbons"),
-                            label: "<b>Status Ribbons</b><br />Use corner ribbons instead of colored borders for flags",
+                            value: betterSearch.fetchSettings("ribbonsFlag"),
+                            label: "<b>Status Ribbons</b><br />Display post status as a colored ribbon on the post",
                             width: 3,
                         },
                         async (data) => {
-                            await thumbnailEnhancer.pushSettings("ribbons", data);
-                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleStatusRibbons(data);
-
-                            $("input#optgeneral-gencollapse-thumb-relations-ribbons")
-                                .prop("disabled", !data)
-                                .parent()
-                                .toggleClass("input-disabled", !data);
+                            await betterSearch.pushSettings("ribbonsFlag", data);
+                            if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                         }
                     ),
-                    Form.spacer(3),
+                    Form.spacer(3, true),
 
                     Form.checkbox(
                         {
-                            name: "relations-ribbons",
-                            value: thumbnailEnhancer.fetchSettings("relRibbons"),
+                            value: betterSearch.fetchSettings("ribbonsRel"),
                             label: "<b>Relations Ribbons</b><br />Display ribbons for parent/child relationships",
                             width: 3,
-                            wrapper: (thumbnailEnhancer.fetchSettings("ribbons") ? undefined : "input-disabled"),
-                            disabled: !thumbnailEnhancer.fetchSettings("ribbons"),
                         },
                         async (data) => {
-                            await thumbnailEnhancer.pushSettings("relRibbons", data);
-                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleRelationRibbons(data);
+                            await betterSearch.pushSettings("ribbonsRel", data);
+                            if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                         }
                     ),
 

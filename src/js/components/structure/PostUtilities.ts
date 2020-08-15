@@ -1,5 +1,6 @@
 import { BetterSearch, ImageClickAction, ImageLoadMethod } from "../../modules/search/BetterSearch";
 import { BlacklistEnhancer } from "../../modules/search/BlacklistEnhancer";
+import { E621 } from "../api/E621";
 import { APIPost } from "../api/responses/APIPost";
 import { XM } from "../api/XM";
 import { PostActions } from "../data/PostActions";
@@ -18,6 +19,7 @@ export class PostUtilities {
         const $article = $("<post>")
             .attr({
                 "id": "post_" + data.id,
+                "fav": data.is_favorited == true ? "true" : undefined,
                 "state": "ready",
                 "animated": tags.has("animated") ? "true" : undefined,
                 "filetype": data.file.ext,
@@ -116,13 +118,72 @@ export class PostUtilities {
         else flagRibbon.remove();
 
 
+        // Voting Buttons
+        let buttonBlock = false;
+        const $voteBox = $("<post-voting>")
+            .appendTo($article);
+
+        $("<button>")                           // Upvote
+            .html(`<i class="far fa-thumbs-up"></i>`)
+            .addClass("button voteButton vote post-vote-up-" + data.id + " score-neutral")
+            .appendTo($voteBox)
+            .click((event) => {
+                event.preventDefault();
+                if (buttonBlock) return;
+                buttonBlock = true;
+                Danbooru.Post.vote(data.id, 1);
+                buttonBlock = false;
+            });
+
+        $("<button>")                           // Downvote
+            .html(`<i class="far fa-thumbs-down"></i>`)
+            .addClass("button voteButton vote post-vote-down-" + data.id + " score-neutral")
+            .appendTo($voteBox)
+            .click((event) => {
+                event.preventDefault();
+                if (buttonBlock) return;
+                buttonBlock = true;
+                Danbooru.Post.vote(data.id, -1);
+                buttonBlock = false;
+            });
+
+        const $favorite = $("<button>")        // Favorite
+            .html(`<i class="far fa-star"></i>`)
+            .addClass("button voteButton fav post-favorite-" + data.id + " score-neutral" + (data.is_favorited ? " score-favorite" : ""))
+            .appendTo($voteBox)
+            .click(async (event) => {
+                event.preventDefault();
+                if (buttonBlock) return;
+                buttonBlock = true;
+                if ($article.data("is_favorited")) {
+                    await E621.Favorite.id(data.id).delete();
+                    $article.data("is_favorited", false)
+                    $article.removeAttr("fav");
+                    $favorite.removeClass("score-favorite");
+                } else {
+                    await E621.Favorites.post({ "post_id": data.id });
+                    $article.data("is_favorited", true)
+                    $article.attr("fav", "true");
+                    $favorite.addClass("score-favorite");
+                }
+                buttonBlock = false;
+            });
+
+
         // Post info
         $("<post-loading>")
             .html(`<i class="fas fa-circle-notch fa-2x fa-spin"></i>`)
             .appendTo($link);
 
+        const scoreClass = data.score.total > 0 ? "positive" : (data.score.total < 0 ? "negative" : "neutral");
         const $postInfo = $("<post-info>")
-            .appendTo($article);
+            .html(`
+                <span class="post-info-score score-${scoreClass}">${data.score.total}</span>
+                <span class="post-info-favorites">${data.fav_count}</span>
+                <span class="post-info-comments">${data.comment_count}</span>
+                <span class="post-info-rating rating-${data.rating}">${data.rating}</span>
+            `)
+            .appendTo($article);;
 
         // Listen for post updates to refresh the data
         $article.on("update.re621", () => { PostUtilities.update($article, $link, $img, $postInfo); });
@@ -141,13 +202,13 @@ export class PostUtilities {
         ]);
 
 
-        /* Step 1: Update Article Properties */
+        /* 1. Update Article Properties */
         // Favorite status
         if ($article.data("is_favorited")) $article.attr("fav", "true");
         else $article.removeAttr("fav");
 
 
-        /* Step 2: Update Image Properties */
+        /* 2. Update Image Properties */
         // Handle upscaling
         const imgState = $article.attr("state");
         if (imgState == "ready") PostUtilities.handleUpscaling($article, $img, conf);
@@ -164,23 +225,6 @@ export class PostUtilities {
         // Add hover text
         if (conf.hoverTags) $img.attr("title", getHoverText($article));
         else $img.removeAttr("title");
-
-        /* Step 3: Update postInfo */
-        const info = {
-            score: $article.data("score"),
-            favorites: $article.data("favorites"),
-            comments: $article.data("comments"),
-            rating: $article.data("rating"),
-        };
-
-        const scoreClass = info.score > 0 ? "positive" : (info.score < 0 ? "negative" : "neutral");
-
-        $postInfo.html(`
-            <span class="post-info-score score-${scoreClass}">${info.score}</span>
-            <span class="post-info-favorites">${info.favorites}</span>
-            <span class="post-info-comments">${info.comments}</span>
-            <span class="post-info-rating rating-${info.rating}">${info.rating}</span>
-        `);
 
         /** Format the image hover text based on stored data */
         function getHoverText($article: JQuery<HTMLElement>): string {

@@ -164,21 +164,22 @@ search-content > post {
 
 
 /* Image Ribbons */
-search-content > post img-ribbons {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 0;
+search-content {
 
-    & > ribbon {
+    img-ribbons {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 0;
+    }
+
+    ribbon {
         position: absolute;
         width: 1rem;
         height: 1rem;
         overflow: hidden;
         display: block;
-
-        box-shadow: 0 0 10px -4px black;
 
         $status-flagged: orangered;
         $status-pending: blue;
@@ -194,6 +195,8 @@ search-content > post img-ribbons {
             background: white;
             transform-origin: bottom;
             cursor: pointer;
+
+            box-shadow: 0 0 10px -4px black;
         }
 
         &.right {
@@ -224,4 +227,60 @@ search-content > post img-ribbons {
             background: linear-gradient(90deg, $status-flagged 50%, $status-pending 50%);
         }
     }
+
+    &:not([ribbon-flag=true]) ribbon.right { display: none; }
+    &:not([ribbon-rel=true]) ribbon.left { display: none; }
+}
+
+
+/* Voting Buttons */
+search-content  {
+    
+    post-voting {
+        display: flex;
+        position: absolute;
+        justify-content: center;
+        align-items: flex-end;
+        bottom: 1rem;
+        left: 0;
+        right: 0;
+        height: 0;
+    }
+
+    post:hover post-voting button.vote { visibility: visible; }
+    post:hover post-voting button.fav,
+    post[fav=true] post-voting button.fav { visibility: visible; }
+
+    button.voteButton {
+        font-size: 0.9rem;
+        padding: 0.125rem 0.75rem;
+        border-radius: 0;
+
+        &.vote {
+            visibility: hidden;
+            &:nth-child(1) {
+                border-right: 1px solid #666;
+                border-top-left-radius: 0.75rem;
+            }
+            &:nth-child(2) {
+                border-left: 1px solid #666;
+                border-top-right-radius: 0.75rem;
+            }
+        }
+
+        &.fav {
+            visibility: hidden;
+            position: absolute;
+            left: 0;
+            bottom: -1rem;
+            padding: 0.25rem 0.35rem 0.125rem 0.125rem;
+            border-radius: 0 0.75rem 0 0;
+
+            &.score-favorite { color: #c3a816;  }
+        }
+    }
+
+    &:not([btn-vote=true]) button.voteButton.vote { display: none; }
+    &:not([btn-fav=true]) button.voteButton.fav { display: none; }
+
 }

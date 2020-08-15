@@ -28,7 +28,16 @@ export class BetterSearch extends RE6Module {
             imageRatioChange: true,                         // If true, crops the image to ratio specified in `imageRatio`
             imageRatio: "0.9",                              // Ratio to conform to
 
+            zoomMode: ImageZoomMode.Disabled,               // How should the hover zoom be triggered
+            zoomScale: "2",
+            zoomContextual: true,
+
             hoverTags: false,                               // if true, adds a hover text to the image containing all of its tags
+
+            ribbonsFlag: true,                              // Status ribbons - flagged / pending
+            ribbonsRel: true,                               // Relations ribbons - parent / child posts
+            buttonsVote: true,                              // Voting buttons
+            buttonsFav: true,                               // Favorite button
 
             clickAction: ImageClickAction.NewTab,           // Action take when double-clicking the thumbnail
         };
@@ -60,7 +69,7 @@ export class BetterSearch extends RE6Module {
     public create(): void {
         super.create();
 
-        this.updateContentSettings();
+        this.updateContentHeader();
 
         E621.Posts.get<APIPost>({}, 500).then((search) => {
             console.log(search);
@@ -73,15 +82,33 @@ export class BetterSearch extends RE6Module {
         });
     }
 
-    public refresh(): void {
+    public updateContentStructure(): void {
         this.$content.children("post").trigger("update.re621");
     }
 
-    public updateContentSettings(): void {
-        const conf = this.fetchSettings(["imageSizeChange", "imageWidth", "imageRatioChange", "imageRatio"]);
+    public updateContentHeader(): void {
+        const conf = this.fetchSettings([
+            "imageSizeChange", "imageWidth", "imageRatioChange", "imageRatio",
+            "ribbonsFlag", "ribbonsRel",
+            "buttonsVote", "buttonsFav",
+        ]);
+
+        // Scaling Settings
         this.$content.removeAttr("style");
         if (conf.imageSizeChange) this.$content.css("--img-width", conf.imageWidth);
         if (conf.imageRatioChange) this.$content.css("--img-ratio", conf.imageRatio);
+
+        // Ribbons
+        if (conf.ribbonsFlag) this.$content.attr("ribbon-flag", "true");
+        else this.$content.removeAttr("ribbon-flag");
+        if (conf.ribbonsRel) this.$content.attr("ribbon-rel", "true");
+        else this.$content.removeAttr("ribbon-rel");
+
+        // Voting Buttons
+        if (conf.buttonsVote) this.$content.attr("btn-vote", "true");
+        else this.$content.removeAttr("btn-vote");
+        if (conf.buttonsFav) this.$content.attr("btn-fav", "true");
+        else this.$content.removeAttr("btn-fav");
     }
 
     public static isPaused(): boolean {
@@ -94,6 +121,12 @@ export enum ImageLoadMethod {
     Disabled = "disabled",
     Hover = "hover",
     Always = "always",
+}
+
+export enum ImageZoomMode {
+    Disabled = "disabled",
+    Hover = "hover",
+    OnShift = "onshift",
 }
 
 export enum ImageClickAction {
