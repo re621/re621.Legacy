@@ -22,7 +22,7 @@ section#content {
     }
 
     &[loading=true] search-content { display: none; }
-    &:not([loading=true]) post-loading { display: none; }
+    &:not([loading=true]) search-loading { display: none; }
 
 }
 
@@ -51,6 +51,7 @@ search-content > post {
         display: flex;
         align-items: center;
         justify-content: center;
+        visibility: hidden;
 
         position: absolute;
         top: 0;
@@ -71,8 +72,9 @@ search-content > post {
         }
     }
 
-    &:not([state=loading]) post-loading {
-        display: none;
+    &[state=loading] post-loading,
+    &[loading=true] post-loading {
+        visibility: visible;
     }
 
     // Description section - upvotes, favorites, comment count, rating
@@ -283,4 +285,36 @@ search-content  {
     &:not([btn-vote=true]) button.voteButton.vote { display: none; }
     &:not([btn-fav=true]) button.voteButton.fav { display: none; }
 
+}
+
+
+/* Hover Zoom */
+zoom-container {
+    position: fixed;
+    top: 100vh;
+    z-index: 800;
+
+    & > img {
+        max-width: 50vw;
+        max-height: 80vh;
+        background: white;
+
+        &::before {
+            content: var(--image-info, "??? x ???, ???MB");
+        }
+    }
+
+    & > div {
+        max-width: fit-content;
+        max-height: 4rem;
+        overflow: hidden;
+        padding: 0 4px;
+
+        background: #000000aa;
+        font-family: monospace;
+        line-height: 1rem;
+    }
+
+    &[status=waiting] { display: none; }
+    &[status=loading] { visibility: hidden; }
 }

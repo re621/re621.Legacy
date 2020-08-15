@@ -31,7 +31,7 @@ import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
 import { CustomFlagger, FlagDefinition } from "../search/CustomFlagger";
 import { InfiniteScroll } from "../search/InfiniteScroll";
 import { SearchUtilities } from "../search/SearchUtilities";
-import { ThumbnailEnhancer, ThumbnailPerformanceMode } from "../search/ThumbnailsEnhancer";
+import { ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
 import { ForumTracker } from "../subscriptions/ForumTracker";
 import { PoolTracker } from "../subscriptions/PoolTracker";
 import { SubscriptionManager } from "../subscriptions/SubscriptionManager";
@@ -471,47 +471,36 @@ export class SettingsController extends RE6Module {
                             "Increases the size of the thumbnail when hovering over it",                                                        // line 2
                             2,                                                                                                                  // width
                             "hoverzoom-desc",                                                                                                   // name
-                            thumbnailEnhancer.fetchSettings("upscale") === ThumbnailPerformanceMode.Disabled ? "input-disabled" : undefined,    // wrapper
+                            betterSearch.fetchSettings("imageLoadMethod") === ImageLoadMethod.Disabled ? "input-disabled" : undefined,          // wrapper
                         ),
                         Form.select(
                             {
                                 name: "hoverzoom",
-                                value: thumbnailEnhancer.fetchSettings("zoom"),
-                                wrapper: thumbnailEnhancer.fetchSettings("upscale") === ThumbnailPerformanceMode.Disabled ? "input-disabled" : undefined,
-                                disabled: thumbnailEnhancer.fetchSettings("upscale") === ThumbnailPerformanceMode.Disabled,
+                                value: betterSearch.fetchSettings("zoomMode"),
+                                wrapper: betterSearch.fetchSettings("imageLoadMethod") === ImageLoadMethod.Disabled ? "input-disabled" : undefined,
+                                disabled: betterSearch.fetchSettings("imageLoadMethod") === ImageLoadMethod.Disabled,
                             },
                             {
-                                "true": "Enabled",
-                                "false": "Disabled",
+                                "disabled": "Disabled",
+                                "hover": "On Hover",
                                 "onshift": "Holding Shift",
                             },
                             async (data) => {
-                                await thumbnailEnhancer.pushSettings("zoom", data);
-                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleHoverZoom(data);
-                            }
-                        ),
-                        Form.spacer(3, true),
-
-                        Form.subheader("Zoom scale", "The ratio of the enlarged thumbnail to its original size", 2),
-                        Form.input(
-                            { value: thumbnailEnhancer.fetchSettings("zoomScale"), pattern: "^[1-9](\\.\\d+)?$" },
-                            async (data, input) => {
-                                if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
-                                await thumbnailEnhancer.pushSettings("zoomScale", data);
-                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.setZoomScale(data);
+                                await betterSearch.pushSettings("zoomMode", data);
+                                if (betterSearch.isInitialized()) betterSearch.updateContentStructure();
                             }
                         ),
                         Form.spacer(3, true),
 
                         Form.checkbox(
                             {
-                                value: thumbnailEnhancer.fetchSettings("zoomContextual"),
-                                label: "<b>Contextual Zoom</b><br />Only enable thumbnail zoom in the viewing mode",
+                                value: betterSearch.fetchSettings("zoomTags"),
+                                label: "<b>Show Tags</b><br />Display the list of posts's tags under the zoom-in image",
                                 width: 3,
                             },
                             async (data) => {
-                                await thumbnailEnhancer.pushSettings("zoomContextual", data);
-                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleZoomContextual(data);
+                                await betterSearch.pushSettings("zoomTags", data);
+                                if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                             }
                         ),
                         Form.spacer(3, true),

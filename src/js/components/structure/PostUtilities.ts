@@ -1,4 +1,4 @@
-import { BetterSearch, ImageClickAction, ImageLoadMethod } from "../../modules/search/BetterSearch";
+import { BetterSearch, ImageClickAction, ImageLoadMethod, ImageZoomMode } from "../../modules/search/BetterSearch";
 import { BlacklistEnhancer } from "../../modules/search/BlacklistEnhancer";
 import { E621 } from "../api/E621";
 import { APIPost } from "../api/responses/APIPost";
@@ -10,10 +10,14 @@ import { DomUtilities } from "./DomUtilities";
 
 export class PostUtilities {
 
+    private static readonly mouseOverTimeout = 200;
+    private static readonly doubleClickTimeout = 200;
+
     public static make(data: APIPost): JQuery<HTMLElement> {
 
         const tags = APIPost.getTagSet(data),
-            flags = APIPost.getFlagSet(data);
+            flags = APIPost.getFlagSet(data),
+            animated = tags.has("animated") || data.file.ext == "webm" || data.file.ext == "gif";
 
         // Image container and post data store
         const $article = $("<post>")
@@ -21,7 +25,7 @@ export class PostUtilities {
                 "id": "post_" + data.id,
                 "fav": data.is_favorited == true ? "true" : undefined,
                 "state": "ready",
-                "animated": tags.has("animated") ? "true" : undefined,
+                "animated": animated ? "true" : undefined,
                 "filetype": data.file.ext,
                 "deleted": flags.has("deleted") ? "true" : undefined,
             })
@@ -52,6 +56,7 @@ export class PostUtilities {
                 "file.original": data.file.url,
                 "file.sample": data.sample.url,
                 "file.preview": data.preview.url,
+                "file.size": data.file.size,
 
                 "img.width": data.file.width,
                 "img.height": data.file.height,
@@ -176,7 +181,7 @@ export class PostUtilities {
             .appendTo($link);
 
         const scoreClass = data.score.total > 0 ? "positive" : (data.score.total < 0 ? "negative" : "neutral");
-        const $postInfo = $("<post-info>")
+        $("<post-info>")
             .html(`
                 <span class="post-info-score score-${scoreClass}">${data.score.total}</span>
                 <span class="post-info-favorites">${data.fav_count}</span>
@@ -186,19 +191,20 @@ export class PostUtilities {
             .appendTo($article);;
 
         // Listen for post updates to refresh the data
-        $article.on("update.re621", () => { PostUtilities.update($article, $link, $img, $postInfo); });
-        PostUtilities.update($article, $link, $img, $postInfo);
+        $article.on("update.re621", () => { PostUtilities.update($article, $link, $img); });
+        PostUtilities.update($article, $link, $img);
 
         return $article;
     }
 
-    private static update($article: JQuery<HTMLElement>, $link: JQuery<HTMLElement>, $img: JQuery<HTMLElement>, $postInfo: JQuery<HTMLElement>): void {
+    private static update($article: JQuery<HTMLElement>, $link: JQuery<HTMLElement>, $img: JQuery<HTMLElement>): void {
         // Fetch the settings
         const conf = ModuleController.get(BetterSearch).fetchSettings([
             "imageLoadMethod", "autoPlayGIFs",
             "imageRatioChange",
             "clickAction",
-            "hoverTags"
+            "hoverTags",
+            "zoomMode",
         ]);
 
 
@@ -223,17 +229,15 @@ export class PostUtilities {
         if (conf.clickAction !== ImageClickAction.Disabled) PostUtilities.handleDoubleClick($article, $link, conf);
 
         // Add hover text
-        if (conf.hoverTags) $img.attr("title", getHoverText($article));
+        if (conf.hoverTags) $img.attr("title", PostUtilities.getHoverText($article));
         else $img.removeAttr("title");
 
-        /** Format the image hover text based on stored data */
-        function getHoverText($article: JQuery<HTMLElement>): string {
-            return `` +
-                `ID: ${$article.data("id")}\n` +
-                `Date: ${Util.Time.format($article.data("date"))} (${$article.data("date.ago")})\n` +
-                `\n` +
-                `${[...$article.data("tags")].sort().join(" ")}`;
-        }
+        // Establish the hover zoom event listeners
+        $article.off("mouseenter.re621.zoom")
+            .off("mouseleave.re621.zoom");
+        if (conf.zoomMode !== ImageZoomMode.Disabled) PostUtilities.handleZoom($article);
+
+
     }
 
     /** Processes the upscaling routine */
@@ -253,8 +257,8 @@ export class PostUtilities {
 
         } else {
 
-            $article.off("mouseenter.re621")
-                .off("mouseleave.re621");
+            $article.off("mouseenter.re621.upscale")
+                .off("mouseleave.re621.upscale");
 
             // Add dynamically-loaded highres thumbnails
             const sampleURL = $article.data("file.sample"),
@@ -265,7 +269,7 @@ export class PostUtilities {
                 $img.attr("data-src", previewURL);
 
                 let timer: number;
-                $article.on("mouseenter.re621", () => {
+                $article.on("mouseenter.re621.upscale", () => {
 
                     // only load sample after a bit of waiting
                     // this prevents loading images just by hovering over them to get to another one
@@ -274,9 +278,9 @@ export class PostUtilities {
                         $img.attr("data-src", sampleURL)
                             .addClass("lazyload")
                             .one("lazyloaded", () => { $article.attr("state", "done"); });
-                    }, 200);
+                    }, PostUtilities.mouseOverTimeout);
                 });
-                $article.on("mouseleave.re621", () => {
+                $article.on("mouseleave.re621.upscale", () => {
                     window.clearTimeout(timer);
                 });
             } else if (conf.imageLoadMethod === ImageLoadMethod.Always) {
@@ -293,12 +297,11 @@ export class PostUtilities {
 
     /** Processes the double click routine */
     private static handleDoubleClick($article: JQuery<HTMLElement>, $link: JQuery<HTMLElement>, conf: any): void {
-        /* Handle double-click */
+
         let dbclickTimer: number;
-        const delay = 200;
         let prevent = false;
 
-        //Make it so that the doubleclick prevents the normal click event
+        // Make it so that the doubleclick prevents the normal click event
         $link.on("click.re621.thumbnail", (event) => {
             if (
                 // Ignore mouse clicks which are not left clicks
@@ -325,7 +328,7 @@ export class PostUtilities {
                     $link[0].click();
                 }
                 prevent = false;
-            }, delay);
+            }, PostUtilities.doubleClickTimeout);
         }).on("dblclick.re621.thumbnail", (event) => {
             if (
                 // Ignore mouse clicks which are not left clicks
@@ -383,4 +386,38 @@ export class PostUtilities {
         });
     }
 
+    /** Starts up the hover zoom process */
+    private static handleZoom($article: JQuery<HTMLElement>): void {
+
+        let timer: number,
+            started = false;
+        $article.on("mouseenter.re621.zoom", () => {
+            timer = window.setTimeout(() => {
+                started = true;
+                BetterSearch.trigger("zoom.start", $article.data("id"));
+            }, PostUtilities.mouseOverTimeout);
+        });
+        $article.on("mouseleave.re621.zoom", () => {
+            window.clearTimeout(timer);
+            if (started) {
+                started = false;
+                BetterSearch.trigger("zoom.stop", $article.data("id"));
+            }
+        });
+
+    }
+
+    /**
+     * Returns a formatted tags section based on the provided post element
+     * @param $article Post element
+     */
+    public static getHoverText($article: JQuery<HTMLElement>, html = false): string {
+        const br = html ? "<br>\n" : "\n";
+        return `` +
+            `#${$article.data("id")}, posted on: ${Util.Time.format($article.data("date"))} (${$article.data("date.ago")})${br}` +
+            `${[...$article.data("tags.artist"), ...$article.data("tags.copyright")].join(" ")}${br}` +
+            `${[...$article.data("tags.character"), ...$article.data("tags.species")].join(" ")}${br}` +
+            `${[...$article.data("tags.general"), ...$article.data("tags.invalid"), $article.data("tags.lore"), ...$article.data("tags.meta")].join(" ")}${br}` +
+            ``;
+    }
 }
