@@ -55,13 +55,10 @@ export class BetterSearch extends RE6Module {
     public async prepare(): Promise<void> {
         await super.prepare();
 
-        // TODO check if module is enabled
-        if (!this.pageMatchesFilter()) return;
+        if (!this.fetchSettings("enabled") || !this.pageMatchesFilter()) return;
         this.$wrapper = $("#content")
             .html("")
             .attr("loading", "true");
-
-        // TODO Use LS to remove #content html early
 
         this.$loading = $("<search-loading>")
             .html(`
@@ -106,8 +103,78 @@ export class BetterSearch extends RE6Module {
 
             this.$wrapper.attr("loading", "false");
         });
+        // Prevent loading pages past 750
 
-        // Listen for hover zoom
+        this.initHoverZoom();
+    }
+
+    public static isPaused(): boolean { return BetterSearch.paused; }
+    public static setPaused(state: boolean): void { BetterSearch.paused = state; }
+
+    /** Triggers an update event on all loaded posts */
+    public updateContentStructure(): void {
+        this.$content.children("post").trigger("update.re621");
+    }
+
+    /** Updates the content wrapper attributes and variables */
+    public updateContentHeader(): void {
+        const conf = this.fetchSettings([
+            "imageSizeChange", "imageWidth", "imageRatioChange", "imageRatio",
+            "ribbonsFlag", "ribbonsRel",
+            "buttonsVote", "buttonsFav",
+            "zoomMode",
+        ]);
+
+        // Scaling Settings
+        this.$content.removeAttr("style");
+        if (conf.imageSizeChange) this.$content.css("--img-width", conf.imageWidth);
+        if (conf.imageRatioChange) this.$content.css("--img-ratio", conf.imageRatio);
+
+        // Ribbons
+        if (conf.ribbonsFlag) this.$content.attr("ribbon-flag", "true");
+        else this.$content.removeAttr("ribbon-flag");
+        if (conf.ribbonsRel) this.$content.attr("ribbon-rel", "true");
+        else this.$content.removeAttr("ribbon-rel");
+
+        // Voting Buttons
+        if (conf.buttonsVote) this.$content.attr("btn-vote", "true");
+        else this.$content.removeAttr("btn-vote");
+        if (conf.buttonsFav) this.$content.attr("btn-fav", "true");
+        else this.$content.removeAttr("btn-fav");
+
+        // Zoom Toggle
+        $(document)
+            .off("keydown.re621.zoom")
+            .off("keyup.re621.zoom");
+        $("#tags")
+            .off("keydown.re621.zoom")
+            .off("keyup.re621.zoom");
+
+        if (conf.zoomMode == ImageZoomMode.OnShift) {
+            // This is necessary, because by default, the tag input is focused on page load
+            // If shift press didn't work when input is focused, this could cause confusion
+            $(document)
+                .on("keydown.re621.zoom", null, "shift", () => {
+                    if (this.shiftPressed) return;
+                    this.shiftPressed = true;
+                })
+                .on("keyup.re621.zoom", null, "shift", () => {
+                    this.shiftPressed = false;
+                });
+            $("#tags")
+                .on("keydown.re621.zoom", null, "shift", () => {
+                    if (this.shiftPressed) return;
+                    this.shiftPressed = true;
+                })
+                .on("keyup.re621.zoom", null, "shift", () => {
+                    this.shiftPressed = false;
+                });
+        }
+    }
+
+    /** Initialize the event listeners for the hover zoom functionality */
+    private initHoverZoom(): void {
+
         const viewport = $(window);
         BetterSearch.on("zoom.start", (event, data) => {
             if (BetterSearch.paused || (this.fetchSettings("zoomMode") == ImageZoomMode.OnShift && !this.shiftPressed))
@@ -173,56 +240,6 @@ export class BetterSearch extends RE6Module {
             // If the post was loading, remove the spinner
             $("#post_" + data).removeAttr("loading");
         });
-    }
-
-    public updateContentStructure(): void {
-        this.$content.children("post").trigger("update.re621");
-    }
-
-    public updateContentHeader(): void {
-        const conf = this.fetchSettings([
-            "imageSizeChange", "imageWidth", "imageRatioChange", "imageRatio",
-            "ribbonsFlag", "ribbonsRel",
-            "buttonsVote", "buttonsFav",
-            "zoomMode",
-        ]);
-
-        // Scaling Settings
-        this.$content.removeAttr("style");
-        if (conf.imageSizeChange) this.$content.css("--img-width", conf.imageWidth);
-        if (conf.imageRatioChange) this.$content.css("--img-ratio", conf.imageRatio);
-
-        // Ribbons
-        if (conf.ribbonsFlag) this.$content.attr("ribbon-flag", "true");
-        else this.$content.removeAttr("ribbon-flag");
-        if (conf.ribbonsRel) this.$content.attr("ribbon-rel", "true");
-        else this.$content.removeAttr("ribbon-rel");
-
-        // Voting Buttons
-        if (conf.buttonsVote) this.$content.attr("btn-vote", "true");
-        else this.$content.removeAttr("btn-vote");
-        if (conf.buttonsFav) this.$content.attr("btn-fav", "true");
-        else this.$content.removeAttr("btn-fav");
-
-        // Zoom Toggle
-        $(document)
-            .off("keydown.re621.zoom")
-            .off("keyup.re621.zoom");
-
-        if (conf.zoomMode == ImageZoomMode.OnShift) {
-            $(document)
-                .on("keydown.re621.zoom", null, "shift", () => {
-                    if (this.shiftPressed) return;
-                    this.shiftPressed = true;
-                })
-                .on("keyup.re621.zoom", null, "shift", () => {
-                    this.shiftPressed = false;
-                });
-        }
-    }
-
-    public static isPaused(): boolean {
-        return BetterSearch.paused;
     }
 
 }
