@@ -327,7 +327,10 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await betterSearch.pushSettings("imageLoadMethod", data);
-                            if (betterSearch.isInitialized()) betterSearch.updateContentStructure();
+                            if (betterSearch.isInitialized()) {
+                                betterSearch.updateContentStructure();
+                                betterSearch.reloadEventListeners();
+                            }
 
                             const zoomDisabled = data === ImageLoadMethod.Disabled;
                             $("#optgeneral-gencollapse-thumb-scalingconf-hoverzoom-desc").toggleClass("input-disabled", zoomDisabled);
@@ -347,7 +350,10 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await betterSearch.pushSettings("autoPlayGIFs", data);
-                            if (betterSearch.isInitialized()) betterSearch.updateContentStructure();
+                            if (betterSearch.isInitialized()) {
+                                betterSearch.updateContentStructure();
+                                betterSearch.reloadEventListeners();
+                            }
                         }
                     ),
                     Form.spacer(3, true),
@@ -366,7 +372,7 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await betterSearch.pushSettings("clickAction", data);
-                            if (betterSearch.isInitialized()) betterSearch.updateContentStructure();
+                            if (betterSearch.isInitialized()) betterSearch.reloadEventListeners();
                         }
                     ),
                     Form.spacer(3, true),
@@ -484,7 +490,6 @@ export class SettingsController extends RE6Module {
                             async (data) => {
                                 await betterSearch.pushSettings("zoomMode", data);
                                 if (betterSearch.isInitialized()) {
-                                    betterSearch.updateContentStructure();
                                     betterSearch.reloadEventListeners();
                                 }
                             }

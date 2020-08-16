@@ -1,15 +1,20 @@
 import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
+import { XM } from "../../components/api/XM";
 import { Page, PageDefintion } from "../../components/data/Page";
+import { PostActions } from "../../components/data/PostActions";
 import { User } from "../../components/data/User";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { PostUtilities } from "../../components/structure/PostUtilities";
 import { Util } from "../../components/utility/Util";
+import { BlacklistEnhancer } from "./BlacklistEnhancer";
 
 export class BetterSearch extends RE6Module {
 
     private static readonly PAGES_PRELOAD = 3;  // Number of pages to pre-load when `loadPrevPages` is true
+    private static readonly HOVER_DELAY = 200;  // How long should a user hover over a post in order to trigger an event
+    private static readonly CLICK_DELAY = 200;  // Timeout for double-click events
 
     private static paused = false;              // If true, stops several actions that may interfere with other modules
 
@@ -104,6 +109,15 @@ export class BetterSearch extends RE6Module {
             }, 250);
         });
 
+        // Event listener for article updates
+        this.$content.on("update.re621", "post", (event) => {
+            const $article = $(event.currentTarget),
+                $link = $article.find("a").first(),
+                $img = $link.find("img").first();
+
+            PostUtilities.update($article, $link, $img);
+        });
+
         // Initial post load
         new Promise(async (resolve) => {
             const firstPage = this.fetchSettings("loadPrevPages") && preloadEnabled
@@ -187,8 +201,7 @@ export class BetterSearch extends RE6Module {
             .appendTo(infscroll);
         this.$paginator = $("<paginator>")
             .html(``)
-            .appendTo(infscroll)
-            .on("refresh.re621", this.reloadPaginator);
+            .appendTo(infscroll);
 
         // Hover Zoom
         this.$zoomBlock = $("<zoom-container>")
@@ -238,13 +251,186 @@ export class BetterSearch extends RE6Module {
         else this.$content.removeAttr("btn-fav");
     }
 
-    /** Retstarts various event listenerd used by the module */
+    /** Restarts various event listenerd used by the module */
     public reloadEventListeners(): void {
-        const conf = this.fetchSettings([
-            "zoomMode",
-        ]);
 
-        // Zoom Toggle
+        this.reloadUpscalingListeners();
+        this.reloadDoubleClickListeners();
+        this.reloadZoomListeners();
+        this.reloadInfScrollListeners();
+    }
+
+    /**
+     * Restarts the even listeners used by the hover zoom submodule.  
+     * Should only be called from `reloadEventListeners()`
+     */
+    private reloadUpscalingListeners(): void {
+
+        const conf = this.fetchSettings(["imageLoadMethod", "autoPlayGIFs"]);
+
+        this.$content
+            .off("mouseenter.re621.upscale", "post[state=ready]")
+            .off("mouseleave.re621.upscale", "post[state=ready]");
+
+        if (conf.imageLoadMethod === ImageLoadMethod.Disabled) return;
+
+        let timer: number;
+        this.$content.on("mouseenter.re621.upscale", "post[state=ready]", (event) => {
+
+            const $article = $(event.currentTarget),
+                $img = $article.find("img").first();
+
+            timer = window.setTimeout(() => {
+                $article.attr("state", "loading");
+                $img.attr("data-src", $article.data("file.sample"))
+                    .addClass("lazyload")
+                    .one("lazyloaded", () => {
+                        $article
+                            .attr("state", "done")
+                            .off("mouseenter.re621.upscale")
+                            .off("mouseleave.re621.upscale");
+                    });
+            }, BetterSearch.HOVER_DELAY);
+        });
+        this.$content.on("mouseleave.re621.upscale", "post[state=ready]", () => {
+            window.clearTimeout(timer);
+        });
+    }
+
+    /**
+     * Restarts the even listeners used by the double click actions. 
+     * Should only be called from `reloadEventListeners()`
+     */
+    private reloadDoubleClickListeners(): void {
+
+        const conf = this.fetchSettings(["clickAction"]);
+
+        this.$content
+            .off("click.re621.dblextra", "post a")
+            .off("dblclick.re621.dblextra", "post a");
+
+        if (conf.clickAction == ImageClickAction.Disabled) return;
+
+        let dbclickTimer: number;
+        let prevent = false;
+
+        // Make it so that the doubleclick prevents the normal click event
+        this.$content.on("click.re621.dblextra", "post a", (event) => {
+            if (
+                // Ignore mouse clicks which are not left clicks
+                (event.button !== 0) ||
+                // Ignore meta-key presses
+                (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) ||
+                // Stop keeping track of double clicks if the zoom is paused
+                (BetterSearch.isPaused()) ||
+                // Only use double-click actions in the view mode
+                $("#mode-box-mode").val() !== "view"
+            ) return;
+
+            event.preventDefault();
+
+            const $link = $(event.currentTarget);
+
+            dbclickTimer = window.setTimeout(() => {
+                if (!prevent) {
+                    $link.off("click.re621.dblextra");
+                    $link[0].click();
+                }
+                prevent = false;
+            }, BetterSearch.CLICK_DELAY);
+
+            return false;
+        });
+        this.$content.on("dblclick.re621.dblextra", "post a", (event) => {
+            if (
+                // Ignore mouse clicks which are not left clicks
+                (event.button !== 0) ||
+                // Ignore meta-key presses
+                (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) ||
+                // Stop keeping track of double clicks if the zoom is paused
+                (BetterSearch.isPaused()) ||
+                // Only use double-click actions in the view mode
+                $("#mode-box-mode").val() !== "view"
+            ) { return; }
+
+            event.preventDefault();
+            window.clearTimeout(dbclickTimer);
+            prevent = true;
+
+            const $link = $(event.currentTarget),
+                $article = $link.parent(),
+                postID = $article.data("id");
+
+            $article.addClass("highlight");
+            window.setTimeout(() => $article.removeClass("highlight"), 250);
+
+            switch (conf.clickAction) {
+                case ImageClickAction.NewTab: {
+                    XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
+                    break;
+                }
+                case ImageClickAction.CopyID: {
+                    Danbooru.notice(`Copied post ID to clipboard: <a href="/posts/${postID}" target="_blank">#${postID}</a>`);
+                    XM.Util.setClipboard(postID + "", "text");
+                    break;
+                }
+                case ImageClickAction.Blacklist: {
+                    BlacklistEnhancer.toggleBlacklistTag("id:" + postID);
+                    break;
+                }
+                case ImageClickAction.AddToSet: {
+                    const lastSet = parseInt(window.localStorage.getItem("set"));
+                    if (!lastSet) Danbooru.error(`Error: no set selected`);
+                    else PostActions.addSet(lastSet, postID);
+                    break;
+                }
+                case ImageClickAction.ToggleSet: {
+                    const lastSet = parseInt(window.localStorage.getItem("set"));
+                    if (!lastSet) Danbooru.error(`Error: no set selected`);
+                    else PostActions.toggleSet(lastSet, postID);
+                    break;
+                }
+                default: {
+                    $link.off("click.re621.dblextra");
+                    $link[0].click();
+                }
+            }
+        });
+    }
+
+    /**
+     * Restarts the even listeners used by the hover zoom submodule.  
+     * Should only be called from `reloadEventListeners()`
+     */
+    private reloadZoomListeners(): void {
+
+        const zoomMode = this.fetchSettings("zoomMode");
+
+        // Hover Zoom - Mouseover
+        this.$content
+            .off("mouseenter.re621.zoom", "post")
+            .off("mouseleave.re621.zoom", "post");
+        if (zoomMode !== ImageZoomMode.Disabled) {
+            let timer: number,
+                started = false;
+            this.$content.on("mouseenter.re621.zoom", "post", (event) => {
+                const $article = $(event.currentTarget);
+                timer = window.setTimeout(() => {
+                    started = true;
+                    BetterSearch.trigger("zoom.start", $article.data("id"));
+                }, BetterSearch.HOVER_DELAY);
+            });
+            this.$content.on("mouseleave.re621.zoom", "post", () => {
+                const $article = $(event.currentTarget);
+                window.clearTimeout(timer);
+                if (started) {
+                    started = false;
+                    BetterSearch.trigger("zoom.stop", $article.data("id"));
+                }
+            });
+        }
+
+        // Hover Zoom - Shift Hold
         $(document)
             .off("keydown.re621.zoom")
             .off("keyup.re621.zoom");
@@ -252,7 +438,7 @@ export class BetterSearch extends RE6Module {
             .off("keydown.re621.zoom")
             .off("keyup.re621.zoom");
 
-        if (conf.zoomMode == ImageZoomMode.OnShift) {
+        if (zoomMode == ImageZoomMode.OnShift) {
             // This is necessary, because by default, the tag input is focused on page load
             // If shift press didn't work when input is focused, this could cause confusion
             $(document)
@@ -272,8 +458,13 @@ export class BetterSearch extends RE6Module {
                     this.shiftPressed = false;
                 });
         }
+    }
 
-        // Infinite Scroll
+    /**
+     * Restarts the even listeners used by the infinite scroll submodule.  
+     * Should only be called from `reloadEventListeners()`
+     */
+    private reloadInfScrollListeners(): void {
         const fullpage = $(document),
             viewport = $(window);
 

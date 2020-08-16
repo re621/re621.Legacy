@@ -1,17 +1,11 @@
-import { BetterSearch, ImageClickAction, ImageLoadMethod, ImageZoomMode } from "../../modules/search/BetterSearch";
-import { BlacklistEnhancer } from "../../modules/search/BlacklistEnhancer";
+import { BetterSearch, ImageLoadMethod } from "../../modules/search/BetterSearch";
 import { E621 } from "../api/E621";
 import { APIPost } from "../api/responses/APIPost";
-import { XM } from "../api/XM";
-import { PostActions } from "../data/PostActions";
 import { ModuleController } from "../ModuleController";
 import { Util } from "../utility/Util";
 import { DomUtilities } from "./DomUtilities";
 
 export class PostUtilities {
-
-    private static readonly mouseOverTimeout = 200;
-    private static readonly doubleClickTimeout = 200;
 
     public static make(data: APIPost, page?: number): JQuery<HTMLElement> {
 
@@ -192,20 +186,18 @@ export class PostUtilities {
             .appendTo($article);;
 
         // Listen for post updates to refresh the data
-        $article.on("update.re621", () => { PostUtilities.update($article, $link, $img); });
         PostUtilities.update($article, $link, $img);
 
         return $article;
     }
 
-    private static update($article: JQuery<HTMLElement>, $link: JQuery<HTMLElement>, $img: JQuery<HTMLElement>): void {
+    public static update($article: JQuery<HTMLElement>, $link: JQuery<HTMLElement>, $img: JQuery<HTMLElement>): void {
         // Fetch the settings
         const conf = ModuleController.get(BetterSearch).fetchSettings([
             "imageLoadMethod", "autoPlayGIFs",
             "imageRatioChange",
-            "clickAction",
             "hoverTags",
-            "zoomMode",
+            "clickAction",
         ]);
 
 
@@ -224,20 +216,9 @@ export class PostUtilities {
         $img.removeAttr("style");
         if (!conf.imageRatioChange) $img.css("--img-ratio", $article.data("img.ratio"));
 
-        // Handle double-click
-        $link.off("click.re621.thumbnail")
-            .off("dblclick.re621.thumbnail");
-        if (conf.clickAction !== ImageClickAction.Disabled) PostUtilities.handleDoubleClick($article, $link, conf);
-
         // Add hover text
         if (conf.hoverTags) $img.attr("title", PostUtilities.getHoverText($article));
         else $img.removeAttr("title");
-
-        // Establish the hover zoom event listeners
-        $article.off("mouseenter.re621.zoom")
-            .off("mouseleave.re621.zoom");
-        if (conf.zoomMode !== ImageZoomMode.Disabled) PostUtilities.handleZoom($article);
-
 
     }
 
@@ -258,32 +239,16 @@ export class PostUtilities {
 
         } else {
 
-            $article.off("mouseenter.re621.upscale")
-                .off("mouseleave.re621.upscale");
-
             // Add dynamically-loaded highres thumbnails
             const sampleURL = $article.data("file.sample"),
                 previewURL = $article.data("file.preview");
 
             if (conf.imageLoadMethod === ImageLoadMethod.Hover ||
-                (conf.imageLoadMethod === ImageLoadMethod.Always && $article.data("file.ext") === "gif" && conf.autoPlayGIFs)) {
+                (conf.imageLoadMethod === ImageLoadMethod.Always && $article.data("file.ext") === "gif" && !conf.autoPlayGIFs)) {
+
                 $img.attr("data-src", previewURL);
+                // The rest is handled via a delegated event in `BetterSearch`
 
-                let timer: number;
-                $article.on("mouseenter.re621.upscale", () => {
-
-                    // only load sample after a bit of waiting
-                    // this prevents loading images just by hovering over them to get to another one
-                    timer = window.setTimeout(() => {
-                        $article.attr("state", "loading");
-                        $img.attr("data-src", sampleURL)
-                            .addClass("lazyload")
-                            .one("lazyloaded", () => { $article.attr("state", "done"); });
-                    }, PostUtilities.mouseOverTimeout);
-                });
-                $article.on("mouseleave.re621.upscale", () => {
-                    window.clearTimeout(timer);
-                });
             } else if (conf.imageLoadMethod === ImageLoadMethod.Always) {
                 $article.attr("state", "loading");
                 $img.attr("data-src", sampleURL)
@@ -294,118 +259,6 @@ export class PostUtilities {
             }
 
         }
-    }
-
-    /** Processes the double click routine */
-    private static handleDoubleClick($article: JQuery<HTMLElement>, $link: JQuery<HTMLElement>, conf: any): void {
-
-        let dbclickTimer: number;
-        let prevent = false;
-
-        // Make it so that the doubleclick prevents the normal click event
-        $link.on("click.re621.thumbnail", (event) => {
-            if (
-                // Ignore mouse clicks which are not left clicks
-                (event.button !== 0) ||
-                // Stop keeping track of double clicks if the zoom is paused
-                (BetterSearch.isPaused()) ||
-                // Make sure the click does not get triggered on the voting buttons
-                ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton")) ||
-                // Only use double-click actions in the view mode
-                $("#mode-box-mode").val() !== "view"
-            ) { return; }
-
-            // Handle the meta-key presses
-            if (event.ctrlKey || event.metaKey) {
-                XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
-                return;
-            }
-
-            event.preventDefault();
-
-            dbclickTimer = window.setTimeout(() => {
-                if (!prevent) {
-                    $link.off("click.re621.thumbnail");
-                    $link[0].click();
-                }
-                prevent = false;
-            }, PostUtilities.doubleClickTimeout);
-        }).on("dblclick.re621.thumbnail", (event) => {
-            if (
-                // Ignore mouse clicks which are not left clicks
-                (event.button !== 0) ||
-                // Ignore meta-key presses
-                (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) ||
-                // Stop keeping track of double clicks if the zoom is paused
-                (BetterSearch.isPaused()) ||
-                // Make sure the click does not get triggered on the voting buttons
-                ($(event.target).hasClass("voteButton") || $(event.target).parent().hasClass("voteButton")) ||
-                // Only use double-click actions in the view mode
-                $("#mode-box-mode").val() !== "view"
-            ) { return; }
-
-            event.preventDefault();
-            window.clearTimeout(dbclickTimer);
-            prevent = true;
-
-            $article.addClass("highlight");
-            window.setTimeout(() => $article.removeClass("highlight"), 250);
-
-            const postID = $article.data("id");
-
-            switch (conf.clickAction) {
-                case ImageClickAction.NewTab: {
-                    XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
-                    break;
-                }
-                case ImageClickAction.CopyID: {
-                    Danbooru.notice(`Copied post ID to clipboard: <a href="/posts/${postID}" target="_blank">#${postID}</a>`);
-                    XM.Util.setClipboard(postID + "", "text");
-                    break;
-                }
-                case ImageClickAction.Blacklist: {
-                    BlacklistEnhancer.toggleBlacklistTag("id:" + postID);
-                    break;
-                }
-                case ImageClickAction.AddToSet: {
-                    const lastSet = parseInt(window.localStorage.getItem("set"));
-                    if (!lastSet) Danbooru.error(`Error: no set selected`);
-                    else PostActions.addSet(lastSet, postID);
-                    break;
-                }
-                case ImageClickAction.ToggleSet: {
-                    const lastSet = parseInt(window.localStorage.getItem("set"));
-                    if (!lastSet) Danbooru.error(`Error: no set selected`);
-                    else PostActions.toggleSet(lastSet, postID);
-                    break;
-                }
-                default: {
-                    $link.off("click.re621.thumbnail");
-                    $link[0].click();
-                }
-            }
-        });
-    }
-
-    /** Starts up the hover zoom process */
-    private static handleZoom($article: JQuery<HTMLElement>): void {
-
-        let timer: number,
-            started = false;
-        $article.on("mouseenter.re621.zoom", () => {
-            timer = window.setTimeout(() => {
-                started = true;
-                BetterSearch.trigger("zoom.start", $article.data("id"));
-            }, PostUtilities.mouseOverTimeout);
-        });
-        $article.on("mouseleave.re621.zoom", () => {
-            window.clearTimeout(timer);
-            if (started) {
-                started = false;
-                BetterSearch.trigger("zoom.stop", $article.data("id"));
-            }
-        });
-
     }
 
     /**
