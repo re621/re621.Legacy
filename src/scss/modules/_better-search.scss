@@ -52,6 +52,8 @@ section#content {
             &::before { margin-right: 0.5rem; }
             &::after { margin-left: 0.5rem; }
         }
+
+        &[hide-page-breaks=true] post-break { display: none; }
     }
 
     &[loading=true] search-content { display: none; }

@@ -66,8 +66,10 @@ export class BetterSearch extends RE6Module {
 
             clickAction: ImageClickAction.NewTab,           // Action take when double-clicking the thumbnail
 
-            infiniteScroll: true,                           // Auto-load more posts when reaching the bottom of the page
+            infiniteScroll: true,                           // Seemlessly load more posts below the current ones
+            loadAutomatically: true,                        // Load posts automatically while scrolling down
             loadPrevPages: true,                            // If enabled, will load 3 pages before the current one (if available)
+            hidePageBreaks: true,                           // Show a visual separator between different pages
         };
     }
 
@@ -231,6 +233,7 @@ export class BetterSearch extends RE6Module {
             "imageSizeChange", "imageWidth", "imageRatioChange", "imageRatio",
             "ribbonsFlag", "ribbonsRel",
             "buttonsVote", "buttonsFav",
+            "hidePageBreaks",
         ]);
 
         // Scaling Settings
@@ -249,6 +252,10 @@ export class BetterSearch extends RE6Module {
         else this.$content.removeAttr("btn-vote");
         if (conf.buttonsFav) this.$content.attr("btn-fav", "true");
         else this.$content.removeAttr("btn-fav");
+
+        // InfScroll separators
+        if (conf.hidePageBreaks) this.$content.attr("hide-page-breaks", "true");
+        else this.$content.removeAttr("hide-page-breaks");
     }
 
     /** Restarts various event listenerd used by the module */
@@ -524,6 +531,10 @@ export class BetterSearch extends RE6Module {
             viewport = $(window);
 
         BetterSearch.off("scroll.infscroll");
+
+        // Disable auto-loading if a post limit is specified
+        if (!this.fetchSettings("infiniteScroll") || !this.fetchSettings("loadAutomatically") || this.queryLimit !== undefined) return;
+
         BetterSearch.on("scroll.infscroll", () => {
 
             // If there aren't any more posts, there's no need to keep checking this

@@ -587,14 +587,31 @@ export class SettingsController extends RE6Module {
                     Form.checkbox(
                         {
                             value: betterSearch.fetchSettings("infiniteScroll"),
-                            label: "<b>Enable Infinite Scroll</b><br />Load more posts as you scroll to the bottom of the page",
+                            label: "<b>Enable Infinite Scroll</b><br />Append the next page of posts below the current one",
                             width: 3,
                         },
                         async (data) => {
                             await betterSearch.pushSettings("infiniteScroll", data);
-                            betterSearch.reloadPaginator();
+                            if (betterSearch.isInitialized()) {
+                                betterSearch.reloadEventListeners();
+                                betterSearch.reloadPaginator();
+                            }
                         }
                     ),
+                    Form.spacer(3, true),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("loadAutomatically"),
+                            label: "<b>Auto-Load Posts</b><br />Load posts automatically as you scroll, not by clicking a button",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("loadAutomatically", data);
+                            if (betterSearch.isInitialized()) betterSearch.reloadEventListeners();
+                        }
+                    ),
+                    Form.spacer(3, true),
 
                     Form.checkbox(
                         {
@@ -602,8 +619,24 @@ export class SettingsController extends RE6Module {
                             label: "<b>Preserve Scroll History</b><br />When opening a specific result page, load several previous pages as well",
                             width: 3,
                         },
-                        async (data) => { await betterSearch.pushSettings("loadPrevPages", data); }
+                        async (data) => {
+                            await betterSearch.pushSettings("loadPrevPages", data);
+                        }
                     ),
+                    Form.spacer(3, true),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("hidePageBreaks"),
+                            label: "<b>Hide Page Separators</b><br />Display posts as one continuous section, instead of being separated by page",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("hidePageBreaks", data);
+                            if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
+                        }
+                    ),
+
 
                 ]),
 
