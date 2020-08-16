@@ -253,11 +253,66 @@ export class BetterSearch extends RE6Module {
 
     /** Restarts various event listenerd used by the module */
     public reloadEventListeners(): void {
-
+        this.reloadVoteFavListeners();
         this.reloadUpscalingListeners();
         this.reloadDoubleClickListeners();
         this.reloadZoomListeners();
         this.reloadInfScrollListeners();
+    }
+
+    /**
+     * Restarts the even listeners used by voting buttons.
+     * Should only be called from `reloadEventListeners()`
+     */
+    private reloadVoteFavListeners(): void {
+
+        const conf = this.fetchSettings(["buttonsVote", "buttonsFav"]);
+
+        this.$content
+            .off("click.re621.vote", "button.vote")
+            .off("click.re621.vote", "button.fav");
+
+        if (conf.buttonsVote) {
+            this.$content.on("click.re621.vote", "button.vote", (event) => {
+                event.preventDefault();
+
+                const $target = $(event.currentTarget),
+                    $article = $target.parents("post"),
+                    id = parseInt($article.data("id"));
+
+                if ($target.hasClass("vote-up")) Danbooru.Post.vote(id, 1);
+                else if ($target.hasClass("vote-down")) Danbooru.Post.vote(id, -1);
+                else Danbooru.error("Invalid post action");
+            });
+        }
+
+        if (conf.buttonsFav) {
+            let favBlock = false;
+            this.$content.on("click.re621.vote", "button.fav", async (event) => {
+                event.preventDefault();
+
+                if (favBlock) return;
+                favBlock = true;
+
+                const $target = $(event.currentTarget),
+                    $article = $target.parents("post"),
+                    id = parseInt($article.data("id"));
+
+                if ($article.data("is_favorited")) {
+                    await E621.Favorite.id(id).delete();
+                    $article.data("is_favorited", false)
+                    $article.removeAttr("fav");
+                    $target.removeClass("score-favorite");
+                } else {
+                    await E621.Favorites.post({ "post_id": id });
+                    $article.data("is_favorited", true)
+                    $article.attr("fav", "true");
+                    $target.addClass("score-favorite");
+                }
+
+                favBlock = false;
+            });
+        }
     }
 
     /**
@@ -559,6 +614,7 @@ export class BetterSearch extends RE6Module {
         });
     }
 
+    /** Retrieves post data from an appropriate API endpoint */
     private async fetchPosts(page?: number): Promise<APIPost[]> {
         if (Page.matches(PageDefintion.favorites)) {
             const userID = Page.getQueryParameter("user_id") || User.getUserID();

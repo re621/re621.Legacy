@@ -1,5 +1,4 @@
 import { BetterSearch, ImageLoadMethod } from "../../modules/search/BetterSearch";
-import { E621 } from "../api/E621";
 import { APIPost } from "../api/responses/APIPost";
 import { ModuleController } from "../ModuleController";
 import { Util } from "../utility/Util";
@@ -119,55 +118,23 @@ export class PostUtilities {
 
 
         // Voting Buttons
-        let buttonBlock = false;
         const $voteBox = $("<post-voting>")
             .appendTo($article);
 
-        $("<button>")                           // Upvote
+        $("<button>")   // Upvote
             .html(`<i class="far fa-thumbs-up"></i>`)
-            .addClass("button voteButton vote post-vote-up-" + data.id + " score-neutral")
-            .appendTo($voteBox)
-            .click((event) => {
-                event.preventDefault();
-                if (buttonBlock) return;
-                buttonBlock = true;
-                Danbooru.Post.vote(data.id, 1);
-                buttonBlock = false;
-            });
+            .addClass("button voteButton vote vote-up post-vote-up-" + data.id + " score-neutral")
+            .appendTo($voteBox);
 
-        $("<button>")                           // Downvote
+        $("<button>")   // Downvote
             .html(`<i class="far fa-thumbs-down"></i>`)
-            .addClass("button voteButton vote post-vote-down-" + data.id + " score-neutral")
-            .appendTo($voteBox)
-            .click((event) => {
-                event.preventDefault();
-                if (buttonBlock) return;
-                buttonBlock = true;
-                Danbooru.Post.vote(data.id, -1);
-                buttonBlock = false;
-            });
+            .addClass("button voteButton vote vote-down post-vote-down-" + data.id + " score-neutral")
+            .appendTo($voteBox);
 
-        const $favorite = $("<button>")        // Favorite
+        $("<button>")   // Favorite
             .html(`<i class="far fa-star"></i>`)
             .addClass("button voteButton fav post-favorite-" + data.id + " score-neutral" + (data.is_favorited ? " score-favorite" : ""))
-            .appendTo($voteBox)
-            .click(async (event) => {
-                event.preventDefault();
-                if (buttonBlock) return;
-                buttonBlock = true;
-                if ($article.data("is_favorited")) {
-                    await E621.Favorite.id(data.id).delete();
-                    $article.data("is_favorited", false)
-                    $article.removeAttr("fav");
-                    $favorite.removeClass("score-favorite");
-                } else {
-                    await E621.Favorites.post({ "post_id": data.id });
-                    $article.data("is_favorited", true)
-                    $article.attr("fav", "true");
-                    $favorite.addClass("score-favorite");
-                }
-                buttonBlock = false;
-            });
+            .appendTo($voteBox);
 
 
         // Post info
