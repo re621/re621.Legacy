@@ -29,9 +29,7 @@ import { TitleCustomizer } from "../post/TitleCustomizer";
 import { BetterSearch, ImageLoadMethod } from "../search/BetterSearch";
 import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
 import { CustomFlagger, FlagDefinition } from "../search/CustomFlagger";
-import { InfiniteScroll } from "../search/InfiniteScroll";
 import { SearchUtilities } from "../search/SearchUtilities";
-import { ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
 import { ForumTracker } from "../subscriptions/ForumTracker";
 import { PoolTracker } from "../subscriptions/PoolTracker";
 import { SubscriptionManager } from "../subscriptions/SubscriptionManager";
@@ -163,8 +161,6 @@ export class SettingsController extends RE6Module {
             postViewer = ModuleController.get(PostViewer),
             blacklistEnhancer = ModuleController.get(BlacklistEnhancer),
             imageScaler = ModuleController.get(ImageScaler),
-            infiniteScroll = ModuleController.get(InfiniteScroll),
-            thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer),
             headerCustomizer = ModuleController.get(HeaderCustomizer),
             searchUtilities = ModuleController.get(SearchUtilities),
             betterSearch = ModuleController.get(BetterSearch);
@@ -487,7 +483,10 @@ export class SettingsController extends RE6Module {
                             },
                             async (data) => {
                                 await betterSearch.pushSettings("zoomMode", data);
-                                if (betterSearch.isInitialized()) betterSearch.updateContentStructure();
+                                if (betterSearch.isInitialized()) {
+                                    betterSearch.updateContentStructure();
+                                    betterSearch.reloadEventListeners();
+                                }
                             }
                         ),
                         Form.spacer(3, true),
@@ -577,18 +576,34 @@ export class SettingsController extends RE6Module {
 
                 ]),
 
-                // Miscellaneous
-                Form.accordionTab({ name: "misc", label: "Other", columns: 3, width: 3 }, [
+                // Infinite Scroll
+                Form.accordionTab({ name: "infscroll", label: "Infinite Scroll", columns: 3, width: 3 }, [
 
                     Form.checkbox(
                         {
-                            value: infiniteScroll.fetchSettings("keepHistory"),
-                            label: "<b>Preserve Scroll History</b><br />Load all result pages up to the current one (Infinite Scroll)",
-                            width: 2,
+                            value: betterSearch.fetchSettings("infiniteScroll"),
+                            label: "<b>Enable Infinite Scroll</b><br />Load more posts as you scroll to the bottom of the page",
+                            width: 3,
                         },
-                        async (data) => { await infiniteScroll.pushSettings("keepHistory", data); }
+                        async (data) => {
+                            await betterSearch.pushSettings("infiniteScroll", data);
+                            betterSearch.reloadPaginator();
+                        }
                     ),
-                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("loadPrevPages"),
+                            label: "<b>Preserve Scroll History</b><br />When opening a specific result page, load several previous pages as well",
+                            width: 3,
+                        },
+                        async (data) => { await betterSearch.pushSettings("loadPrevPages", data); }
+                    ),
+
+                ]),
+
+                // Miscellaneous
+                Form.accordionTab({ name: "misc", label: "Other", columns: 3, width: 3 }, [
 
                     Form.hr(3),
 

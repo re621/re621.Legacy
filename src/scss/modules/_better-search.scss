@@ -19,11 +19,76 @@ section#content {
         grid-column-gap: 0.25rem;
         grid-row-gap: 0.5rem;
         justify-content: space-between;
+        height: 100%;
+
+        span#no-results {
+            height: 154px;
+            display: flex;
+            justify-content: center;
+            grid-column: 1/-1;
+            align-items: center;
+        }
+
+        post-break {
+            grid-column: 1/-1;
+            display: flex;
+            justify-content: center;
+            height: 1rem;
+
+            font-family: monospace;
+            text-transform: uppercase;
+            color: #666;
+            line-height: 1rem;
+            font-size: 1rem;
+
+            &::after, &::before {
+                content: " ";
+                display: inline-flex;
+                width: 100%;
+                position: relative;
+                bottom: 0.5rem;
+                border-bottom: 1px solid #666;
+            }
+            &::before { margin-right: 0.5rem; }
+            &::after { margin-left: 0.5rem; }
+        }
     }
 
     &[loading=true] search-content { display: none; }
     &:not([loading=true]) search-loading { display: none; }
 
+    paginator-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 5rem;
+
+        & > paginator {
+            display: flex;
+            width: 100%;
+            justify-content: space-evenly;
+        }
+
+        & #infscroll-next {
+            &::before, &::after {
+                content: " ";
+                display: inline-flex;
+                position: relative;
+                bottom: 0.35rem;
+                width: 5rem;
+                height: 1px;
+                border-bottom: 1px solid #666;
+            }
+            &::before { margin-right: 0.5rem; }
+            &::after { margin-left: 0.5rem; }
+        }
+    }
+
+    &[infscroll=false] paginator-container,
+    &:not([infscroll]) paginator-container { display: none; }
+
+    &[infscroll=loading] paginator-container > paginator { display: none; }
+    &[infscroll=ready] paginator-container > span { display: none; }
 }
 
 search-content > post {

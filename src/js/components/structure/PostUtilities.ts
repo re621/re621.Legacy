@@ -13,7 +13,7 @@ export class PostUtilities {
     private static readonly mouseOverTimeout = 200;
     private static readonly doubleClickTimeout = 200;
 
-    public static make(data: APIPost): JQuery<HTMLElement> {
+    public static make(data: APIPost, page?: number): JQuery<HTMLElement> {
 
         const tags = APIPost.getTagSet(data),
             flags = APIPost.getFlagSet(data),
@@ -28,6 +28,7 @@ export class PostUtilities {
                 "animated": animated ? "true" : undefined,
                 "filetype": data.file.ext,
                 "deleted": flags.has("deleted") ? "true" : undefined,
+                "page": page ? page : undefined
             })
             .data({
                 "id": data.id,
