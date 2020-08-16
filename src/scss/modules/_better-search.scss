@@ -113,10 +113,9 @@ search-content > post {
 
     // Loading overlay
     & > a > post-loading {
-        display: flex;
+        display: none;
         align-items: center;
         justify-content: center;
-        visibility: hidden;
 
         position: absolute;
         top: 0;
@@ -139,7 +138,7 @@ search-content > post {
 
     &[state=loading] post-loading,
     &[loading=true] post-loading {
-        visibility: visible;
+        display: flex;
     }
 
     // Description section - upvotes, favorites, comment count, rating
