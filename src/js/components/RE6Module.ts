@@ -41,6 +41,7 @@ export class RE6Module {
         else this.settingsTag = this.constructor.name;
     }
 
+    /** Executed before any initialization occurs, prepares settings and basic structure */
     public async prepare(): Promise<void> {
         await this.loadSettingsCache();
         this.enabled = this.fetchSettings("enabled");
