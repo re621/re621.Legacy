@@ -143,7 +143,12 @@ class APIEndpoint {
 
         const queryString = [];
         keys.forEach((key) => {
+
+            // Undefined values should be ignored
             let value = query[key];
+            if (value === undefined) return;
+
+            // Convert the array parameters into a `+`-separated string
             if (Array.isArray(value)) value = (value as string[]).join("+");
 
             // This is a workaround for a very specific problem and needs to be cleaned up
