@@ -40,9 +40,11 @@ export class Post {
             this.htmlElement = PostHtml.create(element);
         }
 
+        /*
         for (const filter of Blacklist.get().values()) {
             filter.addPost(this, false);
         }
+        */
 
         this.tags = APIPost.getTags(this.apiElement);
     }
@@ -112,12 +114,7 @@ export class Post {
      * Checks if the post is found in an activated blacklist filter
      */
     public matchesBlacklist(ignoreDisabled = false): boolean {
-        for (const filter of Blacklist.get().values()) {
-            if (filter.matchesPost(this, ignoreDisabled)) {
-                return true;
-            }
-        }
-        return false;
+        return Blacklist.checkPost(this.getId(), ignoreDisabled);
     }
 
     /**

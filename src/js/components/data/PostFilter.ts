@@ -1,157 +1,170 @@
 import { PostRating } from "../api/responses/APIPost";
-import { FavoriteCache } from "../cache/FavoriteCache";
-import { Post } from "./Post";
+import { Post } from "../structure/PostUtilities";
 import { Tag } from "./Tag";
 
 export class PostFilter {
 
-    private entries: SinglePostFilter[];
-    private enabled: boolean;
-    private matchesIds: Set<number>;
+    private entries: Filter[];          // individual filters
+    private enabled: boolean;           // if false, the filters are ignored
+    private matchIDs: Set<number>;       // post IDs matched by the filter
+    private optionals: number;          // number of optional filters
 
     constructor(input: string, enabled = true) {
         this.entries = [];
         this.enabled = enabled;
-        this.matchesIds = new Set();
+        this.matchIDs = new Set();
+        this.optionals = 0;
 
-        for (let filter of input.split(" ")) {
-            // Remove dash from filter, if it starts with one
+        input = input.toLowerCase().trim();
+
+        for (let filter of new Set(input.split(" ").filter(e => e != ""))) {
+
+            // Filter is optional
+            const optional = filter.startsWith("~");
+            if (optional) {
+                filter = filter.substring(1);
+                this.optionals++;
+            }
+
+            // Filter is inverted
             const inverse = filter.startsWith("-");
-            filter = inverse ? filter.substring(1) : filter;
+            if (inverse) filter = filter.substring(1);
 
-            // Get filter type, like tags, id, score
-            let filterType = PostFilterType.getFromString(filter);
-            if (filterType === undefined) filterType = PostFilterType.Tags;
-            else filter = filter.substring(filterType.length);
+            // Get filter type: tag, id, score, rating, etc.
+            const filterType = FilterType.test(filter);
+            if (filterType !== FilterType.Tag)
+                filter = filter.substring(filterType.length);
 
-            // Get comapre methods, like equals or smaller then
-            let comparable = Comparable.getFromString(filter);
-            if (comparable === undefined) comparable = Comparable.Equals;
-            else filter = filter.substring(comparable.length);
+            // Get comparison methods: equals, smaller then, etc
+            const comparison = ComparisonType.test(filter);
+            if (comparison !== ComparisonType.Equals)
+                filter = filter.substring(comparison.length);
 
-            this.entries.push({ type: filterType, content: filter, invert: inverse, comparable: comparable });
+            this.entries.push({ type: filterType, value: filter, inverted: inverse, optional: optional, comparison: comparison });
         }
     }
 
     /**
-     * Adds a post to this filter.
-     * Most of the things that work on the site should also work here
-     * @todo Implement ~ modifier
-     * @param post the post to check agains
-     * @param shouldDecrement if the matched counter should decrement if the post doesn't match
-     * should be false for newly added posts, and true otherwise
-     * @returns wether or not the filter matches the post
+     * Tests the provided post agains the filter, and adds it to the cache if it passes.  
+     * Should be triggered every time a post is added or updated.
+     * @param post Post to test against
+     * @param shouldDecrement If false, does not remove the post from the filter if the tests fail
+     * @returns Whether or not the filter matches the post
      */
-    public addPost(post: Post, shouldDecrement: boolean): boolean {
+    public update(post: Post | Post[], shouldDecrement = true): boolean {
+
+        // Take care of the multiple posts separately
+        if (Array.isArray(post)) {
+            for (const entry of post) this.update(entry);
+            return;
+        }
+
+        // Check if the post matches the filter
         let result = true;
+        let optionalHits = 0;
         for (const filter of this.entries) {
-            // If the result is already negative, bail. All filters must match
-            if (result === false) break;
-            const content = filter.content;
+
+            const value = filter.value;
             switch (filter.type) {
-                case PostFilterType.Flag:
-                    result = post.getFlagsSet().has(content);
+                case FilterType.Flag:
+                    result = post.flags.has(value);
                     break;
-                case PostFilterType.Id:
-                    result = this.compareNumbers(post.getId(), parseInt(content), filter.comparable);
+                case FilterType.Id:
+                    result = PostFilterUtils.compareNumbers(post.id, parseInt(value), filter.comparison);
                     break;
-                case PostFilterType.Rating:
-                    result = post.getRating() === PostRating.fromValue(content);
+                case FilterType.Rating:
+                    result = post.rating === PostRating.fromValue(value);
                     break;
-                case PostFilterType.Score:
-                    result = this.compareNumbers(post.getScoreCount(), parseInt(content), filter.comparable);
+                case FilterType.Score:
+                    result = PostFilterUtils.compareNumbers(post.score, parseInt(value), filter.comparison);
                     break;
-                case PostFilterType.Tags:
-                    result = this.tagsMatchesFilter(post, content);
+                case FilterType.Tag:
+                    result = PostFilterUtils.tagsMatchesFilter(post, value);
                     break;
-                case PostFilterType.Uploader:
-                    result = post.getUploaderID() === parseInt(content);
+                case FilterType.Uploader:
+                    result = post.uploader === parseInt(value);
                     break;
-                case PostFilterType.Fav:
-                    result = FavoriteCache.has(post.getId());
+                case FilterType.Fav:
+                    result = post.is_favorited;
                     break;
             }
-            //invert the result, depending on if the filter started with a -
-            result = result !== filter.invert;
+
+            // Invert the result if necessary
+            if (filter.inverted) result = !result;
+
+            if (filter.optional) optionalHits += result ? 1 : 0;
+            else if (!result) break;
         }
-        if (result === true) this.matchesIds.add(post.getId());
-        else if (result === false && shouldDecrement) this.matchesIds.delete(post.getId());
+
+        // The post must match all normal filters, and at least one optional one
+        result = result && (this.optionals == 0 || optionalHits > 0);
+
+        if (result === true) this.matchIDs.add(post.id);
+        else if (result === false && shouldDecrement) this.matchIDs.delete(post.id);
         return result;
     }
 
-    public matchesPost(post: Post, ignoreDisabled = false): boolean {
-        return (this.enabled || ignoreDisabled) && this.matchesIds.has(post.getId());
+    /**
+     * Returns true if the provided post matches the filter
+     * @param post Post to test against the filter
+     * @param ignoreDisabled Return the result regardless of the filter's state
+     */
+    public matches(post: Post, ignoreDisabled = false): boolean {
+        return this.matchesID(post.id, ignoreDisabled);
     }
 
-    public compareNumbers(a: number, b: number, mode: Comparable): boolean {
+    /**
+     * Returns true if the provided post matches the filter
+     * @param id ID of the post to test against the filter
+     * @param ignoreDisabled Return the result regardless of the filter's state
+     */
+    public matchesID(id: number, ignoreDisabled = false): boolean {
+        return (this.enabled || ignoreDisabled) && this.matchIDs.has(id);
+    }
+
+    public getMatches(): Set<number> { return this.matchIDs; }
+    public getMatchesCount(): number { return this.matchIDs.size; }
+
+    public toggleEnabled(): void { this.enabled = !this.enabled; }
+    public setEnabled(enabled: boolean): void { this.enabled = enabled; }
+    public isEnabled(): boolean { return this.enabled; }
+
+}
+
+class PostFilterUtils {
+
+    /** Returns true if the two provided numbers pass the specified comparison type */
+    public static compareNumbers(a: number, b: number, mode: ComparisonType): boolean {
         switch (mode) {
-            case Comparable.Equals:
-                return a === b;
-            case Comparable.Smaller:
-                return a < b;
-            case Comparable.EqualsSmaller:
-                return a <= b;
-            case Comparable.Larger:
-                return a > b;
-            case Comparable.EqualsLarger:
-                return a >= b;
+            case ComparisonType.Equals: return a === b;
+            case ComparisonType.Smaller: return a < b;
+            case ComparisonType.EqualsSmaller: return a <= b;
+            case ComparisonType.Larger: return a > b;
+            case ComparisonType.EqualsLarger: return a >= b;
         }
     }
 
-    public tagsMatchesFilter(post: Post, filter: string): boolean {
+    /** Returns true if the specified post has the provided tag */
+    public static tagsMatchesFilter(post: Post, filter: string): boolean {
         if (filter.includes("*")) {
             const regex = Tag.escapeSearchToRegex(filter);
-            return regex.test(post.getTags());
-        } else {
-            //if there is no wildcard, the filter and tag must be an equal match
-            for (const tag of post.getTags().split(" ")) {
-                if (tag === filter) {
-                    return true;
-                }
-            }
+            return regex.test([...post.tags.all].join(" "));
         }
-        return false;
+        return post.tags.all.has(filter);
     }
 
-    /**
-     * Returns how many posts are affected by this filter
-     */
-    public getMatches(): number {
-        return this.matchesIds.size;
-    }
-
-    /**
-     * Returns which posts are affected by this filter
-     */
-    public getMatchesIds(): Set<number> {
-        return this.matchesIds;
-    }
-
-    /**
-     * Enables/Disables the filter
-     */
-    public toggleEnabled(): void {
-        this.enabled = !this.enabled;
-    }
-
-    public setEnabled(enabled: boolean): void {
-        this.enabled = enabled;
-    }
-
-    public isEnabled(): boolean {
-        return this.enabled;
-    }
 }
 
-export interface SinglePostFilter {
-    type: PostFilterType;
-    content: string;
-    invert: boolean;
-    comparable: Comparable;
+interface Filter {
+    type: FilterType;
+    value: string;
+    inverted: boolean;
+    optional: boolean;
+    comparison: ComparisonType;
 }
 
-export enum PostFilterType {
-    Tags = "tag:",
+enum FilterType {
+    Tag = "tag:",
     Id = "id:",
     Score = "score:",
     Rating = "rating:",
@@ -160,21 +173,19 @@ export enum PostFilterType {
     Fav = "fav:",
 }
 
-export namespace PostFilterType {
-    export function getFromString(value: string): PostFilterType {
-        for (const key of Object.keys(PostFilterType)) {
-            if (value.startsWith(PostFilterType[key])) {
-                return PostFilterType[key];
-            }
-        }
-        return undefined;
+namespace FilterType {
+    export function test(input: string): FilterType {
+        input = input.toLowerCase();
+        for (const key of Object.keys(FilterType))
+            if (input.startsWith(FilterType[key])) return FilterType[key];
+        return FilterType.Tag;
     }
 }
 
 // Its important that they are in this order
 // should the one character ones be in front they will match
 // before the other ones have a chance
-export enum Comparable {
+enum ComparisonType {
     EqualsSmaller = "<=",
     EqualsLarger = ">=",
     Equals = "=",
@@ -182,13 +193,11 @@ export enum Comparable {
     Larger = ">"
 }
 
-export namespace Comparable {
-    export function getFromString(value: string): Comparable {
-        for (const key of Object.keys(Comparable)) {
-            if (value.startsWith(Comparable[key])) {
-                return Comparable[key];
-            }
-        }
-        return undefined;
+namespace ComparisonType {
+    export function test(input: string): ComparisonType {
+        input = input.toLowerCase();
+        for (const key of Object.keys(ComparisonType))
+            if (input.startsWith(ComparisonType[key])) return ComparisonType[key];
+        return ComparisonType.Equals;
     }
 }

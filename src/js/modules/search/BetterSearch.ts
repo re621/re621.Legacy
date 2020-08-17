@@ -1,12 +1,13 @@
 import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { XM } from "../../components/api/XM";
+import { Blacklist } from "../../components/data/Blacklist";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { PostActions } from "../../components/data/PostActions";
 import { User } from "../../components/data/User";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
-import { PostUtilities } from "../../components/structure/PostUtilities";
+import { Post, PostUtilities } from "../../components/structure/PostUtilities";
 import { Util } from "../../components/utility/Util";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
 
@@ -113,11 +114,10 @@ export class BetterSearch extends RE6Module {
 
         // Event listener for article updates
         this.$content.on("update.re621", "post", (event) => {
-            const $article = $(event.currentTarget),
-                $link = $article.find("a").first(),
-                $img = $link.find("img").first();
-
-            PostUtilities.update($article, $link, $img);
+            PostUtilities.update($(event.currentTarget));
+        });
+        this.$content.on("refresh.re621", "post", (event) => {
+            PostUtilities.updateVisibility($(event.currentTarget));
         });
 
         // Initial post load
@@ -175,6 +175,8 @@ export class BetterSearch extends RE6Module {
             }
 
             this.initPageTracker();
+
+            BlacklistEnhancer.update();
         });
     }
 
@@ -284,11 +286,10 @@ export class BetterSearch extends RE6Module {
                 event.preventDefault();
 
                 const $target = $(event.currentTarget),
-                    $article = $target.parents("post"),
-                    id = parseInt($article.data("id"));
+                    post = Post.get($target.parents("post"));
 
-                if ($target.hasClass("vote-up")) Danbooru.Post.vote(id, 1);
-                else if ($target.hasClass("vote-down")) Danbooru.Post.vote(id, -1);
+                if ($target.hasClass("vote-up")) Danbooru.Post.vote(post.id, 1);
+                else if ($target.hasClass("vote-down")) Danbooru.Post.vote(post.id, -1);
                 else Danbooru.error("Invalid post action");
             });
         }
@@ -303,16 +304,16 @@ export class BetterSearch extends RE6Module {
 
                 const $target = $(event.currentTarget),
                     $article = $target.parents("post"),
-                    id = parseInt($article.data("id"));
+                    post = Post.get($article);
 
-                if ($article.data("is_favorited")) {
-                    await E621.Favorite.id(id).delete();
-                    $article.data("is_favorited", false)
+                if (post.is_favorited) {
+                    await E621.Favorite.id(post.id).delete();
+                    Post.set(post, "is_favorited", false);
                     $article.removeAttr("fav");
                     $target.removeClass("score-favorite");
                 } else {
-                    await E621.Favorites.post({ "post_id": id });
-                    $article.data("is_favorited", true)
+                    await E621.Favorites.post({ "post_id": post.id });
+                    Post.set(post, "is_favorited", false);
                     $article.attr("fav", "true");
                     $target.addClass("score-favorite");
                 }
@@ -344,7 +345,7 @@ export class BetterSearch extends RE6Module {
 
             timer = window.setTimeout(() => {
                 $article.attr("state", "loading");
-                $img.attr("data-src", $article.data("file.sample"))
+                $img.attr("data-src", Post.get($article).file.sample)
                     .addClass("lazyload")
                     .one("lazyloaded", () => {
                         $article
@@ -437,7 +438,7 @@ export class BetterSearch extends RE6Module {
                     break;
                 }
                 case ImageClickAction.Blacklist: {
-                    BlacklistEnhancer.toggleBlacklistTag("id:" + postID);
+                    Blacklist.toggleBlacklistTag("id:" + postID);
                     break;
                 }
                 case ImageClickAction.AddToSet: {
@@ -565,20 +566,21 @@ export class BetterSearch extends RE6Module {
 
             const $article = $("#post_" + data)
                 .attr("loading", "true");
+            const post = Post.get($article);
 
             // Load the image and its basic info
             this.$zoomBlock.attr("status", "loading");
             this.$zoomImage
-                .attr("src", $article.data(this.fetchSettings("zoomFull") ? "file.original" : "file.sample"))
+                .attr("src", this.fetchSettings("zoomFull") ? post.file.original : post.file.sample)
                 .one("load", () => {
                     this.$zoomBlock.attr("status", "ready");
                     $article.removeAttr("loading");
                 });
-            this.$zoomInfo.html(`${$article.data("img.width")} x ${$article.data("img.height")}, ${Util.formatBytes($article.data("file.size"))}`);
+            this.$zoomInfo.html(`${post.img.width} x ${post.img.height}, ${Util.formatBytes(post.file.size)}`);
 
             // Append the tags block
             if (this.fetchSettings("zoomTags"))
-                this.$zoomTags.html([...$article.data("tags")].sort().join(" "));
+                this.$zoomTags.html([...post.tags.all].sort().join(" "));
 
             // Listen for mouse movements to move the preview accordingly
             let throttled = false;
@@ -650,6 +652,7 @@ export class BetterSearch extends RE6Module {
             this.$content.append(PostUtilities.make(post, this.queryPage));
 
         BetterSearch.trigger("tracker.update");
+        BlacklistEnhancer.update();
 
         return Promise.resolve(true);
     }

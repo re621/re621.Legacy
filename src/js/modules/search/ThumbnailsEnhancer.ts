@@ -2,13 +2,13 @@ import { Danbooru } from "../../components/api/Danbooru";
 import { E621 } from "../../components/api/E621";
 import { XM } from "../../components/api/XM";
 import { FavoriteCache } from "../../components/cache/FavoriteCache";
+import { Blacklist } from "../../components/data/Blacklist";
 import { PageDefintion } from "../../components/data/Page";
 import { PostActions } from "../../components/data/PostActions";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Util } from "../../components/utility/Util";
-import { BlacklistEnhancer } from "./BlacklistEnhancer";
 
 declare const Freezeframe: any;
 
@@ -496,7 +496,7 @@ export class ThumbnailEnhancer extends RE6Module {
                         break;
                     }
                     case ThumbnailClickAction.Blacklist: {
-                        BlacklistEnhancer.toggleBlacklistTag("id:" + postID);
+                        Blacklist.toggleBlacklistTag("id:" + postID);
                         break;
                     }
                     case ThumbnailClickAction.AddToSet: {

@@ -54,15 +54,16 @@ const loadOrder = [
     TitleCustomizer,
 
     BetterSearch,
-
     CustomFlagger,
+    BlacklistEnhancer,
+
     InfiniteScroll,
     InstantSearch,
     ThumbnailEnhancer,
+
     PostSuggester,
     SearchUtilities,
     Miscellaneous,
-    BlacklistEnhancer,
 
     SmartAlias,
     WikiEnhancer,

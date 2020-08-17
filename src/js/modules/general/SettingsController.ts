@@ -1465,6 +1465,9 @@ export class SettingsController extends RE6Module {
 
                         Form.div({
                             value: async (element) => {
+                                element.html("closed");
+
+                                /*
                                 const $status = $("<div>")
                                     .attr("id", "favcache-status")
                                     .html(`<i class="fas fa-circle-notch fa-spin"></i> Initializing . . .`)
@@ -1485,6 +1488,7 @@ export class SettingsController extends RE6Module {
                                         favcacheUpdated = false;
                                     }
                                 } else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified`)
+                                */
                             },
                             width: 2,
                         }),

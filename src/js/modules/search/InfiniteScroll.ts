@@ -7,7 +7,6 @@ import { Post } from "../../components/data/Post";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
-import { CustomFlagger } from "./CustomFlagger";
 import { InstantSearch } from "./InstantSearch";
 import { ThumbnailEnhancer, ThumbnailPerformanceMode } from "./ThumbnailsEnhancer";
 
@@ -189,7 +188,7 @@ export class InfiniteScroll extends RE6Module {
                     this.$postContainer.append(element);
 
                     ThumbnailEnhancer.modifyThumbnail(element, upscaleMode, preserveHoverText);
-                    CustomFlagger.modifyThumbnail(post);
+                    // CustomFlagger.modifyThumbnail(post);
                 }
 
                 resolve();

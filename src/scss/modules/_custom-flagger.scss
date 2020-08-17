@@ -43,28 +43,36 @@ div.custom-flag {
 }
 
 /** Search page view **/
-div.flag-container {
+post-flags {
     display: flex;
+
     flex-direction: column;
     align-items: flex-end;
+    justify-content: flex-end;
 
     position: absolute;
-    bottom: 0;
+    left: 0;
     right: 0;
-    // z-index: 110;
-
-    width: stretch;
+    top: 0;
+    bottom: 1rem;
     overflow: hidden;
 
+    pointer-events: none;
+
     span.custom-flag-thumb {
-        background-color: var(--flag-color, #666666);
-        margin: 0.125rem 0;
         display: block;
         height: 1rem;
-        font-size: 0.75em;
-        width: 1em;
+        margin: 0.125rem 0;
         padding: 0 0.125rem;
+
         position: relative;
+        pointer-events: all;
+        cursor: help;
+
+        background-color: var(--flag-color, #666666);
+        font-size: 0.75em;
+        max-width: 0.75rem;
+        transition: max-width 0.75s ease-out;
 
         &:before {
             content: "";
@@ -76,7 +84,7 @@ div.flag-container {
         }
 
         &:hover {
-            width: unset;
+            max-width: 100%;
         }
     }
 }

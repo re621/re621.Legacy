@@ -1,9 +1,7 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { Blacklist } from "../../components/data/Blacklist";
 import { PageDefintion } from "../../components/data/Page";
-import { Post, ViewingPost } from "../../components/data/Post";
 import { PostFilter } from "../../components/data/PostFilter";
-import { User } from "../../components/data/User";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
@@ -12,10 +10,10 @@ import { RE6Module, Settings } from "../../components/RE6Module";
  */
 export class BlacklistEnhancer extends RE6Module {
 
-    /** Container for the blacklist filters in the sidebar */
-    private static $box: JQuery<HTMLElement>;
-    /** List of filters within the box */
-    private static $list: JQuery<HTMLElement>;
+    private static $wrapper: JQuery<HTMLElement>;               // wrapper for the rest of the content
+    private static $header: JQuery<HTMLElement>;                // interactable header for the blacklist
+    private static $content: JQuery<HTMLElement>;               // list of applicable filters
+    private static $toggle: JQuery<HTMLElement>;                // toggle switch for all blacklists
 
     public constructor() {
         super([PageDefintion.search, PageDefintion.post], true);
@@ -28,7 +26,9 @@ export class BlacklistEnhancer extends RE6Module {
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
-            quickaddTags: true
+            quickaddTags: true,
+
+            blacklistCollapsed: true,
         };
     }
 
@@ -40,170 +40,114 @@ export class BlacklistEnhancer extends RE6Module {
         Danbooru.Blacklist.initialize_disable_all_blacklists();
         $("#blacklisted-hider").remove();
 
-        // Remove already added entries
-        BlacklistEnhancer.$box = $("section#blacklist-box");
-        BlacklistEnhancer.$list = $("#blacklist-list").html("");
+        // Content wrapper
+        // Clean up the vanilla attributes and styles, or things will go poorly
+        BlacklistEnhancer.$wrapper = $("#blacklist-box")
+            .attr({
+                "id": "re621-blacklist",
+                "open": false,
+                "count": 0,
+                "collapsed": this.fetchSettings("blacklistCollapsed"),
+            })
+            .removeAttr("style")
+            .removeAttr("class")
+            .html("");
 
-        const $disableAllButton = $("#disable-all-blacklists").text("Disable all filters");
-        const $enableAllbutton = $("#re-enable-all-blacklists").text("Enable all filters");
-
-        // Catch when the user toggles the blacklist
-        $disableAllButton
-            .off("click.danbooru")
+        // Clickable header
+        // Should remember its state between page loads
+        BlacklistEnhancer.$header = $("<blacklist-header>")
+            .html("Blacklisted")
+            .appendTo(BlacklistEnhancer.$wrapper)
             .on("click.re621", () => {
-                for (const filter of Blacklist.get().values())
-                    filter.setEnabled(false);
-                BlacklistEnhancer.applyBlacklist();
-                $disableAllButton.hide();
-                $enableAllbutton.show();
+                const enabled = BlacklistEnhancer.$wrapper.attr("collapsed") == "true";
+                BlacklistEnhancer.$wrapper.attr("collapsed", !enabled + "");
+                this.pushSettings("blacklistCollapsed", !enabled);
             });
-        $enableAllbutton
-            .off("click.danbooru")
+
+        // Blacklist Filters
+        // Click to disable individually
+        BlacklistEnhancer.$content = $("<blacklist-content>")
+            .appendTo(BlacklistEnhancer.$wrapper);
+
+        BlacklistEnhancer.$content.on("click.re621", "a", (event) => {
+            event.preventDefault();
+
+            const $target = $(event.currentTarget).parent();
+            const enabled = !($target.attr("enabled") == "true");
+            const filter: PostFilter = $target.data("filter");
+            filter.setEnabled(enabled);
+            $target.attr("enabled", enabled + "");
+
+            BlacklistEnhancer.updateHeader();
+            BlacklistEnhancer.updateToggleSwitch();
+
+            for (const match of filter.getMatches())
+                $("#post_" + match).trigger("refresh.re621");
+        });
+
+        // Toggle-All Switch
+        // Click to disable / re-enable all filters
+        const toggleContainer = $("<blacklist-toggle>")
+            .appendTo(BlacklistEnhancer.$wrapper);
+
+        BlacklistEnhancer.$toggle = $("<a>")
+            .html("Disable All Filters")
+            .appendTo(toggleContainer)
             .on("click.re621", () => {
-                for (const filter of Blacklist.get().values())
-                    filter.setEnabled(true);
-                BlacklistEnhancer.applyBlacklist();
-                $disableAllButton.show();
-                $enableAllbutton.hide();
+                // This is dumb, but much faster than the alternative
+                if (BlacklistEnhancer.$toggle.text().startsWith("Enable")) Blacklist.enableAll();
+                else Blacklist.disableAll();
+                BlacklistEnhancer.update();
+
+                $("post").trigger("refresh.re621");
             });
+    }
 
-        if (!$disableAllButton.is(":visible") && !$enableAllbutton.is(":visible"))
-            $enableAllbutton[0].click();
+    public static update(): void {
+        BlacklistEnhancer.updateFilterList();
+        BlacklistEnhancer.updateHeader();
+        BlacklistEnhancer.updateToggleSwitch();
+    }
 
-        // Add x next to tag names to toggle them from the blacklist
-        if (this.fetchSettings("quickaddTags") === true && User.isLoggedIn()) {
-            $("div.tag-actions span.tag-action-blacklist").each((index, element) => {
-                const $container = $(element);
+    public static updateHeader(): void {
+        let postCount = 0;
+        for (const entry of BlacklistEnhancer.$content.find("filter[enabled=true]"))
+            postCount += parseInt($(entry).attr("count")) || 0;
 
-                $("<a>")
-                    .attr({
-                        "href": "#",
-                        "title": "Blacklist Tag",
-                    })
-                    .addClass("blacklist-tag-toggle")
-                    .html(`<i class="fas fa-times"></i>`)
-                    .prependTo($container)
-                    .click((event) => {
-                        event.preventDefault();
-                        BlacklistEnhancer.toggleBlacklistTag($container.parent().attr("data-tag"));
-                    });
-            });
-        }
-
-        // Apply blacklist without user interaction. Blacklist might be active
-        BlacklistEnhancer.applyBlacklist();
-
-        BlacklistEnhancer.on("updateSidebar.main", () => {
-            BlacklistEnhancer.updateSidebar();
+        BlacklistEnhancer.$header.html(`Blacklisted (${postCount})`);
+        BlacklistEnhancer.$wrapper.attr({
+            "count": postCount,
         });
     }
 
-    public destroy(): void {
-        super.destroy();
-        BlacklistEnhancer.off("updateSidebar.main");
-    }
+    public static updateFilterList(): void {
 
-    /**
-     * Adds or removes a tag from the user's blacklist
-     * @param tagname Name of the tag to toggle
-     */
-    public static async toggleBlacklistTag(tagName: string): Promise<void> {
-        let currentBlacklist = (await User.getCurrentSettings()).blacklisted_tags.split("\n");
+        BlacklistEnhancer.$content.html("");
 
-        if (currentBlacklist.indexOf(tagName) === -1) {
-            currentBlacklist.push(tagName);
-            Blacklist.createFilter(tagName);
-            Danbooru.notice(`Adding ${getTagLink(tagName)} to blacklist`);
-        } else {
-            currentBlacklist = currentBlacklist.filter(e => e !== tagName);
-            Blacklist.deleteFilter(tagName);
-            Danbooru.notice(`Removing ${getTagLink(tagName)} from blacklist`);
-        }
-        await User.setSettings({ blacklisted_tags: currentBlacklist.join("\n") });
-        await BlacklistEnhancer.applyBlacklist();
-
-        return Promise.resolve();
-
-        function getTagLink(tagName: string): string {
-            if (tagName.startsWith("id:")) return `<a href="/posts/${tagName.substr(3)}" target="_blank">${tagName}</a>`;
-            return `<a href="/wiki_pages/show_or_new?title=${tagName}">${tagName}</a>`;
-        }
-    }
-
-    /**
-     * Refreshes the post's visibility status in accordance to the blacklist
-     * @param firstRun 
-     */
-    private static async applyBlacklist(): Promise<void> {
-        const posts = Post.fetchPosts();
-        for (const post of posts) {
-            if (post instanceof ViewingPost) continue;
-            post.applyBlacklist();
-        }
-
-        this.updateSidebar();
-        return Promise.resolve();
-    }
-
-    private static async updateSidebar(): Promise<void> {
-        // Remove already added entries
-        BlacklistEnhancer.$list.html("");
-
-        const blacklist = Blacklist.get();
-
-        let filtered = new Set<number>();
-        for (const [filterString, filter] of blacklist.entries()) {
-            addSidebarEntry(filterString, filter);
-            filtered = new Set<number>([...filtered, ...filter.getMatchesIds()]);
-        }
-
-        // When there are no entries there's no need to display the blacklist box
-        if (filtered.size === 0) BlacklistEnhancer.$box.hide();
-        else BlacklistEnhancer.$box.show();
-
-        // Update total count
-        $("#blacklisted-count").text("(" + filtered.size + ")");
-
-        /**
-         * Creates a filter list entry and appends it to the list  
-         * https://github.com/zwagoth/e621ng/blob/master/app/javascript/src/javascripts/blacklists.js
-         * @param filterString Filter string
-         * @param filter PostFilter object
-         * @returns True if an entry was added, false otherwise
-         */
-        function addSidebarEntry(filterString: string, filter: PostFilter): boolean {
-            if (filter.getMatches() === 0) return false;
-            // console.log(filterString, filter.getMatches(), filter.getMatchesIds());
-
-            const $entry = $("<li>");
-
-            const $link = $("<a>")
-                .text(filterString)
-                .addClass("blacklist-toggle-link")
-                .toggleClass("blacklisted-active", !filter.isEnabled())
+        for (const [tags, filter] of Blacklist.getActiveFilters()) {
+            const count = filter.getMatchesCount();
+            const entry = $("<filter>")
                 .attr({
-                    "href": `/posts?tags=${encodeURIComponent(filterString)}`,
-                    "title": filterString,
-                    "rel": "nofollow"
+                    "count": count,
+                    "enabled": filter.isEnabled()
                 })
-                .appendTo($entry)
-                .on("click", event => {
-                    event.preventDefault();
-                    filter.toggleEnabled();
-                    BlacklistEnhancer.applyBlacklist();
-                    $link.toggleClass("blacklisted-active");
-                });
-
-            $entry.append(" ");
+                .data("filter", filter)
+                .appendTo(BlacklistEnhancer.$content);
+            $("<a>")
+                .attr("href", "/posts?tags=" + tags.replace(" ", "+"))
+                .html(tags.replace(/_/g, "&#8203;_"))
+                .appendTo(entry);
 
             $("<span>")
-                .html(filter.getMatches() + "")
-                .addClass("post-count")
-                .appendTo($entry);
-
-            BlacklistEnhancer.$list.append($entry);
-            return true;
+                .html(count + "")
+                .appendTo(entry);
         }
+    }
+
+    public static updateToggleSwitch(): void {
+        if (BlacklistEnhancer.$content.find("filter[enabled=false]").length > 0)
+            BlacklistEnhancer.$toggle.html("Enable All Filters");
+        else BlacklistEnhancer.$toggle.html("Disable All Filters");
     }
 
 }

@@ -16,6 +16,7 @@ section#content {
     search-content {
         display: grid;
         grid-template-columns: repeat(auto-fill, max(var(--img-width, 150px), 150px));
+        grid-auto-rows: minmax(min-content, max-content);   // random space at the bottom otherwise
         grid-column-gap: 0.25rem;
         grid-row-gap: 0.5rem;
         justify-content: space-between;
@@ -103,6 +104,8 @@ search-content > post {
 
     border-radius: 0.25rem;
     position: relative;
+
+    &[blacklisted=true] { display: none; }
 
     & > a {
         display: flex;

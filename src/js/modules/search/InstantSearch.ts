@@ -67,9 +67,11 @@ export class InstantSearch extends RE6Module {
                 post.show();
             }
         } else {
+            /*
             for (const post of posts) {
                 filter.addPost(post, true) ? post.show() : post.hide();
             }
+            */
         }
     }
 
