@@ -20,7 +20,7 @@ section#content {
         grid-column-gap: 0.25rem;
         grid-row-gap: 0.5rem;
         justify-content: space-between;
-        height: 100%;
+        height: min-content;    // as above, random space at the bottom causes pagination to jump
 
         span#no-results {
             height: 154px;
@@ -131,19 +131,21 @@ search-content > post {
         color: white;
         text-shadow: 0 0 10px black;
 
-        & > i.fas {
+        &::before {
+            content: "\f1ce";
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
             width: 2rem;
             height: 2rem;
             font-size: 2rem;
             line-height: 2rem;
-            text-align: center;
-            vertical-align: middle;
         }
     }
 
     &[state=loading] post-loading,
     &[loading=true] post-loading {
         display: flex;
+        &::before { animation: fa-spin 2s infinite linear; }
     }
 
     // Description section - upvotes, favorites, comment count, rating
@@ -318,9 +320,11 @@ search-content  {
         height: 0;
     }
 
+    /*
     post:hover post-voting button.vote { visibility: visible; }
     post:hover post-voting button.fav,
     post[fav=true] post-voting button.fav { visibility: visible; }
+    */
 
     button.voteButton {
         font-size: 0.9rem;
@@ -328,19 +332,29 @@ search-content  {
         border-radius: 0;
 
         &.vote {
-            visibility: hidden;
-            &:nth-child(1) {
-                border-right: 1px solid #666;
-                border-top-left-radius: 0.75rem;
+            display: none;
+        }
+        &.vote-up {
+            border-right: 1px solid #666;
+            border-top-left-radius: 0.75rem;
+            &::before {
+                content: unicode("f164");
+                font-family: "Font Awesome 5 Free";
+                font-weight: 500;
             }
-            &:nth-child(2) {
-                border-left: 1px solid #666;
-                border-top-right-radius: 0.75rem;
+        }
+        &.vote-down {
+            border-left: 1px solid #666;
+            border-top-right-radius: 0.75rem;
+            &::before {
+                content: unicode("f165");
+                font-family: "Font Awesome 5 Free";
+                font-weight: 500;
             }
         }
 
         &.fav {
-            visibility: hidden;
+            display: none;
             position: absolute;
             left: 0;
             bottom: -1rem;
@@ -348,11 +362,22 @@ search-content  {
             border-radius: 0 0.75rem 0 0;
 
             &.score-favorite { color: #c3a816;  }
+            &::before {
+                content: unicode("f005");
+                font-family: "Font Awesome 5 Free";
+                font-weight: 500;
+            }
         }
     }
 
+    &[btn-vote=true] post:hover button.vote { display: block; }
+    &[btn-fav=true] post:hover button.fav,
+    &[btn-fav=true] post[fav=true] button.fav { display: block; }
+
+    /*
     &:not([btn-vote=true]) button.voteButton.vote { display: none; }
     &:not([btn-fav=true]) button.voteButton.fav { display: none; }
+    */
 
 }
 

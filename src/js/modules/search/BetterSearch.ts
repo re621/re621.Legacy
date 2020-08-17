@@ -548,7 +548,9 @@ export class BetterSearch extends RE6Module {
             if (this.loadingPosts) return;
 
             // Viewport must be two screens away from the bottom
-            if (viewport.scrollTop() < fullpage.height() - (viewport.height() * 2)) return;
+            const pageHeight = fullpage.height(),
+                viewportHeight = viewport.height();
+            if (viewport.scrollTop() < Math.max((fullpage.height() - (viewport.height() * 2)), (fullpage.height() * 0.9))) return;
 
             // Trigger the loading process by clicking on "Load More" button
             $("#infscroll-next")[0].click();

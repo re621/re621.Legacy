@@ -129,30 +129,29 @@ export class PostUtilities {
         if (flagRibbonText != "") { flagRibbon.attr("title", flagRibbonText); }
         else flagRibbon.remove();
 
+        // Remove unused element if the post has no ribbons
+        if ($ribbons.children().length == 0) $ribbons.remove();
+
 
         // Voting Buttons
         const $voteBox = $("<post-voting>")
             .appendTo($article);
 
         $("<button>")   // Upvote
-            .html(`<i class="far fa-thumbs-up"></i>`)
             .addClass("button voteButton vote vote-up post-vote-up-" + data.id + " score-neutral")
             .appendTo($voteBox);
 
         $("<button>")   // Downvote
-            .html(`<i class="far fa-thumbs-down"></i>`)
             .addClass("button voteButton vote vote-down post-vote-down-" + data.id + " score-neutral")
             .appendTo($voteBox);
 
         $("<button>")   // Favorite
-            .html(`<i class="far fa-star"></i>`)
             .addClass("button voteButton fav post-favorite-" + data.id + " score-neutral" + (data.is_favorited ? " score-favorite" : ""))
             .appendTo($voteBox);
 
 
         // Post info
         $("<post-loading>")
-            .html(`<i class="fas fa-circle-notch fa-2x fa-spin"></i>`)
             .appendTo($link);
 
         const scoreClass = data.score.total > 0 ? "positive" : (data.score.total < 0 ? "negative" : "neutral");
@@ -228,6 +227,7 @@ export class PostUtilities {
                 .html(flag.name)
                 .appendTo($flagBox);
         }
+        $flagBox.toggleClass("display-none", $flagBox.children().length == 0);
 
     }
 

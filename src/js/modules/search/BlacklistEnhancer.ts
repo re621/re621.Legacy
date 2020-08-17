@@ -16,7 +16,7 @@ export class BlacklistEnhancer extends RE6Module {
     private static $toggle: JQuery<HTMLElement>;                // toggle switch for all blacklists
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.post], true);
+        super([PageDefintion.search, PageDefintion.favorites], true);
     }
 
     /**
@@ -96,7 +96,10 @@ export class BlacklistEnhancer extends RE6Module {
             .on("click.re621", () => {
                 // This is dumb, but much faster than the alternative
                 if (BlacklistEnhancer.$toggle.text().startsWith("Enable")) Blacklist.enableAll();
-                else Blacklist.disableAll();
+                else {
+                    Blacklist.disableAll();
+                    BlacklistEnhancer.$wrapper.attr("collapsed", "false");
+                }
                 BlacklistEnhancer.update();
 
                 $("post").trigger("refresh.re621");
