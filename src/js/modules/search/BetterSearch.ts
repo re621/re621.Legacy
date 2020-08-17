@@ -396,7 +396,7 @@ export class BetterSearch extends RE6Module {
 
             dbclickTimer = window.setTimeout(() => {
                 if (!prevent) {
-                    $link.off("click.re621.dblextra");
+                    this.$content.off("click.re621.dblextra", "post a");
                     $link[0].click();
                 }
                 prevent = false;
