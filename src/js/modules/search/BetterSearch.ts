@@ -97,7 +97,7 @@ export class BetterSearch extends RE6Module {
         this.createStructure();
         this.updateContentHeader();
 
-        const preloadEnabled = Page.getQueryParameter("nopreload") !== "true";
+        const preloadEnabled = this.fetchSettings("loadPrevPages") && Page.getQueryParameter("nopreload") !== "true";
         Page.removeQueryParameter("nopreload");
 
         // Throttled scroll-resize events for other submodules
@@ -143,19 +143,22 @@ export class BetterSearch extends RE6Module {
                 if (!has && value.isIntersecting) {
                     // console.log("object entered", id);
                     intersecting.add(id);
-                    $article.trigger("re621:render");
-                    const page = parseInt($article.attr("page"));
-                    if (page != selectedPage) {
-                        selectedPage = page;
-                        Page.setQueryParameter("page", page + "");
-                    }
+                    window.setTimeout(() => {
+                        if (!intersecting.has(id)) return;
+                        $article.trigger("re621:render");
+                        const page = parseInt($article.attr("page"));
+                        if (page != selectedPage) {
+                            selectedPage = page;
+                            Page.setQueryParameter("page", page + "");
+                        }
+                    }, 100);
                 }
             })
         }, config);
 
         // Initial post load
         new Promise(async (resolve) => {
-            const firstPage = this.fetchSettings("loadPrevPages") && preloadEnabled
+            const firstPage = preloadEnabled
                 ? Math.max((this.queryPage - BetterSearch.PAGES_PRELOAD), 1)
                 : this.queryPage;
 
