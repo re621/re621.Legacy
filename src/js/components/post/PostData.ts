@@ -7,18 +7,20 @@ export interface PostData {
     id: number;
     flags: Set<string>;
     score: number;
-    user_vote: number;
     favorites: number;
     is_favorited: boolean;
     comments: number;
     rating: PostRating;
     uploader: number;
 
+    page: number;
+
     date: {
         raw: string;
         ago: string;
     };
 
+    tagString: string;
     tags: {
         all: Set<string>;
         artist: Set<string>;

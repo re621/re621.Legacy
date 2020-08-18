@@ -184,7 +184,7 @@ export class PostViewer extends RE6Module {
         $("a#image-note-button").html("Notes: ON");
         await ModuleController.get(PostViewer).pushSettings("hideNotes", false);
 
-        Danbooru.Note.TranslationMode.toggle(new Event("re621.dummy-event"));
+        Danbooru.Note.TranslationMode.toggle();
     }
 
     /** Opens the dialog to add the post to the set */

@@ -1,5 +1,6 @@
 import { BetterSearch, ImageClickAction, ImageLoadMethod, ImageZoomMode } from "../../modules/search/BetterSearch";
 import { CustomFlagger } from "../../modules/search/CustomFlagger";
+import { Danbooru } from "../api/Danbooru";
 import { E621 } from "../api/E621";
 import { XM } from "../api/XM";
 import { Blacklist } from "../data/Blacklist";
@@ -47,7 +48,7 @@ export class PostParts {
 
             dbclickTimer = window.setTimeout(() => {
                 if (!prevent) {
-                    $link.off("click.re621.dblextra", "post a");
+                    $link.off("click.re621.dblextra");
                     $link[0].click();
                 }
                 prevent = false;
@@ -251,29 +252,68 @@ export class PostParts {
         const $voteBox = $("<post-voting>");
 
         if (conf.buttonsVote) {
+
             $("<button>")   // Upvote
-                .addClass(`button voteButton vote vote-up post-vote-up-${post.id} ${post.user_vote > 0 ? "score-positive" : "score-neutral"}`)
+                .addClass(`button voteButton vote score-neutral`)
+                .attr("action", "up")
                 .appendTo($voteBox)
                 .on("click", (event) => {
                     event.preventDefault();
-                    Danbooru.Post.vote(post.id, 1);
-                    // TODO record user's votes
+
+                    const firstVote = post.$ref.attr("vote") == undefined;
+
+                    PostActions.vote(post.id, 1, firstVote).then(
+                        (response) => {
+                            console.log(response);
+
+                            if (response.action == 0) {
+                                if (firstVote) post.$ref.attr("vote", "1");
+                                else post.$ref.attr("vote", "0");
+                            } else post.$ref.attr("vote", response.action);
+
+                            PostData.set(post, "score", response.score);
+                            post.$ref.trigger("re621:update");
+                        },
+                        (error) => {
+                            Danbooru.error("An error occurred while recording the vote");
+                            console.log(error);
+                        }
+                    );
                 });
 
             $("<button>")   // Downvote
-                .addClass(`button voteButton vote vote-down post-vote-down-${post.id} ${post.user_vote < 0 ? "score-negative" : "score-neutral"}`)
+                .addClass(`button voteButton vote score-neutral`)
+                .attr("action", "down")
                 .appendTo($voteBox)
                 .on("click", (event) => {
                     event.preventDefault();
-                    Danbooru.Post.vote(post.id, -1);
-                    // TODO record user's votes
+
+                    const firstVote = parseInt(post.$ref.attr("vote")) == undefined;
+
+                    PostActions.vote(post.id, -1, firstVote).then(
+                        (response) => {
+                            console.log(response);
+
+                            if (response.action == 0) {
+                                if (firstVote) post.$ref.attr("vote", "-1");
+                                else post.$ref.attr("vote", "0");
+                            } else post.$ref.attr("vote", response.action);
+
+                            PostData.set(post, "score", response.score);
+                            post.$ref.trigger("re621:update");
+                        },
+                        (error) => {
+                            Danbooru.error("An error occurred while recording the vote");
+                            console.log(error);
+                        }
+                    );
                 });
         }
 
         if (conf.buttonsFav) {
             let favBlock = false;
             const $btn = $("<button>")   // Favorite
-                .addClass(`button voteButton fav post-favorite-${post.id} score-neutral ${post.is_favorited ? " score-favorite" : ""}`)
+                .addClass(`button voteButton fav score-neutral`)
                 .appendTo($voteBox)
                 .on("click", async (event) => {
                     event.preventDefault();
@@ -321,14 +361,23 @@ export class PostParts {
 
     public static renderInfo(post: PostData): JQuery<HTMLElement> {
 
-        const scoreClass = post.score > 0 ? "positive" : (post.score < 0 ? "negative" : "neutral");
-        return $("<post-info>")
-            .html(`
+        const $infoBlock = $("<post-info>");
+        post.$ref.on("re621:update", () => {
+            $infoBlock.html(getPostInfo(PostData.get(post.$ref)));
+        })
+        $infoBlock.html(getPostInfo(post));
+
+        return $infoBlock;
+
+        function getPostInfo(post: PostData): string {
+            const scoreClass = post.score > 0 ? "positive" : (post.score < 0 ? "negative" : "neutral");
+            return `
                 <span class="post-info-score score-${scoreClass}">${post.score}</span>
                 <span class="post-info-favorites">${post.favorites}</span>
                 <span class="post-info-comments">${post.comments}</span>
                 <span class="post-info-rating rating-${post.rating}">${post.rating}</span>
-            `)
+            `;
+        }
     }
 
 }

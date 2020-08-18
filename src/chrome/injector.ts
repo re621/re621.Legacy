@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 /**
  * ===== Injected Functions =====
  * Functions that cannot be called from the content script.  
@@ -24,9 +25,17 @@ const fnDanbooru = {
     },
     "Post": {
         "vote": (postid, scoreDifference, preventUnvote): void => { Danbooru.Post.vote(postid, scoreDifference, preventUnvote); },
+        "initialize_all": (): void => { Danbooru.Post.initialize_all(); },
+        "update": (postid, params): void => { Danbooru.Post.update(postid, params); },
+        "delete_with_reason": (post_id, reason, reload_after_delete): void => { Danbooru.Post.delete_with_reason(post_id, reason, reload_after_delete); },
+        "undelete": (post_id): void => { Danbooru.Post.undelete(post_id); },
+        "approve": (post_id, should_reload): void => { Danbooru.Post.approve(post_id, should_reload); },
+        "disapprove": (post_id, reason, should_reload): void => { Danbooru.Post.disapprove(post_id, reason, should_reload); },
+        "unapprove": (post_id): void => { Danbooru.Post.unapprove(post_id); },
     },
     "PostModeMenu": {
-        "change": (): void => { Danbooru.PostModeMenu.change(); }
+        "change": (): void => { Danbooru.PostModeMenu.change(); },
+        "click": (e): void => { Danbooru.PostModeMenu.click(e); },
     },
     "Note.Box": {
         "scale_all": (): void => { Danbooru.Note.Box.scale_all(); },

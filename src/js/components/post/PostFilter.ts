@@ -148,7 +148,7 @@ class PostFilterUtils {
     public static tagsMatchesFilter(post: PostData, filter: string): boolean {
         if (filter.includes("*")) {
             const regex = Tag.escapeSearchToRegex(filter);
-            return regex.test([...post.tags.all].join(" "));
+            return regex.test(post.tagString);
         }
         return post.tags.all.has(filter);
     }

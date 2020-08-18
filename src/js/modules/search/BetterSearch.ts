@@ -1,8 +1,10 @@
+import { Danbooru } from "../../components/api/Danbooru";
 import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { Post } from "../../components/post/Post";
+import { PostActions } from "../../components/post/PostActions";
 import { PostData } from "../../components/post/PostData";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
@@ -146,7 +148,7 @@ export class BetterSearch extends RE6Module {
                     window.setTimeout(() => {
                         if (!intersecting.has(id)) return;
                         $article.trigger("re621:render");
-                        const page = parseInt($article.attr("page"));
+                        const page = $article.data("page") as number;
                         if (page != selectedPage) {
                             selectedPage = page;
                             Page.setQueryParameter("page", page + "");
@@ -291,14 +293,123 @@ export class BetterSearch extends RE6Module {
 
     /** Restarts various event listenerd used by the module */
     public reloadEventListeners(): void {
+        this.reloadModeSwitchListener();
         this.reloadZoomListeners();
         this.reloadInfScrollListeners();
     }
 
-    /**
-     * Restarts the even listeners used by the hover zoom submodule.  
-     * Should only be called from `reloadEventListeners()`
-     */
+    public reloadModeSwitchListener(): void {
+        this.$content.on("click", "post a", (event) => {
+
+            const mode = $("#mode-box-mode").val();
+            if (mode == "view") return;
+            event.preventDefault();
+
+            const $article = $(event.currentTarget).parent(),
+                post = PostData.get($article);
+
+            switch (mode) {
+                case "rating-q":
+                case "rating-s":
+                case "rating-e":
+                case "lock-rating":
+                case "lock-note":
+                case "delete":
+                case "undelete":
+                case "approve":
+                case "remove-parent":
+                case "tag-script":
+
+                case "edit": { }
+                case "add-to-set": { }
+                case "remove-from-set": { }
+
+                case "fake-click": {
+
+                    // To avoid having to duplicate the functionality of every single mode,
+                    // a fake article is created with all appropriate data, which is then
+                    // used to trigger Danbooru's native functionality.
+
+                    const $farticle = $("<article>")
+                        .addClass("post-preview display-none")
+                        .attr({
+                            "id": "post_" + post.id,
+                            "data-id": post.id,
+                            "data-tags": post.tagString,
+                        })
+                        .appendTo("body");
+                    $("<a>").appendTo($farticle)
+                        .one("click", (event) => {
+                            console.log($(event.target).closest("article").data("id"));
+                            Danbooru.PostModeMenu.click(event);
+                        })[0].click();
+                    break;
+                }
+
+                case "vote-up": {
+                    const firstVote = post.$ref.attr("vote") == undefined;
+
+                    PostActions.vote(post.id, 1, firstVote).then(
+                        (response) => {
+                            console.log(response);
+
+                            if (response.action == 0) {
+                                if (firstVote) post.$ref.attr("vote", "1");
+                                else post.$ref.attr("vote", "0");
+                            } else post.$ref.attr("vote", response.action);
+
+                            PostData.set(post, "score", response.score);
+                            post.$ref.trigger("re621:update");
+                        },
+                        (error) => {
+                            Danbooru.error("An error occurred while recording the vote");
+                            console.log(error);
+                        }
+                    );
+                    break;
+                }
+                case "vote-down": {
+                    const firstVote = post.$ref.attr("vote") == undefined;
+
+                    PostActions.vote(post.id, -1, false).then(
+                        (response) => {
+                            console.log(response);
+
+                            if (response.action == 0) {
+                                if (firstVote) post.$ref.attr("vote", "1");
+                                else post.$ref.attr("vote", "0");
+                            } else post.$ref.attr("vote", response.action);
+
+                            PostData.set(post, "score", response.score);
+                            post.$ref.trigger("re621:update");
+                        },
+                        (error) => {
+                            Danbooru.error("An error occurred while recording the vote");
+                            console.log(error);
+                        }
+                    );
+                    break;
+                }
+                case "add-fav": {
+                    E621.Favorite.id(post.id).delete();
+                    PostData.set(post, "is_favorited", false);
+                    post.$ref.removeAttr("fav");
+                    break;
+                }
+                case "remove-fav": {
+                    E621.Favorites.post({ "post_id": post.id });
+                    PostData.set(post, "is_favorited", false);
+                    post.$ref.attr("fav", "true");
+                    break;
+                }
+            }
+
+            console.log($article.data("id"), mode);
+
+        });
+    }
+
+    /** Restarts the even listeners used by the hover zoom submodule. */
     private reloadZoomListeners(): void {
 
         const zoomMode = this.fetchSettings("zoomMode");
@@ -333,10 +444,7 @@ export class BetterSearch extends RE6Module {
         }
     }
 
-    /**
-     * Restarts the even listeners used by the infinite scroll submodule.  
-     * Should only be called from `reloadEventListeners()`
-     */
+    /** Restarts the even listeners used by the infinite scroll submodule. */
     private reloadInfScrollListeners(): void {
         const fullpage = $(document),
             viewport = $(window);
@@ -383,7 +491,7 @@ export class BetterSearch extends RE6Module {
             if (BetterSearch.paused || (this.fetchSettings("zoomMode") == ImageZoomMode.OnShift && !this.shiftPressed))
                 return;
 
-            const $article = $("#post_" + data)
+            const $article = $("#entry_" + data)
                 .attr("loading", "true");
             const post = PostData.get($article);
 
@@ -399,7 +507,7 @@ export class BetterSearch extends RE6Module {
 
             // Append the tags block
             if (this.fetchSettings("zoomTags"))
-                this.$zoomTags.html([...post.tags.all].sort().join(" "));
+                this.$zoomTags.html(post.tagString);
 
             // Listen for mouse movements to move the preview accordingly
             let throttled = false;
@@ -442,7 +550,7 @@ export class BetterSearch extends RE6Module {
             this.$zoomTags.html("");
 
             // If the post was loading, remove the spinner
-            $("#post_" + data).removeAttr("loading");
+            $("#entry_" + data).removeAttr("loading");
         });
     }
 

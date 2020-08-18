@@ -18,30 +18,32 @@ export class Post {
         // Image container and post data store
         const $article = $("<post>")
             .attr({
-                "id": "post_" + data.id,
+                "id": "entry_" + data.id,
                 "fav": data.is_favorited == true ? "true" : undefined,
+                "vote": undefined,
                 "animated": animated ? "true" : undefined,
                 "filetype": data.file.ext,
                 "deleted": flags.has("deleted") ? "true" : undefined,
-                "page": page ? page : undefined,
                 "rendered": false,
             })
             .data({
                 id: data.id,
                 flags: flags,
                 score: data.score.total,
-                user_vote: 0,
                 favorites: data.fav_count,
                 is_favorited: data.is_favorited == true,
                 comments: data.comment_count,
                 rating: data.rating,
                 uploader: data.uploader_id,
 
+                page: page,
+
                 date: {
                     raw: data.created_at,
                     ago: Util.Time.ago(data.created_at),
                 },
 
+                tagString: [...tags].sort().join(" "),
                 tags: {
                     all: tags,
                     artist: new Set(data.tags.artist),
@@ -124,10 +126,7 @@ export class Post {
 
     public static reset($article: JQuery<HTMLElement>): JQuery<HTMLElement> {
         $article
-            .attr({
-                "state": "done",
-                "rendered": false,
-            })
+            .attr({ "rendered": false, })
             .html($article.data("id"))
             .children().remove();
         return $article;

@@ -266,6 +266,7 @@ search-content > post {
 
     &[animated=true][filetype=webm] { content: "WEBM"; }
     &[animated=true][filetype=gif] { content: "GIF"; }
+    &[animated=true][filetype=swf] { content: "SWF"; }
 
 }
 
@@ -351,36 +352,27 @@ search-content  {
         height: 0;
     }
 
-    /*
-    post:hover post-voting button.vote { visibility: visible; }
-    post:hover post-voting button.fav,
-    post[fav=true] post-voting button.fav { visibility: visible; }
-    */
-
     button.voteButton {
         font-size: 0.9rem;
         padding: 0.125rem 0.75rem;
         border-radius: 0;
 
         &.vote {
+
             display: none;
-        }
-        &.vote-up {
-            border-right: 1px solid #666;
-            border-top-left-radius: 0.75rem;
             &::before {
-                content: unicode("f164");
                 font-family: "Font Awesome 5 Free";
                 font-weight: 500;
             }
-        }
-        &.vote-down {
-            border-left: 1px solid #666;
-            border-top-right-radius: 0.75rem;
-            &::before {
-                content: unicode("f165");
-                font-family: "Font Awesome 5 Free";
-                font-weight: 500;
+            &[action=up] {
+                border-right: 1px solid #666;
+                border-top-left-radius: 0.75rem;
+                &::before { content: unicode("f164"); }
+            }
+            &[action=down] {
+                border-left: 1px solid #666;
+                border-top-right-radius: 0.75rem;
+                &::before { content: unicode("f165"); }
             }
         }
 
@@ -392,7 +384,6 @@ search-content  {
             padding: 0.25rem 0.35rem 0.125rem 0.125rem;
             border-radius: 0 0.75rem 0 0;
 
-            &.score-favorite { color: #c3a816;  }
             &::before {
                 content: unicode("f005");
                 font-family: "Font Awesome 5 Free";
@@ -401,6 +392,12 @@ search-content  {
         }
     }
 
+    // Scoring
+    post[vote="1"] button.vote[action=up] { color: #3e9e49; }
+    post[vote="-1"] button.vote[action=down] { color: #e45f5f; }
+    post[fav=true] button.fav { color: #c3a816; }
+
+    // Visibility
     post:hover button.vote { display: block; }
     post:hover button.fav,
     post[fav=true] button.fav { display: block; }

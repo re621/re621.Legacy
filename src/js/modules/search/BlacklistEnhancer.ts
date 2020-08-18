@@ -78,7 +78,7 @@ export class BlacklistEnhancer extends RE6Module {
             BlacklistEnhancer.updateToggleSwitch();
 
             for (const match of filter.getMatches())
-                $("#post_" + match).trigger("re621:blacklist");
+                $("#entry_" + match).trigger("re621:blacklist");
             BetterSearch.trigger("postcount");
         });
 
