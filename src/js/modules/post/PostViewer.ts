@@ -2,8 +2,8 @@ import { Danbooru } from "../../components/api/Danbooru";
 import { FavoriteCache } from "../../components/cache/FavoriteCache";
 import { PageDefintion } from "../../components/data/Page";
 import { Post, ViewingPost } from "../../components/data/Post";
-import { PostActions } from "../../components/data/PostActions";
 import { ModuleController } from "../../components/ModuleController";
+import { PostActions } from "../../components/post/PostActions";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**

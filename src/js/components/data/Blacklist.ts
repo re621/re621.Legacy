@@ -1,7 +1,7 @@
 import { BlacklistEnhancer } from "../../modules/search/BlacklistEnhancer";
-import { Post } from "../structure/PostUtilities";
+import { PostData } from "../post/PostData";
+import { PostFilter } from "../post/PostFilter";
 import { Util } from "../utility/Util";
-import { PostFilter } from "./PostFilter";
 import { User } from "./User";
 
 export class Blacklist {
@@ -12,7 +12,7 @@ export class Blacklist {
 
     private constructor() {
         const filters = $("head meta[name=blacklisted-tags]").attr("content");
-        const blacklistEnabled = Util.LS.getItem("dab") == "1";
+        const blacklistEnabled = Util.LS.getItem("dab") !== "1";
 
         if (filters !== undefined) {
             for (const filter of JSON.parse(filters))
@@ -47,7 +47,7 @@ export class Blacklist {
      * @param posts Post(s) to add to the cache
      * @returns Number of filters that match the post
      */
-    public static addPost(...posts: Post[]): number {
+    public static addPost(...posts: PostData[]): number {
         let count = 0;
         for (const filter of Blacklist.get().values()) {
             if (filter.update(posts)) count++;
@@ -60,12 +60,12 @@ export class Blacklist {
      * @param posts Post(s) to update
      * @returns Number of filters that match the post
      */
-    public static updatePost(...posts: Post[]): number {
+    public static updatePost(...posts: PostData[]): number {
         return Blacklist.addPost(...posts);
     }
 
     /** Returns true if the post is in the blacklist cache */
-    public static checkPost(post: Post | number, ignoreDisabled = false): boolean {
+    public static checkPost(post: PostData | number, ignoreDisabled = false): boolean {
         if (typeof post !== "number") post = post.id;
         for (const filter of Blacklist.get().values()) {
             if (filter.matchesID(post, ignoreDisabled)) return true;

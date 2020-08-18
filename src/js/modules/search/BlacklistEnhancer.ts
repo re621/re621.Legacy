@@ -1,8 +1,10 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { Blacklist } from "../../components/data/Blacklist";
 import { PageDefintion } from "../../components/data/Page";
-import { PostFilter } from "../../components/data/PostFilter";
+import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Util } from "../../components/utility/Util";
+import { BetterSearch } from "./BetterSearch";
 
 /**
  * Blacklist Enhancer  
@@ -19,16 +21,10 @@ export class BlacklistEnhancer extends RE6Module {
         super([PageDefintion.search, PageDefintion.favorites], true);
     }
 
-    /**
-     * Returns a set of default settings values
-     * @returns Default settings
-     */
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
             quickaddTags: true,
-
-            blacklistCollapsed: true,
         };
     }
 
@@ -47,7 +43,7 @@ export class BlacklistEnhancer extends RE6Module {
                 "id": "re621-blacklist",
                 "open": false,
                 "count": 0,
-                "collapsed": this.fetchSettings("blacklistCollapsed"),
+                "collapsed": Util.LS.getItem("bc") == "1",
             })
             .removeAttr("style")
             .removeAttr("class")
@@ -59,9 +55,9 @@ export class BlacklistEnhancer extends RE6Module {
             .html("Blacklisted")
             .appendTo(BlacklistEnhancer.$wrapper)
             .on("click.re621", () => {
-                const enabled = BlacklistEnhancer.$wrapper.attr("collapsed") == "true";
-                BlacklistEnhancer.$wrapper.attr("collapsed", !enabled + "");
-                this.pushSettings("blacklistCollapsed", !enabled);
+                const collapsed = !(BlacklistEnhancer.$wrapper.attr("collapsed") == "true");
+                BlacklistEnhancer.$wrapper.attr("collapsed", collapsed + "");
+                Util.LS.setItem("bc", collapsed ? "1" : "0");
             });
 
         // Blacklist Filters
@@ -82,7 +78,8 @@ export class BlacklistEnhancer extends RE6Module {
             BlacklistEnhancer.updateToggleSwitch();
 
             for (const match of filter.getMatches())
-                $("#post_" + match).trigger("refresh.re621");
+                $("#post_" + match).trigger("re621:blacklist");
+            BetterSearch.trigger("postcount");
         });
 
         // Toggle-All Switch
@@ -99,10 +96,12 @@ export class BlacklistEnhancer extends RE6Module {
                 else {
                     Blacklist.disableAll();
                     BlacklistEnhancer.$wrapper.attr("collapsed", "false");
+                    Util.LS.setItem("bc", "0");
                 }
                 BlacklistEnhancer.update();
 
-                $("post").trigger("refresh.re621");
+                $("post").trigger("re621:blacklist");
+                BetterSearch.trigger("postcount");
             });
     }
 
@@ -148,9 +147,13 @@ export class BlacklistEnhancer extends RE6Module {
     }
 
     public static updateToggleSwitch(): void {
-        if (BlacklistEnhancer.$content.find("filter[enabled=false]").length > 0)
+        if (BlacklistEnhancer.$content.find("filter[enabled=false]").length > 0) {
             BlacklistEnhancer.$toggle.html("Enable All Filters");
-        else BlacklistEnhancer.$toggle.html("Disable All Filters");
+            Util.LS.setItem("dab", "1");
+        } else {
+            BlacklistEnhancer.$toggle.html("Disable All Filters");
+            Util.LS.setItem("dab", "0");
+        }
     }
 
 }

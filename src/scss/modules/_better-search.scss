@@ -21,13 +21,22 @@ section#content {
         grid-row-gap: 0.5rem;
         justify-content: space-between;
         height: min-content;    // as above, random space at the bottom causes pagination to jump
+        min-height: 80vh;
 
-        span#no-results {
-            height: 154px;
+        // All results filtered out
+        &[posts="0"]::before {
+            content: "Nobody here but us chickens!";
             display: flex;
+            height: 150px;
+            width: 100%;
+
             justify-content: center;
-            grid-column: 1/-1;
             align-items: center;
+            grid-column: 1/-1;
+
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: #aaa;
         }
 
         post-break {
@@ -104,6 +113,8 @@ search-content > post {
 
     border-radius: 0.25rem;
     position: relative;
+    
+    transition: box-shadow 0.25s linear;
 
     &[blacklisted=true] { display: none; }
 
@@ -112,6 +123,7 @@ search-content > post {
         justify-content: center;
         width: 100%;
         position: relative;
+        outline: 0 !important;
 
         img { align-self: flex-end; }
     }
@@ -142,10 +154,14 @@ search-content > post {
         }
     }
 
-    &[state=loading] post-loading,
     &[loading=true] post-loading {
         display: flex;
         &::before { animation: fa-spin 2s infinite linear; }
+    }
+
+    // Double-click Highlight
+    &.highlight {
+        box-shadow: 0px 0px 0px 5px #ffffff60;
     }
 
     // Description section - upvotes, favorites, comment count, rating
@@ -196,6 +212,24 @@ search-content > post {
         }
 
     }
+}
+
+
+/* Un-rendered Post */
+search-content > post[rendered=false] {
+    width: var(--img-width, 150px);
+    height: calc(max(var(--img-width, 150px), 150px) * var(--img-ratio, 1));
+    max-height: 50vh;
+    align-items: center;
+
+    border-bottom: 1rem solid #ffffff25;
+    background-image: url(placeholderBG("ffffff06"));
+
+    font-size: 2em;
+    font-family: monospace;
+    color: #ffffff10;
+
+    pointer-events: none;
 }
 
 
@@ -300,9 +334,6 @@ search-content {
             background: linear-gradient(90deg, $status-flagged 50%, $status-pending 50%);
         }
     }
-
-    &:not([ribbon-flag=true]) ribbon.right { display: none; }
-    &:not([ribbon-rel=true]) ribbon.left { display: none; }
 }
 
 
@@ -370,14 +401,9 @@ search-content  {
         }
     }
 
-    &[btn-vote=true] post:hover button.vote { display: block; }
-    &[btn-fav=true] post:hover button.fav,
-    &[btn-fav=true] post[fav=true] button.fav { display: block; }
-
-    /*
-    &:not([btn-vote=true]) button.voteButton.vote { display: none; }
-    &:not([btn-fav=true]) button.voteButton.fav { display: none; }
-    */
+    post:hover button.vote { display: block; }
+    post:hover button.fav,
+    post[fav=true] button.fav { display: block; }
 
 }
 

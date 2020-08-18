@@ -1,20 +1,17 @@
 import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
-import { XM } from "../../components/api/XM";
-import { Blacklist } from "../../components/data/Blacklist";
 import { Page, PageDefintion } from "../../components/data/Page";
-import { PostActions } from "../../components/data/PostActions";
 import { User } from "../../components/data/User";
+import { Post } from "../../components/post/Post";
+import { PostData } from "../../components/post/PostData";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
-import { Post, PostUtilities } from "../../components/structure/PostUtilities";
 import { Util } from "../../components/utility/Util";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
 
 export class BetterSearch extends RE6Module {
 
     private static readonly PAGES_PRELOAD = 3;  // Number of pages to pre-load when `loadPrevPages` is true
-    private static readonly HOVER_DELAY = 200;  // How long should a user hover over a post in order to trigger an event
     private static readonly CLICK_DELAY = 200;  // Timeout for double-click events
 
     private static paused = false;              // If true, stops several actions that may interfere with other modules
@@ -28,6 +25,8 @@ export class BetterSearch extends RE6Module {
     private $zoomTags: JQuery<HTMLElement>;     // Post's tags section displayed on hover
 
     private $paginator: JQuery<HTMLElement>;    // Pagination element
+
+    private observer: IntersectionObserver;     // Handles dynamic post rendering
 
     private shiftPressed = false;               // Used to block zoom in onshift mode
 
@@ -60,8 +59,8 @@ export class BetterSearch extends RE6Module {
 
             hoverTags: false,                               // If true, adds a hover text to the image containing all of its tags
 
-            ribbonsFlag: true,                              // Status ribbons - flagged / pending
             ribbonsRel: true,                               // Relations ribbons - parent / child posts
+            ribbonsFlag: true,                              // Status ribbons - flagged / pending
             buttonsVote: true,                              // Voting buttons
             buttonsFav: true,                               // Favorite button
 
@@ -69,7 +68,7 @@ export class BetterSearch extends RE6Module {
 
             infiniteScroll: true,                           // Seemlessly load more posts below the current ones
             loadAutomatically: true,                        // Load posts automatically while scrolling down
-            loadPrevPages: true,                            // If enabled, will load 3 pages before the current one (if available)
+            loadPrevPages: false,                           // If enabled, will load 3 pages before the current one (if available)
             hidePageBreaks: true,                           // Show a visual separator between different pages
         };
     }
@@ -113,12 +112,46 @@ export class BetterSearch extends RE6Module {
         });
 
         // Event listener for article updates
-        this.$content.on("update.re621", "post", (event) => {
-            PostUtilities.update($(event.currentTarget));
+        this.$content
+            .on("re621:render", "post", (event) => { Post.render($(event.currentTarget)); })
+            .on("re621:reset", "post", (event) => { Post.reset($(event.currentTarget)); })
+            .on("re621:blacklist", "post", (event) => { Post.updateVisibility($(event.currentTarget)); });
+        BetterSearch.on("postcount", () => {
+            this.updatePostCount();
         });
-        this.$content.on("refresh.re621", "post", (event) => {
-            PostUtilities.updateVisibility($(event.currentTarget));
-        });
+
+        const intersecting: Set<number> = new Set();
+        let selectedPage = this.queryPage;
+        const config = {
+            root: null,
+            rootMargin: "100% 0px 100% 0px",
+            threshold: 0.5,
+        };
+        this.observer = new IntersectionObserver((entries) => {
+            entries.forEach((value) => {
+                const $article = $(value.target),
+                    id = $article.data("id") || 0,
+                    has = intersecting.has(id);
+
+                // element left the viewport
+                if (has && !value.isIntersecting) {
+                    // console.log("object left", id);
+                    intersecting.delete(id);
+                    $article.trigger("re621:reset");
+                }
+                // element entered viewport
+                if (!has && value.isIntersecting) {
+                    // console.log("object entered", id);
+                    intersecting.add(id);
+                    $article.trigger("re621:render");
+                    const page = parseInt($article.attr("page"));
+                    if (page != selectedPage) {
+                        selectedPage = page;
+                        Page.setQueryParameter("page", page + "");
+                    }
+                }
+            })
+        }, config);
 
         // Initial post load
         new Promise(async (resolve) => {
@@ -127,21 +160,19 @@ export class BetterSearch extends RE6Module {
                 : this.queryPage;
 
             const pageResult = await this.fetchPosts();
-            if (pageResult.length == 0) {
-                $("<span>")
-                    .attr("id", "no-results")
-                    .html("Nobody here but us chickens!")
-                    .appendTo(this.$content);
+            if (pageResult.length > 0) {
 
-                this.hasMorePages = false;
-            } else {
+                const imageRatioChange = this.fetchSettings<boolean>("imageRatioChange");
 
                 // Reload previous pages
                 let result: APIPost[] = [];
                 for (let i = firstPage; i < this.queryPage; i++) {
                     result = await this.fetchPosts(i);
-                    for (const post of result)
-                        this.$content.append(PostUtilities.make(post, i));
+                    for (const post of result) {
+                        const $article = Post.build(post, imageRatioChange, i);
+                        this.$content.append($article);
+                        this.observer.observe($article[0]);
+                    }
                     $("<post-break>")
                         .attr("id", "page-" + (i + 1))
                         .html(`Page&nbsp;${(i + 1)}`)
@@ -149,8 +180,11 @@ export class BetterSearch extends RE6Module {
                 }
 
                 // Append the current page results
-                for (const post of pageResult)
-                    this.$content.append(PostUtilities.make(post, this.queryPage));
+                for (const post of pageResult) {
+                    const $article = Post.build(post, imageRatioChange, this.queryPage);
+                    this.$content.append($article);
+                    this.observer.observe($article[0]);
+                }
 
                 // If the loaded page has less than the absolute minimum value of posts per page,
                 // then it's most likely the last one, as long as there is no custom query limit.
@@ -174,9 +208,8 @@ export class BetterSearch extends RE6Module {
                     .animate({ scrollTop: scrollTo.offset().top - 30 }, 200);
             }
 
-            this.initPageTracker();
-
             BlacklistEnhancer.update();
+            this.updatePostCount();
         });
     }
 
@@ -224,9 +257,14 @@ export class BetterSearch extends RE6Module {
             .appendTo(this.$zoomBlock);
     }
 
-    /** Triggers an update event on all loaded posts */
-    public updateContentStructure(): void {
-        this.$content.children("post").trigger("update.re621");
+    /** Refreshes the visible post count attribute */
+    public updatePostCount(): void {
+        this.$content.attr("posts", $("post:visible").length);
+    }
+
+    /** Re-renders the posts that are currently being displayed */
+    public reloadRenderedPosts(): void {
+        $("post[rendered=true]").trigger("re621:render");
     }
 
     /** Updates the content wrapper attributes and variables */
@@ -243,18 +281,6 @@ export class BetterSearch extends RE6Module {
         if (conf.imageSizeChange) this.$content.css("--img-width", conf.imageWidth);
         if (conf.imageRatioChange) this.$content.css("--img-ratio", conf.imageRatio);
 
-        // Ribbons
-        if (conf.ribbonsFlag) this.$content.attr("ribbon-flag", "true");
-        else this.$content.removeAttr("ribbon-flag");
-        if (conf.ribbonsRel) this.$content.attr("ribbon-rel", "true");
-        else this.$content.removeAttr("ribbon-rel");
-
-        // Voting Buttons
-        if (conf.buttonsVote) this.$content.attr("btn-vote", "true");
-        else this.$content.removeAttr("btn-vote");
-        if (conf.buttonsFav) this.$content.attr("btn-fav", "true");
-        else this.$content.removeAttr("btn-fav");
-
         // InfScroll separators
         if (conf.hidePageBreaks) this.$content.attr("hide-page-breaks", "true");
         else this.$content.removeAttr("hide-page-breaks");
@@ -262,203 +288,8 @@ export class BetterSearch extends RE6Module {
 
     /** Restarts various event listenerd used by the module */
     public reloadEventListeners(): void {
-        this.reloadVoteFavListeners();
-        this.reloadUpscalingListeners();
-        this.reloadDoubleClickListeners();
         this.reloadZoomListeners();
         this.reloadInfScrollListeners();
-    }
-
-    /**
-     * Restarts the even listeners used by voting buttons.
-     * Should only be called from `reloadEventListeners()`
-     */
-    private reloadVoteFavListeners(): void {
-
-        const conf = this.fetchSettings(["buttonsVote", "buttonsFav"]);
-
-        this.$content
-            .off("click.re621.vote", "button.vote")
-            .off("click.re621.vote", "button.fav");
-
-        if (conf.buttonsVote) {
-            this.$content.on("click.re621.vote", "button.vote", (event) => {
-                event.preventDefault();
-
-                const $target = $(event.currentTarget),
-                    post = Post.get($target.parents("post"));
-
-                if ($target.hasClass("vote-up")) Danbooru.Post.vote(post.id, 1);
-                else if ($target.hasClass("vote-down")) Danbooru.Post.vote(post.id, -1);
-                else Danbooru.error("Invalid post action");
-            });
-        }
-
-        if (conf.buttonsFav) {
-            let favBlock = false;
-            this.$content.on("click.re621.vote", "button.fav", async (event) => {
-                event.preventDefault();
-
-                if (favBlock) return;
-                favBlock = true;
-
-                const $target = $(event.currentTarget),
-                    $article = $target.parents("post"),
-                    post = Post.get($article);
-
-                if (post.is_favorited) {
-                    await E621.Favorite.id(post.id).delete();
-                    Post.set(post, "is_favorited", false);
-                    $article.removeAttr("fav");
-                    $target.removeClass("score-favorite");
-                } else {
-                    await E621.Favorites.post({ "post_id": post.id });
-                    Post.set(post, "is_favorited", false);
-                    $article.attr("fav", "true");
-                    $target.addClass("score-favorite");
-                }
-
-                favBlock = false;
-            });
-        }
-    }
-
-    /**
-     * Restarts the even listeners used by the hover zoom submodule.  
-     * Should only be called from `reloadEventListeners()`
-     */
-    private reloadUpscalingListeners(): void {
-
-        const conf = this.fetchSettings(["imageLoadMethod", "autoPlayGIFs"]);
-
-        this.$content
-            .off("mouseenter.re621.upscale", "post[state=ready]")
-            .off("mouseleave.re621.upscale", "post[state=ready]");
-
-        if (conf.imageLoadMethod === ImageLoadMethod.Disabled) return;
-
-        let timer: number;
-        this.$content.on("mouseenter.re621.upscale", "post[state=ready]", (event) => {
-
-            const $article = $(event.currentTarget),
-                $img = $article.find("img").first();
-
-            timer = window.setTimeout(() => {
-                $article.attr("state", "loading");
-                $img.attr("data-src", Post.get($article).file.sample)
-                    .addClass("lazyload")
-                    .one("lazyloaded", () => {
-                        $article
-                            .attr("state", "done")
-                            .off("mouseenter.re621.upscale")
-                            .off("mouseleave.re621.upscale");
-                    });
-            }, BetterSearch.HOVER_DELAY);
-        });
-        this.$content.on("mouseleave.re621.upscale", "post[state=ready]", () => {
-            window.clearTimeout(timer);
-        });
-    }
-
-    /**
-     * Restarts the even listeners used by the double click actions. 
-     * Should only be called from `reloadEventListeners()`
-     */
-    private reloadDoubleClickListeners(): void {
-
-        const conf = this.fetchSettings(["clickAction"]);
-
-        this.$content
-            .off("click.re621.dblextra", "post a")
-            .off("dblclick.re621.dblextra", "post a");
-
-        if (conf.clickAction == ImageClickAction.Disabled) return;
-
-        let dbclickTimer: number;
-        let prevent = false;
-
-        // Make it so that the doubleclick prevents the normal click event
-        this.$content.on("click.re621.dblextra", "post a", (event) => {
-            if (
-                // Ignore mouse clicks which are not left clicks
-                (event.button !== 0) ||
-                // Ignore meta-key presses
-                (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) ||
-                // Stop keeping track of double clicks if the zoom is paused
-                (BetterSearch.isPaused()) ||
-                // Only use double-click actions in the view mode
-                $("#mode-box-mode").val() !== "view"
-            ) return;
-
-            event.preventDefault();
-
-            const $link = $(event.currentTarget);
-
-            dbclickTimer = window.setTimeout(() => {
-                if (!prevent) {
-                    this.$content.off("click.re621.dblextra", "post a");
-                    $link[0].click();
-                }
-                prevent = false;
-            }, BetterSearch.CLICK_DELAY);
-
-            return false;
-        });
-        this.$content.on("dblclick.re621.dblextra", "post a", (event) => {
-            if (
-                // Ignore mouse clicks which are not left clicks
-                (event.button !== 0) ||
-                // Ignore meta-key presses
-                (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) ||
-                // Stop keeping track of double clicks if the zoom is paused
-                (BetterSearch.isPaused()) ||
-                // Only use double-click actions in the view mode
-                $("#mode-box-mode").val() !== "view"
-            ) { return; }
-
-            event.preventDefault();
-            window.clearTimeout(dbclickTimer);
-            prevent = true;
-
-            const $link = $(event.currentTarget),
-                $article = $link.parent(),
-                postID = $article.data("id");
-
-            $article.addClass("highlight");
-            window.setTimeout(() => $article.removeClass("highlight"), 250);
-
-            switch (conf.clickAction) {
-                case ImageClickAction.NewTab: {
-                    XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
-                    break;
-                }
-                case ImageClickAction.CopyID: {
-                    Danbooru.notice(`Copied post ID to clipboard: <a href="/posts/${postID}" target="_blank">#${postID}</a>`);
-                    XM.Util.setClipboard(postID + "", "text");
-                    break;
-                }
-                case ImageClickAction.Blacklist: {
-                    Blacklist.toggleBlacklistTag("id:" + postID);
-                    break;
-                }
-                case ImageClickAction.AddToSet: {
-                    const lastSet = parseInt(window.localStorage.getItem("set"));
-                    if (!lastSet) Danbooru.error(`Error: no set selected`);
-                    else PostActions.addSet(lastSet, postID);
-                    break;
-                }
-                case ImageClickAction.ToggleSet: {
-                    const lastSet = parseInt(window.localStorage.getItem("set"));
-                    if (!lastSet) Danbooru.error(`Error: no set selected`);
-                    else PostActions.toggleSet(lastSet, postID);
-                    break;
-                }
-                default: {
-                    $link.off("click.re621.dblextra");
-                    $link[0].click();
-                }
-            }
-        });
     }
 
     /**
@@ -468,30 +299,6 @@ export class BetterSearch extends RE6Module {
     private reloadZoomListeners(): void {
 
         const zoomMode = this.fetchSettings("zoomMode");
-
-        // Hover Zoom - Mouseover
-        this.$content
-            .off("mouseenter.re621.zoom", "post")
-            .off("mouseleave.re621.zoom", "post");
-        if (zoomMode !== ImageZoomMode.Disabled) {
-            let timer: number,
-                started = false;
-            this.$content.on("mouseenter.re621.zoom", "post", (event) => {
-                const $article = $(event.currentTarget);
-                timer = window.setTimeout(() => {
-                    started = true;
-                    BetterSearch.trigger("zoom.start", $article.data("id"));
-                }, BetterSearch.HOVER_DELAY);
-            });
-            this.$content.on("mouseleave.re621.zoom", "post", () => {
-                const $article = $(event.currentTarget);
-                window.clearTimeout(timer);
-                if (started) {
-                    started = false;
-                    BetterSearch.trigger("zoom.stop", $article.data("id"));
-                }
-            });
-        }
 
         // Hover Zoom - Shift Hold
         $(document)
@@ -547,10 +354,17 @@ export class BetterSearch extends RE6Module {
             // Don't double-queue the loading process
             if (this.loadingPosts) return;
 
-            // Viewport must be two screens away from the bottom
+            // The next page should start loading either:
+            // - when the user is one screen's height away from the bottom
+            // - when the user is 90% though the page
+            // The larger of the values (lower on the page) is chosen.
+            // The former works best when a lot of pages are loaded, the latter - when there isn't a lot of content
+
             const pageHeight = fullpage.height(),
-                viewportHeight = viewport.height();
-            if (viewport.scrollTop() < Math.max((fullpage.height() - (viewport.height() * 2)), (fullpage.height() * 0.9))) return;
+                viewHeight = viewport.height();
+
+            //   vv   bottom of the viewport    vv              vv  one screen away  vv    vv    90% through    vv
+            if ((viewport.scrollTop() + viewHeight) < Math.max((pageHeight - viewHeight), (fullpage.height() * 0.9))) return;
 
             // Trigger the loading process by clicking on "Load More" button
             $("#infscroll-next")[0].click();
@@ -568,7 +382,7 @@ export class BetterSearch extends RE6Module {
 
             const $article = $("#post_" + data)
                 .attr("loading", "true");
-            const post = Post.get($article);
+            const post = PostData.get($article);
 
             // Load the image and its basic info
             this.$zoomBlock.attr("status", "loading");
@@ -645,53 +459,25 @@ export class BetterSearch extends RE6Module {
 
         this.queryPage += 1;
 
+        const imageRatioChange = this.fetchSettings<boolean>("imageRatioChange");
+
         $("<post-break>")
             .attr("id", "page-" + this.queryPage)
             .html(`Page&nbsp;${this.queryPage}`)
             .appendTo(this.$content);
 
-        for (const post of search)
-            this.$content.append(PostUtilities.make(post, this.queryPage));
+        for (const post of search) {
+            const $article = Post.build(post, imageRatioChange, this.queryPage);
+            this.$content.append($article);
+            this.observer.observe($article[0]);
+        }
 
+        Page.setQueryParameter("page", this.queryPage + "");
         BetterSearch.trigger("tracker.update");
         BlacklistEnhancer.update();
+        this.updatePostCount();
 
         return Promise.resolve(true);
-    }
-
-    /** Sets the appropriate page query parameter depending on viewport location */
-    private initPageTracker(): void {
-
-        const viewport = $(window);
-
-        const lookup = this.$content.find("[page]:visible");
-        const firstPage = lookup.length == 0 ? 1 : parseInt(lookup.first().attr("page"));
-
-        // Create a list of page references
-        // If posts are added, or the visibility of ANY post changes, this needs to be triggered
-        let refElements: { [index: number]: JQuery<HTMLElement> } = {};
-        BetterSearch.on("tracker.update", () => {
-            refElements = {};
-            for (let index = firstPage; index <= this.queryPage; index++) {
-                const elem = $(`[page=${index}]:visible:first`);
-                if (elem.length > 0) refElements[index] = elem;
-            }
-        });
-        BetterSearch.trigger("tracker.update");
-
-        // Wait for the user to scroll past a reference post and set the corresponding page number
-        BetterSearch.on("scroll.tracker", () => {
-            for (const index of Object.keys(refElements).reverse()) {
-                if (!isElementVisible(refElements[index])) continue;
-                if (Page.getQueryParameter("page") == index) break;
-                Page.setQueryParameter("page", index);
-                break;
-            }
-        });
-
-        function isElementVisible(element: JQuery<HTMLElement>): boolean {
-            return element.offset().top < (viewport.scrollTop() + (viewport.height() * 0.5));
-        }
     }
 
     /** Rebuilds the DOM structure of the paginator */

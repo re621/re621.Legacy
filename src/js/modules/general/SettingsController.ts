@@ -328,8 +328,8 @@ export class SettingsController extends RE6Module {
                         async (data) => {
                             await betterSearch.pushSettings("imageLoadMethod", data);
                             if (betterSearch.isInitialized()) {
-                                betterSearch.updateContentStructure();
                                 betterSearch.reloadEventListeners();
+                                betterSearch.reloadRenderedPosts();
                             }
 
                             const zoomDisabled = data === ImageLoadMethod.Disabled;
@@ -350,10 +350,7 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await betterSearch.pushSettings("autoPlayGIFs", data);
-                            if (betterSearch.isInitialized()) {
-                                betterSearch.updateContentStructure();
-                                betterSearch.reloadEventListeners();
-                            }
+                            // TODO ???
                         }
                     ),
                     Form.spacer(3, true),
@@ -372,7 +369,7 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await betterSearch.pushSettings("clickAction", data);
-                            if (betterSearch.isInitialized()) betterSearch.reloadEventListeners();
+                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
                         }
                     ),
                     Form.spacer(3, true),
@@ -386,7 +383,7 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await betterSearch.pushSettings("hoverTags", data);
-                            if (betterSearch.isInitialized()) betterSearch.updateContentStructure();
+                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
                         }
                     ),
                     Form.spacer(3, true),
@@ -429,7 +426,7 @@ export class SettingsController extends RE6Module {
                                 await betterSearch.pushSettings("imageRatioChange", data);
                                 if (betterSearch.isInitialized()) {
                                     betterSearch.updateContentHeader();
-                                    betterSearch.updateContentStructure();
+                                    betterSearch.reloadRenderedPosts();
                                 }
 
                                 $("#optgeneral-gencollapse-thumb-scalingconf-cropratio-desc").toggleClass("input-disabled", !data);
@@ -461,7 +458,7 @@ export class SettingsController extends RE6Module {
                                 await betterSearch.pushSettings("imageRatio", data);
                                 if (betterSearch.isInitialized()) {
                                     betterSearch.updateContentHeader();
-                                    betterSearch.updateContentStructure();
+                                    betterSearch.reloadRenderedPosts();
                                 }
                             }
                         ),
@@ -491,6 +488,7 @@ export class SettingsController extends RE6Module {
                                 await betterSearch.pushSettings("zoomMode", data);
                                 if (betterSearch.isInitialized()) {
                                     betterSearch.reloadEventListeners();
+                                    betterSearch.reloadRenderedPosts();
                                 }
                             }
                         ),
@@ -533,7 +531,7 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await betterSearch.pushSettings("buttonsVote", data);
-                            if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
+                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
                         }
                     ),
                     Form.spacer(3, true),
@@ -548,25 +546,12 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await betterSearch.pushSettings("buttonsFav", data);
-                            if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
+                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
                         }
                     ),
                     Form.spacer(3, true),
 
                     // Ribbons
-                    Form.checkbox(
-                        {
-                            value: betterSearch.fetchSettings("ribbonsFlag"),
-                            label: "<b>Status Ribbons</b><br />Display post status as a colored ribbon on the post",
-                            width: 3,
-                        },
-                        async (data) => {
-                            await betterSearch.pushSettings("ribbonsFlag", data);
-                            if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
-                        }
-                    ),
-                    Form.spacer(3, true),
-
                     Form.checkbox(
                         {
                             value: betterSearch.fetchSettings("ribbonsRel"),
@@ -575,7 +560,20 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await betterSearch.pushSettings("ribbonsRel", data);
-                            if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
+                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
+                        }
+                    ),
+                    Form.spacer(3, true),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("ribbonsFlag"),
+                            label: "<b>Status Ribbons</b><br />Display post status as a colored ribbon on the post",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("ribbonsFlag", data);
+                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
                         }
                     ),
 

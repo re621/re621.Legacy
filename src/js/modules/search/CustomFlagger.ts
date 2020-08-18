@@ -1,8 +1,8 @@
 import { Page, PageDefintion } from "../../components/data/Page";
-import { PostFilter } from "../../components/data/PostFilter";
 import { ModuleController } from "../../components/ModuleController";
+import { PostData } from "../../components/post/PostData";
+import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { Post } from "../../components/structure/PostUtilities";
 
 export class CustomFlagger extends RE6Module {
 
@@ -47,7 +47,7 @@ export class CustomFlagger extends RE6Module {
      * @param posts Post(s) to add to the cache
      * @returns Number of filters that match the post
      */
-    public static addPost(...posts: Post[]): number {
+    public static addPost(...posts: PostData[]): number {
         let count = 0;
         for (const filterPair of CustomFlagger.get().values()) {
             if (filterPair.filter.update(posts)) count++;
@@ -60,12 +60,12 @@ export class CustomFlagger extends RE6Module {
      * @param posts Post(s) to update
      * @returns Number of filters that match the post
      */
-    public static updatePost(...posts: Post[]): number {
+    public static updatePost(...posts: PostData[]): number {
         return CustomFlagger.addPost(...posts);
     }
 
     /** Returns true if the post is in the blacklist cache */
-    public static getFlags(post: Post | number): FlagDefinition[] {
+    public static getFlags(post: PostData | number): FlagDefinition[] {
         if (typeof post !== "number") post = post.id;
         const output: FlagDefinition[] = [];
         for (const filterPair of CustomFlagger.get().values()) {

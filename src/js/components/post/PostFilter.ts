@@ -1,6 +1,6 @@
 import { PostRating } from "../api/responses/APIPost";
-import { Post } from "../structure/PostUtilities";
-import { Tag } from "./Tag";
+import { Tag } from "../data/Tag";
+import { PostData } from "./PostData";
 
 export class PostFilter {
 
@@ -51,7 +51,7 @@ export class PostFilter {
      * @param shouldDecrement If false, does not remove the post from the filter if the tests fail
      * @returns Whether or not the filter matches the post
      */
-    public update(post: Post | Post[], shouldDecrement = true): boolean {
+    public update(post: PostData | PostData[], shouldDecrement = true): boolean {
 
         // Take care of the multiple posts separately
         if (Array.isArray(post)) {
@@ -109,7 +109,7 @@ export class PostFilter {
      * @param post Post to test against the filter
      * @param ignoreDisabled Return the result regardless of the filter's state
      */
-    public matches(post: Post, ignoreDisabled = false): boolean {
+    public matches(post: PostData, ignoreDisabled = false): boolean {
         return this.matchesID(post.id, ignoreDisabled);
     }
 
@@ -145,7 +145,7 @@ class PostFilterUtils {
     }
 
     /** Returns true if the specified post has the provided tag */
-    public static tagsMatchesFilter(post: Post, filter: string): boolean {
+    public static tagsMatchesFilter(post: PostData, filter: string): boolean {
         if (filter.includes("*")) {
             const regex = Tag.escapeSearchToRegex(filter);
             return regex.test([...post.tags.all].join(" "));

@@ -1,6 +1,6 @@
 import { PageDefintion } from "../../components/data/Page";
 import { Post } from "../../components/data/Post";
-import { PostFilter } from "../../components/data/PostFilter";
+import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
