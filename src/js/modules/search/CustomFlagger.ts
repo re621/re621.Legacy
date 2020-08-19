@@ -80,23 +80,21 @@ export class CustomFlagger extends RE6Module {
      * Flags are added to the editing form, under the list of tags
      */
     private createPostPage(): void {
-        // TODO Fix this
-        return;
-        /*
-        const viewingPost = Post.getViewingPost();
+
+        const post = PostData.fromDOM($("#image-container"));
+        CustomFlagger.addPost(post);
+
         const flagContainer = $("<div>").insertAfter("div.input#tags-container");
         let activeFlags = 0;
 
         // Fill in the filters and add flags to matching ones
-        CustomFlagger.filters.forEach((entry) => {
-            entry.filter.addPost(viewingPost, false);
-            if (!entry.filter.matchesPost(viewingPost)) return;
+        for (const flag of CustomFlagger.getFlags(post)) {
             $("<div>")
                 .addClass("custom-flag")
-                .html(`<span class="custom-flag-title" style="--flag-color: ${entry.data.color}">${entry.data.name}</span> ${entry.data.tags}`)
+                .html(`<span class="custom-flag-title" style="--flag-color: ${flag.color}">${flag.name}</span> ${flag.tags}`)
                 .appendTo(flagContainer);
             activeFlags++;
-        });
+        }
 
         // Add a header if any flags have been added
         if (activeFlags > 0)
@@ -104,7 +102,6 @@ export class CustomFlagger extends RE6Module {
                 .html("Flags")
                 .addClass("display-block")
                 .prependTo(flagContainer);
-                */
     }
 
 }

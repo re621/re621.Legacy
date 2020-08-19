@@ -133,6 +133,70 @@ export namespace PostData {
 
         };
     }
+
+    export function fromDOM($article: JQuery<HTMLElement>): PostData {
+
+        const timeEl = $("#post-information").find("time");
+        const time = timeEl.length != 0 ? timeEl.attr("title") : "0";
+        const tagString = $article.attr("data-tags") || "";
+
+        const width = parseInt($article.attr("data-width")),
+            height = parseInt($article.attr("data-height"));
+
+        return {
+            $ref: undefined,
+
+            id: parseInt($article.attr("data-id")) || 0,
+            flags: new Set(($article.attr("data-flags") || "").split(" ")),
+            score: parseInt($article.attr("data-score")) || 0,
+            favorites: parseInt($article.attr("data-fav-count")) || 0,
+            is_favorited: $article.attr("data-is-favorited") == "true",
+            comments: -1,
+            rating: PostRating.fromValue($article.attr("data-rating")),
+            uploader: parseInt($article.attr("data-uploader-id")) || 0,
+
+            page: -1,
+
+            date: {
+                raw: time,
+                ago: Util.Time.ago(time),
+            },
+
+            tagString: tagString,
+            tags: {
+                all: new Set(tagString.split(" ")),
+                artist: new Set(),
+                copyright: new Set(),
+                species: new Set(),
+                character: new Set(),
+                general: new Set(),
+                invalid: new Set(),
+                meta: new Set(),
+                lore: new Set(),
+            },
+
+            file: {
+                ext: $article.attr("data-file-ext"),
+                original: $article.attr("data-file-url"),
+                sample: $article.attr("data-large-file-url"),
+                preview: $article.attr("data-preview-file-url"),
+                size: 0,
+            },
+            loaded: undefined,
+
+            img: {
+                width: width,
+                height: height,
+                ratio: height / width,
+            },
+
+            has: {
+                children: $article.attr("data-has-active-children") == "true",
+                parent: $article.attr("data-parent-id") !== undefined,
+            },
+
+        };
+    }
 }
 
 export enum LoadedFileType {
