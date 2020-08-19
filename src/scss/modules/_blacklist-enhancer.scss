@@ -1,5 +1,10 @@
 /** Replacement Blacklist Filtering Styles */
 
+// Hide blacklist if it's empty
+section#re621-blacklist[count="0"][discount="0"] {
+    display: none;
+}
+
 // Header
 blacklist-header {
     display: block;

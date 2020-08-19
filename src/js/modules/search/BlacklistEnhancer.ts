@@ -43,6 +43,7 @@ export class BlacklistEnhancer extends RE6Module {
                 "id": "re621-blacklist",
                 "open": false,
                 "count": 0,
+                "discount": 0,
                 "collapsed": Util.LS.getItem("bc") == "1",
             })
             .removeAttr("style")
@@ -112,13 +113,18 @@ export class BlacklistEnhancer extends RE6Module {
     }
 
     public static updateHeader(): void {
-        let postCount = 0;
-        for (const entry of BlacklistEnhancer.$content.find("filter[enabled=true]"))
-            postCount += parseInt($(entry).attr("count")) || 0;
+        let enabled = 0,
+            disabled = 0;
+        for (const entry of BlacklistEnhancer.$content.find("filter")) {
+            const filter = $(entry);
+            if (filter.attr("enabled") == "true") enabled += parseInt(filter.attr("count")) || 0;
+            else disabled += parseInt(filter.attr("count")) || 0;
+        }
 
-        BlacklistEnhancer.$header.html(`Blacklisted (${postCount})`);
+        BlacklistEnhancer.$header.html(`Blacklisted (${enabled})`);
         BlacklistEnhancer.$wrapper.attr({
-            "count": postCount,
+            "count": enabled,
+            "discount": disabled,
         });
     }
 
