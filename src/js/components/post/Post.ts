@@ -3,7 +3,6 @@ import { CustomFlagger } from "../../modules/search/CustomFlagger";
 import { APIPost } from "../api/responses/APIPost";
 import { Blacklist } from "../data/Blacklist";
 import { ModuleController } from "../ModuleController";
-import { Util } from "../utility/Util";
 import { PostData } from "./PostData";
 import { PostParts } from "./PostParts";
 
@@ -11,9 +10,8 @@ export class Post {
 
     public static build(data: APIPost, imageRatioChange: boolean, page?: number): JQuery<HTMLElement> {
 
-        const tags = APIPost.getTagSet(data),
-            flags = APIPost.getFlagSet(data),
-            animated = tags.has("animated") || data.file.ext == "webm" || data.file.ext == "gif";
+        const post = PostData.fromAPI(data, page),
+            animated = post.tags.all.has("animated") || data.file.ext == "webm" || data.file.ext == "gif";
 
         // Image container and post data store
         const $article = $("<post>")
@@ -23,60 +21,10 @@ export class Post {
                 "vote": undefined,
                 "animated": animated ? "true" : undefined,
                 "filetype": data.file.ext,
-                "deleted": flags.has("deleted") ? "true" : undefined,
+                "deleted": post.flags.has("deleted") ? "true" : undefined,
                 "rendered": false,
             })
-            .data({
-                id: data.id,
-                flags: flags,
-                score: data.score.total,
-                favorites: data.fav_count,
-                is_favorited: data.is_favorited == true,
-                comments: data.comment_count,
-                rating: data.rating,
-                uploader: data.uploader_id,
-
-                page: page,
-
-                date: {
-                    raw: data.created_at,
-                    ago: Util.Time.ago(data.created_at),
-                },
-
-                tagString: [...tags].sort().join(" "),
-                tags: {
-                    all: tags,
-                    artist: new Set(data.tags.artist),
-                    copyright: new Set(data.tags.copyright),
-                    species: new Set(data.tags.species),
-                    character: new Set(data.tags.character),
-                    general: new Set(data.tags.general),
-                    invalid: new Set(data.tags.invalid),
-                    meta: new Set(data.tags.meta),
-                    lore: new Set(data.tags.lore),
-                },
-
-                file: {
-                    ext: data.file.ext,
-                    original: data.file.url,
-                    sample: data.sample.url,
-                    preview: data.preview.url,
-                    size: data.file.size,
-                },
-                loaded: undefined,
-
-                img: {
-                    width: data.file.width,
-                    height: data.file.height,
-                    ratio: data.file.height / data.file.width,
-                },
-
-                has: {
-                    children: data.relationships.has_active_children,
-                    parent: data.relationships.parent_id !== undefined,
-                },
-
-            })
+            .data(post)
             .html(data.id + "");
 
         if (!imageRatioChange) $article.css("--img-ratio", (data.file.height / data.file.width) + "");

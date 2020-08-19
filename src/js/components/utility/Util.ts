@@ -133,6 +133,25 @@ export class Util {
     }
 
     /**
+     * Parses the textare input specified in the parameter and returns a list of space-separated tags
+     * @param input Textarea to parse
+     */
+    public static getTagString(input: JQuery<HTMLElement>): string {
+        return input.val().toString().trim()
+            .toLowerCase()
+            .replace(/\r?\n|\r/g, " ")      // strip newlines
+            .replace(/(?:\s){2,}/g, " ");   // strip multiple spaces
+    }
+
+    public static getTags(input: string): string[];
+    public static getTags(input: JQuery<HTMLElement>): string[];
+    public static getTags(input: string | JQuery<HTMLElement>): string[] {
+        return (typeof input === "string" ? input : Util.getTagString(input))
+            .split(" ")
+            .filter((el) => { return el != null && el != ""; });
+    }
+
+    /**
      * Compares two software version numbers (e.g. "1.7.1" or "1.2b").
      *
      * This function was born in http://stackoverflow.com/a/6832721.

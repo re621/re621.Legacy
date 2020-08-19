@@ -123,6 +123,15 @@ class APIEndpoint {
         );
     }
 
+    public async put(data?: string | APIQuery, delay?: number): Promise<any> {
+        return this.queue.createRequest(this.getParsedPath(), "", "PUT", this.queryToString(data, true), this.name, this.node, delay).then(
+            (data) => {
+                return Promise.resolve(data);
+            },
+            (error) => { return Promise.reject(error); }
+        );
+    }
+
     /** Returns the endpoint path, accounting for the possible parameter */
     private getParsedPath(): string {
         if (this.param) {
@@ -151,11 +160,21 @@ class APIEndpoint {
             // Convert the array parameters into a `+`-separated string
             if (Array.isArray(value)) value = (value as string[]).join("+");
 
-            // This is a workaround for a very specific problem and needs to be cleaned up
-            // When the query parameters are added to the URL, plus signs should be preserved
-            // When using this method to parse POST data, plus signs must be converted to %2B
-            if (post) queryString.push(encodeURIComponent(key) + "=" + encodeURIComponent(value));
-            else queryString.push(encodeURIComponent(key) + "=" + encodeURIComponent(value).replace(/%2B/g, "+"));
+            // Hotfix for an issue with the quick tags form
+            // This should be replaced by a better system
+            if (typeof value == "object") {
+                for (const [subkey, subvalue] of Object.entries(value)) {
+                    if (post) queryString.push(key + "[" + encodeURIComponent(subkey) + "]=" + encodeURIComponent(subvalue + ""));
+                    else queryString.push(key + "[" + encodeURIComponent(subkey) + "]=" + encodeURIComponent(subvalue + "").replace(/%2B/g, "+"));
+                }
+            } else {
+
+                // This is a workaround for a very specific problem and needs to be cleaned up
+                // When the query parameters are added to the URL, plus signs should be preserved
+                // When using this method to parse POST data, plus signs must be converted to %2B
+                if (post) queryString.push(encodeURIComponent(key) + "=" + encodeURIComponent(value));
+                else queryString.push(encodeURIComponent(key) + "=" + encodeURIComponent(value).replace(/%2B/g, "+"));
+            }
         });
         return queryString.join("&");
     }
@@ -260,7 +279,7 @@ export class E621 {
      * @param data Data to POST
      * @param delay How quickly the next request can be sent, in ms
      */
-    public async createRequest(path: string, query: string, method: "GET" | "POST" | "DELETE", requestBody: string, endpoint: string, node: string, delay: number): Promise<any> {
+    public async createRequest(path: string, query: string, method: "GET" | "POST" | "PUT" | "DELETE", requestBody: string, endpoint: string, node: string, delay: number): Promise<any> {
         if (delay === undefined) delay = E621.requestRateLimit;
         else if (delay < 500) delay = 500;
 
@@ -275,7 +294,7 @@ export class E621 {
             mode: "cors"
         };
 
-        if (method === "POST" || method === "DELETE") {
+        if (method !== "GET") {
             if (this.authToken == undefined) {
                 Debug.log("authToken is undefined, regenerating");
                 this.authToken = $("head meta[name=csrf-token]").attr("content");

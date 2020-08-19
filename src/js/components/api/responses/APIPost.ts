@@ -105,6 +105,15 @@ export namespace PostRating {
         }
         return undefined;
     }
+
+    export function toFullString(postRating: PostRating): string {
+        switch (postRating.toLowerCase()) {
+            case "s": return "safe";
+            case "q": return "questionable";
+            case "e": return "explicit";
+        }
+        return null;
+    }
 }
 
 export namespace APIPost {

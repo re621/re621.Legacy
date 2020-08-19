@@ -14,6 +14,7 @@ export class SmartAlias extends RE6Module {
     // Elements to which smart alias instances are to be attached
     private static inputSelector = new Set([
         "#post_tag_string",     // editing form tags
+        "#re621_qedit_tags",   // re621's version
 
         // Yes, this is correct
         "#post_characters",     // artist
@@ -221,6 +222,11 @@ export class SmartAlias extends RE6Module {
                 window.clearInterval(typingTimeout);
                 this.handleTagInput($textarea, $container);
             }, 1000);
+        });
+
+        // Skip the waiting and go straight to parsing
+        $textarea.on("re621:input", () => {
+            this.handleTagInput($textarea, $container);
         });
 
         // First call, in case the input area is not blank

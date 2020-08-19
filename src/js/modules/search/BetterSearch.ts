@@ -1,6 +1,6 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { E621 } from "../../components/api/E621";
-import { APIPost } from "../../components/api/responses/APIPost";
+import { APIPost, PostRating } from "../../components/api/responses/APIPost";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { Post } from "../../components/post/Post";
@@ -20,6 +20,7 @@ export class BetterSearch extends RE6Module {
 
     private $wrapper: JQuery<HTMLElement>;      // Wrapper object containing the loading and content sections
     private $content: JQuery<HTMLElement>;      // Section containing post thumbnails
+    private $quickEdit: JQuery<HTMLElement>;    // Quick tags form
 
     private $zoomBlock: JQuery<HTMLElement>;    // Display area for the hover zoom
     private $zoomImage: JQuery<HTMLElement>;    // Image tag for hover zoom
@@ -117,6 +118,7 @@ export class BetterSearch extends RE6Module {
         this.$content
             .on("re621:render", "post", (event) => { Post.render($(event.currentTarget)); })
             .on("re621:reset", "post", (event) => { Post.reset($(event.currentTarget)); })
+            .on("re621:filters", "post", (event) => { Post.updateFilters($(event.currentTarget)); })
             .on("re621:blacklist", "post", (event) => { Post.updateVisibility($(event.currentTarget)); });
         BetterSearch.on("postcount", () => {
             this.updatePostCount();
@@ -126,7 +128,7 @@ export class BetterSearch extends RE6Module {
         let selectedPage = this.queryPage;
         const config = {
             root: null,
-            rootMargin: "100% 0px 100% 0px",
+            rootMargin: "100% 50% 100% 50%",
             threshold: 0.5,
         };
         this.observer = new IntersectionObserver((entries) => {
@@ -232,6 +234,72 @@ export class BetterSearch extends RE6Module {
             .html(`<span><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></span>`)
             .appendTo(this.$wrapper);
 
+        // Quick Edit Form
+        this.$quickEdit = $("<form>")
+            .attr({
+                "id": "re621-quick-tags",
+                "postid": "invalid",
+            })
+            .addClass("simple_form")
+            .html(
+                `<input type="hidden" name="_method" value="put">` +
+                `<div class="quick-tags-container">` +
+                `   <textarea name="post[tag_string]" id="re621_qedit_tags" data-autocomplete="tag-edit" class="ui-autocomplete-input" autocomplete="off"></textarea>` +
+                `</div>` +
+                `<div class="quick-tags-toolbar">` +
+                `   <input type="submit" name="submit" value="Submit">` +
+                `   <input type="button" name="cancel" value="Cancel">` +
+                `   <select name="post[rating]" id="re621_qedit_rating">
+                        <option value="s">Safe</option>
+                        <option value="q">Questionable</option>
+                        <option value="e">Explicit</option>
+                    </select>` +
+                `</div>`
+            )
+            .appendTo(this.$wrapper)
+            .hide();
+        this.$quickEdit.data({
+            "token": $("#re621_qedit_token"),
+            "tags": $("#re621_qedit_tags"),
+            "rating": $("#re621_qedit_rating"),
+        });
+        this.$quickEdit.find("input[name=cancel]").on("click", () => {
+            console.log("cancelling");
+            this.$quickEdit.hide("fast");
+        });
+        Danbooru.Autocomplete.initialize_all();
+
+        this.$quickEdit.on("submit", (event) => {
+            event.preventDefault();
+            const postID = parseInt(this.$quickEdit.attr("postid"));
+
+            E621.Post.id(postID).put({
+                post: {
+                    "tag_string": this.$quickEdit.data("tags").val() + "",
+                    "rating": PostRating.fromValue(this.$quickEdit.data("rating").val() + ""),
+                }
+            }).then(
+                (response) => {
+                    console.log(response);
+
+                    const $article = $("#entry_" + postID);
+                    $article.data(PostData.fromAPI(response[0]["post"]));
+                    $article
+                        .trigger("re621:filters")
+                        .trigger("re621:render");
+
+                    Danbooru.notice(`Post <a href="/posts/${postID}" target="_blank">#${postID}</a> updated`);
+                    this.$quickEdit.hide("fast");
+                },
+                (error) => {
+                    Danbooru.error(`An error occurred while updating a post`);
+                    console.log(error);
+                    this.$quickEdit.hide("fast");
+                }
+            );
+        });
+
+        // Content
         this.$content = $("<search-content>")
             .appendTo(this.$wrapper);
 
@@ -320,7 +388,6 @@ export class BetterSearch extends RE6Module {
                 case "remove-parent":
                 case "tag-script":
 
-                case "edit": { }
                 case "add-to-set": { }
                 case "remove-from-set": { }
 
@@ -345,7 +412,6 @@ export class BetterSearch extends RE6Module {
                         })[0].click();
                     break;
                 }
-
                 case "vote-up": {
                     const firstVote = post.$ref.attr("vote") == undefined;
 
@@ -402,9 +468,21 @@ export class BetterSearch extends RE6Module {
                     post.$ref.attr("fav", "true");
                     break;
                 }
+                case "edit": {
+                    this.$quickEdit.show("fast");
+                    this.$quickEdit.attr("postid", post.id)
+                    this.$quickEdit.data("tags").val(post.tagString).trigger("re621:input");
+                    this.$quickEdit.data("rating").val(post.rating);
+                    break;
+                }
+                default: {
+                    Danbooru.error("Unknown mode");
+                    break;
+                }
+
             }
 
-            console.log($article.data("id"), mode);
+            console.log(post.id, mode);
 
         });
     }
