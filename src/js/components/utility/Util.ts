@@ -11,6 +11,7 @@ export class Util {
     public static ID = UtilID;
     public static Math = UtilMath;
     public static LS = window.localStorage;
+    public static SS = window.sessionStorage;
 
     /**
      * Downloads the provided object as a JSON file

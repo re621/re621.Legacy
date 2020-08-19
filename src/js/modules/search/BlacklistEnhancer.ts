@@ -48,6 +48,7 @@ export class BlacklistEnhancer extends RE6Module {
             })
             .removeAttr("style")
             .removeAttr("class")
+            .appendTo("#re621-search")
             .html("");
 
         // Clickable header
@@ -59,6 +60,7 @@ export class BlacklistEnhancer extends RE6Module {
                 const collapsed = !(BlacklistEnhancer.$wrapper.attr("collapsed") == "true");
                 BlacklistEnhancer.$wrapper.attr("collapsed", collapsed + "");
                 Util.LS.setItem("bc", collapsed ? "1" : "0");
+                $("#sidebar").trigger("re621:reflow");
             });
 
         // Blacklist Filters
@@ -79,7 +81,7 @@ export class BlacklistEnhancer extends RE6Module {
             BlacklistEnhancer.updateToggleSwitch();
 
             for (const match of filter.getMatches())
-                $("#entry_" + match).trigger("re621:blacklist");
+                $("#entry_" + match).trigger("re621:visibility");
             BetterSearch.trigger("postcount");
         });
 
@@ -97,11 +99,12 @@ export class BlacklistEnhancer extends RE6Module {
                 else {
                     Blacklist.disableAll();
                     BlacklistEnhancer.$wrapper.attr("collapsed", "false");
+                    $("#sidebar").trigger("re621:reflow");
                     Util.LS.setItem("bc", "0");
                 }
                 BlacklistEnhancer.update();
 
-                $("post").trigger("re621:blacklist");
+                $("post").trigger("re621:visibility");
                 BetterSearch.trigger("postcount");
             });
     }
@@ -110,6 +113,7 @@ export class BlacklistEnhancer extends RE6Module {
         BlacklistEnhancer.updateFilterList();
         BlacklistEnhancer.updateHeader();
         BlacklistEnhancer.updateToggleSwitch();
+        $("#sidebar").trigger("re621:reflow");
     }
 
     public static updateHeader(): void {
@@ -150,6 +154,8 @@ export class BlacklistEnhancer extends RE6Module {
                 .html(count + "")
                 .appendTo(entry);
         }
+
+        $("#sidebar").trigger("re621:reflow");
     }
 
     public static updateToggleSwitch(): void {

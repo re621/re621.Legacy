@@ -127,6 +127,7 @@ search-content > post {
     transition: box-shadow 0.25s linear;
 
     &[blacklisted=true] { display: none; }
+    &[filtered=true] { display: none; }
 
     & > a {
         display: flex;

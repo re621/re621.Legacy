@@ -49,14 +49,17 @@ export class PostFilter {
      * Should be triggered every time a post is added or updated.
      * @param post Post to test against
      * @param shouldDecrement If false, does not remove the post from the filter if the tests fail
-     * @returns Whether or not the filter matches the post
+     * @returns Whether or not the filter matches the post. 
+     * If multiple posts are provided, returns true if all of them match.
      */
     public update(post: PostData | PostData[], shouldDecrement = true): boolean {
 
         // Take care of the multiple posts separately
         if (Array.isArray(post)) {
-            for (const entry of post) this.update(entry);
-            return;
+            let result = true;
+            for (const entry of post)
+                result = this.update(entry) ? result : false;
+            return result;
         }
 
         // Check if the post matches the filter

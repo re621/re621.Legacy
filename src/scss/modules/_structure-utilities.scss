@@ -118,40 +118,6 @@ div#c-favorites div#a-index {
     aside#sidebar {
         width: unset;
         float: unset;
-
-        div#re621-search {
-            position: relative;
-            margin: -0.5rem -0.5rem 0;
-            padding: 0.5rem 0.5rem;
-            border-radius: 6px 6px 0 0;
-
-            &[data-sticky=true] {
-                position: sticky;
-                top: -1px;
-                z-index: 50;
-            }
-        }
-
-        section {
-            margin-bottom: 0.5rem;
-        }
-
-        section#search-box form,
-        section#re-instantsearch form,
-        section#mode-box form {
-            display: grid;
-            grid-template-columns: auto 2rem;
-
-            input[type=text],
-            button[type=submit] {
-                width: 100%;
-            }
-
-            select[name=mode] {
-                width: unset;
-                grid-column: span 2;
-            }
-        }
     }
 
     section#content {
@@ -159,6 +125,59 @@ div#c-favorites div#a-index {
         padding-left: unset;
         position: relative;
     }
+}
+
+
+/* Fix Sidebar Sections */
+div#page aside#sidebar {
+    
+    div#re621-search {
+        position: relative;
+        margin: -0.5rem -0.5rem 0;
+        padding: 0.5rem 0.5rem;
+        border-radius: 6px 6px 0 0;
+
+        &[data-sticky=true] {
+            position: sticky;
+            top: -1px;
+            z-index: 50;
+        }
+    }
+
+    section {
+        margin-bottom: 0.5rem;
+    }
+
+    section#search-box form,
+    section#re621-insearch form,
+    section#mode-box form {
+        display: grid;
+        grid-template-columns: auto 2rem;
+
+        input[type=text] {
+            z-index: unset;
+            position: unset;
+            width: unset;
+            padding: 0.125rem;
+            border: 0;
+            border-radius: 0.125rem 0 0 0.125rem;
+        }
+
+        button[type=submit] {
+            padding: unset;
+            background: #eee;
+            width: unset;
+            border-left: 1px solid #ccc;
+            border-radius: 0 0.125rem 0.125rem 0;
+        }
+
+        select[name=mode] {
+            width: unset;
+            grid-column: span 2;
+            border-radius: 0.125rem;
+        }
+    }
+    
 }
 
 

@@ -66,6 +66,11 @@ export class MassDownloader extends RE6Module {
             .html("<h1>Download</h1>")
             .appendTo("aside#sidebar");
 
+        $("#sidebar").on("re621:reflow", () => {
+            this.section.css("top", $("#re621-search").outerHeight() + "px");
+        });
+        $("#sidebar").trigger("re621:reflow");
+
         // Toggles the downloader UI
         this.selectButton = $("<a>")
             .html("Select")

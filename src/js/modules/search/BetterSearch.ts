@@ -119,7 +119,7 @@ export class BetterSearch extends RE6Module {
             .on("re621:render", "post", (event) => { Post.render($(event.currentTarget)); })
             .on("re621:reset", "post", (event) => { Post.reset($(event.currentTarget)); })
             .on("re621:filters", "post", (event) => { Post.updateFilters($(event.currentTarget)); })
-            .on("re621:blacklist", "post", (event) => { Post.updateVisibility($(event.currentTarget)); });
+            .on("re621:visibility", "post", (event) => { Post.updateVisibility($(event.currentTarget)); });
         BetterSearch.on("postcount", () => { this.updatePostCount(); });
         BetterSearch.on("paginator", () => { this.reloadPaginator(); })
 
