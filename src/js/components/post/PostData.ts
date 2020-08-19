@@ -128,7 +128,7 @@ export namespace PostData {
 
             has: {
                 children: data.relationships.has_active_children,
-                parent: data.relationships.parent_id !== undefined,
+                parent: data.relationships.parent_id !== undefined && data.relationships.parent_id !== null,
             },
 
         };
