@@ -111,7 +111,7 @@ search-content > post {
 
     background: #00000040;
 
-    border-radius: 0.25rem;
+    border-radius: 6px;
     position: relative;
     
     transition: box-shadow 0.25s linear;
@@ -125,7 +125,10 @@ search-content > post {
         position: relative;
         outline: 0 !important;
 
-        img { align-self: flex-end; }
+        img {
+            align-self: flex-end;
+            border-radius: 6px 6px 0 0;
+        }
     }
 
     // Loading overlay
@@ -176,6 +179,8 @@ search-content > post {
         background: #ffffff25;
         font-size: 90%;
         color: #bbb;
+
+        border-radius: 0 0 6px 6px;
 
         & > span:not(:last-child) {
             margin-right: 0.5rem;
