@@ -359,21 +359,27 @@ search-content  {
         border-radius: 0;
 
         &.vote {
-
             display: none;
+            padding: 0.125rem 1rem;
+
             &::before {
                 font-family: "Font Awesome 5 Free";
                 font-weight: 500;
+                position: relative;
             }
             &[action=up] {
                 border-right: 1px solid #666;
                 border-top-left-radius: 0.75rem;
-                &::before { content: unicode("f164"); }
+                margin-right: -0.5px;
+                padding-right: 0.7rem;
+                &::before { content: unicode("f164"); bottom: -1px; }
             }
             &[action=down] {
                 border-left: 1px solid #666;
                 border-top-right-radius: 0.75rem;
-                &::before { content: unicode("f165"); }
+                margin-left: -0.5px;
+                padding-left: 0.7rem;
+                &::before { content: unicode("f165"); top: 2px; left: 2px; }
             }
         }
 
