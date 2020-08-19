@@ -4,8 +4,7 @@ import { APIPost } from "../../components/api/responses/APIPost";
 import { PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
-import { InfiniteScroll } from "../search/InfiniteScroll";
-import { ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
+import { BetterSearch } from "../search/BetterSearch";
 
 declare const saveAs;
 
@@ -105,7 +104,7 @@ export class MassDownloader extends RE6Module {
 
     public destroy(): void {
         super.destroy();
-        InfiniteScroll.off("pageLoad.MassDownloader");
+        BetterSearch.off("pageload.MassDownloader");
     }
 
     /**
@@ -115,7 +114,7 @@ export class MassDownloader extends RE6Module {
      */
     private toggleInterface(): void {
         this.showInterface = !this.showInterface;
-        ThumbnailEnhancer.trigger("pauseHoverActions", this.showInterface);
+        BetterSearch.setPaused(this.showInterface);
 
         if (this.showInterface) {
             this.selectButton.html("Cancel");
@@ -135,7 +134,7 @@ export class MassDownloader extends RE6Module {
                     }
                 });
 
-            InfiniteScroll.on("pageLoad.MassDownloader", () => {
+            BetterSearch.on("pageload.MassDownloader", () => {
                 this.container.selectable("refresh");
             });
 
@@ -147,7 +146,7 @@ export class MassDownloader extends RE6Module {
                 .attr("data-downloading", "false")
                 .selectable("destroy");
 
-            InfiniteScroll.off("pageLoad.MassDownloader");
+            BetterSearch.off("pageload.MassDownloader");
         }
     }
 
@@ -165,7 +164,7 @@ export class MassDownloader extends RE6Module {
         this.processing = true;
         this.actButton.attr("disabled", "disabled");
 
-        InfiniteScroll.trigger("pauseScroll", true);
+        BetterSearch.setPaused(true);
 
         this.infoText
             .attr("data-state", "loading")
@@ -318,7 +317,7 @@ export class MassDownloader extends RE6Module {
                         .appendTo(this.infoText);
                 }
             } else {
-                InfiniteScroll.trigger("pauseScroll", false);
+                BetterSearch.setPaused(false);
             }
         });
     }

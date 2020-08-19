@@ -4,7 +4,7 @@ import { APIPost } from "../../components/api/responses/APIPost";
 import { PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
-import { InfiniteScroll } from "../search/InfiniteScroll";
+import { BetterSearch } from "../search/BetterSearch";
 import { MassDownloader } from "./MassDownloader";
 
 declare const saveAs;
@@ -106,7 +106,7 @@ export class FavDownloader extends RE6Module {
         this.processing = true;
         this.actButton.attr("disabled", "disabled");
 
-        InfiniteScroll.trigger("pauseScroll", true);
+        BetterSearch.setPaused(true);
 
         this.infoText
             .attr("data-state", "loading")
@@ -243,7 +243,7 @@ export class FavDownloader extends RE6Module {
                         .appendTo(this.infoText);
                 }
             } else {
-                InfiniteScroll.trigger("pauseScroll", false);
+                BetterSearch.setPaused(false);
             }
         });
     }

@@ -2,9 +2,10 @@ import { E621 } from "../../components/api/E621";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
 import { Page, PageDefintion } from "../../components/data/Page";
+import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
-import { ThumbnailClickAction, ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
+import { BetterSearch, ImageClickAction } from "../search/BetterSearch";
 
 /**
  * Miscellaneous functionality that does not require a separate module
@@ -194,7 +195,7 @@ export class Miscellaneous extends RE6Module {
         if (!state) return;
 
         /* Handle double-click */
-        const clickAction = ThumbnailEnhancer.getClickAction();
+        const clickAction = ModuleController.get(BetterSearch).fetchSettings<ImageClickAction>("clickAction");
 
         const avatars = $("div.avatar > div > a").get();
         for (const element of avatars) {
@@ -231,7 +232,7 @@ export class Miscellaneous extends RE6Module {
                 window.clearTimeout(dbclickTimer);
                 prevent = true;
 
-                if (clickAction === ThumbnailClickAction.NewTab) XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
+                if (clickAction === ImageClickAction.NewTab) XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
                 else {
                     $link.off("click.re621.thumbnail");
                     $link[0].click();

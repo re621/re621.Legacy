@@ -120,9 +120,8 @@ export class BetterSearch extends RE6Module {
             .on("re621:reset", "post", (event) => { Post.reset($(event.currentTarget)); })
             .on("re621:filters", "post", (event) => { Post.updateFilters($(event.currentTarget)); })
             .on("re621:blacklist", "post", (event) => { Post.updateVisibility($(event.currentTarget)); });
-        BetterSearch.on("postcount", () => {
-            this.updatePostCount();
-        });
+        BetterSearch.on("postcount", () => { this.updatePostCount(); });
+        BetterSearch.on("paginator", () => { this.reloadPaginator(); })
 
         const intersecting: Set<number> = new Set();
         let selectedPage = this.queryPage;
@@ -221,7 +220,10 @@ export class BetterSearch extends RE6Module {
     }
 
     public static isPaused(): boolean { return BetterSearch.paused; }
-    public static setPaused(state: boolean): void { BetterSearch.paused = state; }
+    public static setPaused(state: boolean): void {
+        BetterSearch.paused = state;
+        BetterSearch.trigger("paginator");
+    }
 
     /** Creates the basic module structure */
     private createStructure(): void {
@@ -540,6 +542,9 @@ export class BetterSearch extends RE6Module {
                 return;
             }
 
+            // Systems are paused
+            if (BetterSearch.paused) return;
+
             // Don't double-queue the loading process
             if (this.loadingPosts) return;
 
@@ -666,6 +671,8 @@ export class BetterSearch extends RE6Module {
         BlacklistEnhancer.update();
         this.updatePostCount();
 
+        BetterSearch.trigger("pageload");
+
         return Promise.resolve(true);
     }
 
@@ -686,11 +693,17 @@ export class BetterSearch extends RE6Module {
         }
 
         if (this.fetchSettings("infiniteScroll")) {
+            const loadMoreWrap = $("<span>")
+                .addClass("infscroll-next-wrap")
+                .appendTo(this.$paginator);
+            const loadMoreCont = $("<span>")
+                .addClass("infscroll-next-cont")
+                .appendTo(loadMoreWrap);
             if (this.hasMorePages) {
                 $("<a>")
                     .html("Load More")
                     .attr("id", "infscroll-next")
-                    .appendTo(this.$paginator)
+                    .appendTo(loadMoreCont)
                     .one("click", (event) => {
                         event.preventDefault();
 
@@ -703,11 +716,15 @@ export class BetterSearch extends RE6Module {
                             this.loadingPosts = false;
                         });
                     });
+                $("<span>")
+                    .addClass("infscroll-manual")
+                    .html((BetterSearch.paused || !this.fetchSettings("loadAutomatically")) ? "Manual Mode" : "&nbsp;")
+                    .appendTo(loadMoreCont);
             } else {
                 $("<span>")
                     .html("No More Posts")
                     .attr("id", "infscroll-next")
-                    .appendTo(this.$paginator)
+                    .appendTo(loadMoreCont)
             }
         } else $("<span>").appendTo(this.$paginator);
 

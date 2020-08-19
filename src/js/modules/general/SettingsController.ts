@@ -1383,9 +1383,9 @@ export class SettingsController extends RE6Module {
         return new Form({ name: "settings-modules", columns: 3, width: 3, }, [
             Form.header("Features", 3),
 
-            ...createInput("HeaderCustomizer", "Header Customizer", "Add, delete, and customize header links to your heart's content."),
+            ...createInput("BetterSearch", "Improved Thumbnails", "Massively overhauled thumbnail system. Many features will not work with this module disabled."),
 
-            ...createInput("InfiniteScroll", "Infinite Scroll", "New posts are automatically loaded as you scroll."),
+            ...createInput("HeaderCustomizer", "Header Customizer", "Add, delete, and customize header links to your heart's content."),
 
             ...createInput("InstantSearch", "Instant Filters", "Quickly add filters to your current search."),
 

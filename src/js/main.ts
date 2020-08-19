@@ -30,11 +30,9 @@ import { TitleCustomizer } from "./modules/post/TitleCustomizer";
 import { BetterSearch } from "./modules/search/BetterSearch";
 import { BlacklistEnhancer } from "./modules/search/BlacklistEnhancer";
 import { CustomFlagger } from "./modules/search/CustomFlagger";
-import { InfiniteScroll } from "./modules/search/InfiniteScroll";
 import { InstantSearch } from "./modules/search/InstantSearch";
 import { PostSuggester } from "./modules/search/PostSuggester";
 import { SearchUtilities } from "./modules/search/SearchUtilities";
-import { ThumbnailEnhancer } from "./modules/search/ThumbnailsEnhancer";
 import { CommentTracker } from "./modules/subscriptions/CommentTracker";
 import { ForumTracker } from "./modules/subscriptions/ForumTracker";
 import { PoolTracker } from "./modules/subscriptions/PoolTracker";
@@ -57,9 +55,7 @@ const loadOrder = [
     CustomFlagger,
     BlacklistEnhancer,
 
-    InfiniteScroll,
     InstantSearch,
-    ThumbnailEnhancer,
 
     PostSuggester,
     SearchUtilities,

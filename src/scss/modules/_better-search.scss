@@ -81,18 +81,28 @@ section#content {
             justify-content: space-evenly;
         }
 
-        & #infscroll-next {
+        span.infscroll-next-wrap {
+            display: flex;
+
             &::before, &::after {
                 content: " ";
                 display: inline-flex;
                 position: relative;
-                bottom: 0.35rem;
+                bottom: -0.5rem;
                 width: 5rem;
                 height: 1px;
                 border-bottom: 1px solid #666;
             }
             &::before { margin-right: 0.5rem; }
             &::after { margin-left: 0.5rem; }
+
+            span.infscroll-next-cont { text-align: center; }
+            span.infscroll-manual {
+                display: block;
+                font-family: monospace;
+                text-transform: uppercase;
+                color: #999;
+            }
         }
     }
 
