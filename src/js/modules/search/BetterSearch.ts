@@ -23,6 +23,7 @@ export class BetterSearch extends RE6Module {
 
     private $zoomBlock: JQuery<HTMLElement>;    // Display area for the hover zoom
     private $zoomImage: JQuery<HTMLElement>;    // Image tag for hover zoom
+    private $zoomVideo: JQuery<HTMLElement>;    // Video tag for hover zoom
     private $zoomInfo: JQuery<HTMLElement>;     // Posts's resolution and file size
     private $zoomTags: JQuery<HTMLElement>;     // Post's tags section displayed on hover
 
@@ -320,7 +321,16 @@ export class BetterSearch extends RE6Module {
             .attr("id", "zoom-info")
             .appendTo(this.$zoomBlock);
         this.$zoomImage = $("<img>")
-            .attr("src", DomUtilities.getPlaceholderImage())
+            .attr("src", "/images/deleted-preview.png")
+            .addClass("display-none")
+            .appendTo(this.$zoomBlock);
+        this.$zoomVideo = $("<video controls autoplay loop></video>")
+            .attr({
+                poster: "/images/deleted-preview.png",
+                src: "/images/deleted-preview.png",
+                muted: "muted",
+            })
+            .addClass("display-none")
             .appendTo(this.$zoomBlock);
         this.$zoomTags = $("<div>")
             .attr("id", "zoom-tags")
@@ -564,6 +574,8 @@ export class BetterSearch extends RE6Module {
     /** Initialize the event listeners for the hover zoom functionality */
     private initHoverZoom(): void {
 
+        let videoTimeout;
+
         const viewport = $(window);
         BetterSearch.on("zoom.start", (event, data) => {
             if (BetterSearch.paused || (this.fetchSettings("zoomMode") == ImageZoomMode.OnShift && !this.shiftPressed))
@@ -574,12 +586,28 @@ export class BetterSearch extends RE6Module {
 
             // Load the image and its basic info
             this.$zoomBlock.attr("status", "loading");
-            this.$zoomImage
-                .attr("src", this.fetchSettings("zoomFull") ? post.file.original : post.file.sample)
-                .one("load", () => {
-                    this.$zoomBlock.attr("status", "ready");
-                    post.$ref.removeAttr("loading");
-                });
+            if (post.file.ext == "webm") {
+                this.$zoomVideo
+                    .removeClass("display-none")
+                    .attr({
+                        src: post.file.original,
+                        poster: post.file.sample,
+                    });
+
+                // Chrome blocks the video autoplay unless it's muted
+                videoTimeout = window.setTimeout(() => { this.$zoomVideo.attr("muted", "false"); }, 500);
+
+                this.$zoomBlock.attr("status", "ready");
+                post.$ref.removeAttr("loading");
+            } else {
+                this.$zoomImage
+                    .removeClass("display-none")
+                    .attr("src", this.fetchSettings("zoomFull") ? post.file.original : post.file.sample)
+                    .one("load", () => {
+                        this.$zoomBlock.attr("status", "ready");
+                        post.$ref.removeAttr("loading");
+                    });
+            }
             this.$zoomInfo.html(`${post.img.width} x ${post.img.height}, ${Util.formatBytes(post.file.size)}`);
 
             // Append the tags block
@@ -623,7 +651,17 @@ export class BetterSearch extends RE6Module {
                     "top": "100vh",
                 });
             this.$zoomInfo.html("");
-            this.$zoomImage.attr("src", DomUtilities.getPlaceholderImage());
+            this.$zoomImage
+                .addClass("display-none")
+                .attr("src", DomUtilities.getPlaceholderImage());
+            this.$zoomVideo
+                .addClass("display-none")
+                .attr({
+                    "poster": "/images/deleted-preview.png",
+                    "src": "/images/deleted-preview.png",
+                    "muted": "",
+                });
+            window.clearTimeout(videoTimeout);
             this.$zoomTags.html("");
 
             // If the post was loading, remove the spinner

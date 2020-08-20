@@ -479,13 +479,19 @@ zoom-container {
     z-index: 800;
 
     & > img {
-        max-width: 50vw;
+        max-width: 55vw;
         max-height: 80vh;
         background: white;
 
         &::before {
             content: var(--image-info, "??? x ???, ???MB");
         }
+    }
+
+    & > video {
+        max-width: 55vw;
+        max-height: 80vh;
+        background: white;
     }
 
     & > div {
