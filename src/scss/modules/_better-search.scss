@@ -240,7 +240,6 @@ search-content > post[rendered=false] {
     align-items: center;
 
     border-bottom: 1rem solid #ffffff25;
-    background-image: url(placeholderBG("ffffff06"));
 
     font-size: 2em;
     font-family: monospace;
@@ -248,6 +247,35 @@ search-content > post[rendered=false] {
 
     pointer-events: none;
 }
+
+search-content > post[rendered=false],
+search-content > post[filetype=swf],
+search-content > post[deleted=true] {
+    background-image: url(placeholderBG("ffffff06"));
+}
+
+
+/* Placeholder Images */
+search-content > post[filetype=swf] > a:after,
+search-content > post[deleted=true] > a:after {
+    content: "PLACEHOLDER";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-family: "Courier New";
+    letter-spacing: 3px;
+    font-size: 1.5rem;
+    color: #999;
+}
+search-content > post[filetype=swf] > a:after { content: "FLASH" }
+search-content > post[deleted=true] > a:after { content: "DELETED" }
 
 
 /* Thumbnail Resizing */
@@ -273,7 +301,7 @@ search-content > post {
         color: #fff;
         position: absolute;
         left: -0.25rem;
-        top: 0.75rem;
+        top: 1.125rem;
         text-align: center;
         border-radius: 0.25rem;
         padding: 0 0.125rem;
@@ -281,9 +309,9 @@ search-content > post {
         font-weight: 700;
     }
 
-    &[animated=true][filetype=webm] { content: "WEBM"; }
-    &[animated=true][filetype=gif] { content: "GIF"; }
-    &[animated=true][filetype=swf] { content: "SWF"; }
+    &[animated=true][filetype=webm] > a::before { content: "WEBM"; }
+    &[animated=true][filetype=gif] > a::before { content: "GIF"; }
+    &[animated=true][filetype=swf] > a::before { content: "SWF"; }
 
 }
 

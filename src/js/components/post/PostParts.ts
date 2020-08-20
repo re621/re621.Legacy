@@ -114,6 +114,9 @@ export class PostParts {
         let timer: number,
             started = false;
 
+        // Flash files will never work with hover zoom, deal with it
+        if (post.file.ext === "swf" || post.flags.has("deleted")) return;
+
         $link.on("mouseenter.re621.zoom", () => {
             timer = window.setTimeout(() => {
                 started = true;

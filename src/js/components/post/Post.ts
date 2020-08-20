@@ -175,7 +175,7 @@ export class Post implements PostData {
 
         const tags = APIPost.getTagSet(data),
             flags = APIPost.getFlagSet(data),
-            animated = tags.has("animated") || data.file.ext == "webm" || data.file.ext == "gif";
+            animated = tags.has("animated") || data.file.ext == "webm" || data.file.ext == "gif" || data.file.ext == "swf";
 
         if (imageRatioChange == undefined) imageRatioChange = ModuleController.get(BetterSearch).fetchSettings("imageRatioChange");
 
