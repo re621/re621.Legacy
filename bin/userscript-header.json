@@ -44,6 +44,7 @@
 
         "unsafeWindow"
     ],
+    "icon": "https://cdn.jsdelivr.net/gh/re621/re621.github.io@master/images/icons/icon64.png",
     "icon64": "https://cdn.jsdelivr.net/gh/re621/re621.github.io@master/images/icons/icon64.png",
     "connect": [
         "api.github.com",
