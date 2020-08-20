@@ -3,7 +3,6 @@ import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
 import { GMxmlHttpRequestResponse } from "../../components/api/XMConnect";
 import { AvoidPosting } from "../../components/cache/AvoidPosting";
-import { FavoriteCache } from "../../components/cache/FavoriteCache";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
@@ -1435,8 +1434,7 @@ export class SettingsController extends RE6Module {
         });
         let selectedModule = "none";
 
-        let favcacheUpdated = true,
-            dnpcacheUpdated = true;
+        let dnpcacheUpdated = true;
 
         // Create the settings form
         return new Form({ name: "optmisc", columns: 3, width: 3 }, [
@@ -1445,76 +1443,6 @@ export class SettingsController extends RE6Module {
             Form.accordion({ name: "misccollapse", columns: 3, width: 3, active: 0 }, [
 
                 Form.accordionTab({ name: "cache", label: "Cache", columns: 3, width: 3 }, [
-
-                    Form.section({ name: "favcache", columns: 3, width: 3 }, [
-
-                        Form.div({
-                            value: `<b>Favorites Cache</b><br />Recorded to minimize the number of API calls`,
-                            width: 2,
-                        }),
-                        Form.button({ name: "reset", value: "Reset", }, async (data, input) => {
-                            input.prop("disabled", true);
-                            await FavoriteCache.update($("#favcache-status"));
-                            input.prop("disabled", false);
-
-                            if (favcacheUpdated) return;
-                            favcacheUpdated = true;
-                            this.pushNotificationsCount(-1);
-                        }),
-
-                        Form.div({
-                            value: async (element) => {
-                                element.html("closed");
-
-                                /*
-                                const $status = $("<div>")
-                                    .attr("id", "favcache-status")
-                                    .html(`<i class="fas fa-circle-notch fa-spin"></i> Initializing . . .`)
-                                    .appendTo(element);
-
-                                if (!FavoriteCache.isEnabled()) {
-                                    $status.html(`<i class="far fa-times-circle"></i> Cache disabled`);
-                                } else if (await FavoriteCache.isUpdateRequired()) {
-
-                                    if (await FavoriteCache.quickUpdate($status)) {
-                                        $status.html(`<i class="far fa-check-circle"></i> Cache recovered (${FavoriteCache.size()} items)`);
-                                    } else {
-                                        $status.html(`
-                                            <i class="far fa-times-circle"></i> 
-                                            <span style="color:gold">Reset required</span>: Cache integrity failure
-                                        `);
-                                        this.pushNotificationsCount(1);
-                                        favcacheUpdated = false;
-                                    }
-                                } else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified`)
-                                */
-                            },
-                            width: 2,
-                        }),
-                        Form.div({
-                            value: (element) => {
-                                const lastUpdate = FavoriteCache.getUpdateTime();
-                                if (lastUpdate) element.html(Util.Time.format(lastUpdate));
-                                else element.html("");
-                            },
-                            wrapper: "text-center input-disabled",
-                        }),
-
-                        Form.checkbox(
-                            {
-                                value: !FavoriteCache.isEnabled(),
-                                label: "<b>Disable Favorite Caching</b><br />All systems that deal with favorites will become non-functional",
-                                width: 2,
-                            },
-                            (data) => {
-                                FavoriteCache.setEnabled(!data);
-                                FavoriteCache.clear();
-                            }
-                        ),
-                        Form.text(`<div class="text-center text-bold">Requires a page reload</div>`),
-
-                    ]),
-                    Form.spacer(3),
 
                     Form.section({ name: "dnpcache", columns: 3, width: 3 }, [
 

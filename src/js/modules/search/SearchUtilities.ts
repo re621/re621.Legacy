@@ -1,5 +1,4 @@
 import { Danbooru } from "../../components/api/Danbooru";
-import { FavoriteCache } from "../../components/cache/FavoriteCache";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
@@ -82,23 +81,6 @@ export class SearchUtilities extends RE6Module {
                 return true;
             });
         }
-
-        // Listen to post clicks to update FavoritesCache
-        $(".post-preview a").on("click.danbooru", (event) => {
-            const mode = $("#mode-box-mode").val(),
-                postID = $(event.target).closest("article").data("id");
-
-            switch (mode) {
-                case "add-fav": {
-                    FavoriteCache.add(postID);
-                    break;
-                }
-                case "remove-fav": {
-                    FavoriteCache.remove(postID);
-                    break;
-                }
-            }
-        });
 
     }
 
