@@ -254,14 +254,16 @@ export class SmartAlias extends RE6Module {
         if (AvoidPosting.isUpdateRequired()) await AvoidPosting.update();
 
         // Fix typos
+        // TODO Replace this with better error handling
+        /*
         if (this.fetchSettings<boolean>("fixCommonTypos")) {
             $textarea.val((index, currentValue) => {
                 return (currentValue
                     .toLowerCase()
-                    .replace(/\-/g, "_"))
-                    + ((currentValue.length == 0 || currentValue.endsWith(" ")) ? "" : " ");
+                    .replace(/\-/g, "_"));
             });
         }
+        */
 
         // Get the tags from the textarea
         const inputString = SmartAlias.getInputString($textarea);
