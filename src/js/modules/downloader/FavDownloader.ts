@@ -2,12 +2,11 @@ import { DownloadQueue } from "../../components/api/DownloadQueue";
 import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { PageDefintion } from "../../components/data/Page";
+import { PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 import { BetterSearch } from "../search/BetterSearch";
 import { MassDownloader } from "./MassDownloader";
-
-declare const saveAs;
 
 export class FavDownloader extends RE6Module {
 
@@ -223,13 +222,12 @@ export class FavDownloader extends RE6Module {
 
             // Download the resulting ZIP
             const $downloadLink = $("<a>")
-                .attr("href", filename)
+                .attr({
+                    "href": URL.createObjectURL(zipData),
+                    "download": filename,
+                })
                 .html("Download Archive")
-                .appendTo(this.infoText)
-                .on("click", (event) => {
-                    event.preventDefault();
-                    saveAs(zipData, filename);
-                });
+                .appendTo(this.infoText);
 
             if (this.fetchSettings("autoDownloadArchive")) { $downloadLink.get(0).click(); }
 
@@ -258,7 +256,7 @@ export class FavDownloader extends RE6Module {
      * @param data Post data
      */
     private createFilename(data: APIPost): string {
-        return MassDownloader.createFilenameBase(this.fetchSettings<string>("template"), data)
+        return MassDownloader.createFilenameBase(this.fetchSettings<string>("template"), PostData.fromAPI(data)) // TODO Fic this
             .slice(0, 128)
             .replace(/-{2,}/g, "-")
             .replace(/-*$/g, "")

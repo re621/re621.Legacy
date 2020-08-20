@@ -36,13 +36,18 @@ export class DownloadCustomizer extends RE6Module {
 
         this.post = Post.getViewingPost();
 
-        this.link = $("#image-download-link").find("a").first();
+        this.link = $("#image-download-link a").first();
         this.refreshDownloadLink();
 
         this.link.click(event => {
             event.preventDefault();
             event.stopImmediatePropagation();
-            XM.Connect.download(this.link.attr("href"), this.link.attr("download"));
+            this.link.attr("loading", "true");
+            XM.Connect.download({
+                url: this.link.attr("href"),
+                name: this.link.attr("download"),
+                onload: () => { this.link.removeAttr("loading"); }
+            });
         });
     }
 

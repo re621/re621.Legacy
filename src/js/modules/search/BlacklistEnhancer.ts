@@ -1,6 +1,7 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { Blacklist } from "../../components/data/Blacklist";
 import { PageDefintion } from "../../components/data/Page";
+import { Post } from "../../components/post/Post";
 import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
@@ -95,16 +96,19 @@ export class BlacklistEnhancer extends RE6Module {
             .appendTo(toggleContainer)
             .on("click.re621", () => {
                 // This is dumb, but much faster than the alternative
-                if (BlacklistEnhancer.$toggle.text().startsWith("Enable")) Blacklist.enableAll();
-                else {
+                if (BlacklistEnhancer.$toggle.text().startsWith("Enable")) {
+                    Blacklist.enableAll();
+                    Post.find("all").each(post => post.updateVisibility());
+                } else {
                     Blacklist.disableAll();
-                    BlacklistEnhancer.$wrapper.attr("collapsed", "false");
-                    $("#sidebar").trigger("re621:reflow");
-                    Util.LS.setItem("bc", "0");
-                }
-                BlacklistEnhancer.update();
+                    Post.find("blacklisted").each(post => post.updateVisibility());
 
-                $("post").trigger("re621:visibility");
+                    BlacklistEnhancer.$wrapper.attr("collapsed", "false");
+                    Util.LS.setItem("bc", "0");
+                    $("#sidebar").trigger("re621:reflow");
+                }
+
+                BlacklistEnhancer.update();
                 BetterSearch.trigger("postcount");
             });
     }

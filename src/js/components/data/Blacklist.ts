@@ -1,5 +1,5 @@
 import { BlacklistEnhancer } from "../../modules/search/BlacklistEnhancer";
-import { PostData } from "../post/PostData";
+import { PostData } from "../post/Post";
 import { PostFilter } from "../post/PostFilter";
 import { Util } from "../utility/Util";
 import { User } from "./User";

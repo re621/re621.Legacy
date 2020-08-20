@@ -5,7 +5,6 @@ import { Page, PageDefintion } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { Post } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
-import { PostData } from "../../components/post/PostData";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Util } from "../../components/utility/Util";
@@ -116,10 +115,10 @@ export class BetterSearch extends RE6Module {
 
         // Event listener for article updates
         this.$content
-            .on("re621:render", "post", (event) => { Post.render($(event.currentTarget)); })
-            .on("re621:reset", "post", (event) => { Post.reset($(event.currentTarget)); })
-            .on("re621:filters", "post", (event) => { Post.updateFilters($(event.currentTarget)); })
-            .on("re621:visibility", "post", (event) => { Post.updateVisibility($(event.currentTarget)); });
+            .on("re621:render", "post", (event) => { Post.get($(event.currentTarget)).render(); })
+            .on("re621:reset", "post", (event) => { Post.get($(event.currentTarget)).reset(); })
+            .on("re621:filters", "post", (event) => { Post.get($(event.currentTarget)).updateFilters(); })
+            .on("re621:visibility", "post", (event) => { Post.get($(event.currentTarget)).updateVisibility(); });
         BetterSearch.on("postcount", () => { this.updatePostCount(); });
         BetterSearch.on("paginator", () => { this.reloadPaginator(); })
 
@@ -132,27 +131,25 @@ export class BetterSearch extends RE6Module {
         };
         this.observer = new IntersectionObserver((entries) => {
             entries.forEach((value) => {
-                const $article = $(value.target),
-                    id = $article.data("id") || 0,
-                    has = intersecting.has(id);
+                const post = Post.get($(value.target)),
+                    has = intersecting.has(post.id);
 
                 // element left the viewport
                 if (has && !value.isIntersecting) {
                     // console.log("object left", id);
-                    intersecting.delete(id);
-                    $article.trigger("re621:reset");
+                    intersecting.delete(post.id);
+                    post.reset();
                 }
                 // element entered viewport
                 if (!has && value.isIntersecting) {
                     // console.log("object entered", id);
-                    intersecting.add(id);
+                    intersecting.add(post.id);
                     window.setTimeout(() => {
-                        if (!intersecting.has(id)) return;
-                        $article.trigger("re621:render");
-                        const page = $article.data("page") as number;
-                        if (page != selectedPage) {
-                            selectedPage = page;
-                            Page.setQueryParameter("page", page + "");
+                        if (!intersecting.has(post.id)) return;
+                        post.render();
+                        if (post.page != selectedPage) {
+                            selectedPage = post.page;
+                            Page.setQueryParameter("page", selectedPage + "");
                         }
                     }, 100);
                 }
@@ -175,9 +172,9 @@ export class BetterSearch extends RE6Module {
                 for (let i = firstPage; i < this.queryPage; i++) {
                     result = await this.fetchPosts(i);
                     for (const post of result) {
-                        const $article = Post.build(post, imageRatioChange, i);
-                        this.$content.append($article);
-                        this.observer.observe($article[0]);
+                        const postData = Post.make(post, i, imageRatioChange);
+                        this.$content.append(postData.$ref);
+                        this.observer.observe(postData.$ref[0]);
                     }
                     $("<post-break>")
                         .attr("id", "page-" + (i + 1))
@@ -187,9 +184,9 @@ export class BetterSearch extends RE6Module {
 
                 // Append the current page results
                 for (const post of pageResult) {
-                    const $article = Post.build(post, imageRatioChange, this.queryPage);
-                    this.$content.append($article);
-                    this.observer.observe($article[0]);
+                    const postData = Post.make(post, this.queryPage, imageRatioChange);
+                    this.$content.append(postData.$ref);
+                    this.observer.observe(postData.$ref[0]);
                 }
 
                 // If the loaded page has less than the absolute minimum value of posts per page,
@@ -284,11 +281,9 @@ export class BetterSearch extends RE6Module {
                 (response) => {
                     console.log(response);
 
-                    const $article = $("#entry_" + postID);
-                    $article.data(PostData.fromAPI(response[0]["post"]));
-                    $article
-                        .trigger("re621:filters")
-                        .trigger("re621:render");
+                    Post.get(postID)
+                        .update(response[0]["post"])
+                        .render();
 
                     Danbooru.notice(`Post <a href="/posts/${postID}" target="_blank">#${postID}</a> updated`);
                     this.$quickEdit.hide("fast");
@@ -339,7 +334,7 @@ export class BetterSearch extends RE6Module {
 
     /** Re-renders the posts that are currently being displayed */
     public reloadRenderedPosts(): void {
-        $("post[rendered=true]").trigger("re621:render");
+        Post.find("rendered").each(post => post.render());
     }
 
     /** Updates the content wrapper attributes and variables */
@@ -376,7 +371,7 @@ export class BetterSearch extends RE6Module {
             event.preventDefault();
 
             const $article = $(event.currentTarget).parent(),
-                post = PostData.get($article);
+                post = Post.get($article);
 
             switch (mode) {
                 case "rating-q":
@@ -426,7 +421,7 @@ export class BetterSearch extends RE6Module {
                                 else post.$ref.attr("vote", "0");
                             } else post.$ref.attr("vote", response.action);
 
-                            PostData.set(post, "score", response.score);
+                            post.score = response.score;
                             post.$ref.trigger("re621:update");
                         },
                         (error) => {
@@ -448,7 +443,7 @@ export class BetterSearch extends RE6Module {
                                 else post.$ref.attr("vote", "0");
                             } else post.$ref.attr("vote", response.action);
 
-                            PostData.set(post, "score", response.score);
+                            post.score = response.score;
                             post.$ref.trigger("re621:update");
                         },
                         (error) => {
@@ -459,15 +454,15 @@ export class BetterSearch extends RE6Module {
                     break;
                 }
                 case "add-fav": {
-                    E621.Favorite.id(post.id).delete();
-                    PostData.set(post, "is_favorited", false);
-                    post.$ref.removeAttr("fav");
+                    E621.Favorites.post({ "post_id": post.id });
+                    post.is_favorited = true;
+                    post.$ref.attr("fav", "true");
                     break;
                 }
                 case "remove-fav": {
-                    E621.Favorites.post({ "post_id": post.id });
-                    PostData.set(post, "is_favorited", false);
-                    post.$ref.attr("fav", "true");
+                    E621.Favorite.id(post.id).delete();
+                    post.is_favorited = false;
+                    post.$ref.removeAttr("fav");
                     break;
                 }
                 case "edit": {
@@ -574,9 +569,8 @@ export class BetterSearch extends RE6Module {
             if (BetterSearch.paused || (this.fetchSettings("zoomMode") == ImageZoomMode.OnShift && !this.shiftPressed))
                 return;
 
-            const $article = $("#entry_" + data)
-                .attr("loading", "true");
-            const post = PostData.get($article);
+            const post = Post.get(data);
+            post.$ref.attr("loading", "true");
 
             // Load the image and its basic info
             this.$zoomBlock.attr("status", "loading");
@@ -584,7 +578,7 @@ export class BetterSearch extends RE6Module {
                 .attr("src", this.fetchSettings("zoomFull") ? post.file.original : post.file.sample)
                 .one("load", () => {
                     this.$zoomBlock.attr("status", "ready");
-                    $article.removeAttr("loading");
+                    post.$ref.removeAttr("loading");
                 });
             this.$zoomInfo.html(`${post.img.width} x ${post.img.height}, ${Util.formatBytes(post.file.size)}`);
 
@@ -661,9 +655,9 @@ export class BetterSearch extends RE6Module {
             .appendTo(this.$content);
 
         for (const post of search) {
-            const $article = Post.build(post, imageRatioChange, this.queryPage);
-            this.$content.append($article);
-            this.observer.observe($article[0]);
+            const postData = Post.make(post, this.queryPage, imageRatioChange);
+            this.$content.append(postData.$ref);
+            this.observer.observe(postData.$ref[0]);
         }
 
         Page.setQueryParameter("page", this.queryPage + "");

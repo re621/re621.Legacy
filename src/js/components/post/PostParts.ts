@@ -6,12 +6,12 @@ import { XM } from "../api/XM";
 import { Blacklist } from "../data/Blacklist";
 import { DomUtilities } from "../structure/DomUtilities";
 import { Util } from "../utility/Util";
+import { LoadedFileType, Post } from "./Post";
 import { PostActions } from "./PostActions";
-import { LoadedFileType, PostData } from "./PostData";
 
 export class PostParts {
 
-    public static renderImage(post: PostData, conf: any): JQuery<HTMLElement> {
+    public static renderImage(post: Post, conf: any): JQuery<HTMLElement> {
 
         // Basic structure
         const $link = $("<a>")
@@ -26,7 +26,7 @@ export class PostParts {
 
     }
 
-    private static handleDoubleClick($link: JQuery<HTMLElement>, post: PostData, conf: any): void {
+    private static handleDoubleClick($link: JQuery<HTMLElement>, post: Post, conf: any): void {
 
         let dbclickTimer: number;
         let prevent = false;
@@ -109,7 +109,7 @@ export class PostParts {
         });
     }
 
-    private static handleHoverZoom($link: JQuery<HTMLElement>, post: PostData): void {
+    private static handleHoverZoom($link: JQuery<HTMLElement>, post: Post): void {
 
         let timer: number,
             started = false;
@@ -130,7 +130,7 @@ export class PostParts {
         });
     }
 
-    private static renderImageElement(post: PostData, conf: any): JQuery<HTMLElement> {
+    private static renderImageElement(post: Post, conf: any): JQuery<HTMLElement> {
 
         post.$ref.attr("loading", "true");
 
@@ -153,7 +153,6 @@ export class PostParts {
             else $image.attr("src", post.file.preview);
             post.loaded = size;
         }
-        PostData.save(post);
 
         // Load sample-sized image on hover
         if (conf.imageLoadMethod == ImageLoadMethod.Hover && post.loaded == LoadedFileType.PREVIEW) {
@@ -161,7 +160,8 @@ export class PostParts {
             $image.on("mouseenter.re621.upscale", () => {
                 timer = window.setTimeout(() => {
                     post.$ref.attr("loading", "true");
-                    PostData.set(post, "loaded", LoadedFileType.SAMPLE);
+                    post.loaded = LoadedFileType.SAMPLE;
+
                     $image.attr("src", post.file.sample)
                         .one("load", () => {
                             post.$ref.removeAttr("loading");
@@ -178,7 +178,7 @@ export class PostParts {
         return $image;
 
         /** Returns a formatted tag string for the image's hover text */
-        function formatHoverText(post: PostData, html = false): string {
+        function formatHoverText(post: Post, html = false): string {
             const br = html ? "<br>\n" : "\n";
             return `` +
                 `Post #${post.id}, posted on: ${Util.Time.format(post.date.raw)} (${post.date.ago})${br}` +
@@ -197,7 +197,7 @@ export class PostParts {
         }
     }
 
-    public static renderRibbons(post: PostData, conf: any): JQuery<HTMLElement> {
+    public static renderRibbons(post: Post, conf: any): JQuery<HTMLElement> {
 
         const $ribbons = $("<img-ribbons>")
 
@@ -247,7 +247,7 @@ export class PostParts {
         return $ribbons;
     }
 
-    public static renderButtons(post: PostData, conf: any): JQuery<HTMLElement> {
+    public static renderButtons(post: Post, conf: any): JQuery<HTMLElement> {
 
         const $voteBox = $("<post-voting>");
 
@@ -264,14 +264,14 @@ export class PostParts {
 
                     PostActions.vote(post.id, 1, firstVote).then(
                         (response) => {
-                            console.log(response);
+                            // console.log(response);
 
                             if (response.action == 0) {
                                 if (firstVote) post.$ref.attr("vote", "1");
                                 else post.$ref.attr("vote", "0");
                             } else post.$ref.attr("vote", response.action);
 
-                            PostData.set(post, "score", response.score);
+                            post.score = response.score;
                             post.$ref.trigger("re621:update");
                         },
                         (error) => {
@@ -292,14 +292,14 @@ export class PostParts {
 
                     PostActions.vote(post.id, -1, firstVote).then(
                         (response) => {
-                            console.log(response);
+                            // console.log(response);
 
                             if (response.action == 0) {
                                 if (firstVote) post.$ref.attr("vote", "-1");
                                 else post.$ref.attr("vote", "0");
                             } else post.$ref.attr("vote", response.action);
 
-                            PostData.set(post, "score", response.score);
+                            post.score = response.score;
                             post.$ref.trigger("re621:update");
                         },
                         (error) => {
@@ -323,12 +323,12 @@ export class PostParts {
 
                     if (post.is_favorited) {
                         await E621.Favorite.id(post.id).delete();
-                        PostData.set(post, "is_favorited", false);
+                        post.is_favorited = false;
                         post.$ref.removeAttr("fav");
                         $btn.removeClass("score-favorite");
                     } else {
                         await E621.Favorites.post({ "post_id": post.id });
-                        PostData.set(post, "is_favorited", false);
+                        post.is_favorited = true;
                         post.$ref.attr("fav", "true");
                         $btn.addClass("score-favorite");
                     }
@@ -341,7 +341,7 @@ export class PostParts {
         return $voteBox;
     }
 
-    public static renderFlags(post: PostData): JQuery<HTMLElement> {
+    public static renderFlags(post: Post): JQuery<HTMLElement> {
 
         const $flagBox = $("<post-flags>");
 
@@ -359,17 +359,17 @@ export class PostParts {
 
     }
 
-    public static renderInfo(post: PostData): JQuery<HTMLElement> {
+    public static renderInfo(post: Post): JQuery<HTMLElement> {
 
         const $infoBlock = $("<post-info>");
         post.$ref.on("re621:update", () => {
-            $infoBlock.html(getPostInfo(PostData.get(post.$ref)));
-        })
+            $infoBlock.html(getPostInfo(post));
+        });
         $infoBlock.html(getPostInfo(post));
 
         return $infoBlock;
 
-        function getPostInfo(post: PostData): string {
+        function getPostInfo(post: Post): string {
             const scoreClass = post.score > 0 ? "positive" : (post.score < 0 ? "negative" : "neutral");
             return `
                 <span class="post-info-score score-${scoreClass}">${post.score}</span>

@@ -1,6 +1,6 @@
 import { Page, PageDefintion } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
-import { PostData } from "../../components/post/PostData";
+import { PostData } from "../../components/post/Post";
 import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module, Settings } from "../../components/RE6Module";
 

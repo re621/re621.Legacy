@@ -98,17 +98,9 @@ section#downloader-box {
     }
 }
 
-body[data-sticky-header=true] section#downloader-box {
-    top: 12.5rem;
-}
+search-content[data-downloading=true] {
 
-div#posts-container[data-downloading=true] {
-
-    article.post-preview.download-item {
-
-        a {
-            outline: 0;
-        }
+    post.download-item {
 
         &::before {
             content: "";
@@ -156,7 +148,7 @@ div#posts-container[data-downloading=true] {
         }
     }
 
-    article.post-preview.ui-selecting {
+    post.ui-selecting {
         &::after {
             content: "";
 

@@ -1,5 +1,5 @@
 import { PageDefintion } from "../../components/data/Page";
-import { PostData } from "../../components/post/PostData";
+import { Post, PostData } from "../../components/post/Post";
 import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
@@ -35,7 +35,7 @@ export class InstantSearch extends RE6Module {
 
         $("search-content").on("re621:insearch", "post", (event) => {
             const $article = $(event.currentTarget),
-                post = PostData.get($article);
+                post = Post.get($article);
 
             if (InstantSearch.filter == undefined) $article.removeAttr("filtered");
             else {

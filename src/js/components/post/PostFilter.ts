@@ -1,6 +1,6 @@
 import { PostRating } from "../api/responses/APIPost";
 import { Tag } from "../data/Tag";
-import { PostData } from "./PostData";
+import { Post, PostData } from "./Post";
 
 export class PostFilter {
 
@@ -112,7 +112,7 @@ export class PostFilter {
      * @param post Post to test against the filter
      * @param ignoreDisabled Return the result regardless of the filter's state
      */
-    public matches(post: PostData, ignoreDisabled = false): boolean {
+    public matches(post: Post, ignoreDisabled = false): boolean {
         return this.matchesID(post.id, ignoreDisabled);
     }
 
