@@ -282,6 +282,7 @@ export class SettingsController extends RE6Module {
                         async (data) => {
                             await miscellaneous.pushSettings("stickyHeader", data);
                             miscellaneous.createStickyHeader(data);
+                            $("#sidebar").trigger("re621:reflow");
                         }
                     ),
                     Form.spacer(3),
@@ -289,12 +290,13 @@ export class SettingsController extends RE6Module {
                     Form.checkbox(
                         {
                             value: miscellaneous.fetchSettings("stickySearchbox"),
-                            label: "<b>Fixed Searchbox</b><br />Make the searchbox remain visible when scrolling",
+                            label: "<b>Fixed Sidebar</b><br />Leave the sidebar controls on the screen while scrolling",
                             width: 3,
                         },
                         async (data) => {
                             await miscellaneous.pushSettings("stickySearchbox", data);
                             miscellaneous.createStickySearchbox(data);
+                            $("#sidebar").trigger("re621:reflow");
                         }
                     ),
                     Form.spacer(3),
@@ -774,18 +776,6 @@ export class SettingsController extends RE6Module {
                         async (data) => { await massDownloader.pushSettings("autoDownloadArchive", data); }
                     ),
 
-                    Form.checkbox(
-                        {
-                            value: massDownloader.fetchSettings("fixedSection"),
-                            label: "<b>Fixed Interface</b><br />The downloader interface will remain on the screen as you scroll",
-                            width: 3,
-                        },
-                        async (data) => {
-                            await massDownloader.pushSettings("fixedSection", data);
-                            massDownloader.toggleFixedSection();
-                        }
-                    ),
-
                 ]),
 
                 // Fav Downloader
@@ -808,18 +798,6 @@ export class SettingsController extends RE6Module {
                             width: 3,
                         },
                         async (data) => { await favDownloader.pushSettings("autoDownloadArchive", data); }
-                    ),
-
-                    Form.checkbox(
-                        {
-                            value: favDownloader.fetchSettings("fixedSection"),
-                            label: "<b>Fixed Interface</b><br />The downloader interface will remain on the screen as you scroll",
-                            width: 3,
-                        },
-                        async (data) => {
-                            await favDownloader.pushSettings("fixedSection", data);
-                            favDownloader.toggleFixedSection();
-                        }
                     ),
 
                 ]),

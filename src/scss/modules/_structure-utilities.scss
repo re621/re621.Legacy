@@ -129,20 +129,24 @@ div#c-favorites div#a-index {
 
 
 /* Fix Sidebar Sections */
-div#page aside#sidebar {
-    
-    div#re621-search {
+body {
+    aside#sidebar div#re621-search {
         position: relative;
         margin: -0.5rem -0.5rem 0;
         padding: 0.5rem 0.5rem;
         border-radius: 6px 6px 0 0;
-
-        &[data-sticky=true] {
-            position: sticky;
-            top: -1px;
-            z-index: 50;
-        }
+        top: -1px;
+        z-index: 1;
     }
+
+    &[data-sticky=true] aside#sidebar {
+        
+        div#re621-search,
+        section#downloader-box,
+        section#fav-downloader-box { position: sticky; }
+    }
+}
+div#page aside#sidebar {
 
     section {
         margin-bottom: 0.5rem;

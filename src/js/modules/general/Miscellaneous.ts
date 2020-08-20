@@ -108,7 +108,7 @@ export class Miscellaneous extends RE6Module {
      * @param state True to stick, false to unstick
      */
     public createStickySearchbox(state = true): void {
-        $("#re621-search").attr("data-sticky", state + "");
+        $("body").attr("data-sticky", state + "");
     }
 
     /**

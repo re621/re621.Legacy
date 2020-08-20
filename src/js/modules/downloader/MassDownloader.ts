@@ -47,7 +47,6 @@ export class MassDownloader extends RE6Module {
             enabled: true,
             template: "%artist%/%postid%-%copyright%-%character%-%species%",
             autoDownloadArchive: true,
-            fixedSection: true,
         };
     }
 
