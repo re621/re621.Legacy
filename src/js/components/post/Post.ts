@@ -117,9 +117,21 @@ export class Post implements PostData {
 
     public reset(): Post {
         this.$ref
-            .attr({ "rendered": false, })
+            .attr({
+                "rendered": false,
+                "loading": false,
+            })
             .html(this.id + "")
             .children().remove();
+
+        if (this.$ref.data("gif-interval") !== undefined) {
+            window.clearInterval(this.$ref.data("gif-interval"));
+            this.$ref.data("gif-interval", undefined);
+        }
+        if (this.$ref.data("gif-freezefr") !== undefined) {
+            this.$ref.data("gif-freezefr").destroy();
+            this.$ref.data("gif-freezefr", undefined);
+        }
 
         return this;
     }

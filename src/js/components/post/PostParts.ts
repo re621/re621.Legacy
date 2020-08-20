@@ -9,6 +9,8 @@ import { Util } from "../utility/Util";
 import { LoadedFileType, Post } from "./Post";
 import { PostActions } from "./PostActions";
 
+declare const Freezeframe;
+
 export class PostParts {
 
     public static renderImage(post: Post, conf: any): JQuery<HTMLElement> {
@@ -144,12 +146,36 @@ export class PostParts {
         if (conf.hoverTags) $image.attr("title", formatHoverText(post));
 
         // Load appropriate image
-        if (post.file.ext === "swf") {
+        if (post.flags.has("deleted")) {
             post.img.ratio = 1;
             post.loaded = LoadedFileType.ORIGINAL;
-        } else if (post.flags.has("deleted")) {
+        } else if (post.file.ext === "swf") {
             post.img.ratio = 1;
             post.loaded = LoadedFileType.ORIGINAL;
+        } else if (post.file.ext === "gif" && conf.imageLoadMethod == ImageLoadMethod.Always && !conf.autoPlayGIFs) { // account for other load methods
+
+            if (post.loaded == LoadedFileType.SAMPLE) $image.attr("src", post.file.sample);
+            else {
+                $image.attr("src", post.file.preview);
+                post.loaded = LoadedFileType.PREVIEW;
+
+                let timer: number;
+                $image.on("mouseenter.re621.upscale", () => {
+                    timer = window.setTimeout(() => {
+                        post.$ref.attr("loading", "true");
+                        post.loaded = LoadedFileType.SAMPLE;
+                        // ($image[0] as HTMLImageElement).src = post.file.sample;
+                        $image.attr("src", post.file.sample).on("load", () => {
+                            post.$ref.removeAttr("loading");
+                            $image.off("mouseenter.re621.upscale")
+                                .off("mouseleave.re621.upscale");
+                        });
+                    }, 200);
+                });
+                $image.on("mouseleave.re621.upscale", () => {
+                    window.clearTimeout(timer);
+                });
+            }
         } else {
             const size = getRequiredImageSize(post.loaded, conf.imageLoadMethod);
             if (size == LoadedFileType.SAMPLE) $image.attr("src", post.file.sample);

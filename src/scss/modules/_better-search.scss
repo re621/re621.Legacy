@@ -140,6 +140,17 @@ search-content > post {
             align-self: flex-end;
             border-radius: 6px 6px 0 0;
         }
+
+        canvas {
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .ff-container .ff-overlay {
+            max-width: 2.5rem;
+            max-height: 2.5rem;
+        }
     }
 
     // Loading overlay
@@ -153,6 +164,7 @@ search-content > post {
         bottom: 0;
         left: 0;
         right: 0;
+        z-index: 100;
 
         color: white;
         text-shadow: 0 0 10px black;
@@ -186,6 +198,7 @@ search-content > post {
         padding: 0 0.5rem;
         justify-content: center;
         box-sizing: border-box;
+        z-index: 10;
 
         background: #ffffff25;
         font-size: 90%;
@@ -307,6 +320,7 @@ search-content > post {
         padding: 0 0.125rem;
         font-size: 0.6em;
         font-weight: 700;
+        z-index: 10;
     }
 
     &[animated=true][filetype=webm] > a::before { content: "WEBM"; }
@@ -325,6 +339,7 @@ search-content {
         left: 0;
         right: 0;
         height: 0;
+        z-index: 10;
     }
 
     ribbon {
@@ -399,6 +414,7 @@ search-content  {
         left: 0;
         right: 0;
         height: 0;
+        z-index: 10;
     }
 
     button.button.voteButton {

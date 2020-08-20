@@ -349,7 +349,7 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await betterSearch.pushSettings("autoPlayGIFs", data);
-                            // TODO ???
+                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
                         }
                     ),
                     Form.spacer(3, true),
@@ -405,10 +405,10 @@ export class SettingsController extends RE6Module {
 
                         Form.subheader("Thumbnail Size", "Thumbnail width, in px, em, or rem", 2),
                         Form.input(
-                            { value: betterSearch.fetchSettings("imageWidth"), pattern: "^\\d{2,3}(px|rem|em)$" },
+                            { value: betterSearch.fetchSettings("imageWidth"), pattern: "^\\d{2,3}$" },
                             async (data, input) => {
                                 if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
-                                await betterSearch.pushSettings("imageWidth", data);
+                                await betterSearch.pushSettings("imageWidth", parseInt(data));
                                 if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                             }
                         ),
@@ -448,13 +448,13 @@ export class SettingsController extends RE6Module {
                             {
                                 name: "cropratio",
                                 value: betterSearch.fetchSettings("imageRatio"),
-                                pattern: "^(([01](\\.\\d+)?)|2)$",
+                                pattern: "^[01]\\.[1-9]|1\\.0$",
                                 wrapper: betterSearch.fetchSettings("imageRatioChange") ? undefined : "input-disabled",
                                 disabled: !betterSearch.fetchSettings("imageRatioChange"),
                             },
                             async (data, input) => {
                                 if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
-                                await betterSearch.pushSettings("imageRatio", data);
+                                await betterSearch.pushSettings("imageRatio", parseFloat(data));
                                 if (betterSearch.isInitialized()) {
                                     betterSearch.updateContentHeader();
                                     betterSearch.reloadRenderedPosts();

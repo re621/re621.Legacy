@@ -52,9 +52,9 @@ export class BetterSearch extends RE6Module {
             autoPlayGIFs: true,                             // If false, animated GIFs will use the `hover` load method even if that is set to `always`
 
             imageSizeChange: true,                          // If true, resizes the image in accordance with `imageWidth`
-            imageWidth: "150px",                            // Width if the resized image
+            imageWidth: 150,                                // Width if the resized image
             imageRatioChange: true,                         // If true, crops the image to ratio specified in `imageRatio`
-            imageRatio: "0.9",                              // Ratio to conform to
+            imageRatio: 0.9,                                // Ratio to conform to
 
             zoomMode: ImageZoomMode.Disabled,               // How should the hover zoom be triggered
             zoomFull: false,                                // Load full-sized (original) image instead of a sampled one
@@ -358,7 +358,7 @@ export class BetterSearch extends RE6Module {
 
         // Scaling Settings
         this.$content.removeAttr("style");
-        if (conf.imageSizeChange) this.$content.css("--img-width", conf.imageWidth);
+        if (conf.imageSizeChange) this.$content.css("--img-width", conf.imageWidth + "px");
         if (conf.imageRatioChange) this.$content.css("--img-ratio", conf.imageRatio);
 
         // InfScroll separators
