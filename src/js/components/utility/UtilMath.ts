@@ -4,4 +4,8 @@ export class UtilMath {
         return Math.min(Math.max(value, min), max);
     }
 
+    public static between(value: number, min: number, max: number): boolean {
+        return min <= value && max >= value;
+    }
+
 }

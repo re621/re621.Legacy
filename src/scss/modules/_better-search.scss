@@ -70,19 +70,35 @@ section#content {
     &:not([loading=true]) search-loading { display: none; }
 
     paginator-container {
-        display: flex;
+        display: block;
         justify-content: center;
         align-items: center;
+        padding-top: 1rem;
         height: 5rem;
+        width: 100%;
+
+        & > span.paginator-loading {
+            display: flex;
+            justify-content: center;
+        }
 
         & > paginator {
-            display: flex;
+            display: grid;
+            grid-template-columns: auto auto auto;
             width: 100%;
-            justify-content: space-evenly;
+            text-align: center;
+        }
+
+        .paginator-prev,
+        .paginator-next {
+            grid-row: span 2;
+            align-self: center;
         }
 
         span.infscroll-next-wrap {
             display: flex;
+            justify-content: center;
+            height: 2.25rem;
 
             &::before, &::after {
                 content: " ";
@@ -104,11 +120,19 @@ section#content {
                 color: #999;
             }
         }
+
+        div.paginator-numbers {
+            grid-row: 2;
+            grid-column: 2;
+
+            a, span {
+                margin: 0.5rem 0.5rem;
+                display: inline-block;
+            }
+        }
     }
 
-    &[infscroll=false] paginator-container,
-    &:not([infscroll]) paginator-container { display: none; }
-
+    &[loading=true] paginator-container { display: none; }
     &[infscroll=loading] paginator-container > paginator { display: none; }
     &[infscroll=ready] paginator-container > span { display: none; }
 }

@@ -201,6 +201,7 @@ export class Post implements PostData {
                 "filetype": data.file.ext,
                 "deleted": flags.has("deleted") ? "true" : undefined,
                 "rendered": false,
+                "page": page,
             })
             .html(data.id + "");
 

@@ -37,6 +37,7 @@ export class BetterSearch extends RE6Module {
     private queryPage: number;                  // Number of the last page to be loaded
     private queryLimit: number;                 // Maxmimum number of posts per request
 
+    private lastPage: number;                   // Last page number from the vanilla pagination
     private hasMorePages: boolean;              // If false, there are no more posts to load
     private loadingPosts: boolean;              // True value indicates that infinite scroll is loading posts
 
@@ -81,6 +82,11 @@ export class BetterSearch extends RE6Module {
 
         if (!this.fetchSettings("enabled") || !this.pageMatchesFilter()) return;
 
+        const paginator = $("div.paginator menu");
+        const curPage = parseInt(paginator.find(".current-page").text()) || 1,
+            lastPage = parseInt(paginator.find(".numbered-page").last().text()) || 1;
+        this.lastPage = Math.max(curPage, lastPage);
+
         $("#content")
             .html("")
             .attr("loading", "true");
@@ -92,7 +98,7 @@ export class BetterSearch extends RE6Module {
         this.queryPage = parseInt(Page.getQueryParameter("page")) || 1;
         this.queryTags = Page.getQueryParameter("tags") || "";
         this.queryLimit = parseInt(Page.getQueryParameter("limit")) || undefined;
-        this.hasMorePages = true;
+        this.hasMorePages = this.queryPage < this.lastPage;
 
         if (this.queryPage >= 750) return;
 
@@ -207,6 +213,7 @@ export class BetterSearch extends RE6Module {
             this.initHoverZoom();
 
             const scrollTo = $(`[page=${this.queryPage}]:visible:first`);
+            console.log(preloadEnabled, this.queryPage > 1, scrollTo.length !== 0);
             if (preloadEnabled && this.queryPage > 1 && scrollTo.length !== 0) {
                 $([document.documentElement, document.body])
                     .animate({ scrollTop: scrollTo.offset().top - 30 }, 200);
@@ -305,6 +312,7 @@ export class BetterSearch extends RE6Module {
         const infscroll = $("<paginator-container>")
             .appendTo(this.$wrapper);
         $("<span>")
+            .addClass("paginator-loading")
             .html(`<div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>`)
             .appendTo(infscroll);
         this.$paginator = $("<paginator>")
@@ -705,7 +713,7 @@ export class BetterSearch extends RE6Module {
 
         BetterSearch.trigger("pageload");
 
-        return Promise.resolve(true);
+        return Promise.resolve(this.queryPage < this.lastPage);
     }
 
     /** Rebuilds the DOM structure of the paginator */
@@ -716,11 +724,13 @@ export class BetterSearch extends RE6Module {
         if (this.queryPage == 1) {
             $("<span>")
                 .html(`<i class="fas fa-angle-double-left"></i> Previous`)
+                .addClass("paginator-prev")
                 .appendTo(this.$paginator);
         } else {
             $("<a>")
-                .attr("href", getPageURL(this.queryPage, false))
+                .attr("href", getPageURL(this.queryPage - 1))
                 .html(`<i class="fas fa-angle-double-left"></i> Previous`)
+                .addClass("paginator-prev")
                 .appendTo(this.$paginator);
         }
 
@@ -762,18 +772,51 @@ export class BetterSearch extends RE6Module {
 
         if (this.hasMorePages) {
             $("<a>")
-                .attr("href", getPageURL(this.queryPage, true))
+                .attr("href", getPageURL(this.queryPage + 1))
                 .html(`Next <i class="fas fa-angle-double-right"></i>`)
+                .addClass("paginator-next")
                 .appendTo(this.$paginator);
         } else {
             $("<span>")
                 .html(`Next <i class="fas fa-angle-double-right"></i>`)
+                .addClass("paginator-next")
                 .appendTo(this.$paginator);
         }
 
-        function getPageURL(currentPage: number, next: boolean): string {
+        const pages = $("<div>")
+            .addClass("paginator-numbers")
+            .appendTo(this.$paginator);
+
+        const pageNum: number[] = [];
+
+        let count = 0;
+        for (let i = 1; i <= this.lastPage; i++) {
+            if (
+                Util.Math.between(i, 0, (this.queryPage < 5 ? 5 : 3)) ||
+                Util.Math.between(i, this.queryPage - 2, this.queryPage + 2) ||
+                Util.Math.between(i, (this.queryPage < 5 ? (this.lastPage - 5) : (this.lastPage - 3)), this.lastPage)
+            ) {
+                pageNum.push(i);
+                count++;
+            } else {
+                if (pageNum[count - 1] !== null) {
+                    pageNum.push(null);
+                    count++;
+                }
+            }
+        }
+
+        for (const page of pageNum) {
+            if (page == null) $("<span>").html(`. . .`).appendTo(pages);
+            else {
+                if (page == this.queryPage) $("<span>").html(`<b>${page}</b>`).appendTo(pages);
+                else $("<a>").attr("href", getPageURL(page)).html(`${page}`).appendTo(pages);
+            }
+        }
+
+        function getPageURL(number: number): string {
             const url = new URL(window.location.toString())
-            url.searchParams.set("page", (currentPage + (next ? 1 : -1)) + "");
+            url.searchParams.set("page", number + "");
             url.searchParams.set("nopreload", "true");
             return url.pathname + url.search;
         }
