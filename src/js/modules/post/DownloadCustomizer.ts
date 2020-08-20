@@ -1,7 +1,6 @@
 import { XM } from "../../components/api/XM";
 import { PageDefintion } from "../../components/data/Page";
-import { Post, ViewingPost } from "../../components/data/Post";
-import { TagTypes } from "../../components/data/Tag";
+import { Post } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
@@ -9,7 +8,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
  */
 export class DownloadCustomizer extends RE6Module {
 
-    private post: ViewingPost;
+    private post: Post;
     private link: JQuery<HTMLElement>;
 
     public constructor() {
@@ -64,17 +63,21 @@ export class DownloadCustomizer extends RE6Module {
      */
     private parseTemplate(): string {
         return this.fetchSettings("template")
-            .replace(/%postid%/g, this.post.getId())
-            .replace(/%artist%/g, this.post.getTagsFromType(TagTypes.Artist).join("-"))
-            .replace(/%copyright%/g, this.post.getTagsFromType(TagTypes.Copyright).join("-"))
-            .replace(/%character%/g, this.post.getTagsFromType(TagTypes.Character).join("-"))
-            .replace(/%species%/g, this.post.getTagsFromType(TagTypes.Species).join("-"))
-            .replace(/%meta%/g, this.post.getTagsFromType(TagTypes.Meta).join("-"))
-            .replace(/%md5%/g, this.post.getMD5())
+            .replace(/%postid%/g, this.post.id)
+            .replace(/%artist%/g, tagSetToString(this.post.tags.real_artist))
+            .replace(/%copyright%/g, tagSetToString(this.post.tags.copyright))
+            .replace(/%species%/g, tagSetToString(this.post.tags.species))
+            .replace(/%character%/g, tagSetToString(this.post.tags.character))
+            .replace(/%meta%/g, tagSetToString(this.post.tags.meta))
+            .replace(/%md5%/g, this.post.file.md5)
             .slice(0, 128)
             .replace(/-{2,}/g, "-")
             .replace(/-*$/g, "")
-            + "." + this.post.getFileExtension();
+            + "." + this.post.file.ext;
+
+        function tagSetToString(tags: Set<string>): string {
+            return [...tags].join("-");
+        }
     }
 
 }

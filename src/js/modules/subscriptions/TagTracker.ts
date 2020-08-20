@@ -1,7 +1,8 @@
 import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
-import { Post } from "../../components/data/Post";
+import { Blacklist } from "../../components/data/Blacklist";
 import { ModuleController } from "../../components/ModuleController";
+import { PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
@@ -26,7 +27,7 @@ export class TagTracker extends RE6Module implements SubscriptionTracker {
 
     updateActions: UpdateActions = {
         imageSrc: (data) => {
-            return Post.createPreviewUrlFromMd5(data.md5);
+            return PostData.createPreviewUrlFromMd5(data.md5);
         },
         imageHref: (data) => {
             return `/posts/${data.id}`;
@@ -135,7 +136,7 @@ export class TagTracker extends RE6Module implements SubscriptionTracker {
             Debug.log(`TgT: ${post.id} ${Util.Time.format(new Date(post.created_at))}`);
 
             // Only add posts that match the blacklist
-            if (new Post(post).matchesBlacklist(true)) {
+            if (Blacklist.checkPost(post.id), true) {
                 Debug.log("TgT: blacklist");
                 continue;
             }

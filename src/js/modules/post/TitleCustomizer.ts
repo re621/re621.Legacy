@@ -1,6 +1,5 @@
 import { Page, PageDefintion } from "../../components/data/Page";
-import { Post, ViewingPost } from "../../components/data/Post";
-import { Tag, TagTypes } from "../../components/data/Tag";
+import { Post } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
@@ -8,7 +7,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
  */
 export class TitleCustomizer extends RE6Module {
 
-    private post: ViewingPost;
+    private post: Post;
 
     public constructor() {
         super(PageDefintion.post, true);
@@ -54,21 +53,25 @@ export class TitleCustomizer extends RE6Module {
     private parseTemplate(): string {
         let prefix = "";
         if (this.fetchSettings("symbolsEnabled")) {
-            if (this.post.getIsFaved()) { prefix += this.fetchSettings("symbolFav"); }
-            if (this.post.getIsUpvoted()) { prefix += this.fetchSettings("symbolVoteUp"); }
-            else if (this.post.getIsDownvoted()) { prefix += this.fetchSettings("symbolVoteDown"); }
+            if (this.post.is_favorited) { prefix += this.fetchSettings("symbolFav"); }
+            if (this.post.user_score > 0) { prefix += this.fetchSettings("symbolVoteUp"); }
+            else if (this.post.user_score < 0) { prefix += this.fetchSettings("symbolVoteDown"); }
             if (prefix) prefix += " ";
         }
 
         return prefix + this.fetchSettings("template")
-            .replace(/%postid%/g, this.post.getId().toString())
-            .replace(/%artist%/g, this.post.getTagsFromType(TagTypes.Artist).filter(tag => Tag.isArist(tag)).join(", "))
-            .replace(/%copyright%/g, this.post.getTagsFromType(TagTypes.Copyright).join(", "))
-            .replace(/%character%/g, this.post.getTagsFromType(TagTypes.Character).join(", "))
-            .replace(/%species%/g, this.post.getTagsFromType(TagTypes.Species).join(", "))
-            .replace(/%meta%/g, this.post.getTagsFromType(TagTypes.Meta).join(", "))
+            .replace(/%postid%/g, this.post.id)
+            .replace(/%artist%/g, tagSetToString(this.post.tags.real_artist))
+            .replace(/%copyright%/g, tagSetToString(this.post.tags.copyright))
+            .replace(/%character%/g, tagSetToString(this.post.tags.character))
+            .replace(/%species%/g, tagSetToString(this.post.tags.species))
+            .replace(/%meta%/g, tagSetToString(this.post.tags.meta))
             .replace(/\(\)|( - )$/g, "")
             .replace(/[ ]{2,}|^ | $/g, "")
             + " - " + Page.getSiteName();
+
+        function tagSetToString(tags: Set<string>): string {
+            return [...tags].join(", ");
+        }
     }
 }

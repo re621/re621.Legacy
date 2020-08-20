@@ -2,8 +2,8 @@ import { E621 } from "../../components/api/E621";
 import { APIComment } from "../../components/api/responses/APIComment";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { Page, PageDefintion } from "../../components/data/Page";
-import { Post } from "../../components/data/Post";
 import { User } from "../../components/data/User";
+import { PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 import { Subscription } from "./SubscriptionManager";
@@ -27,7 +27,7 @@ export class CommentTracker extends RE6Module implements SubscriptionTracker {
 
     updateActions: UpdateActions = {
         imageSrc: (data) => {
-            return Post.createPreviewUrlFromMd5(data.md5);
+            return PostData.createPreviewUrlFromMd5(data.md5);
         },
         imageHref: (data) => {
             return `/posts/${data.extra.parent}`;

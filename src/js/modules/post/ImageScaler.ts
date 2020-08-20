@@ -1,7 +1,7 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { PageDefintion } from "../../components/data/Page";
-import { Post } from "../../components/data/Post";
 import { ModuleController } from "../../components/ModuleController";
+import { Post } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
@@ -70,7 +70,7 @@ export class ImageScaler extends RE6Module {
 
         $("<a>")
             .attr({
-                "href": this.post.getImageURL(),
+                "href": this.post.file.original,
                 "id": "re621-imagescaler-fullscreen",
             })
             .addClass("button btn-neutral")
@@ -115,26 +115,26 @@ export class ImageScaler extends RE6Module {
 
         switch (size) {
             case ("sample"): {
-                this.image.attr("src", this.post.getSampleURL());
+                this.image.attr("src", this.post.file.sample);
                 break;
             }
             case ("fit-vertical"): {
                 this.image.addClass("re621-fit-vertical");
-                if (this.image.attr("src") !== this.post.getImageURL()) {
-                    this.image.attr("src", this.post.getImageURL());
+                if (this.image.attr("src") !== this.post.file.original) {
+                    this.image.attr("src", this.post.file.original);
                 } else { this.image.parent().removeClass("loading"); }
                 break;
             }
             case ("fit-horizontal"): {
                 this.image.addClass("re621-fit-horizontal");
-                if (this.image.attr("src") !== this.post.getImageURL()) {
-                    this.image.attr("src", this.post.getImageURL());
+                if (this.image.attr("src") !== this.post.file.original) {
+                    this.image.attr("src", this.post.file.original);
                 } else { this.image.parent().removeClass("loading"); }
                 break;
             }
             case ("original"): {
-                if (this.image.attr("src") !== this.post.getImageURL()) {
-                    this.image.attr("src", this.post.getImageURL());
+                if (this.image.attr("src") !== this.post.file.original) {
+                    this.image.attr("src", this.post.file.original);
                 } else { this.image.parent().removeClass("loading"); }
                 break;
             }

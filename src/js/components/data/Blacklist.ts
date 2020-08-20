@@ -96,12 +96,6 @@ export class Blacklist {
             postFilter = new PostFilter(filter, enabled);
             this.blacklist.set(filter, postFilter);
         }
-        /*
-        const posts = Post.fetchPosts();
-        for (const post of posts) {
-            postFilter.addPost(post, false);
-        }
-        */
     }
 
     /**

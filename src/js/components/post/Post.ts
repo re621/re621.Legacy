@@ -2,6 +2,7 @@ import { BetterSearch } from "../../modules/search/BetterSearch";
 import { CustomFlagger } from "../../modules/search/CustomFlagger";
 import { APIPost, PostRating } from "../api/responses/APIPost";
 import { Blacklist } from "../data/Blacklist";
+import { Tag } from "../data/Tag";
 import { ModuleController } from "../ModuleController";
 import { Util } from "../utility/Util";
 import { PostParts } from "./PostParts";
@@ -14,6 +15,7 @@ export class Post implements PostData {
     public id: number;
     public flags: Set<string>;
     public score: number;
+    public user_score: number;
     public favorites: number;
     public is_favorited: boolean;
     public comments: number;
@@ -30,6 +32,7 @@ export class Post implements PostData {
     public tags: {
         all: Set<string>;
         artist: Set<string>;
+        real_artist: Set<string>;
         copyright: Set<string>;
         species: Set<string>;
         character: Set<string>;
@@ -146,6 +149,12 @@ export class Post implements PostData {
         return post.data("post");
     }
 
+    public static getViewingPost(): Post {
+        const container = $("#image-container");
+        if (container.data("post") !== undefined) return Post.get(container);
+        return new Post(PostData.fromDOM(), container);
+    }
+
     public static find(type: "rendered" | "blacklisted" | "all"): PostSet {
         const result = new PostSet();
         switch (type) {
@@ -201,6 +210,7 @@ export interface PostData {
     id: number;
     flags: Set<string>;
     score: number;
+    user_score: number;
     favorites: number;
     is_favorited: boolean;
     comments: number;
@@ -218,6 +228,7 @@ export interface PostData {
     tags: {
         all: Set<string>;
         artist: Set<string>;
+        real_artist: Set<string>;
         copyright: Set<string>;
         species: Set<string>;
         character: Set<string>;
@@ -261,6 +272,7 @@ export namespace PostData {
             id: data.id,
             flags: flags,
             score: data.score.total,
+            user_score: undefined,
             favorites: data.fav_count,
             is_favorited: data.is_favorited == true,
             comments: data.comment_count,
@@ -278,6 +290,7 @@ export namespace PostData {
             tags: {
                 all: tags,
                 artist: new Set(data.tags.artist),
+                real_artist: new Set(data.tags.artist.filter(tag => Tag.isArist(tag))),
                 copyright: new Set(data.tags.copyright),
                 species: new Set(data.tags.species),
                 character: new Set(data.tags.character),
@@ -311,22 +324,44 @@ export namespace PostData {
         };
     }
 
-    export function fromDOM($article: JQuery<HTMLElement>): PostData {
+    export function fromDOM(): PostData {
 
+        const $article = $("#image-container");
+
+        const id = parseInt($article.attr("data-id")) || 0;
         const timeEl = $("#post-information").find("time");
         const time = timeEl.length != 0 ? timeEl.attr("title") : "0";
+
+        // Tags
         const tagString = $article.attr("data-tags") || "";
+        const artistTags = getTags("artist");
 
-        const md5match = /\/\S{2}\/\S{2}\/(\S{32})\.\w+/g.exec($article.attr("data-file-url"));
-        const md5 = md5match !== null ? md5match[1] : null;
+        // MD5
+        let md5: string;
+        if ($article.attr("data-md5")) md5 = $article.attr("data-md5");
+        else if ($article.attr("data-file-url"))
+            md5 = $article.attr("data-file-url").substring(36, 68);
 
+        // Score
+        let score = 0;
+        if ($article.attr("data-score")) score = parseInt($article.attr("data-score"));
+        else if ($article.find(".post-score-score").length !== 0)
+            score = parseInt($article.find(".post-score-score").first().html().substring(1));
+
+        // User score;
+        let userScore = 0;
+        if ($(".post-vote-up-" + id).first().hasClass("score-positive")) userScore = 1;
+        else if ($(".post-vote-down-" + id).first().hasClass("score-negative")) userScore = -1;
+
+        // Dimensions
         const width = parseInt($article.attr("data-width")),
             height = parseInt($article.attr("data-height"));
 
         return {
-            id: parseInt($article.attr("data-id")) || 0,
+            id: id,
             flags: new Set(($article.attr("data-flags") || "").split(" ")),
-            score: parseInt($article.attr("data-score")) || 0,
+            score: score,
+            user_score: userScore,
             favorites: parseInt($article.attr("data-fav-count")) || 0,
             is_favorited: $article.attr("data-is-favorited") == "true",
             comments: -1,
@@ -343,14 +378,15 @@ export namespace PostData {
             tagString: tagString,
             tags: {
                 all: new Set(tagString.split(" ")),
-                artist: new Set(),
-                copyright: new Set(),
-                species: new Set(),
-                character: new Set(),
-                general: new Set(),
-                invalid: new Set(),
-                meta: new Set(),
-                lore: new Set(),
+                artist: artistTags,
+                real_artist: new Set([...artistTags].filter(tag => Tag.isArist(tag))),
+                copyright: getTags("copyright"),
+                species: getTags("species"),
+                character: getTags("character"),
+                general: getTags("general"),
+                invalid: getTags("invalid"),
+                meta: getTags("meta"),
+                lore: getTags("lore"),
             },
 
             file: {
@@ -375,6 +411,21 @@ export namespace PostData {
             },
 
         };
+
+        function getTags(group: string): Set<string> {
+            const result: Set<string> = new Set();
+            for (const element of $(`#tag-list .${group}-tag-list`).children()) {
+                result.add($(element).find(".search-tag").text().replace(/ /g, "_"));
+            }
+            return result;
+        }
+    }
+
+    export function createPreviewUrlFromMd5(md5: string): string {
+        // Assume that the post is flash when no md5 is passed
+        return md5 == ""
+            ? "https://static1.e621.net/images/download-preview.png"
+            : `https://static1.e621.net/data/preview/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`;
     }
 }
 

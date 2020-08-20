@@ -1,6 +1,6 @@
 import { Page, PageDefintion } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
-import { PostData } from "../../components/post/Post";
+import { Post, PostData } from "../../components/post/Post";
 import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
@@ -81,7 +81,7 @@ export class CustomFlagger extends RE6Module {
      */
     private createPostPage(): void {
 
-        const post = PostData.fromDOM($("#image-container"));
+        const post = Post.getViewingPost();
         CustomFlagger.addPost(post);
 
         const flagContainer = $("<div>").insertAfter("div.input#tags-container");
