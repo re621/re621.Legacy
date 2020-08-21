@@ -17,30 +17,38 @@ export class ModuleController {
 
         Debug.perfStart("re621.total");
 
+        // Prepare and setup modules
         let activeModules = 0;
         for (const moduleClass of moduleList) {
             Debug.perfStart(moduleClass.prototype.constructor.name);
             try {
-                const moduleInstance = moduleClass.getInstance();
-                this.modules.set(moduleClass.prototype.constructor.name, moduleInstance);
-                await moduleInstance.prepare();
-                if (moduleInstance.canInitialize()) {
-                    if (moduleInstance.isWaitingForDOM()) {
+                const instance = moduleClass.getInstance();
+                this.modules.set(moduleClass.prototype.constructor.name, instance);
+                await instance.prepare();
+            } catch (error) { ErrorHandler.error(moduleClass.prototype.constructor.name, error.stack, "prepare"); }
+        }
+
+        for (const instance of this.modules.values()) {
+            try {
+                if (instance.canInitialize()) {
+                    console.log("init", instance.getSettingsTag());
+                    if (instance.isWaitingForDOM()) {
                         $(() => {
-                            try { moduleInstance.create(); }
-                            catch (error) { ErrorHandler.error(moduleClass, error.stack, "init"); }
+                            try { instance.create(); }
+                            catch (error) { ErrorHandler.error(instance, error.stack, "init"); }
                         });
-                    } else moduleInstance.create();
+                    } else instance.create();
 
                     activeModules++;
                 }
-            } catch (error) { ErrorHandler.error(moduleClass, error.stack, "init"); }
-            Debug.perfEnd(moduleClass.prototype.constructor.name);
+            } catch (error) { ErrorHandler.error(instance, error.stack, "init"); }
+            Debug.perfEnd(instance.constructor.name);
         }
 
         Debug.perfEnd("re621.total");
 
         return Promise.resolve(activeModules);
+
     }
 
     /**

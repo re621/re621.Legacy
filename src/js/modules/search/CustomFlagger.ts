@@ -3,13 +3,14 @@ import { ModuleController } from "../../components/ModuleController";
 import { Post, PostData } from "../../components/post/Post";
 import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { BetterSearch } from "./BetterSearch";
 
 export class CustomFlagger extends RE6Module {
 
     private static filters: Map<string, FilterPair>;
 
     public constructor() {
-        super([PageDefintion.post, PageDefintion.search, PageDefintion.favorites, PageDefintion.popular], true);
+        super([PageDefintion.post, PageDefintion.search, PageDefintion.favorites, PageDefintion.popular], true, [BetterSearch]);
     }
 
     protected getDefaultSettings(): Settings {

@@ -25,8 +25,6 @@ export class ThumbnailTweaks extends RE6Module {
 
     private static modify($article: JQuery<HTMLElement>, ribbonsRel: boolean, ribbonsFlag: boolean): void {
 
-        console.log("modifying " + $article.attr("data-id"));
-
         // Sometimes, the image might not be wrapped in a picture tag properly
         // This is most common on comment pages and the like
         // If that bug gets fixed, this code can be removed

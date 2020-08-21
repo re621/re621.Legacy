@@ -1,6 +1,7 @@
 import { XM } from "./api/XM";
 import { Hotkeys } from "./data/Hotkeys";
 import { Page } from "./data/Page";
+import { ModuleController } from "./ModuleController";
 
 /**
  * Class that other modules extend.  
@@ -17,6 +18,7 @@ export class RE6Module {
     private enabled: boolean;
     private initialized = false;
 
+    private dependencies: { new(): RE6Module }[] = [];
     private constraint: RegExp[] = [];
     private hotkeys: Hotkey[] = [];
 
@@ -30,10 +32,12 @@ export class RE6Module {
      * @param waitForDOM If true, waits for the page to finish loading before executing `create()`.
      * @param settingsTag Override for the name of the settings variable. Defaults to the class name.
      */
-    public constructor(constraint?: RegExp | RegExp[], waitForDOM = false, settingsTag?: string) {
+    public constructor(constraint?: RegExp | RegExp[], waitForDOM = false, dependencies: { new(): RE6Module }[] = [], settingsTag?: string) {
         if (constraint === undefined) this.constraint = [];
         else if (constraint instanceof RegExp) this.constraint.push(constraint);
         else this.constraint = constraint;
+
+        this.dependencies = dependencies;
 
         this.waitForDOM = waitForDOM;
 
@@ -54,7 +58,13 @@ export class RE6Module {
 
     /** Checks if the module should call the init function */
     public canInitialize(): boolean {
-        return !this.initialized && this.pageMatchesFilter() && this.enabled;
+        let depend = true;
+        for (const module of this.dependencies)
+            if (!ModuleController.get(module).isEnabled()) {
+                depend = false;
+                break;
+            }
+        return !this.initialized && this.pageMatchesFilter() && this.enabled && depend;
     }
 
     /** Returns the settings tag for this module */

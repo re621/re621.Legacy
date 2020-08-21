@@ -19,7 +19,7 @@ export class BlacklistEnhancer extends RE6Module {
     private static $toggle: JQuery<HTMLElement>;                // toggle switch for all blacklists
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.favorites], true);
+        super([PageDefintion.search, PageDefintion.favorites], true, [BetterSearch]);
     }
 
     protected getDefaultSettings(): Settings {

@@ -3,6 +3,7 @@ import { Post, PostData } from "../../components/post/Post";
 import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
+import { BetterSearch } from "./BetterSearch";
 
 /**
  * Adds a extra search input below the current one where 
@@ -15,7 +16,7 @@ export class InstantSearch extends RE6Module {
     private $searchbox: JQuery<HTMLElement>;
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.favorites], true);
+        super([PageDefintion.search, PageDefintion.favorites], true, [BetterSearch]);
     }
 
     /**
