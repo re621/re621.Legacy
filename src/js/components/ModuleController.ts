@@ -31,7 +31,6 @@ export class ModuleController {
         for (const instance of this.modules.values()) {
             try {
                 if (instance.canInitialize()) {
-                    console.log("init", instance.getSettingsTag());
                     if (instance.isWaitingForDOM()) {
                         $(() => {
                             try { instance.create(); }
