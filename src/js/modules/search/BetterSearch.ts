@@ -269,12 +269,22 @@ export class BetterSearch extends RE6Module {
                         <option value="q">Questionable</option>
                         <option value="e">Explicit</option>
                     </select>` +
+                `<div class="quick-tags-info">` +
+                `   <span id="re621-qedit-dimensions"></span>` +
+                `   <span id="re621-qedit-flags" class="display-none-important"></span>` +
+                `   <a id="re621-qedit-history" href="404">history</a>` +
+                `</div>` +
                 `</div>`
             )
             .appendTo(this.$wrapper)
             .hide();
         this.$quickEdit.data({
             "token": $("#re621_qedit_token"),
+
+            "info": $("#re621-qedit-dimensions"),
+            "flags": $("#re621-qedit-flags"),
+            "history": $("#re621-qedit-history"),
+
             "tags": $("#re621_qedit_tags"),
             "reason": $("#re621_qedit_reason"),
             "parent": $("#re621_qedit_parent"),
@@ -304,7 +314,7 @@ export class BetterSearch extends RE6Module {
                         .update(response[0]["post"])
                         .render();
 
-                    Danbooru.notice(`Post <a href="/posts/${postID}" target="_blank">#${postID}</a> updated`);
+                    Danbooru.notice(`Post <a href="/posts/${postID}" target="_blank">#${postID}</a> updated (<a href="/post_versions?search[post_id]=${postID}">history</a>)`);
                     this.$quickEdit.hide("fast");
                 },
                 (error) => {
@@ -500,6 +510,14 @@ export class BetterSearch extends RE6Module {
 
                     this.$quickEdit.show("fast");
                     this.$quickEdit.attr("postid", post.id)
+
+                    const ratio = Util.formatRatio(post.img.width, post.img.height);
+                    this.$quickEdit.data("info").html(`${post.img.width} x ${post.img.height} (${ratio[0]}:${ratio[1]}), ${Util.formatBytes(post.file.size)}`);
+                    this.$quickEdit.data("flags")
+                        .toggleClass("display-none-important", post.flags.size == 0)
+                        .html(post.flags.size > 0 ? [...post.flags].join(", ") : "");
+                    this.$quickEdit.data("history").attr("href", `https://e621.net/post_versions?search[post_id]=${post.id}`);
+
                     this.$quickEdit.data("tags").val(post.tagString + " ").trigger("re621:input").focus();
                     this.$quickEdit.data("reason").val("");
                     this.$quickEdit.data("parent").val(post.has.parent_id);

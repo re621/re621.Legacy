@@ -142,6 +142,31 @@ export class Util {
         return Math.abs(num) > 999 ? (Math.sign(num) * (Math.abs(num) / 1000)).toFixed(1) + "k" : Math.sign(num) * Math.abs(num) + "";
     }
 
+
+    /* returns an array with the ratio */
+    public static formatRatio(width: number, height: number): [number, number] {
+        const d = gcd(width, height);
+        return [width / d, height / d];
+
+        function gcd(u: number, v: number): number {
+            if (u === v) return u;
+            if (u === 0) return v;
+            if (v === 0) return u;
+
+            if (~u & 1)
+                if (v & 1)
+                    return gcd(u >> 1, v);
+                else
+                    return gcd(u >> 1, v >> 1) << 1;
+
+            if (~v & 1) return gcd(u, v >> 1);
+
+            if (u > v) return gcd((u - v) >> 1, v);
+
+            return gcd((v - u) >> 1, u);
+        }
+    }
+
     /**
      * Parses the textare input specified in the parameter and returns a list of space-separated tags
      * @param input Textarea to parse
