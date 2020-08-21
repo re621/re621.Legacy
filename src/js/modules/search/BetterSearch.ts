@@ -240,7 +240,10 @@ export class BetterSearch extends RE6Module {
 
     /** Updates the document title with the current page number */
     private updatePageTitle(page: number): void {
-        document.title = this.queryTags.replace(/_/g, " ") + (page > 1 ? (" - Page " + page) : "") + " - " + Page.getSiteName();
+        document.title =
+            (this.queryTags.length == 0 ? "Posts" : this.queryTags.replace(/_/g, " ")) +
+            (page > 1 ? (" - Page " + page) : "") +
+            " - " + Page.getSiteName();
     }
 
     /** Creates the basic module structure */
