@@ -2,6 +2,7 @@ import { E621 } from "../../components/api/E621";
 import { APITag } from "../../components/api/responses/APITag";
 import { APITagAlias } from "../../components/api/responses/APITagAlias";
 import { AvoidPosting } from "../../components/cache/AvoidPosting";
+import { TagCache } from "../../components/cache/TagCache";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
@@ -56,6 +57,8 @@ export class SmartAlias extends RE6Module {
             fixCommonTypos: false,
             minPostsWarning: 20,
             compactOutput: false,
+
+            minCachedTags: 1000,
 
             data: "",
         };
@@ -416,6 +419,27 @@ export class SmartAlias extends RE6Module {
         }
 
 
+        // Step 4.5
+        // Check the tags against the cache
+        TagCache.load();
+        for (const tag of lookup) {
+            const data = TagCache.get(tag);
+            if (data == null) continue;
+
+            SmartAlias.tagData[tag] = {
+                count: data.count,
+                category: data.category,
+
+                ambiguous: false,
+                invalid: false,
+                dnp: AvoidPosting.has(tag),
+
+                cached: true,
+            };
+            lookup.delete(tag);
+        }
+
+
         // Step 5
         // Look up the tags through the API to make sure they exist
         // Those that do not get removed from the list must be invalid
@@ -426,9 +450,12 @@ export class SmartAlias extends RE6Module {
                     SmartAlias.tagData[result.name] = {
                         count: result.post_count,
                         category: result.category,
+
                         ambiguous: ambiguousTags.has(result.name),
                         invalid: invalidTags.has(result.name),
                         dnp: AvoidPosting.has(result.name),
+
+                        cached: false,
                     };
                     lookup.delete(result.name);
                 }
@@ -438,12 +465,27 @@ export class SmartAlias extends RE6Module {
                 SmartAlias.tagData[tagName] = {
                     count: -1,
                     category: -1,
+
                     ambiguous: false,
                     invalid: true,
                     dnp: AvoidPosting.has(tagName),
+
+                    cached: false,
                 };
             }
 
+        }
+
+
+        // Step 5.5
+        // Add data to cache
+        const minCachedTags = this.fetchSettings<number>("minCachedTags");
+        if (minCachedTags > 0) {
+            for (const [name, data] of Object.entries(SmartAlias.tagData)) {
+                if (TagCache.has(name) || data.count < minCachedTags) continue;
+                TagCache.add(name, data.count, data.category);
+            }
+            TagCache.save();
         }
 
 
@@ -519,7 +561,8 @@ export class SmartAlias extends RE6Module {
 
                 let symbol: string,         // font-awesome icon in front of the line
                     color: string,          // color of the non-link text
-                    text: string;           // text after the link
+                    text: string,           // text after the link
+                    title: string;
 
                 if (isLoading) {
                     symbol = "loading";
@@ -553,7 +596,8 @@ export class SmartAlias extends RE6Module {
                 } else {
                     symbol = "success";
                     color = "success";
-                    text = data.count + "";
+                    text = data.cached ? "~" + Util.formatK(data.count) : data.count + "";
+                    title = data.cached ? "cached value" : undefined;
                 }
 
                 // Insert zero-width spaces for better linebreaking
@@ -565,6 +609,7 @@ export class SmartAlias extends RE6Module {
                         "name": tagName,
                         "symbol": symbol,
                         "color": color,
+                        "title": title,
                     })
                     .html(`<a href="/wiki_pages/show_or_new?title=${tagName}" target="_blank">${displayName}</a> ${text}`)
                     .appendTo($container);
@@ -654,6 +699,8 @@ interface Tag {
     invalid: boolean;
     ambiguous: boolean;
     dnp: boolean;
+
+    cached: boolean;
 }
 
 interface TagAlias {

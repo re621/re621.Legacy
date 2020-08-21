@@ -134,6 +134,15 @@ export class Util {
     }
 
     /**
+     * Trims the thousands off a number and replaced them with a K.  
+     * ex. 54321 -> 54.3k
+     * @param num Number to trim
+     */
+    public static formatK(num: number): string {
+        return Math.abs(num) > 999 ? (Math.sign(num) * (Math.abs(num) / 1000)).toFixed(1) + "k" : Math.sign(num) * Math.abs(num) + "";
+    }
+
+    /**
      * Parses the textare input specified in the parameter and returns a list of space-separated tags
      * @param input Textarea to parse
      */

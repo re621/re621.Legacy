@@ -3,6 +3,7 @@ import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
 import { GMxmlHttpRequestResponse } from "../../components/api/XMConnect";
 import { AvoidPosting } from "../../components/cache/AvoidPosting";
+import { TagCache } from "../../components/cache/TagCache";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
@@ -1048,6 +1049,21 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3),
 
+                    Form.subheader("Cache Post Minimum", "Tags with this amount of posts will be cached to speed up lookups", 2),
+                    Form.input(
+                        {
+                            value: smartAlias.fetchSettings("minCachedTags"),
+                            width: 1,
+                            pattern: "\\d{2,}",
+                        },
+                        (data, input) => {
+                            if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                            smartAlias.pushSettings("minCachedTags", data);
+                        }
+                    ),
+                    Form.hr(3),
+
+
                     Form.checkbox(
                         {
                             value: smartAlias.fetchSettings("compactOutput"),
@@ -1422,10 +1438,25 @@ export class SettingsController extends RE6Module {
 
                 Form.accordionTab({ name: "cache", label: "Cache", columns: 3, width: 3 }, [
 
+                    Form.section({ name: "tagcache", columns: 3, width: 3 }, [
+
+                        Form.div({
+                            value: `<b>Tag Cache</b><br />Used to speed up SmartAlias tag checking`,
+                            width: 2,
+                        }),
+                        Form.button({ name: "reset", value: "Clear", }, async (data, input) => {
+                            TagCache.clear();
+                            input.html("Done!");
+                            window.setTimeout(() => { input.html("Clear"); }, 1000);
+                        }),
+
+                    ]),
+                    Form.spacer(3),
+
                     Form.section({ name: "dnpcache", columns: 3, width: 3 }, [
 
                         Form.div({
-                            value: `<b>Avoid Posting List</b><br />Used to speed up SmartAlias tag checking`,
+                            value: `<b>Avoid Posting Cache</b><br />Used to validate the artist tags against the DNP list`,
                             width: 2,
                         }),
                         Form.button({ name: "reset", value: "Reset", }, async (data, input) => {
