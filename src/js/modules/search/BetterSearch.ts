@@ -527,7 +527,7 @@ export class BetterSearch extends RE6Module {
         $(document)
             .off("keydown.re621.zoom")
             .off("keyup.re621.zoom");
-        $("#tags")
+        $("#tags, #re621_qedit_tags")
             .off("keydown.re621.zoom")
             .off("keyup.re621.zoom");
 
@@ -542,7 +542,7 @@ export class BetterSearch extends RE6Module {
                 .on("keyup.re621.zoom", null, "shift", () => {
                     this.shiftPressed = false;
                 });
-            $("#tags")
+            $("#tags, #re621_qedit_tags")
                 .on("keydown.re621.zoom", null, "shift", () => {
                     if (this.shiftPressed) return;
                     this.shiftPressed = true;
