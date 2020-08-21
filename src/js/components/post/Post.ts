@@ -210,6 +210,11 @@ export class Post implements PostData {
 
         const result = new Post(PostData.fromAPI(data, page), $article);
 
+        if (!result.file.original && !result.flags.has("deleted")) {
+            console.log(`Post #${result.id} skipped: no file`);
+            return null;
+        }
+
         // Register for blacklist and custom flagger
         result.updateFilters();
         result.updateVisibility();

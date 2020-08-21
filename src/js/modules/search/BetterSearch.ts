@@ -83,8 +83,8 @@ export class BetterSearch extends RE6Module {
         if (!this.fetchSettings("enabled") || !this.pageMatchesFilter()) return;
 
         const paginator = $("div.paginator menu");
-        const curPage = parseInt(paginator.find(".current-page").text()) || 1,
-            lastPage = parseInt(paginator.find(".numbered-page").last().text()) || 1;
+        const curPage = parseInt(paginator.find(".current-page").text()) || -1,
+            lastPage = parseInt(paginator.find(".numbered-page").last().text()) || -1;
         this.lastPage = Math.max(curPage, lastPage);
 
         $("#content")
@@ -98,9 +98,9 @@ export class BetterSearch extends RE6Module {
         this.queryPage = parseInt(Page.getQueryParameter("page")) || 1;
         this.queryTags = Page.getQueryParameter("tags") || "";
         this.queryLimit = parseInt(Page.getQueryParameter("limit")) || undefined;
-        this.hasMorePages = this.queryPage < this.lastPage;
 
-        if (this.queryPage >= 750) return;
+        if (this.lastPage < this.queryPage) this.lastPage = this.queryPage;
+        this.hasMorePages = this.queryPage < this.lastPage;
 
         // Write appropriate settings into the content wrapper
         this.createStructure();
@@ -165,6 +165,12 @@ export class BetterSearch extends RE6Module {
 
         // Initial post load
         new Promise(async (resolve) => {
+
+            if (this.queryPage > 750) {
+                resolve();
+                return;
+            }
+
             const firstPage = preloadEnabled
                 ? Math.max((this.queryPage - BetterSearch.PAGES_PRELOAD), 1)
                 : this.queryPage;
@@ -180,8 +186,10 @@ export class BetterSearch extends RE6Module {
                     result = await this.fetchPosts(i);
                     for (const post of result) {
                         const postData = Post.make(post, i, imageRatioChange);
-                        this.$content.append(postData.$ref);
-                        this.observer.observe(postData.$ref[0]);
+                        if (postData !== null) {
+                            this.$content.append(postData.$ref);
+                            this.observer.observe(postData.$ref[0]);
+                        }
                     }
                     $("<post-break>")
                         .attr("id", "page-" + (i + 1))
@@ -192,13 +200,12 @@ export class BetterSearch extends RE6Module {
                 // Append the current page results
                 for (const post of pageResult) {
                     const postData = Post.make(post, this.queryPage, imageRatioChange);
-                    this.$content.append(postData.$ref);
-                    this.observer.observe(postData.$ref[0]);
+                    if (postData !== null) {
+                        this.$content.append(postData.$ref);
+                        this.observer.observe(postData.$ref[0]);
+                    }
                 }
 
-                // If the loaded page has less than the absolute minimum value of posts per page,
-                // then it's most likely the last one, as long as there is no custom query limit.
-                if (!this.queryLimit && pageResult.length < 25) this.hasMorePages = false;
             }
 
             this.$wrapper
@@ -213,7 +220,6 @@ export class BetterSearch extends RE6Module {
             this.initHoverZoom();
 
             const scrollTo = $(`[page=${this.queryPage}]:visible:first`);
-            console.log(preloadEnabled, this.queryPage > 1, scrollTo.length !== 0);
             if (preloadEnabled && this.queryPage > 1 && scrollTo.length !== 0) {
                 $([document.documentElement, document.body])
                     .animate({ scrollTop: scrollTo.offset().top - 30 }, 200);
@@ -275,7 +281,6 @@ export class BetterSearch extends RE6Module {
             "rating": $("#re621_qedit_rating"),
         });
         this.$quickEdit.find("input[name=cancel]").on("click", () => {
-            console.log("cancelling");
             this.$quickEdit.hide("fast");
         });
         Danbooru.Autocomplete.initialize_all();
@@ -713,8 +718,10 @@ export class BetterSearch extends RE6Module {
 
         for (const post of search) {
             const postData = Post.make(post, this.queryPage, imageRatioChange);
-            this.$content.append(postData.$ref);
-            this.observer.observe(postData.$ref[0]);
+            if (postData !== null) {
+                this.$content.append(postData.$ref);
+                this.observer.observe(postData.$ref[0]);
+            }
         }
 
         Page.setQueryParameter("page", this.queryPage + "");
