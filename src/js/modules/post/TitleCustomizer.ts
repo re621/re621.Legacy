@@ -66,8 +66,9 @@ export class TitleCustomizer extends RE6Module {
             .replace(/%character%/g, tagSetToString(this.post.tags.character))
             .replace(/%species%/g, tagSetToString(this.post.tags.species))
             .replace(/%meta%/g, tagSetToString(this.post.tags.meta))
+            .replace(/[ ]{2,}/g, " ")
             .replace(/\(\)|( - )$/g, "")
-            .replace(/[ ]{2,}|^ | $/g, "")
+            .replace(/^ | $/g, "")
             + " - " + Page.getSiteName();
 
         function tagSetToString(tags: Set<string>): string {
