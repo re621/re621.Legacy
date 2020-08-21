@@ -236,18 +236,18 @@ export class PostParts {
                 .addClass("left")
                 .html(`<span></span>`)
                 .appendTo($ribbons);
-            let relRibbonText = "";
+            const relRibbonText = [];
 
             if (post.has.children) {
                 relRibbon.addClass("has-children");
-                relRibbonText += "Child posts\n"
+                relRibbonText.push("Child posts");
             }
             if (post.has.parent) {
                 relRibbon.addClass("has-parent");
-                relRibbonText += "Parent posts\n"
+                relRibbonText.push("Parent posts");
             }
 
-            if (relRibbonText != "") { relRibbon.attr("title", relRibbonText); }
+            if (relRibbonText.length > 0) relRibbon.attr("title", relRibbonText.join("\n"));
             else relRibbon.remove();
         }
 
@@ -257,18 +257,18 @@ export class PostParts {
                 .addClass("right")
                 .html(`<span></span>`)
                 .appendTo($ribbons);
-            let flagRibbonText = "";
+            const flagRibbonText = [];
 
             if (post.flags.has("flagged")) {
                 flagRibbon.addClass("is-flagged");
-                flagRibbonText += "Flagged\n"
+                flagRibbonText.push("Flagged");
             }
             if (post.flags.has("pending")) {
                 flagRibbon.addClass("is-pending");
-                flagRibbonText += "Pending\n"
+                flagRibbonText.push("Pending");
             }
 
-            if (flagRibbonText != "") { flagRibbon.attr("title", flagRibbonText); }
+            if (flagRibbonText.length > 0) flagRibbon.attr("title", flagRibbonText.join("\n"));
             else flagRibbon.remove();
         }
 

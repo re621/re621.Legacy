@@ -355,7 +355,17 @@ search-content > post {
 
 
 /* Image Ribbons */
-search-content {
+picture.picture-container {
+    display: block;
+    position: relative;
+    width: min-content;
+    height: min-content;
+
+    & > img { border: 0 !important; }
+}
+
+search-content,
+picture.picture-container {
 
     img-ribbons {
         position: absolute;
@@ -413,7 +423,7 @@ search-content {
 
         &.has-children span { background: $rel-children; }
         &.has-parent span { background: $rel-parent; }
-        &.has-children.thumb-ribbon-has-parent span {
+        &.has-children.has-parent span {
             background: linear-gradient(90deg, $rel-parent 50%, $rel-children 50%);
         }
 

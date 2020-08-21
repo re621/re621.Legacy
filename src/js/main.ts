@@ -33,6 +33,7 @@ import { CustomFlagger } from "./modules/search/CustomFlagger";
 import { InstantSearch } from "./modules/search/InstantSearch";
 import { PostSuggester } from "./modules/search/PostSuggester";
 import { SearchUtilities } from "./modules/search/SearchUtilities";
+import { ThumbnailTweaks } from "./modules/search/ThumbnailTweaks";
 import { CommentTracker } from "./modules/subscriptions/CommentTracker";
 import { ForumTracker } from "./modules/subscriptions/ForumTracker";
 import { PoolTracker } from "./modules/subscriptions/PoolTracker";
@@ -56,6 +57,7 @@ const loadOrder = [
     BlacklistEnhancer,
 
     InstantSearch,
+    ThumbnailTweaks,
 
     PostSuggester,
     SearchUtilities,
