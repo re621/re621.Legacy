@@ -232,6 +232,7 @@ export class BetterSearch extends RE6Module {
         });
     }
 
+    /** If true, InfiniteScroll and HoverZoom are both paused */
     public static isPaused(): boolean { return BetterSearch.paused; }
     public static setPaused(state: boolean): void {
         BetterSearch.paused = state;
@@ -530,7 +531,7 @@ export class BetterSearch extends RE6Module {
 
                     this.$quickEdit.data("tags").val(post.tagString + " ").trigger("re621:input").focus();
                     this.$quickEdit.data("reason").val("");
-                    this.$quickEdit.data("parent").val(post.has.parent_id);
+                    this.$quickEdit.data("parent").val(post.rel.parent);
                     this.$quickEdit.data("rating").val(post.rating);
                     break;
                 }

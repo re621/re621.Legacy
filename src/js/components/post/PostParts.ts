@@ -2,6 +2,7 @@ import { BetterSearch, ImageClickAction, ImageLoadMethod, ImageZoomMode } from "
 import { CustomFlagger } from "../../modules/search/CustomFlagger";
 import { Danbooru } from "../api/Danbooru";
 import { E621 } from "../api/E621";
+import { PostFlag } from "../api/responses/APIPost";
 import { XM } from "../api/XM";
 import { Blacklist } from "../data/Blacklist";
 import { DomUtilities } from "../structure/DomUtilities";
@@ -9,8 +10,7 @@ import { Util } from "../utility/Util";
 import { LoadedFileType, Post } from "./Post";
 import { PostActions } from "./PostActions";
 
-declare const Freezeframe;
-
+/** Handles the rendering of individual post elements. Called from the main Post class. */
 export class PostParts {
 
     public static renderImage(post: Post, conf: any): JQuery<HTMLElement> {
@@ -117,7 +117,7 @@ export class PostParts {
             started = false;
 
         // Flash files will never work with hover zoom, deal with it
-        if (post.file.ext === "swf" || post.flags.has("deleted")) return;
+        if (post.file.ext === "swf" || post.flags.has(PostFlag.Deleted)) return;
 
         $link.on("mouseenter.re621.zoom", () => {
             timer = window.setTimeout(() => {
@@ -146,7 +146,7 @@ export class PostParts {
         if (conf.hoverTags) $image.attr("title", formatHoverText(post));
 
         // Load appropriate image
-        if (post.flags.has("deleted")) {
+        if (post.flags.has(PostFlag.Deleted)) {
             post.img.ratio = 1;
             post.loaded = LoadedFileType.ORIGINAL;
         } else if (post.file.ext === "swf") {
@@ -259,11 +259,11 @@ export class PostParts {
                 .appendTo($ribbons);
             const flagRibbonText = [];
 
-            if (post.flags.has("flagged")) {
+            if (post.flags.has(PostFlag.Flagged)) {
                 flagRibbon.addClass("is-flagged");
                 flagRibbonText.push("Flagged");
             }
-            if (post.flags.has("pending")) {
+            if (post.flags.has(PostFlag.Pending)) {
                 flagRibbon.addClass("is-pending");
                 flagRibbonText.push("Pending");
             }

@@ -113,6 +113,7 @@ export class BlacklistEnhancer extends RE6Module {
             });
     }
 
+    /** Reloads all sidebar DOM elements */
     public static update(): void {
         BlacklistEnhancer.updateFilterList();
         BlacklistEnhancer.updateHeader();
@@ -120,6 +121,7 @@ export class BlacklistEnhancer extends RE6Module {
         $("#sidebar").trigger("re621:reflow");
     }
 
+    /** Reloads the blacklist header */
     public static updateHeader(): void {
         let enabled = 0,
             disabled = 0;
@@ -136,6 +138,7 @@ export class BlacklistEnhancer extends RE6Module {
         });
     }
 
+    /** Reloads the blacklist filters */
     public static updateFilterList(): void {
 
         BlacklistEnhancer.$content.html("");
@@ -162,6 +165,7 @@ export class BlacklistEnhancer extends RE6Module {
         $("#sidebar").trigger("re621:reflow");
     }
 
+    /** Reloads the "Enable / Disable All" toggle */
     public static updateToggleSwitch(): void {
         if (BlacklistEnhancer.$content.find("filter[enabled=false]").length > 0) {
             BlacklistEnhancer.$toggle.html("Enable All Filters");

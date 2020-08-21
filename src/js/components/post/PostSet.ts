@@ -1,5 +1,6 @@
 import { Post } from "./Post";
 
+/** Collection of Post objects */
 export class PostSet {
 
     private posts: Post[];
@@ -8,30 +9,37 @@ export class PostSet {
         this.posts = posts || [];
     }
 
+    /** Adds a post to the set */
     public push(post: Post): void {
         this.posts.push(post);
     }
 
+    /** Pops the last post from the set */
     public pop(): Post {
         return this.posts.pop();
     }
 
+    /** Returns the number of posts in the set */
     public size(): number {
         return this.posts.length;
     }
 
+    /** Returns a set with a reversed order */
     public reverse(): PostSet {
         return new PostSet(this.posts.reverse());
     }
 
+    /** Returns an iteratable object for the set */
     public values(): IterableIterator<Post> {
         return this.posts.values();
     }
 
+    /** Executes the provided function on every element of the set */
     public each(fn: (post: Post) => void): void {
         for (const entry of this.posts) fn(entry);
     }
 
+    /** Returns a set sorted via the provided method */
     public sort(type?: PostSortType): PostSet {
         if (!type) type = PostSortType.ID;
         switch (type) {

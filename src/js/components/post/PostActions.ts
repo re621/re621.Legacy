@@ -131,9 +131,14 @@ export class PostActions {
 }
 
 interface VoteReponse {
+    /** If false, an error has occurred, and the rest of the values do not exist */
     success: boolean;
+    /** -1 for downvote, 1 for upvote, 0 for unvote */
     action?: -1 | 0 | 1;
+    /** Final score of the post */
     score?: number;
+    /** Total number of upvotes */
     up?: number;
+    /** Total number of downvotes */
     down?: number;
 }

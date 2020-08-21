@@ -1,4 +1,4 @@
-import { PostRating } from "../api/responses/APIPost";
+import { PostFlag, PostRating } from "../api/responses/APIPost";
 import { Tag } from "../data/Tag";
 import { Post, PostData } from "./Post";
 
@@ -70,7 +70,7 @@ export class PostFilter {
             const value = filter.value;
             switch (filter.type) {
                 case FilterType.Flag:
-                    result = post.flags.has(value);
+                    result = post.flags.has(PostFlag.fromSingle(value));
                     break;
                 case FilterType.Id:
                     result = PostFilterUtils.compareNumbers(post.id, parseInt(value), filter.comparison);

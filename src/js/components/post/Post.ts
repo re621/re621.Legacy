@@ -1,68 +1,73 @@
 import { BetterSearch } from "../../modules/search/BetterSearch";
 import { CustomFlagger } from "../../modules/search/CustomFlagger";
-import { APIPost, PostRating } from "../api/responses/APIPost";
+import { APIPost, PostFlag, PostRating } from "../api/responses/APIPost";
 import { Blacklist } from "../data/Blacklist";
 import { Tag } from "../data/Tag";
 import { ModuleController } from "../ModuleController";
+import { Debug } from "../utility/Debug";
 import { Util } from "../utility/Util";
 import { PostParts } from "./PostParts";
 import { PostSet } from "./PostSet";
 
 export class Post implements PostData {
 
-    public $ref: JQuery<HTMLElement>;
+    public $ref: JQuery<HTMLElement>;       // reference to the post's DOM object
 
     public id: number;
-    public flags: Set<string>;
-    public score: number;
-    public user_score: number;
-    public favorites: number;
-    public is_favorited: boolean;
-    public comments: number;
-    public rating: PostRating;
-    public uploader: number;
-    public page: number;
+    public flags: Set<PostFlag>;
+    public score: number;                   // post total score
+    public user_score: number;              // user's current vote. might be undefined if no vote has been registered this session
+    public favorites: number;               // total number of favorites
+    public is_favorited: boolean;           // true if the post is in the user's favorites
+    public comments: number;                // total number of comments
+    public rating: PostRating;              // rating in the one-letter lowercase format (s, q, e)
+    public uploader: number;                // uploader ID
+    public page: number;                    // search page. currently only supports numeric values, but not A- or B- ones
 
     public date: {
-        raw: string;
-        ago: string;
+        raw: string;                        // upload time, in `Fri Aug 21 2020 12:32:52 GMT-0700` format
+        ago: string;                        // relative time, aka `5 minutes ago`
     };
 
-    public tagString: string;
+    public tagString: string;               // string with space-separated tags. Makes outputting tags easier
     public tags: {
         all: Set<string>;
         artist: Set<string>;
-        real_artist: Set<string>;
+        real_artist: Set<string>;           // same as artist, minus tags like `conditional_dnp` or `sound_warning`. See `Tag.isArtist()` for more info.
         copyright: Set<string>;
         species: Set<string>;
         character: Set<string>;
         general: Set<string>;
-        invalid: Set<string>;
+        invalid: Set<string>;               // usually empty, not sure why it even exists
         meta: Set<string>;
         lore: Set<string>;
     };
 
     public file: {
-        ext: string;
+        ext: string;                        // file extension
         md5: string;
-        original: string;
-        sample: string;
-        preview: string;
+        original: string;                   // full-resolution image. `null` if the post is deleted
+        sample: string;                     // sampled (~850px) image. for WEBM, same as original. for SFW, null or undefined
+        preview: string;                    // thumbnail (150px). for SFW, null or undefined
         size: number;
     };
-    public loaded: LoadedFileType;
+    public loaded: LoadedFileType;          // currently loaded file size. used in hover loading mode
 
     public img: {
         width: number;
         height: number;
-        ratio: number;
+        ratio: number;                      // height divided by width. used to size thumbnails properly
     };
 
     public has: {
-        children: boolean;
-        parent: boolean;
-        parent_id: number;
+        children: boolean;                  // whether the post has any children
+        parent: boolean;                    // whether the post has a parent
     };
+
+    public rel: {
+        children: Set<number>;              // IDs of child posts
+        parent: number;                     // ID of the parent post
+    }
 
     private constructor(data: PostData, $ref: JQuery<HTMLElement>) {
         for (const [key, value] of Object.entries(data)) this[key] = value;
@@ -72,6 +77,7 @@ export class Post implements PostData {
         this.updateFilters();
     }
 
+    /** Updates the post's data from the API response */
     public update(data: APIPost): Post {
         for (const [key, value] of Object.entries(PostData.fromAPI(data)))
             this[key] = value;
@@ -81,14 +87,17 @@ export class Post implements PostData {
         return this;
     }
 
+    /** Returns true if the post has been rendered, false otherwise */
     public isRendered(): boolean {
         return this.$ref.attr("rendered") == "true";
     }
 
+    /** Returns true if the post is currently filtered out by the blacklist */
     public isBlacklisted(): boolean {
         return this.$ref.attr("blacklisted") == "true";
     }
 
+    /** Converts the placeholder DOM into an actual post element */
     public render(): Post {
 
         const conf = ModuleController.get(BetterSearch).fetchSettings([
@@ -124,6 +133,7 @@ export class Post implements PostData {
         return this;
     }
 
+    /** Resets the previously rendered post element back to placeholder state */
     public reset(): Post {
         this.$ref
             .attr({
@@ -145,6 +155,7 @@ export class Post implements PostData {
         return this;
     }
 
+    /** Refreshes the blacklist and custom flagger filters */
     public updateFilters(): Post {
         CustomFlagger.addPost(this);
         Blacklist.addPost(this);
@@ -152,17 +163,26 @@ export class Post implements PostData {
         return this;
     }
 
+    /**
+     * Refreshes the post's blacklist status.  
+     * Should be executed every time a blacklist filter is toggled.
+     */
     public updateVisibility(): Post {
         if (Blacklist.checkPost(this.id)) {
             this.$ref.attr("blacklisted", "true");
             if (this.isRendered()) this.reset();
         } else this.$ref.removeAttr("blacklisted");
 
-        // console.log("updating visibility", this.isBlacklisted(), this.isRendered());
-
         return this;
     }
 
+    /**
+     * Returns a Post object that matches the provided ID.  
+     * Alternatively, fetches the Post object for the probided DOM element.
+     * @param post Post object, if it exists.  
+     * `null` is returned if the DOM element does not exist.  
+     * `undefined` is returned if the DOM element exists, but lacks data
+     */
     public static get(post: number): Post;
     public static get(post: JQuery<Element>): Post;
     public static get(post: number | JQuery<Element>): Post {
@@ -173,12 +193,20 @@ export class Post implements PostData {
         return post.data("post");
     }
 
+    /**
+     * Returns the currently visible post.  
+     * Only applicable on the individual post page (i.e. `/posts/12345`).
+     */
     public static getViewingPost(): Post {
         const container = $("#image-container");
         if (container.data("post") !== undefined) return Post.get(container);
         return new Post(PostData.fromDOM(), container);
     }
 
+    /**
+     * Returns all Post elements of the specified type
+     * @param type Type to look for
+     */
     public static find(type: "rendered" | "blacklisted" | "all"): PostSet {
         const result = new PostSet();
         switch (type) {
@@ -195,10 +223,16 @@ export class Post implements PostData {
         return result;
     }
 
+    /**
+     * Creates a Post element with the specified parameters
+     * @param data API response with post data
+     * @param page Page of the search results
+     * @param imageRatioChange Image crop, if applicable
+     */
     public static make(data: APIPost, page?: number, imageRatioChange?: boolean): Post {
 
         const tags = APIPost.getTagSet(data),
-            flags = APIPost.getFlagSet(data),
+            flags = PostFlag.get(data),
             animated = tags.has("animated") || data.file.ext == "webm" || data.file.ext == "gif" || data.file.ext == "swf";
 
         if (imageRatioChange == undefined) imageRatioChange = ModuleController.get(BetterSearch).fetchSettings("imageRatioChange");
@@ -207,11 +241,11 @@ export class Post implements PostData {
         const $article = $("<post>")
             .attr({
                 "id": "entry_" + data.id,
-                "fav": data.is_favorited == true ? "true" : undefined,
+                "fav": data.is_favorited == true ? true : undefined,
                 "vote": undefined,
                 "animated": animated ? "true" : undefined,
                 "filetype": data.file.ext,
-                "deleted": flags.has("deleted") ? "true" : undefined,
+                "deleted": flags.has(PostFlag.Deleted) ? true : undefined,
                 "rendered": false,
                 "page": page,
             })
@@ -221,8 +255,8 @@ export class Post implements PostData {
 
         const result = new Post(PostData.fromAPI(data, page), $article);
 
-        if (!result.file.original && !result.flags.has("deleted")) {
-            console.log(`Post #${result.id} skipped: no file`);
+        if (!result.file.original && !result.flags.has(PostFlag.Deleted)) {
+            Debug.log(`Post #${result.id} skipped: no file`);
             return null;
         }
 
@@ -235,10 +269,14 @@ export class Post implements PostData {
 
 }
 
+/**
+ * Generalized post data that is not attached to a specific element.  
+ * Generated either from an API result, or from a DOM element.
+ */
 export interface PostData {
 
     id: number;
-    flags: Set<string>;
+    flags: Set<PostFlag>;
     score: number;
     user_score: number;
     favorites: number;
@@ -287,17 +325,26 @@ export interface PostData {
     has: {
         children: boolean;
         parent: boolean;
-        parent_id: number;
+    };
+
+    rel: {
+        children: Set<number>;
+        parent: number;
     };
 
 }
 
 export namespace PostData {
 
+    /**
+     * Generates PostData from an API result
+     * @param data API result
+     * @param page Search page
+     */
     export function fromAPI(data: APIPost, page?: number): PostData {
 
         const tags = APIPost.getTagSet(data),
-            flags = APIPost.getFlagSet(data);
+            flags = PostFlag.get(data);
 
         return {
             id: data.id,
@@ -350,12 +397,20 @@ export namespace PostData {
             has: {
                 children: data.relationships.has_active_children,
                 parent: data.relationships.parent_id !== undefined && data.relationships.parent_id !== null,
-                parent_id: data.relationships.parent_id,
+            },
+
+            rel: {
+                children: new Set(data.relationships.children),
+                parent: data.relationships.parent_id,
             },
 
         };
     }
 
+    /**
+     * Generates PostData from a DOM element  
+     * Only works on an individual post page (ex. `/posts/12345`)
+     */
     export function fromDOM(): PostData {
 
         const $article = $("#image-container");
@@ -363,6 +418,13 @@ export namespace PostData {
         const id = parseInt($article.attr("data-id")) || 0;
         const timeEl = $("#post-information").find("time");
         const time = timeEl.length != 0 ? timeEl.attr("title") : "0";
+
+        // Children
+        const children: Set<number> = new Set();
+        for (const post of $("div.has-children-relationship-preview").find("article").get()) {
+            children.add(parseInt($(post).attr("data-id")));
+        }
+        console.log(children);
 
         // Tags
         const tagString = $article.attr("data-tags") || "";
@@ -391,7 +453,7 @@ export namespace PostData {
 
         return {
             id: id,
-            flags: new Set(($article.attr("data-flags") || "").split(" ")),
+            flags: PostFlag.fromString($article.attr("data-flags") || ""),
             score: score,
             user_score: userScore,
             favorites: parseInt($article.attr("data-fav-count")) || 0,
@@ -440,7 +502,11 @@ export namespace PostData {
             has: {
                 children: $article.attr("data-has-active-children") == "true",
                 parent: $article.attr("data-parent-id") !== undefined,
-                parent_id: parseInt($article.attr("data-parent-id")) || null,
+            },
+
+            rel: {
+                children: children,
+                parent: parseInt($article.attr("data-parent-id")) || null,
             },
 
         };
@@ -454,6 +520,10 @@ export namespace PostData {
         }
     }
 
+    /**
+     * Creates a thumbnail preview from an MD5 hash
+     * @param md5 MD5 hash
+     */
     export function createPreviewUrlFromMd5(md5: string): string {
         // Assume that the post is flash when no md5 is passed
         return md5 == ""
