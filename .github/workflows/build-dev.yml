@@ -2,7 +2,7 @@ name: build-dev
 on:
   push:
     tags:
-    - '*-dev.*'
+    - '*dev.*'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -43,5 +43,6 @@ jobs:
         allowUpdates: true
         artifacts: "./build/userscript/script.user.js,./build/userscript/script.meta.js,./build/userscript/style.min.css,./build/extension/re621.zip"
         replacesArtifacts: true
+        omitBody: true
         prerelease: true
         token: ${{ secrets.GITHUB_TOKEN }}
