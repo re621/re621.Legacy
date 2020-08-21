@@ -1,3 +1,4 @@
+import { ImageZoomMode } from "../../modules/search/BetterSearch";
 import { XM } from "../api/XM";
 import { Debug } from "./Debug";
 
@@ -123,7 +124,10 @@ export class Patcher {
                     betterSearch["imageLoadMethod"] = thumbEnhancer["upscale"];
                     betterSearch["autoPlayGIFs"] = thumbEnhancer["autoPlayGIFs"];
                     betterSearch["hoverTags"] = thumbEnhancer["preserveHoverText"];
-                    betterSearch["zoomMode"] = thumbEnhancer["zoom"];
+
+                    if (thumbEnhancer["zoom"] == "onshift") betterSearch["zoomMode"] = ImageZoomMode.OnShift;
+                    else if (thumbEnhancer["zoom"] == "true") betterSearch["zoomMode"] = ImageZoomMode.Hover;
+                    else betterSearch["zoomMode"] = ImageZoomMode.Disabled;
 
                     betterSearch["imageSizeChange"] = thumbEnhancer["crop"];
                     betterSearch["imageWidth"] = thumbEnhancer["cropSize"].replace(/px/g, "");
