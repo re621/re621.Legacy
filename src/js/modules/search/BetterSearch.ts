@@ -256,7 +256,9 @@ export class BetterSearch extends RE6Module {
                 `<div class="quick-tags-toolbar">` +
                 `   <input type="submit" name="submit" value="Submit">` +
                 `   <input type="button" name="cancel" value="Cancel">` +
-                `   <select name="post[rating]" id="re621_qedit_rating">
+                `   <input type="text" name="reason" placeholder="Edit Reason" title="Edit Reason" id="re621_qedit_reason">` +
+                `   <input type="text" name="parent" placeholder="Parent ID" title="Parent ID" id="re621_qedit_parent">` +
+                `   <select name="post[rating]" title="Rating" id="re621_qedit_rating">
                         <option value="s">Safe</option>
                         <option value="q">Questionable</option>
                         <option value="e">Explicit</option>
@@ -268,6 +270,8 @@ export class BetterSearch extends RE6Module {
         this.$quickEdit.data({
             "token": $("#re621_qedit_token"),
             "tags": $("#re621_qedit_tags"),
+            "reason": $("#re621_qedit_reason"),
+            "parent": $("#re621_qedit_parent"),
             "rating": $("#re621_qedit_rating"),
         });
         this.$quickEdit.find("input[name=cancel]").on("click", () => {
@@ -283,6 +287,8 @@ export class BetterSearch extends RE6Module {
             E621.Post.id(postID).put({
                 post: {
                     "tag_string": this.$quickEdit.data("tags").val() + "",
+                    "edit_reason": this.$quickEdit.data("reason").val() + "",
+                    "parent_id": this.$quickEdit.data("parent").val() + "",
                     "rating": PostRating.fromValue(this.$quickEdit.data("rating").val() + ""),
                 }
             }).then(
@@ -484,9 +490,14 @@ export class BetterSearch extends RE6Module {
                     break;
                 }
                 case "edit": {
+                    if ($("body").attr("data-sticky-header") == "true") this.$quickEdit.css("top", $("#top").height() + "px");
+                    else this.$quickEdit.css("top", "");
+
                     this.$quickEdit.show("fast");
                     this.$quickEdit.attr("postid", post.id)
-                    this.$quickEdit.data("tags").val(post.tagString).trigger("re621:input");
+                    this.$quickEdit.data("tags").val(post.tagString + " ").trigger("re621:input").focus();
+                    this.$quickEdit.data("reason").val("");
+                    this.$quickEdit.data("parent").val(post.has.parent_id);
                     this.$quickEdit.data("rating").val(post.rating);
                     break;
                 }

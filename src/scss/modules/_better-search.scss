@@ -553,7 +553,6 @@ zoom-container {
 /* Quick Tags Form */
 section#content > form#re621-quick-tags {
     display: none;
-    position: sticky;
     box-sizing: border-box;
     top: 0;
     width: 100%;
@@ -570,15 +569,14 @@ section#content > form#re621-quick-tags {
 
     div.quick-tags-toolbar {
         display: grid;
-        grid-template-columns: 5rem 5rem auto;
+        grid-template-columns: 5rem 5rem auto 5rem 7rem;
         grid-column-gap: 0.5rem;
         margin-top: 0.5rem;
-
-        select#re621_qedit_rating {
-            width: min-content;
-            justify-self: right;
-        }
     }
+}
+
+body[data-sticky-editbox=true] section#content > form#re621-quick-tags {
+    position: sticky;
 }
 
 div#page.mode-edit section#content > form#re621-quick-tags {

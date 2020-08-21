@@ -61,6 +61,7 @@ export class Post implements PostData {
     public has: {
         children: boolean;
         parent: boolean;
+        parent_id: number;
     };
 
     private constructor(data: PostData, $ref: JQuery<HTMLElement>) {
@@ -270,6 +271,7 @@ export interface PostData {
     has: {
         children: boolean;
         parent: boolean;
+        parent_id: number;
     };
 
 }
@@ -332,6 +334,7 @@ export namespace PostData {
             has: {
                 children: data.relationships.has_active_children,
                 parent: data.relationships.parent_id !== undefined && data.relationships.parent_id !== null,
+                parent_id: data.relationships.parent_id,
             },
 
         };
@@ -421,6 +424,7 @@ export namespace PostData {
             has: {
                 children: $article.attr("data-has-active-children") == "true",
                 parent: $article.attr("data-parent-id") !== undefined,
+                parent_id: parseInt($article.attr("data-parent-id")) || null,
             },
 
         };
