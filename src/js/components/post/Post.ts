@@ -81,6 +81,14 @@ export class Post implements PostData {
         return this;
     }
 
+    public isRendered(): boolean {
+        return this.$ref.attr("rendered") == "true";
+    }
+
+    public isBlacklisted(): boolean {
+        return this.$ref.attr("blacklisted") == "true";
+    }
+
     public render(): Post {
 
         const conf = ModuleController.get(BetterSearch).fetchSettings([
@@ -145,9 +153,12 @@ export class Post implements PostData {
     }
 
     public updateVisibility(): Post {
-        if (Blacklist.checkPost(this.id))
+        if (Blacklist.checkPost(this.id)) {
             this.$ref.attr("blacklisted", "true");
-        else this.$ref.removeAttr("blacklisted");
+            if (this.isRendered()) this.reset();
+        } else this.$ref.removeAttr("blacklisted");
+
+        // console.log("updating visibility", this.isBlacklisted(), this.isRendered());
 
         return this;
     }
