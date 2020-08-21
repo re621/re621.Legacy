@@ -122,7 +122,7 @@ export class SettingsController extends RE6Module {
             const releases = { latest: null, current: null };
             (async (): Promise<void> => {
                 releases.latest = await getGithubData("latest");
-                releases.current = await getGithubData("tags/" + window["re621"]["version"]);
+                releases.current = await getGithubData("tags/" + Sync.version);
                 await this.pushSettings("newVersionAvailable", releases.latest.name !== releases.current.name);
                 await this.pushSettings("changelog", releases.current.body);
 
