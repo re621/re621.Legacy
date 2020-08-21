@@ -105,6 +105,7 @@ export class BetterSearch extends RE6Module {
         // Write appropriate settings into the content wrapper
         this.createStructure();
         this.updateContentHeader();
+        this.updatePageTitle(this.queryPage);
 
         const preloadEnabled = this.fetchSettings("loadPrevPages") && Page.getQueryParameter("nopreload") !== "true";
         Page.removeQueryParameter("nopreload");
@@ -157,6 +158,7 @@ export class BetterSearch extends RE6Module {
                         if (post.page != selectedPage) {
                             selectedPage = post.page;
                             Page.setQueryParameter("page", selectedPage + "");
+                            this.updatePageTitle(selectedPage);
                         }
                     }, 100);
                 }
@@ -234,6 +236,11 @@ export class BetterSearch extends RE6Module {
     public static setPaused(state: boolean): void {
         BetterSearch.paused = state;
         BetterSearch.trigger("paginator");
+    }
+
+    /** Updates the document title with the current page number */
+    private updatePageTitle(page: number): void {
+        document.title = this.queryTags.replace(/_/g, " ") + (page > 1 ? (" - Page " + page) : "") + " - " + Page.getSiteName();
     }
 
     /** Creates the basic module structure */
