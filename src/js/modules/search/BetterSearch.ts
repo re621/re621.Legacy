@@ -745,6 +745,10 @@ export class BetterSearch extends RE6Module {
             .appendTo(this.$content);
 
         for (const post of search) {
+
+            // Check if the post is already present on the page
+            if (Post.get(post.id) !== null) continue;
+
             const postData = Post.make(post, this.queryPage, imageRatioChange);
             if (postData !== null) {
                 this.$content.append(postData.$ref);
