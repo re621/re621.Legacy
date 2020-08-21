@@ -118,7 +118,7 @@ export class Patcher {
             case 5: {
                 const thumbEnhancer = await XM.Storage.getValue("re621.ThumbnailEnhancer", undefined),
                     infiniteScroll = await XM.Storage.getValue("re621.InfiniteScroll", undefined),
-                    betterSearch = await XM.Storage.getValue("re621.BetterSearch", undefined);
+                    betterSearch = await XM.Storage.getValue("re621.BetterSearch", {});
                 if (thumbEnhancer) {
                     betterSearch["imageLoadMethod"] = thumbEnhancer["upscale"];
                     betterSearch["autoPlayGIFs"] = thumbEnhancer["autoPlayGIFs"];
