@@ -423,13 +423,32 @@ export class SettingsController extends RE6Module {
                             async (data) => {
                                 await betterSearch.pushSettings("imageSizeChange", data);
                                 if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
+
+                                $("#optgeneral-gencollapse-thumb-scalingconf-thumbsize-desc").toggleClass("input-disabled", !data);
+                                $("#optgeneral-gencollapse-thumb-scalingconf-thumbsize")
+                                    .prop("disabled", !data)
+                                    .parent()
+                                    .toggleClass("input-disabled", !data);
                             }
                         ),
                         Form.spacer(3, true),
 
-                        Form.subheader("Thumbnail Size", "Thumbnail width, in px, em, or rem", 2),
+                        Form.subheader(
+                            "Thumbnail Size",
+                            "Thumbnail card width, in pixels",
+                            2,
+                            "thumbsize-desc",
+                            betterSearch.fetchSettings("imageSizeChange") ? undefined : "input-disabled",
+                        ),
                         Form.input(
-                            { value: betterSearch.fetchSettings("imageWidth"), pattern: "^\\d{2,3}$" },
+                            {
+                                name: "thumbsize",
+                                value: betterSearch.fetchSettings("imageWidth"),
+                                required: true,
+                                pattern: "^\\d{2,3}$",
+                                wrapper: betterSearch.fetchSettings("imageSizeChange") ? undefined : "input-disabled",
+                                disabled: !betterSearch.fetchSettings("imageSizeChange"),
+                            },
                             async (data, input) => {
                                 if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
                                 await betterSearch.pushSettings("imageWidth", parseInt(data));
@@ -438,6 +457,7 @@ export class SettingsController extends RE6Module {
                         ),
                         Form.spacer(3, true),
 
+                        // ------------------------------------------ //
 
                         Form.checkbox(
                             {
@@ -473,7 +493,8 @@ export class SettingsController extends RE6Module {
                             {
                                 name: "cropratio",
                                 value: betterSearch.fetchSettings("imageRatio"),
-                                pattern: "^[01]\\.[1-9]|1\\.0$",
+                                required: true,
+                                pattern: "^([01]\\.[1-9]|1\\.0)$",
                                 wrapper: betterSearch.fetchSettings("imageRatioChange") ? undefined : "input-disabled",
                                 disabled: !betterSearch.fetchSettings("imageRatioChange"),
                             },
@@ -488,11 +509,13 @@ export class SettingsController extends RE6Module {
                         ),
                         Form.spacer(3, true),
 
+                        // ------------------------------------------ //
 
                         Form.subheader("Minimum Image Width", "Images narrower than this percent value will be cropped to fit", 2),
                         Form.input(
                             {
                                 value: betterSearch.fetchSettings("imageMinWidth"),
+                                required: true,
                                 pattern: "^([1-9][0-9]|100)$",
                             },
                             async (data, input) => {
