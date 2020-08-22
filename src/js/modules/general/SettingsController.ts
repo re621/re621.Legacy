@@ -44,6 +44,7 @@ export class SettingsController extends RE6Module {
 
     private openSettingsButton: JQuery<HTMLElement>;
     private utilTabButton: JQuery<HTMLElement>;
+    private aboutTabButton: JQuery<HTMLElement>;
 
     public constructor() {
         super();
@@ -61,6 +62,36 @@ export class SettingsController extends RE6Module {
             newVersionAvailable: false,
             changelog: "",
         };
+    }
+
+    public async prepare(): Promise<void> {
+        await super.prepare();
+
+        if ((Sync.version as string).includes("dev")) {
+            await this.pushSettings("changelog", `<i>~ Changelog not available ~</i>`);
+            await this.pushSettings("newVersionAvailable", false);
+            return;
+        }
+
+        if (Sync.infoUpdate + Util.Time.HOUR >= Util.Time.now()) return;
+
+        const releases = {
+            latest: await getGithubData("latest"),
+            current: await getGithubData("tags/" + Sync.version),
+        };
+
+        Sync.infoUpdate = Util.Time.now();
+        await Sync.saveSettings();
+
+        await this.pushSettings("changelog", releases.current.body);
+        await this.pushSettings("newVersionAvailable", Util.versionCompare(releases.current.name, releases.latest.name) < 0);
+
+        async function getGithubData(node: string): Promise<any> {
+            return XM.Connect.xmlHttpPromise({ url: "https://api.github.com/repos/re621/re621/releases/" + node, method: "GET" }).then(
+                (response: GMxmlHttpRequestResponse) => { return Promise.resolve(JSON.parse(response.responseText)); },
+                () => { throw Error("Failed to fetch Github release data"); }
+            );
+        }
     }
 
     public create(): void {
@@ -98,9 +129,19 @@ export class SettingsController extends RE6Module {
                         })
                         .addClass("update-notification")
                         .html("Utilities"),
-                    structure: this.createMiscTab()
+                    structure: this.createMiscTab(),
                 },
-                { name: "About", structure: this.createAboutTab() },
+                {
+                    name: this.aboutTabButton = $("<a>")
+                        .attr({
+                            "data-loading": "false",
+                            "data-updates": "0",
+                            "id": "conf-tab-about",
+                        })
+                        .addClass("update-notification")
+                        .html("About"),
+                    structure: this.createAboutTab(),
+                },
             ]
         });
 
@@ -115,40 +156,16 @@ export class SettingsController extends RE6Module {
             structure: $settings,
             position: { my: "center", at: "center" },
         });
-
-        // Start up the version checker
-        if (Sync.infoUpdate + Util.Time.HOUR < Util.Time.now()) {
-
-            const releases = { latest: null, current: null };
-            (async (): Promise<void> => {
-                releases.latest = await getGithubData("latest");
-                releases.current = await getGithubData("tags/" + Sync.version);
-                await this.pushSettings("newVersionAvailable", releases.latest.name !== releases.current.name);
-                await this.pushSettings("changelog", releases.current.body);
-
-                Sync.infoUpdate = Util.Time.now();
-                await Sync.saveSettings();
-
-                $("#changelog-list").html(Util.quickParseMarkdown(releases.current.body));
-                $("#project-update-button").attr("data-available", (releases.latest.name !== releases.current.name) + "");
-            })();
-
-            async function getGithubData(node: string): Promise<any> {
-                return XM.Connect.xmlHttpPromise({ url: "https://api.github.com/repos/re621/re621/releases/" + node, method: "GET" }).then(
-                    (response: GMxmlHttpRequestResponse) => { return Promise.resolve(JSON.parse(response.responseText)); },
-                    () => { throw Error("Failed to fetch Github release data"); }
-                );
-            }
-        }
     }
 
-    private pushNotificationsCount(count = 0): void {
+    private pushNotificationsCount(tab: "util" | "about", count = 0): void {
         this.openSettingsButton.attr(
             "data-updates",
             (parseInt(this.openSettingsButton.attr("data-updates")) || 0) + count
         );
 
-        this.utilTabButton.attr(
+        const button = tab == "util" ? this.utilTabButton : this.aboutTabButton;
+        button.attr(
             "data-updates",
             (parseInt(this.utilTabButton.attr("data-updates")) || 0) + count
         );
@@ -1466,7 +1483,7 @@ export class SettingsController extends RE6Module {
 
                             if (dnpcacheUpdated) return;
                             dnpcacheUpdated = false;
-                            this.pushNotificationsCount(-1);
+                            this.pushNotificationsCount("util", -1);
                         }),
                         Form.div({
                             value: async (element) => {
@@ -1484,7 +1501,7 @@ export class SettingsController extends RE6Module {
                                         <span style="color:gold">Reset required</span>: Cache integrity failure
                                     `);
 
-                                    this.pushNotificationsCount(1);
+                                    this.pushNotificationsCount("util", 1);
                                     dnpcacheUpdated = true;
                                 } else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified`)
                             },
@@ -1752,18 +1769,22 @@ export class SettingsController extends RE6Module {
 
     /** Creates the about tab */
     private createAboutTab(): Form {
+
+        const hasNewVersion = this.fetchSettings("newVersionAvailable");
+        if (hasNewVersion) this.pushNotificationsCount("about", 1);
+
         return new Form({ name: "optabout", columns: 3, width: 3 }, [
             // About
             Form.div({
                 value:
-                    `<h3 class="display-inline"><a href="${window["re621"]["links"]["website"]}">${window["re621"]["name"]} v.${window["re621"]["version"]}</a></h3>` +
+                    `<h3 class="display-inline"><a href="${window["re621"]["links"]["website"]}" target="_blank">${window["re621"]["name"]} v.${Sync.version}</a></h3>` +
                     ` <span class="display-inline">build ${window["re621"]["build"]}:${Patcher.version}</span>`,
                 width: 2
             }),
             Form.div({
                 value:
-                    `<span class="float-right" id="project-update-button" data-available="${this.fetchSettings("newVersionAvailable")}">
-                    <a href="${window["re621"]["links"]["releases"]}">Update Available</a>
+                    `<span class="float-right" id="project-update-button" data-available="${hasNewVersion}">
+                    <a href="${window["re621"]["links"]["releases"]}" target="_blank">Update Available</a>
                     </span>`
             }),
             Form.div({
@@ -1784,7 +1805,7 @@ export class SettingsController extends RE6Module {
             Form.spacer(3),
 
             // Changelog
-            Form.header(`<a href="${window["re621"]["links"]["releases"]}" class="unmargin">What's new?</a>`, 3),
+            Form.header(`<a href="${window["re621"]["links"]["releases"]}" target="_blank" class="unmargin">What's new?</a>`, 3),
             Form.div({ value: `<div id="changelog-list">${Util.quickParseMarkdown(this.fetchSettings("changelog"))}</div>`, width: 3 })
         ]);
     }

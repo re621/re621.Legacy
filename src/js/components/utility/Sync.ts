@@ -48,13 +48,8 @@ export class Sync {
         const scriptVersion = Util.LS.getItem("re621.version") || window["re621"]["version"];
 
         // Log environment data
-        if (
-            Sync.version !== false &&                      // Statistics reporting is disabled
-            !(scriptVersion as string).includes("dev") &&  // Util.versionCompare does not deal well with suffixes
-            Util.versionCompare(Sync.version as string, scriptVersion) !== 0
-        ) {
-
-            console.log("Sync");
+        if ((scriptVersion as string).includes("dev")) Sync.version = scriptVersion;
+        else if (Sync.version !== false && Util.versionCompare(Sync.version as string, scriptVersion) !== 0) {
 
             // Force the changelog to be updated on script update
             Sync.infoUpdate = 0;

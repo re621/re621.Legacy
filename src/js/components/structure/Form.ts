@@ -803,9 +803,7 @@ export class Form implements PreparedStructure {
                 case "boolean":
                     options.value = options.value + "";
                 default: {
-                    $element
-                        .html(options.value)
-                        .attr("defval", options.value);
+                    $element.html(options.value);
                 }
             }
         }
