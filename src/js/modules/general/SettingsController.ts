@@ -513,6 +513,23 @@ export class SettingsController extends RE6Module {
 
                         // ------------------------------------------ //
 
+                        Form.checkbox(
+                            {
+                                name: "compactMode",
+                                value: betterSearch.fetchSettings("compactMode"),
+                                label: "<b>Compact Mode</b><br />Limit the image height to the same value as the width",
+                                width: 3,
+                            },
+                            async (data) => {
+                                await betterSearch.pushSettings("compactMode", data);
+                                if (betterSearch.isInitialized()) {
+                                    betterSearch.updateContentHeader();
+                                    betterSearch.reloadRenderedPosts();
+                                }
+                            }
+                        ),
+                        Form.spacer(3, true),
+
                         Form.subheader("Minimum Image Width", "Images narrower than this percent value will be cropped to fit", 2),
                         Form.input(
                             {
@@ -527,6 +544,7 @@ export class SettingsController extends RE6Module {
                                 if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                             }
                         ),
+                        Form.spacer(3, true),
 
                     ]),
                     Form.spacer(3, true),
