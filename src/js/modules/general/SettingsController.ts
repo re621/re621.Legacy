@@ -445,7 +445,7 @@ export class SettingsController extends RE6Module {
                                 name: "thumbsize",
                                 value: betterSearch.fetchSettings("imageWidth"),
                                 required: true,
-                                pattern: "^\\d{2,3}$",
+                                pattern: "^(1[5-9][0-9]|[2-9][0-9][0-9])$",
                                 wrapper: betterSearch.fetchSettings("imageSizeChange") ? undefined : "input-disabled",
                                 disabled: !betterSearch.fetchSettings("imageSizeChange"),
                             },
