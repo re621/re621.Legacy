@@ -52,12 +52,11 @@ const loadOrder = [
     PostViewer,
     TitleCustomizer,
 
-    BetterSearch,
-    CustomFlagger,
     BlacklistEnhancer,
-
+    CustomFlagger,
     InstantSearch,
     ThumbnailTweaks,
+    BetterSearch,
 
     PostSuggester,
     SearchUtilities,
