@@ -444,6 +444,7 @@ export class SettingsController extends RE6Module {
                             {
                                 name: "thumbsize",
                                 value: betterSearch.fetchSettings("imageWidth"),
+                                title: "Number between 150 and 999",
                                 required: true,
                                 pattern: "^(1[5-9][0-9]|[2-9][0-9][0-9])$",
                                 wrapper: betterSearch.fetchSettings("imageSizeChange") ? undefined : "input-disabled",
@@ -493,6 +494,7 @@ export class SettingsController extends RE6Module {
                             {
                                 name: "cropratio",
                                 value: betterSearch.fetchSettings("imageRatio"),
+                                title: "Number between 0.1 and 1.9",
                                 required: true,
                                 pattern: "^([01]\\.[1-9]|1\\.0)$",
                                 wrapper: betterSearch.fetchSettings("imageRatioChange") ? undefined : "input-disabled",
@@ -517,6 +519,7 @@ export class SettingsController extends RE6Module {
                                 value: betterSearch.fetchSettings("imageMinWidth"),
                                 required: true,
                                 pattern: "^([1-9][0-9]|100)$",
+                                title: "Number between 10 and 100",
                             },
                             async (data, input) => {
                                 if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;

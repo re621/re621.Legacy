@@ -310,8 +310,10 @@ export class Form implements PreparedStructure {
             }
         }
 
-        if (options.pattern) { $input.attr("pattern", options.pattern); }
-        if (options.required) { $input.attr("required", ''); }
+        if (options.title) $input.attr("title", options.title);
+
+        if (options.pattern) $input.attr("pattern", options.pattern);
+        if (options.required) $input.attr("required", '');
 
         if (changed !== undefined) {
             let timer: number;
@@ -380,6 +382,11 @@ export class Form implements PreparedStructure {
             .html(`<i class="far fa-copy"></i>`)
             .appendTo($element);
 
+        if (options.title) {
+            $input.attr("title", options.title);
+            $copybutton.attr("title", options.title);
+        }
+
         let copyTimer: number;
         $($copybutton).click(function () {
             XM.Util.setClipboard($input.val());
@@ -445,6 +452,11 @@ export class Form implements PreparedStructure {
             .html(`<i class="far fa-keyboard"></i>`)
             .appendTo($element);
 
+        if (options.title) {
+            $input.attr("title", options.title);
+            $recordbutton.attr("title", options.title);
+        }
+
         let occupied = false;
         $($recordbutton).click(function () {
             if (occupied) return;
@@ -505,6 +517,8 @@ export class Form implements PreparedStructure {
             .addClass("bg-section color-text")
             .prop("disabled", options.disabled == true)
             .appendTo($element);
+
+        if (options.title) $input.attr("title", options.title);
 
         if (changed !== undefined) {
             $input.on("change", () => {
@@ -634,6 +648,8 @@ export class Form implements PreparedStructure {
             }
         }
 
+        if (options.title) $input.attr("title", options.title);
+
         if (changed !== undefined)
             $input.on("click", (event) => {
                 event.preventDefault();
@@ -749,6 +765,8 @@ export class Form implements PreparedStructure {
                 }
             }
         }
+
+        if (options.title) $input.attr("title", options.title);
 
         if (changed !== undefined)
             $input.on("change", () => { changed($input.val().toString(), $input); });
@@ -991,6 +1009,8 @@ interface ElementOptions {
     name?: string;
     /** Input label text */
     label?: string;
+    /** Text displayed on hover */
+    title?: string;
     /** Input value, if applicable */
     value?: string | boolean | number | JQuery<HTMLElement> | ElementInputValue;
     /** Column span, between 1 and 3 */
