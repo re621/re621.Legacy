@@ -567,6 +567,9 @@ export class BetterSearch extends RE6Module {
                 .on("keydown.re621.zoom", null, "shift", () => {
                     if (this.shiftPressed) return;
                     this.shiftPressed = true;
+                    Post.find("hovering").each((post) => {
+                        post.$ref.trigger("mouseenter.re621.zoom");
+                    });
                 })
                 .on("keyup.re621.zoom", null, "shift", () => {
                     this.shiftPressed = false;
@@ -575,6 +578,9 @@ export class BetterSearch extends RE6Module {
                 .on("keydown.re621.zoom", null, "shift", () => {
                     if (this.shiftPressed) return;
                     this.shiftPressed = true;
+                    Post.find("hovering").each((post) => {
+                        post.$ref.trigger("mouseenter.re621.zoom");
+                    });
                 })
                 .on("keyup.re621.zoom", null, "shift", () => {
                     this.shiftPressed = false;

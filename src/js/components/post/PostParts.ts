@@ -119,17 +119,19 @@ export class PostParts {
         // Flash files will never work with hover zoom, deal with it
         if (post.file.ext === "swf" || post.flags.has(PostFlag.Deleted)) return;
 
-        $link.on("mouseenter.re621.zoom", () => {
+        post.$ref.on("mouseenter.re621.zoom", () => {
             timer = window.setTimeout(() => {
                 started = true;
+                post.$ref.attr("hovering", "true");
                 BetterSearch.trigger("zoom.start", post.id);
             }, 200);
         });
 
-        $link.on("mouseleave.re621.zoom", () => {
+        post.$ref.on("mouseleave.re621.zoom", () => {
             window.clearTimeout(timer);
             if (started) {
                 started = false;
+                post.$ref.removeAttr("hovering");
                 BetterSearch.trigger("zoom.stop", post.id);
             }
         });

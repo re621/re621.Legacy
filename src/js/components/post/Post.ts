@@ -207,9 +207,10 @@ export class Post implements PostData {
      * Returns all Post elements of the specified type
      * @param type Type to look for
      */
-    public static find(type: "rendered" | "blacklisted" | "all"): PostSet {
+    public static find(type: "rendered" | "blacklisted" | "hovering" | "all"): PostSet {
         const result = new PostSet();
         switch (type) {
+            case "hovering":
             case "blacklisted":
             case "rendered": {
                 for (const elem of $(`post[${type}=true]`).get())
