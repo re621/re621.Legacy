@@ -67,14 +67,14 @@ export class SettingsController extends RE6Module {
     public async prepare(): Promise<void> {
         await super.prepare();
 
-        if ((Sync.version as string).includes("dev")) {
-            await this.pushSettings("changelog", `<i>~ Changelog not available ~</i>`);
-            await this.pushSettings("newVersionAvailable", false);
-            return;
-        }
+        // Abort: Dev release (compiled by github actions)
+        if ((Sync.version as string).includes("dev"))
+            return await abort(this);
 
+        // Abort: Version didn't change, timer didn't expire
         if (Sync.infoUpdate + Util.Time.HOUR >= Util.Time.now()) return;
 
+        // Fetch release data from github
         const releases = {
             latest: await getGithubData("latest"),
             current: await getGithubData("tags/" + Sync.version),
@@ -83,8 +83,19 @@ export class SettingsController extends RE6Module {
         Sync.infoUpdate = Util.Time.now();
         await Sync.saveSettings();
 
+        // Abort: Dev build (compiled manually)
+        if (releases.current.name == undefined)
+            return await abort(this);
+
         await this.pushSettings("changelog", releases.current.body);
         await this.pushSettings("newVersionAvailable", Util.versionCompare(releases.current.name, releases.latest.name) < 0);
+
+        async function abort(localThis: RE6Module): Promise<void> {
+            await localThis.pushSettings("changelog", `<i>~ Changelog not available ~</i>`);
+            await localThis.pushSettings("newVersionAvailable", false);
+            Sync.infoUpdate = Util.Time.now();
+            await Sync.saveSettings();
+        }
 
         async function getGithubData(node: string): Promise<any> {
             return XM.Connect.xmlHttpPromise({ url: "https://api.github.com/repos/re621/re621/releases/" + node, method: "GET" }).then(
