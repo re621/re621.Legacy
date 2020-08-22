@@ -26,7 +26,7 @@ import { ImageScaler } from "../post/ImageScaler";
 import { PoolNavigator } from "../post/PoolNavigator";
 import { PostViewer } from "../post/PostViewer";
 import { TitleCustomizer } from "../post/TitleCustomizer";
-import { BetterSearch, ImageLoadMethod } from "../search/BetterSearch";
+import { BetterSearch } from "../search/BetterSearch";
 import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
 import { CustomFlagger, FlagDefinition } from "../search/CustomFlagger";
 import { SearchUtilities } from "../search/SearchUtilities";
@@ -361,13 +361,6 @@ export class SettingsController extends RE6Module {
                                 betterSearch.reloadEventListeners();
                                 betterSearch.reloadRenderedPosts();
                             }
-
-                            const zoomDisabled = data === ImageLoadMethod.Disabled;
-                            $("#optgeneral-gencollapse-thumb-scalingconf-hoverzoom-desc").toggleClass("input-disabled", zoomDisabled);
-                            $("#optgeneral-gencollapse-thumb-scalingconf-hoverzoom")
-                                .prop("disabled", zoomDisabled)
-                                .parent()
-                                .toggleClass("input-disabled", zoomDisabled);
                         }
                     ),
                     Form.spacer(3, true),
@@ -438,12 +431,13 @@ export class SettingsController extends RE6Module {
                         Form.input(
                             { value: betterSearch.fetchSettings("imageWidth"), pattern: "^\\d{2,3}$" },
                             async (data, input) => {
-                                if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                                if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
                                 await betterSearch.pushSettings("imageWidth", parseInt(data));
                                 if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                             }
                         ),
                         Form.spacer(3, true),
+
 
                         Form.checkbox(
                             {
@@ -484,7 +478,7 @@ export class SettingsController extends RE6Module {
                                 disabled: !betterSearch.fetchSettings("imageRatioChange"),
                             },
                             async (data, input) => {
-                                if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                                if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
                                 await betterSearch.pushSettings("imageRatio", parseFloat(data));
                                 if (betterSearch.isInitialized()) {
                                     betterSearch.updateContentHeader();
@@ -492,61 +486,21 @@ export class SettingsController extends RE6Module {
                                 }
                             }
                         ),
-
-                        Form.hr(3),
-
-                        Form.subheader(
-                            "Zoom on Hover",                                                                                                    // line 1
-                            "Increases the size of the thumbnail when hovering over it",                                                        // line 2
-                            2,                                                                                                                  // width
-                            "hoverzoom-desc",                                                                                                   // name
-                            betterSearch.fetchSettings("imageLoadMethod") === ImageLoadMethod.Disabled ? "input-disabled" : undefined,          // wrapper
-                        ),
-                        Form.select(
-                            {
-                                name: "hoverzoom",
-                                value: betterSearch.fetchSettings("zoomMode"),
-                                wrapper: betterSearch.fetchSettings("imageLoadMethod") === ImageLoadMethod.Disabled ? "input-disabled" : undefined,
-                                disabled: betterSearch.fetchSettings("imageLoadMethod") === ImageLoadMethod.Disabled,
-                            },
-                            {
-                                "disabled": "Disabled",
-                                "hover": "On Hover",
-                                "onshift": "Holding Shift",
-                            },
-                            async (data) => {
-                                await betterSearch.pushSettings("zoomMode", data);
-                                if (betterSearch.isInitialized()) {
-                                    betterSearch.reloadEventListeners();
-                                    betterSearch.reloadRenderedPosts();
-                                }
-                            }
-                        ),
                         Form.spacer(3, true),
 
-                        Form.checkbox(
-                            {
-                                value: betterSearch.fetchSettings("zoomFull"),
-                                label: "<b>Large Images</b><br />Load the zoomed-in preview at the original resolution",
-                                width: 3,
-                            },
-                            async (data) => {
-                                await betterSearch.pushSettings("zoomFull", data);
-                            }
-                        ),
-                        Form.spacer(3, true),
 
-                        Form.checkbox(
+                        Form.subheader("Minimum Image Width", "Images narrower than this percent value will be cropped to fit", 2),
+                        Form.input(
                             {
-                                value: betterSearch.fetchSettings("zoomTags"),
-                                label: "<b>Show Tags</b><br />Display the list of posts's tags under the zoom-in image",
-                                width: 3,
+                                value: betterSearch.fetchSettings("imageMinWidth"),
+                                pattern: "^([1-9][0-9]|100)$",
                             },
-                            async (data) => {
-                                await betterSearch.pushSettings("zoomTags", data);
+                            async (data, input) => {
+                                if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                                await betterSearch.pushSettings("imageMinWidth", parseInt(data));
+                                if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                             }
                         ),
-                        Form.spacer(3, true),
 
                     ]),
                     Form.spacer(3, true),
@@ -610,7 +564,9 @@ export class SettingsController extends RE6Module {
                 ]),
 
                 // Infinite Scroll
-                Form.accordionTab({ name: "infscroll", label: "Infinite Scroll", columns: 3, width: 3 }, [
+                Form.accordionTab({ name: "infscroll", label: "Scrolling and Zoom", columns: 3, width: 3 }, [
+
+                    Form.header("Infinite Scroll", 3),
 
                     Form.checkbox(
                         {
@@ -664,7 +620,57 @@ export class SettingsController extends RE6Module {
                             if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                         }
                     ),
+                    Form.hr(3),
 
+
+                    Form.header("Hover Zoom", 3),
+                    Form.div({
+                        value: "<b>Zoom Mode</b><br />Increases the size of the thumbnail when hovering over it",
+                        width: 2,
+                    }),
+                    Form.select(
+                        {
+                            name: "hoverzoom",
+                            value: betterSearch.fetchSettings("zoomMode"),
+                        },
+                        {
+                            "disabled": "Disabled",
+                            "hover": "On Hover",
+                            "onshift": "Holding Shift",
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("zoomMode", data);
+                            if (betterSearch.isInitialized()) {
+                                betterSearch.reloadEventListeners();
+                                betterSearch.reloadRenderedPosts();
+                            }
+                        }
+                    ),
+                    Form.spacer(3, true),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("zoomFull"),
+                            label: "<b>Large Images</b><br />Load the zoomed-in preview at the original resolution",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("zoomFull", data);
+                        }
+                    ),
+                    Form.spacer(3, true),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("zoomTags"),
+                            label: "<b>Show Tags</b><br />Display the list of posts's tags under the zoom-in image",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("zoomTags", data);
+                        }
+                    ),
+                    Form.spacer(3, true),
 
                 ]),
 

@@ -56,6 +56,7 @@ export class BetterSearch extends RE6Module {
             imageWidth: 150,                                // Width if the resized image
             imageRatioChange: true,                         // If true, crops the image to ratio specified in `imageRatio`
             imageRatio: 0.9,                                // Ratio to conform to
+            imageMinWidth: 50,                              // Minimum image width, when it's not being cropped
 
             zoomMode: ImageZoomMode.Disabled,               // How should the hover zoom be triggered
             zoomFull: false,                                // Load full-sized (original) image instead of a sampled one
@@ -390,9 +391,10 @@ export class BetterSearch extends RE6Module {
     /** Updates the content wrapper attributes and variables */
     public updateContentHeader(): void {
         const conf = this.fetchSettings([
-            "imageSizeChange", "imageWidth", "imageRatioChange", "imageRatio",
-            "ribbonsFlag", "ribbonsRel",
-            "buttonsVote", "buttonsFav",
+            "imageSizeChange", "imageWidth",
+            "imageRatioChange", "imageRatio",
+            "imageMinWidth",
+
             "hidePageBreaks",
         ]);
 
@@ -400,6 +402,7 @@ export class BetterSearch extends RE6Module {
         this.$content.removeAttr("style");
         if (conf.imageSizeChange) this.$content.css("--img-width", conf.imageWidth + "px");
         if (conf.imageRatioChange) this.$content.css("--img-ratio", conf.imageRatio);
+        this.$content.css("--img-fit", conf.imageMinWidth + "%");
 
         // InfScroll separators
         if (conf.hidePageBreaks) this.$content.attr("hide-page-breaks", "true");

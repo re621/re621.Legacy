@@ -315,15 +315,11 @@ search-content > post[deleted=true] > a:after { content: "DELETED" }
 
 
 /* Thumbnail Resizing */
-search-content > post  {
-
-    img {
-        width: max(var(--img-width, 150px), 150px);
-        height: calc(max(var(--img-width, 150px), 150px) * var(--img-ratio, 1));
-        object-fit: cover;
-        max-height: 50vh;
-    }
-
+search-content > post img {
+    height: calc(max(var(--img-width, 150px), 150px) * var(--img-ratio, 1));
+    object-fit: cover;
+    max-height: 50vh;
+    min-width: clamp(10%, var(--img-fit, 25%), 100%);
 }
 
 
