@@ -214,6 +214,7 @@ export class Post implements PostData {
             case "rendered": {
                 for (const elem of $(`post[${type}=true]`).get())
                     result.push(Post.get($(elem)));
+                break;
             }
             case "all": {
                 for (const elem of $(`post`).get())
