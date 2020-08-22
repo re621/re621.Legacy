@@ -290,7 +290,7 @@ export class Form implements PreparedStructure {
             .prop("disabled", options.disabled == true)
             .appendTo($element);
 
-        if (options.value !== undefined) {
+        if (options.value !== undefined && options.value !== null) {
             switch (typeof options.value) {
                 case "function": {
                     options.value($input);
@@ -351,7 +351,7 @@ export class Form implements PreparedStructure {
             .addClass("bg-section color-text")
             .appendTo($element);
 
-        if (options.value !== undefined) {
+        if (options.value !== undefined && options.value !== null) {
             switch (typeof options.value) {
                 case "function": {
                     options.value($input);
@@ -416,7 +416,7 @@ export class Form implements PreparedStructure {
             .addClass("bg-section color-text")
             .appendTo($element);
 
-        if (options.value !== undefined) {
+        if (options.value !== undefined && options.value !== null) {
             switch (typeof options.value) {
                 case "function": {
                     options.value($input);
@@ -533,7 +533,7 @@ export class Form implements PreparedStructure {
             .css("display", "none")
             .appendTo($element);
 
-        if (options.value !== undefined) {
+        if (options.value !== undefined && options.value !== null) {
             switch (typeof options.value) {
                 case "function": {
                     options.value($input);
@@ -613,7 +613,7 @@ export class Form implements PreparedStructure {
             .prop("disabled", options.disabled == true)
             .appendTo($element);
 
-        if (options.value !== undefined) {
+        if (options.value !== undefined && options.value !== null) {
             switch (typeof options.value) {
                 case "function": {
                     options.value($input);
@@ -665,7 +665,7 @@ export class Form implements PreparedStructure {
             .prop("disabled", options.disabled == true)
             .appendTo($element);
 
-        if (options.value !== undefined) {
+        if (options.value !== undefined && options.value !== null) {
             switch (typeof options.value) {
                 case "function": {
                     options.value($input);
@@ -730,7 +730,7 @@ export class Form implements PreparedStructure {
             for (const key in content)
                 $("<option>").val(key).text(content[key]).appendTo($input);
         }
-        if (options.value !== undefined) {
+        if (options.value !== undefined && options.value !== null) {
             switch (typeof options.value) {
                 case "function": {
                     options.value($input);
@@ -789,7 +789,7 @@ export class Form implements PreparedStructure {
             .addClass("text-div")
             .attr("id", options.name);
 
-        if (options.value !== undefined) {
+        if (options.value !== undefined && options.value !== null) {
             switch (typeof options.value) {
                 case "function": {
                     options.value($element);
