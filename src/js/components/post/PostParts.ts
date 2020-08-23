@@ -113,27 +113,18 @@ export class PostParts {
 
     private static handleHoverZoom($link: JQuery<HTMLElement>, post: Post): void {
 
-        let timer: number,
-            started = false;
 
         // Flash files will never work with hover zoom, deal with it
         if (post.file.ext === "swf" || post.flags.has(PostFlag.Deleted)) return;
 
-        post.$ref.on("mouseenter.re621.zoom", () => {
-            timer = window.setTimeout(() => {
-                started = true;
-                post.$ref.attr("hovering", "true");
-                BetterSearch.trigger("zoom.start", post.id);
-            }, 200);
+        post.$ref.on("mouseenter.re621.zoom", (event) => {
+            post.$ref.attr("hovering", "true");
+            BetterSearch.trigger("zoom.start", { post: post.id, pageX: event.pageX, pageY: event.pageY });
         });
 
-        post.$ref.on("mouseleave.re621.zoom", () => {
-            window.clearTimeout(timer);
-            if (started) {
-                started = false;
-                post.$ref.removeAttr("hovering");
-                BetterSearch.trigger("zoom.stop", post.id);
-            }
+        post.$ref.on("mouseleave.re621.zoom", (event) => {
+            post.$ref.removeAttr("hovering");
+            BetterSearch.trigger("zoom.stop", { post: post.id, pageX: event.pageX, pageY: event.pageY });
         });
     }
 

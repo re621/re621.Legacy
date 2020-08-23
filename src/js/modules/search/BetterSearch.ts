@@ -363,12 +363,12 @@ export class BetterSearch extends RE6Module {
             .attr("id", "zoom-info")
             .appendTo(this.$zoomBlock);
         this.$zoomImage = $("<img>")
-            .attr("src", "/images/deleted-preview.png")
+            .attr("src", DomUtilities.getPlaceholderImage())
             .addClass("display-none")
             .appendTo(this.$zoomBlock);
         this.$zoomVideo = $("<video controls autoplay loop></video>")
             .attr({
-                poster: "/images/deleted-preview.png",
+                poster: DomUtilities.getPlaceholderImage(),
                 src: "/images/deleted-preview.png",
                 muted: "muted",
             })
@@ -645,14 +645,29 @@ export class BetterSearch extends RE6Module {
             if (BetterSearch.paused || (this.fetchSettings("zoomMode") == ImageZoomMode.OnShift && !this.shiftPressed))
                 return;
 
-            const post = Post.get(data);
+            const post = Post.get(data.post);
             post.$ref.attr("loading", "true");
-
-            // Load the image and its basic info
             this.$zoomBlock.attr("status", "loading");
+
+            // Calculate preview width and height
+            let width = Math.min(post.img.width, viewport.width() * 0.5 - 50),
+                height = width * post.img.ratio;
+
+            if (height > (viewport.height() * 0.75)) {
+                height = viewport.height() * 0.75;
+                width = height / post.img.ratio;
+            }
+
+            this.$zoomImage.css({
+                "width": width + "px",
+                "height": height + "px",
+            });
+
+            // Display the image
             if (post.file.ext == "webm") {
                 this.$zoomVideo
                     .removeClass("display-none")
+                    .css("background-image", `url("${post.file.sample}")`)
                     .attr({
                         src: post.file.original,
                         poster: post.file.sample,
@@ -664,9 +679,11 @@ export class BetterSearch extends RE6Module {
                 this.$zoomBlock.attr("status", "ready");
                 post.$ref.removeAttr("loading");
             } else {
+                const zoomFull = this.fetchSettings("zoomFull");
                 this.$zoomImage
                     .removeClass("display-none")
-                    .attr("src", this.fetchSettings("zoomFull") ? post.file.original : post.file.sample)
+                    .css("background-image", `url("${zoomFull ? post.file.sample : post.file.preview}")`)
+                    .attr("src", zoomFull ? post.file.original : post.file.sample)
                     .one("load", () => {
                         this.$zoomBlock.attr("status", "ready");
                         post.$ref.removeAttr("loading");
@@ -689,12 +706,13 @@ export class BetterSearch extends RE6Module {
                 window.setTimeout(() => { throttled = false }, 25);
 
                 const imgHeight = this.$zoomBlock.height(),
+                    imgWidth = this.$zoomBlock.width(),
                     cursorX = event.pageX,
                     cursorY = event.pageY - viewport.scrollTop();
 
                 const left = (cursorX < (viewport.width() / 2))
                     ? cursorX + 50                                  // left side of the screen
-                    : cursorX - this.$zoomBlock.width() - 50;       // right side
+                    : cursorX - imgWidth - 50;                      // right side
                 const top = Util.Math.clamp(cursorY - (imgHeight / 2), 10, (viewport.height() - imgHeight - 10));
 
                 this.$zoomBlock.css({
@@ -703,6 +721,20 @@ export class BetterSearch extends RE6Module {
                 });
 
             });
+
+            // Emulate a mousemove event with data from the mouseover trigger
+            const offset = post.$ref.offset();
+            const e = $.Event("mousemove.re621.zoom");
+            const centerX = offset.left + (post.$ref.width() / 2),
+                centerY = offset.top + (post.$ref.height() / 2);
+            /*
+            // Alternative averaging method
+            e.pageX = data.pageX ? (data.pageX + centerX) / 2 : centerX;
+            e.pageY = data.pageY ? (data.pageY + centerY) / 2 : centerY;
+            */
+            e.pageX = data.pageX ? data.pageX : centerX;
+            e.pageY = data.pageY ? data.pageY : centerY;
+            $(document).trigger(e);
         });
         BetterSearch.on("zoom.stop", (event, data) => {
             $(document).off("mousemove.re621.zoom");
@@ -717,6 +749,7 @@ export class BetterSearch extends RE6Module {
             this.$zoomInfo.html("");
             this.$zoomImage
                 .addClass("display-none")
+                .removeAttr("style")
                 .attr("src", DomUtilities.getPlaceholderImage());
             this.$zoomVideo
                 .addClass("display-none")
@@ -729,7 +762,7 @@ export class BetterSearch extends RE6Module {
             this.$zoomTags.html("");
 
             // If the post was loading, remove the spinner
-            $("#entry_" + data).removeAttr("loading");
+            $("#entry_" + data.post).removeAttr("loading");
         });
     }
 

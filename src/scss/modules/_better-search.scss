@@ -523,21 +523,28 @@ zoom-container {
     position: fixed;
     top: 100vh;
     z-index: 800;
+    pointer-events: none;
 
     & > img {
         max-width: calc(50vw - 50px);
         max-height: 80vh;
-        background: white;
+        background: #00000090;
+        background-position: center center;
+        background-size: contain;
 
+        /*
         &::before {
             content: var(--image-info, "??? x ???, ???MB");
         }
+        */
     }
 
     & > video {
         max-width: calc(50vw - 50px);
         max-height: 80vh;
-        background: white;
+        background: #00000090;
+        background-position: center center;
+        background-size: contain;
     }
 
     & > div {
@@ -552,7 +559,28 @@ zoom-container {
     }
 
     &[status=waiting] { display: none; }
-    &[status=loading] { visibility: hidden; }
+    &[status=loading] {
+        &::after {
+            content: unicode("f1ce");
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            font-size: 3rem;
+            line-height: 3rem;
+            text-shadow: 0 0 3px black;
+
+            animation: fa-spin 2s infinite linear;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+    }
 }
 
 
