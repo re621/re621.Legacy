@@ -693,8 +693,8 @@ export class BetterSearch extends RE6Module {
                     cursorY = event.pageY - viewport.scrollTop();
 
                 const left = (cursorX < (viewport.width() / 2))
-                    ? cursorX + 100                                 // left side of the screen
-                    : cursorX - this.$zoomBlock.width() - 100;      // right side
+                    ? cursorX + 50                                  // left side of the screen
+                    : cursorX - this.$zoomBlock.width() - 50;       // right side
                 const top = Util.Math.clamp(cursorY - (imgHeight / 2), 10, (viewport.height() - imgHeight - 10));
 
                 this.$zoomBlock.css({

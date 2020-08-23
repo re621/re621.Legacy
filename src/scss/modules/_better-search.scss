@@ -525,7 +525,7 @@ zoom-container {
     z-index: 800;
 
     & > img {
-        max-width: 55vw;
+        max-width: calc(50vw - 50px);
         max-height: 80vh;
         background: white;
 
@@ -535,7 +535,7 @@ zoom-container {
     }
 
     & > video {
-        max-width: 55vw;
+        max-width: calc(50vw - 50px);
         max-height: 80vh;
         background: white;
     }
