@@ -423,10 +423,8 @@ export namespace PostData {
 
         // Children
         const children: Set<number> = new Set();
-        for (const post of $("div.has-children-relationship-preview").find("article").get()) {
+        for (const post of $("div#has-children-relationship-preview").find("article").get())
             children.add(parseInt($(post).attr("data-id")));
-        }
-        console.log(children);
 
         // Tags
         const tagString = $article.attr("data-tags") || "";
