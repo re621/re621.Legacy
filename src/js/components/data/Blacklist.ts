@@ -1,5 +1,5 @@
 import { BlacklistEnhancer } from "../../modules/search/BlacklistEnhancer";
-import { PostData } from "../post/Post";
+import { Post, PostData } from "../post/Post";
 import { PostFilter } from "../post/PostFilter";
 import { Util } from "../utility/Util";
 import { User } from "./User";
@@ -144,7 +144,7 @@ export class Blacklist {
         await User.setSettings({ blacklisted_tags: currentBlacklist.join("\n") });
 
         BlacklistEnhancer.update();
-        // TODO Trigger BetterSearch visibility update
+        Post.find("all").each((post) => { post.updateVisibility(); });
 
         return Promise.resolve();
 
