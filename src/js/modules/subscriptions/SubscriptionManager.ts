@@ -230,6 +230,17 @@ export class SubscriptionManager extends RE6Module {
      * Builds a subscription settings page, containing various controls
      */
     private buildInfoPage(): Form {
+        let updateInterval = this.fetchSettings<number>("updateInterval");
+
+        // Fix for the update timer heading into the eternity
+        if (updateInterval > Util.Time.HOUR * 24 || (updateInterval < Util.Time.HOUR && updateInterval != -1)) {
+            updateInterval = Util.Time.HOUR;
+            this.pushSettings("updateInterval", updateInterval);
+        }
+
+        // Convert into a usable format
+        if (updateInterval !== -1) updateInterval /= Util.Time.HOUR;
+
         return new Form({ name: "subscriptions-controls", columns: 2, width: 2 }, [
             // List and manage active subscriptions
             Form.header("Subscriptions"),
@@ -258,18 +269,18 @@ export class SubscriptionManager extends RE6Module {
 
                 Form.div({ value: "Update Interval" }),
                 Form.select(
-                    { value: this.fetchSettings("updateInterval") / Util.Time.HOUR },
+                    { value: updateInterval + "" },
                     {
-                        // "0.1": "6 minutes",
-                        "0.5": "30 minutes",
+                        "-1": "Manually",
                         "1": "1 hour",
                         "6": "6 hours",
                         "12": "12 hours",
                         "24": "24 hours",
                     },
                     async (data) => {
-                        if (data < (Util.Time.MINUTE * 30)) data = Util.Time.MINUTE * 30;
-                        await this.pushSettings("updateInterval", parseFloat(data) * Util.Time.HOUR);
+                        data = Math.max(parseFloat(data) * Util.Time.HOUR, -1);
+                        if (data < Util.Time.HOUR && data != -1) data = Util.Time.HOUR;
+                        await this.pushSettings("updateInterval", data);
                         SubscriptionManager.trigger("timerRefresh");
                     }
                 ),
@@ -417,7 +428,8 @@ export class SubscriptionManager extends RE6Module {
         if (time.now === undefined) time.now = Util.Time.now();  // "now" setting is used for debugging purposes only
 
         return Promise.resolve(
-            !SubscriptionManager.updateInProgress && (                                                              // Update process isn't running already
+            !SubscriptionManager.updateInProgress &&                                                                // Update process isn't running already
+            time.updateInterval !== -1 && (                                                                         // Not in manual only mode
                 (time.now - time.lastUpdate) >= time.updateInterval ||                                              // Update interval passed
                 (time.updateStarted !== 0 && time.now - time.updateStarted >= SubscriptionManager.updateTimeout)    // Previous update completed or failed
             )
@@ -526,8 +538,8 @@ export class SubscriptionManager extends RE6Module {
         const time = await this.fetchSettings(["lastUpdate", "updateInterval", "updateStarted"], true);
 
         $("span#subscriptions-lastupdate")
-            .attr("title", getLastUpdateTime(time.lastUpdate, time.updateStarted))
-            .html(getLastUpdateText(time.lastUpdate, time.updateStarted));
+            .attr("title", getLastUpdateTime(time.lastUpdate, time.updateStarted, time.updateInterval))
+            .html(getLastUpdateText(time.lastUpdate, time.updateStarted, time.updateInterval));
         $("span#subscriptions-nextupdate")
             .attr("title", getNextUpdateTime(time.lastUpdate, time.updateInterval, time.updateStarted))
             .html(getNextUpdateText(time.lastUpdate, time.updateInterval, time.updateStarted));
@@ -535,15 +547,17 @@ export class SubscriptionManager extends RE6Module {
         $("i#subscription-action-update").toggleClass("fa-spin", SubscriptionManager.updateInProgress);
 
         /** Formats the last update timestamp into a readable date */
-        function getLastUpdateText(lastUpdate: number, updateStarted: number): string {
+        function getLastUpdateText(lastUpdate: number, updateStarted: number, updateInterval: number): string {
             if (SubscriptionManager.updateInProgress) return "In progress . . .";
+            else if (updateInterval == -1) return "Never";
             else if (updateStarted !== 0) return Util.Time.ago(updateStarted) + " (interrupted)";
             else if (lastUpdate === 0) return "Never";
             else return Util.Time.ago(lastUpdate);
         }
 
-        function getLastUpdateTime(lastUpdate: number, updateStarted: number): string {
+        function getLastUpdateTime(lastUpdate: number, updateStarted: number, updateInterval: number): string {
             if (SubscriptionManager.updateInProgress) return "";
+            else if (updateInterval == -1) return "Never";
             else if (updateStarted !== 0) return Util.Time.format(updateStarted);
             else if (lastUpdate === 0) return "";
             else return Util.Time.format(lastUpdate);
@@ -554,7 +568,8 @@ export class SubscriptionManager extends RE6Module {
             const now = Util.Time.now();
 
             if (SubscriptionManager.updateInProgress) return "In progress . . .";
-            if (updateStarted !== 0) return Util.Time.ago(updateStarted + SubscriptionManager.updateTimeout + Util.Time.MINUTE);
+            else if (updateInterval == -1) return "Never";
+            else if (updateStarted !== 0) return Util.Time.ago(updateStarted + SubscriptionManager.updateTimeout + Util.Time.MINUTE);
             else if (lastUpdate === 0) return Util.Time.ago(now + updateInterval);
             else if ((lastUpdate + updateInterval) < now) return "Less than a minute";
             else return Util.Time.ago(lastUpdate + updateInterval + Util.Time.MINUTE);
@@ -563,7 +578,8 @@ export class SubscriptionManager extends RE6Module {
             const now = Util.Time.now();
 
             if (SubscriptionManager.updateInProgress) return "";
-            if (updateStarted !== 0) return Util.Time.format(updateStarted + SubscriptionManager.updateTimeout);
+            else if (updateInterval == -1) return "Never";
+            else if (updateStarted !== 0) return Util.Time.format(updateStarted + SubscriptionManager.updateTimeout);
             else if (lastUpdate === 0) return Util.Time.format(now + updateInterval);
             else if ((lastUpdate + updateInterval) < now) return "";
             else return Util.Time.format(lastUpdate + updateInterval);
