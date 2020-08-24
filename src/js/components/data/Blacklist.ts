@@ -1,4 +1,5 @@
 import { BlacklistEnhancer } from "../../modules/search/BlacklistEnhancer";
+import { ModuleController } from "../ModuleController";
 import { Post, PostData } from "../post/Post";
 import { PostFilter } from "../post/PostFilter";
 import { Util } from "../utility/Util";
@@ -143,7 +144,7 @@ export class Blacklist {
 
         await User.setSettings({ blacklisted_tags: currentBlacklist.join("\n") });
 
-        BlacklistEnhancer.update();
+        if (ModuleController.get(BlacklistEnhancer).isInitialized()) BlacklistEnhancer.update();
         Post.find("all").each((post) => { post.updateVisibility(); });
 
         return Promise.resolve();
