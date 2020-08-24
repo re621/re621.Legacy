@@ -71,6 +71,8 @@ export class PostViewer extends RE6Module {
 
             upvoteOnFavorite: true,     // add an upvote when adding the post to favorites
             hideNotes: false,           // should the notes be hidden by default
+
+            moveChildThumbs: true,      // Moves the parent/child post thumbnails to under the searchbar
         };
     }
 
@@ -115,8 +117,13 @@ export class PostViewer extends RE6Module {
             .attr("data-hidden", this.fetchSettings("hideNotes"));
 
         // Move child/parent indicator, leave others as is, like marked for deleteion
-        const $bottomNotices = $(".parent-children");
-        $bottomNotices.insertAfter($("#search-box"));
+        if (this.fetchSettings("moveChildThumbs"))
+            $(".parent-children")
+                .addClass("children-moved")
+                .insertAfter($("#search-box"));
+
+        // Bolden the tags
+        this.toggleBoldenedTags(this.fetchSettings<boolean>("boldenTags"));
 
         // Listen to favorites button click
         $("#add-fav-button").on("click", () => {

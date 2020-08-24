@@ -197,7 +197,7 @@ export class SettingsController extends RE6Module {
 
             Form.accordion({ name: "gencollapse", columns: 3, width: 3, active: 0 }, [
 
-                // Title Customizer
+                // Page Layout
                 Form.accordionTab({ name: "layout", label: "Layout", columns: 3, width: 3 }, [
 
                     Form.div({ value: "<b>Main Page</b><br />Reroute the title page to the one specified", width: 2 }),
@@ -301,6 +301,21 @@ export class SettingsController extends RE6Module {
                         }
                     ),
                     Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: postViewer.fetchSettings("moveChildThumbs"),
+                            label: "<b>Move Related Thumbnails</b><br />Moves the parent / child thumbnails to the sidebar",
+                            width: 2,
+                        },
+                        async (data) => {
+                            await postViewer.pushSettings("moveChildThumbs", data);
+                        }
+                    ),
+                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
+                    Form.hr(3),
+
+                    // ------------------------------------------ //
 
                     Form.checkbox(
                         {
