@@ -27,7 +27,6 @@ import { PoolNavigator } from "../post/PoolNavigator";
 import { PostViewer } from "../post/PostViewer";
 import { TitleCustomizer } from "../post/TitleCustomizer";
 import { BetterSearch } from "../search/BetterSearch";
-import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
 import { CustomFlagger, FlagDefinition } from "../search/CustomFlagger";
 import { SearchUtilities } from "../search/SearchUtilities";
 import { ForumTracker } from "../subscriptions/ForumTracker";
@@ -187,7 +186,7 @@ export class SettingsController extends RE6Module {
         const titleCustomizer = ModuleController.get(TitleCustomizer),
             miscellaneous = ModuleController.get(Miscellaneous),
             postViewer = ModuleController.get(PostViewer),
-            blacklistEnhancer = ModuleController.get(BlacklistEnhancer),
+            // blacklistEnhancer = ModuleController.get(BlacklistEnhancer),
             imageScaler = ModuleController.get(ImageScaler),
             headerCustomizer = ModuleController.get(HeaderCustomizer),
             searchUtilities = ModuleController.get(SearchUtilities),

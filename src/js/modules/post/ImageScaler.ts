@@ -86,14 +86,7 @@ export class ImageScaler extends RE6Module {
                 }
             });
 
-        $("<a>")
-            .attr({
-                "href": this.post.file.original,
-                "id": "re621-imagescaler-fullscreen",
-            })
-            .addClass("button btn-neutral")
-            .html("Fullscreen")
-            .appendTo(resizeButtonContainer);
+        $("#image-download-link a").html("Fullscreen");
 
         this.image.click(async () => {
             if (!this.fetchSettings("clickScale") || await Danbooru.Note.TranslationMode.active()) return;

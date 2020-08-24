@@ -136,7 +136,7 @@ export class PostParts {
             .attr("src", DomUtilities.getPlaceholderImage())
             .one("load", () => { post.$ref.removeAttr("loading"); });
 
-        if (conf.hoverTags) $image.attr("title", formatHoverText(post));
+        if (conf.hoverTags) $image.attr("title", PostParts.formatHoverText(post));
 
         // Load appropriate image
         if (post.flags.has(PostFlag.Deleted)) {
@@ -199,16 +199,6 @@ export class PostParts {
 
         return $image;
 
-        /** Returns a formatted tag string for the image's hover text */
-        function formatHoverText(post: Post, html = false): string {
-            const br = html ? "<br>\n" : "\n";
-            return `` +
-                `Post #${post.id}, posted on: ${Util.Time.format(post.date.raw)} (${post.date.ago})${br}` +
-                `${[...post.tags.artist, ...post.tags.copyright].join(" ")}${br}` +
-                `${[...post.tags.character, ...post.tags.species].join(" ")}${br}` +
-                `${[...post.tags.general, ...post.tags.invalid, ...post.tags.lore, ...post.tags.meta].join(" ")}${br}` +
-                ``;
-        }
 
         /** Determines the size of the image to load */
         function getRequiredImageSize(cur: LoadedFileType, req: ImageLoadMethod): LoadedFileType {
@@ -400,6 +390,17 @@ export class PostParts {
                 <span class="post-info-rating rating-${post.rating}">${post.rating}</span>
             `;
         }
+    }
+
+    /** Returns a formatted tag string for the image's hover text */
+    public static formatHoverText(post: Post, html = false): string {
+        const br = html ? "<br>\n" : "\n";
+        return `` +
+            `Post #${post.id}, posted on: ${Util.Time.format(post.date.raw)} (${post.date.ago})${br}` +
+            `${[...post.tags.artist, ...post.tags.copyright].join(" ")}${br}` +
+            `${[...post.tags.character, ...post.tags.species].join(" ")}${br}` +
+            `${[...post.tags.general, ...post.tags.invalid, ...post.tags.lore, ...post.tags.meta].join(" ")}${br}` +
+            ``;
     }
 
 }

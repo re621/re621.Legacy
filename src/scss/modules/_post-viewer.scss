@@ -29,34 +29,40 @@ section#image-extra-controls {
         width: 6rem;
         text-align: center;
         position: relative;
-
-        &[loading=true] {
-            font-size: 0;
-
-            &:before {
-                content: "\f1ce";
-                font-family: "Font Awesome 5 Free";
-                font-weight: 900;
-                animation: fa-spin 2s infinite linear;
-                font-size: initial;
-                line-height: 1.3rem;
-                position: absolute;
-                left: 0;
-                right: 0;
-            }
-        }
     }
 
-    div#image-add-links > a {
+    div#image-add-links > a,
+    div#image-custdownload-links > a {
         margin-right: 0.5rem;
         &:last-child { margin-right: 0; }
     }
 
     div#image-resize-cycle {
         select {
-            margin-right: 0.5rem;
+            height: 1.75rem;
             vertical-align: unset;
             cursor: pointer;
+        }
+    }
+
+    div#image-custdownload-links > a {
+        text-align: center;
+        position: relative;
+
+        &[loading=true] {
+            color: transparent;
+
+            &:before {
+                content: "\f1ce";
+                font-family: "Font Awesome 5 Free";
+                font-weight: 900;
+                animation: fa-spin 2s infinite linear;
+                color: #aaa;
+                line-height: 1.3rem;
+                position: absolute;
+                left: 0;
+                right: 0;
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 import { XM } from "../../components/api/XM";
 import { PageDefintion } from "../../components/data/Page";
 import { Post } from "../../components/post/Post";
+import { PostParts } from "../../components/post/PostParts";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
@@ -9,7 +10,6 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 export class DownloadCustomizer extends RE6Module {
 
     private post: Post;
-    private link: JQuery<HTMLElement>;
 
     public constructor() {
         super(PageDefintion.post, true);
@@ -35,33 +35,66 @@ export class DownloadCustomizer extends RE6Module {
 
         this.post = Post.getViewingPost();
 
-        this.link = $("#image-download-link a").first();
-        this.refreshDownloadLink();
+        const downloadContainer = $("<div>")
+            .attr("id", "image-custdownload-links")
+            .appendTo("#image-extra-controls")
 
-        this.link.click(event => {
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            this.link.attr("loading", "true");
-            XM.Connect.download({
-                url: this.link.attr("href"),
-                name: this.link.attr("download"),
-                onload: () => { this.link.removeAttr("loading"); }
+        const link = $("<a>")
+            .attr({
+                id: "image-custdownload-file",
+                href: this.post.file.original,
+                download: this.parseTemplate(),
+            })
+            .html("Download")
+            .addClass("button btn-neutral")
+            .appendTo(downloadContainer)
+            .on("click", (event) => {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                link.attr("loading", "true");
+                XM.Connect.download({
+                    url: link.attr("href"),
+                    name: link.attr("download"),
+                    onload: () => { link.removeAttr("loading"); }
+                });
             });
-        });
+
+        const tags = $("<a>")
+            .attr({
+                id: "image-custdownload-tags",
+                href: this.getTagsBlock(),
+                download: this.parseTemplate("txt"),
+            })
+            .html("Tags")
+            .addClass("button btn-neutral")
+            .appendTo(downloadContainer)
+            .on("click", () => {
+                tags.attr("loading", "true");
+
+                tags.attr({
+                    loading: "false",
+                    href: this.getTagsBlock(),
+                });
+            });
     }
 
-    /**
-     * Creates a download link with the saved template
-     */
+    /** Creates a download link with the saved template */
     public refreshDownloadLink(): void {
-        this.link.attr("download", this.parseTemplate());
+        $("#image-custdownload-file").attr("download", this.parseTemplate());
+    }
+
+    private getTagsBlock(): string {
+        return URL.createObjectURL(new Blob(
+            [PostParts.formatHoverText(this.post)],
+            { type: 'text/plain' }
+        ));
     }
 
     /**
      * Parses the download link template, replacing variables with their corresponding values
      * @returns string Download link
      */
-    private parseTemplate(): string {
+    private parseTemplate(ext?: string): string {
         return this.fetchSettings("template")
             .replace(/%postid%/g, this.post.id)
             .replace(/%artist%/g, tagSetToString(this.post.tags.real_artist))
@@ -73,7 +106,7 @@ export class DownloadCustomizer extends RE6Module {
             .slice(0, 128)
             .replace(/-{2,}/g, "-")
             .replace(/-*$/g, "")
-            + "." + this.post.file.ext;
+            + "." + (ext ? ext : this.post.file.ext);
 
         function tagSetToString(tags: Set<string>): string {
             return [...tags].join("-");
