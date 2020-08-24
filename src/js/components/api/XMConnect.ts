@@ -191,14 +191,14 @@ export class XMConnect {
             },
             onload: (event) => {
                 a.onload(event);
-                $("<a>")
+                const btn = $("<a>")
                     .attr({
                         href: URL.createObjectURL(event.response as Blob),
                         download: a.name,
                     })
                     .html("download")
-                    .click(() => { $(this).remove(); })
-                [0].click();
+                    .click(() => { btn.remove(); });
+                btn[0].click();
             }
         });
     };
