@@ -99,6 +99,7 @@ export class ImageScaler extends RE6Module {
             if (!this.fetchSettings("clickScale") || await Danbooru.Note.TranslationMode.active()) return;
             this.setScale("", false);
         });
+        this.toggleClickScale(this.fetchSettings<boolean>("clickScale"));
 
     }
 
@@ -164,6 +165,11 @@ export class ImageScaler extends RE6Module {
     /** Opens the post in fullscreen mode */
     private openFullscreen(): void {
         $("#re621-imagescaler-fullscreen")[0].click();
+    }
+
+    /** Sets the appropriate click-scale style */
+    public toggleClickScale(state = true): void {
+        $("#image-container").toggleClass("click-scale", state);
     }
 
 }

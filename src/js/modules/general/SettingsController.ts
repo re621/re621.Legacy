@@ -780,7 +780,10 @@ export class SettingsController extends RE6Module {
                             label: "<b>Quick Rescale</b><br />Click on a post image to cycle through scaling options",
                             width: 3,
                         },
-                        async (data) => { await imageScaler.pushSettings("clickScale", data); }
+                        async (data) => {
+                            await imageScaler.pushSettings("clickScale", data);
+                            imageScaler.toggleClickScale(data);
+                        }
                     ),
                     Form.spacer(3),
 
