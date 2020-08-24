@@ -73,6 +73,7 @@ export class PostViewer extends RE6Module {
             hideNotes: false,           // should the notes be hidden by default
 
             moveChildThumbs: true,      // Moves the parent/child post thumbnails to under the searchbar
+            boldenTags: true,           // Restores the classic bold look on non-general tags
         };
     }
 
@@ -130,6 +131,11 @@ export class PostViewer extends RE6Module {
             if (this.fetchSettings("upvoteOnFavorite"))
                 Danbooru.Post.vote(this.post.id, 1, true);
         });
+    }
+
+    /** Toggles the boldened look on sidebar tags */
+    public toggleBoldenedTags(state = true): void {
+        $("#tag-list").toggleClass("tags-boldened", state);
     }
 
     /** Emulates a click on the upvote button */

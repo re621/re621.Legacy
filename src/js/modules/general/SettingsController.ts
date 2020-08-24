@@ -313,6 +313,19 @@ export class SettingsController extends RE6Module {
                         }
                     ),
                     Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: postViewer.fetchSettings("boldenTags"),
+                            label: "<b>Boldened Tags</b><br />Restore the classic boldened look on the sidebar tags",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await postViewer.pushSettings("boldenTags", data);
+                            postViewer.toggleBoldenedTags(data);
+                        }
+                    ),
                     Form.hr(3),
 
                     // ------------------------------------------ //
