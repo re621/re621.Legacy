@@ -37,6 +37,10 @@ section#image-container {
 
 }
 
+div#image-resize-notice {
+    display: none;
+}
+
 @keyframes loading-rotation {
     from {
         transform: rotate(0deg);
