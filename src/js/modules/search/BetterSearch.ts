@@ -5,6 +5,7 @@ import { Page, PageDefintion } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { Post } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
+import { PostParts } from "../../components/post/PostParts";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Util } from "../../components/utility/Util";
@@ -693,7 +694,7 @@ export class BetterSearch extends RE6Module {
 
             // Append the tags block
             if (this.fetchSettings("zoomTags"))
-                this.$zoomTags.html(post.tagString);
+                this.$zoomTags.html(PostParts.formatHoverText(post, true, true));
 
             // Listen for mouse movements to move the preview accordingly
             let throttled = false;

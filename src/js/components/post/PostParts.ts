@@ -393,8 +393,14 @@ export class PostParts {
     }
 
     /** Returns a formatted tag string for the image's hover text */
-    public static formatHoverText(post: Post, html = false): string {
+    public static formatHoverText(post: Post, compact = false, html = false): string {
         const br = html ? "<br>\n" : "\n";
+        if (compact)
+            return `` +
+                `${[...post.tags.artist, ...post.tags.copyright].join(" ")} ` +
+                `${[...post.tags.character, ...post.tags.species].join(" ")} ` +
+                `${[...post.tags.general, ...post.tags.invalid, ...post.tags.lore, ...post.tags.meta].join(" ")}` +
+                ``;
         return `` +
             `Post #${post.id}, posted on: ${Util.Time.format(post.date.raw)} (${post.date.ago})${br}` +
             `${[...post.tags.artist, ...post.tags.copyright].join(" ")}${br}` +
