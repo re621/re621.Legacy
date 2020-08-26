@@ -368,8 +368,8 @@ export class BetterSearch extends RE6Module {
             .appendTo(this.$zoomBlock);
         this.$zoomVideo = $("<video controls autoplay loop></video>")
             .attr({
-                poster: DomUtilities.getPlaceholderImage(),
-                src: "/images/deleted-preview.png",
+                poster: "",
+                src: "",
                 muted: "muted",
             })
             .addClass("display-none")
@@ -753,10 +753,11 @@ export class BetterSearch extends RE6Module {
                 .attr("src", DomUtilities.getPlaceholderImage());
             this.$zoomVideo
                 .addClass("display-none")
-                .attr({
-                    "poster": "/images/deleted-preview.png",
-                    "src": "/images/deleted-preview.png",
-                    "muted": "",
+                .attr({ "muted": "", });
+            if (this.$zoomVideo.attr("src") !== "")
+                this.$zoomVideo.attr({
+                    "poster": "",
+                    "src": "",
                 });
             window.clearTimeout(videoTimeout);
             this.$zoomTags.html("");
