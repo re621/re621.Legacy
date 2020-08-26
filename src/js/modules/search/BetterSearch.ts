@@ -366,7 +366,7 @@ export class BetterSearch extends RE6Module {
             .attr("src", DomUtilities.getPlaceholderImage())
             .addClass("display-none")
             .appendTo(this.$zoomBlock);
-        this.$zoomVideo = $("<video controls autoplay loop></video>")
+        this.$zoomVideo = $("<video controls autoplay loop muted></video>")
             .attr({
                 poster: "",
                 src: "",
