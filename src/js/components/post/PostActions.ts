@@ -71,7 +71,74 @@ export class PostActions {
                 return Promise.resolve(false);
             }
         );
-
     }
 
+    /**
+     * Records a vote for the specified post
+     * @param postID Post ID
+     * @param score -1 to downvote, 1 to upvote, 0 to remove the vote
+     * @param preventUnvote If true, voting will fail if a vote of the same type (-1 / 1) already exsits
+     */
+    public static vote(postID: number, score: number, preventUnvote = false): Promise<VoteReponse> {
+        return new Promise((resolve) => {
+            E621.PostVotes.id(postID).post({ score: score, no_unvote: preventUnvote }).then(
+                (success) => {
+                    console.log(success);
+                    resolve({
+                        success: true,
+                        action: success[0].our_score,
+                        score: success[0].score,
+                        up: success[0].up,
+                        down: success[0].down
+                    })
+                },
+                (error) => {
+                    console.log(error);
+                    resolve({ success: false });
+                }
+            )
+        });
+    }
+
+    /**
+     * Adds the specified post to favorites
+     * @param postID Post ID
+     * @returns True if the operation was successful, false otherwise
+     */
+    public static addFavorite(postID: number): Promise<boolean> {
+        return new Promise((resolve) => {
+            E621.Favorites.post({ "post_id": postID }).then(
+                (response) => { console.log(response); resolve(true); },
+                (error) => { console.log(error); resolve(false); }
+            );
+        });
+    }
+
+    /**
+     * Removes the specified post from favorites
+     * @param postID Post ID
+     * @returns True if the operation was successful, false otherwise
+     */
+    public static removeFavorite(postID: number): Promise<boolean> {
+        return new Promise((resolve) => {
+            E621.Favorite.id(postID).delete().then(
+                (response) => { console.log(response); resolve(true); },
+                (error) => { console.log(error); resolve(false); }
+            );
+        });
+    }
+
+}
+
+interface VoteReponse {
+    /** If false, an error has occurred, and the rest of the values do not exist */
+    success: boolean;
+    /** -1 for downvote, 1 for upvote, 0 for unvote */
+    action?: -1 | 0 | 1;
+    /** Final score of the post */
+    score?: number;
+    /** Total number of upvotes */
+    up?: number;
+    /** Total number of downvotes */
+    down?: number;
 }

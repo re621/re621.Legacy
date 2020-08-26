@@ -1,19 +1,21 @@
 import { Page, PageDefintion } from "../../components/data/Page";
-import { Post } from "../../components/data/Post";
-import { PostFilter } from "../../components/data/PostFilter";
+import { ModuleController } from "../../components/ModuleController";
+import { Post, PostData } from "../../components/post/Post";
+import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { BetterSearch } from "./BetterSearch";
 
 export class CustomFlagger extends RE6Module {
 
     private static filters: Map<string, FilterPair>;
 
     public constructor() {
-        super([PageDefintion.post, PageDefintion.search, PageDefintion.favorites, PageDefintion.popular], true);
+        super([PageDefintion.post, PageDefintion.search, PageDefintion.favorites, PageDefintion.popular], true, [BetterSearch]);
     }
 
     protected getDefaultSettings(): Settings {
         return {
-            enabled: true,
+            enabled: false,
             flags: [
                 //    { name: "CHARS", color: "#800000", tags: "-solo -duo -group -zero_pictured" },
                 //    { name: "TAGS", color: "#008000", tags: "tagcount:<5" },
@@ -23,45 +25,77 @@ export class CustomFlagger extends RE6Module {
     }
 
     public create(): void {
-
-        const posts = Post.fetchPosts();
-        CustomFlagger.filters = new Map();
-        for (const flag of this.fetchSettings<FlagDefinition[]>("flags")) {
-            if (CustomFlagger.filters.get(flag.tags)) continue;
-            CustomFlagger.filters.set(
-                flag.tags,
-                { data: flag, filter: new PostFilter(flag.tags, true) }
-            );
-        }
-
-        if (Page.matches(PageDefintion.post)) {
+        if (Page.matches(PageDefintion.post))
             this.createPostPage();
-        } else {
-            posts.forEach((post) => {
-                CustomFlagger.modifyThumbnail(post);
-            });
+    }
+
+    private static get(): Map<string, FilterPair> {
+        if (CustomFlagger.filters == undefined) {
+            CustomFlagger.filters = new Map();
+            for (const flag of ModuleController.get(CustomFlagger).fetchSettings<FlagDefinition[]>("flags")) {
+                if (CustomFlagger.filters.get(flag.tags)) continue;
+                CustomFlagger.filters.set(
+                    flag.tags,
+                    { data: flag, filter: new PostFilter(flag.tags, true) }
+                );
+            }
         }
+        return CustomFlagger.filters;
+    }
+
+    /**
+     * Adds the post to the flag cache
+     * @param posts Post(s) to add to the cache
+     * @returns Number of filters that match the post
+     */
+    public static addPost(...posts: PostData[]): number {
+        let count = 0;
+        for (const filterPair of CustomFlagger.get().values()) {
+            if (filterPair.filter.update(posts)) count++;
+        }
+        return count;
+    }
+
+    /**
+     * Alias of `addPost`, to avoid ambiguity
+     * @param posts Post(s) to update
+     * @returns Number of filters that match the post
+     */
+    public static updatePost(...posts: PostData[]): number {
+        return CustomFlagger.addPost(...posts);
+    }
+
+    /** Returns true if the post is in the blacklist cache */
+    public static getFlags(post: PostData | number): FlagDefinition[] {
+        if (typeof post !== "number") post = post.id;
+        const output: FlagDefinition[] = [];
+        for (const filterPair of CustomFlagger.get().values()) {
+            if (filterPair.filter.matchesID(post))
+                output.push(filterPair.data);
+        }
+        return output;
     }
 
     /**
      * Special case for the individual post page.  
      * Flags are added to the editing form, under the list of tags
      */
-    protected createPostPage(): void {
-        const viewingPost = Post.getViewingPost();
+    private createPostPage(): void {
+
+        const post = Post.getViewingPost();
+        CustomFlagger.addPost(post);
+
         const flagContainer = $("<div>").insertAfter("div.input#tags-container");
         let activeFlags = 0;
 
         // Fill in the filters and add flags to matching ones
-        CustomFlagger.filters.forEach((entry) => {
-            entry.filter.addPost(viewingPost, false);
-            if (!entry.filter.matchesPost(viewingPost)) return;
+        for (const flag of CustomFlagger.getFlags(post)) {
             $("<div>")
                 .addClass("custom-flag")
-                .html(`<span class="custom-flag-title" style="--flag-color: ${entry.data.color}">${entry.data.name}</span> ${entry.data.tags}`)
+                .html(`<span class="custom-flag-title" style="--flag-color: ${flag.color}">${flag.name}</span> ${flag.tags}`)
                 .appendTo(flagContainer);
             activeFlags++;
-        });
+        }
 
         // Add a header if any flags have been added
         if (activeFlags > 0)
@@ -69,37 +103,6 @@ export class CustomFlagger extends RE6Module {
                 .html("Flags")
                 .addClass("display-block")
                 .prependTo(flagContainer);
-    }
-
-    /**
-     * Check if the provided post matches any flags, and add appropriate badges if it does
-     * @param post Post to check
-     */
-    public static async modifyThumbnail(post: Post): Promise<void> {
-        // Sometimes, the image might not be wrapped in a picture tag properly
-        // This is most common on comment pages and the like
-        // If that bug gets fixed, this code can be removed
-        let $picture = post.getDomElement().find("picture");
-        if ($picture.length == 0) {
-            const $img = post.getDomElement().find("img");
-            $picture = $("<picture>").insertAfter($img).append($img);
-        }
-
-        // Create a flag container
-        const flagContainer = $("<div>")
-            .addClass("flag-container")
-            .appendTo(post.getDomElement().find("picture"));
-
-        // Determine active flags and append badges
-        CustomFlagger.filters.forEach((entry) => {
-            entry.filter.addPost(post, false);
-            if (!entry.filter.matchesPost(post)) return;
-            $("<span>")
-                .addClass("custom-flag-thumb")
-                .html(entry.data.name)
-                .css("--flag-color", entry.data.color)
-                .appendTo(flagContainer);
-        });
     }
 
 }
@@ -110,7 +113,7 @@ export interface FlagDefinition {
     tags: string;
 }
 
-interface FilterPair {
+export interface FilterPair {
     data: FlagDefinition;
     filter: PostFilter;
 }

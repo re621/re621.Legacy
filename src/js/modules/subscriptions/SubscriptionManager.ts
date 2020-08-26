@@ -9,7 +9,7 @@ import { Tabbed, TabContent } from "../../components/structure/Tabbed";
 import { Debug } from "../../components/utility/Debug";
 import { Sync } from "../../components/utility/Sync";
 import { Util } from "../../components/utility/Util";
-import { ThumbnailClickAction, ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
+import { BetterSearch, ImageClickAction } from "../search/BetterSearch";
 import { CommentTracker } from "./CommentTracker";
 import { ForumTracker } from "./ForumTracker";
 import { PoolTracker } from "./PoolTracker";
@@ -517,7 +517,7 @@ export class SubscriptionManager extends RE6Module {
         if (cache.getSize() > 0)    // Can be appended anywhere, sorting is done through CSS
             trackerData.content.append(this.createCacheDivider());
 
-        const clickAction = ThumbnailEnhancer.getClickAction();
+        const clickAction = ModuleController.get(BetterSearch).fetchSettings<ImageClickAction>("clickAction");
 
         cache.forEach((content, timestamp) => {
             trackerData.content.append(this.createUpdateEntry(timestamp, content, trackerData, clickAction));
@@ -795,7 +795,7 @@ export class SubscriptionManager extends RE6Module {
                 window.clearTimeout(dbclickTimer);
                 prevent = true;
 
-                if (clickAction === ThumbnailClickAction.NewTab) XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
+                if (clickAction === ImageClickAction.NewTab) XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
                 else {
                     $link.off("click.re621.thumbnail");
                     $link[0].click();

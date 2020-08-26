@@ -1,16 +1,77 @@
-//make image container square, instead of what it was before
-.post-thumbnail.filtered {
-    & img {
-        width: 100%;
-        height: 100%;
+/** Replacement Blacklist Filtering Styles */
+
+// Hide blacklist if it's empty
+section#re621-blacklist[count="0"][discount="0"] {
+    display: none;
+}
+
+// Header
+blacklist-header {
+    display: block;
+    font-size: 1.16667em;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+    cursor: pointer;
+}
+
+section#re621-blacklist > blacklist-header::before {
+    content: unicode("f0d7");
+    display: inline-block;
+    margin-right: 0.5rem;
+    font-family: "Font Awesome 5 Free";
+    font-weight: 700;
+    transition: transform 0.25s ease;
+}
+section#re621-blacklist[collapsed=true] > blacklist-header::before {
+    transform: rotate(-90deg);
+}
+
+// Content
+blacklist-content {
+    display: block;
+
+    & > filter {
+        display: list-item;
+        list-style: none;
+        margin-left: 1rem;
+        margin-top: 0.125rem;
+        color: #bbb;
+
+        &::before {
+            content: unicode("f14a");
+            display: inline-block;
+            margin-right: 0.435rem;
+            margin-left: -1.125rem;
+            margin-top: 0.125rem;
+            font-family: "Font Awesome 5 Free";
+            font-weight: 500;
+        }
+
+        & > a {
+            outline: 0 !important;
+        }
+
+        & > span {
+            margin-left: 0.5rem;
+        }
+
+        &[enabled=false] {
+            &::before { content: unicode("f0c8"); }
+            & > a { color: #ccc !important; }
+        }
     }
 }
 
-#blacklist-collapse {
-    display: block;
+section#re621-blacklist[collapsed=true] > blacklist-content {
+    display: none;
 }
 
-span#blacklisted-count {
-    display: inline-block;
-    margin-left: 0.25rem;
+section#re621-blacklist:not([collapsed=true]) > blacklist-content {
+    @include scrollbars;
+}
+
+// Toggle
+blacklist-toggle {
+    display: block;
+    margin-top: 0.25rem;
 }

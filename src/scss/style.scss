@@ -9,13 +9,12 @@
 @import 'components/prompt';
 @import 'components/tabbed';
 
+@import 'modules/better-search';
 @import 'modules/blacklist-enhancer';
 @import 'modules/custom-flagger';
 @import 'modules/formatting-helper';
 @import 'modules/header-customizer';
 @import 'modules/image-scaler';
-@import 'modules/infinite_scroll';
-@import 'modules/instant-search';
 
 @import 'modules/mass-downloader';
 @import 'modules/pool-downloader';
@@ -28,6 +27,5 @@
 @import 'modules/settings-controller';
 @import 'modules/structure-utilities';
 @import 'modules/subscription-manager';
-@import 'modules/thumbnail-enhancer';
 @import 'modules/smart-alias';
 @import 'modules/upload-utilities';

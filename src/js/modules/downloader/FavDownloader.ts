@@ -2,12 +2,11 @@ import { DownloadQueue } from "../../components/api/DownloadQueue";
 import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { PageDefintion } from "../../components/data/Page";
+import { PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
-import { InfiniteScroll } from "../search/InfiniteScroll";
+import { BetterSearch } from "../search/BetterSearch";
 import { MassDownloader } from "./MassDownloader";
-
-declare const saveAs;
 
 export class FavDownloader extends RE6Module {
 
@@ -47,7 +46,6 @@ export class FavDownloader extends RE6Module {
             enabled: true,
             template: "%artist%/%postid%-%copyright%-%character%-%species%",
             autoDownloadArchive: true,
-            fixedSection: true,
         };
     }
 
@@ -62,6 +60,11 @@ export class FavDownloader extends RE6Module {
             })
             .html(`<h1>Download</h1>`)
             .appendTo("aside#sidebar");
+
+        $("#sidebar").on("re621:reflow", () => {
+            this.section.css("top", $("#re621-search").outerHeight() + "px");
+        });
+        $("#sidebar").trigger("re621:reflow");
 
         const usernameMatch = /^(?:.*\s)?fav:([^\s]+)\s.*$/g.exec($("input#tags").val() + "");
         if (usernameMatch == null || usernameMatch[1] == undefined) return;
@@ -106,7 +109,7 @@ export class FavDownloader extends RE6Module {
         this.processing = true;
         this.actButton.attr("disabled", "disabled");
 
-        InfiniteScroll.trigger("pauseScroll", true);
+        BetterSearch.setPaused(true);
 
         this.infoText
             .attr("data-state", "loading")
@@ -218,13 +221,12 @@ export class FavDownloader extends RE6Module {
 
             // Download the resulting ZIP
             const $downloadLink = $("<a>")
-                .attr("href", filename)
+                .attr({
+                    "href": URL.createObjectURL(zipData),
+                    "download": filename,
+                })
                 .html("Download Archive")
-                .appendTo(this.infoText)
-                .on("click", (event) => {
-                    event.preventDefault();
-                    saveAs(zipData, filename);
-                });
+                .appendTo(this.infoText);
 
             if (this.fetchSettings("autoDownloadArchive")) { $downloadLink.get(0).click(); }
 
@@ -243,7 +245,7 @@ export class FavDownloader extends RE6Module {
                         .appendTo(this.infoText);
                 }
             } else {
-                InfiniteScroll.trigger("pauseScroll", false);
+                BetterSearch.setPaused(false);
             }
         });
     }
@@ -253,7 +255,7 @@ export class FavDownloader extends RE6Module {
      * @param data Post data
      */
     private createFilename(data: APIPost): string {
-        return MassDownloader.createFilenameBase(this.fetchSettings<string>("template"), data)
+        return MassDownloader.createFilenameBase(this.fetchSettings<string>("template"), PostData.fromAPI(data)) // TODO Fic this
             .slice(0, 128)
             .replace(/-{2,}/g, "-")
             .replace(/-*$/g, "")

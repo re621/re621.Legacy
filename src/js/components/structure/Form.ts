@@ -290,7 +290,7 @@ export class Form implements PreparedStructure {
             .prop("disabled", options.disabled == true)
             .appendTo($element);
 
-        if (options.value !== undefined) {
+        if (options.value !== undefined && options.value !== null) {
             switch (typeof options.value) {
                 case "function": {
                     options.value($input);
@@ -310,8 +310,10 @@ export class Form implements PreparedStructure {
             }
         }
 
-        if (options.pattern) { $input.attr("pattern", options.pattern); }
-        if (options.required) { $input.attr("required", ''); }
+        if (options.title) $input.attr("title", options.title);
+
+        if (options.pattern) $input.attr("pattern", options.pattern);
+        if (options.required) $input.attr("required", '');
 
         if (changed !== undefined) {
             let timer: number;
@@ -351,7 +353,7 @@ export class Form implements PreparedStructure {
             .addClass("bg-section color-text")
             .appendTo($element);
 
-        if (options.value !== undefined) {
+        if (options.value !== undefined && options.value !== null) {
             switch (typeof options.value) {
                 case "function": {
                     options.value($input);
@@ -379,6 +381,11 @@ export class Form implements PreparedStructure {
             .addClass("button btn-neutral border-highlight border-left")
             .html(`<i class="far fa-copy"></i>`)
             .appendTo($element);
+
+        if (options.title) {
+            $input.attr("title", options.title);
+            $copybutton.attr("title", options.title);
+        }
 
         let copyTimer: number;
         $($copybutton).click(function () {
@@ -416,7 +423,7 @@ export class Form implements PreparedStructure {
             .addClass("bg-section color-text")
             .appendTo($element);
 
-        if (options.value !== undefined) {
+        if (options.value !== undefined && options.value !== null) {
             switch (typeof options.value) {
                 case "function": {
                     options.value($input);
@@ -444,6 +451,11 @@ export class Form implements PreparedStructure {
             .addClass("button btn-neutral border-highlight border-left")
             .html(`<i class="far fa-keyboard"></i>`)
             .appendTo($element);
+
+        if (options.title) {
+            $input.attr("title", options.title);
+            $recordbutton.attr("title", options.title);
+        }
 
         let occupied = false;
         $($recordbutton).click(function () {
@@ -506,6 +518,8 @@ export class Form implements PreparedStructure {
             .prop("disabled", options.disabled == true)
             .appendTo($element);
 
+        if (options.title) $input.attr("title", options.title);
+
         if (changed !== undefined) {
             $input.on("change", () => {
                 changed($input.prop("files"), $input);
@@ -533,7 +547,7 @@ export class Form implements PreparedStructure {
             .css("display", "none")
             .appendTo($element);
 
-        if (options.value !== undefined) {
+        if (options.value !== undefined && options.value !== null) {
             switch (typeof options.value) {
                 case "function": {
                     options.value($input);
@@ -613,7 +627,7 @@ export class Form implements PreparedStructure {
             .prop("disabled", options.disabled == true)
             .appendTo($element);
 
-        if (options.value !== undefined) {
+        if (options.value !== undefined && options.value !== null) {
             switch (typeof options.value) {
                 case "function": {
                     options.value($input);
@@ -633,6 +647,8 @@ export class Form implements PreparedStructure {
                 }
             }
         }
+
+        if (options.title) $input.attr("title", options.title);
 
         if (changed !== undefined)
             $input.on("click", (event) => {
@@ -665,7 +681,7 @@ export class Form implements PreparedStructure {
             .prop("disabled", options.disabled == true)
             .appendTo($element);
 
-        if (options.value !== undefined) {
+        if (options.value !== undefined && options.value !== null) {
             switch (typeof options.value) {
                 case "function": {
                     options.value($input);
@@ -730,7 +746,7 @@ export class Form implements PreparedStructure {
             for (const key in content)
                 $("<option>").val(key).text(content[key]).appendTo($input);
         }
-        if (options.value !== undefined) {
+        if (options.value !== undefined && options.value !== null) {
             switch (typeof options.value) {
                 case "function": {
                     options.value($input);
@@ -749,6 +765,8 @@ export class Form implements PreparedStructure {
                 }
             }
         }
+
+        if (options.title) $input.attr("title", options.title);
 
         if (changed !== undefined)
             $input.on("change", () => { changed($input.val().toString(), $input); });
@@ -789,7 +807,7 @@ export class Form implements PreparedStructure {
             .addClass("text-div")
             .attr("id", options.name);
 
-        if (options.value !== undefined) {
+        if (options.value !== undefined && options.value !== null) {
             switch (typeof options.value) {
                 case "function": {
                     options.value($element);
@@ -803,9 +821,7 @@ export class Form implements PreparedStructure {
                 case "boolean":
                     options.value = options.value + "";
                 default: {
-                    $element
-                        .html(options.value)
-                        .attr("defval", options.value);
+                    $element.html(options.value);
                 }
             }
         }
@@ -993,6 +1009,8 @@ interface ElementOptions {
     name?: string;
     /** Input label text */
     label?: string;
+    /** Text displayed on hover */
+    title?: string;
     /** Input value, if applicable */
     value?: string | boolean | number | JQuery<HTMLElement> | ElementInputValue;
     /** Column span, between 1 and 3 */

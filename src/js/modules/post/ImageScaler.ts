@@ -1,7 +1,8 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { PageDefintion } from "../../components/data/Page";
-import { Post } from "../../components/data/Post";
+import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
+import { Post } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
@@ -35,7 +36,7 @@ export class ImageScaler extends RE6Module {
 
             clickScale: true,
 
-            size: "fit-vertical",
+            size: ImageSize.Fill,
         };
     }
 
@@ -54,10 +55,10 @@ export class ImageScaler extends RE6Module {
 
         this.resizeSelector = $("<select>")
             .html(`
-                <option value="sample">Sample</option>
-                <option value="fit-vertical">Fill Screen</option>
-                <option value="fit-horizontal">Fit Horizontally</option>
-                <option value="original">Original</option>
+                <option value="${ImageSize.Sample}">Sample</option>
+                <option value="${ImageSize.Fill}">Fill Screen</option>
+                <option value="${ImageSize.Fit}">Fit Horizontally</option>
+                <option value="${ImageSize.Original}">Original</option>
             `)
             .val(this.fetchSettings("size"))
             .addClass("button btn-neutral")
@@ -65,22 +66,33 @@ export class ImageScaler extends RE6Module {
             .change(async (event, save) => {
                 const size = $(event.target).val() + "";
                 this.setImageSize(size);
-                if (save !== false) await this.pushSettings("size", size);
+                if (save !== false) {
+                    await this.pushSettings("size", size);
+                    switch (size) {
+                        case ImageSize.Sample: {
+                            await User.setSettings({ default_image_size: "large" });
+                            break;
+                        }
+                        case ImageSize.Fill:
+                        case ImageSize.Fit: {
+                            await User.setSettings({ default_image_size: "fit" });
+                            break;
+                        }
+                        case ImageSize.Original: {
+                            await User.setSettings({ default_image_size: "original" });
+                            break;
+                        }
+                    }
+                }
             });
 
-        $("<a>")
-            .attr({
-                "href": this.post.getImageURL(),
-                "id": "re621-imagescaler-fullscreen",
-            })
-            .addClass("button btn-neutral")
-            .html("Fullscreen")
-            .appendTo(resizeButtonContainer);
+        $("#image-download-link a").html("Fullscreen");
 
         this.image.click(async () => {
             if (!this.fetchSettings("clickScale") || await Danbooru.Note.TranslationMode.active()) return;
             this.setScale("", false);
         });
+        this.toggleClickScale(this.fetchSettings<boolean>("clickScale"));
 
     }
 
@@ -114,27 +126,27 @@ export class ImageScaler extends RE6Module {
         });
 
         switch (size) {
-            case ("sample"): {
-                this.image.attr("src", this.post.getSampleURL());
+            case (ImageSize.Sample): {
+                this.image.attr("src", this.post.file.sample);
                 break;
             }
-            case ("fit-vertical"): {
+            case (ImageSize.Fill): {
                 this.image.addClass("re621-fit-vertical");
-                if (this.image.attr("src") !== this.post.getImageURL()) {
-                    this.image.attr("src", this.post.getImageURL());
+                if (this.image.attr("src") !== this.post.file.original) {
+                    this.image.attr("src", this.post.file.original);
                 } else { this.image.parent().removeClass("loading"); }
                 break;
             }
-            case ("fit-horizontal"): {
+            case (ImageSize.Fit): {
                 this.image.addClass("re621-fit-horizontal");
-                if (this.image.attr("src") !== this.post.getImageURL()) {
-                    this.image.attr("src", this.post.getImageURL());
+                if (this.image.attr("src") !== this.post.file.original) {
+                    this.image.attr("src", this.post.file.original);
                 } else { this.image.parent().removeClass("loading"); }
                 break;
             }
-            case ("original"): {
-                if (this.image.attr("src") !== this.post.getImageURL()) {
-                    this.image.attr("src", this.post.getImageURL());
+            case (ImageSize.Original): {
+                if (this.image.attr("src") !== this.post.file.original) {
+                    this.image.attr("src", this.post.file.original);
                 } else { this.image.parent().removeClass("loading"); }
                 break;
             }
@@ -148,4 +160,16 @@ export class ImageScaler extends RE6Module {
         $("#re621-imagescaler-fullscreen")[0].click();
     }
 
+    /** Sets the appropriate click-scale style */
+    public toggleClickScale(state = true): void {
+        $("#image-container").toggleClass("click-scale", state);
+    }
+
+}
+
+enum ImageSize {
+    Sample = "sample",
+    Fill = "fit-vertical",
+    Fit = "fit-horizontal",
+    Original = "original",
 }

@@ -44,8 +44,12 @@ export class Sync {
             });
         }
 
+        // Replacement script version
+        const scriptVersion = Util.LS.getItem("re621.version") || window["re621"]["version"];
+
         // Log environment data
-        if (Sync.version !== false && Util.versionCompare(Sync.version as string, window["re621"]["version"]) !== 0) {
+        if ((scriptVersion as string).includes("dev")) Sync.version = scriptVersion;
+        else if (Sync.version !== false && Util.versionCompare(Sync.version as string, scriptVersion) !== 0) {
 
             // Force the changelog to be updated on script update
             Sync.infoUpdate = 0;
@@ -58,7 +62,7 @@ export class Sync {
                 data: JSON.stringify(Sync.getEnvData()),
                 onload: (data) => {
                     Debug.log(data.responseText);
-                    Sync.version = window["re621"]["version"];
+                    Sync.version = scriptVersion;
                 }
             });
         }
@@ -90,7 +94,7 @@ export class Sync {
             osVersion: userAgent.os.version,
             handlerName: XM.info().scriptHandler,
             handlerVersion: XM.info().version,
-            scriptVersion: window["re621"]["version"],
+            scriptVersion: Util.LS.getItem("re621.version") || window["re621"]["version"],
         };
     }
 

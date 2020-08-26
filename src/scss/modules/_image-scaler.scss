@@ -23,7 +23,6 @@ section#image-container {
     img#image {
         height: unset;
         width: unset;
-        cursor: pointer;
 
         &.re621-fit-horizontal {
             max-width: 100%;
@@ -35,6 +34,14 @@ section#image-container {
         }
     }
 
+    &.click-scale img#image {
+        cursor: pointer;
+    }
+
+}
+
+div#image-resize-notice {
+    display: none;
 }
 
 @keyframes loading-rotation {

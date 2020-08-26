@@ -5,11 +5,7 @@ section#downloader-box {
     grid-template-columns: 1fr 1fr;
     grid-column-gap: 0.5rem;
     grid-row-gap: 0.5rem;
-
-    &[data-fixed=true] {
-        position: sticky;
-        top: 10rem;
-    }
+    top: 10rem;
 
     h1 {
         grid-column: span 2;
@@ -98,17 +94,9 @@ section#downloader-box {
     }
 }
 
-body[data-sticky-header=true] section#downloader-box {
-    top: 12.5rem;
-}
+search-content[data-downloading=true] {
 
-div#posts-container[data-downloading=true] {
-
-    article.post-preview.download-item {
-
-        a {
-            outline: 0;
-        }
+    post.download-item {
 
         &::before {
             content: "";
@@ -156,7 +144,7 @@ div#posts-container[data-downloading=true] {
         }
     }
 
-    article.post-preview.ui-selecting {
+    post.ui-selecting {
         &::after {
             content: "";
 

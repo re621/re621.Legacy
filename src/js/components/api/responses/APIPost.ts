@@ -92,6 +92,55 @@ enum PostRatingAliases {
     "explicit" = PostRating.Explicit,
 }
 
+export enum PostFlag {
+    /** Post in the modqueue that has not been approved / disapproved yet */
+    Pending = "pending",
+    /** Post that has been flagged for moderation - duplicate, DNP, etc */
+    Flagged = "flagged",
+    /** Post that has been deleted. Indicates that the image file will return `null` */
+    Deleted = "deleted",
+
+    // Not working correctly
+    // NoteLocked = "note_locked",
+    // StatusLocked = "status_locked",
+    // RatingLocked = "rating_locked",
+}
+
+export namespace PostFlag {
+
+    export function get(post: APIPost): Set<PostFlag> {
+        const flags: Set<PostFlag> = new Set();
+        if (post.flags.deleted) flags.add(PostFlag.Deleted);
+        if (post.flags.flagged) flags.add(PostFlag.Flagged);
+        if (post.flags.pending) flags.add(PostFlag.Pending);
+        return flags;
+    }
+
+    export function getString(post: APIPost): string {
+        return [...PostFlag.get(post)].join(" ");
+    }
+
+    export function fromSingle(input: string): PostFlag {
+        input = input.toLowerCase().trim();
+        switch (input) {
+            case "pending": return PostFlag.Pending;
+            case "flagged": return PostFlag.Flagged;
+            case "deleted": return PostFlag.Deleted;
+        }
+        return null;
+    }
+
+    export function fromString(input: string): Set<PostFlag> {
+        const parts = new Set(input.split(" "));
+        const flags: Set<PostFlag> = new Set();
+        if (parts.has("deleted")) flags.add(PostFlag.Deleted);
+        if (parts.has("flagged")) flags.add(PostFlag.Flagged);
+        if (parts.has("pending")) flags.add(PostFlag.Pending);
+        return flags;
+    }
+
+}
+
 export namespace PostRating {
     export function fromValue(value: string): PostRating {
         return PostRatingAliases[value];
@@ -104,6 +153,15 @@ export namespace PostRating {
             }
         }
         return undefined;
+    }
+
+    export function toFullString(postRating: PostRating): string {
+        switch (postRating.toLowerCase()) {
+            case "s": return "safe";
+            case "q": return "questionable";
+            case "e": return "explicit";
+        }
+        return null;
     }
 }
 
@@ -126,20 +184,8 @@ export namespace APIPost {
         return APIPost.getTags(post).join(" ");
     }
 
-    export function getFlagString(post: APIPost): string {
-        const flags = [];
-        if (post.flags.deleted) flags.push("deleted");
-        if (post.flags.flagged) flags.push("flagged");
-        if (post.flags.pending) flags.push("pending");
-        return flags.join(" ");
-    }
-
-    export function getFlagSet(post: APIPost): Set<string> {
-        const flags: Set<string> = new Set();
-        if (post.flags.deleted) flags.add("deleted");
-        if (post.flags.flagged) flags.add("flagged");
-        if (post.flags.pending) flags.add("pending");
-        return flags;
+    export function getTagSet(post: APIPost): Set<string> {
+        return new Set(APIPost.getTags(post));
     }
 
     /**

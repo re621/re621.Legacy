@@ -1,9 +1,8 @@
 import { Danbooru } from "../../components/api/Danbooru";
-import { FavoriteCache } from "../../components/cache/FavoriteCache";
 import { PageDefintion } from "../../components/data/Page";
-import { Post, ViewingPost } from "../../components/data/Post";
-import { PostActions } from "../../components/data/PostActions";
 import { ModuleController } from "../../components/ModuleController";
+import { Post } from "../../components/post/Post";
+import { PostActions } from "../../components/post/PostActions";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
@@ -11,13 +10,15 @@ import { RE6Module, Settings } from "../../components/RE6Module";
  */
 export class PostViewer extends RE6Module {
 
-    private post: ViewingPost;
+    private post: Post;
 
     public constructor() {
         super(PageDefintion.post, true);
         this.registerHotkeys(
             { keys: "hotkeyUpvote", fnct: this.triggerUpvote },
+            { keys: "hotkeyUpvoteNU", fnct: this.triggerUpvoteNU },
             { keys: "hotkeyDownvote", fnct: this.triggerDownvote },
+            { keys: "hotkeyDownvoteNU", fnct: this.triggerDownvoteNU },
 
             { keys: "hotkeyFavorite", fnct: this.toggleFavorite },
             { keys: "hotkeyAddFavorite", fnct: this.addFavorite },
@@ -47,7 +48,9 @@ export class PostViewer extends RE6Module {
         return {
             enabled: true,
             hotkeyUpvote: "w",          // vote up on the current post
+            hotkeyUpvoteNU: "",         // vote up, don't unvote
             hotkeyDownvote: "s",        // vote down on the current post
+            hotkeyDownvoteNU: "",       // vote down, don't unvote
 
             hotkeyFavorite: "f",        // toggle the favorite state of the post
             hotkeyAddFavorite: "",      // add current post to favorites
@@ -72,6 +75,9 @@ export class PostViewer extends RE6Module {
 
             upvoteOnFavorite: true,     // add an upvote when adding the post to favorites
             hideNotes: false,           // should the notes be hidden by default
+
+            moveChildThumbs: true,      // Moves the parent/child post thumbnails to under the searchbar
+            boldenTags: true,           // Restores the classic bold look on non-general tags
         };
     }
 
@@ -82,7 +88,7 @@ export class PostViewer extends RE6Module {
     public create(): void {
         super.create();
 
-        this.post = Post.getViewingPost();
+        this.post = Post.getViewingPost()
 
         // Move the add to set / pool buttons
         const $addToContainer = $("<div>").attr("id", "image-add-links").insertAfter("div#image-download-link");
@@ -116,30 +122,90 @@ export class PostViewer extends RE6Module {
             .attr("data-hidden", this.fetchSettings("hideNotes"));
 
         // Move child/parent indicator, leave others as is, like marked for deleteion
-        const $bottomNotices = $(".parent-children");
-        $bottomNotices.insertAfter($("#search-box"));
+        if (this.fetchSettings("moveChildThumbs"))
+            $(".parent-children")
+                .addClass("children-moved")
+                .insertAfter($("#search-box"));
+
+        // Bolden the tags
+        this.toggleBoldenedTags(this.fetchSettings<boolean>("boldenTags"));
 
         // Listen to favorites button click
         $("#add-fav-button").on("click", () => {
             if (this.fetchSettings("upvoteOnFavorite"))
-                Danbooru.Post.vote(Post.getViewingPost().getId(), 1, true);
-
-            FavoriteCache.add(this.post.getId());
+                Danbooru.Post.vote(this.post.id, 1, true);
         });
+    }
 
-        $("#remove-fav-button").on("click", () => {
-            FavoriteCache.remove(this.post.getId());
-        });
+    /** Toggles the boldened look on sidebar tags */
+    public toggleBoldenedTags(state = true): void {
+        $("#tag-list").toggleClass("tags-boldened", state);
     }
 
     /** Emulates a click on the upvote button */
     private triggerUpvote(): void {
-        Danbooru.Post.vote(Post.getViewingPost().getId(), 1);
+        Danbooru.Post.vote(Post.getViewingPost().id, 1);
+    }
+
+    /** Same as above, but does not unvote */
+    private triggerUpvoteNU(): void {
+        const id = Post.getViewingPost().id;
+        PostActions.vote(id, 1, true).then((response) => {
+            if (!response.success) {
+                Danbooru.error("An error occurred while processing votes");
+                return;
+            }
+
+            $("span.post-vote-up-" + id)
+                .removeClass("score-neutral")
+                .addClass("score-positive");
+            $("span.post-vote-down-" + id)
+                .removeClass("score-negative")
+                .addClass("score-neutral");
+
+            $("span.post-score-" + id)
+                .removeClass("score-positive score-negative score-neutral")
+                .addClass(PostViewer.getScoreClass(response.score))
+                .attr("title", response.up + " up / " + response.down + " down")
+                .html(response.score + "")
+            if (response.score > 0) Danbooru.notice("Post Score Updated");
+        });
     }
 
     /** Emulates a click on the downvote button */
     private triggerDownvote(): void {
-        Danbooru.Post.vote(Post.getViewingPost().getId(), -1);
+        Danbooru.Post.vote(Post.getViewingPost().id, -1);
+    }
+
+    /** Same as above, but does not unvote */
+    private triggerDownvoteNU(): void {
+        const id = Post.getViewingPost().id;
+        PostActions.vote(id, -1, true).then((response) => {
+            if (!response.success) {
+                Danbooru.error("An error occurred while processing votes");
+                return;
+            }
+
+            $("span.post-vote-down-" + id)
+                .addClass("score-negative")
+                .removeClass("score-neutral");
+            $("span.post-vote-up-" + id)
+                .removeClass("score-positive")
+                .addClass("score-neutral");
+
+            $("span.post-score-" + id)
+                .removeClass("score-positive score-negative score-neutral")
+                .addClass(PostViewer.getScoreClass(response.score))
+                .attr("title", response.up + " up / " + response.down + " down")
+                .html(response.score + "")
+            if (response.score < 0) Danbooru.notice("Post Score Updated");
+        });
+    }
+
+    private static getScoreClass(score: number): string {
+        if (score > 0) return "score-positive";
+        if (score < 0) return "score-negative";
+        return "score-neutral";
     }
 
     /** Toggles the favorite state */
@@ -184,7 +250,7 @@ export class PostViewer extends RE6Module {
         $("a#image-note-button").html("Notes: ON");
         await ModuleController.get(PostViewer).pushSettings("hideNotes", false);
 
-        Danbooru.Note.TranslationMode.toggle(new Event("re621.dummy-event"));
+        Danbooru.Note.TranslationMode.toggle();
     }
 
     /** Opens the dialog to add the post to the set */
@@ -200,7 +266,7 @@ export class PostViewer extends RE6Module {
             return;
         }
 
-        PostActions.toggleSet(lastSet, Post.getViewingPost().getId());
+        PostActions.toggleSet(lastSet, Post.getViewingPost().id);
     }
 
     /** Adds the current post to the latest used set */
@@ -211,7 +277,7 @@ export class PostViewer extends RE6Module {
             return;
         }
 
-        PostActions.addSet(lastSet, Post.getViewingPost().getId());
+        PostActions.addSet(lastSet, Post.getViewingPost().id);
     }
 
     /** Removes the current post frp, the latest used set */
@@ -222,14 +288,14 @@ export class PostViewer extends RE6Module {
             return;
         }
 
-        PostActions.removeSet(lastSet, Post.getViewingPost().getId());
+        PostActions.removeSet(lastSet, Post.getViewingPost().id);
     }
 
     /** Adds the current post to the set defined in the config */
     private addSetCustom(dataKey: string): void {
         PostActions.addSet(
             this.fetchSettings<number>(dataKey),
-            Post.getViewingPost().getId()
+            Post.getViewingPost().id
         );
     }
 

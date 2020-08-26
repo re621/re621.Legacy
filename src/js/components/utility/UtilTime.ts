@@ -71,8 +71,8 @@ export namespace UtilTime {
      * Formats the provided date as a string in YYYY-MM-DD HH:SS format
      * @param date Date to format. If none is provided, formats current date
      */
-    export function format(date: Date | number = new Date()): string {
-        if (typeof date == "number") date = new Date(date);
+    export function format(date: Date | number | string = new Date()): string {
+        if (typeof date == "number" || typeof date == "string") date = new Date(date);
         const parts = {
             year: "" + date.getFullYear(),
             month: "" + (date.getMonth() + 1),

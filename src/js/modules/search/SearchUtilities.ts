@@ -1,5 +1,5 @@
 import { Danbooru } from "../../components/api/Danbooru";
-import { FavoriteCache } from "../../components/cache/FavoriteCache";
+import { Blacklist } from "../../components/data/Blacklist";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
@@ -32,6 +32,8 @@ export class SearchUtilities extends RE6Module {
             categoryData: [],
 
             persistentTags: "",
+
+            quickBlacklist: true,
 
             hotkeyFocusSearch: "q",
             hotkeyRandomPost: "r",
@@ -83,22 +85,8 @@ export class SearchUtilities extends RE6Module {
             });
         }
 
-        // Listen to post clicks to update FavoritesCache
-        $(".post-preview a").on("click.danbooru", (event) => {
-            const mode = $("#mode-box-mode").val(),
-                postID = $(event.target).closest("article").data("id");
-
-            switch (mode) {
-                case "add-fav": {
-                    FavoriteCache.add(postID);
-                    break;
-                }
-                case "remove-fav": {
-                    FavoriteCache.remove(postID);
-                    break;
-                }
-            }
-        });
+        // Initialize the quick-blacklist buttons
+        this.initQuickBlacklist(this.fetchSettings("quickBlacklist"));
 
     }
 
@@ -183,6 +171,29 @@ export class SearchUtilities extends RE6Module {
     private static switchMode(mode: string): void {
         $("select#mode-box-mode").val(mode);
         Danbooru.PostModeMenu.change();
+    }
+
+    public initQuickBlacklist(state = true): void {
+
+        if (!state) $("div.tag-actions span.tag-action-blacklist").html("");
+        else {
+            for (const element of $("div.tag-actions span.tag-action-blacklist").get()) {
+                const $container = $(element);
+
+                $("<a>")
+                    .attr({
+                        "href": "#",
+                        "title": "Blacklist Tag",
+                    })
+                    .addClass("blacklist-tag-toggle")
+                    .html(`<i class="fas fa-times"></i>`)
+                    .prependTo($container)
+                    .click((event) => {
+                        event.preventDefault();
+                        Blacklist.toggleBlacklistTag($container.parent().attr("data-tag"));
+                    });
+            }
+        }
     }
 
 }

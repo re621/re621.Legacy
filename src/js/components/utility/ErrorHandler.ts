@@ -53,10 +53,10 @@ export class ErrorHandler {
      * @param message Error message, preferably the stack trace
      * @param context Error context. ex. API Lookup
      */
-    public static log(module: "ModuleController" | "DOM" | { new(): RE6Module }, message: string, context?: string): void {
+    public static log(module: "ModuleController" | "DOM" | RE6Module | string, message: string, context?: string): void {
         const instance = this.getInstance();
 
-        if (typeof module !== "string") module = module.prototype.constructor.name;
+        if (typeof module !== "string") module = module.getSettingsTag();
         if (context !== undefined) module += "/" + context;
 
         instance.feedback.val((index, value) => {
@@ -72,7 +72,7 @@ export class ErrorHandler {
      * @param message Error message, preferably the stack trace
      * @param context Error context. ex. API Lookup
      */
-    public static error(module: "ModuleController" | "DOM" | { new(): RE6Module }, message: string, context?: string): void {
+    public static error(module: "ModuleController" | "DOM" | RE6Module | string, message: string, context?: string): void {
         const instance = this.getInstance();
         if (!instance.modal.isOpen()) instance.trigger.get(0).click();
         this.log(module, message, context);

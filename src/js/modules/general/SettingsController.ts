@@ -3,7 +3,7 @@ import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
 import { GMxmlHttpRequestResponse } from "../../components/api/XMConnect";
 import { AvoidPosting } from "../../components/cache/AvoidPosting";
-import { FavoriteCache } from "../../components/cache/FavoriteCache";
+import { TagCache } from "../../components/cache/TagCache";
 import { Hotkeys } from "../../components/data/Hotkeys";
 import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
@@ -26,11 +26,9 @@ import { ImageScaler } from "../post/ImageScaler";
 import { PoolNavigator } from "../post/PoolNavigator";
 import { PostViewer } from "../post/PostViewer";
 import { TitleCustomizer } from "../post/TitleCustomizer";
-import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
+import { BetterSearch } from "../search/BetterSearch";
 import { CustomFlagger, FlagDefinition } from "../search/CustomFlagger";
-import { InfiniteScroll } from "../search/InfiniteScroll";
 import { SearchUtilities } from "../search/SearchUtilities";
-import { ThumbnailEnhancer, ThumbnailPerformanceMode } from "../search/ThumbnailsEnhancer";
 import { ForumTracker } from "../subscriptions/ForumTracker";
 import { PoolTracker } from "../subscriptions/PoolTracker";
 import { SubscriptionManager } from "../subscriptions/SubscriptionManager";
@@ -45,6 +43,7 @@ export class SettingsController extends RE6Module {
 
     private openSettingsButton: JQuery<HTMLElement>;
     private utilTabButton: JQuery<HTMLElement>;
+    private aboutTabButton: JQuery<HTMLElement>;
 
     public constructor() {
         super();
@@ -62,6 +61,47 @@ export class SettingsController extends RE6Module {
             newVersionAvailable: false,
             changelog: "",
         };
+    }
+
+    public async prepare(): Promise<void> {
+        await super.prepare();
+
+        // Abort: Dev release (compiled by github actions)
+        if ((Sync.version as string).includes("dev"))
+            return await abort(this);
+
+        // Abort: Version didn't change, timer didn't expire
+        if (Sync.infoUpdate + Util.Time.HOUR >= Util.Time.now()) return;
+
+        // Fetch release data from github
+        const releases = {
+            latest: await getGithubData("latest"),
+            current: await getGithubData("tags/" + Sync.version),
+        };
+
+        Sync.infoUpdate = Util.Time.now();
+        await Sync.saveSettings();
+
+        // Abort: Dev build (compiled manually)
+        if (releases.current.name == undefined)
+            return await abort(this);
+
+        await this.pushSettings("changelog", releases.current.body);
+        await this.pushSettings("newVersionAvailable", Util.versionCompare(releases.current.name, releases.latest.name) < 0);
+
+        async function abort(localThis: RE6Module): Promise<void> {
+            await localThis.pushSettings("changelog", `<i>~ Changelog not available ~</i>`);
+            await localThis.pushSettings("newVersionAvailable", false);
+            Sync.infoUpdate = Util.Time.now();
+            await Sync.saveSettings();
+        }
+
+        async function getGithubData(node: string): Promise<any> {
+            return XM.Connect.xmlHttpPromise({ url: "https://api.github.com/repos/re621/re621/releases/" + node, method: "GET" }).then(
+                (response: GMxmlHttpRequestResponse) => { return Promise.resolve(JSON.parse(response.responseText)); },
+                () => { throw Error("Failed to fetch Github release data"); }
+            );
+        }
     }
 
     public create(): void {
@@ -99,9 +139,19 @@ export class SettingsController extends RE6Module {
                         })
                         .addClass("update-notification")
                         .html("Utilities"),
-                    structure: this.createMiscTab()
+                    structure: this.createMiscTab(),
                 },
-                { name: "About", structure: this.createAboutTab() },
+                {
+                    name: this.aboutTabButton = $("<a>")
+                        .attr({
+                            "data-loading": "false",
+                            "data-updates": "0",
+                            "id": "conf-tab-about",
+                        })
+                        .addClass("update-notification")
+                        .html("About"),
+                    structure: this.createAboutTab(),
+                },
             ]
         });
 
@@ -116,40 +166,16 @@ export class SettingsController extends RE6Module {
             structure: $settings,
             position: { my: "center", at: "center" },
         });
-
-        // Start up the version checker
-        if (Sync.infoUpdate + Util.Time.HOUR < Util.Time.now()) {
-
-            const releases = { latest: null, current: null };
-            (async (): Promise<void> => {
-                releases.latest = await getGithubData("latest");
-                releases.current = await getGithubData("tags/" + window["re621"]["version"]);
-                await this.pushSettings("newVersionAvailable", releases.latest.name !== releases.current.name);
-                await this.pushSettings("changelog", releases.current.body);
-
-                Sync.infoUpdate = Util.Time.now();
-                await Sync.saveSettings();
-
-                $("#changelog-list").html(Util.quickParseMarkdown(releases.current.body));
-                $("#project-update-button").attr("data-available", (releases.latest.name !== releases.current.name) + "");
-            })();
-
-            async function getGithubData(node: string): Promise<any> {
-                return XM.Connect.xmlHttpPromise({ url: "https://api.github.com/repos/re621/re621/releases/" + node, method: "GET" }).then(
-                    (response: GMxmlHttpRequestResponse) => { return Promise.resolve(JSON.parse(response.responseText)); },
-                    () => { throw Error("Failed to fetch Github release data"); }
-                );
-            }
-        }
     }
 
-    private pushNotificationsCount(count = 0): void {
+    private pushNotificationsCount(tab: "util" | "about", count = 0): void {
         this.openSettingsButton.attr(
             "data-updates",
             (parseInt(this.openSettingsButton.attr("data-updates")) || 0) + count
         );
 
-        this.utilTabButton.attr(
+        const button = tab == "util" ? this.utilTabButton : this.aboutTabButton;
+        button.attr(
             "data-updates",
             (parseInt(this.utilTabButton.attr("data-updates")) || 0) + count
         );
@@ -160,18 +186,17 @@ export class SettingsController extends RE6Module {
         const titleCustomizer = ModuleController.get(TitleCustomizer),
             miscellaneous = ModuleController.get(Miscellaneous),
             postViewer = ModuleController.get(PostViewer),
-            blacklistEnhancer = ModuleController.get(BlacklistEnhancer),
+            // blacklistEnhancer = ModuleController.get(BlacklistEnhancer),
             imageScaler = ModuleController.get(ImageScaler),
-            infiniteScroll = ModuleController.get(InfiniteScroll),
-            thumbnailEnhancer = ModuleController.get(ThumbnailEnhancer),
             headerCustomizer = ModuleController.get(HeaderCustomizer),
-            searchUtilities = ModuleController.get(SearchUtilities);
+            searchUtilities = ModuleController.get(SearchUtilities),
+            betterSearch = ModuleController.get(BetterSearch);
 
         return new Form({ name: "optgeneral", columns: 3, width: 3 }, [
 
             Form.accordion({ name: "gencollapse", columns: 3, width: 3, active: 0 }, [
 
-                // Title Customizer
+                // Page Layout
                 Form.accordionTab({ name: "layout", label: "Layout", columns: 3, width: 3 }, [
 
                     Form.div({ value: "<b>Main Page</b><br />Reroute the title page to the one specified", width: 2 }),
@@ -278,6 +303,34 @@ export class SettingsController extends RE6Module {
 
                     Form.checkbox(
                         {
+                            value: postViewer.fetchSettings("moveChildThumbs"),
+                            label: "<b>Move Related Thumbnails</b><br />Moves the parent / child thumbnails to the sidebar",
+                            width: 2,
+                        },
+                        async (data) => {
+                            await postViewer.pushSettings("moveChildThumbs", data);
+                        }
+                    ),
+                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: postViewer.fetchSettings("boldenTags"),
+                            label: "<b>Boldened Tags</b><br />Restore the classic boldened look on the sidebar tags",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await postViewer.pushSettings("boldenTags", data);
+                            postViewer.toggleBoldenedTags(data);
+                        }
+                    ),
+                    Form.hr(3),
+
+                    // ------------------------------------------ //
+
+                    Form.checkbox(
+                        {
                             value: miscellaneous.fetchSettings("stickyHeader"),
                             label: "<b>Fixed Header</b><br />Make the page header stick to the top when scrolling",
                             width: 3,
@@ -285,6 +338,7 @@ export class SettingsController extends RE6Module {
                         async (data) => {
                             await miscellaneous.pushSettings("stickyHeader", data);
                             miscellaneous.createStickyHeader(data);
+                            $("#sidebar").trigger("re621:reflow");
                         }
                     ),
                     Form.spacer(3),
@@ -292,12 +346,13 @@ export class SettingsController extends RE6Module {
                     Form.checkbox(
                         {
                             value: miscellaneous.fetchSettings("stickySearchbox"),
-                            label: "<b>Fixed Searchbox</b><br />Make the searchbox remain visible when scrolling",
+                            label: "<b>Fixed Sidebar</b><br />Leave the sidebar controls on the screen while scrolling",
                             width: 3,
                         },
                         async (data) => {
                             await miscellaneous.pushSettings("stickySearchbox", data);
                             miscellaneous.createStickySearchbox(data);
+                            $("#sidebar").trigger("re621:reflow");
                         }
                     ),
                     Form.spacer(3),
@@ -321,30 +376,39 @@ export class SettingsController extends RE6Module {
                     // Upscaling
                     Form.subheader("Hi-Res Thumbnails", "Replace 150x150 thumbnails with high-resolution ones", 2),
                     Form.select(
-                        { value: thumbnailEnhancer.fetchSettings("upscale"), },
+                        { value: betterSearch.fetchSettings("imageLoadMethod"), },
                         {
                             "disabled": "Disabled",
                             "hover": "On Hover",
                             "always": "Always",
                         },
                         async (data) => {
-                            await thumbnailEnhancer.pushSettings("upscale", data);
-
-                            const zoomDisabled = data === ThumbnailPerformanceMode.Disabled;
-                            $("#optgeneral-gencollapse-thumb-scalingconf-hoverzoom-desc").toggleClass("input-disabled", zoomDisabled);
-                            $("#optgeneral-gencollapse-thumb-scalingconf-hoverzoom")
-                                .prop("disabled", zoomDisabled)
-                                .parent()
-                                .toggleClass("input-disabled", zoomDisabled);
+                            await betterSearch.pushSettings("imageLoadMethod", data);
+                            if (betterSearch.isInitialized()) {
+                                betterSearch.reloadEventListeners();
+                                betterSearch.reloadRenderedPosts();
+                            }
                         }
                     ),
-                    Form.spacer(2),
-                    Form.text(`<div class="unmargin text-center text-bold">Requires a page reload</div>`),
+                    Form.spacer(3, true),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("autoPlayGIFs"),
+                            label: "<b>Auto-Play GIFs</b><br />If disabled, animated GIFs will only play on hover",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("autoPlayGIFs", data);
+                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
+                        }
+                    ),
+                    Form.spacer(3, true),
 
                     // Double-click
                     Form.subheader("Double-Click Action", "Action taken when a thumbnail is double-clicked", 2),
                     Form.select(
-                        { value: thumbnailEnhancer.fetchSettings("clickAction") },
+                        { value: betterSearch.fetchSettings("clickAction") },
                         {
                             "disabled": "Disabled",
                             "newtab": "Open New Tab",
@@ -354,239 +418,335 @@ export class SettingsController extends RE6Module {
                             "toggleset": "Toggle Current Set ",
                         },
                         async (data) => {
-                            await ThumbnailEnhancer.setClickAction(data);
+                            await betterSearch.pushSettings("clickAction", data);
+                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
                         }
                     ),
-                    Form.spacer(3),
+                    Form.spacer(3, true),
 
                     // Preserve Hover Text
                     Form.checkbox(
                         {
-                            value: thumbnailEnhancer.fetchSettings("preserveHoverText"),
+                            value: betterSearch.fetchSettings("hoverTags"),
                             label: "<b>Preserve Hover Text</b><br />Restores text displayed when hovering over the thumbnail",
-                            width: 2,
-                        },
-                        async (data) => {
-                            await thumbnailEnhancer.pushSettings("preserveHoverText", data);
-                        }
-                    ),
-                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
-                    Form.spacer(3),
-
-                    // Thumbnail Scaling
-                    Form.checkbox(
-                        {
-                            value: thumbnailEnhancer.fetchSettings("crop"),
-                            label: "<b>Thumbnail Rescaling</b><br />Resize thumbnail images according to settings below",
                             width: 3,
                         },
                         async (data) => {
-                            await thumbnailEnhancer.pushSettings("crop", data);
-                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleThumbCrop(data);
+                            await betterSearch.pushSettings("hoverTags", data);
+                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
                         }
                     ),
+                    Form.spacer(3, true),
 
                     Form.collapse({ name: "scalingconf", columns: 3, width: 3, title: "Scaling Options", collapsed: true }, [
 
-                        Form.subheader("Thumbnail Size", "Thumbnail width, in px, em, or rem", 2),
-                        Form.input(
-                            { value: thumbnailEnhancer.fetchSettings("cropSize"), pattern: "^\\d{2,3}(px|rem|em)$" },
-                            async (data, input) => {
-                                if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
-                                await thumbnailEnhancer.pushSettings("cropSize", data);
-                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.setThumbSize(data);
-                            }
-                        ),
-                        Form.spacer(3),
-
+                        // Thumbnail Scaling
                         Form.checkbox(
                             {
-                                name: "croppreserveratio",
-                                value: thumbnailEnhancer.fetchSettings("cropPreserveRatio"),
-                                label: "<b>Preserve Ratio</b><br />Keep the image ratio of the original image",
+                                value: betterSearch.fetchSettings("imageSizeChange"),
+                                label: "<b>Thumbnail Rescaling</b><br />Resize thumbnail images according to settings below",
                                 width: 3,
                             },
                             async (data) => {
-                                await thumbnailEnhancer.pushSettings("cropPreserveRatio", data);
-                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleThumbPreserveRatio(data);
+                                await betterSearch.pushSettings("imageSizeChange", data);
+                                if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
 
-                                $("#optgeneral-gencollapse-thumb-scalingconf-cropratio-desc").toggleClass("input-disabled", data);
-                                $("#optgeneral-gencollapse-thumb-scalingconf-cropratio")
-                                    .prop("disabled", data)
+                                $("#optgeneral-gencollapse-thumb-scalingconf-thumbsize-desc").toggleClass("input-disabled", !data);
+                                $("#optgeneral-gencollapse-thumb-scalingconf-thumbsize")
+                                    .prop("disabled", !data)
                                     .parent()
-                                    .toggleClass("input-disabled", data);
+                                    .toggleClass("input-disabled", !data);
                             }
                         ),
-                        Form.spacer(3),
+                        Form.spacer(3, true),
+
+                        Form.subheader(
+                            "Thumbnail Size",
+                            "Thumbnail card width, in pixels",
+                            2,
+                            "thumbsize-desc",
+                            betterSearch.fetchSettings("imageSizeChange") ? undefined : "input-disabled",
+                        ),
+                        Form.input(
+                            {
+                                name: "thumbsize",
+                                value: betterSearch.fetchSettings("imageWidth"),
+                                title: "Number between 150 and 999",
+                                required: true,
+                                pattern: "^(1[5-9][0-9]|[2-9][0-9][0-9])$",
+                                wrapper: betterSearch.fetchSettings("imageSizeChange") ? undefined : "input-disabled",
+                                disabled: !betterSearch.fetchSettings("imageSizeChange"),
+                            },
+                            async (data, input) => {
+                                if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                                await betterSearch.pushSettings("imageWidth", parseInt(data));
+                                if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
+                            }
+                        ),
+                        Form.spacer(3, true),
+
+                        // ------------------------------------------ //
+
+                        Form.checkbox(
+                            {
+                                name: "cropimages",
+                                value: betterSearch.fetchSettings("imageRatioChange"),
+                                label: "<b>Crop Images</b><br />Restrict image size to the specified ratio",
+                                width: 3,
+                            },
+                            async (data) => {
+                                await betterSearch.pushSettings("imageRatioChange", data);
+                                if (betterSearch.isInitialized()) {
+                                    betterSearch.updateContentHeader();
+                                    betterSearch.reloadRenderedPosts();
+                                }
+
+                                $("#optgeneral-gencollapse-thumb-scalingconf-cropratio-desc").toggleClass("input-disabled", !data);
+                                $("#optgeneral-gencollapse-thumb-scalingconf-cropratio")
+                                    .prop("disabled", !data)
+                                    .parent()
+                                    .toggleClass("input-disabled", !data);
+                            }
+                        ),
+                        Form.spacer(3, true),
 
                         Form.subheader(
                             "Image Ratio",
                             "Height to width ratio of the image",
                             2,
                             "cropratio-desc",
-                            thumbnailEnhancer.fetchSettings("cropPreserveRatio") ? "input-disabled" : undefined,
+                            betterSearch.fetchSettings("imageRatioChange") ? undefined : "input-disabled",
                         ),
                         Form.input(
                             {
                                 name: "cropratio",
-                                value: thumbnailEnhancer.fetchSettings("cropRatio"),
-                                pattern: "^(([01](\\.\\d+)?)|2)$",
-                                wrapper: thumbnailEnhancer.fetchSettings("cropPreserveRatio") ? "input-disabled" : undefined,
-                                disabled: thumbnailEnhancer.fetchSettings("cropPreserveRatio"),
+                                value: betterSearch.fetchSettings("imageRatio"),
+                                title: "Number between 0.1 and 1.9",
+                                required: true,
+                                pattern: "^([01]\\.[1-9]|1\\.0)$",
+                                wrapper: betterSearch.fetchSettings("imageRatioChange") ? undefined : "input-disabled",
+                                disabled: !betterSearch.fetchSettings("imageRatioChange"),
                             },
                             async (data, input) => {
-                                if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
-                                await thumbnailEnhancer.pushSettings("cropRatio", data);
-                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.setThumbRatio(data);
+                                if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                                await betterSearch.pushSettings("imageRatio", parseFloat(data));
+                                if (betterSearch.isInitialized()) {
+                                    betterSearch.updateContentHeader();
+                                    betterSearch.reloadRenderedPosts();
+                                }
                             }
                         ),
+                        Form.spacer(3, true),
 
-                        Form.hr(3),
-
-                        Form.subheader(
-                            "Zoom on Hover",                                                                                                    // line 1
-                            "Increases the size of the thumbnail when hovering over it",                                                        // line 2
-                            2,                                                                                                                  // width
-                            "hoverzoom-desc",                                                                                                   // name
-                            thumbnailEnhancer.fetchSettings("upscale") === ThumbnailPerformanceMode.Disabled ? "input-disabled" : undefined,   // wrapper
-                        ),
-                        Form.select(
-                            {
-                                name: "hoverzoom",
-                                value: thumbnailEnhancer.fetchSettings("zoom"),
-                                wrapper: thumbnailEnhancer.fetchSettings("upscale") === ThumbnailPerformanceMode.Disabled ? "input-disabled" : undefined,
-                                disabled: thumbnailEnhancer.fetchSettings("upscale") === ThumbnailPerformanceMode.Disabled,
-                            },
-                            {
-                                "true": "Enabled",
-                                "false": "Disabled",
-                                "onshift": "Holding Shift",
-                            },
-                            async (data) => {
-                                await thumbnailEnhancer.pushSettings("zoom", data);
-                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleHoverZoom(data);
-                            }
-                        ),
-                        Form.spacer(3),
-
-                        Form.subheader("Zoom scale", "The ratio of the enlarged thumbnail to its original size", 2),
-                        Form.input(
-                            { value: thumbnailEnhancer.fetchSettings("zoomScale"), pattern: "^[1-9](\\.\\d+)?$" },
-                            async (data, input) => {
-                                if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
-                                await thumbnailEnhancer.pushSettings("zoomScale", data);
-                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.setZoomScale(data);
-                            }
-                        ),
-                        Form.spacer(3),
+                        // ------------------------------------------ //
 
                         Form.checkbox(
                             {
-                                value: thumbnailEnhancer.fetchSettings("zoomContextual"),
-                                label: "<b>Contextual Zoom</b><br />Only enable thumbnail zoom in the viewing mode",
+                                name: "compactMode",
+                                value: betterSearch.fetchSettings("compactMode"),
+                                label: "<b>Compact Mode</b><br />Limit the image height to the same value as the width",
                                 width: 3,
                             },
                             async (data) => {
-                                await thumbnailEnhancer.pushSettings("zoomContextual", data);
-                                if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleZoomContextual(data);
+                                await betterSearch.pushSettings("compactMode", data);
+                                if (betterSearch.isInitialized()) {
+                                    betterSearch.updateContentHeader();
+                                    betterSearch.reloadRenderedPosts();
+                                }
                             }
                         ),
-                        Form.spacer(3),
+                        Form.spacer(3, true),
+
+                        Form.subheader("Minimum Image Width", "Images narrower than this percent value will be cropped to fit", 2),
+                        Form.input(
+                            {
+                                value: betterSearch.fetchSettings("imageMinWidth"),
+                                required: true,
+                                pattern: "^([1-9][0-9]|100)$",
+                                title: "Number between 10 and 100",
+                            },
+                            async (data, input) => {
+                                if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                                await betterSearch.pushSettings("imageMinWidth", parseInt(data));
+                                if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
+                            }
+                        ),
+                        Form.spacer(3, true),
 
                     ]),
-
-                    Form.checkbox(
-                        {
-                            value: thumbnailEnhancer.fetchSettings("autoPlayGIFs"),
-                            label: "<b>Auto-Play GIFs</b><br />If disabled, animated GIFs will only play on hover",
-                            width: 2,
-                        },
-                        async (data) => {
-                            await thumbnailEnhancer.pushSettings("autoPlayGIFs", data);
-                            if (thumbnailEnhancer.isInitialized()) ThumbnailEnhancer.setAutoPlayGIFs(data);
-                        }
-                    ),
-                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
-                    Form.spacer(3),
+                    Form.spacer(3, true),
 
                     // Voting Buttons
                     Form.checkbox(
                         {
                             name: "votebutton",
-                            value: thumbnailEnhancer.fetchSettings("vote"),
+                            value: betterSearch.fetchSettings("buttonsVote"),
                             label: "<b>Voting Buttons</b><br />Adds voting buttons when hovering over a thumbnail",
                             width: 3,
                         },
                         async (data) => {
-                            await thumbnailEnhancer.pushSettings("vote", data);
-                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleHoverVote(data);
+                            await betterSearch.pushSettings("buttonsVote", data);
+                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
                         }
                     ),
-                    Form.spacer(3),
+                    Form.spacer(3, true),
 
                     // Favorite Button
                     Form.checkbox(
                         {
                             name: "favbutton",
-                            value: thumbnailEnhancer.fetchSettings("fav"),
+                            value: betterSearch.fetchSettings("buttonsFav"),
                             label: "<b>Favorite Button</b><br />Adds a +favorite button when hovering over a thumbnail",
                             width: 3
                         },
                         async (data) => {
-                            await thumbnailEnhancer.pushSettings("fav", data);
-                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleHoverFav(data);
+                            await betterSearch.pushSettings("buttonsFav", data);
+                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
                         }
                     ),
-                    Form.spacer(3),
+                    Form.spacer(3, true),
 
                     // Ribbons
                     Form.checkbox(
                         {
-                            value: thumbnailEnhancer.fetchSettings("ribbons"),
-                            label: "<b>Status Ribbons</b><br />Use corner ribbons instead of colored borders for flags",
+                            value: betterSearch.fetchSettings("ribbonsRel"),
+                            label: "<b>Relations Ribbons</b><br />Display ribbons for parent/child relationships",
                             width: 3,
                         },
                         async (data) => {
-                            await thumbnailEnhancer.pushSettings("ribbons", data);
-                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleStatusRibbons(data);
-
-                            $("input#optgeneral-gencollapse-thumb-relations-ribbons")
-                                .prop("disabled", !data)
-                                .parent()
-                                .toggleClass("input-disabled", !data);
+                            await betterSearch.pushSettings("ribbonsRel", data);
+                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
                         }
                     ),
-                    Form.spacer(3),
+                    Form.spacer(3, true),
 
                     Form.checkbox(
                         {
-                            name: "relations-ribbons",
-                            value: thumbnailEnhancer.fetchSettings("relRibbons"),
-                            label: "<b>Relations Ribbons</b><br />Display ribbons for parent/child relationships",
+                            value: betterSearch.fetchSettings("ribbonsFlag"),
+                            label: "<b>Status Ribbons</b><br />Display post status as a colored ribbon on the post",
                             width: 3,
-                            wrapper: (thumbnailEnhancer.fetchSettings("ribbons") ? undefined : "input-disabled"),
-                            disabled: !thumbnailEnhancer.fetchSettings("ribbons"),
                         },
                         async (data) => {
-                            await thumbnailEnhancer.pushSettings("relRibbons", data);
-                            if (thumbnailEnhancer.isInitialized()) thumbnailEnhancer.toggleRelationRibbons(data);
+                            await betterSearch.pushSettings("ribbonsFlag", data);
+                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
                         }
                     ),
 
                 ]),
 
-                // Miscellaneous
-                Form.accordionTab({ name: "misc", label: "Other", columns: 3, width: 3 }, [
+                // Infinite Scroll
+                Form.accordionTab({ name: "infscroll", label: "Scrolling and Zoom", columns: 3, width: 3 }, [
+
+                    Form.header("Infinite Scroll", 3),
 
                     Form.checkbox(
                         {
-                            value: infiniteScroll.fetchSettings("keepHistory"),
-                            label: "<b>Preserve Scroll History</b><br />Load all result pages up to the current one (Infinite Scroll)",
-                            width: 2,
+                            value: betterSearch.fetchSettings("infiniteScroll"),
+                            label: "<b>Enable Infinite Scroll</b><br />Append the next page of posts below the current one",
+                            width: 3,
                         },
-                        async (data) => { await infiniteScroll.pushSettings("keepHistory", data); }
+                        async (data) => {
+                            await betterSearch.pushSettings("infiniteScroll", data);
+                            if (betterSearch.isInitialized()) {
+                                betterSearch.reloadEventListeners();
+                                betterSearch.reloadPaginator();
+                            }
+                        }
                     ),
-                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
+                    Form.spacer(3, true),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("loadAutomatically"),
+                            label: "<b>Auto-Load Posts</b><br />Load posts automatically as you scroll, not by clicking a button",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("loadAutomatically", data);
+                            if (betterSearch.isInitialized()) betterSearch.reloadEventListeners();
+                        }
+                    ),
+                    Form.spacer(3, true),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("loadPrevPages"),
+                            label: "<b>Preserve Scroll History</b><br />When opening a specific result page, load several previous pages as well",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("loadPrevPages", data);
+                        }
+                    ),
+                    Form.spacer(3, true),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("hidePageBreaks"),
+                            label: "<b>Hide Page Separators</b><br />Display posts as one continuous section, instead of being separated by page",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("hidePageBreaks", data);
+                            if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
+                        }
+                    ),
+                    Form.hr(3),
+
+
+                    Form.header("Hover Zoom", 3),
+                    Form.div({
+                        value: "<b>Zoom Mode</b><br />Increases the size of the thumbnail when hovering over it",
+                        width: 2,
+                    }),
+                    Form.select(
+                        {
+                            name: "hoverzoom",
+                            value: betterSearch.fetchSettings("zoomMode"),
+                        },
+                        {
+                            "disabled": "Disabled",
+                            "hover": "On Hover",
+                            "onshift": "Holding Shift",
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("zoomMode", data);
+                            if (betterSearch.isInitialized()) {
+                                betterSearch.reloadEventListeners();
+                                betterSearch.reloadRenderedPosts();
+                            }
+                        }
+                    ),
+                    Form.spacer(3, true),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("zoomFull"),
+                            label: "<b>Large Images</b><br />Load the zoomed-in preview at the original resolution",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("zoomFull", data);
+                        }
+                    ),
+                    Form.spacer(3, true),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("zoomTags"),
+                            label: "<b>Show Tags</b><br />Display the list of posts's tags under the zoom-in image",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("zoomTags", data);
+                        }
+                    ),
+                    Form.spacer(3, true),
+
+                ]),
+
+                // Miscellaneous
+                Form.accordionTab({ name: "misc", label: "Other", columns: 3, width: 3 }, [
 
                     Form.hr(3),
 
@@ -619,7 +779,10 @@ export class SettingsController extends RE6Module {
                             label: "<b>Quick Rescale</b><br />Click on a post image to cycle through scaling options",
                             width: 3,
                         },
-                        async (data) => { await imageScaler.pushSettings("clickScale", data); }
+                        async (data) => {
+                            await imageScaler.pushSettings("clickScale", data);
+                            imageScaler.toggleClickScale(data);
+                        }
                     ),
                     Form.spacer(3),
 
@@ -635,11 +798,14 @@ export class SettingsController extends RE6Module {
 
                     Form.checkbox(
                         {
-                            value: blacklistEnhancer.fetchSettings("quickaddTags"),
+                            value: searchUtilities.fetchSettings("quickBlacklist"),
                             label: "<b>Quick Blacklist</b><br />Click X next to the tag in the sidebar to add it to the blacklist",
                             width: 3,
                         },
-                        async (data) => { await blacklistEnhancer.pushSettings("quickaddTags", data); }
+                        async (data) => {
+                            await searchUtilities.pushSettings("quickBlacklist", data);
+                            searchUtilities.initQuickBlacklist(data);
+                        }
                     ),
                     Form.spacer(3),
 
@@ -722,18 +888,6 @@ export class SettingsController extends RE6Module {
                         async (data) => { await massDownloader.pushSettings("autoDownloadArchive", data); }
                     ),
 
-                    Form.checkbox(
-                        {
-                            value: massDownloader.fetchSettings("fixedSection"),
-                            label: "<b>Fixed Interface</b><br />The downloader interface will remain on the screen as you scroll",
-                            width: 3,
-                        },
-                        async (data) => {
-                            await massDownloader.pushSettings("fixedSection", data);
-                            massDownloader.toggleFixedSection();
-                        }
-                    ),
-
                 ]),
 
                 // Fav Downloader
@@ -756,18 +910,6 @@ export class SettingsController extends RE6Module {
                             width: 3,
                         },
                         async (data) => { await favDownloader.pushSettings("autoDownloadArchive", data); }
-                    ),
-
-                    Form.checkbox(
-                        {
-                            value: favDownloader.fetchSettings("fixedSection"),
-                            label: "<b>Fixed Interface</b><br />The downloader interface will remain on the screen as you scroll",
-                            width: 3,
-                        },
-                        async (data) => {
-                            await favDownloader.pushSettings("fixedSection", data);
-                            favDownloader.toggleFixedSection();
-                        }
                     ),
 
                 ]),
@@ -1018,6 +1160,21 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3),
 
+                    Form.subheader("Cache Post Minimum", "Tags with this amount of posts will be cached to speed up lookups", 2),
+                    Form.input(
+                        {
+                            value: smartAlias.fetchSettings("minCachedTags"),
+                            width: 1,
+                            pattern: "\\d{2,}",
+                        },
+                        (data, input) => {
+                            if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                            smartAlias.pushSettings("minCachedTags", data);
+                        }
+                    ),
+                    Form.hr(3),
+
+
                     Form.checkbox(
                         {
                             value: smartAlias.fetchSettings("compactOutput"),
@@ -1235,8 +1392,11 @@ export class SettingsController extends RE6Module {
 
             // Posts
             Form.header("Posts", 3),
-            ...createInputs(postViewer, "Upvote", "hotkeyUpvote"),
-            ...createInputs(postViewer, "Downvote", "hotkeyDownvote"),
+            ...createInputs(postViewer, "Upvote Post", "hotkeyUpvoteNU"),
+            ...createInputs(postViewer, "Toggle Upvote", "hotkeyUpvote"),
+            ...createInputs(postViewer, "Downvote Post", "hotkeyDownvoteNU"),
+            ...createInputs(postViewer, "Toggle Downvote", "hotkeyDownvote"),
+
             ...createInputs(postViewer, "Toggle Favorite", "hotkeyFavorite"),
             ...createInputs(postViewer, "Add to Favorites", "hotkeyAddFavorite"),
             ...createInputs(postViewer, "Remove From Favorites", "hotkeyRemoveFavorite"),
@@ -1331,9 +1491,9 @@ export class SettingsController extends RE6Module {
         return new Form({ name: "settings-modules", columns: 3, width: 3, }, [
             Form.header("Features", 3),
 
-            ...createInput("HeaderCustomizer", "Header Customizer", "Add, delete, and customize header links to your heart's content."),
+            ...createInput("BetterSearch", "Improved Thumbnails", "Massively overhauled thumbnail system. Many features will not work with this module disabled."),
 
-            ...createInput("InfiniteScroll", "Infinite Scroll", "New posts are automatically loaded as you scroll."),
+            ...createInput("HeaderCustomizer", "Header Customizer", "Add, delete, and customize header links to your heart's content."),
 
             ...createInput("InstantSearch", "Instant Filters", "Quickly add filters to your current search."),
 
@@ -1382,8 +1542,7 @@ export class SettingsController extends RE6Module {
         });
         let selectedModule = "none";
 
-        let favcacheUpdated = true,
-            dnpcacheUpdated = true;
+        let dnpcacheUpdated = true;
 
         // Create the settings form
         return new Form({ name: "optmisc", columns: 3, width: 3 }, [
@@ -1393,68 +1552,17 @@ export class SettingsController extends RE6Module {
 
                 Form.accordionTab({ name: "cache", label: "Cache", columns: 3, width: 3 }, [
 
-                    Form.section({ name: "favcache", columns: 3, width: 3 }, [
+                    Form.section({ name: "tagcache", columns: 3, width: 3 }, [
 
                         Form.div({
-                            value: `<b>Favorites Cache</b><br />Recorded to minimize the number of API calls`,
+                            value: `<b>Tag Cache</b><br />Used to speed up SmartAlias tag checking`,
                             width: 2,
                         }),
-                        Form.button({ name: "reset", value: "Reset", }, async (data, input) => {
-                            input.prop("disabled", true);
-                            await FavoriteCache.update($("#favcache-status"));
-                            input.prop("disabled", false);
-
-                            if (favcacheUpdated) return;
-                            favcacheUpdated = true;
-                            this.pushNotificationsCount(-1);
+                        Form.button({ name: "reset", value: "Clear", }, async (data, input) => {
+                            TagCache.clear();
+                            input.html("Done!");
+                            window.setTimeout(() => { input.html("Clear"); }, 1000);
                         }),
-
-                        Form.div({
-                            value: async (element) => {
-                                const $status = $("<div>")
-                                    .attr("id", "favcache-status")
-                                    .html(`<i class="fas fa-circle-notch fa-spin"></i> Initializing . . .`)
-                                    .appendTo(element);
-
-                                if (!FavoriteCache.isEnabled()) {
-                                    $status.html(`<i class="far fa-times-circle"></i> Cache disabled`);
-                                } else if (await FavoriteCache.isUpdateRequired()) {
-
-                                    if (await FavoriteCache.quickUpdate($status)) {
-                                        $status.html(`<i class="far fa-check-circle"></i> Cache recovered (${FavoriteCache.size()} items)`);
-                                    } else {
-                                        $status.html(`
-                                            <i class="far fa-times-circle"></i> 
-                                            <span style="color:gold">Reset required</span>: Cache integrity failure
-                                        `);
-                                        this.pushNotificationsCount(1);
-                                        favcacheUpdated = false;
-                                    }
-                                } else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified`)
-                            },
-                            width: 2,
-                        }),
-                        Form.div({
-                            value: (element) => {
-                                const lastUpdate = FavoriteCache.getUpdateTime();
-                                if (lastUpdate) element.html(Util.Time.format(lastUpdate));
-                                else element.html("");
-                            },
-                            wrapper: "text-center input-disabled",
-                        }),
-
-                        Form.checkbox(
-                            {
-                                value: !FavoriteCache.isEnabled(),
-                                label: "<b>Disable Favorite Caching</b><br />All systems that deal with favorites will become non-functional",
-                                width: 2,
-                            },
-                            (data) => {
-                                FavoriteCache.setEnabled(!data);
-                                FavoriteCache.clear();
-                            }
-                        ),
-                        Form.text(`<div class="text-center text-bold">Requires a page reload</div>`),
 
                     ]),
                     Form.spacer(3),
@@ -1462,7 +1570,7 @@ export class SettingsController extends RE6Module {
                     Form.section({ name: "dnpcache", columns: 3, width: 3 }, [
 
                         Form.div({
-                            value: `<b>Avoid Posting List</b><br />Used to speed up SmartAlias tag checking`,
+                            value: `<b>Avoid Posting Cache</b><br />Used to validate the artist tags against the DNP list`,
                             width: 2,
                         }),
                         Form.button({ name: "reset", value: "Reset", }, async (data, input) => {
@@ -1472,7 +1580,7 @@ export class SettingsController extends RE6Module {
 
                             if (dnpcacheUpdated) return;
                             dnpcacheUpdated = false;
-                            this.pushNotificationsCount(-1);
+                            this.pushNotificationsCount("util", -1);
                         }),
                         Form.div({
                             value: async (element) => {
@@ -1490,7 +1598,7 @@ export class SettingsController extends RE6Module {
                                         <span style="color:gold">Reset required</span>: Cache integrity failure
                                     `);
 
-                                    this.pushNotificationsCount(1);
+                                    this.pushNotificationsCount("util", 1);
                                     dnpcacheUpdated = true;
                                 } else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified`)
                             },
@@ -1758,18 +1866,22 @@ export class SettingsController extends RE6Module {
 
     /** Creates the about tab */
     private createAboutTab(): Form {
+
+        const hasNewVersion = this.fetchSettings("newVersionAvailable");
+        if (hasNewVersion) this.pushNotificationsCount("about", 1);
+
         return new Form({ name: "optabout", columns: 3, width: 3 }, [
             // About
             Form.div({
                 value:
-                    `<h3 class="display-inline"><a href="${window["re621"]["links"]["website"]}">${window["re621"]["name"]} v.${window["re621"]["version"]}</a></h3>` +
+                    `<h3 class="display-inline"><a href="${window["re621"]["links"]["website"]}" target="_blank">${window["re621"]["name"]} v.${Sync.version}</a></h3>` +
                     ` <span class="display-inline">build ${window["re621"]["build"]}:${Patcher.version}</span>`,
                 width: 2
             }),
             Form.div({
                 value:
-                    `<span class="float-right" id="project-update-button" data-available="${this.fetchSettings("newVersionAvailable")}">
-                    <a href="${window["re621"]["links"]["releases"]}">Update Available</a>
+                    `<span class="float-right" id="project-update-button" data-available="${hasNewVersion}">
+                    <a href="${window["re621"]["links"]["releases"]}" target="_blank">Update Available</a>
                     </span>`
             }),
             Form.div({
@@ -1790,7 +1902,7 @@ export class SettingsController extends RE6Module {
             Form.spacer(3),
 
             // Changelog
-            Form.header(`<a href="${window["re621"]["links"]["releases"]}" class="unmargin">What's new?</a>`, 3),
+            Form.header(`<a href="${window["re621"]["links"]["releases"]}" target="_blank" class="unmargin">What's new?</a>`, 3),
             Form.div({ value: `<div id="changelog-list">${Util.quickParseMarkdown(this.fetchSettings("changelog"))}</div>`, width: 3 })
         ]);
     }

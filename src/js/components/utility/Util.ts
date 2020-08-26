@@ -1,4 +1,5 @@
 import { UtilID } from "./UtilID";
+import { UtilMath } from "./UtilMath";
 import { UtilTime } from "./UtilTime";
 
 /**
@@ -8,7 +9,9 @@ export class Util {
 
     public static Time = UtilTime;
     public static ID = UtilID;
+    public static Math = UtilMath;
     public static LS = window.localStorage;
+    public static SS = window.sessionStorage;
 
     /**
      * Downloads the provided object as a JSON file
@@ -128,6 +131,59 @@ export class Util {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
 
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + sizes[i];
+    }
+
+    /**
+     * Trims the thousands off a number and replaced them with a K.  
+     * ex. 54321 -> 54.3k
+     * @param num Number to trim
+     */
+    public static formatK(num: number): string {
+        return Math.abs(num) > 999 ? (Math.sign(num) * (Math.abs(num) / 1000)).toFixed(1) + "k" : Math.sign(num) * Math.abs(num) + "";
+    }
+
+
+    /* returns an array with the ratio */
+    public static formatRatio(width: number, height: number): [number, number] {
+        const d = gcd(width, height);
+        return [width / d, height / d];
+
+        function gcd(u: number, v: number): number {
+            if (u === v) return u;
+            if (u === 0) return v;
+            if (v === 0) return u;
+
+            if (~u & 1)
+                if (v & 1)
+                    return gcd(u >> 1, v);
+                else
+                    return gcd(u >> 1, v >> 1) << 1;
+
+            if (~v & 1) return gcd(u, v >> 1);
+
+            if (u > v) return gcd((u - v) >> 1, v);
+
+            return gcd((v - u) >> 1, u);
+        }
+    }
+
+    /**
+     * Parses the textare input specified in the parameter and returns a list of space-separated tags
+     * @param input Textarea to parse
+     */
+    public static getTagString(input: JQuery<HTMLElement>): string {
+        return input.val().toString().trim()
+            .toLowerCase()
+            .replace(/\r?\n|\r/g, " ")      // strip newlines
+            .replace(/(?:\s){2,}/g, " ");   // strip multiple spaces
+    }
+
+    public static getTags(input: string): string[];
+    public static getTags(input: JQuery<HTMLElement>): string[];
+    public static getTags(input: string | JQuery<HTMLElement>): string[] {
+        return (typeof input === "string" ? input : Util.getTagString(input))
+            .split(" ")
+            .filter((el) => { return el != null && el != ""; });
     }
 
     /**

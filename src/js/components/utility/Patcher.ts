@@ -1,3 +1,4 @@
+import { ImageZoomMode } from "../../modules/search/BetterSearch";
 import { XM } from "../api/XM";
 import { Debug } from "./Debug";
 
@@ -109,6 +110,58 @@ export class Patcher {
                 }
 
                 Patcher.version = 5;
+            }
+
+            // Patch 6 - Version 1.4.0
+            // ThumbnailEnhancer and InfiniteScroll were merged together into BetterSearch
+            // A lot of settings names were changed to less ambiguous ones
+            // Favorites cache was retired and removed
+            case 5: {
+                const thumbEnhancer = await XM.Storage.getValue("re621.ThumbnailEnhancer", undefined),
+                    infiniteScroll = await XM.Storage.getValue("re621.InfiniteScroll", undefined),
+                    betterSearch = await XM.Storage.getValue("re621.BetterSearch", {});
+                if (thumbEnhancer) {
+                    betterSearch["imageLoadMethod"] = thumbEnhancer["upscale"];
+                    betterSearch["autoPlayGIFs"] = thumbEnhancer["autoPlayGIFs"];
+                    betterSearch["hoverTags"] = thumbEnhancer["preserveHoverText"];
+
+                    if (thumbEnhancer["zoom"] == "onshift") betterSearch["zoomMode"] = ImageZoomMode.OnShift;
+                    else if (thumbEnhancer["zoom"] == "true") betterSearch["zoomMode"] = ImageZoomMode.Hover;
+                    else betterSearch["zoomMode"] = ImageZoomMode.Disabled;
+
+                    betterSearch["imageSizeChange"] = thumbEnhancer["crop"];
+                    betterSearch["imageWidth"] = thumbEnhancer["cropSize"].replace(/px/g, "");
+                    betterSearch["imageRatioChange"] = !thumbEnhancer["cropPreserveRatio"];
+                    betterSearch["imageRatio"] = thumbEnhancer["cropRatio"];
+
+                    betterSearch["ribbonsFlag"] = thumbEnhancer["ribbons"];
+                    betterSearch["ribbonsRel"] = thumbEnhancer["relRibbons"];
+                    betterSearch["buttonsVote"] = thumbEnhancer["vote"];
+                    betterSearch["buttonsFav"] = thumbEnhancer["fav"];
+
+                    counter += 12;
+
+                    await XM.Storage.setValue("re621.BetterSearch", betterSearch);
+                    await XM.Storage.deleteValue("re621.ThumbnailEnhancer");
+                }
+
+                if (infiniteScroll) {
+                    betterSearch["infiniteScroll"] = infiniteScroll["enabled"];
+                    betterSearch["loadPrevPages"] = infiniteScroll["keepHistory"];
+
+                    counter += 2;
+
+                    await XM.Storage.setValue("re621.BetterSearch", betterSearch);
+                    await XM.Storage.deleteValue("re621.InfiniteScroll");
+                }
+
+                window.localStorage.removeItem("re621.favcache.data");
+                window.localStorage.removeItem("re621.favcache.invalid");
+                window.localStorage.removeItem("re621.favcache.update");
+
+                counter += 3;
+
+                Patcher.version = 6;
             }
         }
 

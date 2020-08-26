@@ -25,21 +25,49 @@ section#image-extra-controls {
         padding: 0.25rem 0.5rem;
     }
 
-    div#image-add-links > a {
+    div#image-download-link > a {
+        width: 6rem;
+        text-align: center;
+        position: relative;
+    }
+
+    div#image-add-links > a,
+    div#image-custdownload-links > a {
         margin-right: 0.5rem;
         &:last-child { margin-right: 0; }
     }
 
     div#image-resize-cycle {
         select {
-            margin-right: 0.5rem;
+            height: 1.75rem;
             vertical-align: unset;
             cursor: pointer;
         }
     }
+
+    div#image-custdownload-links > a {
+        text-align: center;
+        position: relative;
+
+        &[loading=true] {
+            color: transparent;
+
+            &:before {
+                content: "\f1ce";
+                font-family: "Font Awesome 5 Free";
+                font-weight: 900;
+                animation: fa-spin 2s infinite linear;
+                color: #aaa;
+                line-height: 1.3rem;
+                position: absolute;
+                left: 0;
+                right: 0;
+            }
+        }
+    }
 }
 
-div#c-posts div.parent-children {
+div#c-posts div.parent-children.children-moved {
     display: block;
 
     & #has-children-relationship-preview,
@@ -49,7 +77,7 @@ div#c-posts div.parent-children {
     }
 }
 
-#tag-list {
+#tag-list.tags-boldened {
     font-weight: bold;
 
     & .general-tag-list,

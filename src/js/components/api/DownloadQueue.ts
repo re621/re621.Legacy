@@ -57,7 +57,12 @@ export class DownloadQueue {
      * @param onArchiveProgress Callback function that fires every time progress is made on the compression.
      * @returns Promise with a ZIP archive as a blob
      */
-    public async run(onArchiveProgress?: Function): Promise<Blob> {
+    public async run(onArchiveProgress?: (metadata: { percent: number; currentFile: string }) => void): Promise<Blob> {
+
+        // Queue is processed in a reverse order via `.pop()`
+        // If it is reversed here, the order becomes correct.
+        this.queue = this.queue.reverse();
+
         const processes: Promise<any>[] = [];
         for (let i = 0; i < DownloadQueue.concurrent; i++) {
             processes.push(this.createNewProcess(i));

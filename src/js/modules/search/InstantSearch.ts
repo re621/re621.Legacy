@@ -1,7 +1,9 @@
 import { PageDefintion } from "../../components/data/Page";
-import { Post } from "../../components/data/Post";
-import { PostFilter } from "../../components/data/PostFilter";
+import { Post, PostData } from "../../components/post/Post";
+import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Util } from "../../components/utility/Util";
+import { BetterSearch } from "./BetterSearch";
 
 /**
  * Adds a extra search input below the current one where 
@@ -9,10 +11,12 @@ import { RE6Module, Settings } from "../../components/RE6Module";
  */
 export class InstantSearch extends RE6Module {
 
+    private static filter: PostFilter;
+
     private $searchbox: JQuery<HTMLElement>;
 
     public constructor() {
-        super(PageDefintion.search, true);
+        super([PageDefintion.search, PageDefintion.favorites], true, [BetterSearch]);
     }
 
     /**
@@ -20,7 +24,7 @@ export class InstantSearch extends RE6Module {
      * @returns Default settings
      */
     protected getDefaultSettings(): Settings {
-        return { enabled: true };
+        return { enabled: false };
     }
 
     /**
@@ -30,20 +34,44 @@ export class InstantSearch extends RE6Module {
     public create(): void {
         super.create();
 
-        this.createDOM();
+        $("search-content").on("re621:insearch", "post", (event) => {
+            const $article = $(event.currentTarget),
+                post = Post.get($article);
+
+            if (InstantSearch.filter == undefined) $article.removeAttr("filtered");
+            else {
+                InstantSearch.filter.update(post);
+                if (InstantSearch.filter.matches(post)) $article.removeAttr("filtered");
+                else $article.attr("filtered", "true");
+            }
+        });
+
+        const $section = $("<section>")
+            .attr("id", "re621-insearch")
+            .html("<h1>Filter</h1>")
+            .insertAfter("#search-box");
+        const $searchForm = $("<form>").appendTo($section);
 
         let typingTimeout: number;
-        this.$searchbox.on("input", () => {
-            clearTimeout(typingTimeout);
-            typingTimeout = window.setTimeout(() => { this.applyFilter(); }, 500);
-        });
+        this.$searchbox = $("<input>")
+            .attr("id", "re621-insearch-input")
+            .attr("type", "text")
+            .val(Util.SS.getItem("re621.insearch") || "")
+            .appendTo($searchForm)
+            .on("input", () => {
+                clearTimeout(typingTimeout);
+                typingTimeout = window.setTimeout(() => { this.applyFilter(); }, 500);
+            });
 
         // The user might have paginated, which means the input is not empty, but there was no input event yet.
         this.$searchbox.trigger("input");
 
-        InstantSearch.on("applyFilter.main", () => {
-            this.applyFilter();
-        });
+        $("<button>")
+            .attr("type", "submit")
+            .html(`<i class="fas fa-search"></i>`)
+            .appendTo($searchForm);
+
+        $("#sidebar").trigger("re621:reflow");
     }
 
     public destroy(): void {
@@ -51,44 +79,31 @@ export class InstantSearch extends RE6Module {
 
         this.$searchbox.val("");
         this.applyFilter();
-        $("section#re-instantsearch").remove();
+        $("#re621-insearch").remove();
 
-        InstantSearch.off("applyFilter.main");
+        $("search-content").off("re621:insearch", "post");
+        $("#sidebar").trigger("re621:reflow");
+    }
+
+    public static get(): PostFilter {
+        return InstantSearch.filter;
+    }
+
+    public static addPost(...posts: PostData[]): boolean {
+        const filter = InstantSearch.get();
+        if (!filter) return false;
+        return filter.update(posts);
     }
 
     public applyFilter(): void {
         const filterText = this.$searchbox.val().toString().trim();
-        const filter = new PostFilter(filterText);
-        sessionStorage.setItem("re-instantsearch", filterText);
-        const posts = Post.fetchPosts();
-        // When the user clears the input, show all posts
-        if (filterText === "") {
-            for (const post of posts) {
-                post.show();
-            }
+        if (filterText.length == 0) {
+            InstantSearch.filter = undefined;
+            Util.SS.removeItem("re621.insearch");
         } else {
-            for (const post of posts) {
-                filter.addPost(post, true) ? post.show() : post.hide();
-            }
+            InstantSearch.filter = new PostFilter(filterText);
+            Util.SS.setItem("re621.insearch", filterText);
         }
-    }
-
-    protected createDOM(): void {
-        const $section = $("<section>")
-            .attr("id", "re-instantsearch")
-            .html("<h1>Filter</h1>")
-            .insertAfter("section#search-box");
-        const $searchForm = $("<form>").appendTo($section);
-
-        this.$searchbox = $("<input>")
-            .attr("id", "re-instantsearch-input")
-            .attr("type", "text")
-            .val(sessionStorage.getItem("re-instantsearch"))
-            .appendTo($searchForm);
-
-        $("<button>")
-            .attr("type", "submit")
-            .html(`<i class="fas fa-search"></i>`)
-            .appendTo($searchForm);
+        $("post").trigger("re621:insearch");
     }
 }

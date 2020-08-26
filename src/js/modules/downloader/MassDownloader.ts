@@ -1,13 +1,10 @@
 import { DownloadQueue } from "../../components/api/DownloadQueue";
-import { E621 } from "../../components/api/E621";
-import { APIPost } from "../../components/api/responses/APIPost";
 import { PageDefintion } from "../../components/data/Page";
+import { Post, PostData } from "../../components/post/Post";
+import { PostSet, PostSortType } from "../../components/post/PostSet";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
-import { InfiniteScroll } from "../search/InfiniteScroll";
-import { ThumbnailEnhancer } from "../search/ThumbnailsEnhancer";
-
-declare const saveAs;
+import { BetterSearch } from "../search/BetterSearch";
 
 export class MassDownloader extends RE6Module {
 
@@ -23,11 +20,10 @@ export class MassDownloader extends RE6Module {
     private processing = false;
 
     private downloadOverSize = false;
-    private batchOverSize = true;
 
     // Value used to make downloaded file names unique
     private fileTimestamp: string = Util.Time.getDatetimeShort();
-    private downloadIndex = 1;
+    private downloadIndex = 0;
 
     // Interface elements
     private container: JQuery<HTMLElement>;
@@ -51,7 +47,6 @@ export class MassDownloader extends RE6Module {
             enabled: true,
             template: "%artist%/%postid%-%copyright%-%character%-%species%",
             autoDownloadArchive: true,
-            fixedSection: true,
         };
     }
 
@@ -66,6 +61,11 @@ export class MassDownloader extends RE6Module {
             })
             .html("<h1>Download</h1>")
             .appendTo("aside#sidebar");
+
+        $("#sidebar").on("re621:reflow", () => {
+            this.section.css("top", $("#re621-search").outerHeight() + "px");
+        });
+        $("#sidebar").trigger("re621:reflow");
 
         // Toggles the downloader UI
         this.selectButton = $("<a>")
@@ -100,12 +100,12 @@ export class MassDownloader extends RE6Module {
             .appendTo(this.section);
 
 
-        this.container = $("#posts-container");
+        this.container = $("search-content");
     }
 
     public destroy(): void {
         super.destroy();
-        InfiniteScroll.off("pageLoad.MassDownloader");
+        BetterSearch.off("pageload.MassDownloader");
     }
 
     /**
@@ -115,7 +115,7 @@ export class MassDownloader extends RE6Module {
      */
     private toggleInterface(): void {
         this.showInterface = !this.showInterface;
-        ThumbnailEnhancer.trigger("pauseHoverActions", this.showInterface);
+        BetterSearch.setPaused(this.showInterface);
 
         if (this.showInterface) {
             this.selectButton.html("Cancel");
@@ -127,7 +127,7 @@ export class MassDownloader extends RE6Module {
                 .attr("data-downloading", "true")
                 .selectable({
                     autoRefresh: false,
-                    filter: "article.post-preview",
+                    filter: "post",
                     selected: function (event, ui) {
                         $(ui.selected)
                             .toggleClass("download-item")
@@ -135,7 +135,7 @@ export class MassDownloader extends RE6Module {
                     }
                 });
 
-            InfiniteScroll.on("pageLoad.MassDownloader", () => {
+            BetterSearch.on("pageload.MassDownloader", () => {
                 this.container.selectable("refresh");
             });
 
@@ -147,7 +147,7 @@ export class MassDownloader extends RE6Module {
                 .attr("data-downloading", "false")
                 .selectable("destroy");
 
-            InfiniteScroll.off("pageLoad.MassDownloader");
+            BetterSearch.off("pageload.MassDownloader");
         }
     }
 
@@ -159,191 +159,162 @@ export class MassDownloader extends RE6Module {
         else this.section.attr("data-fixed", "true")
     }
 
-    /** Processes and downloads the selected files. */
-    private processFiles(): void {
-        if (this.processing) return;
-        this.processing = true;
-        this.actButton.attr("disabled", "disabled");
+    private setProcessing(state: boolean): void {
+        this.processing = state;
+        BetterSearch.setPaused(state);
+        if (state) this.actButton.attr("disabled", "disabled");
+        else this.actButton.removeAttr("disabled");
+    }
 
-        InfiniteScroll.trigger("pauseScroll", true);
+    /** Processes and downloads the selected files. */
+    private async processFiles(): Promise<void> {
+        if (this.processing) return;
+        this.setProcessing(true);
 
         this.infoText
             .attr("data-state", "loading")
             .html(`Indexing selected files . . .`);
 
         // Get the IDs of all selected images
-        const imageList: number[] = [];
-        $("article.post-preview.download-item[data-state=ready]").each((index, element) => {
-            imageList.push(parseInt($(element).attr("data-id")));
+        const postList: PostSet = new PostSet();
+        $("post.download-item[data-state=ready]").each((index, element) => {
+            postList.push(Post.get($(element)));
         });
 
-        if (imageList.length === 0) {
+        if (postList.size() === 0) {
             this.infoText
                 .attr("data-state", "error")
                 .html(`Error: No files selected!`);
+            this.setProcessing(false);
             return;
         }
 
-        // Create API requests, separated into chunks
-        this.infoText
-            .attr("data-state", "loading")
-            .html("Fetching API data . . .");
+        console.log(`downloading ${postList.size()} files`);
+        console.log(postList);
 
-        const dataQueue: Promise<APIPost[]>[] = [];
-        const resultPages = Util.chunkArray(imageList, MassDownloader.chunkSize);
-        this.infoFile.html(" &nbsp; &nbsp;request 1 / " + resultPages.length);
+        const downloadQueue = new DownloadQueue();
 
-        resultPages.forEach((value, index) => {
-            dataQueue.push(new Promise(async (resolve) => {
-                const result = await E621.Posts.get<APIPost>({ tags: "id:" + value.join(",") });
-                this.infoFile.html(" &nbsp; &nbsp;request " + (index + 1) + " / " + resultPages.length);
-                resolve(result);
-            }));
-        });
+        // Create an interface to output queue status
+        const threadInfo: JQuery<HTMLElement>[] = [];
+        this.infoFile.html("");
+        for (let i = 0; i < downloadQueue.getThreadCount(); i++) {
+            threadInfo.push($("<span>").appendTo(this.infoFile));
+        }
 
-        // Fetch the post data from the API
-        Promise.all(dataQueue.reverse()).then((dataChunks) => {
-            // dataQueue needs to be reversed in order to start from top to bottom
-            // downloadQueue will not use the exact order, but it's an improvement
-            const downloadQueue = new DownloadQueue();
+        let totalFileSize = 0,
+            queueSize = 0;
+        this.downloadOverSize = false;
 
-            // Create an interface to output queue status
-            const threadInfo: JQuery<HTMLElement>[] = [];
-            this.infoFile.html("");
-            for (let i = 0; i < downloadQueue.getThreadCount(); i++) {
-                threadInfo.push($("<span>").appendTo(this.infoFile));
+        // Iterate over selected images and add them to the queue
+        for (const post of postList.sort(PostSortType.SizeAsc).values()) {
+            totalFileSize += post.file.size;
+            console.log(`adding #${post.id} (${Util.formatBytes(post.file.size)}) to the queue: ${Util.formatBytes(totalFileSize)} total`)
+            if (totalFileSize > MassDownloader.maxBlobSize) {
+                this.downloadOverSize = true;
+                console.log(`over filesize limit, aborting`);
+                break;
             }
 
-            let totalFileSize = 0,
-                queueSize = 0;
-            this.batchOverSize = false;
-
-            // Add post data from the chunks to the queue
-            dataChunks.forEach((chunk) => {
-
-                if (this.batchOverSize) return;
-
-                chunk.forEach((post: APIPost) => {
-                    totalFileSize += post.file.size;
-                    if (totalFileSize > MassDownloader.maxBlobSize) {
-                        this.batchOverSize = true;
-                        this.downloadOverSize = true;
-                        return;
-                    }
-
-                    $("article.post-preview#post_" + post.id).attr("data-state", "preparing");
-                    downloadQueue.add(
-                        {
-                            name: this.createFilename(post),
-                            path: post.file.url,
-
-                            file: post.file.url.replace(/^https:\/\/static1\.e621\.net\/data\/..\/..\//g, ""),
-
-                            unid: post.id,
-
-                            // Yes, updated_at can be null sometimes. No, I don't know why or how.
-                            date: post.updated_at === null ? new Date(post.created_at) : new Date(post.updated_at),
-                            tags: post.tags.general.join(" "),
-                        },
-                        {
-                            onStart: (item, thread, index) => {
-                                this.infoText.html(`Downloading ... <span class="float-right">` + (queueSize - index) + ` / ` + queueSize + `</span>`);
-                                threadInfo[thread]
-                                    .html(item.file)
-                                    .css("--progress", "0%");
-                                $("article.post-preview#post_" + post.id).attr("data-state", "loading");
-                            },
-                            onFinish: () => {
-                                $("article.post-preview#post_" + post.id).attr("data-state", "done");
-                            },
-                            onError: () => {
-                                $("article.post-preview#post_" + post.id).attr("data-state", "error");
-                            },
-                            onLoadProgress: (item, thread, event) => {
-                                if (event.lengthComputable) {
-                                    threadInfo[thread].css("--progress", Math.round(event.loaded / event.total * 100) + "%");
-                                }
-                            },
-                            onWorkerFinish: (item, thread) => {
-                                threadInfo[thread].remove();
-                            },
-                        }
-                    );
-                });
-            });
-
-            queueSize = downloadQueue.getQueueLength();
-
-            // Begin processing the queue
-            this.infoText.html(`Processing . . . `);
-
-            return downloadQueue.run((metadata) => {
-                this.infoText.html(`Compressing . . . ` + metadata.percent.toFixed(2) + `%`);
-                if (metadata.currentFile) { this.infoFile.html(metadata.currentFile); }
-                else { this.infoFile.html(""); }
-            });
-        }).then((zipData) => {
-            let filename = "e621-" + this.fileTimestamp;
-            filename += this.downloadOverSize ? "-part" + this.downloadIndex + ".zip" : ".zip";
-
-            this.infoText
-                .attr("data-state", "done")
-                .html(`Done! `);
-            this.infoFile.html("");
-
-            // Download the resulting ZIP
-            const $downloadLink = $("<a>")
-                .attr("href", filename)
-                .html("Download Archive")
-                .appendTo(this.infoText)
-                .on("click", (event) => {
-                    event.preventDefault();
-                    saveAs(zipData, filename);
-                });
-
-            if (this.fetchSettings("autoDownloadArchive")) { $downloadLink.get(0).click(); }
-
-            this.downloadIndex++;
-
-            this.actButton.removeAttr("disabled");
-            this.processing = false;
-
-            if (this.batchOverSize) {
-                // Start the next download immediately
-                if (this.fetchSettings("autoDownloadArchive")) { this.actButton.get(0).click(); }
-                else {
-                    $("<div>")
-                        .addClass("download-notice")
-                        .html(`Download has exceeded the maximum file size.<br /><br />Click the download button again for the next part.`)
-                        .appendTo(this.infoText);
+            post.$ref.attr("data-state", "preparing");
+            downloadQueue.add(
+                {
+                    name: this.createFilename(post),
+                    path: post.file.original,
+                    file: post.file.original.replace(/^https:\/\/static1\.e621\.net\/data\/..\/..\//g, ""),
+                    unid: post.id,
+                    date: new Date(post.date.raw),
+                    tags: post.tagString,
+                },
+                {
+                    onStart: (item, thread, index) => {
+                        this.infoText.html(`Downloading ... <span class="float-right">` + (queueSize - index) + ` / ` + queueSize + `</span>`);
+                        threadInfo[thread]
+                            .html(item.file)
+                            .css("--progress", "0%");
+                        $("#entry_" + item.unid).attr("data-state", "loading");
+                    },
+                    onFinish: (item) => {
+                        $("#entry_" + item.unid).attr("data-state", "done");
+                    },
+                    onError: (item) => {
+                        $("#entry_" + item.unid).attr("data-state", "error");
+                    },
+                    onLoadProgress: (item, thread, event) => {
+                        if (event.lengthComputable)
+                            threadInfo[thread].css("--progress", Math.round(event.loaded / event.total * 100) + "%");
+                    },
+                    onWorkerFinish: (item, thread) => {
+                        threadInfo[thread].remove();
+                    },
                 }
-            } else {
-                InfiniteScroll.trigger("pauseScroll", false);
-            }
+            );
+        }
+
+        queueSize = downloadQueue.getQueueLength();
+
+        // Begin processing the queue
+        this.infoText.html(`Processing . . . `);
+
+        const zipData = await downloadQueue.run((metadata) => {
+            this.infoText.html(`Compressing . . . ${metadata.percent.toFixed(2)}%`);
+            if (metadata.currentFile) { this.infoFile.html(metadata.currentFile); }
+            else { this.infoFile.html(""); }
         });
+
+        this.infoText
+            .attr("data-state", "done")
+            .html(`Done! `);
+        this.infoFile.html("");
+
+        // Download the resulting ZIP
+        this.downloadIndex++;
+        const filename = `e621-${this.fileTimestamp}-${this.downloadIndex}.zip`;
+        const $downloadLink = $("<a>")
+            .attr({
+                "href": URL.createObjectURL(zipData),
+                "download": filename,
+            })
+            .html("Download Archive")
+            .appendTo(this.infoText);
+
+        if (this.fetchSettings("autoDownloadArchive")) {
+            $downloadLink.get(0).click();
+            if (this.downloadOverSize) {
+                this.setProcessing(false);
+                this.actButton.get(0).click();
+                return;
+            }
+        } else if (this.downloadOverSize) {
+            $("<div>")
+                .addClass("download-notice")
+                .html(`Download has exceeded the maximum file size.<br /><br />Click the download button again for the next part.`)
+                .appendTo(this.infoText);
+        }
+
+        this.setProcessing(false);
     }
 
     /**
      * Creates a filename from the post data based on the current template
      * @param data Post data
      */
-    private createFilename(data: APIPost): string {
-        return MassDownloader.createFilenameBase(this.fetchSettings<string>("template"), data)
+    private createFilename(post: Post): string {
+        return MassDownloader.createFilenameBase(this.fetchSettings<string>("template"), post)
             .slice(0, 128)
             .replace(/-{2,}/g, "-")
             .replace(/-*$/g, "")
-            + "." + data.file.ext;
+            + "." + post.file.ext;
     }
 
-    public static createFilenameBase(template: string, data: APIPost): string {
+    public static createFilenameBase(template: string, post: PostData): string {
         return template
-            .replace(/%postid%/g, data.id + "")
-            .replace(/%artist%/g, data.tags.artist.join("-"))
-            .replace(/%copyright%/g, data.tags.copyright.join("-"))
-            .replace(/%character%/g, data.tags.character.join("-"))
-            .replace(/%species%/g, data.tags.species.join("-"))
-            .replace(/%meta%/g, data.tags.meta.join("-"))
-            .replace(/%md5%/g, data.file.md5);
+            .replace(/%postid%/g, post.id + "")
+            .replace(/%artist%/g, [...post.tags.artist].join("-"))
+            .replace(/%copyright%/g, [...post.tags.copyright].join("-"))
+            .replace(/%character%/g, [...post.tags.character].join("-"))
+            .replace(/%species%/g, [...post.tags.species].join("-"))
+            .replace(/%meta%/g, [...post.tags.meta].join("-"))
+            .replace(/%md5%/g, post.file.md5);
     }
 
 }

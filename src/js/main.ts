@@ -27,13 +27,13 @@ import { ImageScaler } from "./modules/post/ImageScaler";
 import { PoolNavigator } from "./modules/post/PoolNavigator";
 import { PostViewer } from "./modules/post/PostViewer";
 import { TitleCustomizer } from "./modules/post/TitleCustomizer";
+import { BetterSearch } from "./modules/search/BetterSearch";
 import { BlacklistEnhancer } from "./modules/search/BlacklistEnhancer";
 import { CustomFlagger } from "./modules/search/CustomFlagger";
-import { InfiniteScroll } from "./modules/search/InfiniteScroll";
 import { InstantSearch } from "./modules/search/InstantSearch";
 import { PostSuggester } from "./modules/search/PostSuggester";
 import { SearchUtilities } from "./modules/search/SearchUtilities";
-import { ThumbnailEnhancer } from "./modules/search/ThumbnailsEnhancer";
+import { ThumbnailTweaks } from "./modules/search/ThumbnailTweaks";
 import { CommentTracker } from "./modules/subscriptions/CommentTracker";
 import { ForumTracker } from "./modules/subscriptions/ForumTracker";
 import { PoolTracker } from "./modules/subscriptions/PoolTracker";
@@ -52,14 +52,15 @@ const loadOrder = [
     PostViewer,
     TitleCustomizer,
 
+    BlacklistEnhancer,
     CustomFlagger,
-    InfiniteScroll,
     InstantSearch,
-    ThumbnailEnhancer,
+    ThumbnailTweaks,
+    BetterSearch,
+
     PostSuggester,
     SearchUtilities,
     Miscellaneous,
-    BlacklistEnhancer,
 
     SmartAlias,
     WikiEnhancer,

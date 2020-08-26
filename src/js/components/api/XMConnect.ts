@@ -6,8 +6,6 @@ declare const GM_getResourceText: Function;
 declare const GM_getResourceURL: Function;
 declare const GM_xmlhttpRequest: Function;
 
-declare const saveAs;
-
 export class XMConnect {
 
     /**
@@ -193,7 +191,14 @@ export class XMConnect {
             },
             onload: (event) => {
                 a.onload(event);
-                saveAs(event.response as Blob, a.name);
+                const btn = $("<a>")
+                    .attr({
+                        href: URL.createObjectURL(event.response as Blob),
+                        download: a.name,
+                    })
+                    .html("download")
+                    .click(() => { btn.remove(); });
+                btn[0].click();
             }
         });
     };
