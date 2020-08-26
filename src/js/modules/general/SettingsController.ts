@@ -1392,8 +1392,11 @@ export class SettingsController extends RE6Module {
 
             // Posts
             Form.header("Posts", 3),
-            ...createInputs(postViewer, "Upvote", "hotkeyUpvote"),
-            ...createInputs(postViewer, "Downvote", "hotkeyDownvote"),
+            ...createInputs(postViewer, "Upvote Post", "hotkeyUpvoteNU"),
+            ...createInputs(postViewer, "Toggle Upvote", "hotkeyUpvote"),
+            ...createInputs(postViewer, "Downvote Post", "hotkeyDownvoteNU"),
+            ...createInputs(postViewer, "Toggle Downvote", "hotkeyDownvote"),
+
             ...createInputs(postViewer, "Toggle Favorite", "hotkeyFavorite"),
             ...createInputs(postViewer, "Add to Favorites", "hotkeyAddFavorite"),
             ...createInputs(postViewer, "Remove From Favorites", "hotkeyRemoveFavorite"),

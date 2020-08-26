@@ -16,7 +16,9 @@ export class PostViewer extends RE6Module {
         super(PageDefintion.post, true);
         this.registerHotkeys(
             { keys: "hotkeyUpvote", fnct: this.triggerUpvote },
+            { keys: "hotkeyUpvoteNU", fnct: this.triggerUpvoteNU },
             { keys: "hotkeyDownvote", fnct: this.triggerDownvote },
+            { keys: "hotkeyDownvoteNU", fnct: this.triggerDownvoteNU },
 
             { keys: "hotkeyFavorite", fnct: this.toggleFavorite },
             { keys: "hotkeyAddFavorite", fnct: this.addFavorite },
@@ -46,7 +48,9 @@ export class PostViewer extends RE6Module {
         return {
             enabled: true,
             hotkeyUpvote: "w",          // vote up on the current post
+            hotkeyUpvoteNU: "",         // vote up, don't unvote
             hotkeyDownvote: "s",        // vote down on the current post
+            hotkeyDownvoteNU: "",       // vote down, don't unvote
 
             hotkeyFavorite: "f",        // toggle the favorite state of the post
             hotkeyAddFavorite: "",      // add current post to favorites
@@ -143,9 +147,65 @@ export class PostViewer extends RE6Module {
         Danbooru.Post.vote(Post.getViewingPost().id, 1);
     }
 
+    /** Same as above, but does not unvote */
+    private triggerUpvoteNU(): void {
+        const id = Post.getViewingPost().id;
+        PostActions.vote(id, 1, true).then((response) => {
+            if (!response.success) {
+                Danbooru.error("An error occurred while processing votes");
+                return;
+            }
+
+            $("span.post-vote-up-" + id)
+                .removeClass("score-neutral")
+                .addClass("score-positive");
+            $("span.post-vote-down-" + id)
+                .removeClass("score-negative")
+                .addClass("score-neutral");
+
+            $("span.post-score-" + id)
+                .removeClass("score-positive score-negative score-neutral")
+                .addClass(PostViewer.getScoreClass(response.score))
+                .attr("title", response.up + " up / " + response.down + " down")
+                .html(response.score + "")
+            if (response.score > 0) Danbooru.notice("Post Score Updated");
+        });
+    }
+
     /** Emulates a click on the downvote button */
     private triggerDownvote(): void {
         Danbooru.Post.vote(Post.getViewingPost().id, -1);
+    }
+
+    /** Same as above, but does not unvote */
+    private triggerDownvoteNU(): void {
+        const id = Post.getViewingPost().id;
+        PostActions.vote(id, -1, true).then((response) => {
+            if (!response.success) {
+                Danbooru.error("An error occurred while processing votes");
+                return;
+            }
+
+            $("span.post-vote-down-" + id)
+                .addClass("score-negative")
+                .removeClass("score-neutral");
+            $("span.post-vote-up-" + id)
+                .removeClass("score-positive")
+                .addClass("score-neutral");
+
+            $("span.post-score-" + id)
+                .removeClass("score-positive score-negative score-neutral")
+                .addClass(PostViewer.getScoreClass(response.score))
+                .attr("title", response.up + " up / " + response.down + " down")
+                .html(response.score + "")
+            if (response.score < 0) Danbooru.notice("Post Score Updated");
+        });
+    }
+
+    private static getScoreClass(score: number): string {
+        if (score > 0) return "score-positive";
+        if (score < 0) return "score-negative";
+        return "score-neutral";
     }
 
     /** Toggles the favorite state */
