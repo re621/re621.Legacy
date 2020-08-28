@@ -4,20 +4,21 @@ import { Post, PostData } from "./Post";
 
 export class PostFilter {
 
+    private input: string;
+
     private entries: Filter[];          // individual filters
     private enabled: boolean;           // if false, the filters are ignored
     private matchIDs: Set<number>;       // post IDs matched by the filter
     private optionals: number;          // number of optional filters
 
     constructor(input: string, enabled = true) {
+        this.input = input.toLowerCase().trim();
         this.entries = [];
         this.enabled = enabled;
         this.matchIDs = new Set();
         this.optionals = 0;
 
-        input = input.toLowerCase().trim();
-
-        for (let filter of new Set(input.split(" ").filter(e => e != ""))) {
+        for (let filter of new Set(this.input.split(" ").filter(e => e != ""))) {
 
             // Filter is optional
             const optional = filter.startsWith("~");
@@ -42,6 +43,11 @@ export class PostFilter {
 
             this.entries.push({ type: filterType, value: filter, inverted: inverse, optional: optional, comparison: comparison });
         }
+    }
+
+    /** Returns the original string from which this filter was created */
+    public getName(): string {
+        return this.input;
     }
 
     /**

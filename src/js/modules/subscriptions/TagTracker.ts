@@ -132,16 +132,17 @@ export class TagTracker extends RE6Module implements SubscriptionTracker {
                 break;
             }
 
-            const post: APIPost = apiResult[key];
-            Debug.log(`TgT: ${post.id} ${Util.Time.format(new Date(post.created_at))}`);
+            const post: PostData = PostData.fromAPI(apiResult[key]);
+            Debug.log(`TgT: ${post.id} ${Util.Time.format(new Date(post.date.raw))}`);
 
             // Only add posts that match the blacklist
-            if (Blacklist.checkPost(post.id), true) {
+            Blacklist.addPost(post);
+            if (Blacklist.checkPost(post.id, true)) {
                 Debug.log("TgT: blacklist");
                 continue;
             }
 
-            results[new Date(post.created_at).getTime()] = await this.formatPostUpdate(post);
+            results[new Date(post.date.raw).getTime()] = await this.formatPostUpdate(post);
         }
 
         status.append(`<div>. . . outputting results</div>`);
@@ -149,7 +150,7 @@ export class TagTracker extends RE6Module implements SubscriptionTracker {
         return results;
     }
 
-    private async formatPostUpdate(value: APIPost): Promise<UpdateContent> {
+    private async formatPostUpdate(value: PostData): Promise<UpdateContent> {
         return {
             id: value.id,
             name: "post #" + value.id,
