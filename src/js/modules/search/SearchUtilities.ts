@@ -58,7 +58,7 @@ export class SearchUtilities extends RE6Module {
 
         // Remove the query string on posts
         if (Page.matches(PageDefintion.post)) {
-            this.removeSearchQueryString();
+            Page.removeQueryParameter("q");
         }
 
         // Replaces the tag count estimate with the real number
@@ -88,13 +88,6 @@ export class SearchUtilities extends RE6Module {
         // Initialize the quick-blacklist buttons
         this.initQuickBlacklist(this.fetchSettings("quickBlacklist"));
 
-    }
-
-    /**
-     * Removes the search query from the address bar
-     */
-    private removeSearchQueryString(): void {
-        Page.removeQueryParameter("q");
     }
 
     /**

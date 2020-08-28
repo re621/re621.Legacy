@@ -5,6 +5,7 @@ import { E621 } from "../api/E621";
 import { PostFlag } from "../api/responses/APIPost";
 import { XM } from "../api/XM";
 import { Blacklist } from "../data/Blacklist";
+import { Page } from "../data/Page";
 import { DomUtilities } from "../structure/DomUtilities";
 import { Util } from "../utility/Util";
 import { LoadedFileType, Post } from "./Post";
@@ -15,9 +16,11 @@ export class PostParts {
 
     public static renderImage(post: Post, conf: any): JQuery<HTMLElement> {
 
+        const query = Page.getQueryParameter("tags")
+
         // Basic structure
         const $link = $("<a>")
-            .attr({ "href": "/posts/" + post.id, })
+            .attr({ "href": "/posts/" + post.id + (query !== null ? "?q=" + query : ""), })
             .append(PostParts.renderImageElement(post, conf))
             .append($("<post-loading>"));
 
