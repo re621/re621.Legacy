@@ -84,6 +84,17 @@ const subscriptions = [
 // Show the script version in the console
 console.log(`${window["re621"]["name"]} v.${window["re621"]["version"]} build ${window["re621"]["build"]}`);
 
+if (Page.matches([PageDefintion.search, PageDefintion.favorites]) && Util.LS.getItem("re621.bs.enabled") === "true") {
+    new MutationObserver(function () {
+        const content = $("#posts");
+        // console.log(content.length);
+        if (content.length != 0) {
+            content.remove();
+            this.disconnect();
+        }
+    }).observe(document, { childList: true, subtree: true });
+}
+
 // Reroute the title page before everything else loads
 if (Page.matches(PageDefintion.title)) {
     const page = Util.LS.getItem("re621.mainpage");

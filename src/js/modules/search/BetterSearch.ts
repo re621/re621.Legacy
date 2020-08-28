@@ -83,7 +83,9 @@ export class BetterSearch extends RE6Module {
     public async prepare(): Promise<void> {
         await super.prepare();
 
-        if (!this.fetchSettings("enabled") || !this.pageMatchesFilter()) return;
+        const enabled = this.fetchSettings("enabled");
+        Util.LS.setItem("re621.bs.enabled", enabled + "");
+        if (!enabled || !this.pageMatchesFilter()) return;
 
         const paginator = $("div.paginator menu");
         const curPage = parseInt(paginator.find(".current-page").text()) || -1,
