@@ -52,7 +52,7 @@ export class TagCache {
 
     /** Adds the tag data to cache */
     public static add(tag: string, count: number, category: number): void {
-        TagCache.getCache().set(tag, { count: count, category: category, expires: Util.Time.now() + Util.Time.DAY });
+        TagCache.getCache().set(tag, { count: count, category: category, expires: Util.Time.now() + (count > 100000 ? Util.Time.WEEK : Util.Time.DAY) });
     }
 
 }
