@@ -157,7 +157,7 @@ export class ImageScaler extends RE6Module {
 
     /** Opens the post in fullscreen mode */
     private openFullscreen(): void {
-        $("#re621-imagescaler-fullscreen")[0].click();
+        $("#image-download-link a")[0].click();
     }
 
     /** Sets the appropriate click-scale style */
