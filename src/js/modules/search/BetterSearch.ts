@@ -87,9 +87,10 @@ export class BetterSearch extends RE6Module {
         Util.LS.setItem("re621.bs.enabled", enabled + "");
         if (!enabled || !this.pageMatchesFilter()) return;
 
-        const paginator = $("div.paginator menu");
+        const paginator = $("#paginator-old, div.paginator menu").first();
         const curPage = parseInt(paginator.find(".current-page").text()) || -1,
             lastPage = parseInt(paginator.find(".numbered-page").last().text()) || -1;
+        paginator.remove();
         this.lastPage = Math.max(curPage, lastPage);
 
         $("#content")

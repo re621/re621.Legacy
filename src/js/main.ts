@@ -85,13 +85,21 @@ const subscriptions = [
 console.log(`${window["re621"]["name"]} v.${window["re621"]["version"]} build ${window["re621"]["build"]}`);
 
 if (Page.matches([PageDefintion.search, PageDefintion.favorites]) && Util.LS.getItem("re621.bs.enabled") === "true") {
+    let counter = 0;
     new MutationObserver(function () {
-        const content = $("#posts");
+        const content = $("#posts"),
+            pagination = $("div.paginator menu");
         // console.log(content.length);
-        if (content.length != 0) {
+        if (content.length != 0 && pagination.length !== 0) {
+            pagination
+                .css("display", "none")
+                .attr("id", "paginator-old")
+                .appendTo("body");
             content.remove();
             this.disconnect();
         }
+        counter++;
+        if (counter > 50) this.disconnect();
     }).observe(document, { childList: true, subtree: true });
 }
 
