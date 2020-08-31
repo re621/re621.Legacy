@@ -129,7 +129,6 @@ export class SettingsController extends RE6Module {
                 { name: "Smart Alias", structure: this.createUploadsTab() },
                 { name: "Hotkeys", structure: this.createHotkeysTab() },
                 { name: "Features", structure: this.createFeaturesTab() },
-                // { name: "Sync", structure: this.createSyncTab() },
                 {
                     name: this.utilTabButton = $("<a>")
                         .attr({
@@ -1500,34 +1499,6 @@ export class SettingsController extends RE6Module {
             ...createInput("FormattingManager", "Formatting Helper", "Fully customizable toolbar for easy DText formatting."),
 
             ...createInput("SmartAlias", "Smart Alias", "A more intelligent way to quickly fill out post tags."),
-        ]);
-    }
-
-    private createSyncTab(): Form {
-        return new Form({ name: "optsync", columns: 3, width: 3 }, [
-            Form.header("Settings Synchronization", 3),
-
-            Form.checkbox(
-                { value: Sync.enabled, label: "Enabled" },
-                async (data) => {
-                    console.log(data);
-                }
-            ),
-            Form.spacer(2),
-
-            Form.div({ value: "ID" }),
-            Form.input(
-                { value: Sync.userID },
-                async (data) => {
-                    console.log(data);
-                }
-            ),
-            Form.input(
-                { value: "password" },
-                async (data) => {
-                    console.log(data);
-                }
-            ),
         ]);
     }
 

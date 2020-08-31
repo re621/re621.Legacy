@@ -75,8 +75,7 @@
         "storage",
         "tabs",
         "https://api.github.com/*",
-        "https://static1.e621.net/*",
-        "https://re621.bitwolfy.com/*"
+        "https://static1.e621.net/*"
     ],
 
     "resources": {

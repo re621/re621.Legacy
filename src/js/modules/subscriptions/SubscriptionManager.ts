@@ -7,14 +7,9 @@ import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed, TabContent } from "../../components/structure/Tabbed";
 import { Debug } from "../../components/utility/Debug";
-import { Sync } from "../../components/utility/Sync";
 import { Util } from "../../components/utility/Util";
 import { BetterSearch, ImageClickAction } from "../search/BetterSearch";
-import { CommentTracker } from "./CommentTracker";
-import { ForumTracker } from "./ForumTracker";
-import { PoolTracker } from "./PoolTracker";
 import { SubscriptionTracker, UpdateContent } from "./SubscriptionTracker";
-import { TagTracker } from "./TagTracker";
 
 export class SubscriptionManager extends RE6Module {
 
@@ -449,23 +444,6 @@ export class SubscriptionManager extends RE6Module {
             "data-updates": "0",
         });
 
-        if (Sync.enabled) {
-            const syncData = await Sync.download();
-            if (syncData === null) await Sync.upload();
-            else {
-                const time = new Date(syncData["timestamp"] + "Z").getTime();
-                if (time > Sync.timestamp) {
-                    Debug.log("SYNC: downloading remote")
-                    await ModuleController.get(CommentTracker).pushSettings("data", syncData.data.CommentTracker);
-                    await ModuleController.get(ForumTracker).pushSettings("data", syncData.data.ForumTracker);
-                    await ModuleController.get(PoolTracker).pushSettings("data", syncData.data.PoolTracker);
-                    await ModuleController.get(TagTracker).pushSettings("data", syncData.data.TagTracker);
-                    Sync.timestamp = time;
-                    await Sync.saveSettings();
-                } else Debug.log("SYNC: up to date");
-            }
-        }
-
         const updateThreads: Promise<any>[] = [];
         for (const trackerData of this.trackers.values()) {
             updateThreads.push(new Promise(async (resolve) => {
@@ -693,8 +671,6 @@ export class SubscriptionManager extends RE6Module {
             $subscribeButton.addClass("display-none");
             $unsubscribeButton.removeClass("display-none");
 
-            if (Sync.enabled) await Sync.upload();
-
             return instance.pushSettings("data", subscriptionData);
         }
 
@@ -706,8 +682,6 @@ export class SubscriptionManager extends RE6Module {
 
             $subscribeButton.removeClass("display-none");
             $unsubscribeButton.addClass("display-none");
-
-            if (Sync.enabled) await Sync.upload();
 
             return instance.pushSettings("data", subscriptionData);
         }

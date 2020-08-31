@@ -163,6 +163,13 @@ export class Patcher {
 
                 Patcher.version = 6;
             }
+
+            // Patch 7 - 1.4.3
+            // Synchronization server died, and the sync features with it
+            case 6: {
+                await XM.Storage.deleteValue("re621.sync")
+                Patcher.version = 7;
+            }
         }
 
         Debug.log(`Patcher: ${counter} records changed`)
