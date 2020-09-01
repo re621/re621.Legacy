@@ -556,6 +556,8 @@ zoom-container {
         background: #000000aa;
         font-family: monospace;
         line-height: 1rem;
+
+        box-sizing: border-box;
     }
 
     &[status=waiting] { display: none; }

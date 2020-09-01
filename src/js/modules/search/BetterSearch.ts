@@ -697,7 +697,11 @@ export class BetterSearch extends RE6Module {
 
             // Append the tags block
             if (this.fetchSettings("zoomTags"))
-                this.$zoomTags.html(PostParts.formatHoverText(post, true, true));
+                this.$zoomTags
+                    .html(PostParts.formatHoverText(post, true, true))
+                    .css({
+                        "max-width": width + "px",
+                    });
 
             // Listen for mouse movements to move the preview accordingly
             let throttled = false;
@@ -764,7 +768,9 @@ export class BetterSearch extends RE6Module {
                     "src": "",
                 });
             window.clearTimeout(videoTimeout);
-            this.$zoomTags.html("");
+            this.$zoomTags
+                .removeAttr("style")
+                .html("");
 
             // If the post was loading, remove the spinner
             $("#entry_" + data.post).removeAttr("loading");
