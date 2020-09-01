@@ -68,6 +68,7 @@ export class BetterSearch extends RE6Module {
 
             ribbonsRel: true,                               // Relations ribbons - parent / child posts
             ribbonsFlag: true,                              // Status ribbons - flagged / pending
+            ribbonsAlt: false,                              // Alternative ribbon placement
             buttonsVote: true,                              // Voting buttons
             buttonsFav: true,                               // Favorite button
 
@@ -400,6 +401,8 @@ export class BetterSearch extends RE6Module {
             "imageRatioChange", "imageRatio",
             "imageMinWidth", "compactMode",
 
+            "ribbonsAlt",
+
             "hidePageBreaks",
         ]);
 
@@ -409,6 +412,10 @@ export class BetterSearch extends RE6Module {
         if (conf.imageRatioChange) this.$content.css("--img-ratio", conf.imageRatio);
         else this.$content.css("--img-fit", conf.imageMinWidth + "%");
         if (conf.compactMode) this.$content.css("--img-maxheight", (conf.imageSizeChange ? conf.imageWidth : 150) + "px");
+
+        // Alternative ribbons
+        if (conf.ribbonsAlt) this.$content.attr("ribbons-alt", "true");
+        else this.$content.removeAttr("ribbons-alt");
 
         // InfScroll separators
         if (conf.hidePageBreaks) this.$content.attr("hide-page-breaks", "true");

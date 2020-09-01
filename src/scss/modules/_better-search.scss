@@ -380,7 +380,7 @@ picture.picture-container {
         display: block;
 
         $status-flagged: orangered;
-        $status-pending: blue;
+        $status-pending: #4343d9;
         $rel-children: forestgreen;
         $rel-parent: goldenrod;
 
@@ -428,6 +428,17 @@ picture.picture-container {
         &.is-flagged.is-pending span {
             background: linear-gradient(90deg, $status-flagged 50%, $status-pending 50%);
         }
+    }
+
+    // Bottom Ribbons
+    &[ribbons-alt=true] {
+        img-ribbons {
+            top: unset;
+            bottom: 1rem;
+        }
+
+        ribbon.left { transform: rotate(270deg); }
+        ribbon.right { transform: rotate(90deg); }
     }
 }
 

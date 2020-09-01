@@ -630,6 +630,19 @@ export class SettingsController extends RE6Module {
                             if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
                         }
                     ),
+                    Form.spacer(3, true),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("ribbonsAlt"),
+                            label: "<b>Alternative Ribbons</b><br />Place the ribbons on the bottom of the thumbnail",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("ribbonsAlt", data);
+                            if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
+                        }
+                    ),
 
                 ]),
 
