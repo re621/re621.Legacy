@@ -62,10 +62,6 @@
                 [
                     "https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.2.0/plugins/unload/ls.unload.min.js",
                     "./build/cache/ls.unload.min.js"
-                ],
-                [
-                    "https://cdn.jsdelivr.net/npm/ua-parser-js@0.7.21/src/ua-parser.min.js",
-                    "./build/cache/ua-parser.min.js"
                 ]
             ]
         }

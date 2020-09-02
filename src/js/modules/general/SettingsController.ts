@@ -1,7 +1,6 @@
 import { E621 } from "../../components/api/E621";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
-import { GMxmlHttpRequestResponse } from "../../components/api/XMConnect";
 import { AvoidPosting } from "../../components/cache/AvoidPosting";
 import { TagCache } from "../../components/cache/TagCache";
 import { Hotkeys } from "../../components/data/Hotkeys";
@@ -14,8 +13,8 @@ import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
 import { Debug } from "../../components/utility/Debug";
 import { Patcher } from "../../components/utility/Patcher";
-import { Sync } from "../../components/utility/Sync";
 import { Util } from "../../components/utility/Util";
+import { VersionChecker } from "../../components/utility/VersionChecker";
 import { FavDownloader } from "../downloader/FavDownloader";
 import { MassDownloader } from "../downloader/MassDownloader";
 import { PoolDownloader } from "../downloader/PoolDownloader";
@@ -57,51 +56,7 @@ export class SettingsController extends RE6Module {
             enabled: true,
 
             hotkeyOpenSettings: "",
-
-            newVersionAvailable: false,
-            changelog: "",
         };
-    }
-
-    public async prepare(): Promise<void> {
-        await super.prepare();
-
-        // Abort: Dev release (compiled by github actions)
-        if ((Sync.version as string).includes("dev"))
-            return await abort(this);
-
-        // Abort: Version didn't change, timer didn't expire
-        if (Sync.infoUpdate + Util.Time.HOUR >= Util.Time.now()) return;
-
-        // Fetch release data from github
-        const releases = {
-            latest: await getGithubData("latest"),
-            current: await getGithubData("tags/" + Sync.version),
-        };
-
-        Sync.infoUpdate = Util.Time.now();
-        await Sync.saveSettings();
-
-        // Abort: Dev build (compiled manually)
-        if (releases.current.name == undefined)
-            return await abort(this);
-
-        await this.pushSettings("changelog", releases.current.body);
-        await this.pushSettings("newVersionAvailable", Util.versionCompare(releases.current.name, releases.latest.name) < 0);
-
-        async function abort(localThis: RE6Module): Promise<void> {
-            await localThis.pushSettings("changelog", `<i>~ Changelog not available ~</i>`);
-            await localThis.pushSettings("newVersionAvailable", false);
-            Sync.infoUpdate = Util.Time.now();
-            await Sync.saveSettings();
-        }
-
-        async function getGithubData(node: string): Promise<any> {
-            return XM.Connect.xmlHttpPromise({ url: "https://api.github.com/repos/re621/re621/releases/" + node, method: "GET" }).then(
-                (response: GMxmlHttpRequestResponse) => { return Promise.resolve(JSON.parse(response.responseText)); },
-                () => { throw Error("Failed to fetch Github release data"); }
-            );
-        }
     }
 
     public create(): void {
@@ -1851,20 +1806,19 @@ export class SettingsController extends RE6Module {
     /** Creates the about tab */
     private createAboutTab(): Form {
 
-        const hasNewVersion = this.fetchSettings("newVersionAvailable");
-        if (hasNewVersion) this.pushNotificationsCount("about", 1);
+        if (VersionChecker.hasUpdate) this.pushNotificationsCount("about", 1);
 
         return new Form({ name: "optabout", columns: 3, width: 3 }, [
             // About
             Form.div({
                 value:
-                    `<h3 class="display-inline"><a href="${window["re621"]["links"]["website"]}" target="_blank">${window["re621"]["name"]} v.${Sync.version}</a></h3>` +
+                    `<h3 class="display-inline"><a href="${window["re621"]["links"]["website"]}" target="_blank">${window["re621"]["name"]} v.${VersionChecker.scriptBuild}</a></h3>` +
                     ` <span class="display-inline">build ${window["re621"]["build"]}:${Patcher.version}</span>`,
                 width: 2
             }),
             Form.div({
                 value:
-                    `<span class="float-right" id="project-update-button" data-available="${hasNewVersion}">
+                    `<span class="float-right" id="project-update-button" data-available="${VersionChecker.hasUpdate}">
                     <a href="${window["re621"]["links"]["releases"]}" target="_blank">Update Available</a>
                     </span>`
             }),
@@ -1887,7 +1841,7 @@ export class SettingsController extends RE6Module {
 
             // Changelog
             Form.header(`<a href="${window["re621"]["links"]["releases"]}" target="_blank" class="unmargin">What's new?</a>`, 3),
-            Form.div({ value: `<div id="changelog-list">${Util.quickParseMarkdown(this.fetchSettings("changelog"))}</div>`, width: 3 })
+            Form.div({ value: `<div id="changelog-list"><h5>Version ${VersionChecker.latestBuild}</h5>${VersionChecker.changesHTML}</div>`, width: 3 })
         ]);
     }
 

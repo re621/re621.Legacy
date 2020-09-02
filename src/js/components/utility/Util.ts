@@ -77,7 +77,8 @@ export class Util {
     }
 
     /**
-     * Limited markdown parser. Don't rely on this thing to be any good, replace with an actual library if really necessary.
+     * Convert markdown input into html.  
+     * Very limited in scope, don't rely on this for anything important.
      * @param input Markdown input
      * @returns HTML output
      */
@@ -85,6 +86,8 @@ export class Util {
         if (input === undefined) return "";
         return input
             .replace(/\*\*(.*?)\*\*/gm, "<strong>$1</strong>")
+            .replace(/\_(.*?\S)\_/gm, "<em>$1</em>")
+            .replace(/\[(.+)\]\((.*)\)/gm, `<a href="$2">$1</a>`)
             .replace(/^[-]+(.*)?/gmi, "<ul><li>$1</li></ul>")
             .replace(/\<\/ul\>\r\n\<ul\>/gm, "")
             .replace(/\n(?!<)/gm, "<br />");
