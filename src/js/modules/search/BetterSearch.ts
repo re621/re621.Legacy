@@ -461,7 +461,7 @@ export class BetterSearch extends RE6Module {
                     // used to trigger Danbooru's native functionality.
 
                     const $farticle = $("<article>")
-                        .addClass("post-preview display-none")
+                        .addClass("post-preview display-none-important")
                         .attr({
                             "id": "post_" + post.id,
                             "data-id": post.id,
@@ -470,8 +470,10 @@ export class BetterSearch extends RE6Module {
                         .appendTo("body");
                     $("<a>").appendTo($farticle)
                         .one("click", (event) => {
-                            console.log($(event.target).closest("article").data("id"));
                             Danbooru.PostModeMenu.click(event);
+                            window.setTimeout(() => {
+                                $farticle.remove();
+                            }, 500);
                         })[0].click();
                     break;
                 }
