@@ -85,6 +85,7 @@ form-section > form-input {
         display: inline-grid;
         grid-template-columns: 80% 20%;
         overflow: hidden;
+        position: relative;
 
         input[type=text] {
             width: unset;
@@ -99,6 +100,19 @@ form-section > form-input {
 
             &.highlight {
                 box-shadow: inset 0px 0px 0px 2px #ffffff60;
+            }
+        }
+
+        span.keyinput-warning {
+            position: absolute;
+            width: 0;
+            right: calc(20% + 1.25rem);
+
+            &:before {
+                content: unicode("f12a");
+                font-family: 'Font Awesome 5 Free';
+                font-weight: 900;
+                color: coral;
             }
         }
 

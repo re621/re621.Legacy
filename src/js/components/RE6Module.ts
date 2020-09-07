@@ -1,5 +1,5 @@
 import { XM } from "./api/XM";
-import { Hotkeys } from "./data/Hotkeys";
+import { Keybind, KeybindManager } from "./data/Keybinds";
 import { Page } from "./data/Page";
 import { ModuleController } from "./ModuleController";
 
@@ -20,7 +20,7 @@ export class RE6Module {
 
     private dependencies: { new(): RE6Module }[] = [];
     private constraint: RegExp[] = [];
-    private hotkeys: Hotkey[] = [];
+    private keybinds: KeybindDefinition[] = [];
 
     /**
      * Established basic module configuration.  
@@ -266,27 +266,33 @@ export class RE6Module {
         };
     }
 
-    /** Establish the module's hotkeys */
     public async resetHotkeys(): Promise<void> {
         await this.loadSettingsCache();
 
-        const enabled = this.pageMatchesFilter();
-        this.hotkeys.forEach((value) => {
-            this.fetchSettings(value.keys).split("|").forEach((key) => {
-                if (key === "") return;
-                if (enabled) Hotkeys.register(key, value.fnct, value.element, value.selector);
-                else Hotkeys.register(key, () => { return; });
-            });
+        const keyMeta: string[] = [];
+        const keybindObj: Keybind[] = [];
 
-        });
+        const enabled = this.pageMatchesFilter();
+        for (const keybind of this.keybinds) {
+            const meta = this.getSettingsTag + "." + keybind.keys;
+
+            keybindObj.push({
+                keys: this.fetchSettings(keybind.keys).split("|"),
+                fnct: keybind.fnct,
+                bindMeta: meta,
+                bindName: keybind.name,
+                enabled: enabled,
+            })
+
+            keyMeta.push(meta);
+        }
+
+        KeybindManager.unregister(keyMeta);
+        KeybindManager.register(keybindObj);
     }
 
-    /**
-     * Registers the provided hotkeys with the module
-     * @param hotkeys Hotkey to register
-     */
-    protected registerHotkeys(...hotkeys: Hotkey[]): void {
-        this.hotkeys.push(...hotkeys);
+    protected registerHotkeys(...keybinds: KeybindDefinition[]): void {
+        this.keybinds.push(...keybinds);
         this.resetHotkeys();
     }
 
@@ -329,15 +335,13 @@ export class RE6Module {
 
 }
 
-interface Hotkey {
-    /** List of keys that should trigger the function, pipe-separated */
+interface KeybindDefinition {
+
     keys: string;
-    /** Function to execute on hotkey keypress */
-    fnct: Function;
-    /** Element to listen to hotkeys. Defaults to document */
-    element?: JQuery<HTMLElement>;
-    /** Selector to look for within the element. Defaults to null */
-    selector?: string;
+
+    fnct: (bindMeta: string) => void;
+
+    name?: string;
 }
 
 export type Settings = {

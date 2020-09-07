@@ -1,5 +1,5 @@
 import { XM } from "../api/XM";
-import { Hotkeys } from "../data/Hotkeys";
+import { KeybindManager } from "../data/Keybinds";
 import { Util } from "../utility/Util";
 import { PreparedStructure } from "./PreparedStructure";
 
@@ -441,7 +441,17 @@ export class Form implements PreparedStructure {
                         .attr("defval", options.value);
                 }
             }
+
+            $input.attr("key", $input.val() + "");
         }
+
+        const $warning = $("<span>")
+            .addClass("keyinput-warning")
+            .attr("title", "Duplicate Keybinding")
+            .appendTo($element);
+
+        if (KeybindManager.count($input.val() + "") <= 1)
+            $warning.addClass("display-none");
 
         const $recordbutton = $("<button>")
             .attr({
@@ -462,29 +472,48 @@ export class Form implements PreparedStructure {
             if (occupied) return;
             occupied = true;
 
-            const $oldKey = $input.val();
+            const duplicates = $(`.keyinput input[key="${$input.val()}"]`);
+            if (duplicates.length > 2) {
+                $warning.addClass("display-none");
+            } else {
+                duplicates
+                    .parent()
+                    .find("span.keyinput-warning")
+                    .addClass("display-none");
+            }
+
             $input
                 .addClass("input-info")
                 .val("Recording");
 
-            Hotkeys.recordSingleKeypress(function (key: string) {
-                if (key.includes("escape")) {
-                    $input.removeClass("input-info").val("");
-                    if (changed !== undefined) changed(["", $oldKey], $input);
+            KeybindManager.record((sequence) => {
+                if (sequence.includes("esc")) {
+                    $input
+                        .removeClass("input-info")
+                        .val("")
+                        .attr("key", "");
+
+                    if (changed !== undefined) changed("", $input);
                     occupied = false;
                 }
-                else if (Hotkeys.isRegistered(key)) {
-                    $input.val("Already Taken");
-                    setTimeout(() => {
-                        $input
-                            .removeClass("input-info")
-                            .val($oldKey);
-                        occupied = false;
-                    }, 1000);
-                }
                 else {
-                    $input.removeClass("input-info").val(key);
-                    if (changed !== undefined) changed([key, $oldKey], $input);
+                    const newVal = sequence.join(" ");
+
+                    $input
+                        .removeClass("input-info")
+                        .val(newVal)
+                        .attr("key", newVal);
+
+                    const duplicates = $(`.keyinput input[key="${newVal}"]`);
+
+                    if (duplicates.length > 1) {
+                        duplicates
+                            .parent()
+                            .find("span.keyinput-warning")
+                            .removeClass("display-none");
+                    }
+
+                    if (changed !== undefined) changed(newVal, $input);
                     occupied = false;
                 }
             });

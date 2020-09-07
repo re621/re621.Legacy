@@ -3,7 +3,6 @@ import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
 import { AvoidPosting } from "../../components/cache/AvoidPosting";
 import { TagCache } from "../../components/cache/TagCache";
-import { Hotkeys } from "../../components/data/Hotkeys";
 import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -1306,10 +1305,9 @@ export class SettingsController extends RE6Module {
                 ),
             ];
 
-            async function handleRebinding(data: string[], index: 0 | 1): Promise<void> {
-                bindings[index] = data[0];
+            async function handleRebinding(data: string, index: 0 | 1): Promise<void> {
+                bindings[index] = data;
                 await module.pushSettings(settingsKey, bindings.join("|"));
-                Hotkeys.unregister(data[1]);
                 await module.resetHotkeys();
             }
         }
@@ -1342,10 +1340,9 @@ export class SettingsController extends RE6Module {
                 )
             ];
 
-            async function handleRebinding(data: string[], index: 0 | 1): Promise<void> {
-                bindings[index] = data[0];
+            async function handleRebinding(data: string, index: 0 | 1): Promise<void> {
+                bindings[index] = data;
                 await module.pushSettings(settingsKey, bindings.join("|"));
-                Hotkeys.unregister(data[1]);
                 await module.resetHotkeys();
             }
         }
@@ -1420,11 +1417,13 @@ export class SettingsController extends RE6Module {
 
             ...createInputs(this, "Open Settings", "hotkeyOpenSettings"),
             ...createInputs(subscriptionManager, "Open Notifications", "hotkeyOpenNotifications"),
+            /*
             Form.hr(3),
 
             // Other
             Form.header("Miscellaneous", 3),
             ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
+            */
         ]);
     }
 

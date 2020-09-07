@@ -4,6 +4,7 @@
  */
 
 // Load Modules
+import { Danbooru } from "./components/api/Danbooru";
 import { Page, PageDefintion } from "./components/data/Page";
 import { ModuleController } from "./components/ModuleController";
 import { DomUtilities } from "./components/structure/DomUtilities";
@@ -84,6 +85,7 @@ const subscriptions = [
 // Show the script version in the console
 console.log(`${window["re621"]["name"]} v.${window["re621"]["version"]} build ${window["re621"]["build"]}`);
 
+// Prevent the existing thumbnail structure from loading
 if (Page.matches([PageDefintion.search, PageDefintion.favorites]) && Util.LS.getItem("re621.bs.enabled") === "true") {
     let counter = 0;
     new MutationObserver(function () {
@@ -108,6 +110,9 @@ if (Page.matches(PageDefintion.title)) {
     const page = Util.LS.getItem("re621.mainpage");
     if (page && page !== "default") window.location.replace("/" + page);
 }
+
+// Disable existing keyboard shortcuts
+Danbooru.Utility.disableShortcuts(true);
 
 // Create the basic DOM structure
 DomUtilities.createStructure().then(async () => {
