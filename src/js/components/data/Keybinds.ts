@@ -1,3 +1,5 @@
+import { Debug } from "../utility/Debug";
+
 declare const Mousetrap: any;
 
 export class KeybindManager {
@@ -58,8 +60,11 @@ export class KeybindManager {
                 this.listeners.set(key, () => {
                     if (KeybindManager.listening) return;
                     const listenerExecutor = this.executors.get(key);
-                    for (const [bindMeta, keyObj] of Object.entries(listenerExecutor))
+                    Debug.log("[" + key + "]: triggered " + Object.entries(listenerExecutor).length + " executors");
+                    for (const [bindMeta, keyObj] of Object.entries(listenerExecutor)) {
+                        if (!keyObj.enabled) continue;
                         keyObj.fnct(bindMeta);
+                    }
                 });
 
                 // Dumbest thing I've written today, but it works. Don't question it.

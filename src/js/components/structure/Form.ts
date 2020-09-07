@@ -497,7 +497,8 @@ export class Form implements PreparedStructure {
                     occupied = false;
                 }
                 else {
-                    const newVal = sequence.join(" ");
+                    const newVal = sequence.join("+");
+                    // console.log("new val", sequence);
 
                     $input
                         .removeClass("input-info")
