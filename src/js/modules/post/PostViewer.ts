@@ -131,9 +131,9 @@ export class PostViewer extends RE6Module {
         this.toggleBoldenedTags(this.fetchSettings<boolean>("boldenTags"));
 
         // Listen to favorites button click
-        $("#add-fav-button").on("click", () => {
-            if (this.fetchSettings("upvoteOnFavorite"))
-                Danbooru.Post.vote(this.post.id, 1, true);
+        $("#add-fav-button, #add-to-favorites").on("click", () => {
+            if (!this.fetchSettings("upvoteOnFavorite")) return;
+            Danbooru.Post.vote(this.post.id, 1, true);
         });
     }
 
@@ -210,21 +210,21 @@ export class PostViewer extends RE6Module {
 
     /** Toggles the favorite state */
     private toggleFavorite(): void {
-        if ($("div.fav-buttons").hasClass("fav-buttons-false")) { $("button#add-fav-button")[0].click(); }
-        else { $("button#remove-fav-button")[0].click(); }
+        if ($("div.fav-buttons").hasClass("fav-buttons-false")) { $("#add-fav-button")[0].click(); }
+        else { $("#remove-fav-button")[0].click(); }
     }
 
     /** Adds the post to favorites, does not remove it */
     private addFavorite(): void {
         if ($("div.fav-buttons").hasClass("fav-buttons-false")) {
-            $("button#add-fav-button")[0].click();
+            $("#add-fav-button")[0].click();
         }
     }
 
     /** Removes the post from favorites, does not add it */
     private removeFavorite(): void {
         if (!$("div.fav-buttons").hasClass("fav-buttons-false")) {
-            $("button#remove-fav-button")[0].click();
+            $("#remove-fav-button")[0].click();
         }
     }
 
