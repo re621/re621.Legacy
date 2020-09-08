@@ -439,6 +439,13 @@ export class SubscriptionManager extends RE6Module {
         await this.pushSettings("updateStarted", now);
         SubscriptionManager.trigger("timerRefresh");
 
+        // Delay the update if there is no internet connection
+        if (!navigator.onLine) {
+            SubscriptionManager.updateInProgress = false;
+            SubscriptionManager.trigger("timerRefresh");
+            return;
+        }
+
         this.$openSubsButton.attr({
             "data-loading": "true",
             "data-updates": "0",
