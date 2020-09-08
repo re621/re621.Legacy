@@ -3,6 +3,7 @@ import { PageDefintion } from "../../components/data/Page";
 import { Post, PostData } from "../../components/post/Post";
 import { PostSet, PostSortType } from "../../components/post/PostSet";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
 import { BetterSearch } from "../search/BetterSearch";
 
@@ -207,11 +208,16 @@ export class MassDownloader extends RE6Module {
 
         // Iterate over selected images and add them to the queue
         for (const post of postList.sort(PostSortType.SizeAsc).values()) {
+
+            // Skip deleted files
+            if (!post.has.file) continue;
+
+            // Determine queue size
             totalFileSize += post.file.size;
-            console.log(`adding #${post.id} (${Util.formatBytes(post.file.size)}) to the queue: ${Util.formatBytes(totalFileSize)} total`)
+            Debug.log(`adding #${post.id} (${Util.formatBytes(post.file.size)}) to the queue: ${Util.formatBytes(totalFileSize)} total`)
             if (totalFileSize > MassDownloader.maxBlobSize) {
                 this.downloadOverSize = true;
-                console.log(`over filesize limit, aborting`);
+                Debug.log(`over filesize limit, aborting`);
                 break;
             }
 
@@ -220,7 +226,7 @@ export class MassDownloader extends RE6Module {
                 {
                     name: this.createFilename(post),
                     path: post.file.original,
-                    file: post.file.original.replace(/^https:\/\/static1\.e621\.net\/data\/..\/..\//g, ""),
+                    file: post.file.original.match(/.{32}\..*$/g)[0],
                     unid: post.id,
                     date: new Date(post.date.raw),
                     tags: post.tagString,

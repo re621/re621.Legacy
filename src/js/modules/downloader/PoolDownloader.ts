@@ -6,6 +6,7 @@ import { APIPostGroup } from "../../components/api/responses/APIPostGroup";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
 import { MassDownloader } from "./MassDownloader";
 
@@ -34,9 +35,6 @@ export class PoolDownloader extends RE6Module {
     private poolName = "";
     private poolFiles: number[] = [];
     private poolDownloaded: number[] = [];
-
-    // Files skipped because of blacklist
-    private blacklistSkipped = 0;
 
     // Interface elements
     private section: JQuery<HTMLElement>;
@@ -175,23 +173,25 @@ export class PoolDownloader extends RE6Module {
             let totalFileSize = 0,
                 queueSize = 0;
             this.batchOverSize = false;
-            this.blacklistSkipped = 0;
 
             // Add post data from the chunks to the queue
             dataChunks.forEach((chunk) => {
 
                 if (this.batchOverSize) return;
 
-                chunk.forEach((post: APIPost) => {
+                chunk.forEach((queuedPost: APIPost) => {
+
+                    const post = PostData.fromAPI(queuedPost);
+
+                    // Skip deleted files
+                    if (!post.has.file) return;
+
+                    // Determine queue size
                     totalFileSize += post.file.size;
+                    Debug.log(`adding #${post.id} (${Util.formatBytes(post.file.size)}) to the queue: ${Util.formatBytes(totalFileSize)} total`)
                     if (totalFileSize > PoolDownloader.maxBlobSize) {
                         this.batchOverSize = true;
                         this.downloadOverSize = true;
-                        return;
-                    }
-
-                    if (post.file.url === null) {
-                        this.blacklistSkipped++;
                         return;
                     }
 
@@ -199,15 +199,11 @@ export class PoolDownloader extends RE6Module {
                     downloadQueue.add(
                         {
                             name: this.createFilename(post),
-                            path: post.file.url,
-
-                            file: post.file.url.replace(/^https:\/\/static1\.e621\.net\/data\/..\/..\//g, ""),
-
+                            path: post.file.original,
+                            file: post.file.original.match(/.{32}\..*$/g)[0],
                             unid: post.id,
-
-                            // Yes, updated_at can be null sometimes. No, I don't know why or how.
-                            date: post.updated_at === null ? new Date(post.created_at) : new Date(post.updated_at),
-                            tags: post.tags.general.join(" "),
+                            date: new Date(post.date.raw),
+                            tags: post.tagString,
                         },
                         {
                             onStart: (item, thread, index) => {
@@ -284,12 +280,6 @@ export class PoolDownloader extends RE6Module {
                 }
             }
 
-            if (this.blacklistSkipped > 0) {
-                $("<div>")
-                    .addClass("download-notice")
-                    .html(`Some files could not be downloaded due to the <a href="/help/global_blacklist">global blacklist</a>.`)
-                    .appendTo(this.infoText);
-            }
         });
     }
 
@@ -297,14 +287,14 @@ export class PoolDownloader extends RE6Module {
      * Creates a filename from the post data based on the current template
      * @param data Post data
      */
-    private createFilename(data: APIPost): string {
-        return MassDownloader.createFilenameBase(this.fetchSettings<string>("template"), PostData.fromAPI(data)) // TODO Fix this
+    private createFilename(post: PostData): string {
+        return MassDownloader.createFilenameBase(this.fetchSettings<string>("template"), post)
             .replace(/%pool%/g, this.poolName)
-            .replace(/%index%/g, "" + (this.poolFiles.indexOf(data.id) + 1))
+            .replace(/%index%/g, "" + (this.poolFiles.indexOf(post.id) + 1))
             .slice(0, 128)
             .replace(/-{2,}/g, "-")
             .replace(/-*$/g, "")
-            + "." + data.file.ext;
+            + "." + post.file.ext;
     }
 
     /**

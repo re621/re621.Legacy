@@ -60,6 +60,7 @@ export class Post implements PostData {
     };
 
     public has: {
+        file: boolean;                      // true if the post wasn't deleted, and is not on the anon blacklist
         children: boolean;                  // whether the post has any children
         parent: boolean;                    // whether the post has a parent
     };
@@ -325,6 +326,7 @@ export interface PostData {
     };
 
     has: {
+        file: boolean;
         children: boolean;
         parent: boolean;
     };
@@ -363,7 +365,7 @@ export namespace PostData {
 
             date: {
                 raw: data.created_at == null ? data.updated_at : data.created_at,
-                ago: Util.Time.ago(data.created_at),
+                ago: Util.Time.ago(data.created_at == null ? data.updated_at : data.created_at),
             },
 
             tagString: [...tags].sort().join(" "),
@@ -397,6 +399,7 @@ export namespace PostData {
             },
 
             has: {
+                file: data.file.url !== null,
                 children: data.relationships.has_active_children,
                 parent: data.relationships.parent_id !== undefined && data.relationships.parent_id !== null,
             },
@@ -486,9 +489,9 @@ export namespace PostData {
             file: {
                 ext: $article.attr("data-file-ext"),
                 md5: md5,
-                original: $article.attr("data-file-url"),
-                sample: $article.attr("data-large-file-url"),
-                preview: $article.attr("data-preview-file-url"),
+                original: $article.attr("data-file-url") || null,
+                sample: $article.attr("data-large-file-url") || null,
+                preview: $article.attr("data-preview-file-url") || null,
                 size: 0,
             },
             loaded: undefined,
@@ -500,6 +503,7 @@ export namespace PostData {
             },
 
             has: {
+                file: $article.attr("data-file-url") !== undefined,
                 children: $article.attr("data-has-active-children") == "true",
                 parent: $article.attr("data-parent-id") !== undefined,
             },
