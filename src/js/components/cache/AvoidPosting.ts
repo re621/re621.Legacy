@@ -57,7 +57,7 @@ export class AvoidPosting {
         do {
             page++;
             status.html(`<i class="fas fa-circle-notch fa-spin"></i> Processing tags: batch ${page} / ?`)
-            result = await E621.TagImplications.get<APITagImplication>({ "search[consequent_name]": "avoid_posting+conditional_dnp", page: page, limit: 1000 }, 500);
+            result = await E621.TagImplications.get<APITagImplication>({ search: { consequent_name: ["avoid_posting", "conditional_dnp"] }, page: page, limit: 1000 }, 500);
             for (const entry of result) AvoidPosting.add(entry["antecedent_name"]);
         } while (result.length == 320);
 

@@ -34,7 +34,7 @@ export class BetterSearch extends RE6Module {
 
     private shiftPressed = false;               // Used to block zoom in onshift mode
 
-    private queryTags: string;                  // String containing the current search query
+    private queryTags: string[];                // Array containing the current search query
     private queryPage: number;                  // Number of the last page to be loaded
     private queryLimit: number;                 // Maxmimum number of posts per request
 
@@ -103,8 +103,10 @@ export class BetterSearch extends RE6Module {
         super.create();
 
         this.queryPage = parseInt(Page.getQueryParameter("page")) || 1;
-        this.queryTags = Page.getQueryParameter("tags") || "";
+        this.queryTags = (Page.getQueryParameter("tags") || "").split(" ").filter(el => el != "");
         this.queryLimit = parseInt(Page.getQueryParameter("limit")) || undefined;
+
+        console.log(this.queryTags);
 
         if (this.lastPage < this.queryPage) this.lastPage = this.queryPage;
         this.hasMorePages = this.queryPage < this.lastPage;
@@ -249,7 +251,7 @@ export class BetterSearch extends RE6Module {
     /** Updates the document title with the current page number */
     private updatePageTitle(page: number): void {
         document.title =
-            (this.queryTags.length == 0 ? "Posts" : this.queryTags.replace(/_/g, " ")) +
+            (this.queryTags.length == 0 ? "Posts" : this.queryTags.join(" ").replace(/_/g, " ")) +
             (page > 1 ? (" - Page " + page) : "") +
             " - " + Page.getSiteName();
     }
@@ -522,12 +524,14 @@ export class BetterSearch extends RE6Module {
                     break;
                 }
                 case "add-fav": {
+                    // TODO Replace with PostActions
                     E621.Favorites.post({ "post_id": post.id });
                     post.is_favorited = true;
                     post.$ref.attr("fav", "true");
                     break;
                 }
                 case "remove-fav": {
+                    // TODO Replace with PostActions
                     E621.Favorite.id(post.id).delete();
                     post.is_favorited = false;
                     post.$ref.removeAttr("fav");

@@ -1,5 +1,6 @@
 import { E621 } from "../api/E621";
 import { APISet } from "../api/responses/APISet";
+import { Debug } from "../utility/Debug";
 
 /** Collection of API calls related to individual posts */
 export class PostActions {
@@ -83,7 +84,7 @@ export class PostActions {
         return new Promise((resolve) => {
             E621.PostVotes.id(postID).post({ score: score, no_unvote: preventUnvote }).then(
                 (success) => {
-                    console.log(success);
+                    Debug.log(success);
                     resolve({
                         success: true,
                         action: success[0].our_score,
@@ -108,7 +109,7 @@ export class PostActions {
     public static addFavorite(postID: number): Promise<boolean> {
         return new Promise((resolve) => {
             E621.Favorites.post({ "post_id": postID }).then(
-                (response) => { console.log(response); resolve(true); },
+                (response) => { Debug.log(response); resolve(true); },
                 (error) => { console.log(error); resolve(false); }
             );
         });
@@ -122,7 +123,7 @@ export class PostActions {
     public static removeFavorite(postID: number): Promise<boolean> {
         return new Promise((resolve) => {
             E621.Favorite.id(postID).delete().then(
-                (response) => { console.log(response); resolve(true); },
+                (response) => { Debug.log(response); resolve(true); },
                 (error) => { console.log(error); resolve(false); }
             );
         });

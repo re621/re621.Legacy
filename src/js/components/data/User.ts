@@ -60,9 +60,7 @@ export class User {
      * @returns the users e6 site settings
      */
     public static async getCurrentSettings(): Promise<APICurrentUser> {
-        return E621.User.id(this.getUserID()).first<APICurrentUser>().then((response) => {
-            return Promise.resolve(response);
-        });
+        return E621.User.id(this.getUserID()).first<APICurrentUser>();
     }
 
     /**
@@ -70,11 +68,7 @@ export class User {
      * There is no need to put the keys into array form, this happens automatically
      */
     public static async setSettings(data: {}): Promise<void> {
-        const json = { "_method": "patch" };
-        for (const key of Object.keys(data)) {
-            json["user[" + key + "]"] = data[key];
-        }
-        await E621.User.id(this.getUserID()).post(json);
+        await E621.User.id(this.getUserID()).post({ user: data, "_method": "patch" });
     }
 
     public static getInstance(): User {

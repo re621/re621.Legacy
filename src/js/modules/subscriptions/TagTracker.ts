@@ -109,7 +109,7 @@ export class TagTracker extends RE6Module implements SubscriptionTracker {
         for (const [index, chunk] of storedSubChunks.entries()) {
             if (storedSubChunks.length > 1) status.append(`<div>&nbsp; &nbsp; &nbsp; - processing batch #${index}</div>`);
             if (index == 10) status.append(`<div><span style="color:gold">warning</span> connection throttled</div>`)
-            for (const post of await E621.Posts.get<APIPost>({ "tags": chunk.map(el => "~" + el).join("+"), "limit": 320 }, index < 10 ? 500 : 1000)) {
+            for (const post of await E621.Posts.get<APIPost>({ "tags": chunk.map(el => "~" + el), "limit": 320 }, index < 10 ? 500 : 1000)) {
                 const timestamp = new Date(post.created_at).getTime();
 
                 // Posts are ordered by upload date, with newest first

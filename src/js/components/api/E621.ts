@@ -1,11 +1,12 @@
-
-// All endpoints must be registered here.
-// Name is irrelevant, as long as it is unique.
-// Path is the endpoint address, without https://e621.net/
+// E621 API Endpoint Wrapper
+// Version 2.1
 
 import { Debug } from "../utility/Debug";
 import { Util } from "../utility/Util";
 
+// All endpoints must be registered here.
+// Name is irrelevant, as long as it is unique.
+// Path is the endpoint address, without https://e621.net/
 // Don't forget to update the name in the E621 aliases below
 const ENDPOINT_DEFS: EndpointDefinition[] = [
     { name: "posts", path: "posts.json", node: "posts" },
@@ -75,8 +76,8 @@ class APIEndpoint {
      * @param query Request query, either as a raw string or an APIQuery
      * @param delay Optional delay override, in milliseconds
      */
-    public async get<T extends APIResponse>(query?: string | APIQuery, delay?: number): Promise<T[]> {
-        return this.queue.createRequest(this.getParsedPath(), this.queryToString(query), "GET", "", this.name, this.node, delay).then(
+    public async get<T extends APIResponse>(query?: APIQuery, delay?: number): Promise<T[]> {
+        return this.queue.createRequest(this.getParsedPath(), this.formatParam(query), "GET", {}, this.name, this.node, delay).then(
             (response) => {
                 const result = this.formatData<T>(response[0], response[2]);
                 return Promise.resolve(result);
@@ -93,7 +94,7 @@ class APIEndpoint {
      * @param query Request query, either as a raw string or an APIQuery
      * @param delay Optional delay override, in milliseconds
      */
-    public async first<T extends APIResponse>(query?: string | APIQuery, delay?: number): Promise<T> {
+    public async first<T extends APIResponse>(query?: APIQuery, delay?: number): Promise<T> {
         return this.get<T>(query, delay).then((response) => {
             if (response.length > 0) return Promise.resolve(response[0]);
             else return Promise.resolve(null);
@@ -105,8 +106,8 @@ class APIEndpoint {
      * @param data Data to be sent with the request
      * @param delay Optional delay override, in milliseconds
      */
-    public async post(data?: string | APIQuery, delay?: number): Promise<any> {
-        return this.queue.createRequest(this.getParsedPath(), "", "POST", this.queryToString(data, true), this.name, this.node, delay).then(
+    public async post(data?: APIQuery, delay?: number): Promise<any> {
+        return this.queue.createRequest(this.getParsedPath(), {}, "POST", this.formatParam(data), this.name, this.node, delay).then(
             (data) => {
                 return Promise.resolve(data);
             },
@@ -114,8 +115,8 @@ class APIEndpoint {
         );
     }
 
-    public async delete(data?: string | APIQuery, delay?: number): Promise<any> {
-        return this.queue.createRequest(this.getParsedPath(), "", "DELETE", this.queryToString(data, true), this.name, this.node, delay).then(
+    public async delete(data?: APIQuery, delay?: number): Promise<any> {
+        return this.queue.createRequest(this.getParsedPath(), {}, "DELETE", this.formatParam(data), this.name, this.node, delay).then(
             (data) => {
                 return Promise.resolve(data);
             },
@@ -123,8 +124,8 @@ class APIEndpoint {
         );
     }
 
-    public async put(data?: string | APIQuery, delay?: number): Promise<any> {
-        return this.queue.createRequest(this.getParsedPath(), "", "PUT", this.queryToString(data, true), this.name, this.node, delay).then(
+    public async put(data?: APIQuery, delay?: number): Promise<any> {
+        return this.queue.createRequest(this.getParsedPath(), {}, "PUT", this.formatParam(data), this.name, this.node, delay).then(
             (data) => {
                 return Promise.resolve(data);
             },
@@ -142,41 +143,39 @@ class APIEndpoint {
         return this.path;
     }
 
-    /** Converts APIQuery into a raw string */
-    private queryToString(query: string | APIQuery, post = false): string {
-        if (query === undefined) return "";
-        if (typeof query === "string") return query;
+    /**
+     * Ensures that the provided APIQuery is in the correct format.  
+     * Flattens objects and arrays in order to return a list of key-value pairs.
+     * @param input APIQuery to format
+     * @param encode If true, the values are URI encoded
+     */
+    private formatParam(input: APIQuery): FormattedAPIQuery {
+        console.log("input", input);
+        if (input === undefined || input === null) return {};
 
-        const keys = Object.keys(query);
-        if (keys.length === 0) return "";
+        const response: FormattedAPIQuery = {};
+        for (const [key, value] of Object.entries(input)) {
+            if (value === undefined || value === null) continue;
 
-        const queryString = [];
-        keys.forEach((key) => {
-
-            // Undefined values should be ignored
-            let value = query[key];
-            if (value === undefined) return;
-
-            // Convert the array parameters into a `+`-separated string
-            if (Array.isArray(value)) value = (value as string[]).join("+");
-
-            // Hotfix for an issue with the quick tags form
-            // This should be replaced by a better system
-            if (typeof value == "object") {
+            if (Array.isArray(value)) {
+                for (const [index, elem] of value.entries())
+                    value[index] = encodeURIComponent(elem);
+                response[key] = value.join("+");
+            } else if (typeof value == "object") {
                 for (const [subkey, subvalue] of Object.entries(value)) {
-                    if (post) queryString.push(key + "[" + encodeURIComponent(subkey) + "]=" + encodeURIComponent(subvalue + ""));
-                    else queryString.push(key + "[" + encodeURIComponent(subkey) + "]=" + encodeURIComponent(subvalue + "").replace(/%2B/g, "+"));
+                    if (Array.isArray(subvalue)) {
+                        for (const [index, subelem] of subvalue.entries())
+                            subvalue[index] = encodeURIComponent(subelem);
+                        response[`${key}[${subkey}]`] = subvalue.join("+");
+                    } else response[`${key}[${subkey}]`] = encodeURIComponent(subvalue);
                 }
             } else {
-
-                // This is a workaround for a very specific problem and needs to be cleaned up
-                // When the query parameters are added to the URL, plus signs should be preserved
-                // When using this method to parse POST data, plus signs must be converted to %2B
-                if (post) queryString.push(encodeURIComponent(key) + "=" + encodeURIComponent(value));
-                else queryString.push(encodeURIComponent(key) + "=" + encodeURIComponent(value).replace(/%2B/g, "+"));
+                response[key] = encodeURIComponent(value);
             }
-        });
-        return queryString.join("&");
+        }
+
+        console.log("output", response);
+        return response;
     }
 
     /**
@@ -279,7 +278,7 @@ export class E621 {
      * @param data Data to POST
      * @param delay How quickly the next request can be sent, in ms
      */
-    public async createRequest(path: string, query: string, method: "GET" | "POST" | "PUT" | "DELETE", requestBody: string, endpoint: string, node: string, delay: number): Promise<any> {
+    public async createRequest(path: string, query: FormattedAPIQuery, method: "GET" | "POST" | "PUT" | "DELETE", requestBody: FormattedAPIQuery, endpoint: string, node: string, delay: number): Promise<any> {
         if (delay === undefined) delay = E621.requestRateLimit;
         else if (delay < 500) delay = 500;
 
@@ -299,11 +298,15 @@ export class E621 {
                 Debug.log("authToken is undefined, regenerating");
                 this.authToken = $("head meta[name=csrf-token]").attr("content");
             }
-            requestInfo.body = requestBody + ((requestBody.length > 0) ? "&" : "") + "authenticity_token=" + encodeURIComponent(this.authToken);
+            requestBody["authenticity_token"] = encodeURIComponent(this.authToken);
+            requestInfo.body = FormattedAPIQuery.stringify(requestBody);
+            console.log(FormattedAPIQuery.stringify(requestBody));
         }
-        query = query + (query.length > 0 ? "&" : "") + "_client=" + encodeURIComponent(window["re621"]["useragent"]);
 
-        const entry = new Request(location.origin + "/" + path + "?" + query, requestInfo);
+        // Append query parameters to the URL
+        query["_client"] = window["re621"]["useragent"];
+
+        const entry = new Request(location.origin + "/" + path + "?" + FormattedAPIQuery.stringify(query), requestInfo);
         const index = this.requestIndex++;
         const final = new Promise<any>((resolve, reject) => {
             this.emitter.one("api.re621.result-" + index, (e, data, status, endpoint, node) => {
@@ -338,6 +341,7 @@ export class E621 {
         while (this.queue.length > 0) {
             const item = this.queue.shift();
             Debug.connectLog(item.request.url);
+
             await new Promise(async (resolve) => {
                 fetch(item.request).then(
                     async (response) => {
@@ -416,9 +420,27 @@ interface EndpointDefinition {
  * Any number of query strings to be passed to the endpoint.
  * Stringified into "key1=value1A+value1B+value1C&key2=value2A..."
  */
-type APIQuery = {
-    [prop: string]: any | any[];
+interface APIQuery {
+    [prop: string]: APIQueryEntry | APIQueryEntry[] | APIQuerySubentry;
 };
+
+interface FormattedAPIQuery {
+    [prop: string]: string;
+}
+
+namespace FormattedAPIQuery {
+    export function stringify(input: FormattedAPIQuery): string {
+        const result = [];
+        for (const [key, value] of Object.entries(input))
+            result.push(key + "=" + value);
+        return result.join("&");
+    }
+}
+
+type APIQueryEntry = string | number | boolean;
+interface APIQuerySubentry {
+    [prop: string]: APIQueryEntry | APIQueryEntry[];
+}
 
 /** A queueued request, waiting to be processed */
 interface QueueItem {

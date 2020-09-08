@@ -1,7 +1,6 @@
 import { BetterSearch, ImageClickAction, ImageLoadMethod, ImageZoomMode } from "../../modules/search/BetterSearch";
 import { CustomFlagger } from "../../modules/search/CustomFlagger";
 import { Danbooru } from "../api/Danbooru";
-import { E621 } from "../api/E621";
 import { PostFlag } from "../api/responses/APIPost";
 import { XM } from "../api/XM";
 import { Blacklist } from "../data/Blacklist";
@@ -337,12 +336,12 @@ export class PostParts {
                     favBlock = true;
 
                     if (post.is_favorited) {
-                        await E621.Favorite.id(post.id).delete();
+                        await PostActions.removeFavorite(post.id);
                         post.is_favorited = false;
                         post.$ref.removeAttr("fav");
                         $btn.removeClass("score-favorite");
                     } else {
-                        await E621.Favorites.post({ "post_id": post.id });
+                        await PostActions.addFavorite(post.id);
                         post.is_favorited = true;
                         post.$ref.attr("fav", "true");
                         $btn.addClass("score-favorite");
