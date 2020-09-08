@@ -136,6 +136,8 @@ export class Post implements PostData {
 
     /** Resets the previously rendered post element back to placeholder state */
     public reset(): Post {
+
+        // Remove structure
         this.$ref
             .attr({
                 "rendered": false,
@@ -144,14 +146,11 @@ export class Post implements PostData {
             .html(this.id + "")
             .children().remove();
 
-        if (this.$ref.data("gif-interval") !== undefined) {
-            window.clearInterval(this.$ref.data("gif-interval"));
-            this.$ref.data("gif-interval", undefined);
-        }
-        if (this.$ref.data("gif-freezefr") !== undefined) {
-            this.$ref.data("gif-freezefr").destroy();
-            this.$ref.data("gif-freezefr", undefined);
-        }
+        // Unbind events
+        this.$ref
+            .off("mouseenter.re621.zoom")
+            .off("mouseleave.re621.zoom")
+            .off("re621:update");
 
         return this;
     }
