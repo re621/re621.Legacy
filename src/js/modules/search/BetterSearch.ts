@@ -583,26 +583,20 @@ export class BetterSearch extends RE6Module {
         if (zoomMode == ImageZoomMode.OnShift) {
             // This is necessary, because by default, the tag input is focused on page load
             // If shift press didn't work when input is focused, this could cause confusion
+
             $(document)
-                .on("keydown.re621.zoom", null, "shift", () => {
-                    if (this.shiftPressed) return;
+                .on("keydown.re621.zoom", (event) => {
+                    if (this.shiftPressed || (event.originalEvent as KeyboardEvent).key !== "Shift") return;
                     this.shiftPressed = true;
+                    let count = 0;
                     Post.find("hovering").each((post) => {
                         post.$ref.trigger("mouseenter.re621.zoom");
+                        count++;
                     });
+                    console.log("total", count);
                 })
-                .on("keyup.re621.zoom", null, "shift", () => {
-                    this.shiftPressed = false;
-                });
-            $("#tags, #re621_qedit_tags")
-                .on("keydown.re621.zoom", null, "shift", () => {
-                    if (this.shiftPressed) return;
-                    this.shiftPressed = true;
-                    Post.find("hovering").each((post) => {
-                        post.$ref.trigger("mouseenter.re621.zoom");
-                    });
-                })
-                .on("keyup.re621.zoom", null, "shift", () => {
+                .on("keyup.re621.zoom", (event) => {
+                    if (!this.shiftPressed || (event.originalEvent as KeyboardEvent).key !== "Shift") return;
                     this.shiftPressed = false;
                 });
         }
@@ -659,6 +653,8 @@ export class BetterSearch extends RE6Module {
         BetterSearch.on("zoom.start", (event, data) => {
             if (BetterSearch.paused || (this.fetchSettings("zoomMode") == ImageZoomMode.OnShift && !this.shiftPressed))
                 return;
+
+            console.log("triggering zoom", data, this.shiftPressed);
 
             const post = Post.get(data.post);
             post.$ref.attr("loading", "true");
