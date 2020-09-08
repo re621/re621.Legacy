@@ -497,8 +497,7 @@ export class Form implements PreparedStructure {
                     occupied = false;
                 }
                 else {
-                    const newVal = sequence.join("+");
-                    // console.log("new val", sequence);
+                    const newVal = flattenSequence(sequence);
 
                     $input
                         .removeClass("input-info")
@@ -521,6 +520,16 @@ export class Form implements PreparedStructure {
         });
 
         return new FormElement($element, $input, $label);
+
+        // If a modifier key is pressed, the hotkey library will
+        // add it to every element of the sequence. Since we are
+        // flattening the sequence anyways, it should be safe to
+        // get rid of them altogether.
+        function flattenSequence(input: string[]): string {
+            input = input.join("+").split("+");
+            input = [... new Set(input)];
+            return input.join("+");
+        }
     }
 
     /**

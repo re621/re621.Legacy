@@ -150,7 +150,7 @@ class APIEndpoint {
      * @param encode If true, the values are URI encoded
      */
     private formatParam(input: APIQuery): FormattedAPIQuery {
-        console.log("input", input);
+        Debug.log("input", input);
         if (input === undefined || input === null) return {};
 
         const response: FormattedAPIQuery = {};
@@ -159,23 +159,28 @@ class APIEndpoint {
 
             if (Array.isArray(value)) {
                 for (const [index, elem] of value.entries())
-                    value[index] = encodeURIComponent(elem);
+                    value[index] = cleanURIComponent(elem);
                 response[key] = value.join("+");
             } else if (typeof value == "object") {
                 for (const [subkey, subvalue] of Object.entries(value)) {
                     if (Array.isArray(subvalue)) {
                         for (const [index, subelem] of subvalue.entries())
-                            subvalue[index] = encodeURIComponent(subelem);
+                            subvalue[index] = cleanURIComponent(subelem);
                         response[`${key}[${subkey}]`] = subvalue.join("+");
-                    } else response[`${key}[${subkey}]`] = encodeURIComponent(subvalue);
+                    } else response[`${key}[${subkey}]`] = cleanURIComponent(subvalue);
                 }
             } else {
-                response[key] = encodeURIComponent(value);
+                response[key] = cleanURIComponent(value);
             }
         }
 
-        console.log("output", response);
+        Debug.log("output", response);
         return response;
+
+        /** Prevent double-encoding the values */
+        function cleanURIComponent(value: APIQueryEntry): string {
+            return encodeURIComponent(decodeURIComponent(value + ""));
+        }
     }
 
     /**
@@ -300,7 +305,6 @@ export class E621 {
             }
             requestBody["authenticity_token"] = encodeURIComponent(this.authToken);
             requestInfo.body = FormattedAPIQuery.stringify(requestBody);
-            console.log(FormattedAPIQuery.stringify(requestBody));
         }
 
         // Append query parameters to the URL
