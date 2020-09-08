@@ -106,8 +106,6 @@ export class BetterSearch extends RE6Module {
         this.queryTags = (Page.getQueryParameter("tags") || "").split(" ").filter(el => el != "");
         this.queryLimit = parseInt(Page.getQueryParameter("limit")) || undefined;
 
-        console.log(this.queryTags);
-
         if (this.lastPage < this.queryPage) this.lastPage = this.queryPage;
         this.hasMorePages = this.queryPage < this.lastPage;
 
@@ -796,7 +794,12 @@ export class BetterSearch extends RE6Module {
             const userID = Page.getQueryParameter("user_id") || User.getUserID();
             return E621.Favorites.get<APIPost>({ user_id: userID, page: page ? page : this.queryPage, limit: this.queryLimit }, 500)
         }
-        return E621.Posts.get<APIPost>({ tags: this.queryTags, page: page ? page : this.queryPage, limit: this.queryLimit }, 500)
+
+        const parsedTags = [];
+        for (const tag of this.queryTags)
+            parsedTags.push(decodeURIComponent(tag));
+
+        return E621.Posts.get<APIPost>({ tags: parsedTags, page: page ? page : this.queryPage, limit: this.queryLimit }, 500)
     }
 
     /** Loads the next page of results */
