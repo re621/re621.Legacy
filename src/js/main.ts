@@ -7,6 +7,7 @@
 import { Danbooru } from "./components/api/Danbooru";
 import { Page, PageDefintion } from "./components/data/Page";
 import { ModuleController } from "./components/ModuleController";
+import { CleanSlate } from "./components/structure/CleanSlate";
 import { DomUtilities } from "./components/structure/DomUtilities";
 import { Debug } from "./components/utility/Debug";
 import { Patcher } from "./components/utility/Patcher";
@@ -31,6 +32,7 @@ import { TitleCustomizer } from "./modules/post/TitleCustomizer";
 import { BetterSearch } from "./modules/search/BetterSearch";
 import { BlacklistEnhancer } from "./modules/search/BlacklistEnhancer";
 import { CustomFlagger } from "./modules/search/CustomFlagger";
+import { HoverZoom } from "./modules/search/HoverZoom";
 import { InstantSearch } from "./modules/search/InstantSearch";
 import { PostSuggester } from "./modules/search/PostSuggester";
 import { SearchUtilities } from "./modules/search/SearchUtilities";
@@ -58,6 +60,7 @@ const loadOrder = [
     InstantSearch,
     ThumbnailTweaks,
     BetterSearch,
+    HoverZoom,
 
     PostSuggester,
     SearchUtilities,
@@ -85,26 +88,6 @@ const subscriptions = [
 // Show the script version in the console
 console.log(`${window["re621"]["name"]} v.${window["re621"]["version"]} build ${window["re621"]["build"]}`);
 
-// Prevent the existing thumbnail structure from loading
-if (Page.matches([PageDefintion.search, PageDefintion.favorites]) && Util.LS.getItem("re621.bs.enabled") === "true") {
-    let counter = 0;
-    new MutationObserver(function () {
-        const content = $("#posts"),
-            pagination = $("div.paginator menu");
-        // console.log(content.length);
-        if (content.length != 0 && pagination.length !== 0) {
-            pagination
-                .css("display", "none")
-                .attr("id", "paginator-old")
-                .appendTo("body");
-            content.remove();
-            this.disconnect();
-        }
-        counter++;
-        if (counter > 50) this.disconnect();
-    }).observe(document, { childList: true, subtree: true });
-}
-
 // Reroute the title page before everything else loads
 if (Page.matches(PageDefintion.title)) {
     const page = Util.LS.getItem("re621.mainpage");
@@ -115,7 +98,11 @@ if (Page.matches(PageDefintion.title)) {
 Danbooru.Utility.disableShortcuts(true);
 
 // Create the basic DOM structure
-DomUtilities.createStructure().then(async () => {
+CleanSlate.run().then(async () => {
+
+    DomUtilities.createSearchbox();
+    DomUtilities.createTagList();
+    DomUtilities.createFormattedTextareas();
 
     await Debug.init();
     await Patcher.run();

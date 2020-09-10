@@ -1,4 +1,4 @@
-import { ImageZoomMode } from "../../modules/search/BetterSearch";
+import { ImageZoomMode } from "../../modules/search/HoverZoom";
 import { XM } from "../api/XM";
 import { Debug } from "./Debug";
 
@@ -175,6 +175,30 @@ export class Patcher {
                 await XM.Storage.deleteValue("re621.sync")
                 counter++;
                 Patcher.version = 8;
+            }
+
+            // Patch 9: 1.4.8
+            // HoverZoom was moved into a separate module
+            case 8: {
+                const betterSearch = await XM.Storage.getValue("re621.BetterSearch", {});
+                const hoverZoom = await XM.Storage.getValue("re621.HoverZoom", {});
+                if (betterSearch["zoomMode"] !== undefined) {
+                    hoverZoom["mode"] = betterSearch["zoomMode"];
+                    delete betterSearch["zoomMode"];
+                    counter++;
+                }
+                if (betterSearch["zoomTags"] !== undefined) {
+                    hoverZoom["tags"] = betterSearch["zoomTags"];
+                    delete betterSearch["zoomTags"];
+                    counter++;
+                }
+                for (const deletedEntry of ["zoomFull", "zoomScale", "zoomContextual"]) {
+                    delete betterSearch[deletedEntry];
+                    counter++;
+                }
+                await XM.Storage.setValue("re621.BetterSearch", betterSearch);
+                await XM.Storage.setValue("re621.HoverZoom", hoverZoom);
+                Patcher.version = 9;
             }
         }
 

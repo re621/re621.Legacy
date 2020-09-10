@@ -1,4 +1,4 @@
-import { BetterSearch, ImageClickAction, ImageLoadMethod, ImageZoomMode } from "../../modules/search/BetterSearch";
+import { BetterSearch, ImageClickAction, ImageLoadMethod } from "../../modules/search/BetterSearch";
 import { CustomFlagger } from "../../modules/search/CustomFlagger";
 import { Danbooru } from "../api/Danbooru";
 import { PostFlag } from "../api/responses/APIPost";
@@ -7,7 +7,7 @@ import { Blacklist } from "../data/Blacklist";
 import { Page } from "../data/Page";
 import { DomUtilities } from "../structure/DomUtilities";
 import { Util } from "../utility/Util";
-import { LoadedFileType, Post } from "./Post";
+import { LoadedFileType, Post, PostData } from "./Post";
 import { PostActions } from "./PostActions";
 
 /** Handles the rendering of individual post elements. Called from the main Post class. */
@@ -24,7 +24,6 @@ export class PostParts {
             .append($("<post-loading>"));
 
         if (conf.clickAction !== ImageClickAction.Disabled) PostParts.handleDoubleClick($link, post, conf);
-        if (conf.zoomMode !== ImageZoomMode.Disabled) PostParts.handleHoverZoom($link, post);
 
         return $link;
 
@@ -110,23 +109,6 @@ export class PostParts {
                     $link[0].click();
                 }
             }
-        });
-    }
-
-    private static handleHoverZoom($link: JQuery<HTMLElement>, post: Post): void {
-
-
-        // Flash files will never work with hover zoom, deal with it
-        if (post.file.ext === "swf" || post.flags.has(PostFlag.Deleted)) return;
-
-        post.$ref.on("mouseenter.re621.zoom", (event) => {
-            post.$ref.attr("hovering", "true");
-            BetterSearch.trigger("zoom.start", { post: post.id, pageX: event.pageX, pageY: event.pageY });
-        });
-
-        post.$ref.on("mouseleave.re621.zoom", (event) => {
-            post.$ref.removeAttr("hovering");
-            BetterSearch.trigger("zoom.stop", { post: post.id, pageX: event.pageX, pageY: event.pageY });
         });
     }
 
@@ -395,7 +377,7 @@ export class PostParts {
     }
 
     /** Returns a formatted tag string for the image's hover text */
-    public static formatHoverText(post: Post, compact = false, html = false): string {
+    public static formatHoverText(post: PostData, compact = false, html = false): string {
         const br = html ? "<br>\n" : "\n";
         if (compact)
             return `` +

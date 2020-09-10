@@ -22,7 +22,7 @@ export class Post implements PostData {
     public comments: number;                // total number of comments
     public rating: PostRating;              // rating in the one-letter lowercase format (s, q, e)
     public uploader: number;                // uploader ID
-    public page: number;                    // search page. currently only supports numeric values, but not A- or B- ones
+    public page: string;                    // search page. can either be numberic, or in a- / b- format
 
     public date: {
         raw: string;                        // upload time, in `Fri Aug 21 2020 12:32:52 GMT-0700` format
@@ -103,7 +103,7 @@ export class Post implements PostData {
 
         const conf = ModuleController.get(BetterSearch).fetchSettings([
             "imageRatioChange",                                 // renderArticle
-            "clickAction", "zoomMode",                          // renderLink
+            "clickAction",                                      // renderLink
             "imageLoadMethod", "autoPlayGIFs", "hoverTags",     // renderImage
             "ribbonsFlag", "ribbonsRel",                        // renderRibbons
             "buttonsVote", "buttonsFav",                        // renderButtons
@@ -147,10 +147,7 @@ export class Post implements PostData {
             .children().remove();
 
         // Unbind events
-        this.$ref
-            .off("mouseenter.re621.zoom")
-            .off("mouseleave.re621.zoom")
-            .off("re621:update");
+        this.$ref.off("re621:update");
 
         return this;
     }
@@ -231,7 +228,7 @@ export class Post implements PostData {
      * @param page Page of the search results
      * @param imageRatioChange Image crop, if applicable
      */
-    public static make(data: APIPost, page?: number, imageRatioChange?: boolean): Post {
+    public static make(data: APIPost, page?: string, imageRatioChange?: boolean): Post {
 
         const tags = APIPost.getTagSet(data),
             flags = PostFlag.get(data),
@@ -250,6 +247,12 @@ export class Post implements PostData {
                 "deleted": flags.has(PostFlag.Deleted) ? true : undefined,
                 "rendered": false,
                 "page": page,
+            })
+            .data({
+                // Backwards compatibility for HoverZoom
+                "id": data.id,
+                "large-file-url": data.sample.url,
+                "file-ext": data.file.ext,
             })
             .html(data.id + "");
 
@@ -287,7 +290,7 @@ export interface PostData {
     rating: PostRating;
     uploader: number;
 
-    page: number;
+    page: string;
 
     date: {
         raw: string;
@@ -344,7 +347,7 @@ export namespace PostData {
      * @param data API result
      * @param page Search page
      */
-    export function fromAPI(data: APIPost, page?: number): PostData {
+    export function fromAPI(data: APIPost, page?: string): PostData {
 
         const tags = APIPost.getTagSet(data),
             flags = PostFlag.get(data);
@@ -464,7 +467,7 @@ export namespace PostData {
             rating: PostRating.fromValue($article.attr("data-rating")),
             uploader: parseInt($article.attr("data-uploader-id")) || 0,
 
-            page: -1,
+            page: "-1",
 
             date: {
                 raw: time,
@@ -521,6 +524,131 @@ export namespace PostData {
             }
             return result;
         }
+    }
+
+    /**
+     * Generates PostData from a DOM element  
+     * Unlike `fromDOM()`, works on native thumbnails (ex. `<article>`)
+     * @param $article Article to parse for data
+     */
+    export function fromThumbnail($article: JQuery<HTMLElement>): PostData {
+
+        const id = parseInt($article.attr("data-id")) || 0;
+
+        // Children
+        const children: Set<number> = new Set();
+
+        // Tags
+        const tagString = $article.attr("data-tags") || "";
+
+        // Dimensions
+        const width = parseInt($article.attr("data-width")),
+            height = parseInt($article.attr("data-height"));
+
+        // MD5 and File URLs
+        const extension = $article.attr("data-file-ext");
+        let urls = {};
+        let md5: string;
+        if ($article.is("article")) {
+            if ($article.attr("data-md5")) md5 = $article.attr("data-md5");
+            else if ($article.attr("data-file-url"))
+                md5 = $article.attr("data-file-url").substr(36, 32);
+
+            urls = {
+                preview: $article.attr("data-preview-file-url") || null,
+                sample: $article.attr("data-large-file-url") || null,
+                original: $article.attr("data-file-url") || null,
+            };
+        } else {
+            if ($article.attr("data-md5")) md5 = $article.attr("data-md5");
+            else if ($article.attr("data-preview-url"))
+                md5 = $article.attr("data-preview-url").substr(44, 32);
+
+            if (md5 == undefined) urls = {
+                preview: `/images/deleted-preview.png`,
+                sample: `/images/deleted-preview.png`,
+                original: `/images/deleted-preview.png`,
+            };
+            else urls = {
+                preview: $article.attr("data-preview-url") || null,
+                sample: (width < 850 || height < 850)
+                    ? `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${extension}`
+                    : `https://static1.e621.net/data/sample/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`,
+                original: `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${extension}`,
+            }
+        }
+
+        // Score
+        let score = 0;
+        if ($article.attr("data-score")) score = parseInt($article.attr("data-score"));
+        else if ($article.find(".post-score-score").length !== 0)
+            score = parseInt($article.find(".post-score-score").first().html().substring(1));
+
+        // User score;
+        let userScore = 0;
+        if ($(".post-vote-up-" + id).first().hasClass("score-positive")) userScore = 1;
+        else if ($(".post-vote-down-" + id).first().hasClass("score-negative")) userScore = -1;
+
+        return {
+            id: id,
+            flags: PostFlag.fromString($article.attr("data-flags") || ""),
+            score: score,
+            user_score: userScore,
+            favorites: parseInt($article.attr("data-fav-count")) || 0,
+            is_favorited: $article.attr("data-is-favorited") == "true",
+            comments: -1,
+            rating: PostRating.fromValue($article.attr("data-rating")),
+            uploader: parseInt($article.attr("data-uploader-id")) || 0,
+
+            page: "-1",
+
+            date: {
+                raw: "0",
+                ago: Util.Time.ago(0),
+            },
+
+            tagString: tagString,
+            tags: {
+                all: new Set(tagString.split(" ")),
+                artist: new Set(),
+                real_artist: new Set(),
+                copyright: new Set(),
+                species: new Set(),
+                character: new Set(),
+                general: new Set(),
+                invalid: new Set(),
+                meta: new Set(),
+                lore: new Set(),
+            },
+
+            file: {
+                ext: extension,
+                md5: md5,
+                original: urls["original"],
+                sample: urls["sample"],
+                preview: urls["preview"],
+                size: 0,
+            },
+            loaded: undefined,
+
+            img: {
+                width: width,
+                height: height,
+                ratio: height / width,
+            },
+
+            has: {
+                file: $article.attr("data-file-url") !== undefined,
+                children: $article.attr("data-has-active-children") == "true",
+                parent: $article.attr("data-parent-id") !== undefined,
+            },
+
+            rel: {
+                children: children,
+                parent: parseInt($article.attr("data-parent-id")) || null,
+            },
+
+        };
     }
 
     /**

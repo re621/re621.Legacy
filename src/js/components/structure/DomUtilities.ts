@@ -1,6 +1,4 @@
-import { XM } from "../api/XM";
 import { Page, PageDefintion } from "../data/Page";
-import { ErrorHandler } from "../utility/ErrorHandler";
 import { Util } from "../utility/Util";
 
 declare const GM;
@@ -12,113 +10,9 @@ declare const GM;
 export class DomUtilities {
 
     /**
-     * Builds the structures used by several modules.  
-     * Returns a promise that is fulfilled when all DOM is created
-     */
-    public static async createStructure(): Promise<void> {
-        return new Promise(async (resolve, reject) => {
-            try { await DomUtilities.elementReady("head", DomUtilities.addStylesheets); }
-            catch (error) { ErrorHandler.error("DOM", error.stack, "styles"); }
-
-            let stage = "prepare";
-            try {
-
-                // This is terrible for performance, so keep the number of these to a minimum
-                const promises: Promise<any>[] = [];
-                promises.push(DomUtilities.elementReady("head", DomUtilities.injectChromeScript));
-                promises.push(DomUtilities.elementReady("body", DomUtilities.createThemes));
-                promises.push(DomUtilities.elementReady("#page", DomUtilities.createModalContainer));
-                promises.push(DomUtilities.elementReady("#nav", DomUtilities.createHeader));
-
-                Promise.all(promises).then(() => {
-                    stage = "build";
-                    DomUtilities.createSearchbox();
-                    DomUtilities.createTagList();
-                    DomUtilities.createFormattedTextareas();
-                    resolve();
-                });
-
-            } catch (error) {
-                ErrorHandler.error("DOM", error.stack, stage);
-                reject();
-                return;
-            }
-        });
-    }
-
-    /**
-     * Attaches Chrome extension's injector script to the header.  
-     * Does nothing in the userscript version.  
-     */
-    private static injectChromeScript(): Promise<any> {
-        if (typeof GM !== "undefined") return Promise.resolve();
-
-        $("<script>").attr("src", XM.Chrome.getResourceURL("injector.js")).appendTo("head");
-        return Promise.resolve();
-    }
-
-    /**
-     * Attaches the script's stylesheets to the document.  
-     * This is handled throught the manifest in the extension version.  
-     */
-    private static addStylesheets(): Promise<any> {
-        return XM.Connect.getResourceText("re621_css").then(
-            (css) => {
-                const stylesheet = DomUtilities.addStyle(css);
-                $(() => { stylesheet.appendTo("head"); });
-                return Promise.resolve(stylesheet);
-            }, () => { return Promise.reject(); }
-        )
-    }
-
-    /**
-     * Sets the saved theme as soon as possible.
-     * E621's theme switched does it later, making the background briefly flash blue
-     */
-    private static createThemes(): void {
-        $("body").attr("data-th-main", window.localStorage.getItem("theme"));
-        $("body").attr("data-th-extra", window.localStorage.getItem("theme-extra"));
-        $("body").attr("data-th-nav", window.localStorage.getItem("theme-nav"));
-    }
-
-    /**
-     * Creates the container that all modals attach themselves to
-     */
-    private static createModalContainer(): void {
-        $("<div>").attr("id", "modal-container").prependTo("div#page");
-    }
-
-    /**
-     * Creates a gridified header structure
-     */
-    private static createHeader(): void {
-        const $menuContainer = $("nav#nav");
-        const $menuMain = $("menu.main");
-
-        if ($("#nav").find("menu").length < 2) {
-            $menuContainer.append(`<menu>`);
-        }
-
-        // Replace the logo in menu.main with a separate element
-        const titlePageRouting = Util.LS.getItem("re621.mainpage") || "default";
-        $("<menu>")
-            .addClass("logo desktop-only")
-            .html(`<a href="${titlePageRouting == "default" ? "/" : "/" + titlePageRouting}" data-ytta-id="-">` + Page.getSiteName() + `</a>`)
-            .prependTo($menuContainer);
-        $menuMain.find("a[href='/']").remove();
-
-        // Add a section for re621 settings buttons
-        $("<menu>")
-            .addClass("extra")
-            .insertAfter($menuMain);
-
-        $menuContainer.addClass("grid");
-    }
-
-    /**
      * Creates a sticky searchbox container
      */
-    private static createSearchbox(): void {
+    public static createSearchbox(): void {
 
         // If favorites are private, the sidebar does not exist
         if (Page.matches([PageDefintion.search, PageDefintion.post, PageDefintion.favorites]) && $("aside#sidebar").length > 0) {
@@ -138,7 +32,7 @@ export class DomUtilities {
     /**
      * Re-structures the tag lists
      */
-    private static createTagList(): void {
+    public static createTagList(): void {
         $("#tag-box > ul > li, #tag-list > ul > li").each((index, element) => {
             const $container = $(element);
 
@@ -175,7 +69,7 @@ export class DomUtilities {
     /**
      * Wraps all appropriate textareas in FormattingHelper-readable structures
      */
-    private static createFormattedTextareas(): void {
+    public static createFormattedTextareas(): void {
         /** Wrap the post description textareas in FormattingHelper compatible tags */
         if (Page.matches(PageDefintion.upload) || Page.matches(PageDefintion.post)) {
             const $textarea = $("textarea#post_description");
@@ -186,26 +80,6 @@ export class DomUtilities {
                 .insertBefore($textarea)
                 .append($textarea);
         }
-    }
-
-    /**
-     * Fires the callback as soon as the specified element exists.  
-     * Runs every 250ms, and gives up after 10 seconds
-     * @param element Selector to search for
-     * @param callback Callback function
-     */
-    private static async elementReady(element: string, callback: Function): Promise<void> {
-        return new Promise(async (resolve, reject) => {
-            let timeout = 0;
-            while ($(element).length == 0 && timeout < (1000 * 10)) {
-                await new Promise((resolve) => { window.setTimeout(() => { resolve(); }, 250) });
-                timeout += 250;
-            }
-
-            if ($(element).length > 0)
-                window.setTimeout(() => { callback(); resolve(); }, 250)
-            else reject();
-        });
     }
 
     /**
