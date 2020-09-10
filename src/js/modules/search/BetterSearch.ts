@@ -6,9 +6,7 @@ import { Page, PageDefintion } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { Post } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
-import { PostParts } from "../../components/post/PostParts";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
@@ -24,17 +22,9 @@ export class BetterSearch extends RE6Module {
     private $content: JQuery<HTMLElement>;      // Section containing post thumbnails
     private $quickEdit: JQuery<HTMLElement>;    // Quick tags form
 
-    private $zoomBlock: JQuery<HTMLElement>;    // Display area for the hover zoom
-    private $zoomImage: JQuery<HTMLElement>;    // Image tag for hover zoom
-    private $zoomVideo: JQuery<HTMLElement>;    // Video tag for hover zoom
-    private $zoomInfo: JQuery<HTMLElement>;     // Posts's resolution and file size
-    private $zoomTags: JQuery<HTMLElement>;     // Post's tags section displayed on hover
-
     private $paginator: JQuery<HTMLElement>;    // Pagination element
 
     private observer: IntersectionObserver;     // Handles dynamic post rendering
-
-    private shiftPressed = false;               // Used to block zoom in onshift mode
 
     private queryTags: string[];                // Array containing the current search query
     private queryPage: string;                  // Output page, either as a number of in `a12345` / `b12345` format
@@ -63,10 +53,6 @@ export class BetterSearch extends RE6Module {
             imageRatio: 0.9,                                // Ratio to conform to
             imageMinWidth: 50,                              // Minimum image width, when it's not being cropped
             compactMode: true,                              // Limit the height to the same value as the width, instead of 50vh
-
-            zoomMode: ImageZoomMode.Disabled,               // How should the hover zoom be triggered
-            zoomFull: false,                                // Load full-sized (original) image instead of a sampled one
-            zoomTags: false,                                // Show a list of tags under the zoomed-in image
 
             hoverTags: false,                               // If true, adds a hover text to the image containing all of its tags
 
@@ -262,7 +248,6 @@ export class BetterSearch extends RE6Module {
 
             this.reloadPaginator();
             this.reloadEventListeners();
-            this.initHoverZoom();
 
             const scrollTo = $(`[page=${this.queryPage}]:visible:first`);
             if (preloadEnabled && pagesLoaded > 1 && scrollTo.length !== 0) {
@@ -393,31 +378,6 @@ export class BetterSearch extends RE6Module {
         this.$paginator = $("<paginator>")
             .html(``)
             .appendTo(infscroll);
-
-        // Hover Zoom
-        this.$zoomBlock = $("<zoom-container>")
-            .attr({
-                "status": "waiting",
-            })
-            .appendTo("body");
-        this.$zoomInfo = $("<div>")
-            .attr("id", "zoom-info")
-            .appendTo(this.$zoomBlock);
-        this.$zoomImage = $("<img>")
-            .attr("src", DomUtilities.getPlaceholderImage())
-            .addClass("display-none")
-            .appendTo(this.$zoomBlock);
-        this.$zoomVideo = $("<video controls autoplay loop muted></video>")
-            .attr({
-                poster: "",
-                src: "",
-                muted: "muted",
-            })
-            .addClass("display-none")
-            .appendTo(this.$zoomBlock);
-        this.$zoomTags = $("<div>")
-            .attr("id", "zoom-tags")
-            .appendTo(this.$zoomBlock);
     }
 
     /** Refreshes the visible post count attribute */
@@ -461,7 +421,6 @@ export class BetterSearch extends RE6Module {
     /** Restarts various event listenerd used by the module */
     public reloadEventListeners(): void {
         this.reloadModeSwitchListener();
-        this.reloadZoomListeners();
         this.reloadInfScrollListeners();
     }
 
@@ -603,41 +562,6 @@ export class BetterSearch extends RE6Module {
         });
     }
 
-    /** Restarts the even listeners used by the hover zoom submodule. */
-    private reloadZoomListeners(): void {
-
-        const zoomMode = this.fetchSettings("zoomMode");
-
-        // Hover Zoom - Shift Hold
-        $(document)
-            .off("keydown.re621.zoom")
-            .off("keyup.re621.zoom");
-        $("#tags, #re621_qedit_tags")
-            .off("keydown.re621.zoom")
-            .off("keyup.re621.zoom");
-
-        if (zoomMode == ImageZoomMode.OnShift) {
-            // This is necessary, because by default, the tag input is focused on page load
-            // If shift press didn't work when input is focused, this could cause confusion
-
-            $(document)
-                .on("keydown.re621.zoom", (event) => {
-                    if (this.shiftPressed || (event.originalEvent as KeyboardEvent).key !== "Shift") return;
-                    this.shiftPressed = true;
-                    let count = 0;
-                    Post.find("hovering").each((post) => {
-                        post.$ref.trigger("mouseenter.re621.zoom");
-                        count++;
-                    });
-                    Debug.log("hovering total", count);
-                })
-                .on("keyup.re621.zoom", (event) => {
-                    if (!this.shiftPressed || (event.originalEvent as KeyboardEvent).key !== "Shift") return;
-                    this.shiftPressed = false;
-                });
-        }
-    }
-
     /** Restarts the even listeners used by the infinite scroll submodule. */
     private reloadInfScrollListeners(): void {
         const fullpage = $(document),
@@ -677,144 +601,6 @@ export class BetterSearch extends RE6Module {
             // Trigger the loading process by clicking on "Load More" button
             $("#infscroll-next")[0].click();
 
-        });
-    }
-
-    /** Initialize the event listeners for the hover zoom functionality */
-    private initHoverZoom(): void {
-
-        let videoTimeout;
-
-        const viewport = $(window);
-        BetterSearch.on("zoom.start", (event, data) => {
-            if (BetterSearch.paused || (this.fetchSettings("zoomMode") == ImageZoomMode.OnShift && !this.shiftPressed))
-                return;
-
-            const post = Post.get(data.post);
-            post.$ref.attr("loading", "true");
-            this.$zoomBlock.attr("status", "loading");
-
-            // Calculate preview width and height
-            let width = Math.min(post.img.width, viewport.width() * 0.5 - 50),
-                height = width * post.img.ratio;
-
-            if (height > (viewport.height() * 0.75)) {
-                height = viewport.height() * 0.75;
-                width = height / post.img.ratio;
-            }
-
-            this.$zoomImage.css({
-                "width": width + "px",
-                "height": height + "px",
-            });
-
-            // Display the image
-            if (post.file.ext == "webm") {
-                this.$zoomVideo
-                    .removeClass("display-none")
-                    .css("background-image", `url("${post.file.sample}")`)
-                    .attr({
-                        src: post.file.original,
-                        poster: post.file.sample,
-                    });
-
-                // Chrome blocks the video autoplay unless it's muted
-                videoTimeout = window.setTimeout(() => { this.$zoomVideo.attr("muted", "false"); }, 500);
-
-                this.$zoomBlock.attr("status", "ready");
-                post.$ref.removeAttr("loading");
-            } else {
-                const zoomFull = this.fetchSettings("zoomFull");
-                this.$zoomImage
-                    .removeClass("display-none")
-                    .css("background-image", `url("${zoomFull ? post.file.sample : post.file.preview}")`)
-                    .attr("src", zoomFull ? post.file.original : post.file.sample)
-                    .one("load", () => {
-                        this.$zoomBlock.attr("status", "ready");
-                        post.$ref.removeAttr("loading");
-                    });
-            }
-            this.$zoomInfo.html(`${post.img.width} x ${post.img.height}, ${Util.formatBytes(post.file.size)}`);
-
-            // Append the tags block
-            if (this.fetchSettings("zoomTags"))
-                this.$zoomTags
-                    .html(PostParts.formatHoverText(post, true, true))
-                    .css({
-                        "max-width": width + "px",
-                    });
-
-            // Listen for mouse movements to move the preview accordingly
-            let throttled = false;
-            $(document).on("mousemove.re621.zoom", (event) => {
-
-                // Throttle the mousemove events to 40 frames per second
-                // Anything less than 30 feels choppy, but performance is a concern
-                if (throttled) return;
-                throttled = true;
-                window.setTimeout(() => { throttled = false }, 25);
-
-                const imgHeight = this.$zoomBlock.height(),
-                    imgWidth = this.$zoomBlock.width(),
-                    cursorX = event.pageX,
-                    cursorY = event.pageY - viewport.scrollTop();
-
-                const left = (cursorX < (viewport.width() / 2))
-                    ? cursorX + 50                                  // left side of the screen
-                    : cursorX - imgWidth - 50;                      // right side
-                const top = Util.Math.clamp(cursorY - (imgHeight / 2), 10, (viewport.height() - imgHeight - 10));
-
-                this.$zoomBlock.css({
-                    "left": `${left}px`,
-                    "top": `${top}px`,
-                });
-
-            });
-
-            // Emulate a mousemove event with data from the mouseover trigger
-            const offset = post.$ref.offset();
-            const e = $.Event("mousemove.re621.zoom");
-            const centerX = offset.left + (post.$ref.width() / 2),
-                centerY = offset.top + (post.$ref.height() / 2);
-            /*
-            // Alternative averaging method
-            e.pageX = data.pageX ? (data.pageX + centerX) / 2 : centerX;
-            e.pageY = data.pageY ? (data.pageY + centerY) / 2 : centerY;
-            */
-            e.pageX = data.pageX ? data.pageX : centerX;
-            e.pageY = data.pageY ? data.pageY : centerY;
-            $(document).trigger(e);
-        });
-        BetterSearch.on("zoom.stop", (event, data) => {
-            $(document).off("mousemove.re621.zoom");
-
-            // Reset the preview window
-            this.$zoomBlock
-                .attr("status", "waiting")
-                .css({
-                    "left": 0,
-                    "top": "100vh",
-                });
-            this.$zoomInfo.html("");
-            this.$zoomImage
-                .addClass("display-none")
-                .removeAttr("style")
-                .attr("src", DomUtilities.getPlaceholderImage());
-            this.$zoomVideo
-                .addClass("display-none")
-                .attr({ "muted": "", });
-            if (this.$zoomVideo.attr("src") !== "")
-                this.$zoomVideo.attr({
-                    "poster": "",
-                    "src": "",
-                });
-            window.clearTimeout(videoTimeout);
-            this.$zoomTags
-                .removeAttr("style")
-                .html("");
-
-            // If the post was loading, remove the spinner
-            $("#entry_" + data.post).removeAttr("loading");
         });
     }
 
@@ -1020,12 +806,6 @@ export enum ImageLoadMethod {
     Disabled = "disabled",
     Hover = "hover",
     Always = "always",
-}
-
-export enum ImageZoomMode {
-    Disabled = "disabled",
-    Hover = "hover",
-    OnShift = "onshift",
 }
 
 export enum ImageClickAction {

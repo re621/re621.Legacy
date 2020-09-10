@@ -26,6 +26,7 @@ import { PostViewer } from "../post/PostViewer";
 import { TitleCustomizer } from "../post/TitleCustomizer";
 import { BetterSearch } from "../search/BetterSearch";
 import { CustomFlagger, FlagDefinition } from "../search/CustomFlagger";
+import { HoverZoom } from "../search/HoverZoom";
 import { SearchUtilities } from "../search/SearchUtilities";
 import { ForumTracker } from "../subscriptions/ForumTracker";
 import { PoolTracker } from "../subscriptions/PoolTracker";
@@ -143,7 +144,8 @@ export class SettingsController extends RE6Module {
             imageScaler = ModuleController.get(ImageScaler),
             headerCustomizer = ModuleController.get(HeaderCustomizer),
             searchUtilities = ModuleController.get(SearchUtilities),
-            betterSearch = ModuleController.get(BetterSearch);
+            betterSearch = ModuleController.get(BetterSearch),
+            hoverZoom = ModuleController.get(HoverZoom);
 
         return new Form({ name: "optgeneral", columns: 3, width: 3 }, [
 
@@ -668,7 +670,7 @@ export class SettingsController extends RE6Module {
                     Form.select(
                         {
                             name: "hoverzoom",
-                            value: betterSearch.fetchSettings("zoomMode"),
+                            value: hoverZoom.fetchSettings("mode"),
                         },
                         {
                             "disabled": "Disabled",
@@ -676,35 +678,21 @@ export class SettingsController extends RE6Module {
                             "onshift": "Holding Shift",
                         },
                         async (data) => {
-                            await betterSearch.pushSettings("zoomMode", data);
-                            if (betterSearch.isInitialized()) {
-                                betterSearch.reloadEventListeners();
-                                betterSearch.reloadRenderedPosts();
-                            }
+                            console.log("setting", data, hoverZoom.isInitialized());
+                            await hoverZoom.pushSettings("mode", data);
+                            if (hoverZoom.isInitialized()) hoverZoom.reloadEventListeners();
                         }
                     ),
                     Form.spacer(3, true),
 
                     Form.checkbox(
                         {
-                            value: betterSearch.fetchSettings("zoomFull"),
-                            label: "<b>Large Images</b><br />Load the zoomed-in preview at the original resolution",
-                            width: 3,
-                        },
-                        async (data) => {
-                            await betterSearch.pushSettings("zoomFull", data);
-                        }
-                    ),
-                    Form.spacer(3, true),
-
-                    Form.checkbox(
-                        {
-                            value: betterSearch.fetchSettings("zoomTags"),
+                            value: hoverZoom.fetchSettings("tags"),
                             label: "<b>Show Tags</b><br />Display the list of posts's tags under the zoom-in image",
                             width: 3,
                         },
                         async (data) => {
-                            await betterSearch.pushSettings("zoomTags", data);
+                            await hoverZoom.pushSettings("tags", data);
                         }
                     ),
                     Form.spacer(3, true),

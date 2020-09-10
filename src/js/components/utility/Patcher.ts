@@ -1,4 +1,4 @@
-import { ImageZoomMode } from "../../modules/search/BetterSearch";
+import { ImageZoomMode } from "../../modules/search/HoverZoom";
 import { XM } from "../api/XM";
 import { Debug } from "./Debug";
 
