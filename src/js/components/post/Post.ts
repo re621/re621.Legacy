@@ -22,7 +22,7 @@ export class Post implements PostData {
     public comments: number;                // total number of comments
     public rating: PostRating;              // rating in the one-letter lowercase format (s, q, e)
     public uploader: number;                // uploader ID
-    public page: number;                    // search page. currently only supports numeric values, but not A- or B- ones
+    public page: string;                    // search page. can either be numberic, or in a- / b- format
 
     public date: {
         raw: string;                        // upload time, in `Fri Aug 21 2020 12:32:52 GMT-0700` format
@@ -231,7 +231,7 @@ export class Post implements PostData {
      * @param page Page of the search results
      * @param imageRatioChange Image crop, if applicable
      */
-    public static make(data: APIPost, page?: number, imageRatioChange?: boolean): Post {
+    public static make(data: APIPost, page?: string, imageRatioChange?: boolean): Post {
 
         const tags = APIPost.getTagSet(data),
             flags = PostFlag.get(data),
@@ -287,7 +287,7 @@ export interface PostData {
     rating: PostRating;
     uploader: number;
 
-    page: number;
+    page: string;
 
     date: {
         raw: string;
@@ -344,7 +344,7 @@ export namespace PostData {
      * @param data API result
      * @param page Search page
      */
-    export function fromAPI(data: APIPost, page?: number): PostData {
+    export function fromAPI(data: APIPost, page?: string): PostData {
 
         const tags = APIPost.getTagSet(data),
             flags = PostFlag.get(data);
@@ -464,7 +464,7 @@ export namespace PostData {
             rating: PostRating.fromValue($article.attr("data-rating")),
             uploader: parseInt($article.attr("data-uploader-id")) || 0,
 
-            page: -1,
+            page: "-1",
 
             date: {
                 raw: time,

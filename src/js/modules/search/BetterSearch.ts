@@ -1,3 +1,4 @@
+import { isNumeric } from "jquery";
 import { Danbooru } from "../../components/api/Danbooru";
 import { E621 } from "../../components/api/E621";
 import { APIPost, PostRating } from "../../components/api/responses/APIPost";
@@ -8,6 +9,7 @@ import { PostActions } from "../../components/post/PostActions";
 import { PostParts } from "../../components/post/PostParts";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
+import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
 
@@ -35,15 +37,17 @@ export class BetterSearch extends RE6Module {
     private shiftPressed = false;               // Used to block zoom in onshift mode
 
     private queryTags: string[];                // Array containing the current search query
-    private queryPage: number;                  // Number of the last page to be loaded
+    private queryPage: string;                  // Output page, either as a number of in `a12345` / `b12345` format
     private queryLimit: number;                 // Maxmimum number of posts per request
+
+    private pageResult: Promise<APIPost[]>;     // Post data, called in `prepare`, used in `create`
 
     private lastPage: number;                   // Last page number from the vanilla pagination
     private hasMorePages: boolean;              // If false, there are no more posts to load
     private loadingPosts: boolean;              // True value indicates that infinite scroll is loading posts
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.favorites], false, [BlacklistEnhancer]);
+        super([PageDefintion.search, PageDefintion.favorites], true, [BlacklistEnhancer]);
     }
 
     protected getDefaultSettings(): Settings {
@@ -84,30 +88,57 @@ export class BetterSearch extends RE6Module {
     public async prepare(): Promise<void> {
         await super.prepare();
 
+        // Clear the old thumbnails during script startup
+        // This won't work on first start, but that's not a big deal
         const enabled = this.fetchSettings("enabled");
         Util.LS.setItem("re621.bs.enabled", enabled + "");
         if (!enabled || !this.pageMatchesFilter()) return;
 
+        // console.log("starting up bettersearch", $("#paginator-old, div.paginator menu").length);
+
+        // Establish query parameters
+        this.queryPage = Page.getQueryParameter("page") || "1";
+        this.queryTags = (Page.getQueryParameter("tags") || "").split(" ").filter(el => el != "");
+        this.queryLimit = parseInt(Page.getQueryParameter("limit")) || undefined;
+
+        // Queue up the first API call
+        // This can be done early, to prevent waiting for `create()`
+        this.pageResult = this.fetchPosts();
+
+        $("#content").attr("loading", "true");
+    }
+
+    public create(): void {
+        super.create();
+
+        // Scrape the old paginator for data
+        // If the API ever starts returning the total number of results, this can be removed
         const paginator = $("#paginator-old, div.paginator menu").first();
         const curPage = parseInt(paginator.find(".current-page").text()) || -1,
             lastPage = parseInt(paginator.find(".numbered-page").last().text()) || -1;
         paginator.remove();
         this.lastPage = Math.max(curPage, lastPage);
 
-        $("#content")
-            .html("")
-            .attr("loading", "true");
-    }
+        // Determine if there are more content pages to show
+        // If the page number is numeric, that is determined by the last page scraped above
+        // If it's in the a- / b- format, there is always more content to show, unless `fetchPosts()` returns false
+        if (isNumeric(this.queryPage)) {
+            const currentPage = Util.Math.clamp(parseInt(this.queryPage), 1, 750);
+            this.queryPage = currentPage + "";
 
-    public create(): void {
-        super.create();
+            if (this.lastPage < currentPage) this.lastPage = currentPage;
 
-        this.queryPage = parseInt(Page.getQueryParameter("page")) || 1;
-        this.queryTags = (Page.getQueryParameter("tags") || "").split(" ").filter(el => el != "");
-        this.queryLimit = parseInt(Page.getQueryParameter("limit")) || undefined;
+            this.hasMorePages = currentPage == 750
+                ? true
+                : currentPage < this.lastPage;
 
-        if (this.lastPage < this.queryPage) this.lastPage = this.queryPage;
-        this.hasMorePages = this.queryPage < this.lastPage;
+        } else if (this.queryPage.match(/(?:a|b)\d+/g)) {
+            this.hasMorePages = true;
+        } else {
+            this.queryPage = "-1";
+            this.hasMorePages = false;
+        }
+
 
         // Write appropriate settings into the content wrapper
         this.createStructure();
@@ -175,35 +206,39 @@ export class BetterSearch extends RE6Module {
         // Initial post load
         new Promise(async (resolve) => {
 
-            if (this.queryPage > 750) {
-                resolve();
-                return;
-            }
+            let pagesLoaded = 0;
 
-            const firstPage = preloadEnabled
-                ? Math.max((this.queryPage - BetterSearch.PAGES_PRELOAD), 1)
-                : this.queryPage;
-
-            const pageResult = await this.fetchPosts();
+            const pageResult = await this.pageResult;
             if (pageResult.length > 0) {
 
                 const imageRatioChange = this.fetchSettings<boolean>("imageRatioChange");
 
-                // Reload previous pages
-                let result: APIPost[] = [];
-                for (let i = firstPage; i < this.queryPage; i++) {
-                    result = await this.fetchPosts(i);
-                    for (const post of result) {
-                        const postData = Post.make(post, i, imageRatioChange);
-                        if (postData !== null) {
-                            this.$content.append(postData.$ref);
-                            this.observer.observe(postData.$ref[0]);
+                // Preload previous pages
+                // Not available for relative page numbers
+                if (isNumeric(this.queryPage)) {
+
+                    const currentPage = parseInt(this.queryPage);
+                    const firstPage = preloadEnabled
+                        ? Math.max((currentPage - BetterSearch.PAGES_PRELOAD), 1)
+                        : currentPage;
+
+                    let result: APIPost[] = [];
+                    for (let i = firstPage; i < currentPage; i++) {
+                        result = await this.fetchPosts(i);
+                        for (const post of result) {
+                            const postData = Post.make(post, i + "", imageRatioChange);
+                            if (postData !== null) {
+                                this.$content.append(postData.$ref);
+                                this.observer.observe(postData.$ref[0]);
+                            }
                         }
+                        $("<post-break>")
+                            .attr("id", "page-" + (i + 1))
+                            .html(`Page&nbsp;${(i + 1)}`)
+                            .appendTo(this.$content);
+
+                        pagesLoaded++
                     }
-                    $("<post-break>")
-                        .attr("id", "page-" + (i + 1))
-                        .html(`Page&nbsp;${(i + 1)}`)
-                        .appendTo(this.$content);
                 }
 
                 // Append the current page results
@@ -214,6 +249,7 @@ export class BetterSearch extends RE6Module {
                         this.observer.observe(postData.$ref[0]);
                     }
                 }
+                pagesLoaded++;
 
             }
 
@@ -221,15 +257,15 @@ export class BetterSearch extends RE6Module {
                 .removeAttr("loading")
                 .attr("infscroll", "ready");
 
-            resolve();
-        }).then(() => {
+            resolve(pagesLoaded);
+        }).then((pagesLoaded) => {
 
             this.reloadPaginator();
             this.reloadEventListeners();
             this.initHoverZoom();
 
             const scrollTo = $(`[page=${this.queryPage}]:visible:first`);
-            if (preloadEnabled && this.queryPage > 1 && scrollTo.length !== 0) {
+            if (preloadEnabled && pagesLoaded > 1 && scrollTo.length !== 0) {
                 $([document.documentElement, document.body])
                     .animate({ scrollTop: scrollTo.offset().top - 30 }, 200);
             }
@@ -247,10 +283,10 @@ export class BetterSearch extends RE6Module {
     }
 
     /** Updates the document title with the current page number */
-    private updatePageTitle(page: number): void {
+    private updatePageTitle(page: string): void {
         document.title =
             (this.queryTags.length == 0 ? "Posts" : this.queryTags.join(" ").replace(/_/g, " ")) +
-            (page > 1 ? (" - Page " + page) : "") +
+            (page != "1" ? (" - Page " + page) : "") +
             " - " + Page.getSiteName();
     }
 
@@ -326,7 +362,7 @@ export class BetterSearch extends RE6Module {
                 }
             }).then(
                 (response) => {
-                    console.log(response);
+                    Debug.log(response);
 
                     Post.get(postID)
                         .update(response[0]["post"])
@@ -482,7 +518,7 @@ export class BetterSearch extends RE6Module {
 
                     PostActions.vote(post.id, 1, firstVote).then(
                         (response) => {
-                            console.log(response);
+                            Debug.log(response);
 
                             if (response.action == 0) {
                                 if (firstVote) post.$ref.attr("vote", "1");
@@ -504,7 +540,7 @@ export class BetterSearch extends RE6Module {
 
                     PostActions.vote(post.id, -1, false).then(
                         (response) => {
-                            console.log(response);
+                            Debug.log(response);
 
                             if (response.action == 0) {
                                 if (firstVote) post.$ref.attr("vote", "1");
@@ -562,7 +598,7 @@ export class BetterSearch extends RE6Module {
 
             }
 
-            console.log(post.id, mode);
+            // console.log(post.id, mode);
 
         });
     }
@@ -593,7 +629,7 @@ export class BetterSearch extends RE6Module {
                         post.$ref.trigger("mouseenter.re621.zoom");
                         count++;
                     });
-                    console.log("total", count);
+                    Debug.log("hovering total", count);
                 })
                 .on("keyup.re621.zoom", (event) => {
                     if (!this.shiftPressed || (event.originalEvent as KeyboardEvent).key !== "Shift") return;
@@ -653,8 +689,6 @@ export class BetterSearch extends RE6Module {
         BetterSearch.on("zoom.start", (event, data) => {
             if (BetterSearch.paused || (this.fetchSettings("zoomMode") == ImageZoomMode.OnShift && !this.shiftPressed))
                 return;
-
-            console.log("triggering zoom", data, this.shiftPressed);
 
             const post = Post.get(data.post);
             post.$ref.attr("loading", "true");
@@ -785,7 +819,7 @@ export class BetterSearch extends RE6Module {
     }
 
     /** Retrieves post data from an appropriate API endpoint */
-    private async fetchPosts(page?: number): Promise<APIPost[]> {
+    private async fetchPosts(page?: number | string): Promise<APIPost[]> {
         if (Page.matches(PageDefintion.favorites)) {
             const userID = Page.getQueryParameter("user_id") || User.getUserID();
             return E621.Favorites.get<APIPost>({ user_id: userID, page: page ? page : this.queryPage, limit: this.queryLimit }, 500)
@@ -795,15 +829,18 @@ export class BetterSearch extends RE6Module {
         for (const tag of this.queryTags)
             parsedTags.push(decodeURIComponent(tag));
 
-        return E621.Posts.get<APIPost>({ tags: parsedTags, page: page ? page : this.queryPage, limit: this.queryLimit }, 500)
+        return E621.Posts.get<APIPost>({ tags: parsedTags, page: page ? page : this.queryPage, limit: this.queryLimit }, 500);
     }
 
     /** Loads the next page of results */
     private async loadNextPage(): Promise<boolean> {
-        const search = await this.fetchPosts(this.queryPage + 1);
-        if (search.length == 0) return Promise.resolve(false);
 
-        this.queryPage += 1;
+        this.queryPage = isNumeric(this.queryPage)
+            ? this.queryPage = (parseInt(this.queryPage) + 1) + ""
+            : this.queryPage = "b" + Post.get($("post:last")).id;
+
+        const search = await this.fetchPosts(this.queryPage);
+        if (search.length == 0) return Promise.resolve(false);
 
         const imageRatioChange = this.fetchSettings<boolean>("imageRatioChange");
 
@@ -831,7 +868,9 @@ export class BetterSearch extends RE6Module {
 
         BetterSearch.trigger("pageload");
 
-        return Promise.resolve(this.queryPage < this.lastPage);
+        if (isNumeric(this.queryPage))
+            return Promise.resolve(parseInt(this.queryPage) < this.lastPage);
+        else return Promise.resolve(true);
     }
 
     /** Rebuilds the DOM structure of the paginator */
@@ -839,19 +878,21 @@ export class BetterSearch extends RE6Module {
 
         this.$paginator.html("");
 
-        if (this.queryPage == 1) {
+        // PREV
+        if (this.queryPage == "1") {
             $("<span>")
                 .html(`<i class="fas fa-angle-double-left"></i> Previous`)
                 .addClass("paginator-prev")
                 .appendTo(this.$paginator);
         } else {
             $("<a>")
-                .attr("href", getPageURL(this.queryPage - 1))
+                .attr("href", getPrevPageURL(this.queryPage))
                 .html(`<i class="fas fa-angle-double-left"></i> Previous`)
                 .addClass("paginator-prev")
                 .appendTo(this.$paginator);
         }
 
+        // LOAD
         if (this.fetchSettings("infiniteScroll")) {
             const loadMoreWrap = $("<span>")
                 .addClass("infscroll-next-wrap")
@@ -888,9 +929,10 @@ export class BetterSearch extends RE6Module {
             }
         } else $("<span>").appendTo(this.$paginator);
 
+        // NEXT
         if (this.hasMorePages) {
             $("<a>")
-                .attr("href", getPageURL(this.queryPage + 1))
+                .attr("href", getNextPageURL(this.queryPage))
                 .html(`Next <i class="fas fa-angle-double-right"></i>`)
                 .addClass("paginator-next")
                 .appendTo(this.$paginator);
@@ -901,40 +943,71 @@ export class BetterSearch extends RE6Module {
                 .appendTo(this.$paginator);
         }
 
+        // PAGE
         const pages = $("<div>")
             .addClass("paginator-numbers")
             .appendTo(this.$paginator);
 
-        const pageNum: number[] = [];
+        if (isNumeric(this.queryPage)) {
+            const currentPage = parseInt(this.queryPage);
+            const pageNum: number[] = [];
 
-        let count = 0;
-        for (let i = 1; i <= this.lastPage; i++) {
-            if (
-                Util.Math.between(i, 0, (this.queryPage < 5 ? 5 : 3)) ||
-                Util.Math.between(i, this.queryPage - 2, this.queryPage + 2) ||
-                Util.Math.between(i, (this.queryPage < 5 ? (this.lastPage - 5) : (this.lastPage - 3)), this.lastPage)
-            ) {
-                pageNum.push(i);
-                count++;
-            } else {
-                if (pageNum[count - 1] !== null) {
-                    pageNum.push(null);
+            let count = 0;
+            for (let i = 1; i <= this.lastPage; i++) {
+                if (
+                    Util.Math.between(i, 0, (currentPage < 5 ? 5 : 3)) ||
+                    Util.Math.between(i, currentPage - 2, currentPage + 2) ||
+                    Util.Math.between(i, (currentPage < 5 ? (this.lastPage - 5) : (this.lastPage - 3)), this.lastPage)
+                ) {
+                    pageNum.push(i);
                     count++;
+                } else {
+                    if (pageNum[count - 1] !== null) {
+                        pageNum.push(null);
+                        count++;
+                    }
+                }
+            }
+
+            for (const page of pageNum) {
+                if (page == null) $("<span>").html(`. . .`).appendTo(pages);
+                else {
+                    if (page == currentPage) $("<span>").html(`<b>${page}</b>`).appendTo(pages);
+                    else $("<a>").attr("href", getPageURL(page)).html(`${page}`).appendTo(pages);
                 }
             }
         }
 
-        for (const page of pageNum) {
-            if (page == null) $("<span>").html(`. . .`).appendTo(pages);
-            else {
-                if (page == this.queryPage) $("<span>").html(`<b>${page}</b>`).appendTo(pages);
-                else $("<a>").attr("href", getPageURL(page)).html(`${page}`).appendTo(pages);
-            }
+        function getPrevPageURL(page: string): string {
+
+            // Default pagination
+            if (isNumeric(page)) return getPageURL(parseInt(page) - 1);
+
+            // Relative pagination
+            const lookup = $("post:first");
+            if (lookup.length == 0) return null;
+
+            return getPageURL("a" + Post.get(lookup).id);
         }
 
-        function getPageURL(number: number): string {
+        function getNextPageURL(page: string): string {
+
+            // Default pagination
+            if (isNumeric(page)) {
+                const pageNum = parseInt(page);
+                if (pageNum < 750) return getPageURL(parseInt(page) + 1);
+            }
+
+            // Relative pagination
+            const lookup = $("post:last");
+            if (lookup.length == 0) return null;
+
+            return getPageURL("b" + Post.get(lookup).id);
+        }
+
+        function getPageURL(page: number | string): string {
             const url = new URL(window.location.toString())
-            url.searchParams.set("page", number + "");
+            url.searchParams.set("page", page + "");
             url.searchParams.set("nopreload", "true");
             return url.pathname + url.search;
         }
