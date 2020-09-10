@@ -17,6 +17,7 @@ export class Miscellaneous extends RE6Module {
         this.registerHotkeys(
             { keys: "hotkeyNewComment", fnct: this.openNewComment },
             { keys: "hotkeyEditPost", fnct: this.openEditTab },
+            { keys: "hotkeyToggleBlacklist", fnct: this.toggleBlacklist },
             // { keys: "hotkeySubmit", fnct: this.handleSubmitForm, element: $("body"), selector: "textarea, input" },
         );
     }
@@ -28,9 +29,10 @@ export class Miscellaneous extends RE6Module {
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
+
             hotkeyNewComment: "n",
             hotkeyEditPost: "e",
-
+            hotkeyToggleBlacklist: "",
             hotkeySubmit: "alt+return",
 
             stickySearchbox: true,
@@ -266,6 +268,10 @@ export class Miscellaneous extends RE6Module {
         $textarea.keyup(() => {
             charCounter.html(($textarea.val() + "").length + " / 50000");
         });
+    }
+
+    private toggleBlacklist(): void {
+        $("a#disable-all-blacklists:visible, a#re-enable-all-blacklists:visible").first()[0].click();
     }
 
 }

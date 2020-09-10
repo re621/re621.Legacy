@@ -1391,6 +1391,7 @@ export class SettingsController extends RE6Module {
             ...createInputs(miscellaneous, "Edit Post", "hotkeyEditPost"),
             ...createInputs(postViewer, "Toggle Notes", "hotkeyHideNotes"),
             ...createInputs(postViewer, "Edit Notes", "hotkeyNewNote"),
+            ...createInputs(miscellaneous, "Toggle Blacklist", "hotkeyToggleBlacklist"),
             Form.hr(3),
 
             // Modes

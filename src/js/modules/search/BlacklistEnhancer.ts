@@ -85,16 +85,20 @@ export class BlacklistEnhancer extends RE6Module {
             .appendTo(BlacklistEnhancer.$wrapper);
 
         BlacklistEnhancer.$toggle = $("<a>")
+            .attr("id", "disable-all-blacklists")
             .html("Disable All Filters")
             .appendTo(toggleContainer)
             .on("click.re621", () => {
                 // This is dumb, but much faster than the alternative
-                if (BlacklistEnhancer.$toggle.text().startsWith("Enable")) {
+                if (BlacklistEnhancer.$toggle.attr("id") == "re-enable-all-blacklists") {
                     Blacklist.enableAll();
+                    BlacklistEnhancer.$toggle.attr("id", "disable-all-blacklists");
+
                     Post.find("all").each(post => post.updateVisibility());
                 } else {
                     Blacklist.disableAll();
                     Post.find("blacklisted").each(post => post.updateVisibility());
+                    BlacklistEnhancer.$toggle.attr("id", "re-enable-all-blacklists");
 
                     BlacklistEnhancer.$wrapper.attr("collapsed", "false");
                     Util.LS.setItem("bc", "0");
@@ -161,10 +165,14 @@ export class BlacklistEnhancer extends RE6Module {
     /** Reloads the "Enable / Disable All" toggle */
     public static updateToggleSwitch(): void {
         if (BlacklistEnhancer.$content.find("filter[enabled=false]").length > 0) {
-            BlacklistEnhancer.$toggle.html("Enable All Filters");
+            BlacklistEnhancer.$toggle
+                .html("Enable All Filters")
+                .attr("id", "re-enable-all-blacklists");
             Util.LS.setItem("dab", "1");
         } else {
-            BlacklistEnhancer.$toggle.html("Disable All Filters");
+            BlacklistEnhancer.$toggle
+                .html("Disable All Filters")
+                .attr("id", "disable-all-blacklists");
             Util.LS.setItem("dab", "0");
         }
     }
