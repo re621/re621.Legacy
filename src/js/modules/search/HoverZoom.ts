@@ -25,7 +25,7 @@ export class HoverZoom extends RE6Module {
         return {
             enabled: true,
 
-            mode: ImageZoomMode.Disabled,               // How should the hover zoom be triggered
+            mode: ImageZoomMode.OnShift,                // How should the hover zoom be triggered
             tags: false,                                // Show a list of tags under the zoomed-in image
         };
     }
