@@ -114,6 +114,8 @@ export class CleanSlate {
         return new Promise((resolve) => {
             new MutationObserver(function () {
 
+                // console.log("iteration", iterations);
+
                 for (const [selector, action] of processed.entries()) {
                     if ($(selector).length == 0) continue;
                     // console.log("found [" + selector + "]");
