@@ -135,6 +135,15 @@ export class CleanSlate {
         });
     }
 
+    public static async awaitFocus(): Promise<boolean> {
+        return new Promise((resolve) => {
+            if (document.hasFocus()) { resolve(true); return; }
+            $(window).one("focus", () => {
+                resolve(true);
+            });
+        });
+    }
+
 }
 
 interface ActionDefinition {
