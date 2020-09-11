@@ -66,7 +66,6 @@ export class HoverZoom extends RE6Module {
     public reloadEventListeners(): void {
 
         const zoomMode = this.fetchSettings("mode");
-        console.log("initializing event listeners", zoomMode);
 
         $(document)
             .off("keydown.re621.zoom")
