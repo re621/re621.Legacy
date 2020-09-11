@@ -37,14 +37,13 @@ export class DomUtilities {
             const $container = $(element);
 
             const $tagLink = $container.find("a.search-tag").first();
-            const $tagWrap = $("<span>").addClass("tag-wrap").insertAfter($tagLink).append($tagLink);
+            $("<span>").addClass("tag-wrap").insertAfter($tagLink).append($tagLink);
 
             // Container for various actions - subscribe, add to blacklist, etc.
             const $actionsBox = $("<div>")
                 .addClass("tag-actions")
                 .attr("data-tag", $container.find("a.search-tag").text().replace(/ /g, "_"))
                 .appendTo($container);
-            $container.find("a.wiki-link").first().insertBefore($tagWrap);
 
             //   ELEMENT   - METHOD  - STATE
             // - blacklist - display - hover
