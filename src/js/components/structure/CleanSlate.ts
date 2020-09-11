@@ -135,15 +135,22 @@ export class CleanSlate {
         });
     }
 
+    /** Returns a promise that gets resolved if and when the window is visible on the screen */
     public static async awaitFocus(): Promise<boolean> {
         return new Promise((resolve) => {
-            if (document.hasFocus()) { resolve(true); return; }
+
+            // Document either has direct user focus, or is generally visible on the screen
+            if (document.hasFocus() || document.visibilityState == "visible") {
+                resolve(true);
+                return;
+            }
+
+            // Window receives focus
             $(window).one("focus", () => {
                 resolve(true);
             });
         });
     }
-
 }
 
 interface ActionDefinition {
