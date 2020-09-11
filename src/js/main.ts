@@ -102,7 +102,6 @@ CleanSlate.run().then(async () => {
 
     DomUtilities.createSearchbox();
     DomUtilities.createTagList();
-    DomUtilities.createFormattedTextareas();
 
     await Debug.init();
     await Patcher.run();

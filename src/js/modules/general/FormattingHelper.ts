@@ -1,5 +1,6 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { E621 } from "../../components/api/E621";
+import { Page, PageDefintion } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
@@ -98,6 +99,17 @@ export class FormattingManager extends RE6Module {
     /** Creates the Formatting Helpers for appropriate textareas */
     public create(): void {
         super.create();
+
+        /** Wrap the post description textareas in FormattingHelper compatible tags */
+        if (Page.matches(PageDefintion.upload) || Page.matches(PageDefintion.post)) {
+            const $textarea = $("textarea#post_description");
+
+            $("<div>")
+                .addClass("dtext-previewable")
+                .append($(`<div class="dtext-preview">`))
+                .insertBefore($textarea)
+                .append($textarea);
+        }
 
         $("div.dtext-previewable:has(textarea)").each((i, element) => {
             const $container = $(element);
