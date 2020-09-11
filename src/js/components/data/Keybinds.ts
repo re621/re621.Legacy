@@ -68,7 +68,7 @@ export class KeybindManager {
                 });
 
                 // Dumbest thing I've written today, but it works. Don't question it.
-                Mousetrap.bind(key, () => { this.listeners.get(key)(); });
+                Mousetrap.bind(key, () => { this.listeners.get(key)(); }, "keyup");
             }
 
             // Create the executor

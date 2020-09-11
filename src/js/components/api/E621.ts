@@ -299,10 +299,7 @@ export class E621 {
         };
 
         if (method !== "GET") {
-            if (this.authToken == undefined) {
-                Debug.log("authToken is undefined, regenerating");
-                this.authToken = $("head meta[name=csrf-token]").attr("content");
-            }
+            this.authToken = $("meta[name=csrf-token]").attr("content");
             requestBody["authenticity_token"] = encodeURIComponent(this.authToken);
             requestInfo.body = FormattedAPIQuery.stringify(requestBody);
         }

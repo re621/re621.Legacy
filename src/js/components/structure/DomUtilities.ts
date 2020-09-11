@@ -67,22 +67,6 @@ export class DomUtilities {
     }
 
     /**
-     * Wraps all appropriate textareas in FormattingHelper-readable structures
-     */
-    public static createFormattedTextareas(): void {
-        /** Wrap the post description textareas in FormattingHelper compatible tags */
-        if (Page.matches(PageDefintion.upload) || Page.matches(PageDefintion.post)) {
-            const $textarea = $("textarea#post_description");
-
-            $("<div>")
-                .addClass("dtext-previewable")
-                .append($(`<div class="dtext-preview">`))
-                .insertBefore($textarea)
-                .append($textarea);
-        }
-    }
-
-    /**
      * Adds a button to the top-right of the navbar
      * @param config Button configuration
      */

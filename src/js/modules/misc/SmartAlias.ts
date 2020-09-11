@@ -78,7 +78,7 @@ export class SmartAlias extends RE6Module {
             // This fixes an issue with SmartAlias not loading if the editing form is opened before page loads
 
             SmartAlias.postPageLockout = true;
-            $("#post-edit-link").one("click.re621", () => {
+            $("body").one("click.re621", "#post-edit-link", () => {
                 SmartAlias.postPageLockout = false;
                 this.reload();
             });
@@ -102,7 +102,7 @@ export class SmartAlias extends RE6Module {
     public destroy(): void {
         if (!this.isInitialized()) return;
         super.destroy();
-        for (const inputElement of $("textarea#post_tags, textarea#post_tag_string").get()) {
+        for (const inputElement of $("#post_tags, #post_tag_string").get()) {
             $(inputElement)
                 .off("focus.re621.smart-alias")
                 .off("focusout.re621.smart-alias");

@@ -33,8 +33,10 @@ export class ModuleController {
                 if (instance.canInitialize()) {
                     if (instance.isWaitingForDOM()) {
                         $(() => {
-                            try { instance.create(); }
-                            catch (error) { ErrorHandler.error(instance, error.stack, "init"); }
+                            window.setTimeout(() => {
+                                try { instance.create(); }
+                                catch (error) { ErrorHandler.error(instance, error.stack, "init"); }
+                            }, 50);
                         });
                     } else instance.create();
 

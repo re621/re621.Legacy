@@ -102,11 +102,14 @@ CleanSlate.run().then(async () => {
 
     DomUtilities.createSearchbox();
     DomUtilities.createTagList();
-    DomUtilities.createFormattedTextareas();
 
     await Debug.init();
     await Patcher.run();
     await VersionChecker.init();
+
+    // Do not initialize modules until the page is in focus
+    // This should prevent API throttling from BetterSearch
+    await CleanSlate.awaitFocus();
 
     // This code is pretty fragile. It's also what makes the rest of the project work.
     // It is dependent on the previous step, which runs when the document fully loads

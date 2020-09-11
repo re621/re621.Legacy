@@ -9,7 +9,7 @@ export class UploadUtilities extends RE6Module {
 
 
     public constructor() {
-        super([PageDefintion.upload]);
+        super([PageDefintion.upload], true);
     }
 
     protected getDefaultSettings(): Settings {
