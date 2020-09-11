@@ -72,20 +72,19 @@ export class HoverZoom extends RE6Module {
             .off("keyup.re621.zoom");
 
         $("#page")
-            .off("mouseenter.re621.zoom", "post, article.post-preview, div.post-thumbnail")
-            .off("mouseleave.re621.zoom", "post, article.post-preview, div.post-thumbnail");
+            .off("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail")
+            .off("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail");
 
         if (zoomMode == ImageZoomMode.Disabled) return;
 
         // Listen for mouse hover over thumbnails
         $("#page")
-            .on("mouseenter.re621.zoom", "post, article.post-preview, div.post-thumbnail", (event) => {
-                // TODO Account for SWF and deleted files
+            .on("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail", (event) => {
                 const $ref = $(event.currentTarget);
                 $ref.attr("hovering", "true");
                 HoverZoom.trigger("zoom.start", { post: $ref.data("id"), pageX: event.pageX, pageY: event.pageY });
             })
-            .on("mouseleave.re621.zoom", "post, article.post-preview, div.post-thumbnail", (event) => {
+            .on("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail", (event) => {
                 const $ref = $(event.currentTarget);
                 $ref.removeAttr("hovering");
                 HoverZoom.trigger("zoom.stop", { post: $ref.data("id"), pageX: event.pageX, pageY: event.pageY });
