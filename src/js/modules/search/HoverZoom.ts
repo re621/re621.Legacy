@@ -72,20 +72,19 @@ export class HoverZoom extends RE6Module {
             .off("keyup.re621.zoom");
 
         $("#page")
-            .off("mouseenter.re621.zoom", "post, article.post-preview, div.post-thumbnail")
-            .off("mouseleave.re621.zoom", "post, article.post-preview, div.post-thumbnail");
+            .off("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail")
+            .off("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail");
 
         if (zoomMode == ImageZoomMode.Disabled) return;
 
         // Listen for mouse hover over thumbnails
         $("#page")
-            .on("mouseenter.re621.zoom", "post, article.post-preview, div.post-thumbnail", (event) => {
-                // TODO Account for SWF and deleted files
+            .on("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail", (event) => {
                 const $ref = $(event.currentTarget);
                 $ref.attr("hovering", "true");
                 HoverZoom.trigger("zoom.start", { post: $ref.data("id"), pageX: event.pageX, pageY: event.pageY });
             })
-            .on("mouseleave.re621.zoom", "post, article.post-preview, div.post-thumbnail", (event) => {
+            .on("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail", (event) => {
                 const $ref = $(event.currentTarget);
                 $ref.removeAttr("hovering");
                 HoverZoom.trigger("zoom.stop", { post: $ref.data("id"), pageX: event.pageX, pageY: event.pageY });
@@ -128,6 +127,10 @@ export class HoverZoom extends RE6Module {
             // Skip deleted and flash files
             if (post.flags.has(PostFlag.Deleted) || post.file.ext == "swf") return;
 
+            const $img = $ref.find("img").first();
+            $ref.data("stored-title", $img.attr("title") || "");
+            $img.removeAttr("title");
+
             this.$zoomBlock.attr("status", "loading");
 
             // Calculate preview width and height
@@ -167,15 +170,20 @@ export class HoverZoom extends RE6Module {
                         this.$zoomBlock.attr("status", "ready");
                     });
             }
-            this.$zoomInfo.html(`${post.img.width} x ${post.img.height}` + (post.file.size > 0 ? `, ${Util.formatBytes(post.file.size)}` : ""));
+
+            // Write the image data into the info block
+            this.$zoomInfo.html(
+                `${post.img.width} x ${post.img.height}` +
+                (post.file.size > 0 ? `, ${Util.formatBytes(post.file.size)}` : "") +
+                ` | <span class="post-info-rating rating-${post.rating}">${post.rating}</span>` +
+                (post.date.raw !== "0" ? ` | ${post.date.ago}` : "")
+            );
 
             // Append the tags block
             if (this.fetchSettings("tags"))
                 this.$zoomTags
                     .html(post.tagString)
-                    .css({
-                        "max-width": width + "px",
-                    });
+                    .css({ "max-width": width + "px" });
 
             // Listen for mouse movements to move the preview accordingly
             let throttled = false;
@@ -219,8 +227,13 @@ export class HoverZoom extends RE6Module {
             $(document).trigger(e);
         });
 
-        HoverZoom.on("zoom.stop", () => {
+        HoverZoom.on("zoom.stop", (event, data) => {
             $(document).off("mousemove.re621.zoom");
+
+            const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}]`).first();
+
+            const $img = $ref.find("img").first();
+            if ($ref.data("stored-title")) $img.attr("title", $ref.data("stored-title"));
 
             // Reset the preview window
             this.$zoomBlock

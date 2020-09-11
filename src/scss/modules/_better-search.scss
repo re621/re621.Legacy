@@ -261,16 +261,15 @@ search-content > post {
             }
         }
 
-        span.post-info-rating {
-            text-transform: uppercase;
-            &.rating-e { color: #e45f5f; }
-            &.rating-q { color: #ffe666; }
-            &.rating-s { color: #3e9e49; }
-        }
-
     }
 }
 span.post-score-faves { color: #c3a816; }
+span.post-info-rating {
+    text-transform: uppercase;
+    &.rating-e { color: #e45f5f; }
+    &.rating-q { color: #ffe666; }
+    &.rating-s { color: #3e9e49; }
+}
 
 
 /* Un-rendered Post */

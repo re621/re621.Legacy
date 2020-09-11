@@ -549,7 +549,7 @@ export namespace PostData {
         const extension = $article.attr("data-file-ext");
         let urls = {};
         let md5: string;
-        if ($article.is("article")) {
+        if ($article.hasClass("post-preview")) {
             if ($article.attr("data-md5")) md5 = $article.attr("data-md5");
             else if ($article.attr("data-file-url"))
                 md5 = $article.attr("data-file-url").substr(36, 32);
@@ -578,22 +578,14 @@ export namespace PostData {
             }
         }
 
-        // Score
-        let score = 0;
-        if ($article.attr("data-score")) score = parseInt($article.attr("data-score"));
-        else if ($article.find(".post-score-score").length !== 0)
-            score = parseInt($article.find(".post-score-score").first().html().substring(1));
-
-        // User score;
-        let userScore = 0;
-        if ($(".post-vote-up-" + id).first().hasClass("score-positive")) userScore = 1;
-        else if ($(".post-vote-down-" + id).first().hasClass("score-negative")) userScore = -1;
+        // Date
+        const rawDate = $article.attr("data-created-at") || "0";
 
         return {
             id: id,
             flags: PostFlag.fromString($article.attr("data-flags") || ""),
-            score: score,
-            user_score: userScore,
+            score: parseInt($article.attr("data-score") || "0"),
+            user_score: 0,
             favorites: parseInt($article.attr("data-fav-count")) || 0,
             is_favorited: $article.attr("data-is-favorited") == "true",
             comments: -1,
@@ -603,8 +595,8 @@ export namespace PostData {
             page: "-1",
 
             date: {
-                raw: "0",
-                ago: Util.Time.ago(0),
+                raw: rawDate,
+                ago: Util.Time.ago(rawDate),
             },
 
             tagString: tagString,
