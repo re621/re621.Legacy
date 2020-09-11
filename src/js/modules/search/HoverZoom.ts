@@ -166,15 +166,20 @@ export class HoverZoom extends RE6Module {
                         this.$zoomBlock.attr("status", "ready");
                     });
             }
-            this.$zoomInfo.html(`${post.img.width} x ${post.img.height}` + (post.file.size > 0 ? `, ${Util.formatBytes(post.file.size)}` : ""));
+
+            // Write the image data into the info block
+            this.$zoomInfo.html(
+                `${post.img.width} x ${post.img.height}` +
+                (post.file.size > 0 ? `, ${Util.formatBytes(post.file.size)}` : "") +
+                ` | <span class="post-info-rating rating-${post.rating}">${post.rating}</span>` +
+                (post.date.raw !== "0" ? ` | ${post.date.ago}` : "")
+            );
 
             // Append the tags block
             if (this.fetchSettings("tags"))
                 this.$zoomTags
                     .html(post.tagString)
-                    .css({
-                        "max-width": width + "px",
-                    });
+                    .css({ "max-width": width + "px" });
 
             // Listen for mouse movements to move the preview accordingly
             let throttled = false;
