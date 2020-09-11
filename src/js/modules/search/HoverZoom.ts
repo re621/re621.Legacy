@@ -127,6 +127,10 @@ export class HoverZoom extends RE6Module {
             // Skip deleted and flash files
             if (post.flags.has(PostFlag.Deleted) || post.file.ext == "swf") return;
 
+            const $img = $ref.find("img").first();
+            $ref.data("stored-title", $img.attr("title") || "");
+            $img.removeAttr("title");
+
             this.$zoomBlock.attr("status", "loading");
 
             // Calculate preview width and height
@@ -223,8 +227,13 @@ export class HoverZoom extends RE6Module {
             $(document).trigger(e);
         });
 
-        HoverZoom.on("zoom.stop", () => {
+        HoverZoom.on("zoom.stop", (event, data) => {
             $(document).off("mousemove.re621.zoom");
+
+            const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}]`).first();
+
+            const $img = $ref.find("img").first();
+            if ($ref.data("stored-title")) $img.attr("title", $ref.data("stored-title"));
 
             // Reset the preview window
             this.$zoomBlock
