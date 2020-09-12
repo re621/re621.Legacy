@@ -112,10 +112,10 @@ export class CleanSlate {
 
         let iterations = 0;
         return new Promise((resolve) => {
-            new MutationObserver(function () {
+
+            const observer = new MutationObserver(() => {
 
                 // console.log("iteration", iterations);
-
                 for (const [selector, action] of processed.entries()) {
                     if ($(selector).length == 0) continue;
                     // console.log("found [" + selector + "]");
@@ -125,13 +125,21 @@ export class CleanSlate {
 
                 iterations++;
                 if (processed.size == 0) {
-                    this.disconnect();
+                    observer.disconnect();
                     resolve(true);
                 } else if (iterations > 100) {
-                    this.disconnect();
+                    observer.disconnect();
                     resolve(false);
                 }
-            }).observe(document, { childList: true, subtree: true });
+            });
+            observer.observe(document, { childList: true, subtree: true });
+
+            $(() => {
+                observer.disconnect();
+                for (const action of processed.values())
+                    action();
+                resolve(false);
+            })
         });
     }
 
