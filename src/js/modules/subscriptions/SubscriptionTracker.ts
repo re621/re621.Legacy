@@ -114,7 +114,11 @@ export class UpdateCache {
 
     /** Refreshes update cache from stored data */
     public async load(): Promise<boolean> {
-        this.data = await XM.Storage.getValue(this.getStorageTag(), {});
+        try { this.data = JSON.parse(Util.LS.getItem(this.getStorageTag())); }
+        catch (error) {
+            this.data = {};
+            this.save();
+        }
         this.updateIndex();
         return Promise.resolve(true);
     }
@@ -137,7 +141,8 @@ export class UpdateCache {
 
     /** Saves update cache to storage */
     public async save(): Promise<boolean> {
-        return XM.Storage.setValue(this.getStorageTag(), this.data);
+        Util.LS.setItem(this.getStorageTag(), JSON.stringify(this.data));
+        return XM.Storage.setValue(this.getStorageTag(), Util.Time.now());
     }
 
     /** Irreversibly clears the update cache */
