@@ -9,10 +9,6 @@ import { BetterSearch } from "../search/BetterSearch";
 
 export class MassDownloader extends RE6Module {
 
-    // Requesting multiple post ID from the API is limited to a specific number.
-    // What that number is... nobody knows. It is currently presumed to be ~100.
-    private static chunkSize = 100;
-
     // Maximum Blob size. This value differs depending on the browser.
     // Different sources cite different numbers. For now, we'll go with 800MB.
     private static maxBlobSize = 1024 * 1024 * 800;
@@ -36,7 +32,7 @@ export class MassDownloader extends RE6Module {
     private infoFile: JQuery<HTMLElement>;
 
     public constructor() {
-        super(PageDefintion.search);
+        super(PageDefintion.search, true, [BetterSearch]);
     }
 
     /**

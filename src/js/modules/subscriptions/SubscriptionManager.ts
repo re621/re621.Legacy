@@ -14,7 +14,7 @@ import { SubscriptionTracker, UpdateContent } from "./SubscriptionTracker";
 export class SubscriptionManager extends RE6Module {
 
     /** Used to invalidate cache if the format changes */
-    private static cacheVersion = 1;
+    private static cacheVersion = 2;
 
     /** Used to block manual updates while an interval update is in progress */
     private static updateInProgress = false;
