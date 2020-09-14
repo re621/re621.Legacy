@@ -2,6 +2,8 @@ import { isNumeric } from "jquery";
 import { Danbooru } from "../../components/api/Danbooru";
 import { E621 } from "../../components/api/E621";
 import { APIPost, PostRating } from "../../components/api/responses/APIPost";
+import { XM } from "../../components/api/XM";
+import { Blacklist } from "../../components/data/Blacklist";
 import { Page, PageDefintion } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { Post } from "../../components/post/Post";
@@ -286,6 +288,10 @@ export class BetterSearch extends RE6Module {
             .html(`<span><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></span>`)
             .appendTo(this.$wrapper);
 
+        // Search Modes
+        $(`<option value="open">Fullscreen</option>`).insertAfter("#mode-box-mode option[value=edit]");
+        $(`<option value="blacklist">Blacklist</option>`).insertAfter("#mode-box-mode option[value=remove-fav]");
+
         // Quick Edit Form
         this.$quickEdit = $("<form>")
             .attr({
@@ -470,6 +476,14 @@ export class BetterSearch extends RE6Module {
                                 $farticle.remove();
                             }, 500);
                         })[0].click();
+                    break;
+                }
+                case "open": {
+                    XM.Util.openInTab(post.file.original, false);
+                    break;
+                }
+                case "blacklist": {
+                    Blacklist.toggleBlacklistTag("id:" + post.id);
                     break;
                 }
                 case "vote-up": {

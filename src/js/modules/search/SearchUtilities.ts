@@ -13,8 +13,10 @@ export class SearchUtilities extends RE6Module {
 
             { keys: "hotkeySwitchModeView", fnct: this.switchModeView },
             { keys: "hotkeySwitchModeEdit", fnct: this.switchModeEdit },
+            { keys: "hotkeySwitchModeOpen", fnct: this.switchModeOpen },
             { keys: "hotkeySwitchModeAddFav", fnct: this.switchModeAddFav },
             { keys: "hotkeySwitchModeRemFav", fnct: this.switchModeRemFav },
+            { keys: "hotkeySwitchModeBlacklist", fnct: this.switchModeBlacklist },
             { keys: "hotkeySwitchModeAddSet", fnct: this.switchModeAddSet },
             { keys: "hotkeySwitchModeRemSet", fnct: this.switchModeRemSet },
         );
@@ -40,10 +42,12 @@ export class SearchUtilities extends RE6Module {
 
             hotkeySwitchModeView: "",
             hotkeySwitchModeEdit: "",
+            hotkeySwitchModeOpen: "",
             hotkeySwitchModeAddFav: "",
             hotkeySwitchModeRemFav: "",
             hotkeySwitchModeAddSet: "",
             hotkeySwitchModeRemSet: "",
+            hotkeySwitchModeBlacklist: "",
         }
     }
 
@@ -150,8 +154,10 @@ export class SearchUtilities extends RE6Module {
 
     private switchModeView(): void { SearchUtilities.switchMode("view"); }
     private switchModeEdit(): void { SearchUtilities.switchMode("edit"); }
+    private switchModeOpen(): void { SearchUtilities.switchMode("open"); }
     private switchModeAddFav(): void { SearchUtilities.switchMode("add-fav"); }
     private switchModeRemFav(): void { SearchUtilities.switchMode("remove-fav"); }
+    private switchModeBlacklist(): void { SearchUtilities.switchMode("blacklist"); }
     private switchModeAddSet(): void {
         SearchUtilities.switchMode("add-to-set");
         $("#set-id").focus();
