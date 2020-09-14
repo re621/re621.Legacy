@@ -93,8 +93,8 @@ export class PostSuggester extends RE6Module {
         let result: APIPost[];
         for (let i = 1; i <= PostSuggester.maxPages; i++) {
             // Fetching data from the API
-            this.status.html(`Analyzing favorites [ ${i} / ${PostSuggester.maxPages} ]`);
-            result = await E621.Posts.get<APIPost>({ tags: "fav:" + User.getUsername(), page: i, limit: 320 }, 500); // TODO Use the actual username
+            this.status.html(`Analyzing favorites [ page ${i} ]`);
+            result = await E621.Favorites.get<APIPost>({ "user_id": User.getUserID(), page: i }, 500);
             result.forEach((post) => {
                 APIPost.getTags(post).forEach((tag) => {
                     if (data[tag]) data[tag] = data[tag] + 1;
@@ -102,7 +102,7 @@ export class PostSuggester extends RE6Module {
                 });
             });
 
-            if (result.length !== 320) break;
+            if (result.length !== 100) break;
         }
 
         this.status.html("Lookup complete");
