@@ -1,5 +1,5 @@
 import { DownloadQueue } from "../../components/api/DownloadQueue";
-import { PageDefintion } from "../../components/data/Page";
+import { PageDefinition } from "../../components/data/Page";
 import { Post, PostData } from "../../components/post/Post";
 import { PostSet, PostSortType } from "../../components/post/PostSet";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -32,7 +32,7 @@ export class MassDownloader extends RE6Module {
     private infoFile: JQuery<HTMLElement>;
 
     public constructor() {
-        super(PageDefintion.search, true, [BetterSearch]);
+        super(PageDefinition.search, true, [BetterSearch]);
     }
 
     /**

@@ -1,12 +1,12 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { Blacklist } from "../../components/data/Blacklist";
-import { Page, PageDefintion } from "../../components/data/Page";
+import { Page, PageDefinition } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 export class SearchUtilities extends RE6Module {
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.post, PageDefintion.favorites]);
+        super([PageDefinition.search, PageDefinition.post, PageDefinition.favorites]);
         this.registerHotkeys(
             { keys: "hotkeyFocusSearch", fnct: this.focusSearchbar },
             { keys: "hotkeyRandomPost", fnct: this.randomPost },
@@ -55,31 +55,31 @@ export class SearchUtilities extends RE6Module {
         super.create();
 
         // Auto-focus on the searchbar
-        if (Page.matches(PageDefintion.search)) {
+        if (Page.matches(PageDefinition.search)) {
             const searchbox = $("section#search-box input");
             if (searchbox.val() == "") searchbox.focus();
         }
 
         // Remove the query string on posts
-        if (Page.matches(PageDefintion.post)) {
+        if (Page.matches(PageDefinition.post)) {
             Page.removeQueryParameter("q");
         }
 
         // Replaces the tag count estimate with the real number
-        if (Page.matches([PageDefintion.search, PageDefintion.post])) {
+        if (Page.matches([PageDefinition.search, PageDefinition.post])) {
             this.improveTagCount(this.fetchSettings("improveTagCount"));
             this.shortenTagNames(this.fetchSettings("shortenTagNames"));
             this.hidePlusMinusIcons(this.fetchSettings("hidePlusMinusIcons"));
         }
 
         // Restore the collapsed categories
-        if (this.fetchSettings("collapseCategories") === true && Page.matches(PageDefintion.post)) {
+        if (this.fetchSettings("collapseCategories") === true && Page.matches(PageDefinition.post)) {
             this.collapseTagCategories();
         }
 
         // Append custom string to searches
         const persistentTags = this.fetchSettings<string>("persistentTags").trim().toLowerCase();
-        if (persistentTags !== "" && Page.matches([PageDefintion.search, PageDefintion.post, PageDefintion.favorites])) {
+        if (persistentTags !== "" && Page.matches([PageDefinition.search, PageDefinition.post, PageDefinition.favorites])) {
             const $tagInput = $("input#tags");
             $tagInput.val(($tagInput.val() + "").replace(persistentTags, ""));
 

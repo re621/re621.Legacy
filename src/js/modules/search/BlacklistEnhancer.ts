@@ -1,6 +1,6 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { Blacklist } from "../../components/data/Blacklist";
-import { PageDefintion } from "../../components/data/Page";
+import { PageDefinition } from "../../components/data/Page";
 import { Post } from "../../components/post/Post";
 import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module } from "../../components/RE6Module";
@@ -19,7 +19,7 @@ export class BlacklistEnhancer extends RE6Module {
     private static $toggle: JQuery<HTMLElement>;                // toggle switch for all blacklists
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.favorites], true, [BetterSearch]);
+        super([PageDefinition.search, PageDefinition.favorites], true, [BetterSearch]);
     }
 
     public create(): void {

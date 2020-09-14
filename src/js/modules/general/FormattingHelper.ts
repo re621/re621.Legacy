@@ -1,6 +1,6 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { E621 } from "../../components/api/E621";
-import { Page, PageDefintion } from "../../components/data/Page";
+import { Page, PageDefinition } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
@@ -101,7 +101,7 @@ export class FormattingManager extends RE6Module {
         super.create();
 
         /** Wrap the post description textareas in FormattingHelper compatible tags */
-        if (Page.matches(PageDefintion.upload) || Page.matches(PageDefintion.post)) {
+        if (Page.matches(PageDefinition.upload) || Page.matches(PageDefinition.post)) {
             const $textarea = $("#post_description");
 
             $("<div>")
@@ -112,7 +112,7 @@ export class FormattingManager extends RE6Module {
         }
 
         console.log("running", Page.getURL());
-        if (Page.matches(PageDefintion.settings)) {
+        if (Page.matches(PageDefinition.settings)) {
             console.log("Hello");
 
             const $textareas = $("#user_profile_about, #user_profile_artinfo");

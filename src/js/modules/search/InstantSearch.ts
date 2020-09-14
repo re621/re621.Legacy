@@ -1,4 +1,4 @@
-import { PageDefintion } from "../../components/data/Page";
+import { PageDefinition } from "../../components/data/Page";
 import { Post, PostData } from "../../components/post/Post";
 import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -16,7 +16,7 @@ export class InstantSearch extends RE6Module {
     private $searchbox: JQuery<HTMLElement>;
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.favorites], true, [BetterSearch]);
+        super([PageDefinition.search, PageDefinition.favorites], true, [BetterSearch]);
     }
 
     /**

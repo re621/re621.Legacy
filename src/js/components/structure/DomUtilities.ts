@@ -1,4 +1,4 @@
-import { Page, PageDefintion } from "../data/Page";
+import { Page, PageDefinition } from "../data/Page";
 import { Util } from "../utility/Util";
 
 declare const GM;
@@ -15,7 +15,7 @@ export class DomUtilities {
     public static createSearchbox(): void {
 
         // If favorites are private, the sidebar does not exist
-        if (Page.matches([PageDefintion.search, PageDefintion.post, PageDefintion.favorites]) && $("aside#sidebar").length > 0) {
+        if (Page.matches([PageDefinition.search, PageDefinition.post, PageDefinition.favorites]) && $("aside#sidebar").length > 0) {
             const $searchContainer = $("<div>").attr("id", "re621-search").prependTo("aside#sidebar");
             $("aside#sidebar section#search-box").appendTo($searchContainer);
             $("aside#sidebar section#mode-box").appendTo($searchContainer);

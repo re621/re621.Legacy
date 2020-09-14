@@ -5,7 +5,7 @@
 
 // Load Modules
 import { Danbooru } from "./components/api/Danbooru";
-import { Page, PageDefintion } from "./components/data/Page";
+import { Page, PageDefinition } from "./components/data/Page";
 import { ModuleController } from "./components/ModuleController";
 import { CleanSlate } from "./components/structure/CleanSlate";
 import { DomUtilities } from "./components/structure/DomUtilities";
@@ -89,7 +89,7 @@ const subscriptions = [
 console.log(`${window["re621"]["name"]} v.${window["re621"]["version"]} build ${window["re621"]["build"]}`);
 
 // Reroute the title page before everything else loads
-if (Page.matches(PageDefintion.title)) {
+if (Page.matches(PageDefinition.title)) {
     const page = Util.LS.getItem("re621.mainpage");
     if (page && page !== "default") window.location.replace("/" + page);
 }

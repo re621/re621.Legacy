@@ -1,4 +1,4 @@
-import { Page, PageDefintion } from "../../components/data/Page";
+import { Page, PageDefinition } from "../../components/data/Page";
 import { Post } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
@@ -10,7 +10,7 @@ export class TitleCustomizer extends RE6Module {
     private post: Post;
 
     public constructor() {
-        super(PageDefintion.post, true);
+        super(PageDefinition.post, true);
     }
 
     /**

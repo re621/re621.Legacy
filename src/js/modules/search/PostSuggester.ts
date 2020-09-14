@@ -1,6 +1,6 @@
 import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
-import { PageDefintion } from "../../components/data/Page";
+import { PageDefinition } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Modal } from "../../components/structure/Modal";
@@ -37,7 +37,7 @@ export class PostSuggester extends RE6Module {
     private content: JQuery<HTMLElement>;
 
     public constructor() {
-        super(PageDefintion.search);
+        super(PageDefinition.search);
     }
 
     protected getDefaultSettings(): Settings {

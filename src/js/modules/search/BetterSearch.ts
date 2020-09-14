@@ -4,7 +4,7 @@ import { E621 } from "../../components/api/E621";
 import { APIPost, PostRating } from "../../components/api/responses/APIPost";
 import { XM } from "../../components/api/XM";
 import { Blacklist } from "../../components/data/Blacklist";
-import { Page, PageDefintion } from "../../components/data/Page";
+import { Page, PageDefinition } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { Post } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
@@ -39,7 +39,7 @@ export class BetterSearch extends RE6Module {
     private loadingPosts: boolean;              // True value indicates that infinite scroll is loading posts
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.favorites], true, [BlacklistEnhancer]);
+        super([PageDefinition.search, PageDefinition.favorites], true, [BlacklistEnhancer]);
     }
 
     protected getDefaultSettings(): Settings {
@@ -620,7 +620,7 @@ export class BetterSearch extends RE6Module {
 
     /** Retrieves post data from an appropriate API endpoint */
     private async fetchPosts(page?: number | string): Promise<APIPost[]> {
-        if (Page.matches(PageDefintion.favorites)) {
+        if (Page.matches(PageDefinition.favorites)) {
             const userID = Page.getQueryParameter("user_id") || User.getUserID();
             return E621.Favorites.get<APIPost>({ user_id: userID, page: page ? page : this.queryPage, limit: this.queryLimit }, 500)
         }

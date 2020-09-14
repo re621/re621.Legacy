@@ -1,7 +1,7 @@
 import { E621 } from "../../components/api/E621";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
-import { Page, PageDefintion } from "../../components/data/Page";
+import { Page, PageDefinition } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
@@ -53,18 +53,18 @@ export class Miscellaneous extends RE6Module {
         super.create();
 
         // Enhanced quoting button
-        if (Page.matches([PageDefintion.post, PageDefintion.forum])) {
+        if (Page.matches([PageDefinition.post, PageDefinition.forum])) {
             this.handleQuoteButton();
         }
 
         // Sticky elements
-        if (Page.matches([PageDefintion.search, PageDefintion.post, PageDefintion.favorites])) {
+        if (Page.matches([PageDefinition.search, PageDefinition.post, PageDefinition.favorites])) {
             this.createStickySearchbox(this.fetchSettings("stickySearchbox"));
         }
 
         this.createStickyHeader(this.fetchSettings("stickyHeader"));
 
-        if (Page.matches([PageDefintion.search, PageDefintion.favorites])) {
+        if (Page.matches([PageDefinition.search, PageDefinition.favorites])) {
             this.createStickyEditBox(this.fetchSettings("stickyEditBox"));
         }
 
@@ -72,13 +72,13 @@ export class Miscellaneous extends RE6Module {
         this.handleAvatarClick(this.fetchSettings("avatarClick"));
 
         // Fix the forum title
-        if (this.fetchSettings("fixForumTitle") && Page.matches(PageDefintion.forum)) {
+        if (this.fetchSettings("fixForumTitle") && Page.matches(PageDefinition.forum)) {
             const title = /^(?:Forum - )(.+)(?: - (e621|e926))$/g.exec(document.title);
             if (title) document.title = `${title[1]} - Forum - ${title[2]}`;
         }
 
         // Add a character counter to the blacklist input in the settings
-        if (Page.matches(PageDefintion.settings)) {
+        if (Page.matches(PageDefinition.settings)) {
             this.modifyBlacklistForm();
         }
 
@@ -92,15 +92,15 @@ export class Miscellaneous extends RE6Module {
 
     /** Emulates the clicking on "New Comment" link */
     private openNewComment(): void {
-        if (Page.matches(PageDefintion.post)) {
+        if (Page.matches(PageDefinition.post)) {
             $("menu#post-sections > li > a[href$=comments]")[0].click();
             $("a.expand-comment-response")[0].click();
-        } else if (Page.matches(PageDefintion.forum)) { $("a#new-response-link")[0].click(); }
+        } else if (Page.matches(PageDefinition.forum)) { $("a#new-response-link")[0].click(); }
     }
 
     /** Emulated clicking on "Edit" tab */
     private openEditTab(): void {
-        if (Page.matches(PageDefintion.post)) {
+        if (Page.matches(PageDefinition.post)) {
             window.setTimeout(() => { $("#post-edit-link")[0].click(); }, 100);
         }
     }
@@ -133,7 +133,7 @@ export class Miscellaneous extends RE6Module {
      * Handles the "Reply" button functionality
      */
     private handleQuoteButton(): void {
-        if (Page.matches(PageDefintion.forum)) {
+        if (Page.matches(PageDefinition.forum)) {
             $(".forum-post-reply-link").each(function (index, element) {
                 const $newLink = $("<a>")
                     .attr("href", "#")
@@ -147,7 +147,7 @@ export class Miscellaneous extends RE6Module {
                 const $parent = $(event.target).parents("article.forum-post");
                 this.quote($parent, "forum", $parent.data("forum-post-id"), $("#forum_post_body"), $("a#new-response-link"));
             });
-        } else if (Page.matches(PageDefintion.post)) {
+        } else if (Page.matches(PageDefinition.post)) {
             $(".comment-reply-link").each(function (index, element) {
                 const $newLink = $("<a>")
                     .attr("href", "#")

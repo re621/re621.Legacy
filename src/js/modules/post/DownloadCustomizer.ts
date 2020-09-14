@@ -1,5 +1,5 @@
 import { XM } from "../../components/api/XM";
-import { PageDefintion } from "../../components/data/Page";
+import { PageDefinition } from "../../components/data/Page";
 import { Post } from "../../components/post/Post";
 import { PostParts } from "../../components/post/PostParts";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -12,7 +12,7 @@ export class DownloadCustomizer extends RE6Module {
     private post: Post;
 
     public constructor() {
-        super(PageDefintion.post, true);
+        super(PageDefinition.post, true);
     }
 
     /**

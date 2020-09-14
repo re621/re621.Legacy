@@ -1,4 +1,4 @@
-import { Page, PageDefintion } from "../../components/data/Page";
+import { Page, PageDefinition } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { Post, PostData } from "../../components/post/Post";
 import { PostFilter } from "../../components/post/PostFilter";
@@ -10,7 +10,7 @@ export class CustomFlagger extends RE6Module {
     private static filters: Map<string, FilterPair>;
 
     public constructor() {
-        super([PageDefintion.post, PageDefintion.search, PageDefintion.favorites, PageDefintion.popular], true, [BetterSearch]);
+        super([PageDefinition.post, PageDefinition.search, PageDefinition.favorites, PageDefinition.popular], true, [BetterSearch]);
     }
 
     protected getDefaultSettings(): Settings {
@@ -25,7 +25,7 @@ export class CustomFlagger extends RE6Module {
     }
 
     public create(): void {
-        if (Page.matches(PageDefintion.post))
+        if (Page.matches(PageDefinition.post))
             this.createPostPage();
     }
 

@@ -1,4 +1,4 @@
-import { PageDefintion } from "../../components/data/Page";
+import { PageDefinition } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
@@ -8,7 +8,7 @@ export class PoolNavigator extends RE6Module {
     private navbars: PostNav[] = [];
 
     public constructor() {
-        super(PageDefintion.post);
+        super(PageDefinition.post);
         this.registerHotkeys(
             { keys: "hotkeyCycle", fnct: this.cycleNavbars },
             { keys: "hotkeyNext", fnct: this.triggerNextPost },

@@ -1,7 +1,7 @@
 import { DownloadQueue } from "../../components/api/DownloadQueue";
 import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
-import { Page, PageDefintion } from "../../components/data/Page";
+import { Page, PageDefinition } from "../../components/data/Page";
 import { PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Debug } from "../../components/utility/Debug";
@@ -35,7 +35,7 @@ export class FavDownloader extends RE6Module {
     private infoFile: JQuery<HTMLElement>;
 
     public constructor() {
-        super(PageDefintion.favorites);
+        super(PageDefinition.favorites);
     }
 
     /**
