@@ -714,8 +714,6 @@ export class SettingsController extends RE6Module {
                 // Miscellaneous
                 Form.accordionTab({ name: "misc", label: "Other", columns: 3, width: 3 }, [
 
-                    Form.hr(3),
-
                     Form.text("<b>Persistent Tags</b>"),
                     Form.input(
                         {
