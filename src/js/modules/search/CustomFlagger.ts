@@ -85,7 +85,7 @@ export class CustomFlagger extends RE6Module {
         const post = Post.getViewingPost();
         CustomFlagger.addPost(post);
 
-        const flagContainer = $("<div>").insertAfter("div.input#tags-container");
+        const flagContainer = $("<div>").insertBefore("div.input#tags-container");
         let activeFlags = 0;
 
         // Fill in the filters and add flags to matching ones
