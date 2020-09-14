@@ -27,6 +27,14 @@ div.guest-warning {
     z-index: 10001;
 }
 
+// Fix edit page styling
+div#c-users div#a-edit .active {
+    color: unset;
+}
+#basic-settings-section .dtext-previewable {
+    width: 80%;
+}
+
 // Gridify the header
 header#top {
     h1 {

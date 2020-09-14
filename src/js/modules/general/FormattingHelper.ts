@@ -102,13 +102,28 @@ export class FormattingManager extends RE6Module {
 
         /** Wrap the post description textareas in FormattingHelper compatible tags */
         if (Page.matches(PageDefintion.upload) || Page.matches(PageDefintion.post)) {
-            const $textarea = $("textarea#post_description");
+            const $textarea = $("#post_description");
 
             $("<div>")
                 .addClass("dtext-previewable")
                 .append($(`<div class="dtext-preview">`))
                 .insertBefore($textarea)
                 .append($textarea);
+        }
+
+        console.log("running", Page.getURL());
+        if (Page.matches(PageDefintion.settings)) {
+            console.log("Hello");
+
+            const $textareas = $("#user_profile_about, #user_profile_artinfo");
+            for (const input of $textareas) {
+                const $input = $(input);
+                $("<div>")
+                    .addClass("dtext-previewable")
+                    .append($(`<div class="dtext-preview">`))
+                    .insertBefore($input)
+                    .append($input);
+            }
         }
 
         $("div.dtext-previewable:has(textarea)").each((i, element) => {
