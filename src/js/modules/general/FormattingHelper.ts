@@ -1,6 +1,6 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { E621 } from "../../components/api/E621";
-import { Page, PageDefintion } from "../../components/data/Page";
+import { Page, PageDefinition } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
@@ -101,14 +101,29 @@ export class FormattingManager extends RE6Module {
         super.create();
 
         /** Wrap the post description textareas in FormattingHelper compatible tags */
-        if (Page.matches(PageDefintion.upload) || Page.matches(PageDefintion.post)) {
-            const $textarea = $("textarea#post_description");
+        if (Page.matches(PageDefinition.upload) || Page.matches(PageDefinition.post)) {
+            const $textarea = $("#post_description");
 
             $("<div>")
                 .addClass("dtext-previewable")
                 .append($(`<div class="dtext-preview">`))
                 .insertBefore($textarea)
                 .append($textarea);
+        }
+
+        console.log("running", Page.getURL());
+        if (Page.matches(PageDefinition.settings)) {
+            console.log("Hello");
+
+            const $textareas = $("#user_profile_about, #user_profile_artinfo");
+            for (const input of $textareas) {
+                const $input = $(input);
+                $("<div>")
+                    .addClass("dtext-previewable")
+                    .append($(`<div class="dtext-preview">`))
+                    .insertBefore($input)
+                    .append($input);
+            }
         }
 
         $("div.dtext-previewable:has(textarea)").each((i, element) => {

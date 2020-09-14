@@ -1,6 +1,6 @@
 import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
-import { PageDefintion } from "../../components/data/Page";
+import { PageDefinition } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Modal } from "../../components/structure/Modal";
@@ -37,7 +37,7 @@ export class PostSuggester extends RE6Module {
     private content: JQuery<HTMLElement>;
 
     public constructor() {
-        super(PageDefintion.search);
+        super(PageDefinition.search);
     }
 
     protected getDefaultSettings(): Settings {
@@ -93,8 +93,8 @@ export class PostSuggester extends RE6Module {
         let result: APIPost[];
         for (let i = 1; i <= PostSuggester.maxPages; i++) {
             // Fetching data from the API
-            this.status.html(`Analyzing favorites [ ${i} / ${PostSuggester.maxPages} ]`);
-            result = await E621.Posts.get<APIPost>({ tags: "fav:" + User.getUsername(), page: i, limit: 320 }, 500); // TODO Use the actual username
+            this.status.html(`Analyzing favorites [ page ${i} ]`);
+            result = await E621.Favorites.get<APIPost>({ "user_id": User.getUserID(), page: i }, 500);
             result.forEach((post) => {
                 APIPost.getTags(post).forEach((tag) => {
                     if (data[tag]) data[tag] = data[tag] + 1;
@@ -102,7 +102,7 @@ export class PostSuggester extends RE6Module {
                 });
             });
 
-            if (result.length !== 320) break;
+            if (result.length !== 100) break;
         }
 
         this.status.html("Lookup complete");
@@ -171,8 +171,12 @@ export class PostSuggester extends RE6Module {
                 const query = [];
                 for (const checkedEl of checkedEls)
                     query.push("~" + encodeURIComponent($(checkedEl).attr("data-tag")))
-                query.push(encodeURIComponent("order:random"));
-                query.push(encodeURIComponent("score:>10"));
+                query.length = Math.min(query.length, 37);
+                query.push(
+                    encodeURIComponent("-fav:" + User.getUsername()),
+                    encodeURIComponent("order:random"),
+                    encodeURIComponent("score:>10"),
+                );
 
                 window.location.href = "/posts?tags=" + query.join("+");
             });

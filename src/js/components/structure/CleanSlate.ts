@@ -1,5 +1,5 @@
 import { XM } from "../api/XM";
-import { Page, PageDefintion } from "../data/Page";
+import { Page, PageDefinition } from "../data/Page";
 import { ErrorHandler } from "../utility/ErrorHandler";
 import { Util } from "../utility/Util";
 import { DomUtilities } from "./DomUtilities";
@@ -80,7 +80,7 @@ export class CleanSlate {
         })
 
         // Clear the existing thumbnails
-        if (Page.matches([PageDefintion.search, PageDefintion.favorites]) && Util.LS.getItem("re621.bs.enabled") === "true") {
+        if (Page.matches([PageDefinition.search, PageDefinition.favorites]) && Util.LS.getItem("re621.bs.enabled") === "true") {
             actions.push({
                 selector: "div.paginator menu",
                 action: () => {

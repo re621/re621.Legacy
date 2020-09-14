@@ -1,5 +1,5 @@
 import { Danbooru } from "../../components/api/Danbooru";
-import { PageDefintion } from "../../components/data/Page";
+import { PageDefinition } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { Post } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
@@ -13,7 +13,7 @@ export class PostViewer extends RE6Module {
     private post: Post;
 
     public constructor() {
-        super(PageDefintion.post, true);
+        super(PageDefinition.post, true);
         this.registerHotkeys(
             { keys: "hotkeyUpvote", fnct: this.triggerUpvote },
             { keys: "hotkeyUpvoteNU", fnct: this.triggerUpvoteNU },

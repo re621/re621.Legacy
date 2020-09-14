@@ -3,7 +3,7 @@ import { APITag } from "../../components/api/responses/APITag";
 import { APITagAlias } from "../../components/api/responses/APITagAlias";
 import { AvoidPosting } from "../../components/cache/AvoidPosting";
 import { TagCache } from "../../components/cache/TagCache";
-import { Page, PageDefintion } from "../../components/data/Page";
+import { Page, PageDefinition } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 
@@ -34,7 +34,7 @@ export class SmartAlias extends RE6Module {
     private static postPageLockout = false;         // Used to avoid calling the API on every post page
 
     public constructor() {
-        super([PageDefintion.upload, PageDefintion.post, PageDefintion.search, PageDefintion.favorites], true);
+        super([PageDefinition.upload, PageDefinition.post, PageDefinition.search, PageDefinition.favorites], true);
     }
 
     protected getDefaultSettings(): Settings {
@@ -67,7 +67,7 @@ export class SmartAlias extends RE6Module {
     public async prepare(): Promise<void> {
         await super.prepare();
 
-        if (!Page.matches(PageDefintion.post)) return;
+        if (!Page.matches(PageDefinition.post)) return;
 
         // Only create an instance once the editing form is enabled
         // This will avoid unnecessary API calls, as well as solve issues with dynamic DOM
@@ -116,11 +116,11 @@ export class SmartAlias extends RE6Module {
         super.create();
 
         // Abort the whole thing if the quick tags form is disabled in settings
-        if (!this.fetchSettings("quickTagsForm") && Page.matches([PageDefintion.search, PageDefintion.favorites]))
+        if (!this.fetchSettings("quickTagsForm") && Page.matches([PageDefinition.search, PageDefinition.favorites]))
             return;
 
         // Abort execution on the post page if it's disabled anyways
-        if (!this.fetchSettings("editTagsForm") && Page.matches(PageDefintion.post))
+        if (!this.fetchSettings("editTagsForm") && Page.matches(PageDefinition.post))
             return;
 
         // Toggle the data-attribute necessary for the compact form
@@ -163,7 +163,7 @@ export class SmartAlias extends RE6Module {
 
             // On search pages, in the editing mode, reload container when the user clicks on a thumbnail
             // Otherwise, the old tags get left behind. Thanks to tag data caching, this should be pretty quick
-            if (Page.matches([PageDefintion.search, PageDefintion.favorites])) {
+            if (Page.matches([PageDefinition.search, PageDefinition.favorites])) {
                 $("article.post-preview").on("click.danbooru", () => {
                     if (mode) this.handleTagInput($textarea, $container, false);
                     else $container.html("");

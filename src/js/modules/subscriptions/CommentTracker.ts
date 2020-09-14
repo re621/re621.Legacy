@@ -1,7 +1,7 @@
 import { E621 } from "../../components/api/E621";
 import { APIComment } from "../../components/api/responses/APIComment";
 import { APIPost } from "../../components/api/responses/APIPost";
-import { Page, PageDefintion } from "../../components/data/Page";
+import { Page, PageDefinition } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -68,7 +68,7 @@ export class CommentTracker extends RE6Module implements SubscriptionTracker {
     }
 
     public getButtonAttachment(): JQuery<HTMLElement> {
-        if (Page.matches(PageDefintion.post)) return $("menu#post-sections").first();
+        if (Page.matches(PageDefinition.post)) return $("menu#post-sections").first();
         else return $();
     }
 

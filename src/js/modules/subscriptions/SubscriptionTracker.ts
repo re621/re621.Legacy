@@ -114,7 +114,7 @@ export class UpdateCache {
 
     /** Refreshes update cache from stored data */
     public async load(): Promise<boolean> {
-        try { this.data = JSON.parse(Util.LS.getItem(this.getStorageTag())); }
+        try { this.data = JSON.parse(Util.LS.getItem(this.getStorageTag()) || "{}"); }
         catch (error) {
             this.data = {};
             this.save();

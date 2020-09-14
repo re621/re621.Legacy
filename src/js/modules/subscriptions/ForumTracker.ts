@@ -1,6 +1,6 @@
 import { E621 } from "../../components/api/E621";
 import { APIForumTopic } from "../../components/api/responses/APIForumTopic";
-import { Page, PageDefintion } from "../../components/data/Page";
+import { Page, PageDefinition } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
@@ -62,7 +62,7 @@ export class ForumTracker extends RE6Module implements SubscriptionTracker {
     }
 
     public getButtonAttachment(): JQuery<HTMLElement> {
-        if (Page.matches(PageDefintion.forumPost)) return $("#c-forum-topics").first();
+        if (Page.matches(PageDefinition.forumPost)) return $("#c-forum-topics").first();
         else return $();
     }
 

@@ -1,7 +1,7 @@
 import { E621 } from "../../components/api/E621";
 import { APIIQDBResponse } from "../../components/api/responses/APIIQDBResponse";
 import { XM } from "../../components/api/XM";
-import { PageDefintion } from "../../components/data/Page";
+import { PageDefinition } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 
@@ -9,7 +9,7 @@ export class UploadUtilities extends RE6Module {
 
 
     public constructor() {
-        super([PageDefintion.upload], true);
+        super([PageDefinition.upload], true);
     }
 
     protected getDefaultSettings(): Settings {

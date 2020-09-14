@@ -19,7 +19,7 @@ form.formatting-helper {
             display: none;
         }
 
-        span.hint {
+        .dtext-previewable + span.hint {
             max-width: unset;
             float: right;
         }

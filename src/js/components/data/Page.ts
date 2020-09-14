@@ -91,7 +91,7 @@ export class Page {
     }
 }
 
-export const PageDefintion = {
+export const PageDefinition = {
     title: /^(\/)?$/,
     search: /^\/posts\/?$/,
     post: /^\/posts\/\d+\/?(show_seq)?$/,
@@ -105,6 +105,6 @@ export const PageDefintion = {
     wiki: /^\/wiki_pages\/[0-9]+/,
     wikiNA: /^\/wiki_pages\/show_or_new.*/,
     artist: /^\/artists\/[0-9]+/,
-    comments: /^\/comments\??.*/g,
-    settings: /^\/users\/\d+\/edit$/g,
+    comments: /^\/comments\??.*/,
+    settings: /^\/users\/\d+\/edit$/,
 };

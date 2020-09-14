@@ -1,20 +1,22 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { Blacklist } from "../../components/data/Blacklist";
-import { Page, PageDefintion } from "../../components/data/Page";
+import { Page, PageDefinition } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 export class SearchUtilities extends RE6Module {
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.post, PageDefintion.favorites]);
+        super([PageDefinition.search, PageDefinition.post, PageDefinition.favorites]);
         this.registerHotkeys(
             { keys: "hotkeyFocusSearch", fnct: this.focusSearchbar },
             { keys: "hotkeyRandomPost", fnct: this.randomPost },
 
             { keys: "hotkeySwitchModeView", fnct: this.switchModeView },
             { keys: "hotkeySwitchModeEdit", fnct: this.switchModeEdit },
+            { keys: "hotkeySwitchModeOpen", fnct: this.switchModeOpen },
             { keys: "hotkeySwitchModeAddFav", fnct: this.switchModeAddFav },
             { keys: "hotkeySwitchModeRemFav", fnct: this.switchModeRemFav },
+            { keys: "hotkeySwitchModeBlacklist", fnct: this.switchModeBlacklist },
             { keys: "hotkeySwitchModeAddSet", fnct: this.switchModeAddSet },
             { keys: "hotkeySwitchModeRemSet", fnct: this.switchModeRemSet },
         );
@@ -40,10 +42,12 @@ export class SearchUtilities extends RE6Module {
 
             hotkeySwitchModeView: "",
             hotkeySwitchModeEdit: "",
+            hotkeySwitchModeOpen: "",
             hotkeySwitchModeAddFav: "",
             hotkeySwitchModeRemFav: "",
             hotkeySwitchModeAddSet: "",
             hotkeySwitchModeRemSet: "",
+            hotkeySwitchModeBlacklist: "",
         }
     }
 
@@ -51,31 +55,31 @@ export class SearchUtilities extends RE6Module {
         super.create();
 
         // Auto-focus on the searchbar
-        if (Page.matches(PageDefintion.search)) {
+        if (Page.matches(PageDefinition.search)) {
             const searchbox = $("section#search-box input");
             if (searchbox.val() == "") searchbox.focus();
         }
 
         // Remove the query string on posts
-        if (Page.matches(PageDefintion.post)) {
+        if (Page.matches(PageDefinition.post)) {
             Page.removeQueryParameter("q");
         }
 
         // Replaces the tag count estimate with the real number
-        if (Page.matches([PageDefintion.search, PageDefintion.post])) {
+        if (Page.matches([PageDefinition.search, PageDefinition.post])) {
             this.improveTagCount(this.fetchSettings("improveTagCount"));
             this.shortenTagNames(this.fetchSettings("shortenTagNames"));
             this.hidePlusMinusIcons(this.fetchSettings("hidePlusMinusIcons"));
         }
 
         // Restore the collapsed categories
-        if (this.fetchSettings("collapseCategories") === true && Page.matches(PageDefintion.post)) {
+        if (this.fetchSettings("collapseCategories") === true && Page.matches(PageDefinition.post)) {
             this.collapseTagCategories();
         }
 
         // Append custom string to searches
         const persistentTags = this.fetchSettings<string>("persistentTags").trim().toLowerCase();
-        if (persistentTags !== "" && Page.matches([PageDefintion.search, PageDefintion.post, PageDefintion.favorites])) {
+        if (persistentTags !== "" && Page.matches([PageDefinition.search, PageDefinition.post, PageDefinition.favorites])) {
             const $tagInput = $("input#tags");
             $tagInput.val(($tagInput.val() + "").replace(persistentTags, ""));
 
@@ -150,8 +154,10 @@ export class SearchUtilities extends RE6Module {
 
     private switchModeView(): void { SearchUtilities.switchMode("view"); }
     private switchModeEdit(): void { SearchUtilities.switchMode("edit"); }
+    private switchModeOpen(): void { SearchUtilities.switchMode("open"); }
     private switchModeAddFav(): void { SearchUtilities.switchMode("add-fav"); }
     private switchModeRemFav(): void { SearchUtilities.switchMode("remove-fav"); }
+    private switchModeBlacklist(): void { SearchUtilities.switchMode("blacklist"); }
     private switchModeAddSet(): void {
         SearchUtilities.switchMode("add-to-set");
         $("#set-id").focus();

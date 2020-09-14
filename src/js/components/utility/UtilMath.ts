@@ -8,4 +8,8 @@ export class UtilMath {
         return min <= value && max >= value;
     }
 
+    public static isNumeric(value: string): boolean {
+        return !isNaN(Number(value));
+    }
+
 }

@@ -697,12 +697,22 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3, true),
 
+                    Form.checkbox(
+                        {
+                            value: hoverZoom.fetchSettings("time"),
+                            label: "<b>Relative Time</b><br />Display the post's uplaod time in a relative format",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await hoverZoom.pushSettings("time", data);
+                        }
+                    ),
+                    Form.spacer(3, true),
+
                 ]),
 
                 // Miscellaneous
                 Form.accordionTab({ name: "misc", label: "Other", columns: 3, width: 3 }, [
-
-                    Form.hr(3),
 
                     Form.text("<b>Persistent Tags</b>"),
                     Form.input(
@@ -1386,8 +1396,10 @@ export class SettingsController extends RE6Module {
             Form.header("Search Modes", 3),
             ...createInputs(searchUtilities, "View", "hotkeySwitchModeView"),
             ...createInputs(searchUtilities, "Edit", "hotkeySwitchModeEdit"),
+            ...createInputs(searchUtilities, "Fullscreen", "hotkeySwitchModeOpen"),
             ...createInputs(searchUtilities, "Add Favorite", "hotkeySwitchModeAddFav"),
             ...createInputs(searchUtilities, "Remove Favorite", "hotkeySwitchModeRemFav"),
+            ...createInputs(searchUtilities, "Blacklist", "hotkeySwitchModeBlacklist"),
             ...createInputs(searchUtilities, "Add to Set", "hotkeySwitchModeAddSet"),
             ...createInputs(searchUtilities, "Remove from Set", "hotkeySwitchModeRemSet"),
             Form.hr(3),

@@ -1,5 +1,5 @@
 import { Danbooru } from "../../components/api/Danbooru";
-import { PageDefintion } from "../../components/data/Page";
+import { PageDefinition } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
 import { Post } from "../../components/post/Post";
@@ -16,7 +16,7 @@ export class ImageScaler extends RE6Module {
     private resizeSelector: JQuery<HTMLElement>;
 
     public constructor() {
-        super(PageDefintion.post, true);
+        super(PageDefinition.post, true);
         this.registerHotkeys(
             { keys: "hotkeyScale", fnct: () => { this.setScale(); } },
             { keys: "hotkeyFullscreen", fnct: this.openFullscreen },

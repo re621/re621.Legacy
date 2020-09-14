@@ -3,7 +3,7 @@ import { E621 } from "../../components/api/E621";
 import { APIPool } from "../../components/api/responses/APIPool";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { APIPostGroup } from "../../components/api/responses/APIPostGroup";
-import { Page, PageDefintion } from "../../components/data/Page";
+import { Page, PageDefinition } from "../../components/data/Page";
 import { PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Debug } from "../../components/utility/Debug";
@@ -40,7 +40,7 @@ export class PoolDownloader extends RE6Module {
     private infoFile: JQuery<HTMLElement>;
 
     public constructor() {
-        super([PageDefintion.pool, PageDefintion.set]);
+        super([PageDefinition.pool, PageDefinition.set]);
     }
 
     /**
@@ -59,7 +59,7 @@ export class PoolDownloader extends RE6Module {
     public create(): void {
         super.create();
 
-        const base = Page.matches(PageDefintion.pool) ? "div#c-pools" : "div#c-sets";
+        const base = Page.matches(PageDefinition.pool) ? "div#c-pools" : "div#c-sets";
 
         const container = $(base)
             .addClass("pool-container");
@@ -116,7 +116,7 @@ export class PoolDownloader extends RE6Module {
         let source: Promise<APIPostGroup[]>;
         let poolName = "UnknownPostGroup";
 
-        if (Page.matches(PageDefintion.pool)) source = E621.Pools.get<APIPool>({ "search[id]": Page.getPageID() });
+        if (Page.matches(PageDefinition.pool)) source = E621.Pools.get<APIPool>({ "search[id]": Page.getPageID() });
         else source = E621.Sets.get<APIPool>({ "search[id]": Page.getPageID() });
 
         source.then((poolData) => {
@@ -147,7 +147,7 @@ export class PoolDownloader extends RE6Module {
 
             for (let i = 1; i <= resultPages; i++) {
                 dataQueue.push(new Promise(async (resolve) => {
-                    const result = await E621.Posts.get<APIPost>({ tags: (Page.matches(PageDefintion.pool) ? "pool:" : "set:") + pool.id, page: i, limit: 320 }, 500);
+                    const result = await E621.Posts.get<APIPost>({ tags: (Page.matches(PageDefinition.pool) ? "pool:" : "set:") + pool.id, page: i, limit: 320 }, 500);
                     this.infoFile.html(" &nbsp; &nbsp;request " + (i + 1) + " / " + resultPages);
                     resolve(result);
                 }));

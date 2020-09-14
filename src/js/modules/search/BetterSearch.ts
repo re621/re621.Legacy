@@ -2,7 +2,9 @@ import { isNumeric } from "jquery";
 import { Danbooru } from "../../components/api/Danbooru";
 import { E621 } from "../../components/api/E621";
 import { APIPost, PostRating } from "../../components/api/responses/APIPost";
-import { Page, PageDefintion } from "../../components/data/Page";
+import { XM } from "../../components/api/XM";
+import { Blacklist } from "../../components/data/Blacklist";
+import { Page, PageDefinition } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { Post } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
@@ -37,7 +39,7 @@ export class BetterSearch extends RE6Module {
     private loadingPosts: boolean;              // True value indicates that infinite scroll is loading posts
 
     public constructor() {
-        super([PageDefintion.search, PageDefintion.favorites], true, [BlacklistEnhancer]);
+        super([PageDefinition.search, PageDefinition.favorites], true, [BlacklistEnhancer]);
     }
 
     protected getDefaultSettings(): Settings {
@@ -108,7 +110,7 @@ export class BetterSearch extends RE6Module {
         // Determine if there are more content pages to show
         // If the page number is numeric, that is determined by the last page scraped above
         // If it's in the a- / b- format, there is always more content to show, unless `fetchPosts()` returns false
-        if (isNumeric(this.queryPage)) {
+        if (Util.Math.isNumeric(this.queryPage)) {
             const currentPage = Util.Math.clamp(parseInt(this.queryPage), 1, 750);
             this.queryPage = currentPage + "";
 
@@ -285,6 +287,10 @@ export class BetterSearch extends RE6Module {
         $("<search-loading>")
             .html(`<span><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></span>`)
             .appendTo(this.$wrapper);
+
+        // Search Modes
+        $(`<option value="open">Fullscreen</option>`).insertAfter("#mode-box-mode option[value=edit]");
+        $(`<option value="blacklist">Blacklist</option>`).insertAfter("#mode-box-mode option[value=remove-fav]");
 
         // Quick Edit Form
         this.$quickEdit = $("<form>")
@@ -472,6 +478,14 @@ export class BetterSearch extends RE6Module {
                         })[0].click();
                     break;
                 }
+                case "open": {
+                    XM.Util.openInTab(post.file.original, false);
+                    break;
+                }
+                case "blacklist": {
+                    Blacklist.toggleBlacklistTag("id:" + post.id);
+                    break;
+                }
                 case "vote-up": {
                     const firstVote = post.$ref.attr("vote") == undefined;
 
@@ -606,7 +620,7 @@ export class BetterSearch extends RE6Module {
 
     /** Retrieves post data from an appropriate API endpoint */
     private async fetchPosts(page?: number | string): Promise<APIPost[]> {
-        if (Page.matches(PageDefintion.favorites)) {
+        if (Page.matches(PageDefinition.favorites)) {
             const userID = Page.getQueryParameter("user_id") || User.getUserID();
             return E621.Favorites.get<APIPost>({ user_id: userID, page: page ? page : this.queryPage, limit: this.queryLimit }, 500)
         }
