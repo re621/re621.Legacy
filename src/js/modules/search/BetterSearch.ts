@@ -108,7 +108,7 @@ export class BetterSearch extends RE6Module {
         // Determine if there are more content pages to show
         // If the page number is numeric, that is determined by the last page scraped above
         // If it's in the a- / b- format, there is always more content to show, unless `fetchPosts()` returns false
-        if (isNumeric(this.queryPage)) {
+        if (Util.Math.isNumeric(this.queryPage)) {
             const currentPage = Util.Math.clamp(parseInt(this.queryPage), 1, 750);
             this.queryPage = currentPage + "";
 
