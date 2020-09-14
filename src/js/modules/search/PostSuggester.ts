@@ -171,8 +171,12 @@ export class PostSuggester extends RE6Module {
                 const query = [];
                 for (const checkedEl of checkedEls)
                     query.push("~" + encodeURIComponent($(checkedEl).attr("data-tag")))
-                query.push(encodeURIComponent("order:random"));
-                query.push(encodeURIComponent("score:>10"));
+                query.length = Math.min(query.length, 37);
+                query.push(
+                    encodeURIComponent("-fav:" + User.getUsername()),
+                    encodeURIComponent("order:random"),
+                    encodeURIComponent("score:>10"),
+                );
 
                 window.location.href = "/posts?tags=" + query.join("+");
             });
