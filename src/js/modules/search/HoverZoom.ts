@@ -27,6 +27,7 @@ export class HoverZoom extends RE6Module {
 
             mode: ImageZoomMode.OnShift,                // How should the hover zoom be triggered
             tags: false,                                // Show a list of tags under the zoomed-in image
+            time: true,                                 // If true, shows the timestamp in "x ago" format
         };
     }
 
@@ -176,7 +177,7 @@ export class HoverZoom extends RE6Module {
                 `${post.img.width} x ${post.img.height}` +
                 (post.file.size > 0 ? `, ${Util.formatBytes(post.file.size)}` : "") +
                 ` | <span class="post-info-rating rating-${post.rating}">${post.rating}</span>` +
-                (post.date.raw !== "0" ? ` | ${post.date.ago}` : "")
+                (post.date.raw !== "0" ? ` | ${this.fetchSettings("time") ? post.date.ago : Util.Time.format(post.date.raw)}` : "")
             );
 
             // Append the tags block

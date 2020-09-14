@@ -697,6 +697,18 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3, true),
 
+                    Form.checkbox(
+                        {
+                            value: hoverZoom.fetchSettings("time"),
+                            label: "<b>Relative Time</b><br />Display the post's uplaod time in a relative format",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await hoverZoom.pushSettings("time", data);
+                        }
+                    ),
+                    Form.spacer(3, true),
+
                 ]),
 
                 // Miscellaneous
