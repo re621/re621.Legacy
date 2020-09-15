@@ -700,7 +700,7 @@ export class SettingsController extends RE6Module {
                     Form.checkbox(
                         {
                             value: hoverZoom.fetchSettings("time"),
-                            label: "<b>Relative Time</b><br />Display the post's uplaod time in a relative format",
+                            label: "<b>Relative Time</b><br />Display the post's upload time in a relative format",
                             width: 3,
                         },
                         async (data) => {
