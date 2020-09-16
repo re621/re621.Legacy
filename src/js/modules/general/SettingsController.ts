@@ -1419,13 +1419,12 @@ export class SettingsController extends RE6Module {
 
             ...createInputs(this, "Open Settings", "hotkeyOpenSettings"),
             ...createInputs(subscriptionManager, "Open Notifications", "hotkeyOpenNotifications"),
-            /*
             Form.hr(3),
 
             // Other
             Form.header("Miscellaneous", 3),
-            ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
-            */
+            ...createInputs(miscellaneous, "Random Set Post", "hotkeyRandomSetPost"),
+            // ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
         ]);
     }
 
