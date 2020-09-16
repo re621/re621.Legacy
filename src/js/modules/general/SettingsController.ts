@@ -700,7 +700,7 @@ export class SettingsController extends RE6Module {
                     Form.checkbox(
                         {
                             value: hoverZoom.fetchSettings("time"),
-                            label: "<b>Relative Time</b><br />Display the post's uplaod time in a relative format",
+                            label: "<b>Relative Time</b><br />Display the post's upload time in a relative format",
                             width: 3,
                         },
                         async (data) => {
@@ -1389,6 +1389,7 @@ export class SettingsController extends RE6Module {
             ...createInputs(miscellaneous, "Edit Post", "hotkeyEditPost"),
             ...createInputs(postViewer, "Toggle Notes", "hotkeyHideNotes"),
             ...createInputs(postViewer, "Edit Notes", "hotkeyNewNote"),
+            ...createInputs(postViewer, "Post History", "hotkeyOpenHistory"),
             ...createInputs(miscellaneous, "Toggle Blacklist", "hotkeyToggleBlacklist"),
             Form.hr(3),
 
@@ -1418,13 +1419,12 @@ export class SettingsController extends RE6Module {
 
             ...createInputs(this, "Open Settings", "hotkeyOpenSettings"),
             ...createInputs(subscriptionManager, "Open Notifications", "hotkeyOpenNotifications"),
-            /*
             Form.hr(3),
 
             // Other
             Form.header("Miscellaneous", 3),
-            ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
-            */
+            ...createInputs(miscellaneous, "Random Set Post", "hotkeyRandomSetPost"),
+            // ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
         ]);
     }
 

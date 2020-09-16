@@ -1,5 +1,6 @@
 import { E621 } from "../../components/api/E621";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
+import { APIPost } from "../../components/api/responses/APIPost";
 import { XM } from "../../components/api/XM";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
@@ -19,6 +20,7 @@ export class Miscellaneous extends RE6Module {
             { keys: "hotkeyEditPost", fnct: this.openEditTab },
             { keys: "hotkeyToggleBlacklist", fnct: this.toggleBlacklist },
             // { keys: "hotkeySubmit", fnct: this.handleSubmitForm, element: $("body"), selector: "textarea, input" },
+            { keys: "hotkeyRandomSetPost", fnct: this.randomSetPost },
         );
     }
 
@@ -34,6 +36,8 @@ export class Miscellaneous extends RE6Module {
             hotkeyEditPost: "e",
             hotkeyToggleBlacklist: "",
             hotkeySubmit: "alt+return",
+
+            hotkeyRandomSetPost: "",
 
             stickySearchbox: true,
             stickyHeader: false,
@@ -80,6 +84,11 @@ export class Miscellaneous extends RE6Module {
         // Add a character counter to the blacklist input in the settings
         if (Page.matches(PageDefinition.settings)) {
             this.modifyBlacklistForm();
+        }
+
+        // Minor changes to the set cover page
+        if (Page.matches(PageDefinition.set)) {
+            this.tweakSetPage();
         }
 
         DomUtilities.addSettingsButton({
@@ -272,6 +281,32 @@ export class Miscellaneous extends RE6Module {
 
     private toggleBlacklist(): void {
         $("a#disable-all-blacklists:visible, a#re-enable-all-blacklists:visible").first()[0].click();
+    }
+
+    /** Add a "random post" button to set cover page */
+    private tweakSetPage(): void {
+        const wrapper = $("span.set-viewposts").first();
+        wrapper.find("a").addClass("button btn-success");
+
+        $("<a>")
+            .addClass("button btn-neutral")
+            .html("Random Post")
+            .attr({ "id": "set-random-post" })
+            .on("click", async () => {
+                const shortname = $("div.set-shortname a").first().text();
+
+                const result = await E621.Posts.get<APIPost>({ tags: ["set:" + shortname, "order:random"], limit: 1 });
+                console.log(result);
+                if (result.length == 0) return;
+
+                location.href = "/posts/" + result[0].id + "?q=set:" + shortname;
+            })
+            .appendTo(wrapper);
+    }
+
+    private randomSetPost(): void {
+        if (!Page.matches(PageDefinition.set)) return;
+        $("#set-random-post")[0].click();
     }
 
 }

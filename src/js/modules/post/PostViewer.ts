@@ -37,6 +37,8 @@ export class PostViewer extends RE6Module {
             { keys: "hotkeyAddSetCustom1", fnct: () => { this.addSetCustom("hotkeyAddSetCustom1_data"); } },
             { keys: "hotkeyAddSetCustom2", fnct: () => { this.addSetCustom("hotkeyAddSetCustom2_data"); } },
             { keys: "hotkeyAddSetCustom3", fnct: () => { this.addSetCustom("hotkeyAddSetCustom3_data"); } },
+
+            { keys: "hotkeyOpenHistory", fnct: this.openImageHistory, },
         );
     }
 
@@ -72,6 +74,8 @@ export class PostViewer extends RE6Module {
             hotkeyAddSetCustom2_data: "0",
             hotkeyAddSetCustom3: "",
             hotkeyAddSetCustom3_data: "0",
+
+            hotkeyOpenHistory: "",      // Opens the post history for the current image
 
             upvoteOnFavorite: true,     // add an upvote when adding the post to favorites
             hideNotes: false,           // should the notes be hidden by default
@@ -302,6 +306,11 @@ export class PostViewer extends RE6Module {
     /** Opens the dialog to add the post to the pool */
     private addPool(): void {
         $("a#pool")[0].click();
+    }
+
+    /** Redirects the page to the post history */
+    private openImageHistory(): void {
+        location.href = "/post_versions?search[post_id]=" + Post.getViewingPost().id;
     }
 
 }
