@@ -111,7 +111,6 @@ export class FormattingManager extends RE6Module {
                 .append($textarea);
         }
 
-        console.log("running", Page.getURL());
         if (Page.matches(PageDefinition.settings)) {
             console.log("Hello");
 

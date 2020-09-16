@@ -38,7 +38,7 @@ export class SubscriptionManager extends RE6Module {
     private tabs: JQuery<HTMLElement>;
 
     public constructor() {
-        super();
+        super([], false, true);
         this.registerHotkeys(
             { keys: "hotkeyOpenNotifications", fnct: this.openNotifications },
         );

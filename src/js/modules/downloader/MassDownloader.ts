@@ -32,7 +32,7 @@ export class MassDownloader extends RE6Module {
     private infoFile: JQuery<HTMLElement>;
 
     public constructor() {
-        super(PageDefinition.search, true, [BetterSearch]);
+        super(PageDefinition.search, true, false, [BetterSearch]);
     }
 
     /**

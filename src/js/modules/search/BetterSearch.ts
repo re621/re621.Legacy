@@ -39,7 +39,7 @@ export class BetterSearch extends RE6Module {
     private loadingPosts: boolean;              // True value indicates that infinite scroll is loading posts
 
     public constructor() {
-        super([PageDefinition.search, PageDefinition.favorites], true, [BlacklistEnhancer]);
+        super([PageDefinition.search, PageDefinition.favorites], true, true, [BlacklistEnhancer]);
     }
 
     protected getDefaultSettings(): Settings {
