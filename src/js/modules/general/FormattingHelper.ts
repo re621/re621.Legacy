@@ -111,7 +111,6 @@ export class FormattingManager extends RE6Module {
                 .append($textarea);
         }
 
-        console.log("running", Page.getURL());
         if (Page.matches(PageDefinition.settings)) {
             console.log("Hello");
 
@@ -314,8 +313,8 @@ class FormattingHelper {
             `)
             .appendTo($bar);
 
-        this.$toggleTabs.find("a").click(e => {
-            e.preventDefault();
+        this.$toggleTabs.find("a").on("click", (event) => {
+            event.preventDefault();
             this.toggleEditing();
         });
 
@@ -329,7 +328,7 @@ class FormattingHelper {
             .html("&#x" + "f1de")
             .attr("title", "Settings")
             .appendTo($drawerButtonBox)
-            .click(event => {
+            .on("click", event => {
                 event.preventDefault();
                 this.toggleButtonDrawer();
             });
@@ -405,7 +404,7 @@ class FormattingHelper {
             .append(charCounter)
             .appendTo(this.$container);
 
-        this.$textarea.keyup(() => {
+        this.$textarea.on("keyup", () => {
             charCounter.html((this.$textarea.val() + "").length + " / 50000");
         });
     }
@@ -493,7 +492,7 @@ class FormattingHelper {
             .appendTo(box);
 
         this.$editButtonsModal.registerTrigger({ element: button });
-        button.click(event => {
+        button.on("click", (event) => {
             event.preventDefault();
             if (this.$container.attr("data-drawer") === "false") {
                 this.processFormattingTag(box.attr("data-text"));
@@ -547,6 +546,7 @@ class FormattingHelper {
         } else {
             this.$container.attr("data-editing", "true");
             this.$toggleTabs.find("a").toggleClass("active");
+            this.$textarea.trigger("focus");
         }
     }
 
@@ -613,7 +613,7 @@ class FormattingHelper {
 
             content = content.replace(/%selection%/g, currentText.substring(position.start, position.end));
 
-            this.$textarea.focus();
+            this.$textarea.trigger("focus");
 
             // This is a workaround for a Firefox bug, which existed since 2015
             // Check https://bugzilla.mozilla.org/show_bug.cgi?id=1220696 for more information
@@ -625,7 +625,7 @@ class FormattingHelper {
             this.$textarea.prop("selectionStart", position.start);
             this.$textarea.prop("selectionEnd", position.start + content.length);
 
-            this.$textarea.keyup();
+            this.$textarea.trigger("focus");
         });
     }
 

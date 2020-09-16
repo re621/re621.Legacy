@@ -57,7 +57,7 @@ export class SearchUtilities extends RE6Module {
         // Auto-focus on the searchbar
         if (Page.matches(PageDefinition.search)) {
             const searchbox = $("section#search-box input");
-            if (searchbox.val() == "") searchbox.focus();
+            if (searchbox.val() == "") searchbox.trigger("focus");
         }
 
         // Remove the query string on posts
@@ -144,7 +144,7 @@ export class SearchUtilities extends RE6Module {
     /** Sets the focus on the search bar */
     private focusSearchbar(event): void {
         event.preventDefault();
-        $("section#search-box input").focus();
+        $("section#search-box input").trigger("focus");
     }
 
     /** Switches the location over to a random post */
@@ -160,11 +160,11 @@ export class SearchUtilities extends RE6Module {
     private switchModeBlacklist(): void { SearchUtilities.switchMode("blacklist"); }
     private switchModeAddSet(): void {
         SearchUtilities.switchMode("add-to-set");
-        $("#set-id").focus();
+        $("#set-id").trigger("focus");
     }
     private switchModeRemSet(): void {
         SearchUtilities.switchMode("remove-from-set");
-        $("#set-id").focus();
+        $("#set-id").trigger("focus");
     }
 
     private static switchMode(mode: string): void {
@@ -187,7 +187,7 @@ export class SearchUtilities extends RE6Module {
                     .addClass("blacklist-tag-toggle")
                     .html(`<i class="fas fa-times"></i>`)
                     .prependTo($container)
-                    .click((event) => {
+                    .on("click", (event) => {
                         event.preventDefault();
                         Blacklist.toggleBlacklistTag($container.parent().attr("data-tag"));
                     });

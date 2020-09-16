@@ -16,7 +16,7 @@ export class InstantSearch extends RE6Module {
     private $searchbox: JQuery<HTMLElement>;
 
     public constructor() {
-        super([PageDefinition.search, PageDefinition.favorites], true, [BetterSearch]);
+        super([PageDefinition.search, PageDefinition.favorites], true, false, [BetterSearch]);
     }
 
     /**

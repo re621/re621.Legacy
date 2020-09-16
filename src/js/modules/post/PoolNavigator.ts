@@ -38,7 +38,7 @@ export class PoolNavigator extends RE6Module {
 
         this.buildDOM();
 
-        $("input[type='radio'].post-nav-switch").change((event) => {
+        $("input[type='radio'].post-nav-switch").on("change", (event) => {
             this.activeNav = parseInt($(event.target).val() + "");
         });
 
@@ -52,8 +52,8 @@ export class PoolNavigator extends RE6Module {
 
         if (navbars.length == 0) return;
 
-        if ((active + 1) >= navbars.length) { navbars[0].checkbox.click(); }
-        else { navbars[active + 1].checkbox.click(); }
+        if ((active + 1) >= navbars.length) { navbars[0].checkbox.trigger("click"); }
+        else { navbars[active + 1].checkbox.trigger("click"); }
     }
 
     /** Emulates a click on the "next" button */

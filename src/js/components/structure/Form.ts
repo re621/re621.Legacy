@@ -388,7 +388,7 @@ export class Form implements PreparedStructure {
         }
 
         let copyTimer: number;
-        $($copybutton).click(function () {
+        $($copybutton).on("click", () => {
             XM.Util.setClipboard($input.val());
 
             window.clearTimeout(copyTimer);
@@ -468,7 +468,7 @@ export class Form implements PreparedStructure {
         }
 
         let occupied = false;
-        $($recordbutton).click(function () {
+        $($recordbutton).on("click", () => {
             if (occupied) return;
             occupied = true;
 
@@ -618,7 +618,7 @@ export class Form implements PreparedStructure {
                 .appendTo($selectContainer);
         }
 
-        $selectContainer.find("a").click((event) => {
+        $selectContainer.find("a").on("click", (event) => {
             event.preventDefault();
             $selectContainer.find("a").removeClass("active");
 
@@ -629,14 +629,14 @@ export class Form implements PreparedStructure {
             if (changed) changed($input.val().toString(), $input);
         });
 
-        if (options.value) { $selectContainer.find("a[data-value='" + options.value + "']").first().click(); }
-        else { $selectContainer.find("a").first().click(); }
+        if (options.value) { $selectContainer.find("a[data-value='" + options.value + "']").first().trigger("click"); }
+        else { $selectContainer.find("a").first().trigger("click"); }
 
         // When the field value is set externally, this event needs to be triggered on the text input field.
         // There is probably a better way to do this, but this should work for now.
         $input.on("re621:form:update", () => {
-            if ($input.val() == "") { $selectContainer.find("a").first().click(); }
-            else { $selectContainer.find("a[data-value='" + $input.val() + "']").first().click(); }
+            if ($input.val() == "") { $selectContainer.find("a").first().trigger("click"); }
+            else { $selectContainer.find("a[data-value='" + $input.val() + "']").first().trigger("click"); }
         });
 
         return new FormElement($element, $input, $label);

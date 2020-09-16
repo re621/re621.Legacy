@@ -996,7 +996,7 @@ export class SettingsController extends RE6Module {
                 .val(flag === undefined ? "" : flag.color)
                 .css("border-left-color", flag === undefined ? "transparent" : flag.color)
                 .appendTo(flagContainer)
-                .keyup((event) => {
+                .on("keyup", (event) => {
                     const $target = $(event.target);
                     if (($target.val() + "").match(/^#(?:[0-9a-f]{3}){1,2}$/i)) {
                         $target.css("border-left-color", $target.val() + "");
@@ -1013,7 +1013,7 @@ export class SettingsController extends RE6Module {
             $("<button>")
                 .html(`<i class="far fa-trash-alt"></i>`)
                 .appendTo(flagContainer)
-                .click(() => {
+                .on("click", () => {
                     flagContainer.remove();
                 });
 

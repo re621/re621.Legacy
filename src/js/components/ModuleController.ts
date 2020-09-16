@@ -1,6 +1,8 @@
 import { RE6Module } from "./RE6Module";
+import { CleanSlate } from "./structure/CleanSlate";
 import { Debug } from "./utility/Debug";
 import { ErrorHandler } from "./utility/ErrorHandler";
+import { Util } from "./utility/Util";
 
 export class ModuleController {
 
@@ -29,19 +31,26 @@ export class ModuleController {
         }
 
         for (const instance of this.modules.values()) {
-            try {
-                if (instance.canInitialize()) {
-                    if (instance.isWaitingForDOM()) {
-                        $(() => {
-                            window.setTimeout(() => {
-                                try { instance.create(); }
-                                catch (error) { ErrorHandler.error(instance, error.stack, "init"); }
-                            }, 50);
-                        });
-                    } else instance.create();
+            if (!instance.canInitialize()) {
+                Debug.perfEnd(instance.constructor.name);
+                continue;
+            }
 
-                    activeModules++;
+            try {
+                if (instance.isWaitingForDOM()) {
+                    $(async () => {
+                        await Util.sleep(50);
+                        if (instance.isWaitingForFocus())
+                            await CleanSlate.awaitFocus();
+                        instance.create();
+                    });
+                } else {
+                    if (instance.isWaitingForFocus())
+                        await CleanSlate.awaitFocus();
+                    instance.create();
                 }
+
+                activeModules++;
             } catch (error) { ErrorHandler.error(instance, error.stack, "init"); }
             Debug.perfEnd(instance.constructor.name);
         }

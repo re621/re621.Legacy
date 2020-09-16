@@ -1,5 +1,6 @@
 import { XM } from "../api/XM";
 import { Page, PageDefinition } from "../data/Page";
+import { Debug } from "../utility/Debug";
 import { ErrorHandler } from "../utility/ErrorHandler";
 import { Util } from "../utility/Util";
 import { DomUtilities } from "./DomUtilities";
@@ -152,9 +153,11 @@ export class CleanSlate {
                 resolve(true);
                 return;
             }
+            Debug.log("CleanSlate: waiting for focus");
 
             // Window receives focus
             $(window).one("focus", () => {
+                Debug.log("CleanSlate: received focus");
                 resolve(true);
             });
         });
