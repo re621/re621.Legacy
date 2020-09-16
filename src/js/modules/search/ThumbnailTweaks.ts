@@ -1,6 +1,8 @@
 import { ModuleController } from "../../components/ModuleController";
+import { PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { BetterSearch } from "./BetterSearch";
+import { CustomFlagger } from "./CustomFlagger";
 
 export class ThumbnailTweaks extends RE6Module {
 
@@ -24,6 +26,9 @@ export class ThumbnailTweaks extends RE6Module {
     }
 
     private static modify($article: JQuery<HTMLElement>, ribbonsRel: boolean, ribbonsFlag: boolean): void {
+
+        const post = PostData.fromThumbnail($article);
+        CustomFlagger.addPost(post);
 
         // Sometimes, the image might not be wrapped in a picture tag properly
         // This is most common on comment pages and the like
@@ -83,6 +88,19 @@ export class ThumbnailTweaks extends RE6Module {
         }
 
         if ($ribbons.children().length == 0) $ribbons.remove();
+
+
+        // Custom Flags
+        const $flagBox = $("<post-flags>").appendTo($picture);
+
+        for (const flag of CustomFlagger.getFlags(post)) {
+            $("<span>")
+                .addClass("custom-flag-thumb")
+                .css("--flag-color", flag.color)
+                .attr("title", flag.tags)
+                .html(flag.name)
+                .appendTo($flagBox);
+        }
     }
 
 }
