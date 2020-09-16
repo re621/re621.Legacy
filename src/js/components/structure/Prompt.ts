@@ -20,10 +20,10 @@ export class Prompt extends Modal {
         this.createForm();
         this.addContent(this.$form);
         this.open();
-        this.$input.focus();
+        this.$input.trigger("focus");
 
         this.promise = new Promise((resolve, reject) => {
-            this.$form.submit(event => {
+            this.$form.on("submit", (event) => {
                 event.preventDefault();
                 this.destroy();
                 resolve(this.$input.val());

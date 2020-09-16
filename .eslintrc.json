@@ -18,7 +18,8 @@
         ]
     },
     "plugins": [
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "deprecation"
     ],
     "extends": [
         //    "eslint:recommended",
@@ -89,6 +90,7 @@
         "@typescript-eslint/prefer-namespace-keyword": "error",
         "@typescript-eslint/triple-slash-reference": "error",
         "@typescript-eslint/type-annotation-spacing": "error",
+        "deprecation/deprecation": "warn",
         "no-var": "error",
         "prefer-const": "error",
         "prefer-rest-params": "error",

@@ -14,6 +14,7 @@ export class RE6Module {
     private settingsTag: string;
     private settings: Settings;
     private waitForDOM: boolean;
+    private waitForFocus: boolean;
 
     private enabled: boolean;
     private initialized = false;
@@ -32,7 +33,7 @@ export class RE6Module {
      * @param waitForDOM If true, waits for the page to finish loading before executing `create()`.
      * @param settingsTag Override for the name of the settings variable. Defaults to the class name.
      */
-    public constructor(constraint?: RegExp | RegExp[], waitForDOM = false, dependencies: { new(): RE6Module }[] = [], settingsTag?: string) {
+    public constructor(constraint?: RegExp | RegExp[], waitForDOM = false, waitForFocus = false, dependencies: { new(): RE6Module }[] = [], settingsTag?: string) {
         if (constraint === undefined) this.constraint = [];
         else if (constraint instanceof RegExp) this.constraint.push(constraint);
         else this.constraint = constraint;
@@ -40,6 +41,7 @@ export class RE6Module {
         this.dependencies = dependencies;
 
         this.waitForDOM = waitForDOM;
+        this.waitForFocus = waitForFocus;
 
         if (settingsTag) this.settingsTag = settingsTag;
         else this.settingsTag = this.constructor.name;
@@ -75,6 +77,11 @@ export class RE6Module {
     /** If true, delay module creation until the DOM is ready */
     public isWaitingForDOM(): boolean {
         return this.waitForDOM
+    }
+
+    /** If true, delay module creation until the window is in focus */
+    public isWaitingForFocus(): boolean {
+        return this.waitForFocus;
     }
 
     /**

@@ -1,4 +1,3 @@
-import { isNumeric } from "jquery";
 import { Danbooru } from "../../components/api/Danbooru";
 import { E621 } from "../../components/api/E621";
 import { APIPost, PostRating } from "../../components/api/responses/APIPost";
@@ -39,7 +38,7 @@ export class BetterSearch extends RE6Module {
     private loadingPosts: boolean;              // True value indicates that infinite scroll is loading posts
 
     public constructor() {
-        super([PageDefinition.search, PageDefinition.favorites], true, [BlacklistEnhancer]);
+        super([PageDefinition.search, PageDefinition.favorites], true, true, [BlacklistEnhancer]);
     }
 
     protected getDefaultSettings(): Settings {
@@ -203,7 +202,7 @@ export class BetterSearch extends RE6Module {
 
                 // Preload previous pages
                 // Not available for relative page numbers
-                if (isNumeric(this.queryPage)) {
+                if (Util.Math.isNumeric(this.queryPage)) {
 
                     const currentPage = parseInt(this.queryPage);
                     const firstPage = preloadEnabled
@@ -635,7 +634,7 @@ export class BetterSearch extends RE6Module {
     /** Loads the next page of results */
     private async loadNextPage(): Promise<boolean> {
 
-        this.queryPage = isNumeric(this.queryPage)
+        this.queryPage = Util.Math.isNumeric(this.queryPage)
             ? this.queryPage = (parseInt(this.queryPage) + 1) + ""
             : this.queryPage = "b" + Post.get($("post:last")).id;
 
@@ -668,7 +667,7 @@ export class BetterSearch extends RE6Module {
 
         BetterSearch.trigger("pageload");
 
-        if (isNumeric(this.queryPage))
+        if (Util.Math.isNumeric(this.queryPage))
             return Promise.resolve(parseInt(this.queryPage) < this.lastPage);
         else return Promise.resolve(true);
     }
@@ -748,7 +747,7 @@ export class BetterSearch extends RE6Module {
             .addClass("paginator-numbers")
             .appendTo(this.$paginator);
 
-        if (isNumeric(this.queryPage)) {
+        if (Util.Math.isNumeric(this.queryPage)) {
             const currentPage = parseInt(this.queryPage);
             const pageNum: number[] = [];
 
@@ -781,7 +780,7 @@ export class BetterSearch extends RE6Module {
         function getPrevPageURL(page: string): string {
 
             // Default pagination
-            if (isNumeric(page)) return getPageURL(parseInt(page) - 1);
+            if (Util.Math.isNumeric(page)) return getPageURL(parseInt(page) - 1);
 
             // Relative pagination
             const lookup = $("post:first");
@@ -793,7 +792,7 @@ export class BetterSearch extends RE6Module {
         function getNextPageURL(page: string): string {
 
             // Default pagination
-            if (isNumeric(page)) {
+            if (Util.Math.isNumeric(page)) {
                 const pageNum = parseInt(page);
                 if (pageNum < 750) return getPageURL(parseInt(page) + 1);
             }

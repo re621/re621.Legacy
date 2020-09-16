@@ -63,7 +63,7 @@ export class ImageScaler extends RE6Module {
             .val(this.fetchSettings("size"))
             .addClass("button btn-neutral")
             .appendTo(resizeButtonContainer)
-            .change(async (event, save) => {
+            .on("change", async (event, save) => {
                 const size = $(event.target).val() + "";
                 this.setImageSize(size);
                 if (save !== false) {
@@ -88,7 +88,7 @@ export class ImageScaler extends RE6Module {
 
         $("#image-download-link a").html("Fullscreen");
 
-        this.image.click(async () => {
+        this.image.on("click", async () => {
             if (!this.fetchSettings("clickScale") || await Danbooru.Note.TranslationMode.active()) return;
             this.setScale("", false);
         });

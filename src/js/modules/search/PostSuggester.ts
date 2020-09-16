@@ -165,7 +165,7 @@ export class PostSuggester extends RE6Module {
             .html("Search")
             .addClass("button btn-neutral post-suggester-search")
             .appendTo(this.status)
-            .click((event) => {
+            .on("click", (event) => {
                 event.preventDefault();
                 const checkedEls = $("input[name=post-suggester-selector]:checked").get();
                 const query = [];
