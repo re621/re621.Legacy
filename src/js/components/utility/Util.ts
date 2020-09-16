@@ -19,14 +19,14 @@ export class Util {
      * @param file File name
      */
     public static downloadAsJSON(data: any, file: string): void {
-        $("<a>")
+        const tempLink = $("<a>")
             .attr({
                 "download": file + ".json",
                 "href": "data:application/json," + encodeURIComponent(JSON.stringify(data, null, 4)),
             })
             .appendTo("body")
-            .click(function () { $(this).remove(); })
-        [0].click();
+            .on("click", () => { tempLink.remove(); });
+        tempLink[0].click();
     }
 
     /**

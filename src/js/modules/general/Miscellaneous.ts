@@ -191,7 +191,7 @@ export class Miscellaneous extends RE6Module {
         $textarea.scrollTop($textarea[0].scrollHeight);
 
         const newVal = $textarea.val() + strippedBody;
-        $textarea.focus().val("").val(newVal);
+        $textarea.trigger("focus").val("").val(newVal);
     }
 
     /**
@@ -257,7 +257,7 @@ export class Miscellaneous extends RE6Module {
      * @param event Keydown event
      */
     private handleSubmitForm(event): void {
-        $(event.target).parents("form").submit();
+        $(event.target).parents("form").trigger("submit");
     }
 
     /**
@@ -274,7 +274,7 @@ export class Miscellaneous extends RE6Module {
             .append(charCounter)
             .appendTo($container);
 
-        $textarea.keyup(() => {
+        $textarea.on("keyup", () => {
             charCounter.html(($textarea.val() + "").length + " / 50000");
         });
     }

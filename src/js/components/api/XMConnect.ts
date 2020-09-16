@@ -197,7 +197,7 @@ export class XMConnect {
                         download: a.name,
                     })
                     .html("download")
-                    .click(() => { btn.remove(); });
+                    .on("click", () => { btn.remove(); });
                 btn[0].click();
             }
         });

@@ -643,7 +643,7 @@ export class SubscriptionManager extends RE6Module {
 
             // Process subscribe / unsubscribe actions
             let processing = false;
-            $subscribeButton.click(async (event) => {
+            $subscribeButton.on("click", async (event) => {
                 event.preventDefault();
 
                 if (processing) return;
@@ -652,7 +652,7 @@ export class SubscriptionManager extends RE6Module {
                 execSubscribe(id, $subscribeButton, $unsubscribeButton, $element)
                     .then(() => { processing = false; });
             });
-            $unsubscribeButton.click(async (event) => {
+            $unsubscribeButton.on("click", async (event) => {
                 event.preventDefault();
 
                 if (processing) return;
@@ -819,7 +819,7 @@ export class SubscriptionManager extends RE6Module {
             .attr("title", "Remove")
             .html(`<i class="fas fa-times"></i>`)
             .appendTo($remove)
-            .click(async (event) => {
+            .on("click", async (event) => {
                 event.preventDefault();
 
                 const $buttons = $("a.sub-" + subscription.tabIndex + "-remove");

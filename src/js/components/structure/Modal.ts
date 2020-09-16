@@ -113,7 +113,7 @@ export class Modal {
 
             // This effectively clamps down the modal position while scrolling
             // Without this, the modal gets run off the screen for some reason
-            $(window).scroll(() => {
+            $(window).on("scroll", () => {
                 if (timer) clearTimeout(timer);
                 else {
                     left = widget.css("left");
