@@ -59,7 +59,7 @@ smart-alias {
         &[symbol=success]::before   { content: unicode("f058"); }   // fa-check-circle
 
 
-        // Stupid hacky fix, but here we go
+        // Stupid hack, but here we go
         &.category-3 a:not(:hover) {
             color: #d8c;
         }

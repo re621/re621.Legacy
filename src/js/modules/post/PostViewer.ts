@@ -6,7 +6,7 @@ import { PostActions } from "../../components/post/PostActions";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
- * Add various symbols to the tilebar depending on the posts state
+ * Add various symbols to the titlebar depending on the posts state
  */
 export class PostViewer extends RE6Module {
 
@@ -108,7 +108,7 @@ export class PostViewer extends RE6Module {
             .appendTo($addToContainer);
 
         // Create the Note Toggle button
-        const $noteToggleCountainer = $("<div>").attr("id", "image-toggle-notes").insertAfter("div#image-add-links");
+        const $noteToggleContainer = $("<div>").attr("id", "image-toggle-notes").insertAfter("div#image-add-links");
         $("<a>")
             .attr({
                 "id": "image-note-button",
@@ -116,7 +116,7 @@ export class PostViewer extends RE6Module {
             })
             .addClass("button btn-neutral")
             .html(this.fetchSettings("hideNotes") ? "Notes: Off" : "Notes: On")
-            .appendTo($noteToggleCountainer)
+            .appendTo($noteToggleContainer)
             .on("click", (event) => {
                 event.preventDefault();
                 this.toggleNotes();
@@ -125,7 +125,7 @@ export class PostViewer extends RE6Module {
             .css("display", "")
             .attr("data-hidden", this.fetchSettings("hideNotes"));
 
-        // Move child/parent indicator, leave others as is, like marked for deleteion
+        // Move child/parent indicator, leave others as is, like marked for deletion
         if (this.fetchSettings("moveChildThumbs"))
             $(".parent-children")
                 .addClass("children-moved")

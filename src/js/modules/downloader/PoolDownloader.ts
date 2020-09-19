@@ -27,7 +27,7 @@ export class PoolDownloader extends RE6Module {
     // If there are several batches in the download, a number will be appended to the end
     private downloadIndex = 1;
 
-    // Pool-specific variables used in the templating system
+    // Pool-specific variables used in the template system
     private poolName = "";
     private poolFiles: number[] = [];
     private poolDownloaded: number[] = [];

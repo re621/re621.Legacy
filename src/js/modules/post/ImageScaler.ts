@@ -31,7 +31,7 @@ export class ImageScaler extends RE6Module {
         return {
             enabled: true,
 
-            hotkeyScale: "v|0",         // cycle through the varous scaling modes
+            hotkeyScale: "v|0",         // cycle through the various scaling modes
             hotkeyFullscreen: "",       // open the current post in fullscreen mode
 
             clickScale: true,
@@ -114,7 +114,7 @@ export class ImageScaler extends RE6Module {
 
     /**
      * Set the page image to the specified size
-     * @param size sample, fit-gorizontal, fit-vertical, or original
+     * @param size sample, fit-horizontal, fit-vertical, or original
      */
     private setImageSize(size: string): void {
         this.image.removeClass();

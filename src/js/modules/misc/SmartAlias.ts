@@ -87,7 +87,7 @@ export class SmartAlias extends RE6Module {
 
     /**
      * Destroys and re-creates the entire module as a method of reloading it.  
-     * It's stupid, but it's the easiest and hassle-free method of resetting some thigns.
+     * It's stupid, but it's the easiest and hassle-free method of resetting some things.
      */
     public async reload(): Promise<void> {
         this.destroy();
@@ -126,7 +126,7 @@ export class SmartAlias extends RE6Module {
         // Toggle the data-attribute necessary for the compact form
         this.setCompactOutput(this.fetchSettings("compactOutput"));
 
-        // Only create the structue once the editing form is enabled
+        // Only create the structure once the editing form is enabled
         if (SmartAlias.postPageLockout) return;
 
         // Establish the data caches
@@ -181,7 +181,7 @@ export class SmartAlias extends RE6Module {
     }
 
     /**
-     * Parses the textare input specified in the parameter and returns a list of space-separated tags
+     * Parses the textarea input specified in the parameter and returns a list of space-separated tags
      * @param input Textarea to parse
      */
     private static getInputString(input: JQuery<HTMLElement>): string {
@@ -192,7 +192,7 @@ export class SmartAlias extends RE6Module {
     }
 
     /**
-     * Parses the textare input specified in the parameter and returns an array of tags
+     * Parses the textarea input specified in the parameter and returns an array of tags
      * @param input Textarea to parse, or a space-separated sting of tags
      */
     private static getInputTags(input: string): string[];
@@ -510,7 +510,7 @@ export class SmartAlias extends RE6Module {
 
         /**
          * Fix for Vue data-attribute binding  
-         * This needs to be executed every time the textare value gets changed
+         * This needs to be executed every time the textarea value gets changed
          * @param $textarea Textarea input
          */
         function triggerUpdateEvent($textarea: JQuery<HTMLElement>): void {
@@ -606,7 +606,7 @@ export class SmartAlias extends RE6Module {
                     title = data.cached ? "cached value" : undefined;
                 }
 
-                // Insert zero-width spaces for better linebreaking
+                // Insert zero-width spaces for better line-breaking
                 displayName = displayName.replace(/_/g, "_&#8203;");
 
                 $("<smart-tag>")
@@ -625,7 +625,7 @@ export class SmartAlias extends RE6Module {
     }
 
     /**
-     * Processses the raw text value of the custom alias field and converts it into machine-readable format.  
+     * Processes the raw text value of the custom alias field and converts it into machine-readable format.  
      * TODO Optimize this as much as possible
      * @param rawData Raw plaintext data
      */

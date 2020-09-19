@@ -59,7 +59,7 @@ export class PostFilter {
     }
 
     /**
-     * Tests the provided post agains the filter, and adds it to the cache if it passes.  
+     * Tests the provided post against the filter, and adds it to the cache if it passes.  
      * Should be triggered every time a post is added or updated.
      * @param post Post to test against
      * @param shouldDecrement If false, does not remove the post from the filter if the tests fail

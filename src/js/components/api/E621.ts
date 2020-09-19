@@ -162,12 +162,12 @@ class APIEndpoint {
                     value[index] = cleanURIComponent(elem);
                 response[key] = value.join("+");
             } else if (typeof value == "object") {
-                for (const [subkey, subvalue] of Object.entries(value)) {
-                    if (Array.isArray(subvalue)) {
-                        for (const [index, subelem] of subvalue.entries())
-                            subvalue[index] = cleanURIComponent(subelem);
-                        response[`${key}[${subkey}]`] = subvalue.join("+");
-                    } else response[`${key}[${subkey}]`] = cleanURIComponent(subvalue);
+                for (const [subKey, subValue] of Object.entries(value)) {
+                    if (Array.isArray(subValue)) {
+                        for (const [index, subElement] of subValue.entries())
+                            subValue[index] = cleanURIComponent(subElement);
+                        response[`${key}[${subKey}]`] = subValue.join("+");
+                    } else response[`${key}[${subKey}]`] = cleanURIComponent(subValue);
                 }
             } else {
                 response[key] = cleanURIComponent(value);
@@ -443,7 +443,7 @@ interface APIQuerySubentry {
     [prop: string]: APIQueryEntry | APIQueryEntry[];
 }
 
-/** A queueued request, waiting to be processed */
+/** A queued request, waiting to be processed */
 interface QueueItem {
     /** Request body */
     request: Request;

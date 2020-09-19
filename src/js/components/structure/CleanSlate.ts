@@ -67,7 +67,7 @@ export class CleanSlate {
                 const titlePageRouting = Util.LS.getItem("re621.mainpage") || "default";
                 $("<menu>")
                     .addClass("logo desktop-only")
-                    .html(`<a href="${titlePageRouting == "default" ? "/" : "/" + titlePageRouting}" data-ytta-id="-">` + Page.getSiteName() + `</a>`)
+                    .html(`<a href="${titlePageRouting == "default" ? "/" : "/" + titlePageRouting}">` + Page.getSiteName() + `</a>`)
                     .prependTo($menuContainer);
                 $menuMain.find("a[href='/']").remove();
 

@@ -147,9 +147,9 @@ export class SettingsController extends RE6Module {
             betterSearch = ModuleController.get(BetterSearch),
             hoverZoom = ModuleController.get(HoverZoom);
 
-        return new Form({ name: "optgeneral", columns: 3, width: 3 }, [
+        return new Form({ name: "conf-general", columns: 3, width: 3 }, [
 
-            Form.accordion({ name: "gencollapse", columns: 3, width: 3, active: 0 }, [
+            Form.accordion({ name: "collapse", columns: 3, width: 3, active: 0 }, [
 
                 // Page Layout
                 Form.accordionTab({ name: "layout", label: "Layout", columns: 3, width: 3 }, [
@@ -393,7 +393,7 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3, true),
 
-                    Form.collapse({ name: "scalingconf", columns: 3, width: 3, title: "Scaling Options", collapsed: true }, [
+                    Form.collapse({ name: "scaling", columns: 3, width: 3, title: "Scaling Options", collapsed: true }, [
 
                         // Thumbnail Scaling
                         Form.checkbox(
@@ -406,8 +406,8 @@ export class SettingsController extends RE6Module {
                                 await betterSearch.pushSettings("imageSizeChange", data);
                                 if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
 
-                                $("#optgeneral-gencollapse-thumb-scalingconf-thumbsize-desc").toggleClass("input-disabled", !data);
-                                $("#optgeneral-gencollapse-thumb-scalingconf-thumbsize")
+                                $("#conf-general-collapse-thumb-scaling-thumbsize-desc").toggleClass("input-disabled", !data);
+                                $("#conf-general-collapse-thumb-scaling-thumbsize")
                                     .prop("disabled", !data)
                                     .parent()
                                     .toggleClass("input-disabled", !data);
@@ -456,8 +456,8 @@ export class SettingsController extends RE6Module {
                                     betterSearch.reloadRenderedPosts();
                                 }
 
-                                $("#optgeneral-gencollapse-thumb-scalingconf-cropratio-desc").toggleClass("input-disabled", !data);
-                                $("#optgeneral-gencollapse-thumb-scalingconf-cropratio")
+                                $("#conf-general-collapse-thumb-scaling-cropratio-desc").toggleClass("input-disabled", !data);
+                                $("#conf-general-collapse-thumb-scaling-cropratio")
                                     .prop("disabled", !data)
                                     .parent()
                                     .toggleClass("input-disabled", !data);
@@ -688,7 +688,7 @@ export class SettingsController extends RE6Module {
                     Form.checkbox(
                         {
                             value: hoverZoom.fetchSettings("tags"),
-                            label: "<b>Show Tags</b><br />Display the list of posts's tags under the zoom-in image",
+                            label: "<b>Show Tags</b><br />Display the list of post's tags under the zoom-in image",
                             width: 3,
                         },
                         async (data) => {
@@ -800,7 +800,7 @@ export class SettingsController extends RE6Module {
             poolDownloader = ModuleController.get(PoolDownloader),
             favDownloader = ModuleController.get(FavDownloader);
 
-        return new Form({ name: "optdownload", columns: 3, width: 3 }, [
+        return new Form({ name: "conf-download", columns: 3, width: 3 }, [
 
             // Download Customizer
             Form.section({ name: "customizer", columns: 3, width: 3 }, [
@@ -828,7 +828,7 @@ export class SettingsController extends RE6Module {
             ]),
             Form.spacer(3),
 
-            Form.accordion({ name: "downcollapse", columns: 3, width: 3, active: 0 }, [
+            Form.accordion({ name: "collapse", columns: 3, width: 3, active: 0 }, [
 
                 // Mass Downloader
                 Form.accordionTab({ name: "mass", label: "Mass Downloader", subheader: "Download files from the search page", columns: 3, width: 3 }, [
@@ -921,7 +921,7 @@ export class SettingsController extends RE6Module {
             makeDefInput(flag).appendTo(defsContainer);
         });
 
-        return new Form({ name: "optflags", columns: 3, width: 3 }, [
+        return new Form({ name: "conf-flags", columns: 3, width: 3 }, [
             Form.header("Flag Definitions", 2),
             Form.button(
                 { value: "New Flag" },
@@ -1030,9 +1030,9 @@ export class SettingsController extends RE6Module {
             .attr("id", "alias-list-container")
             .val(smartAlias.fetchSettings<string>("data"));
 
-        return new Form({ name: "optalias", columns: 3, width: 3 }, [
+        return new Form({ name: "conf-alias", columns: 3, width: 3 }, [
 
-            Form.accordion({ name: "aliascollapse", columns: 3, width: 3, active: 0 }, [
+            Form.accordion({ name: "collapse", columns: 3, width: 3, active: 0 }, [
 
                 // Validator Configuration
                 Form.accordionTab({ name: "validatior", label: "Validation Configuration", columns: 3, width: 3 }, [
@@ -1345,7 +1345,7 @@ export class SettingsController extends RE6Module {
             }
         }
 
-        return new Form({ name: "opthotkeys", columns: 3, width: 3 }, [
+        return new Form({ name: "conf-hotkeys", columns: 3, width: 3 }, [
             // Listing
             Form.header("Listing", 3),
             ...createInputs(searchUtilities, "Search", "hotkeyFocusSearch"),
@@ -1484,10 +1484,10 @@ export class SettingsController extends RE6Module {
         let dnpcacheUpdated = true;
 
         // Create the settings form
-        return new Form({ name: "optmisc", columns: 3, width: 3 }, [
+        return new Form({ name: "conf-misc", columns: 3, width: 3 }, [
             Form.header("Miscellaneous", 3),
 
-            Form.accordion({ name: "misccollapse", columns: 3, width: 3, active: 0 }, [
+            Form.accordion({ name: "collapse", columns: 3, width: 3, active: 0 }, [
 
                 Form.accordionTab({ name: "cache", label: "Cache", columns: 3, width: 3 }, [
 
@@ -1681,7 +1681,7 @@ export class SettingsController extends RE6Module {
             ]),
         ]);
 
-        /** Export the currnt module settings to file */
+        /** Export the current module settings to file */
         function exportToFile(): void {
 
             const promises: Promise<any>[] = [];
@@ -1808,7 +1808,7 @@ export class SettingsController extends RE6Module {
 
         if (VersionChecker.hasUpdate) this.pushNotificationsCount("about", 1);
 
-        return new Form({ name: "optabout", columns: 3, width: 3 }, [
+        return new Form({ name: "conf-about", columns: 3, width: 3 }, [
             // About
             Form.div({
                 value:

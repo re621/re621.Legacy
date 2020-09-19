@@ -66,7 +66,7 @@ export class HeaderCustomizer extends RE6Module {
                 { name: "Blips", href: "/blips" },
                 { name: "Pools", href: "/pools" },
                 { name: "Sets", href: "/post_sets" },
-                { name: "Wiki", href: "/wiki_pages?title=help%3Ahome" },
+                { name: "Wiki", href: "/wiki_pages?title=help:home" },
                 { name: "Forum", href: "/forum_topics" },
                 { name: "Discord", href: "/static/discord" },
                 { name: "Help", href: "/help" },
@@ -393,7 +393,7 @@ export class HeaderCustomizer extends RE6Module {
         tabs[num].click();
     }
 
-    /** Refreshes the right-aligned tabs to have propper margins */
+    /** Refreshes the right-aligned tabs to have proper margins */
     private reloadTabMargins(): void {
         this.$menu.children("li").removeClass("margined");
         this.$menu.find("li[align=true]")

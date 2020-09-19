@@ -3,7 +3,7 @@ import { Post } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
- * Add various symbols to the tilebar depending on the posts state
+ * Add various symbols to the titlebar depending on the posts state
  */
 export class TitleCustomizer extends RE6Module {
 

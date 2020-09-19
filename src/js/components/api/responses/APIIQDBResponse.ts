@@ -25,7 +25,7 @@ export interface APIIQDBResponse extends APIResponse {
             last_comment_bumped_at: string;
             last_commented_at: string;
             last_noted_at: string;
-            descriptioni: string;
+            description: string;
 
             change_seq: number;
             duration: any; // ???

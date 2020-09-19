@@ -10,10 +10,10 @@ export class Page {
 
     /**
      * Checks if the url the user is currently on satisfies the filter
-     * @param filter Pipe seperated list of filters the current location has to satisfy
+     * @param filter Pipe separated list of filters the current location has to satisfy
      *               Matches are by default on a startsWith basis, but if the url must match
      *               you can prepend =
-     * @returns true if at least on filter is fullfilled
+     * @returns true if at least on filter is fulfilled
      */
     public static matches(filter: RegExp | RegExp[]): boolean {
         if (filter instanceof RegExp) filter = [filter];

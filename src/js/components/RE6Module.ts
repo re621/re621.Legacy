@@ -29,7 +29,7 @@ export class RE6Module {
      * - `prepare()` is used to fetch settings and load data
      * - `create()`  contains DOM manipulation and event listeners
      * - `destroy()` must undo everything done in create()
-     * @param constraint Which pages this module should run on? Accepts RegEx, but the use of `PageDefinition` constans is encouraged.
+     * @param constraint Which pages this module should run on? Accepts RegEx, but the use of `PageDefinition` constants is encouraged.
      * @param waitForDOM If true, waits for the page to finish loading before executing `create()`.
      * @param settingsTag Override for the name of the settings variable. Defaults to the class name.
      */
@@ -129,7 +129,7 @@ export class RE6Module {
      *   
      * This is a hybrid method. If the `fresh` argument is set to true, the method will return a promise
      * that will be fulfilled when new settings are fetched from storage. Otherwise, the settings will
-     * be fetched from the local cache. Note that the second method may result in existant settings to 
+     * be fetched from the local cache. Note that the second method may result in existent settings to 
      * either be undefined, or to have wrong values.  
      *   
      * If the `property` argument is a string, the method will return the value of the specified property
@@ -174,7 +174,7 @@ export class RE6Module {
      * Saves the provided settings.  
      *   
      * This method returns a Promise that is fulfilled when the operation completes, one way or another.
-     * If the action was succesful, the Promise will resolve to true, otherwise, it will return false.
+     * If the action was successful, the Promise will resolve to true, otherwise, it will return false.
      *   
      * If the `property` argument is a string, the method will set the value of the specified property
      * to the one provided by the second argument. If the `property` is an object containing multiple

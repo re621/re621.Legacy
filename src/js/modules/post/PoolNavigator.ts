@@ -85,12 +85,12 @@ export class PoolNavigator extends RE6Module {
             this.navbars.push({ type: "search", element: $("#search-seq-nav > ul > li").first(), checkbox: undefined, });
         }
 
-        // Pool-navs
+        // Pool-navbars
         for (const element of $("#pool-nav").find("ul > li").get()) {
             this.navbars.push({ type: "pool", element: $(element), checkbox: undefined, });
         }
 
-        // Set-navs
+        // Set-navbars
         for (const element of $("#set-nav").find("ul > li").get()) {
             this.navbars.push({ type: "set", element: $(element), checkbox: undefined, });
         };

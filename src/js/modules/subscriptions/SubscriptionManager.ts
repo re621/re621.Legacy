@@ -755,14 +755,14 @@ export class SubscriptionManager extends RE6Module {
                 .appendTo($imageDiv)
                 .append($image);
 
-            let dbclickTimer: number;
+            let dblclickTimer: number;
             let prevent = false;
 
             $link.on("click.re621.thumbnail", (event) => {
                 if (event.button !== 0) { return; }
                 event.preventDefault();
 
-                dbclickTimer = window.setTimeout(() => {
+                dblclickTimer = window.setTimeout(() => {
                     if (!prevent) {
                         $link.off("click.re621.thumbnail");
                         $link[0].click();
@@ -773,7 +773,7 @@ export class SubscriptionManager extends RE6Module {
                 if (event.button !== 0) { return; }
 
                 event.preventDefault();
-                window.clearTimeout(dbclickTimer);
+                window.clearTimeout(dblclickTimer);
                 prevent = true;
 
                 if (clickAction === ImageClickAction.NewTab) XM.Util.openInTab(window.location.origin + $link.attr("href"), false);

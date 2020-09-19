@@ -1,5 +1,5 @@
 /**
- * RE:621 - e621 Reimagined
+ * RE621 - E621 Reimagined
  * Script root. Better keep this place tidy.
  */
 

@@ -32,7 +32,7 @@ section#image-extra-controls {
     }
 
     div#image-add-links > a,
-    div#image-custdownload-links > a {
+    div#image-custom-download-links > a {
         margin-right: 0.5rem;
         &:last-child { margin-right: 0; }
     }
@@ -45,7 +45,7 @@ section#image-extra-controls {
         }
     }
 
-    div#image-custdownload-links > a {
+    div#image-custom-download-links > a {
         text-align: center;
         position: relative;
 

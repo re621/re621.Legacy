@@ -97,7 +97,7 @@ export class Patcher {
                         counter++;
                     }
 
-                    // Append the imported data to SmartAlias configuraiton
+                    // Append the imported data to SmartAlias configuration
                     const saConf = await XM.Storage.getValue("re621.SmartAlias", { data: "" });
                     saConf.data = saConf.data +
                         (saConf.data == "" ? "" : "\n\n") +

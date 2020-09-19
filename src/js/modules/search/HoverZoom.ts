@@ -12,7 +12,7 @@ export class HoverZoom extends RE6Module {
     private $zoomBlock: JQuery<HTMLElement>;    // Display area for the hover zoom
     private $zoomImage: JQuery<HTMLElement>;    // Image tag for hover zoom
     private $zoomVideo: JQuery<HTMLElement>;    // Video tag for hover zoom
-    private $zoomInfo: JQuery<HTMLElement>;     // Posts's resolution and file size
+    private $zoomInfo: JQuery<HTMLElement>;     // Post's resolution and file size
     private $zoomTags: JQuery<HTMLElement>;     // Post's tags section displayed on hover
 
     private shiftPressed = false;               // Used to block zoom in onshift mode

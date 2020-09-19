@@ -22,7 +22,7 @@ export class Form implements PreparedStructure {
      * Use `get()` to return an actual DOM element.
      * @param options Form options
      * @param content Form elements
-     * @param onSubmit Form submittion callback
+     * @param onSubmit Form submission callback
      */
     public constructor(options?: SectionOptions, content?: FormElement[], onSubmit?: FormSubmitEvent) {
         if (!options.name) options.name = Util.ID.make();
@@ -148,7 +148,7 @@ export class Form implements PreparedStructure {
     }
 
     /**
-     * Creates a collapsable section FormElement based on the provided parameters  
+     * Creates a collapsible section FormElement based on the provided parameters  
      * @param options Section configuration
      * @param content Form elements
      */
@@ -217,7 +217,7 @@ export class Form implements PreparedStructure {
     }
 
     /**
-     * Creates a collapsable section FormElement based on the provided parameters  
+     * Creates a collapsible section FormElement based on the provided parameters  
      * @param options Section configuration
      * @param content Form elements
      */
@@ -373,7 +373,7 @@ export class Form implements PreparedStructure {
             }
         }
 
-        const $copybutton = $("<button>")
+        const $copyButton = $("<button>")
             .attr({
                 "type": "button",
                 "id": options.name + "-copy",
@@ -384,11 +384,11 @@ export class Form implements PreparedStructure {
 
         if (options.title) {
             $input.attr("title", options.title);
-            $copybutton.attr("title", options.title);
+            $copyButton.attr("title", options.title);
         }
 
         let copyTimer: number;
-        $($copybutton).on("click", () => {
+        $($copyButton).on("click", () => {
             XM.Util.setClipboard($input.val());
 
             window.clearTimeout(copyTimer);
@@ -453,7 +453,7 @@ export class Form implements PreparedStructure {
         if (KeybindManager.count($input.val() + "") <= 1)
             $warning.addClass("display-none");
 
-        const $recordbutton = $("<button>")
+        const $recordButton = $("<button>")
             .attr({
                 "type": "button",
                 "id": options.name + "-key",
@@ -464,11 +464,11 @@ export class Form implements PreparedStructure {
 
         if (options.title) {
             $input.attr("title", options.title);
-            $recordbutton.attr("title", options.title);
+            $recordButton.attr("title", options.title);
         }
 
         let occupied = false;
-        $($recordbutton).on("click", () => {
+        $($recordButton).on("click", () => {
             if (occupied) return;
             occupied = true;
 

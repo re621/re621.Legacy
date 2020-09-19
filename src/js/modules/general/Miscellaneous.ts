@@ -211,7 +211,7 @@ export class Miscellaneous extends RE6Module {
         const avatars = $("div.avatar > div > a").get();
         for (const element of avatars) {
             const $link = $(element);
-            let dbclickTimer: number;
+            let dblclickTimer: number;
             let prevent = false;
 
             $link.on("click.re621.thumbnail", (event) => {
@@ -224,7 +224,7 @@ export class Miscellaneous extends RE6Module {
 
                 event.preventDefault();
 
-                dbclickTimer = window.setTimeout(() => {
+                dblclickTimer = window.setTimeout(() => {
                     if (!prevent) {
                         $link.off("click.re621.thumbnail");
                         $link[0].click();
@@ -240,7 +240,7 @@ export class Miscellaneous extends RE6Module {
                 ) { return; }
 
                 event.preventDefault();
-                window.clearTimeout(dbclickTimer);
+                window.clearTimeout(dblclickTimer);
                 prevent = true;
 
                 if (clickAction === ImageClickAction.NewTab) XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
