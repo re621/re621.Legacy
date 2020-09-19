@@ -1,5 +1,6 @@
 import { PostFlag, PostRating } from "../api/responses/APIPost";
 import { Tag } from "../data/Tag";
+import { Util } from "../utility/Util";
 import { Post, PostData } from "./Post";
 
 export class PostFilter {
@@ -40,6 +41,13 @@ export class PostFilter {
             const comparison = ComparisonType.test(filter);
             if (comparison !== ComparisonType.Equals)
                 filter = filter.substring(comparison.length);
+
+            // Convert some values immediately
+            switch (filterType) {
+                case FilterType.Size:
+                    filter = Util.unformatBytes(filter) + "";
+                    break;
+            }
 
             this.entries.push({ type: filterType, value: filter, inverted: inverse, optional: optional, comparison: comparison });
         }
@@ -91,10 +99,20 @@ export class PostFilter {
                     result = PostFilterUtils.tagsMatchesFilter(post, value);
                     break;
                 case FilterType.Uploader:
+                case FilterType.UserID:
                     result = post.uploader === parseInt(value);
                     break;
                 case FilterType.Fav:
                     result = post.is_favorited;
+                    break;
+                case FilterType.Height:
+                    result = PostFilterUtils.compareNumbers(post.img.height, parseInt(value), filter.comparison);
+                    break;
+                case FilterType.Width:
+                    result = PostFilterUtils.compareNumbers(post.img.width, parseInt(value), filter.comparison);
+                    break;
+                case FilterType.Size:
+                    result = PostFilterUtils.compareNumbers(post.file.size, parseInt(value), filter.comparison);
                     break;
             }
 
@@ -177,9 +195,13 @@ enum FilterType {
     Id = "id:",
     Score = "score:",
     Rating = "rating:",
-    Uploader = "uplaoder:",
+    Uploader = "uploader:",
+    UserID = "userid:",
     Flag = "status:",
     Fav = "fav:",
+    Height = "height:",
+    Width = "width:",
+    Size = "filesize:",
 }
 
 namespace FilterType {
