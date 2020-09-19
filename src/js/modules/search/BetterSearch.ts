@@ -29,7 +29,7 @@ export class BetterSearch extends RE6Module {
 
     private queryTags: string[];                // Array containing the current search query
     private queryPage: string;                  // Output page, either as a number of in `a12345` / `b12345` format
-    private queryLimit: number;                 // Maxmimum number of posts per request
+    private queryLimit: number;                 // Maximum number of posts per request
 
     private pageResult: Promise<APIPost[]>;     // Post data, called in `prepare`, used in `create`
 
@@ -65,7 +65,7 @@ export class BetterSearch extends RE6Module {
 
             clickAction: ImageClickAction.NewTab,           // Action take when double-clicking the thumbnail
 
-            infiniteScroll: true,                           // Seemlessly load more posts below the current ones
+            infiniteScroll: true,                           // Seamlessly load more posts below the current ones
             loadAutomatically: true,                        // Load posts automatically while scrolling down
             loadPrevPages: false,                           // If enabled, will load 3 pages before the current one (if available)
             hidePageBreaks: true,                           // Show a visual separator between different pages
@@ -423,7 +423,7 @@ export class BetterSearch extends RE6Module {
         else this.$content.removeAttr("hide-page-breaks");
     }
 
-    /** Restarts various event listenerd used by the module */
+    /** Restarts various event listeners used by the module */
     public reloadEventListeners(): void {
         this.reloadModeSwitchListener();
         this.reloadInfScrollListeners();
@@ -460,7 +460,7 @@ export class BetterSearch extends RE6Module {
                     // a fake article is created with all appropriate data, which is then
                     // used to trigger Danbooru's native functionality.
 
-                    const $farticle = $("<article>")
+                    const $tempArticle = $("<article>")
                         .addClass("post-preview display-none-important")
                         .attr({
                             "id": "post_" + post.id,
@@ -468,11 +468,11 @@ export class BetterSearch extends RE6Module {
                             "data-tags": post.tagString,
                         })
                         .appendTo("body");
-                    $("<a>").appendTo($farticle)
+                    $("<a>").appendTo($tempArticle)
                         .one("click", (event) => {
                             Danbooru.PostModeMenu.click(event);
                             window.setTimeout(() => {
-                                $farticle.remove();
+                                $tempArticle.remove();
                             }, 500);
                         })[0].click();
                     break;

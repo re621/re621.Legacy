@@ -16,11 +16,11 @@ export class Tag {
 
     /**
      * This function just checks if the string is contained in nonArtistTags
-     * A nonartist would be avoid_posting for example
+     * A non-artist would be avoid_posting for example
      * Does NOT take into consideration the tag type
      * In this functions eyes a general tag will also be an artist tag
      */
-    public static isArist(tag: string): boolean {
+    public static isArtist(tag: string): boolean {
         return Tag.nonArtistTags.indexOf(tag) === -1;
     }
 
@@ -29,7 +29,7 @@ export class Tag {
      * First it escapes all characters from the input which have special meaning in a regex, like + or ?, except for *
      * '*' has a special meaning when searching and acts as a wildcard character
      * To put this into the regex it gets replaced with [\S]* which matches zero or more non-whitespace characters
-     * This ways if you have a space seperated string of tags this function will tell you wether or not the filter matches
+     * This ways if you have a space separated string of tags this function will tell you wether or not the filter matches
      * @param string 
      */
     public static escapeSearchToRegex(string: string): RegExp {

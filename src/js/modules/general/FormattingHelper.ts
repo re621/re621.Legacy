@@ -6,7 +6,7 @@ import { Form } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Prompt } from "../../components/structure/Prompt";
 
-// Avaliable icons for formatting buttons
+// Available icons for formatting buttons
 const iconDefinitions = {
     "spacer": "&nbsp;",
 
@@ -179,7 +179,7 @@ class FormattingHelper {
         this.createDOM();
     }
 
-    /** Returns the formatter's container element */
+    /** Returns the formatter container element */
     public getContainer(): JQuery<HTMLElement> {
         return this.$container;
     }

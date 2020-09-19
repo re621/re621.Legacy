@@ -107,7 +107,7 @@ export class Util {
 
         input = input
             .replace(/\[b\]([\s\S]*)\[\/b\]/g, "<b>$1</b>")                     // bold
-            .replace(/\[i\]([\s\S]*)\[\/i\]/g, "<i>$1</i>")                     // italicts
+            .replace(/\[i\]([\s\S]*)\[\/i\]/g, "<i>$1</i>")                     // italics
             .replace(/\[u\]([\s\S]*)\[\/u\]/g, "<u>$1</u>")                     // Underline
             .replace(/\[o\]([\s\S]*)\[\/o\]/g, "<o>$1</o>")                     // Overline
             .replace(/\[s\]([\s\S]*)\[\/s\]/g, "<s>$1</s>")                     // Strikeout
@@ -129,11 +129,23 @@ export class Util {
 
         const k = 1024;
         const dm = decimals < 0 ? 0 : decimals;
-        const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+        const sizes = ["B", "KB", "MB", "GB", "TB", "PB"];
 
         const i = Math.floor(Math.log(bytes) / Math.log(k));
 
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + sizes[i];
+    }
+
+    public static unformatBytes(input: string): number {
+        if (Util.Math.isNumeric(input)) return parseInt(input);
+
+        input = input.toUpperCase();
+        for (const [index, size] of [/\dB$/, /\dKB$/, /\dMB$/, /\dGB$/, /\dTB$/, /\dPB$/].entries()) {
+            if (size.test(input)) {
+                return parseInt(input) * Math.pow(1024, index);
+            }
+        }
+        return 0;
     }
 
     /**
@@ -171,7 +183,7 @@ export class Util {
     }
 
     /**
-     * Parses the textare input specified in the parameter and returns a list of space-separated tags
+     * Parses the textarea input specified in the parameter and returns a list of space-separated tags
      * @param input Textarea to parse
      */
     public static getTagString(input: JQuery<HTMLElement>): string {

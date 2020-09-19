@@ -210,7 +210,7 @@ export class Modal {
 
     public getElement(): JQuery<HTMLElement> { return this.$modal; }
 
-    /** Togle the modal visibility */
+    /** Toggle the modal visibility */
     public toggle(): void {
         if (this.isOpen()) this.close();
         else this.open();
@@ -224,7 +224,7 @@ export class Modal {
     public disable(): void { this.config.disabled = true; }
 
     /**
-     * Completely and irreversibly destorys the modal window
+     * Completely and irreversibly destroys the modal window
      */
     public destroy(): void {
         this.$modal.dialog("destroy");

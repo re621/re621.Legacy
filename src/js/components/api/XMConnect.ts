@@ -301,7 +301,7 @@ export interface GMxmlHttpRequestEvent {
     readyState: 0 | 1 | 2 | 3 | 4;
 
     /**
-     * **status** - returns the numberical HTTP status code of the response.  
+     * **status** - returns the numerical HTTP status code of the response.  
      * Before the request completes, the value of **status** is always 0.  
      * Browsers also report a status of 0 in case of XMLHttpRequest errors.
      */
@@ -309,7 +309,7 @@ export interface GMxmlHttpRequestEvent {
 
     /**
      * **statusText** - returns a DOMString containing the response's status message.  
-     * Unlike **status**, this property contains the _text_ of the reponse status, such as "OK" or "Not Found".
+     * Unlike **status**, this property contains the _text_ of the response status, such as "OK" or "Not Found".
      */
     statusText: string;
 }
@@ -358,7 +358,7 @@ export interface GMDownloadDetails {
     /** **url** - the URL from where the data should be downloaded (required) */
     url: string;
 
-    /** **name** - the filename - for security reasons the file extension needs to be whitelisted at Tampermonkey's options page (required) */
+    /** **name** - the filename - for security reasons the file extension needs to be whitelisted at Tampermonkey options page (required) */
     name: string;
 
     /** **headers** - see GM_xmlhttpRequest for more details */

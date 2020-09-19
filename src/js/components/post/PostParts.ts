@@ -31,11 +31,11 @@ export class PostParts {
 
     private static handleDoubleClick($link: JQuery<HTMLElement>, post: Post, conf: any): void {
 
-        let dbclickTimer: number;
+        let dblclickTimer: number;
         let prevent = false;
 
-        // Make it so that the doubleclick prevents the normal click event
-        $link.on("click.re621.dblextra", (event) => {
+        // Make it so that the double-click prevents the normal click event
+        $link.on("click.re621.dbl-extra", (event) => {
             if (
                 // Ignore mouse clicks which are not left clicks
                 (event.button !== 0) ||
@@ -49,9 +49,9 @@ export class PostParts {
 
             event.preventDefault();
 
-            dbclickTimer = window.setTimeout(() => {
+            dblclickTimer = window.setTimeout(() => {
                 if (!prevent) {
-                    $link.off("click.re621.dblextra");
+                    $link.off("click.re621.dbl-extra");
                     $link[0].click();
                 }
                 prevent = false;
@@ -59,7 +59,7 @@ export class PostParts {
 
             return false;
         });
-        $link.on("dblclick.re621.dblextra", (event) => {
+        $link.on("dblclick.re621.dbl-extra", (event) => {
             if (
                 // Ignore mouse clicks which are not left clicks
                 (event.button !== 0) ||
@@ -72,7 +72,7 @@ export class PostParts {
             ) { return; }
 
             event.preventDefault();
-            window.clearTimeout(dbclickTimer);
+            window.clearTimeout(dblclickTimer);
             prevent = true;
 
             post.$ref.addClass("highlight");
@@ -105,7 +105,7 @@ export class PostParts {
                     break;
                 }
                 default: {
-                    $link.off("click.re621.dblextra");
+                    $link.off("click.re621.dbl-extra");
                     $link[0].click();
                 }
             }

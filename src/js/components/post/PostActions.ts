@@ -40,11 +40,11 @@ export class PostActions {
                     return Promise.resolve(true);
                 }
 
-                Danbooru.error(`Error occured while adding the post to set: ${response[1]}`)
+                Danbooru.error(`Error occurred while adding the post to set: ${response[1]}`)
                 return Promise.resolve(false);
             },
             (response) => {
-                Danbooru.error(`Error occured while adding the post to set: ${response[1]}`)
+                Danbooru.error(`Error occurred while adding the post to set: ${response[1]}`)
                 return Promise.resolve(false);
             }
         );
@@ -64,11 +64,11 @@ export class PostActions {
                     return Promise.resolve(true);
                 }
 
-                Danbooru.error(`Error occured while removing the post from set: ${response[1]}`)
+                Danbooru.error(`Error occurred while removing the post from set: ${response[1]}`)
                 return Promise.resolve(false);
             },
             (response) => {
-                Danbooru.error(`Error occured while removing the post from set: ${response[1]}`)
+                Danbooru.error(`Error occurred while removing the post from set: ${response[1]}`)
                 return Promise.resolve(false);
             }
         );
@@ -78,9 +78,9 @@ export class PostActions {
      * Records a vote for the specified post
      * @param postID Post ID
      * @param score -1 to downvote, 1 to upvote, 0 to remove the vote
-     * @param preventUnvote If true, voting will fail if a vote of the same type (-1 / 1) already exsits
+     * @param preventUnvote If true, voting will fail if a vote of the same type (-1 / 1) already exits
      */
-    public static vote(postID: number, score: number, preventUnvote = false): Promise<VoteReponse> {
+    public static vote(postID: number, score: number, preventUnvote = false): Promise<VoteResponse> {
         return new Promise((resolve) => {
             E621.PostVotes.id(postID).post({ score: score, no_unvote: preventUnvote }).then(
                 (success) => {
@@ -131,7 +131,7 @@ export class PostActions {
 
 }
 
-interface VoteReponse {
+interface VoteResponse {
     /** If false, an error has occurred, and the rest of the values do not exist */
     success: boolean;
     /** -1 for downvote, 1 for upvote, 0 for unvote */

@@ -3,7 +3,7 @@ import { PreparedStructure } from "./PreparedStructure";
 
 /**
  * Tabbed  
- * Relateively easy tabbed content, powered by CSS
+ * Relatively easy tabbed content, powered by CSS
  */
 export class Tabbed implements PreparedStructure {
 

@@ -128,7 +128,7 @@ export class TagTracker extends RE6Module implements SubscriptionTracker {
 
             // Stop loading updates if they will get trimmed from the cache anyways
             if (Object.keys(results).length > postLimit) {
-                Debug.log("TgT: postlimit");
+                Debug.log("TgT: post limit");
                 break;
             }
 

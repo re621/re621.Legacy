@@ -82,7 +82,7 @@ export interface UpdateActions {
     imageRemoveOnError?: boolean;
     // Link to get to the update
     updateHref?: (data: UpdateContent) => string;
-    // Text for the updatelink
+    // Text for the update link
     updateText: (data: UpdateContent) => string;
     // Text to display when clicking on sourceLink
     sourceHref?: (data: UpdateContent) => string;
@@ -99,7 +99,7 @@ export class UpdateCache {
     private index: number[];
 
     /**
-     * Create a new UpdateCache for the specificed subscription
+     * Create a new UpdateCache for the specified subscription
      * @param instance Subscription instance
      */
     public constructor(instance: SubscriptionTracker) {
@@ -174,7 +174,7 @@ export class UpdateCache {
     }
 
     /**
-     * Removes an item with the provded timestamp from cache
+     * Removes an item with the provided timestamp from cache
      * @param timestamp Timestamp to look for
      */
     public deleteItem(timestamp: number): void {

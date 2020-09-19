@@ -36,12 +36,12 @@ export class DownloadCustomizer extends RE6Module {
         this.post = Post.getViewingPost();
 
         const downloadContainer = $("<div>")
-            .attr("id", "image-custdownload-links")
+            .attr("id", "image-custom-download-links")
             .appendTo("#image-extra-controls")
 
         const link = $("<a>")
             .attr({
-                id: "image-custdownload-file",
+                id: "image-custom-download-file",
                 href: this.post.file.original,
                 download: this.parseTemplate(),
             })
@@ -61,7 +61,7 @@ export class DownloadCustomizer extends RE6Module {
 
         const tags = $("<a>")
             .attr({
-                id: "image-custdownload-tags",
+                id: "image-custom-download-tags",
                 href: this.getTagsBlock(),
                 download: this.parseTemplate("txt"),
             })
@@ -80,7 +80,7 @@ export class DownloadCustomizer extends RE6Module {
 
     /** Creates a download link with the saved template */
     public refreshDownloadLink(): void {
-        $("#image-custdownload-file").attr("download", this.parseTemplate());
+        $("#image-custom-download-file").attr("download", this.parseTemplate());
     }
 
     private getTagsBlock(): string {

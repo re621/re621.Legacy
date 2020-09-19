@@ -9,9 +9,7 @@ declare const GM;
  */
 export class DomUtilities {
 
-    /**
-     * Creates a sticky searchbox container
-     */
+    /** Creates a sticky search box container */
     public static createSearchbox(): void {
 
         // If favorites are private, the sidebar does not exist

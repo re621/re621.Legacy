@@ -22,7 +22,7 @@ export class Post implements PostData {
     public comments: number;                // total number of comments
     public rating: PostRating;              // rating in the one-letter lowercase format (s, q, e)
     public uploader: number;                // uploader ID
-    public page: string;                    // search page. can either be numberic, or in a- / b- format
+    public page: string;                    // search page. can either be numeric, or in a- / b- format
 
     public date: {
         raw: string;                        // upload time, in `Fri Aug 21 2020 12:32:52 GMT-0700` format
@@ -175,7 +175,7 @@ export class Post implements PostData {
 
     /**
      * Returns a Post object that matches the provided ID.  
-     * Alternatively, fetches the Post object for the probided DOM element.
+     * Alternatively, fetches the Post object for the provided DOM element.
      * @param post Post object, if it exists.  
      * `null` is returned if the DOM element does not exist.  
      * `undefined` is returned if the DOM element exists, but lacks data
@@ -374,7 +374,7 @@ export namespace PostData {
             tags: {
                 all: tags,
                 artist: new Set(data.tags.artist),
-                real_artist: new Set(data.tags.artist.filter(tag => Tag.isArist(tag))),
+                real_artist: new Set(data.tags.artist.filter(tag => Tag.isArtist(tag))),
                 copyright: new Set(data.tags.copyright),
                 species: new Set(data.tags.species),
                 character: new Set(data.tags.character),
@@ -478,7 +478,7 @@ export namespace PostData {
             tags: {
                 all: new Set(tagString.split(" ")),
                 artist: artistTags,
-                real_artist: new Set([...artistTags].filter(tag => Tag.isArist(tag))),
+                real_artist: new Set([...artistTags].filter(tag => Tag.isArtist(tag))),
                 copyright: getTags("copyright"),
                 species: getTags("species"),
                 character: getTags("character"),

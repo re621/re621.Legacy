@@ -9,18 +9,18 @@ export class User {
 
     private static instance: User;
 
-    private loggedin: boolean;
+    private loggedIn: boolean;
     private username: string;
-    private userid: number;
+    private userID: number;
 
     private level: string;
 
     public constructor() {
         const $ref = $("body");
 
-        this.loggedin = $ref.attr("data-user-is-anonymous") == "false";
+        this.loggedIn = $ref.attr("data-user-is-anonymous") == "false";
         this.username = $ref.attr("data-user-name") || "Anonymous";
-        this.userid = parseInt($ref.attr("data-user-id")) || 0;
+        this.userID = parseInt($ref.attr("data-user-id")) || 0;
         this.level = $ref.attr("data-user-level-string") || "Guest";
     }
 
@@ -29,7 +29,7 @@ export class User {
      * @returns boolean true if the user is logged in, false otherwise
      */
     public static isLoggedIn(): boolean {
-        return this.getInstance().loggedin;
+        return this.getInstance().loggedIn;
     }
 
     /**
@@ -45,7 +45,7 @@ export class User {
      * @returns string User ID if the user is logged in, 0 otherwise
      */
     public static getUserID(): number {
-        return this.getInstance().userid;
+        return this.getInstance().userID;
     }
 
     /**

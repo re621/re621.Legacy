@@ -14,7 +14,7 @@ import { BetterSearch } from "./BetterSearch";
 export class BlacklistEnhancer extends RE6Module {
 
     private static $wrapper: JQuery<HTMLElement>;               // wrapper for the rest of the content
-    private static $header: JQuery<HTMLElement>;                // interactable header for the blacklist
+    private static $header: JQuery<HTMLElement>;                // interactive header for the blacklist
     private static $content: JQuery<HTMLElement>;               // list of applicable filters
     private static $toggle: JQuery<HTMLElement>;                // toggle switch for all blacklists
 

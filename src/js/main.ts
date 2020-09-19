@@ -1,5 +1,5 @@
 /**
- * RE:621 - e621 Reimagined
+ * RE621 - E621 Reimagined
  * Script root. Better keep this place tidy.
  */
 
@@ -98,13 +98,13 @@ if (Page.matches(PageDefinition.title)) {
 Danbooru.Utility.disableShortcuts(true);
 
 // Create the basic DOM structure
-CleanSlate.run().then(async () => {
+CleanSlate.createDOM().then(async () => {
 
     DomUtilities.createSearchbox();
     DomUtilities.createTagList();
 
     await Debug.init();
-    await Patcher.run();
+    await Patcher.patchConfig();
     await VersionChecker.init();
 
     // This code is pretty fragile. It's also what makes the rest of the project work.
