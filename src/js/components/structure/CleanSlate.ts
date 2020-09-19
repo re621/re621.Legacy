@@ -10,7 +10,7 @@ declare const GM: any;
 
 export class CleanSlate {
 
-    public static async run(): Promise<boolean> {
+    public static async createDOM(): Promise<boolean> {
         const actions: ActionDefinition[] = [];
 
         // Append stylesheets, inject scripts
