@@ -52,14 +52,6 @@
                     "./build/cache/jszip.min.js"
                 ],
                 [
-                    "https://cdn.jsdelivr.net/gh/re621/re621-lib@c8a82094eefeefdd4389538f87022bacdcf5c459/lazysizes/lazysizes.min.js",
-                    "./build/cache/lazysizes.min.js"
-                ],
-                [
-                    "https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.2.0/plugins/unload/ls.unload.min.js",
-                    "./build/cache/ls.unload.min.js"
-                ],
-                [
                     "https://cdn.jsdelivr.net/npm/jquery.hotkeys@0.1.0/jquery.hotkeys.min.js",
                     "./build/cache/jquery.hotkeys.min.js"
                 ]
