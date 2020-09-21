@@ -48,12 +48,12 @@
                     "./build/cache/jquery-ui.min.js"
                 ],
                 [
-                    "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js",
-                    "./build/cache/jszip.min.js"
-                ],
-                [
                     "https://cdn.jsdelivr.net/npm/jquery.hotkeys@0.1.0/jquery.hotkeys.min.js",
                     "./build/cache/jquery.hotkeys.min.js"
+                ],
+                [
+                    "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js",
+                    "./build/cache/jszip.min.js"
                 ]
             ]
         }
