@@ -186,8 +186,8 @@ export class MassDownloader extends RE6Module {
             return;
         }
 
-        console.log(`downloading ${postList.size()} files`);
-        console.log(postList);
+        Debug.log(`downloading ${postList.size()} files`);
+        Debug.log(postList);
 
         const downloadQueue = new DownloadQueue();
 

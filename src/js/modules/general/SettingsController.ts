@@ -678,7 +678,6 @@ export class SettingsController extends RE6Module {
                             "onshift": "Holding Shift",
                         },
                         async (data) => {
-                            console.log("setting", data, hoverZoom.isInitialized());
                             await hoverZoom.pushSettings("mode", data);
                             if (hoverZoom.isInitialized()) hoverZoom.reloadEventListeners();
                         }

@@ -112,8 +112,6 @@ export class FormattingManager extends RE6Module {
         }
 
         if (Page.matches(PageDefinition.settings)) {
-            console.log("Hello");
-
             const $textareas = $("#user_profile_about, #user_profile_artinfo");
             for (const input of $textareas) {
                 const $input = $(input);
