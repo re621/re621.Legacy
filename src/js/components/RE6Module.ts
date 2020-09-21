@@ -1,5 +1,5 @@
 import { XM } from "./api/XM";
-import { Keybind, KeybindManager } from "./data/Keybinds";
+import { Keybind, KeybindManager, ResponseFunction } from "./data/Keybinds";
 import { Page } from "./data/Page";
 import { ModuleController } from "./ModuleController";
 
@@ -281,14 +281,15 @@ export class RE6Module {
 
         const enabled = this.pageMatchesFilter();
         for (const keybind of this.keybinds) {
-            const meta = this.getSettingsTag + "." + keybind.keys;
+            const meta = this.getSettingsTag() + "." + keybind.keys;
 
             keybindObj.push({
                 keys: this.fetchSettings(keybind.keys).split("|"),
                 fnct: keybind.fnct,
                 bindMeta: meta,
-                bindName: keybind.name,
                 enabled: enabled,
+                element: keybind.element,
+                selector: keybind.selector,
             })
 
             keyMeta.push(meta);
@@ -343,12 +344,10 @@ export class RE6Module {
 }
 
 interface KeybindDefinition {
-
-    keys: string;
-
-    fnct: (bindMeta: string) => void;
-
-    name?: string;
+    keys: string;               // Key the triggers the function
+    fnct: ResponseFunction;     // Function that is executed when the key is pressed
+    element?: string;           // Element to which the listener gets bound. Defaults to `document`
+    selector?: string;          // Selector within the element for deferred listeners. Defaults to `null`
 }
 
 export type Settings = {

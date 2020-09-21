@@ -107,10 +107,6 @@ CleanSlate.createDOM().then(async () => {
     await Patcher.patchConfig();
     await VersionChecker.init();
 
-    // This code is pretty fragile. It's also what makes the rest of the project work.
-    // It is dependent on the previous step, which runs when the document fully loads
-    // If that changes, this will need to be wrapped in `$(() => { ... });`
-
     // Subscriptions have to be registered before the SubscriptionManager
     await ModuleController.register(subscriptions);
     await SubscriptionManager.register(subscriptions);

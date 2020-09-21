@@ -1424,7 +1424,7 @@ export class SettingsController extends RE6Module {
             // Other
             Form.header("Miscellaneous", 3),
             ...createInputs(miscellaneous, "Random Set Post", "hotkeyRandomSetPost"),
-            // ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
+            ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
         ]);
     }
 
