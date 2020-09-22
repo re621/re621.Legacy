@@ -4,6 +4,8 @@ export enum UtilTime {
     HOUR = 60 * UtilTime.MINUTE,
     DAY = 24 * UtilTime.HOUR,
     WEEK = 7 * UtilTime.DAY,
+    MONTH = 30 * UtilTime.DAY,
+    YEAR = 365 * UtilTime.DAY,
 };
 
 export namespace UtilTime {
@@ -89,13 +91,23 @@ export namespace UtilTime {
         return parts.year + "-" + parts.month + "-" + parts.day + " " + parts.hours + ":" + parts.minutes + ":" + parts.seconds;
     }
 
+    export function formatPeriod(input: number): string {
+        if (input < UtilTime.MINUTE) return (input / UtilTime.SECOND).toFixed(1) + " seconds";
+        if (input < UtilTime.HOUR) return (input / UtilTime.MINUTE).toFixed(1) + " minutes";
+        if (input < UtilTime.DAY) return (input / UtilTime.HOUR).toFixed(1) + " hours";
+        if (input < UtilTime.WEEK) return (input / UtilTime.DAY).toFixed(1) + " days";
+        if (input < UtilTime.MONTH) return (input / UtilTime.WEEK).toFixed(1) + " weeks";
+        if (input < UtilTime.YEAR) return (input / UtilTime.MONTH).toFixed(1) + " months";
+        return (input / UtilTime.YEAR).toFixed(1) + " years";
+    }
+
     /**
      * Returns the current date and time in a compressed format.  
      * Used to make downloaded file names unique, i.e. download-200405-0350.zip instead of download.zip
      * @returns String with a date and time in YYMMDD-HHMM format.
      */
     export function getDatetimeShort(): string {
-        function twoDigit(n): string { return (n < 10 ? '0' : '') + n; }
+        function twoDigit(n: number): string { return (n < 10 ? '0' : '') + n; }
 
         const date = new Date();
         return (date.getFullYear() + "").substring(2) + twoDigit(date.getMonth() + 1) + twoDigit(date.getDate()) + "-" + twoDigit(date.getHours()) + twoDigit(date.getMinutes());

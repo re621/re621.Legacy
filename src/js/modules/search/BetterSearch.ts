@@ -196,6 +196,35 @@ export class BetterSearch extends RE6Module {
             let pagesLoaded = 0;
 
             const pageResult = await this.pageResult;
+
+            // Create the statistics section
+            const stats = $("<search-stats>")
+                .appendTo(this.$content);
+
+            if (Util.Math.isNumeric(this.queryPage)) {
+                $("<span>")
+                    .attr({
+                        "id": "search-stats-count",
+                        "title": "Approximate number of posts found",
+                    })
+                    .html("~" + Util.formatK(pageResult.length * this.lastPage) + " Posts")
+                    .appendTo(stats);
+            }
+
+            const order = this.queryTags.find(el => el.includes("order:"));
+            if (pageResult.length > 0 && (!order || order == "order:id_desc")) {
+                const diff = new Date(pageResult[0].created_at).getTime() - new Date(pageResult[pageResult.length - 1].created_at).getTime();
+                console.log(diff);
+                $("<span>")
+                    .attr({
+                        "id": "search-stats-frequency",
+                        "title": "How long it takes to fill a page completely",
+                    })
+                    .html(Util.Time.formatPeriod(diff))
+                    .appendTo(stats);
+            }
+
+            // Load posts
             if (pageResult.length > 0) {
 
                 const imageRatioChange = this.fetchSettings<boolean>("imageRatioChange");

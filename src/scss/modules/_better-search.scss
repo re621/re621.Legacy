@@ -23,6 +23,21 @@ section#content {
         height: min-content;    // as above, random space at the bottom causes pagination to jump
         min-height: 80vh;
 
+        // Search Statistics
+        search-stats {
+            grid-column: 1 / -1;
+            font-family: monospace;
+            font-size: 1rem;
+            color: #ffffffaa;
+            margin: -0.5rem 0;
+            text-align: right;
+
+            span {
+                cursor: help;
+                &:not(:last-child)::after { content: " | "; }
+            }
+        }
+
         // All results filtered out
         &[posts="0"]::before {
             content: "Nobody here but us chickens!";
