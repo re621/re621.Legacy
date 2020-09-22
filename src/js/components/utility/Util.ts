@@ -201,6 +201,14 @@ export class Util {
             .filter((el) => { return el != null && el != ""; });
     }
 
+    /** Takes in an object, and returns a regular expression with its keys */
+    public static getKeyRegex(object: any): RegExp {
+        const result: string[] = [];
+        for (const key of Object.keys(object))
+            result.push(key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+        return new RegExp(result.join("|"), "gi");
+    }
+
     /**
      * Compares two software version numbers (e.g. "1.7.1" or "1.2b").
      *
