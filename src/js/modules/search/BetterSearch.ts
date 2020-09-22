@@ -207,7 +207,7 @@ export class BetterSearch extends RE6Module {
                         "id": "search-stats-count",
                         "title": "Approximate number of posts found",
                     })
-                    .html("~" + Util.formatK(pageResult.length * this.lastPage) + " Posts")
+                    .html((this.lastPage > 1 ? "~" : "") + Util.formatK(pageResult.length * this.lastPage) + " Posts")
                     .appendTo(stats);
             }
 
