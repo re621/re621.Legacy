@@ -118,9 +118,17 @@ export class KeybindManager {
                 // Create the listener itself
                 const $element: any = element ? $(element) : $(document);
                 if (!selector) selector = null;
-                $element.on("keydown.re621.hotkey-" + key, selector, key, (event) => {
+                let keydown = false;
+
+                $element.on("keydown.re621.hotkey-" + key, selector, key, (event: Event) => {
+                    if (keydown) return;
+                    keydown = true;
                     if (!KeybindManager.enabled || KeybindManager.listening) return false;
                     this.listeners.get(key)(event);
+                });
+
+                $element.on("keyup.re621.hotkey-" + key, selector, key, () => {
+                    keydown = false;
                 });
             }
 

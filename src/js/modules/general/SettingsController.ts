@@ -280,6 +280,19 @@ export class SettingsController extends RE6Module {
                             postViewer.toggleBoldenedTags(data);
                         }
                     ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: miscellaneous.fetchSettings("hideBlacklist"),
+                            label: "<b>Hide Blacklist</b><br />Completely remove the \"Blacklisted\" section in the sidebar",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await miscellaneous.pushSettings("hideBlacklist", data);
+                            miscellaneous.hideBlacklist(data);
+                        }
+                    ),
                     Form.hr(3),
 
                     // ------------------------------------------ //

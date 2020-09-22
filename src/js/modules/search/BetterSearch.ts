@@ -48,9 +48,9 @@ export class BetterSearch extends RE6Module {
             imageLoadMethod: ImageLoadMethod.Disabled,      // Whether the image should be loaded as a preview, as a sample immediately, or on hover
             autoPlayGIFs: true,                             // If false, animated GIFs will use the `hover` load method even if that is set to `always`
 
-            imageSizeChange: true,                          // If true, resizes the image in accordance with `imageWidth`
+            imageSizeChange: false,                         // If true, resizes the image in accordance with `imageWidth`
             imageWidth: 150,                                // Width if the resized image
-            imageRatioChange: true,                         // If true, crops the image to ratio specified in `imageRatio`
+            imageRatioChange: false,                        // If true, crops the image to ratio specified in `imageRatio`
             imageRatio: 0.9,                                // Ratio to conform to
             imageMinWidth: 50,                              // Minimum image width, when it's not being cropped
             compactMode: true,                              // Limit the height to the same value as the width, instead of 50vh
@@ -63,7 +63,7 @@ export class BetterSearch extends RE6Module {
             buttonsVote: true,                              // Voting buttons
             buttonsFav: true,                               // Favorite button
 
-            clickAction: ImageClickAction.NewTab,           // Action take when double-clicking the thumbnail
+            clickAction: ImageClickAction.Disabled,         // Action take when double-clicking the thumbnail
 
             infiniteScroll: true,                           // Seamlessly load more posts below the current ones
             loadAutomatically: true,                        // Load posts automatically while scrolling down
@@ -196,6 +196,34 @@ export class BetterSearch extends RE6Module {
             let pagesLoaded = 0;
 
             const pageResult = await this.pageResult;
+
+            // Create the statistics section
+            const stats = $("<search-stats>")
+                .appendTo(this.$content);
+
+            if (Util.Math.isNumeric(this.queryPage)) {
+                $("<span>")
+                    .attr({
+                        "id": "search-stats-count",
+                        "title": "Approximate number of posts found",
+                    })
+                    .html("~" + Util.formatK(pageResult.length * this.lastPage) + " Posts")
+                    .appendTo(stats);
+            }
+
+            const order = this.queryTags.find(el => el.includes("order:"));
+            if (pageResult.length > 0 && (!order || order == "order:id_desc")) {
+                const diff = new Date(pageResult[0].created_at).getTime() - new Date(pageResult[pageResult.length - 1].created_at).getTime();
+                $("<span>")
+                    .attr({
+                        "id": "search-stats-frequency",
+                        "title": "How long it takes to fill a page completely",
+                    })
+                    .html(Util.Time.formatPeriod(diff))
+                    .appendTo(stats);
+            }
+
+            // Load posts
             if (pageResult.length > 0) {
 
                 const imageRatioChange = this.fetchSettings<boolean>("imageRatioChange");
