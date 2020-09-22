@@ -186,6 +186,10 @@ export class SubscriptionManager extends RE6Module {
             if (!this.notificationsAlreadyOpened) {
                 this.notificationsAlreadyOpened = true;
 
+                // Render the subscription updates
+                this.trackers.forEach((trackerData) => { this.executeReloadEvent(trackerData); });
+
+                // Set the active tab
                 let index = 0;
                 for (const sub of this.trackers) {
                     if (parseInt(sub[1].tabElement.attr("data-updates")) > 0) {
@@ -493,24 +497,32 @@ export class SubscriptionManager extends RE6Module {
 
     /** Reloads the entries on the tracker's tab */
     private async executeReloadEvent(trackerData: TrackerData): Promise<void> {
+
+        // Load subscription data
         const cache = trackerData.instance.getCache();
         await cache.load();
-        Debug.log(`SubM${trackerData.tabIndex}: drawing ${cache.getSize()} items`);
-
-        trackerData.content[0].innerHTML = "";
-
-        if (cache.getSize() > 0)    // Can be appended anywhere, sorting is done through CSS
-            trackerData.content.append(this.createCacheDivider());
-
-        const clickAction = ModuleController.get(BetterSearch).fetchSettings<ImageClickAction>("clickAction");
-
-        cache.forEach((content, timestamp) => {
-            trackerData.content.append(this.createUpdateEntry(timestamp, content, trackerData, clickAction));
-        });
 
         this.refreshTabNotifications(trackerData);
         this.refreshHeaderNotifications();
 
+        // Avoid rendering the output if the window has not been opened
+        if (!this.notificationsAlreadyOpened && !this.modal.isOpen()) {
+            Debug.log(`SubM${trackerData.tabIndex}: [${cache.getSize()}] idle`);
+            return;
+        }
+
+        // Render output normally otherwise
+        Debug.log(`SubM${trackerData.tabIndex}: [${cache.getSize()}] draw`);
+        trackerData.content[0].innerHTML = "";
+        if (cache.getSize() > 0)    // Can be appended anywhere, sorting is done through CSS
+            trackerData.content.append(this.createCacheDivider());
+
+        const clickAction = ModuleController.get(BetterSearch).fetchSettings<ImageClickAction>("clickAction");
+        cache.forEach((content, timestamp) => {
+            trackerData.content.append(this.createUpdateEntry(timestamp, content, trackerData, clickAction));
+        });
+
+        // Blink the updates notification on the active tab
         if (this.modal.isOpen()) {
             const activeTab = this.tabs.tabs("option", "active");
             window.setTimeout(() => { this.clearTabNotification(activeTab); }, 1000);
@@ -581,7 +593,7 @@ export class SubscriptionManager extends RE6Module {
     }
 
     private refreshTabNotifications(subscription: TrackerData): number {
-        const curCount = subscription.content.find(".new").length;
+        const curCount = subscription.instance.getCache().getNewCount();
         subscription.content.attr("data-updates", curCount);
         subscription.tabElement.attr("data-updates", curCount);
         return curCount;
@@ -597,10 +609,6 @@ export class SubscriptionManager extends RE6Module {
         const newItems = subscription.content.find(".new").get();
         for (const item of newItems) { $(item).removeClass("new").addClass("new-viewed"); }
 
-        // Recount notifications. The cache can get updated in the background, no need to wait
-        this.refreshTabNotifications(subscription);
-        this.refreshHeaderNotifications();
-
         // Remove the `new` flags from the cached data
         const cache = subscription.instance.getCache();
 
@@ -610,6 +618,10 @@ export class SubscriptionManager extends RE6Module {
             delete entry["new"];
             return entry;
         });
+
+        // Re-count notifications
+        this.refreshTabNotifications(subscription);
+        this.refreshHeaderNotifications();
 
         // Only update cache if changes have been made
         if (cleared > 0) await cache.save();
@@ -735,11 +747,9 @@ export class SubscriptionManager extends RE6Module {
 
         const $image = $("<img>")
             .attr({
-                "src": DomUtilities.getPlaceholderImage(),
-                "data-src": actions.imageSrc(data),
+                "src": actions.imageSrc(data),
                 "title": actions.updateText(data) + "\n" + timeAgo + "\n" + timeString
             })
-            .addClass("lazyload")
             .on("error", () => {
                 if (!actions.imageRemoveOnError) return;
                 $content.remove();

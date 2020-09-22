@@ -487,7 +487,7 @@ export class Form implements PreparedStructure {
                 .val("Recording");
 
             KeybindManager.record((sequence) => {
-                if (sequence.includes("esc")) {
+                if (sequence.includes("escape")) {
                     $input
                         .removeClass("input-info")
                         .val("")

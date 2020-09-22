@@ -165,6 +165,15 @@ export class UpdateCache {
         return this.index.length;
     }
 
+    /** Returns the number of items marked as new */
+    public getNewCount(): number {
+        let count = 0;
+        this.forEach((data) => {
+            if (data.new) count++;
+        });
+        return count;
+    }
+
     /**
      * Returns an item corresponding to the provided timestamp
      * @param timestamp Timestamp to look for

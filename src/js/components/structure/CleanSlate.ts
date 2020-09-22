@@ -1,4 +1,5 @@
 import { XM } from "../api/XM";
+import { KeybindManager } from "../data/Keybinds";
 import { Page, PageDefinition } from "../data/Page";
 import { Debug } from "../utility/Debug";
 import { ErrorHandler } from "../utility/ErrorHandler";
@@ -92,6 +93,16 @@ export class CleanSlate {
 
                     $("#content").html("");
                 },
+            })
+        }
+
+        if (Page.matches(PageDefinition.post)) {
+            actions.push({
+                selector: "#image-container",
+                action: () => {
+                    if ($("#image-container").attr("data-file-ext") === "swf")
+                        KeybindManager.disable();
+                }
             })
         }
 

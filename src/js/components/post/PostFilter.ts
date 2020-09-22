@@ -95,6 +95,9 @@ export class PostFilter {
                 case FilterType.Score:
                     result = PostFilterUtils.compareNumbers(post.score, parseInt(value), filter.comparison);
                     break;
+                case FilterType.FavCount:
+                    result = PostFilterUtils.compareNumbers(post.favorites, parseInt(value), filter.comparison);
+                    break;
                 case FilterType.Tag:
                     result = PostFilterUtils.tagsMatchesFilter(post, value);
                     break;
@@ -194,6 +197,7 @@ enum FilterType {
     Tag = "tag:",
     Id = "id:",
     Score = "score:",
+    FavCount = "favcount:",
     Rating = "rating:",
     Uploader = "uploader:",
     UserID = "userid:",

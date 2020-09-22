@@ -1,13 +1,22 @@
 import { Debug } from "../utility/Debug";
 
-declare const Mousetrap: any;
+const validKeys = [
+    "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "+", "=", ".", ",", "/", "*",
+    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+    "escape", "ctrl", "alt", "shift", "return",
+    "up", "down", "left", "right",
+];
 
 export class KeybindManager {
 
     private static listeners: Map<string, ListenerFunction> = new Map();
     private static executors: Map<string, KeybindExecutor> = new Map();
 
+    private static enabled = true;
     private static listening = false;
+
+    public static enable(): void { KeybindManager.enabled = true; }
+    public static disable(): void { KeybindManager.enabled = false; }
 
     public static register(keybind: Keybind): void;
     public static register(keybind: Keybind[]): void;
@@ -19,7 +28,7 @@ export class KeybindManager {
         }
 
         // Create a listener if one does not exist already
-        this.refreshListener(keybind.keys);
+        this.refreshListener(keybind.keys, keybind.element, keybind.selector);
 
         // Register the keybind function in the executor
         for (const key of keybind.keys) {
@@ -40,10 +49,27 @@ export class KeybindManager {
     }
 
     public static record(callback: (sequence: string[]) => void): void {
-        this.listening = true;
-        Mousetrap.record((sequence: string[]) => {
-            this.listening = false;
-            callback(sequence);
+        KeybindManager.listening = true;
+        let keys = [];
+
+        $(document).on("keydown.re621.record", (event) => {
+            const key = event.key
+                .toLowerCase()
+                .replace(/enter/g, "return")
+                .replace(/control/g, "ctrl")
+                .replace(/arrow/g, "");
+            if (validKeys.indexOf(key) == -1) return;
+            keys.push(key);
+        });
+
+        $(document).on("keyup.re621.record", () => {
+            if (keys.length !== 0) {
+                $(document).off(".re621.record");
+                callback(keys);
+                KeybindManager.listening = false;
+                return;
+            }
+            keys = [];
         });
     }
 
@@ -52,23 +78,30 @@ export class KeybindManager {
         return Object.keys(this.executors.get(sequence)).length;
     }
 
-    private static refreshListener(keys: string[]): void {
+    private static refreshListener(keys: string[], element?: string, selector?: string): void {
         for (const key of keys) {
 
-            // Establish the listener
+            if (key.length == 0) continue;
+
+            // Establish the listener structure
             if (!this.listeners.has(key)) {
-                this.listeners.set(key, () => {
+                this.listeners.set(key, (event: Event) => {
                     if (KeybindManager.listening) return;
                     const listenerExecutor = this.executors.get(key);
                     Debug.log("[" + key + "]: triggered " + Object.entries(listenerExecutor).length + " executors");
                     for (const [bindMeta, keyObj] of Object.entries(listenerExecutor)) {
                         if (!keyObj.enabled) continue;
-                        keyObj.fnct(bindMeta);
+                        keyObj.fnct(event, bindMeta);
                     }
                 });
 
-                // Dumbest thing I've written today, but it works. Don't question it.
-                Mousetrap.bind(key, () => { this.listeners.get(key)(); }, "keyup");
+                // Create the listener itself
+                const $element: any = element ? $(element) : $(document);
+                if (!selector) selector = null;
+                $element.on("keydown.re621.hotkey-" + key, selector, key, (event) => {
+                    if (!KeybindManager.enabled || KeybindManager.listening) return false;
+                    this.listeners.get(key)(event);
+                });
             }
 
             // Create the executor
@@ -84,25 +117,18 @@ export class KeybindManager {
 }
 
 export interface Keybind {
+    keys: string[];             // Array of key combinations that would trigger the executor
+    bindMeta: string;           // Meta-name of the keybinding, used to differentiate between executors
+    fnct: ResponseFunction;     // Function that is triggered that the key is pressed
+    enabled: boolean;           // If false, the key gets bound, but the function never gets executed
 
-    keys: string[];
-
-    bindMeta: string;
-
-    bindName: string;
-
-    fnct: (bindMeta: string) => void;
-
-    enabled: boolean;
+    element?: string;           // Element to which the listener gets bound. Defaults to `document`
+    selector?: string;          // Selector within the element for deferred listeners. Defaults to `null`
 }
 
-type ListenerFunction = () => void;
+type ListenerFunction = (event: Event) => void;
+export type ResponseFunction = (event: Event, bindMeta: string) => void;
 
 interface KeybindExecutor {
     [name: string]: Keybind;
-}
-
-export interface KeybindResponse {
-    success: boolean;
-    taken: boolean;
 }

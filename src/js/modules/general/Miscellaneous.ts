@@ -19,7 +19,7 @@ export class Miscellaneous extends RE6Module {
             { keys: "hotkeyNewComment", fnct: this.openNewComment },
             { keys: "hotkeyEditPost", fnct: this.openEditTab },
             { keys: "hotkeyToggleBlacklist", fnct: this.toggleBlacklist },
-            // { keys: "hotkeySubmit", fnct: this.handleSubmitForm, element: $("body"), selector: "textarea, input" },
+            { keys: "hotkeySubmit", fnct: this.handleSubmitForm, element: "body", selector: "textarea, input" },
             { keys: "hotkeyRandomSetPost", fnct: this.randomSetPost },
         );
     }
@@ -256,7 +256,7 @@ export class Miscellaneous extends RE6Module {
      * Submits the form on hotkey press
      * @param event Keydown event
      */
-    private handleSubmitForm(event): void {
+    private handleSubmitForm(event: Event): void {
         $(event.target).parents("form").trigger("submit");
     }
 
@@ -296,7 +296,6 @@ export class Miscellaneous extends RE6Module {
                 const shortname = $("div.set-shortname a").first().text();
 
                 const result = await E621.Posts.get<APIPost>({ tags: ["set:" + shortname, "order:random"], limit: 1 });
-                console.log(result);
                 if (result.length == 0) return;
 
                 location.href = "/posts/" + result[0].id + "?q=set:" + shortname;

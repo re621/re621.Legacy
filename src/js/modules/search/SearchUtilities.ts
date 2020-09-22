@@ -142,7 +142,7 @@ export class SearchUtilities extends RE6Module {
     }
 
     /** Sets the focus on the search bar */
-    private focusSearchbar(event): void {
+    private focusSearchbar(event: Event): void {
         event.preventDefault();
         $("section#search-box input").trigger("focus");
     }
