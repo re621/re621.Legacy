@@ -214,7 +214,6 @@ export class BetterSearch extends RE6Module {
             const order = this.queryTags.find(el => el.includes("order:"));
             if (pageResult.length > 0 && (!order || order == "order:id_desc")) {
                 const diff = new Date(pageResult[0].created_at).getTime() - new Date(pageResult[pageResult.length - 1].created_at).getTime();
-                console.log(diff);
                 $("<span>")
                     .attr({
                         "id": "search-stats-frequency",
