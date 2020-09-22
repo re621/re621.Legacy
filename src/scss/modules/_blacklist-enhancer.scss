@@ -1,7 +1,10 @@
 /** Replacement Blacklist Filtering Styles */
+section#blacklist-box {
+    display: block;
+}
 
 // Hide blacklist if it's empty
-section#re621-blacklist[count="0"][discount="0"] {
+section#blacklist-box[count="0"][discount="0"] {
     display: none;
 }
 
@@ -14,7 +17,7 @@ blacklist-header {
     cursor: pointer;
 }
 
-section#re621-blacklist > blacklist-header::before {
+section#blacklist-box > blacklist-header::before {
     content: unicode("f0d7");
     display: inline-block;
     margin-right: 0.5rem;
@@ -22,7 +25,7 @@ section#re621-blacklist > blacklist-header::before {
     font-weight: 700;
     transition: transform 0.25s ease;
 }
-section#re621-blacklist[collapsed=true] > blacklist-header::before {
+section#blacklist-box[collapsed=true] > blacklist-header::before {
     transform: rotate(-90deg);
 }
 
@@ -62,11 +65,11 @@ blacklist-content {
     }
 }
 
-section#re621-blacklist[collapsed=true] > blacklist-content {
+section#blacklist-box[collapsed=true] > blacklist-content {
     display: none;
 }
 
-section#re621-blacklist:not([collapsed=true]) > blacklist-content {
+section#blacklist-box:not([collapsed=true]) > blacklist-content {
     @include scrollbars;
 }
 

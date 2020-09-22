@@ -34,7 +34,6 @@ export class BlacklistEnhancer extends RE6Module {
         // Clean up the vanilla attributes and styles, or things will go poorly
         BlacklistEnhancer.$wrapper = $("#blacklist-box")
             .attr({
-                "id": "re621-blacklist",
                 "open": false,
                 "count": 0,
                 "discount": 0,

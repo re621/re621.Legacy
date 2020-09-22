@@ -54,6 +54,10 @@ export class PostSuggester extends RE6Module {
         // Create the sidebar button
         const listItem = $("<li>").appendTo("ul#related-list");
         const button = $("<a>")
+            .attr({
+                "id": "recommended-posts",
+                "title": "Show posts similar to your favorites"
+            })
             .html("Recommended")
             .appendTo(listItem);
 
