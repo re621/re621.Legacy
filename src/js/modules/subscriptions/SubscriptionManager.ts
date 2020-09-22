@@ -183,26 +183,27 @@ export class SubscriptionManager extends RE6Module {
         this.modal.getElement().on("dialogopen.onUpdate", () => {
             if (SubscriptionManager.updateInProgress) return;
 
-            if (!this.notificationsAlreadyOpened) {
-                this.notificationsAlreadyOpened = true;
-
-                // Render the subscription updates
-                this.trackers.forEach((trackerData) => { this.executeReloadEvent(trackerData); });
-
-                // Set the active tab
-                let index = 0;
-                for (const sub of this.trackers) {
-                    if (parseInt(sub[1].tabElement.attr("data-updates")) > 0) {
-                        this.tabs.tabs("option", "active", index);
-                        break;
-                    }
-                    index++;
-                }
+            // Blink the notifications icon if necessary
+            if (this.notificationsAlreadyOpened) {
+                const activeTab = this.tabs.tabs("option", "active");
+                window.setTimeout(() => { this.clearTabNotification(activeTab); }, 1000);
+                return;
             }
-            this.clearTabNotification(this.tabs.tabs("option", "active"));
-            window.setTimeout(() => {
-                this.clearTabNotification(this.tabs.tabs("option", "active"));
-            }, 1000);
+
+            this.notificationsAlreadyOpened = true;
+
+            // Render the subscription updates
+            this.trackers.forEach((trackerData) => { this.executeReloadEvent(trackerData); });
+
+            // Set the active tab
+            let index = 0;
+            for (const sub of this.trackers) {
+                if (parseInt(sub[1].tabElement.attr("data-updates")) > 0) {
+                    this.tabs.tabs("option", "active", index);
+                    break;
+                }
+                index++;
+            }
         });
 
         this.tabs.on("tabsactivate.onUpdate", (event, tabProperties) => {
@@ -488,11 +489,6 @@ export class SubscriptionManager extends RE6Module {
 
         this.$openSubsButton.attr("data-loading", "false");
         this.refreshHeaderNotifications();
-
-        if (this.modal.isOpen()) {
-            const activeTab = this.tabs.tabs("option", "active");
-            window.setTimeout(() => { this.clearTabNotification(activeTab); }, 1000);
-        }
     }
 
     /** Reloads the entries on the tracker's tab */
@@ -523,8 +519,8 @@ export class SubscriptionManager extends RE6Module {
         });
 
         // Blink the updates notification on the active tab
-        if (this.modal.isOpen()) {
-            const activeTab = this.tabs.tabs("option", "active");
+        const activeTab = this.tabs.tabs("option", "active");
+        if (this.modal.isOpen() && trackerData.tabIndex == activeTab) {
             window.setTimeout(() => { this.clearTabNotification(activeTab); }, 1000);
         }
     }
