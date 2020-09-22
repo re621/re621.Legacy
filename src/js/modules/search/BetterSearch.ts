@@ -48,9 +48,9 @@ export class BetterSearch extends RE6Module {
             imageLoadMethod: ImageLoadMethod.Disabled,      // Whether the image should be loaded as a preview, as a sample immediately, or on hover
             autoPlayGIFs: true,                             // If false, animated GIFs will use the `hover` load method even if that is set to `always`
 
-            imageSizeChange: true,                          // If true, resizes the image in accordance with `imageWidth`
+            imageSizeChange: false,                         // If true, resizes the image in accordance with `imageWidth`
             imageWidth: 150,                                // Width if the resized image
-            imageRatioChange: true,                         // If true, crops the image to ratio specified in `imageRatio`
+            imageRatioChange: false,                        // If true, crops the image to ratio specified in `imageRatio`
             imageRatio: 0.9,                                // Ratio to conform to
             imageMinWidth: 50,                              // Minimum image width, when it's not being cropped
             compactMode: true,                              // Limit the height to the same value as the width, instead of 50vh
@@ -63,7 +63,7 @@ export class BetterSearch extends RE6Module {
             buttonsVote: true,                              // Voting buttons
             buttonsFav: true,                               // Favorite button
 
-            clickAction: ImageClickAction.NewTab,           // Action take when double-clicking the thumbnail
+            clickAction: ImageClickAction.Disabled,         // Action take when double-clicking the thumbnail
 
             infiniteScroll: true,                           // Seamlessly load more posts below the current ones
             loadAutomatically: true,                        // Load posts automatically while scrolling down

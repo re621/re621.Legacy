@@ -26,7 +26,7 @@ export class HoverZoom extends RE6Module {
             enabled: true,
 
             mode: ImageZoomMode.OnShift,                // How should the hover zoom be triggered
-            tags: false,                                // Show a list of tags under the zoomed-in image
+            tags: true,                                 // Show a list of tags under the zoomed-in image
             time: true,                                 // If true, shows the timestamp in "x ago" format
         };
     }
