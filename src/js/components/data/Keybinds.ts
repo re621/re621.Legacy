@@ -1,11 +1,28 @@
 import { Debug } from "../utility/Debug";
+import { Util } from "../utility/Util";
 
 const validKeys = [
-    "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "+", "=", ".", ",", "/", "*",
+    "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+    "-", "=", ".", ",", "/", ";", "'", "[", "]",
     "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
     "escape", "ctrl", "alt", "shift", "return",
     "up", "down", "left", "right",
 ];
+
+const replacedKeys = {
+    // event.key returns a different name to what jquery.hotkeys expects
+    "enter": "return",
+    "control": "ctrl",
+    "arrow": "",
+
+    // replacing shift-modified symbols with respective values
+    // it makes no practical difference, but it looks neater
+    "!": "1", "@": "2", "#": "3", "$": "4", "%": "5",
+    "^": "6", "&": "7", "*": "8", "(": "9", ")": "0",
+    "_": "-", "+": "=", "<": ",", ">": ".", "?": "//",
+    ":": ";", '"': "'", "{": "[", "}": "]",
+};
+const replacedRegExp = Util.getKeyRegex(replacedKeys);
 
 export class KeybindManager {
 
@@ -51,13 +68,16 @@ export class KeybindManager {
     public static record(callback: (sequence: string[]) => void): void {
         KeybindManager.listening = true;
         let keys = [];
+        console.log(replacedRegExp);
 
         $(document).on("keydown.re621.record", (event) => {
             const key = event.key
                 .toLowerCase()
-                .replace(/enter/g, "return")
-                .replace(/control/g, "ctrl")
-                .replace(/arrow/g, "");
+                .replace(replacedRegExp, (matched) => {
+                    console.log("replacing", matched, "with", replacedKeys[matched]);
+                    return replacedKeys[matched];
+                });
+            console.log(key, validKeys.indexOf(key) == -1 ? "invalid" : "valid");
             if (validKeys.indexOf(key) == -1) return;
             keys.push(key);
         });
