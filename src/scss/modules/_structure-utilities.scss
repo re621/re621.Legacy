@@ -342,3 +342,8 @@ div#page div#c-sets div#a-show span.set-viewposts {
     padding-top: 1rem;
     a { margin-right: 0.5rem; }
 }
+
+/* Hide the blacklist sidebar section */
+body[data-hide-blacklist=true] section#blacklist-box {
+    display: none !important;
+}

@@ -39,9 +39,10 @@ export class Miscellaneous extends RE6Module {
 
             hotkeyRandomSetPost: "",
 
-            stickySearchbox: true,
-            stickyHeader: false,
-            stickyEditBox: true,
+            stickySearchbox: true,      // `div#re621-search`
+            stickyHeader: false,        // `header#top`
+            stickyEditBox: true,        // `form#re621-quick-tags`
+            hideBlacklist: false,       // remove the "blacklisted" section entirely
 
             avatarClick: true,
 
@@ -71,6 +72,9 @@ export class Miscellaneous extends RE6Module {
         if (Page.matches([PageDefinition.search, PageDefinition.favorites])) {
             this.createStickyEditBox(this.fetchSettings("stickyEditBox"));
         }
+
+        // Hide the blacklist
+        this.hideBlacklist(this.fetchSettings("hideBlacklist"));
 
         // Double-clicking avatars
         this.handleAvatarClick(this.fetchSettings("avatarClick"));
@@ -136,6 +140,11 @@ export class Miscellaneous extends RE6Module {
      */
     public createStickyEditBox(state = true): void {
         $("body").attr("data-sticky-editbox", state + "");
+    }
+
+    /** If true, completely removes the blacklisted section */
+    public hideBlacklist(state = true): void {
+        $("body").attr("data-hide-blacklist", state + "");
     }
 
     /**
