@@ -376,8 +376,8 @@ export class E621 {
                         this.emitter.trigger(
                             "api.re621.result-" + item.index,
                             [
-                                { error: error ? error[1] + " " + error[0].error : "unknown error" },
-                                error ? error[1] : 500,
+                                { error: (error && error[0]) ? error[1] + " " + error[0].error : "unknown error" },
+                                (error && error[0]) ? error[1] : 500,
                                 item.endpoint,
                                 item.node,
                             ]

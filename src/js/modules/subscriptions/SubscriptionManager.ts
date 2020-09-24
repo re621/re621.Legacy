@@ -468,9 +468,16 @@ export class SubscriptionManager extends RE6Module {
                     .html("Loading . . .")
                     .appendTo(trackerData.content);
 
-                const cache = trackerData.instance.getCache();
-                await cache.load();
-                await cache.update(prevUpdate, status);
+                try {
+                    const cache = trackerData.instance.getCache();
+                    await cache.load();
+                    await cache.update(prevUpdate, status);
+                } catch (error) {
+                    // Update returned an error, most likely
+                    // due to lack of internet connection
+                    SubscriptionManager.updateInProgress = false;
+                    SubscriptionManager.trigger("timerRefresh");
+                }
 
                 trackerData.tabElement.attr("data-loading", "false");
                 await this.executeReloadEvent(trackerData);
