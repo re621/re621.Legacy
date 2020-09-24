@@ -51,7 +51,8 @@ export class ImageScaler extends RE6Module {
         this.image = $("img#image");
 
         const resizeButtonContainer = $("#image-resize-cycle").empty();
-        this.setImageSize(this.fetchSettings("size"));
+        if (this.image.attr("src") !== "/images/blacklisted-preview.png")
+            this.setImageSize(this.fetchSettings("size"));
 
         this.resizeSelector = $("<select>")
             .html(`
