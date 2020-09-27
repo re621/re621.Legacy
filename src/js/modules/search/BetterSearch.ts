@@ -217,7 +217,7 @@ export class BetterSearch extends RE6Module {
                 $("<span>")
                     .attr({
                         "id": "search-stats-frequency",
-                        "title": "How long it takes to fill a page completely",
+                        "title": `Post update frequency\n` + `New page every ${(diff / Util.Time.DAY).toFixed(1)} days`,
                     })
                     .html(Util.Time.formatPeriod(diff))
                     .appendTo(stats);
