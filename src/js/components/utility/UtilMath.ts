@@ -12,4 +12,8 @@ export class UtilMath {
         return !isNaN(Number(value));
     }
 
+    public static round(num: number, decimal = 2): number {
+        return parseFloat(num.toFixed(decimal));
+    }
+
 }
