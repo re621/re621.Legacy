@@ -179,13 +179,15 @@ export class SettingsController extends RE6Module {
                         }
                     ),
                     Form.section({ columns: 3, width: 3, }, [
-                        Form.div({ value: `<div class="notice unmargin">The following variables can be used:</div>`, width: 3 }),
+                        Form.div({ value: `<div class="notice">The following variables can be used:</div>`, width: 3 }),
                         Form.copy({ value: "%postid%", label: "Post ID" }),
                         Form.copy({ value: "%artist%", label: "Artist" }),
                         Form.copy({ value: "%copyright%", label: "Copyright" }),
                         Form.copy({ value: "%character%", label: "Characters" }),
                         Form.copy({ value: "%species%", label: "Species" }),
+                        Form.copy({ value: "%general%", label: "General" }),
                         Form.copy({ value: "%meta%", label: "Meta" }),
+                        Form.copy({ value: "%all%", label: "All Tags" }),
                     ]),
                     Form.spacer(3, true),
 
