@@ -6,9 +6,15 @@ div#source-container {
     }
 
     button.source-copy,
-    button.source-link {
+    button.source-link,
+    span.source-eval {
         float: right;
         margin-left: 0.25rem;
+    }
+
+    span.source-eval {
+        color: coral;
+        font-family: monospace;
     }
 }
 
