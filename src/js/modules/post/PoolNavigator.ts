@@ -124,8 +124,8 @@ export class PoolNavigator extends RE6Module {
         }
 
         // Tweak the "first-last" links
-        $("#nav-links").find(".first").each((index, element) => { $(element).html("&laquo;"); });
-        $("#nav-links").find(".last").each((index, element) => { $(element).html("&raquo;"); });
+        $("#nav-links, #nav-links-top, #nav-links-bottom").find(".first").each((index, element) => { $(element).html("&laquo;"); });
+        $("#nav-links, #nav-links-top, #nav-links-bottom").find(".last").each((index, element) => { $(element).html("&raquo;"); });
     }
 }
 
