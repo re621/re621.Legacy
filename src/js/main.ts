@@ -21,6 +21,7 @@ import { HeaderCustomizer } from "./modules/general/HeaderCustomizer";
 import { Miscellaneous } from "./modules/general/Miscellaneous";
 import { SettingsController } from "./modules/general/SettingsController";
 import { ThemeCustomizer } from "./modules/general/ThemeCustomizer";
+import { EditTracker } from "./modules/misc/EditTracker";
 import { SmartAlias } from "./modules/misc/SmartAlias";
 import { UploadUtilities } from "./modules/misc/UploadUtilities";
 import { WikiEnhancer } from "./modules/misc/WikiEnhancer";
@@ -67,6 +68,7 @@ const loadOrder = [
     Miscellaneous,
 
     SmartAlias,
+    EditTracker,
     WikiEnhancer,
     UploadUtilities,
 
