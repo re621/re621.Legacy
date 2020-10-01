@@ -228,7 +228,7 @@ export class BetterSearch extends RE6Module {
                 graphContainer
                     .attr({
                         "id": "search-stats-graph",
-                        "title": "Post update frequency\n" + `New post every ${Util.Time.formatPeriod(diffData.average)}\n` + `At most ${Util.Time.formatPeriod(diffData.largest)}`,
+                        "title": "Post upload frequency\n" + `New post every ${Util.Time.formatPeriod(diffData.average)}\n` + `At most every ${Util.Time.formatPeriod(diffData.largest)}`,
                     })
                     .html("")
                     .appendTo(stats);
