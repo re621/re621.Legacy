@@ -25,6 +25,7 @@ import { PoolNavigator } from "../post/PoolNavigator";
 import { PostViewer } from "../post/PostViewer";
 import { TitleCustomizer } from "../post/TitleCustomizer";
 import { BetterSearch } from "../search/BetterSearch";
+import { BlacklistEnhancer } from "../search/BlacklistEnhancer";
 import { CustomFlagger, FlagDefinition } from "../search/CustomFlagger";
 import { HoverZoom } from "../search/HoverZoom";
 import { SearchUtilities } from "../search/SearchUtilities";
@@ -79,6 +80,7 @@ export class SettingsController extends RE6Module {
             name: "settings-tabs",
             content: [
                 { name: "General", structure: this.createGeneralTab() },
+                { name: "Blacklist", structure: this.createBlacklistTab() },
                 { name: "Downloads", structure: this.createDownloadsTab() },
                 { name: "Custom Flags", structure: this.createFlagsTab() },
                 { name: "Smart Alias", structure: this.createUploadsTab() },
@@ -151,8 +153,8 @@ export class SettingsController extends RE6Module {
 
             Form.accordion({ name: "collapse", columns: 3, width: 3, active: 0 }, [
 
-                // Page Layout
-                Form.accordionTab({ name: "layout", label: "Layout", columns: 3, width: 3 }, [
+                // General
+                Form.accordionTab({ name: "general", label: "General", columns: 3, width: 3 }, [
 
                     Form.div({ value: "<b>Main Page</b><br />Reroute the title page to the one specified", width: 2 }),
                     Form.select(
@@ -217,7 +219,11 @@ export class SettingsController extends RE6Module {
                             if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
                         }
                     ),
-                    Form.hr(3),
+
+                ]),
+
+                // Page Layout
+                Form.accordionTab({ name: "layout", label: "Page Layout", columns: 3, width: 3 }, [
 
                     Form.checkbox(
                         {
@@ -280,19 +286,6 @@ export class SettingsController extends RE6Module {
                         async (data) => {
                             await postViewer.pushSettings("boldenTags", data);
                             postViewer.toggleBoldenedTags(data);
-                        }
-                    ),
-                    Form.spacer(3),
-
-                    Form.checkbox(
-                        {
-                            value: miscellaneous.fetchSettings("hideBlacklist"),
-                            label: "<b>Hide Blacklist</b><br />Completely remove the \"Blacklisted\" section in the sidebar",
-                            width: 3,
-                        },
-                        async (data) => {
-                            await miscellaneous.pushSettings("hideBlacklist", data);
-                            miscellaneous.hideBlacklist(data);
                         }
                     ),
                     Form.hr(3),
@@ -728,19 +721,6 @@ export class SettingsController extends RE6Module {
                 // Miscellaneous
                 Form.accordionTab({ name: "misc", label: "Other", columns: 3, width: 3 }, [
 
-                    Form.text("<b>Persistent Tags</b>"),
-                    Form.input(
-                        {
-                            value: searchUtilities.fetchSettings("persistentTags"),
-                            width: 2,
-                        },
-                        async (data) => { await searchUtilities.pushSettings("persistentTags", data); }
-                    ),
-                    Form.text(`Tags added to every search, used to emulate server-side blacklisting`, 2),
-                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
-
-                    Form.hr(3),
-
                     Form.checkbox(
                         {
                             value: postViewer.fetchSettings("upvoteOnFavorite"),
@@ -776,19 +756,6 @@ export class SettingsController extends RE6Module {
 
                     Form.checkbox(
                         {
-                            value: searchUtilities.fetchSettings("quickBlacklist"),
-                            label: "<b>Quick Blacklist</b><br />Click X next to the tag in the sidebar to add it to the blacklist",
-                            width: 3,
-                        },
-                        async (data) => {
-                            await searchUtilities.pushSettings("quickBlacklist", data);
-                            searchUtilities.initQuickBlacklist(data);
-                        }
-                    ),
-                    Form.spacer(3),
-
-                    Form.checkbox(
-                        {
                             value: headerCustomizer.fetchSettings("forumUpdateDot"),
                             label: "<b>Forum Notifications</b><br />Red dot on the Forum tab in the header if there are new posts",
                             width: 3,
@@ -798,11 +765,89 @@ export class SettingsController extends RE6Module {
                             await headerCustomizer.pushSettings("forumUpdateDot", data)
                         }
                     ),
-                    Form.spacer(3),
+                    // Form.spacer(3),
 
                 ]),
 
             ]),
+
+        ]);
+    }
+
+    private createBlacklistTab(): Form {
+
+        const searchUtilities = ModuleController.get(SearchUtilities),
+            miscellaneous = ModuleController.get(Miscellaneous),
+            blacklistEnhancer = ModuleController.get(BlacklistEnhancer);
+
+        return new Form({ name: "conf-blacklist", columns: 3, width: 3 }, [
+
+            Form.header("Blacklist Settings"),
+
+            Form.checkbox(
+                {
+                    value: miscellaneous.fetchSettings("hideBlacklist"),
+                    label: "<b>Hide Blacklist</b><br />Completely remove the \"Blacklisted\" section in the sidebar",
+                    width: 3,
+                },
+                async (data) => {
+                    await miscellaneous.pushSettings("hideBlacklist", data);
+                    miscellaneous.hideBlacklist(data);
+                }
+            ),
+            Form.spacer(3),
+
+            Form.checkbox(
+                {
+                    value: searchUtilities.fetchSettings("quickBlacklist"),
+                    label: "<b>Quick Blacklist</b><br />Click X next to the tag in the sidebar to add it to the blacklist",
+                    width: 3,
+                },
+                async (data) => {
+                    await searchUtilities.pushSettings("quickBlacklist", data);
+                    searchUtilities.initQuickBlacklist(data);
+                }
+            ),
+            Form.spacer(3),
+
+            Form.checkbox(
+                {
+                    value: blacklistEnhancer.fetchSettings("favorites"),
+                    label: "<b>Exclude Favorites</b><br />Prevent your favorites from being filtered out by the blacklist",
+                    width: 2,
+                },
+                async (data) => {
+                    await blacklistEnhancer.pushSettings("favorites", data);
+                }
+            ),
+            Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
+            Form.spacer(3),
+
+            Form.checkbox(
+                {
+                    value: blacklistEnhancer.fetchSettings("uploads"),
+                    label: "<b>Exclude Uploads</b><br />Prevent your uploads from being filtered out by the blacklist",
+                    width: 2,
+                },
+                async (data) => {
+                    await blacklistEnhancer.pushSettings("uploads", data);
+                }
+            ),
+            Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
+            Form.hr(3),
+
+
+            Form.text("<b>Persistent Tags</b>"),
+            Form.input(
+                {
+                    value: searchUtilities.fetchSettings("persistentTags"),
+                    width: 2,
+                },
+                async (data) => { await searchUtilities.pushSettings("persistentTags", data); }
+            ),
+            Form.text(`Tags added to every search, used to emulate server-side blacklisting`, 2),
+            Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
+            Form.spacer(3),
 
         ]);
     }

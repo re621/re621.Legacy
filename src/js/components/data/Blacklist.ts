@@ -1,7 +1,7 @@
 import { BlacklistEnhancer } from "../../modules/search/BlacklistEnhancer";
 import { ModuleController } from "../ModuleController";
 import { Post, PostData } from "../post/Post";
-import { PostFilter } from "../post/PostFilter";
+import { FilterOptions, PostFilter } from "../post/PostFilter";
 import { Util } from "../utility/Util";
 import { User } from "./User";
 
@@ -15,9 +15,12 @@ export class Blacklist {
         const filters = $("head meta[name=blacklisted-tags]").attr("content");
         const blacklistEnabled = Util.LS.getItem("dab") !== "1";
 
+        const enhancer = ModuleController.get(BlacklistEnhancer)
+        const options = enhancer.fetchSettings(["favorites", "uploads"]) as FilterOptions;
+
         if (filters !== undefined) {
             for (const filter of JSON.parse(filters))
-                this.createFilter(filter, blacklistEnabled);
+                this.createFilter(filter, blacklistEnabled, options);
         }
     }
 
@@ -91,10 +94,10 @@ export class Blacklist {
      * @param filter String which should be turned into a PostFilter
      * @param enabled Whether or not the filter should be enabled after creation
      */
-    private createFilter(filter: string, enabled = true): void {
+    private createFilter(filter: string, enabled = true, options?: FilterOptions): void {
         let postFilter = this.blacklist.get(filter);
         if (postFilter === undefined) {
-            postFilter = new PostFilter(filter, enabled);
+            postFilter = new PostFilter(filter, enabled, options);
             this.blacklist.set(filter, postFilter);
         }
     }
@@ -104,8 +107,8 @@ export class Blacklist {
      * @param filter String which should be turned into a PostFilter
      * @param enabled Whether or not the filter should be enabled after creation
      */
-    public static createFilter(filter: string, enabled = true): void {
-        return this.getInstance().createFilter(filter, enabled);
+    public static createFilter(filter: string, enabled = true, options?: FilterOptions): void {
+        return this.getInstance().createFilter(filter, enabled, options);
     }
 
     /**

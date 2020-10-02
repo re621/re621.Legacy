@@ -174,6 +174,7 @@ export class UploadUtilities extends RE6Module {
 
             $parent.find("button.source-copy").remove();
             $parent.find("button.source-link").remove();
+            $parent.find("span.source-eval").remove();
 
             if ($input.val() == "") return;
 
@@ -192,9 +193,20 @@ export class UploadUtilities extends RE6Module {
                 .on("click", () => {
                     window.open($input.val() + "", "_blank");
                 });
+
+            $("<span>")
+                .addClass("source-eval")
+                .html(getLinkEval($input.val() + ""))
+                .appendTo($parent);
         });
 
         $("input.upload-source-input").trigger("input");
+
+        function getLinkEval(link: string): string {
+            if (!/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/.test(link)) return "invalid";
+            if (!link.startsWith("https")) return "http";
+            return "";
+        }
     }
 
 }

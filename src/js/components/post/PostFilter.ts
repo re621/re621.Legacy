@@ -1,5 +1,6 @@
 import { PostFlag, PostRating } from "../api/responses/APIPost";
 import { Tag } from "../data/Tag";
+import { User } from "../data/User";
 import { Util } from "../utility/Util";
 import { Post, PostData } from "./Post";
 
@@ -12,12 +13,17 @@ export class PostFilter {
     private matchIDs: Set<number>;       // post IDs matched by the filter
     private optionals: number;          // number of optional filters
 
-    constructor(input: string, enabled = true) {
+    constructor(input: string, enabled = true, options?: FilterOptions) {
         this.input = input.toLowerCase().trim();
         this.entries = [];
         this.enabled = enabled;
         this.matchIDs = new Set();
         this.optionals = 0;
+
+        if (options) {
+            if (options.favorites) this.entries.push({ type: FilterType.Fav, value: User.getUsername(), inverted: true, optional: false, comparison: ComparisonType.Equals });
+            if (options.uploads) this.entries.push({ type: FilterType.UserID, value: User.getUserID() + "", inverted: true, optional: false, comparison: ComparisonType.Equals });
+        }
 
         for (let filter of new Set(this.input.split(" ").filter(e => e != ""))) {
 
@@ -235,4 +241,9 @@ namespace ComparisonType {
             if (input.startsWith(ComparisonType[key])) return ComparisonType[key];
         return ComparisonType.Equals;
     }
+}
+
+export interface FilterOptions {
+    favorites: boolean;
+    uploads: boolean;
 }

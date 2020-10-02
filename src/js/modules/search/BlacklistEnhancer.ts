@@ -3,7 +3,7 @@ import { Blacklist } from "../../components/data/Blacklist";
 import { PageDefinition } from "../../components/data/Page";
 import { Post } from "../../components/post/Post";
 import { PostFilter } from "../../components/post/PostFilter";
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 import { BetterSearch } from "./BetterSearch";
 
@@ -20,6 +20,14 @@ export class BlacklistEnhancer extends RE6Module {
 
     public constructor() {
         super([PageDefinition.search, PageDefinition.favorites], true, false, [BetterSearch]);
+    }
+
+    public getDefaultSettings(): Settings {
+        return {
+            enabled: true,
+            favorites: false,
+            uploads: false,
+        }
     }
 
     public create(): void {

@@ -1,6 +1,8 @@
 /* Pool Navigator Styles */
 
-div#nav-links {
+div#nav-links,      // Old version
+div#nav-links-top,  // New version
+div#nav-links-bottom {
 
     li.post-nav {
         position: relative;

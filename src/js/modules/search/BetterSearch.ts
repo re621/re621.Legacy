@@ -212,15 +212,31 @@ export class BetterSearch extends RE6Module {
             }
 
             const order = this.queryTags.find(el => el.includes("order:"));
-            if (pageResult.length > 0 && (!order || order == "order:id_desc")) {
-                const diff = new Date(pageResult[0].created_at).getTime() - new Date(pageResult[pageResult.length - 1].created_at).getTime();
+            if (pageResult.length > 1 && (!order || order == "order:id_desc")) {
+                const diffData = BetterSearch.getPostDiffs(pageResult);
+                // console.log(diffData);
+
                 $("<span>")
                     .attr({
                         "id": "search-stats-frequency",
-                        "title": `Post update frequency\n` + `New page every ${(diff / Util.Time.DAY).toFixed(1)} days`,
+                        "title": `Page refresh frequency\n` + `New page every ${(diffData.refresh / Util.Time.DAY).toFixed(1)} days`,
                     })
-                    .html(Util.Time.formatPeriod(diff))
+                    .html(Util.Time.formatPeriod(diffData.refresh))
                     .appendTo(stats);
+
+                const graphContainer = $("<span>");
+                graphContainer
+                    .attr({
+                        "id": "search-stats-graph",
+                        "title": "Post upload frequency\n" + `New post every ${Util.Time.formatPeriod(diffData.average)}\n` + `At most every ${Util.Time.formatPeriod(diffData.largest)}`,
+                    })
+                    .html("")
+                    .appendTo(stats);
+                for (const point of diffData.data) {
+                    $("<span>")
+                        .css("height", ((0.5 + point) * 0.90).toFixed(2) + "em")
+                        .appendTo(graphContainer);
+                }
             }
 
             // Load posts
@@ -841,6 +857,46 @@ export class BetterSearch extends RE6Module {
 
     }
 
+    private static getPostDiffs(posts: APIPost[], chunks = 10): PostDiff {
+        const response: PostDiff = {
+            refresh: getDiff(posts[0], posts[posts.length - 1]),
+            largest: 1,
+            average: 1,
+            data: [],
+        };
+
+        const period = Math.ceil(posts.length / chunks);
+
+        const intervals = [];
+        let largest = 1,
+            smallest = 1,
+            average = 0;
+        for (let i = 0; i < posts.length - period; i += period) {
+            const diff = getDiff(posts[i], posts[i + period])
+            // console.log(`bt ${posts[i].id}, ${posts[i + period].id}:`, diff)
+            intervals.push(diff);
+            if (diff > largest) largest = diff;
+            if (diff < smallest || smallest == 1) smallest = diff;
+            average += diff;
+        }
+        average = average / posts.length;
+        const range = largest - smallest;
+
+        const intervalData = [];
+        for (const entry of intervals)
+            intervalData.push(Util.Math.round(-1 * ((entry - smallest) / range) + 0.5));
+
+        response.largest = largest;
+        response.average = average;
+        response.data = intervalData;
+
+        return response;
+
+        function getDiff(one: APIPost, two: APIPost): number {
+            return new Date(one.created_at).getTime() - new Date(two.created_at).getTime();
+        }
+    }
+
 }
 
 export enum ImageLoadMethod {
@@ -856,4 +912,11 @@ export enum ImageClickAction {
     Blacklist = "blacklist",
     AddToSet = "addtoset",
     ToggleSet = "toggleset",
+}
+
+interface PostDiff {
+    refresh: number;
+    largest: number;
+    average: number;
+    data: number[];
 }
