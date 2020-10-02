@@ -27,6 +27,7 @@ export class BlacklistEnhancer extends RE6Module {
             enabled: true,
             favorites: false,
             uploads: false,
+            whitelist: "",
         }
     }
 

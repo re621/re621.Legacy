@@ -774,6 +774,7 @@ export class SettingsController extends RE6Module {
         ]);
     }
 
+    /** Creates the blacklist settings tab */
     private createBlacklistTab(): Form {
 
         const searchUtilities = ModuleController.get(SearchUtilities),
@@ -808,7 +809,7 @@ export class SettingsController extends RE6Module {
                     searchUtilities.initQuickBlacklist(data);
                 }
             ),
-            Form.spacer(3),
+            Form.hr(3),
 
             Form.checkbox(
                 {
@@ -833,6 +834,18 @@ export class SettingsController extends RE6Module {
                     await blacklistEnhancer.pushSettings("uploads", data);
                 }
             ),
+            Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
+            Form.spacer(3),
+
+            Form.text("<b>Whitelist</b>"),
+            Form.input(
+                {
+                    value: blacklistEnhancer.fetchSettings("whitelist"),
+                    width: 2,
+                },
+                async (data) => { await blacklistEnhancer.pushSettings("whitelist", data); }
+            ),
+            Form.text(`Posts with these tags will never be filtered out`, 2),
             Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
             Form.hr(3),
 
