@@ -9,7 +9,7 @@ import { BetterSearch } from "./BetterSearch";
  * Adds a extra search input below the current one where 
  * you can filter posts instantaneously
  */
-export class InstantSearch extends RE6Module {
+export class InstantFilters extends RE6Module {
 
     private static filter: PostFilter;
 
@@ -38,10 +38,10 @@ export class InstantSearch extends RE6Module {
             const $article = $(event.currentTarget),
                 post = Post.get($article);
 
-            if (InstantSearch.filter == undefined) $article.removeAttr("filtered");
+            if (InstantFilters.filter == undefined) $article.removeAttr("filtered");
             else {
-                InstantSearch.filter.update(post);
-                if (InstantSearch.filter.matches(post)) $article.removeAttr("filtered");
+                InstantFilters.filter.update(post);
+                if (InstantFilters.filter.matches(post)) $article.removeAttr("filtered");
                 else $article.attr("filtered", "true");
             }
         });
@@ -86,11 +86,11 @@ export class InstantSearch extends RE6Module {
     }
 
     public static get(): PostFilter {
-        return InstantSearch.filter;
+        return InstantFilters.filter;
     }
 
     public static addPost(...posts: PostData[]): boolean {
-        const filter = InstantSearch.get();
+        const filter = InstantFilters.get();
         if (!filter) return false;
         return filter.update(posts);
     }
@@ -98,10 +98,10 @@ export class InstantSearch extends RE6Module {
     public applyFilter(): void {
         const filterText = this.$searchbox.val().toString().trim();
         if (filterText.length == 0) {
-            InstantSearch.filter = undefined;
+            InstantFilters.filter = undefined;
             Util.SS.removeItem("re621.insearch");
         } else {
-            InstantSearch.filter = new PostFilter(filterText);
+            InstantFilters.filter = new PostFilter(filterText);
             Util.SS.setItem("re621.insearch", filterText);
         }
         $("post").trigger("re621:insearch");

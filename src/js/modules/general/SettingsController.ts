@@ -1521,7 +1521,7 @@ export class SettingsController extends RE6Module {
 
             ...createInput("HeaderCustomizer", "Header Customizer", "Add, delete, and customize header links to your heart's content."),
 
-            ...createInput("InstantSearch", "Instant Filters", "Quickly add filters to your current search."),
+            ...createInput("InstantFilters", "Instant Filters", "Quickly add filters to your current search."),
 
             ...createInput("FormattingManager", "Formatting Helper", "Fully customizable toolbar for easy DText formatting."),
 
