@@ -22,15 +22,17 @@ section#content {
         justify-content: space-between;
         height: min-content;    // as above, random space at the bottom causes pagination to jump
         min-height: 80vh;
+        margin-top: 0.5rem;     // spacing for search stats
 
         // Search Statistics
         search-stats {
-            grid-column: 1 / -1;
+            position: absolute;
+            right: 0;
+            margin-top: -1rem;
+
             font-family: monospace;
             font-size: 1rem;
             color: #ffffffaa;
-            margin: -0.5rem 0;
-            text-align: right;
 
             & > span {
                 cursor: help;
