@@ -58,9 +58,9 @@ const loadOrder = [
 
     BlacklistEnhancer,
     CustomFlagger,
-    InstantFilters,
     ThumbnailTweaks,
     BetterSearch,
+    InstantFilters,
     HoverZoom,
 
     PostSuggester,

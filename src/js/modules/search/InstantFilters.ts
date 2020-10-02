@@ -1,4 +1,4 @@
-import { PageDefinition } from "../../components/data/Page";
+import { Page, PageDefinition } from "../../components/data/Page";
 import { Post, PostData } from "../../components/post/Post";
 import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -50,13 +50,15 @@ export class InstantFilters extends RE6Module {
             .attr("id", "re621-insearch")
             .html("<h1>Filter</h1>")
             .insertAfter("#search-box");
-        const $searchForm = $("<form>").appendTo($section);
+        const $searchForm = $("<form>")
+            .appendTo($section)
+            .on("submit", (event) => { event.preventDefault(); });
 
         let typingTimeout: number;
         this.$searchbox = $("<input>")
             .attr("id", "re621-insearch-input")
             .attr("type", "text")
-            .val(Util.SS.getItem("re621.insearch") || "")
+            .val(Page.getQueryParameter("insearch") || "")
             .appendTo($searchForm)
             .on("input", () => {
                 clearTimeout(typingTimeout);
@@ -96,14 +98,9 @@ export class InstantFilters extends RE6Module {
     }
 
     public applyFilter(): void {
-        const filterText = this.$searchbox.val().toString().trim();
-        if (filterText.length == 0) {
-            InstantFilters.filter = undefined;
-            Util.SS.removeItem("re621.insearch");
-        } else {
-            InstantFilters.filter = new PostFilter(filterText);
-            Util.SS.setItem("re621.insearch", filterText);
-        }
+        const filterText = Util.getTagString(this.$searchbox);
+        if (filterText.length == 0) InstantFilters.filter = undefined;
+        else InstantFilters.filter = new PostFilter(filterText);
         $("post").trigger("re621:insearch");
     }
 }
