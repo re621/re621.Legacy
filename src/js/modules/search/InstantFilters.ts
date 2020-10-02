@@ -1,4 +1,4 @@
-import { PageDefinition } from "../../components/data/Page";
+import { Page, PageDefinition } from "../../components/data/Page";
 import { Post, PostData } from "../../components/post/Post";
 import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -9,7 +9,7 @@ import { BetterSearch } from "./BetterSearch";
  * Adds a extra search input below the current one where 
  * you can filter posts instantaneously
  */
-export class InstantSearch extends RE6Module {
+export class InstantFilters extends RE6Module {
 
     private static filter: PostFilter;
 
@@ -38,10 +38,10 @@ export class InstantSearch extends RE6Module {
             const $article = $(event.currentTarget),
                 post = Post.get($article);
 
-            if (InstantSearch.filter == undefined) $article.removeAttr("filtered");
+            if (InstantFilters.filter == undefined) $article.removeAttr("filtered");
             else {
-                InstantSearch.filter.update(post);
-                if (InstantSearch.filter.matches(post)) $article.removeAttr("filtered");
+                InstantFilters.filter.update(post);
+                if (InstantFilters.filter.matches(post)) $article.removeAttr("filtered");
                 else $article.attr("filtered", "true");
             }
         });
@@ -50,13 +50,15 @@ export class InstantSearch extends RE6Module {
             .attr("id", "re621-insearch")
             .html("<h1>Filter</h1>")
             .insertAfter("#search-box");
-        const $searchForm = $("<form>").appendTo($section);
+        const $searchForm = $("<form>")
+            .appendTo($section)
+            .on("submit", (event) => { event.preventDefault(); });
 
         let typingTimeout: number;
         this.$searchbox = $("<input>")
             .attr("id", "re621-insearch-input")
             .attr("type", "text")
-            .val(Util.SS.getItem("re621.insearch") || "")
+            .val(Page.getQueryParameter("insearch") || "")
             .appendTo($searchForm)
             .on("input", () => {
                 clearTimeout(typingTimeout);
@@ -86,24 +88,19 @@ export class InstantSearch extends RE6Module {
     }
 
     public static get(): PostFilter {
-        return InstantSearch.filter;
+        return InstantFilters.filter;
     }
 
     public static addPost(...posts: PostData[]): boolean {
-        const filter = InstantSearch.get();
+        const filter = InstantFilters.get();
         if (!filter) return false;
         return filter.update(posts);
     }
 
     public applyFilter(): void {
-        const filterText = this.$searchbox.val().toString().trim();
-        if (filterText.length == 0) {
-            InstantSearch.filter = undefined;
-            Util.SS.removeItem("re621.insearch");
-        } else {
-            InstantSearch.filter = new PostFilter(filterText);
-            Util.SS.setItem("re621.insearch", filterText);
-        }
+        const filterText = Util.getTagString(this.$searchbox);
+        if (filterText.length == 0) InstantFilters.filter = undefined;
+        else InstantFilters.filter = new PostFilter(filterText);
         $("post").trigger("re621:insearch");
     }
 }

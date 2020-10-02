@@ -772,7 +772,7 @@ export class SubscriptionManager extends RE6Module {
             let prevent = false;
 
             $link.on("click.re621.thumbnail", (event) => {
-                if (event.button !== 0) { return; }
+                if ((event.button !== 0) || (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)) return;
                 event.preventDefault();
 
                 dblclickTimer = window.setTimeout(() => {
@@ -783,7 +783,7 @@ export class SubscriptionManager extends RE6Module {
                     prevent = false;
                 }, 200);
             }).on("dblclick.re621.thumbnail", (event) => {
-                if (event.button !== 0) { return; }
+                if ((event.button !== 0) || (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)) return;
 
                 event.preventDefault();
                 window.clearTimeout(dblclickTimer);

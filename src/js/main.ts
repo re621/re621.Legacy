@@ -34,7 +34,7 @@ import { BetterSearch } from "./modules/search/BetterSearch";
 import { BlacklistEnhancer } from "./modules/search/BlacklistEnhancer";
 import { CustomFlagger } from "./modules/search/CustomFlagger";
 import { HoverZoom } from "./modules/search/HoverZoom";
-import { InstantSearch } from "./modules/search/InstantSearch";
+import { InstantFilters } from "./modules/search/InstantFilters";
 import { PostSuggester } from "./modules/search/PostSuggester";
 import { SearchUtilities } from "./modules/search/SearchUtilities";
 import { ThumbnailTweaks } from "./modules/search/ThumbnailTweaks";
@@ -58,9 +58,9 @@ const loadOrder = [
 
     BlacklistEnhancer,
     CustomFlagger,
-    InstantSearch,
     ThumbnailTweaks,
     BetterSearch,
+    InstantFilters,
     HoverZoom,
 
     PostSuggester,

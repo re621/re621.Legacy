@@ -16,7 +16,7 @@ export class Blacklist {
         const blacklistEnabled = Util.LS.getItem("dab") !== "1";
 
         const enhancer = ModuleController.get(BlacklistEnhancer)
-        const options = enhancer.fetchSettings(["favorites", "uploads"]) as FilterOptions;
+        const options = enhancer.fetchSettings(["favorites", "uploads", "whitelist"]) as FilterOptions;
 
         if (filters !== undefined) {
             for (const filter of JSON.parse(filters))
