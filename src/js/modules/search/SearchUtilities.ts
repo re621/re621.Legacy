@@ -92,6 +92,9 @@ export class SearchUtilities extends RE6Module {
         // Initialize the quick-blacklist buttons
         this.initQuickBlacklist(this.fetchSettings("quickBlacklist"));
 
+        // Handle sidebar collapse
+        if (Page.matches(PageDefinition.search))
+            this.handleSidebarCollapse();
     }
 
     /**
@@ -193,6 +196,18 @@ export class SearchUtilities extends RE6Module {
                     });
             }
         }
+    }
+
+    /** Handle sidebar expansion and collapse */
+    private handleSidebarCollapse(): void {
+        const sidebar = $("#sidebar");
+        const button = $("<a>")
+            .attr({ "id": "sidebar-collapse" })
+            .insertBefore(sidebar)
+            .on("click", () => {
+                sidebar.toggleClass("collapsed");
+                button.toggleClass("collapsed");
+            });
     }
 
 }
