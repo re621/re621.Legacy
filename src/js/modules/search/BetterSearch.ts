@@ -212,7 +212,7 @@ export class BetterSearch extends RE6Module {
             }
 
             const order = this.queryTags.find(el => el.includes("order:"));
-            if (pageResult.length > 1 && (!order || order == "order:id_desc")) {
+            if (Page.matches(PageDefinition.search) && pageResult.length > 1 && (!order || order == "order:id_desc")) {
                 const diffData = BetterSearch.getPostDiffs(pageResult);
                 // console.log(diffData);
 
