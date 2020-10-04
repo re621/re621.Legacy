@@ -128,6 +128,7 @@ export class Post implements PostData {
             .append(PostParts.renderInfo(this))              // Post info
 
         if (!conf.imageRatioChange) this.$ref.css("--img-ratio", this.img.ratio);
+        if (this.file.duration) this.$ref.css("--duration", this.file.duration);
 
         // Refresh blacklist state
         this.updateVisibility();
