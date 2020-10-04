@@ -1,6 +1,7 @@
 import { PageDefinition } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { ThemeCustomizer } from "../general/ThemeCustomizer";
 
 export class PoolNavigator extends RE6Module {
 
@@ -36,11 +37,15 @@ export class PoolNavigator extends RE6Module {
     public create(): void {
         super.create();
 
-        this.buildDOM();
-
-        $("input[type='radio'].post-nav-switch").on("change", (event) => {
-            this.activeNav = parseInt($(event.target).val() + "");
+        this.createStructure();
+        ThemeCustomizer.on("switch.navbar", () => {
+            this.resetStructure();
+            this.createStructure();
         });
+
+        // Tweak the "first-last" links
+        $("#nav-links, #nav-links-top, #nav-links-bottom").find(".first").each((index, element) => { $(element).html("&laquo;"); });
+        $("#nav-links, #nav-links-top, #nav-links-bottom").find(".last").each((index, element) => { $(element).html("&raquo;"); });
 
     }
 
@@ -79,19 +84,19 @@ export class PoolNavigator extends RE6Module {
     }
 
     /** Creates the module structure */
-    private buildDOM(): void {
+    private createStructure(): void {
         // Search-nav
-        if ($("#search-seq-nav").length) {
-            this.navbars.push({ type: "search", element: $("#search-seq-nav > ul > li").first(), checkbox: undefined, });
+        if ($(".search-seq-nav:visible").length) {
+            this.navbars.push({ type: "search", element: $(".search-seq-nav:visible > ul > li").first(), checkbox: undefined, });
         }
 
         // Pool-navbars
-        for (const element of $("#pool-nav").find("ul > li").get()) {
+        for (const element of $(".pool-nav:visible").first().find("ul > li").get()) {
             this.navbars.push({ type: "pool", element: $(element), checkbox: undefined, });
         }
 
         // Set-navbars
-        for (const element of $("#set-nav").find("ul > li").get()) {
+        for (const element of $(".set-nav:visible").first().find("ul > li").get()) {
             this.navbars.push({ type: "set", element: $(element), checkbox: undefined, });
         };
 
@@ -123,9 +128,16 @@ export class PoolNavigator extends RE6Module {
             this.navbars[0].checkbox.parent().addClass("vis-hidden");
         }
 
-        // Tweak the "first-last" links
-        $("#nav-links, #nav-links-top, #nav-links-bottom").find(".first").each((index, element) => { $(element).html("&laquo;"); });
-        $("#nav-links, #nav-links-top, #nav-links-bottom").find(".last").each((index, element) => { $(element).html("&raquo;"); });
+        // Set the active navbar
+        $("input[type='radio'].post-nav-switch").on("change", (event) => {
+            this.activeNav = parseInt($(event.target).val() + "");
+        });
+    }
+
+    public resetStructure(): void {
+        $("input[type='radio'].post-nav-switch").off("change");
+        $(".post-nav-switch-box, .post-nav-spacer").remove();
+        this.navbars = [];
     }
 }
 

@@ -50,6 +50,7 @@ export class ThemeCustomizer extends RE6Module {
                 (data) => {
                     window.localStorage.setItem("theme", data);
                     $("body").attr("data-th-main", data);
+                    ThemeCustomizer.trigger("switch.theme", data);
                 }
             ),
             Form.select(
@@ -67,6 +68,7 @@ export class ThemeCustomizer extends RE6Module {
                 (data) => {
                     window.localStorage.setItem("theme-extra", data);
                     $("body").attr("data-th-extra", data);
+                    ThemeCustomizer.trigger("switch.extras", data);
                 }
             ),
             Form.select(
@@ -74,11 +76,13 @@ export class ThemeCustomizer extends RE6Module {
                 {
                     "top": "Top",
                     "bottom": "Bottom",
+                    "both": "Both",
                     "none": "None",
                 },
                 (data) => {
                     window.localStorage.setItem("theme-nav", data);
                     $("body").attr("data-th-nav", data);
+                    ThemeCustomizer.trigger("switch.navbar", data);
                 }
             ),
         ]);
