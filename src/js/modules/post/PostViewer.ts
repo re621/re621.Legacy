@@ -139,6 +139,10 @@ export class PostViewer extends RE6Module {
             if (!this.fetchSettings("upvoteOnFavorite")) return;
             Danbooru.Post.vote(this.post.id, 1, true);
         });
+
+        // Add target="_blank" to external related links
+        for (const link of $("#post-related-images a[href^=http]").get())
+            $(link).attr("target", "_blank");
     }
 
     /** Toggles the boldened look on sidebar tags */
