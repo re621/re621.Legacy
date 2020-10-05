@@ -20,6 +20,7 @@ export interface APIPost extends APIResponse {
     description: string;
     comment_count: number;
     is_favorited?: boolean;
+    duration: number;
 }
 
 interface Relationships {
@@ -272,6 +273,7 @@ export namespace APIPost {
             },
             updated_at: "",
             uploader_id: parseInt($element.attr("data-uploader-id")),
+            duration: null,
         };
 
         /**

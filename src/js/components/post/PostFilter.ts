@@ -126,6 +126,9 @@ export class PostFilter {
                 case FilterType.Size:
                     result = PostFilterUtils.compareNumbers(post.file.size, parseInt(value), filter.comparison);
                     break;
+                case FilterType.Duration:
+                    result = post.file.duration == null || PostFilterUtils.compareNumbers(post.file.duration, parseFloat(value), filter.comparison);
+                    break;
             }
 
             // Invert the result if necessary
@@ -215,6 +218,7 @@ enum FilterType {
     Height = "height:",
     Width = "width:",
     Size = "filesize:",
+    Duration = "duration:",
 }
 
 namespace FilterType {

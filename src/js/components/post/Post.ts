@@ -50,6 +50,7 @@ export class Post implements PostData {
         sample: string;                     // sampled (~850px) image. for WEBM, same as original. for SFW, null or undefined
         preview: string;                    // thumbnail (150px). for SFW, null or undefined
         size: number;
+        duration: number;                   // in seconds - for webm only, null for everything else
     };
     public loaded: LoadedFileType;          // currently loaded file size. used in hover loading mode
 
@@ -127,6 +128,7 @@ export class Post implements PostData {
             .append(PostParts.renderInfo(this))              // Post info
 
         if (!conf.imageRatioChange) this.$ref.css("--img-ratio", this.img.ratio);
+        if (this.file.duration) this.$ref.css("--duration", this.file.duration);
 
         // Refresh blacklist state
         this.updateVisibility();
@@ -318,6 +320,7 @@ export interface PostData {
         sample: string;
         preview: string;
         size: number;
+        duration: number;
     };
     loaded: LoadedFileType;
 
@@ -391,6 +394,7 @@ export namespace PostData {
                 sample: data.sample.url,
                 preview: data.preview.url,
                 size: data.file.size,
+                duration: data.duration,
             },
             loaded: undefined,
 
@@ -495,6 +499,7 @@ export namespace PostData {
                 sample: $article.attr("data-large-file-url") || null,
                 preview: $article.attr("data-preview-file-url") || null,
                 size: 0,
+                duration: null,
             },
             loaded: undefined,
 
@@ -620,6 +625,7 @@ export namespace PostData {
                 sample: urls["sample"],
                 preview: urls["preview"],
                 size: 0,
+                duration: null,
             },
             loaded: undefined,
 

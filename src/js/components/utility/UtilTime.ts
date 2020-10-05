@@ -113,4 +113,10 @@ export namespace UtilTime {
         return (date.getFullYear() + "").substring(2) + twoDigit(date.getMonth() + 1) + twoDigit(date.getDate()) + "-" + twoDigit(date.getHours()) + twoDigit(date.getMinutes());
     }
 
+    export function formatPlaytime(seconds: number): string {
+        seconds = Math.ceil(seconds);
+        const remainder = (seconds % 60);
+        return Math.floor(seconds / 60) + ":" + (remainder < 10 ? "0" : "") + remainder;
+    }
+
 }

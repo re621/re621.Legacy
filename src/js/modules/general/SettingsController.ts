@@ -55,7 +55,7 @@ export class SettingsController extends RE6Module {
     public getDefaultSettings(): Settings {
         return {
             enabled: true,
-
+            checkUpdates: true,
             hotkeyOpenSettings: "",
         };
     }
@@ -1878,7 +1878,8 @@ export class SettingsController extends RE6Module {
     /** Creates the about tab */
     private createAboutTab(): Form {
 
-        if (VersionChecker.hasUpdate) this.pushNotificationsCount("about", 1);
+        if (VersionChecker.hasUpdate && this.fetchSettings("checkUpdates"))
+            this.pushNotificationsCount("about", 1);
 
         return new Form({ name: "conf-about", columns: 3, width: 3 }, [
             // About
@@ -1909,6 +1910,19 @@ export class SettingsController extends RE6Module {
                 width: 3
             }),
             Form.div({ value: `Thank you for downloading and using this script. We hope that you enjoy the experience.`, width: 3 }),
+            Form.spacer(3),
+
+            Form.checkbox(
+                {
+                    label: "<b>Show Update Notification</b><br />Display a red dot over the settings icon if an update is available",
+                    value: this.fetchSettings("checkUpdates"),
+                    width: 3,
+                },
+                async (data) => {
+                    console.log(data);
+                    await this.pushSettings("checkUpdates", data);
+                }
+            ),
             Form.spacer(3),
 
             // Changelog

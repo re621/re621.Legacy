@@ -23,6 +23,13 @@ export class PostParts {
             .append(PostParts.renderImageElement(post, conf))
             .append($("<post-loading>"));
 
+
+        if (post.file.duration)
+            $("<span>")
+                .addClass("video-duration")
+                .html(Util.Time.formatPlaytime(post.file.duration))
+                .appendTo($link);
+
         if (conf.clickAction !== ImageClickAction.Disabled) PostParts.handleDoubleClick($link, post, conf);
 
         return $link;
