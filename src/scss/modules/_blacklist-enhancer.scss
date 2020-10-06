@@ -32,6 +32,9 @@ section#blacklist-box[collapsed=true] > blacklist-header::before {
 // Content
 blacklist-content {
     display: block;
+    max-height: 50vh;
+    overflow: visible scroll;
+    margin-left: -0.125rem;
 
     & > filter {
         display: list-item;
@@ -44,7 +47,7 @@ blacklist-content {
             content: unicode("f14a");
             display: inline-block;
             margin-right: 0.435rem;
-            margin-left: -1.125rem;
+            margin-left: -1rem;
             margin-top: 0.125rem;
             font-family: "Font Awesome 5 Free";
             font-weight: 500;

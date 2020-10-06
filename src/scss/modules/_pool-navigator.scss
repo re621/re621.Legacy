@@ -32,6 +32,13 @@ div#nav-links-bottom {
             text-align: right;
             margin: 0 0.5rem;
         }
+
+        span.search-name {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            width: 0;
+        }
     }
 
     .first { margin-right: 1rem; }
