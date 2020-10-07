@@ -391,7 +391,7 @@ export namespace PostData {
                 ext: data.file.ext,
                 md5: data.file.md5,
                 original: data.file.url,
-                sample: data.sample.url,
+                sample: data.sample.has ? data.sample.url : data.file.url,
                 preview: data.preview.url,
                 size: data.file.size,
                 duration: data.duration,
