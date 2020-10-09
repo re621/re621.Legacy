@@ -48,6 +48,10 @@ export class ImageScaler extends RE6Module {
     public create(): void {
         super.create();
 
+        // Move the note preview to root
+        $("#note-preview").insertBefore("#page");
+
+        // Create the selector
         this.post = Post.getViewingPost();
         this.image = $("img#image");
 
