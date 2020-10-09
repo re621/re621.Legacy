@@ -779,7 +779,8 @@ export class SettingsController extends RE6Module {
 
         const searchUtilities = ModuleController.get(SearchUtilities),
             miscellaneous = ModuleController.get(Miscellaneous),
-            blacklistEnhancer = ModuleController.get(BlacklistEnhancer);
+            blacklistEnhancer = ModuleController.get(BlacklistEnhancer),
+            imageScaler = ModuleController.get(ImageScaler);
 
         return new Form({ name: "conf-blacklist", columns: 3, width: 3 }, [
 
@@ -809,6 +810,19 @@ export class SettingsController extends RE6Module {
                     searchUtilities.initQuickBlacklist(data);
                 }
             ),
+            Form.spacer(3),
+
+            Form.checkbox(
+                {
+                    value: imageScaler.fetchSettings("clickShowFiltered"),
+                    label: "<b>Click to Show Blacklisted</b><br />Click on the blacklisted image on the post page to show it",
+                    width: 2,
+                },
+                async (data) => {
+                    await imageScaler.pushSettings("clickShowFiltered", data);
+                }
+            ),
+            Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
             Form.hr(3),
 
             Form.checkbox(

@@ -34,7 +34,8 @@ export class ImageScaler extends RE6Module {
             hotkeyScale: "v|0",         // cycle through the various scaling modes
             hotkeyFullscreen: "",       // open the current post in fullscreen mode
 
-            clickScale: true,
+            clickScale: true,           // click on the image to change the scale
+            clickShowFiltered: false,   // click on blacklisted image to show it
 
             size: ImageSize.Fill,
         };
@@ -91,6 +92,11 @@ export class ImageScaler extends RE6Module {
 
         this.image.on("click", async () => {
             if (!this.fetchSettings("clickScale") || await Danbooru.Note.TranslationMode.active()) return;
+            if (this.image.attr("src") == "/images/blacklisted-preview.png") {
+                if (this.fetchSettings("clickShowFiltered"))
+                    this.setScale("current", false);
+                return;
+            }
             this.setScale("", false);
         });
         this.toggleClickScale(this.fetchSettings<boolean>("clickScale"));
@@ -108,7 +114,8 @@ export class ImageScaler extends RE6Module {
             const $next = selector.find("option:selected").next();
             if ($next.length > 0) { size = $next.val() + ""; }
             else { size = selector.find("option").first().val() + ""; }
-        }
+        } else if (size == "current")
+            size = selector.find("option:selected").val() + "";
 
         selector.val(size).trigger("change", save);
     }
