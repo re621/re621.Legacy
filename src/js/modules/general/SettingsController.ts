@@ -765,7 +765,19 @@ export class SettingsController extends RE6Module {
                             await headerCustomizer.pushSettings("forumUpdateDot", data)
                         }
                     ),
-                    // Form.spacer(3),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: miscellaneous.fetchSettings("commitWikiLinks"),
+                            label: "<b>Wiki Links in Post History</b><br />Redirect the tag links in the post history to the wiki pages",
+                            width: 2,
+                        },
+                        async (data) => {
+                            await miscellaneous.pushSettings("commitWikiLinks", data)
+                        }
+                    ),
+                    Form.requiresReload(),
 
                 ]),
 
