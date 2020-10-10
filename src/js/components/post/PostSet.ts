@@ -34,6 +34,11 @@ export class PostSet {
         return this.posts.values();
     }
 
+    /** Returns an array of posts contained within the set */
+    public entries(): Post[] {
+        return this.posts;
+    }
+
     /** Executes the provided function on every element of the set */
     public each(fn: (post: Post) => void): void {
         for (const entry of this.posts) fn(entry);

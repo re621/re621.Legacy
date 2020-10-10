@@ -16,7 +16,7 @@
     "require": [
         "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js",
-        "https://cdn.jsdelivr.net/npm/jquery.hotkeys@0.1.0/jquery.hotkeys.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/jquery.hotkeys/0.1.0/jquery.hotkeys.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"
     ],
     "resource": {

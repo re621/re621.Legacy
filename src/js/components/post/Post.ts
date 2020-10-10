@@ -206,13 +206,18 @@ export class Post implements PostData {
      * Returns all Post elements of the specified type
      * @param type Type to look for
      */
-    public static find(type: "rendered" | "blacklisted" | "hovering" | "all"): PostSet {
+    public static find(type: "rendered" | "blacklisted" | "hovering" | "existant" | "all"): PostSet {
         const result = new PostSet();
         switch (type) {
             case "hovering":
             case "blacklisted":
             case "rendered": {
                 for (const elem of $(`post[${type}=true]`).get())
+                    result.push(Post.get($(elem)));
+                break;
+            }
+            case "existant": {
+                for (const elem of $(`post:not([deleted=true])`).get())
                     result.push(Post.get($(elem)));
                 break;
             }
@@ -391,7 +396,7 @@ export namespace PostData {
                 ext: data.file.ext,
                 md5: data.file.md5,
                 original: data.file.url,
-                sample: data.sample.url,
+                sample: data.sample.has ? data.sample.url : data.file.url,
                 preview: data.preview.url,
                 size: data.file.size,
                 duration: data.duration,

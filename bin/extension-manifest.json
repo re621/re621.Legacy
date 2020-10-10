@@ -48,7 +48,7 @@
                     "./build/cache/jquery-ui.min.js"
                 ],
                 [
-                    "https://cdn.jsdelivr.net/npm/jquery.hotkeys@0.1.0/jquery.hotkeys.min.js",
+                    "https://cdnjs.cloudflare.com/ajax/libs/jquery.hotkeys/0.1.0/jquery.hotkeys.min.js",
                     "./build/cache/jquery.hotkeys.min.js"
                 ],
                 [

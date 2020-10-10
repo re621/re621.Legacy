@@ -53,3 +53,8 @@ div#image-resize-notice {
         transform: rotate(359deg);
     }
 }
+
+// Layer note preview properly
+div#note-preview {
+    z-index: 10;
+}

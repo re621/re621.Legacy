@@ -877,6 +877,10 @@ export class Form implements PreparedStructure {
         return Form.div({ value: text, width: width, wrapper: wrapper });
     }
 
+    public static requiresReload(): FormElement {
+        return Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle");
+    }
+
     /**
      * Alias for `Form.div` with some pre-built markup
      * @param header First line of the header

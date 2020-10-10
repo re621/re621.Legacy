@@ -107,4 +107,5 @@ export const PageDefinition = {
     artist: /^\/artists\/[0-9]+/,
     comments: /^\/comments\??.*/,
     settings: /^\/users\/\d+\/edit$/,
+    changes: /^\/post_versions.*/,
 };

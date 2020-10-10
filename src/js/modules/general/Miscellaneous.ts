@@ -45,6 +45,7 @@ export class Miscellaneous extends RE6Module {
             hideBlacklist: false,       // remove the "blacklisted" section entirely
 
             avatarClick: true,
+            commitWikiLinks: false,     // change the post search links on the comit pages to wiki links
 
             fixForumTitle: true,
         };
@@ -93,6 +94,13 @@ export class Miscellaneous extends RE6Module {
         // Minor changes to the set cover page
         if (Page.matches(PageDefinition.set)) {
             this.tweakSetPage();
+        }
+
+        if (Page.matches(PageDefinition.changes) && this.fetchSettings("commitWikiLinks")) {
+            for (const link of $(".diff-list a").get()) {
+                const $link = $(link);
+                $link.attr("href", "/wiki_pages/show_or_new?title=" + $link.text());
+            }
         }
 
         DomUtilities.addSettingsButton({
