@@ -2,7 +2,7 @@ import { DownloadQueue } from "../../components/api/DownloadQueue";
 import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { Page, PageDefinition } from "../../components/data/Page";
-import { PostData } from "../../components/post/Post";
+import { Post, PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
@@ -21,7 +21,7 @@ export class FavDownloader extends RE6Module {
     private batchOverSize = true;
 
     // Keeping track of downloaded images
-    private posts: APIPost[] = [];
+    private posts: PostData[] = [];
     private userID: number;
 
     // Value used to make downloaded file names unique
@@ -31,6 +31,7 @@ export class FavDownloader extends RE6Module {
     // Interface elements
     private section: JQuery<HTMLElement>;
     private actButton: JQuery<HTMLElement>;
+    private visButton: JQuery<HTMLElement>;
     private infoText: JQuery<HTMLElement>;
     private infoFile: JQuery<HTMLElement>;
 
@@ -72,12 +73,21 @@ export class FavDownloader extends RE6Module {
 
         // Download all files
         this.actButton = $("<a>")
-            .html("Download All")
+            .html("All")
             .addClass("pool-download-button button btn-neutral")
             .appendTo(this.section)
             .on("click", (event) => {
                 event.preventDefault();
                 this.processFiles();
+            });
+
+        this.visButton = $("<a>")
+            .html("Page")
+            .addClass("pool-download-button button btn-neutral")
+            .appendTo(this.section)
+            .on("click", (event) => {
+                event.preventDefault();
+                this.processFiles(true);
             });
 
         // Contains general info about the download
@@ -104,10 +114,11 @@ export class FavDownloader extends RE6Module {
     }
 
     /** Processes and downloads the selected files. */
-    private async processFiles(): Promise<void> {
+    private async processFiles(visible = false): Promise<void> {
         if (this.processing) return;
         this.processing = true;
         this.actButton.attr("disabled", "disabled");
+        this.visButton.attr("disabled", "disabled");
         $("search-content").attr("data-downloading", "true");
 
         BetterSearch.setPaused(true);
@@ -121,16 +132,22 @@ export class FavDownloader extends RE6Module {
             this.infoText
                 .attr("data-state", "loading")
                 .html("Fetching API data . . .");
-            this.posts = (await recursiveLookup([], this.infoFile, this.userID)).reverse();
+            if (visible) this.posts = Post.find("existant").reverse().entries();
+            else this.posts = (await recursiveLookup([], this.infoFile, this.userID)).reverse();
         }
 
-        async function recursiveLookup(output: APIPost[], info: JQuery<HTMLElement>, userID: number, index = 1): Promise<APIPost[]> {
+        async function recursiveLookup(output: PostData[], info: JQuery<HTMLElement>, userID: number, index = 1): Promise<PostData[]> {
             info.html(" &nbsp; &nbsp;request " + index + " [" + output.length + "]");
             return E621.Favorites.get<APIPost>({ user_id: userID, page: index, limit: 320 })
                 .then((data) => {
-                    output.push(...data);
-                    if (data.length == 320) return recursiveLookup(output, info, userID, ++index);
-                    else return Promise.resolve(output);
+                    for (const post of data) {
+                        const $post = PostData.fromAPI(post);
+                        if (!$post.has.file) continue;
+                        output.push(PostData.fromAPI(post));
+                    }
+                    console.log("counting", data.length);
+                    if (data.length == 0) return Promise.resolve(output);
+                    else return recursiveLookup(output, info, userID, ++index);
                 });
         }
 
@@ -149,13 +166,11 @@ export class FavDownloader extends RE6Module {
         this.batchOverSize = false;
 
         // Add post data to the queue
-        let queuedPost: APIPost;
+        let queuedPost: PostData;
         while (queuedPost = this.posts.pop()) {
 
-            const post = PostData.fromAPI(queuedPost);
-
-            // Skip deleted files
-            if (!post.has.file) continue;
+            // Dumb workaround for a bug that I'm too lazy to fix
+            const post = queuedPost;
 
             // Determine queue size
             totalFileSize += post.file.size;
@@ -237,12 +252,15 @@ export class FavDownloader extends RE6Module {
         this.downloadIndex++;
 
         this.actButton.removeAttr("disabled");
+        this.visButton.removeAttr("disabled");
         this.processing = false;
 
         if (this.batchOverSize) {
             // Start the next download immediately
-            if (this.fetchSettings("autoDownloadArchive")) { this.actButton.get(0).click(); }
-            else {
+            if (this.fetchSettings("autoDownloadArchive")) {
+                if (visible) this.visButton.get(0).click();
+                else this.actButton.get(0).click();
+            } else {
                 $("<div>")
                     .addClass("download-notice")
                     .html(`Download has exceeded the maximum file size.<br /><br />Click the download button again for the next part.`)
