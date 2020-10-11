@@ -1,0 +1,24 @@
+
+search-content {
+
+    search-track {
+        position: absolute;
+        left: 0;
+        margin-top: -1rem;
+
+        font-family: monospace;
+        font-size: 1rem;
+        color: #ffffffaa;
+
+        & > a {
+            &:not(:last-child)::after {
+                content: " | ";
+                color: #ffffffaa;
+            }
+        }
+    }
+
+    post[new=true] post-info {
+        background: #48360a;
+    }
+}

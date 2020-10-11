@@ -184,10 +184,32 @@ export class Post implements PostData {
      */
     public static get(post: number): Post;
     public static get(post: JQuery<Element>): Post;
-    public static get(post: number | JQuery<Element>): Post {
+    public static get(type: "first" | "last" | "random"): Post;
+    public static get(post: number | JQuery<Element> | string): Post {
         if (typeof post == "number") {
             post = $("#entry_" + post).first();
             if (post.length == 0) return null;
+        } else if (typeof post == "string") {
+            switch (post) {
+                case "first": {
+                    post = $("post").first();
+                    if (post.length == 0) return null;
+                    break;
+                }
+                case "last": {
+                    post = $("post").last();
+                    if (post.length == 0) return null;
+                    break;
+                }
+                case "random": {
+                    const posts = $("post");
+                    if (posts.length == 0) return null;
+                    const index = Math.floor(Math.random() * posts.length);
+                    post = posts.eq(index);
+                    break;
+                }
+                default: { return null; }
+            }
         }
         return post.data("post");
     }
@@ -206,8 +228,20 @@ export class Post implements PostData {
      * Returns all Post elements of the specified type
      * @param type Type to look for
      */
-    public static find(type: "rendered" | "blacklisted" | "hovering" | "existant" | "all"): PostSet {
+    public static find(type: "rendered" | "blacklisted" | "hovering" | "existant" | "all" | number): PostSet {
         const result = new PostSet();
+
+        // Return posts up to specified ID
+        if (typeof type == "number") {
+            for (const elem of $(`post`).get()) {
+                const post = Post.get($(elem));
+                if (post.id == type) break;
+                result.push(post);
+            }
+            return result;
+        }
+
+        // Normal types
         switch (type) {
             case "hovering":
             case "blacklisted":

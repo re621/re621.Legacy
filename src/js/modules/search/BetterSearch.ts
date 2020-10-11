@@ -302,6 +302,7 @@ export class BetterSearch extends RE6Module {
 
             BlacklistEnhancer.update();
             this.updatePostCount();
+            BetterSearch.trigger("ready");
         });
     }
 
