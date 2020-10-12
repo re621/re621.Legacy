@@ -325,6 +325,18 @@ export class RE6Module {
     }
 
     /**
+     * Executes a handler function exactly once whe encountering a specified event
+     * @param name Event selector
+     * @param callback Handler function
+     */
+    public static one(name: string, callback: (event: JQuery.TriggeredEvent, data: any) => void): void {
+        $(document).on("re621.module." + this.getInstance().constructor.name + "." + name, (event, data) => {
+            callback(event, data);
+            this.off(name);
+        });
+    }
+
+    /**
      * Detaches all handlers from the specified module event
      * @param name Event selector
      */
