@@ -36,6 +36,7 @@ import { CustomFlagger } from "./modules/search/CustomFlagger";
 import { HoverZoom } from "./modules/search/HoverZoom";
 import { InstantFilters } from "./modules/search/InstantFilters";
 import { PostSuggester } from "./modules/search/PostSuggester";
+import { ProgressTracker } from "./modules/search/ProgressTracker";
 import { SearchUtilities } from "./modules/search/SearchUtilities";
 import { ThumbnailTweaks } from "./modules/search/ThumbnailTweaks";
 import { CommentTracker } from "./modules/subscriptions/CommentTracker";
@@ -62,6 +63,7 @@ const loadOrder = [
     BetterSearch,
     InstantFilters,
     HoverZoom,
+    ProgressTracker,
 
     PostSuggester,
     SearchUtilities,

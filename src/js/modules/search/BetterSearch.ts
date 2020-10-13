@@ -302,6 +302,7 @@ export class BetterSearch extends RE6Module {
 
             BlacklistEnhancer.update();
             this.updatePostCount();
+            BetterSearch.trigger("ready");
         });
     }
 
@@ -669,8 +670,10 @@ export class BetterSearch extends RE6Module {
         }
 
         const parsedTags = [];
-        for (const tag of this.queryTags)
-            parsedTags.push(decodeURIComponent(tag));
+        for (const tag of this.queryTags) {
+            try { parsedTags.push(decodeURIComponent(tag)); }
+            catch (error) { return []; }    // If unable to decode (probably because of a % sign), just give up
+        }
 
         return E621.Posts.get<APIPost>({ tags: parsedTags, page: page ? page : this.queryPage, limit: this.queryLimit }, 500);
     }

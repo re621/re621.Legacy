@@ -164,6 +164,19 @@ export class PostFilter {
         return (this.enabled || ignoreDisabled) && this.matchIDs.has(id);
     }
 
+    /**
+     * Alternative approach to `matchesID` method.  
+     * Returns:
+     * - 0 if the filter does not match
+     * - 1 if the filter matches, and is enabled
+     * - 2 if the filter matches, but is disabled
+     * @param id ID of the post to test against the filter
+     */
+    public matchesIDAlt(id: number): number {
+        if (this.matchIDs.has(id)) return this.enabled ? 1 : 2;
+        return 0;
+    }
+
     public getMatches(): Set<number> { return this.matchIDs; }
     public getMatchesCount(): number { return this.matchIDs.size; }
 
@@ -241,11 +254,22 @@ enum ComparisonType {
     Larger = ">"
 }
 
+const ComparisonTypeAliases = {
+    "<=": ComparisonType.EqualsSmaller,
+    "=<": ComparisonType.EqualsSmaller,
+    ">=": ComparisonType.EqualsLarger,
+    "=>": ComparisonType.EqualsLarger,
+    "=": ComparisonType.Equals,
+    "==": ComparisonType.Equals,
+    "<": ComparisonType.Smaller,
+    ">": ComparisonType.Larger,
+}
+
 namespace ComparisonType {
     export function test(input: string): ComparisonType {
         input = input.toLowerCase();
-        for (const key of Object.keys(ComparisonType))
-            if (input.startsWith(ComparisonType[key])) return ComparisonType[key];
+        for (const [key, comparison] of Object.entries(ComparisonTypeAliases))
+            if (input.startsWith(key)) return comparison;
         return ComparisonType.Equals;
     }
 }
