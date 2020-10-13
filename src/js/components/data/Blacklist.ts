@@ -77,6 +77,27 @@ export class Blacklist {
         return false;
     }
 
+    /**
+     * Alternative approach to `checkPost` method.  
+     * Returns:
+     * - 0 if no filters match the post
+     * - 1 if at least one enabled filter matches
+     * - 2 if any number of filters match, but are all disabled
+     * @param post Post to test against the filter
+     */
+    public static checkPostAlt(post: PostData | number): number {
+        if (typeof post !== "number") post = post.id;
+        let resultType = 0;
+        for (const filter of Blacklist.get().values()) {
+            const result = filter.matchesIDAlt(post);
+            if (result) {
+                if (result == 1) return result;
+                else resultType = 2;
+            }
+        }
+        return resultType;
+    }
+
     /** Enables all blacklist filters */
     public static enableAll(): void {
         for (const filter of Blacklist.get().values())

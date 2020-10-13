@@ -185,6 +185,7 @@ search-content > post {
     transition: box-shadow 0.25s linear;
 
     &[blacklisted=true] { display: none; }
+    &[blacklisted=maybe] post-info { background: #ff000025 !important; }
     &[filtered=true] { display: none; }
 
     & > a {

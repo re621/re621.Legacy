@@ -164,6 +164,19 @@ export class PostFilter {
         return (this.enabled || ignoreDisabled) && this.matchIDs.has(id);
     }
 
+    /**
+     * Alternative approach to `matchesID` method.  
+     * Returns:
+     * - 0 if the filter does not match
+     * - 1 if the filter matches, and is enabled
+     * - 2 if the filter matches, but is disabled
+     * @param id ID of the post to test against the filter
+     */
+    public matchesIDAlt(id: number): number {
+        if (this.matchIDs.has(id)) return this.enabled ? 1 : 2;
+        return 0;
+    }
+
     public getMatches(): Set<number> { return this.matchIDs; }
     public getMatchesCount(): number { return this.matchIDs.size; }
 

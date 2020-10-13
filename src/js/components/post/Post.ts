@@ -167,9 +167,13 @@ export class Post implements PostData {
      * Should be executed every time a blacklist filter is toggled.
      */
     public updateVisibility(): Post {
-        if (Blacklist.checkPost(this.id)) {
-            this.$ref.attr("blacklisted", "true");
-            if (this.isRendered()) this.reset();
+        const state = Blacklist.checkPostAlt(this.id);
+        if (state) {
+            console.log("bl", state);
+            if (state == 1) {
+                this.$ref.attr("blacklisted", "true");
+                if (this.isRendered()) this.reset();
+            } else this.$ref.attr("blacklisted", "maybe");
         } else this.$ref.removeAttr("blacklisted");
 
         return this;
