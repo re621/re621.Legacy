@@ -241,11 +241,22 @@ enum ComparisonType {
     Larger = ">"
 }
 
+const ComparisonTypeAliases = {
+    "<=": ComparisonType.EqualsSmaller,
+    "=<": ComparisonType.EqualsSmaller,
+    ">=": ComparisonType.EqualsLarger,
+    "=>": ComparisonType.EqualsLarger,
+    "=": ComparisonType.Equals,
+    "==": ComparisonType.Equals,
+    "<": ComparisonType.Smaller,
+    ">": ComparisonType.Larger,
+}
+
 namespace ComparisonType {
     export function test(input: string): ComparisonType {
         input = input.toLowerCase();
-        for (const key of Object.keys(ComparisonType))
-            if (input.startsWith(ComparisonType[key])) return ComparisonType[key];
+        for (const [key, comparison] of Object.entries(ComparisonTypeAliases))
+            if (input.startsWith(key)) return comparison;
         return ComparisonType.Equals;
     }
 }
