@@ -29,7 +29,7 @@ export class ImageScaler extends RE6Module {
      */
     protected getDefaultSettings(): Settings {
         return {
-            enabled: true,
+            enabled: false,
 
             hotkeyScale: "v|0",         // cycle through the various scaling modes
             hotkeyFullscreen: "",       // open the current post in fullscreen mode
