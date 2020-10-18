@@ -74,7 +74,7 @@ export class Post implements PostData {
     private constructor(data: PostData, $ref: JQuery<HTMLElement>) {
         for (const [key, value] of Object.entries(data)) this[key] = value;
         this.$ref = $ref;
-        this.$ref.data("post", this);
+        this.$ref.data("wfpost", this);
 
         this.updateFilters();
     }
@@ -169,7 +169,6 @@ export class Post implements PostData {
     public updateVisibility(): Post {
         const state = Blacklist.checkPostAlt(this.id);
         if (state) {
-            console.log("bl", state);
             if (state == 1) {
                 this.$ref.attr("blacklisted", "true");
                 if (this.isRendered()) this.reset();
@@ -215,7 +214,7 @@ export class Post implements PostData {
                 default: { return null; }
             }
         }
-        return post.data("post");
+        return post.data("wfpost");
     }
 
     /**
@@ -224,7 +223,7 @@ export class Post implements PostData {
      */
     public static getViewingPost(): Post {
         const container = $("#image-container");
-        if (container.data("post") !== undefined) return Post.get(container);
+        if (container.data("wfpost") !== undefined) return Post.get(container);
         return new Post(PostData.fromDOM(), container);
     }
 
@@ -468,107 +467,35 @@ export namespace PostData {
     export function fromDOM(): PostData {
 
         const $article = $("#image-container");
+        const data: APIPost = JSON.parse($article.attr("data-post"));
 
-        const id = parseInt($article.attr("data-id")) || 0;
-        const timeEl = $("#post-information").find("time");
-        const time = timeEl.length != 0 ? timeEl.attr("title") : "0";
-
-        // Children
-        const children: Set<number> = new Set();
-        for (const post of $("div#has-children-relationship-preview").find("article").get())
-            children.add(parseInt($(post).attr("data-id")));
-
-        // Tags
-        const tagString = $article.attr("data-tags") || "";
-        const artistTags = getTags("artist");
-
-        // MD5
-        let md5: string;
-        if ($article.attr("data-md5")) md5 = $article.attr("data-md5");
-        else if ($article.attr("data-file-url"))
-            md5 = $article.attr("data-file-url").substring(36, 68);
-
-        // Score
-        let score = 0;
-        if ($article.attr("data-score")) score = parseInt($article.attr("data-score"));
-        else if ($article.find(".post-score-score").length !== 0)
-            score = parseInt($article.find(".post-score-score").first().html().substring(1));
-
-        // User score;
-        let userScore = 0;
-        if ($(".post-vote-up-" + id).first().hasClass("score-positive")) userScore = 1;
-        else if ($(".post-vote-down-" + id).first().hasClass("score-negative")) userScore = -1;
-
-        // Dimensions
-        const width = parseInt($article.attr("data-width")),
-            height = parseInt($article.attr("data-height"));
-
-        return {
-            id: id,
-            flags: PostFlag.fromString($article.attr("data-flags") || ""),
-            score: score,
-            user_score: userScore,
-            favorites: parseInt($article.attr("data-fav-count")) || 0,
-            is_favorited: $article.attr("data-is-favorited") == "true",
-            comments: -1,
-            rating: PostRating.fromValue($article.attr("data-rating")),
-            uploader: parseInt($article.attr("data-uploader-id")) || 0,
-
-            page: "-1",
-
-            date: {
-                raw: time,
-                ago: Util.Time.ago(time),
-            },
-
-            tagString: tagString,
-            tags: {
-                all: new Set(tagString.split(" ")),
-                artist: artistTags,
-                real_artist: new Set([...artistTags].filter(tag => Tag.isArtist(tag))),
-                copyright: getTags("copyright"),
-                species: getTags("species"),
-                character: getTags("character"),
-                general: getTags("general"),
-                invalid: getTags("invalid"),
-                meta: getTags("meta"),
-                lore: getTags("lore"),
-            },
-
-            file: {
-                ext: $article.attr("data-file-ext"),
-                md5: md5,
-                original: $article.attr("data-file-url") || null,
-                sample: $article.attr("data-large-file-url") || null,
-                preview: $article.attr("data-preview-file-url") || null,
-                size: 0,
-                duration: null,
-            },
-            loaded: undefined,
-
-            img: {
-                width: width,
-                height: height,
-                ratio: height / width,
-            },
-
-            has: {
-                file: $article.attr("data-file-url") !== undefined,
-                children: $article.attr("data-has-active-children") == "true",
-                parent: $article.attr("data-parent-id") !== undefined,
-            },
-
-            rel: {
-                children: children,
-                parent: parseInt($article.attr("data-parent-id")) || null,
-            },
-
+        // Fetch tags - the existant ones are insufficient
+        data["tags"] = {
+            artist: getTags("artist"),
+            character: getTags("character"),
+            copyright: getTags("copyright"),
+            general: getTags("general"),
+            invalid: getTags("invalid"),
+            lore: getTags("lore"),
+            meta: getTags("meta"),
+            species: getTags("species"),
         };
 
-        function getTags(group: string): Set<string> {
-            const result: Set<string> = new Set();
+        // Restore the preview image. Not used anywhere, but avoids an error.
+        const md5 = data["file"]["md5"],
+            md52 = md5.substr(0, 2);
+        data["preview"] = {
+            "width": -1,
+            "height": -1,
+            "url": `https://static1.e621.net/data/preview/${md52}/${md52}/${md5}.jpg`
+        };
+
+        return PostData.fromAPI(data);
+
+        function getTags(group: string): string[] {
+            const result: string[] = [];
             for (const element of $(`#tag-list .${group}-tag-list`).children()) {
-                result.add($(element).find(".search-tag").text().replace(/ /g, "_"));
+                result.push($(element).find(".search-tag").text().replace(/ /g, "_"));
             }
             return result;
         }
