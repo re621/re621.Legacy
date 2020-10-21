@@ -21,8 +21,8 @@ export class PostFilter {
         this.optionals = 0;
 
         if (options) {
-            if (options.favorites) this.entries.push({ type: FilterType.Fav, value: User.getUsername(), inverted: true, optional: false, comparison: ComparisonType.Equals });
-            if (options.uploads) this.entries.push({ type: FilterType.UserID, value: User.getUserID() + "", inverted: true, optional: false, comparison: ComparisonType.Equals });
+            if (options.favorites) this.entries.push({ type: FilterType.Fav, value: User.username, inverted: true, optional: false, comparison: ComparisonType.Equals });
+            if (options.uploads) this.entries.push({ type: FilterType.UserID, value: User.userID + "", inverted: true, optional: false, comparison: ComparisonType.Equals });
             if (options.whitelist)
                 for (const tag of options.whitelist.split(" "))
                     this.entries.push({ type: FilterType.Tag, value: tag, inverted: true, optional: false, comparison: ComparisonType.Equals });

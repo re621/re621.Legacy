@@ -665,7 +665,7 @@ export class BetterSearch extends RE6Module {
     /** Retrieves post data from an appropriate API endpoint */
     private async fetchPosts(page?: number | string): Promise<APIPost[]> {
         if (Page.matches(PageDefinition.favorites)) {
-            const userID = Page.getQueryParameter("user_id") || User.getUserID();
+            const userID = Page.getQueryParameter("user_id") || User.userID;
             return E621.Favorites.get<APIPost>({ user_id: userID, page: page ? page : this.queryPage, limit: this.queryLimit }, 500)
         }
 

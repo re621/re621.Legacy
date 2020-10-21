@@ -49,7 +49,7 @@ export class PostSuggester extends RE6Module {
     public create(): void {
         super.create();
 
-        if (!User.isLoggedIn()) return;
+        if (!User.loggedIn) return;
 
         // Create the sidebar button
         const listItem = $("<li>").appendTo("ul#related-list");
@@ -98,7 +98,7 @@ export class PostSuggester extends RE6Module {
         for (let i = 1; i <= PostSuggester.maxPages; i++) {
             // Fetching data from the API
             this.status.html(`Analyzing favorites [ page ${i} ]`);
-            result = await E621.Favorites.get<APIPost>({ "user_id": User.getUserID(), page: i }, 500);
+            result = await E621.Favorites.get<APIPost>({ "user_id": User.userID, page: i }, 500);
             result.forEach((post) => {
                 APIPost.getTags(post).forEach((tag) => {
                     if (data[tag]) data[tag] = data[tag] + 1;
@@ -177,7 +177,7 @@ export class PostSuggester extends RE6Module {
                     query.push("~" + encodeURIComponent($(checkedEl).attr("data-tag")))
                 query.length = Math.min(query.length, 37);
                 query.push(
-                    encodeURIComponent("-fav:" + User.getUsername()),
+                    encodeURIComponent("-fav:" + User.username),
                     encodeURIComponent("order:random"),
                     encodeURIComponent("score:>10"),
                 );

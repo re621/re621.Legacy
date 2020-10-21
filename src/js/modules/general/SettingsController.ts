@@ -739,7 +739,6 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await imageScaler.pushSettings("clickScale", data);
-                            imageScaler.toggleClickScale(data);
                         }
                     ),
                     Form.spacer(3),
@@ -1796,7 +1795,7 @@ export class SettingsController extends RE6Module {
                     if (storedData[data.name]["cache"]) storedData[data.name]["cache"] = {};
                 });
 
-                Util.downloadAsJSON(storedData, "re621-" + User.getUsername() + "-userdata");
+                Util.downloadAsJSON(storedData, "re621-" + User.username + "-userdata");
             })
         }
 
