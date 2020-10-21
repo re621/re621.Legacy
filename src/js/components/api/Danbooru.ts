@@ -81,6 +81,14 @@ export class Danbooru {
             if (Danbooru.hasModules()) Danbooru.getModules()["Post"].unapprove(post_id);
             else XM.Chrome.execInjectorRequest("Danbooru", "Post", "unapprove", [post_id]);
         },
+        resize_cycle_mode(): void {
+            if (Danbooru.hasModules()) Danbooru.getModules()["Post"].resize_cycle_mode();
+            else XM.Chrome.execInjectorRequest("Danbooru", "Post", "resize_cycle_mode");
+        },
+        resize_to(size: string): void {
+            if (Danbooru.hasModules()) Danbooru.getModules()["Post"].resize_to(size);
+            else XM.Chrome.execInjectorRequest("Danbooru", "Post", "resize_to", [size]);
+        },
     };
 
     public static PostModeMenu = {

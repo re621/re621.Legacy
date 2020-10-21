@@ -739,7 +739,6 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await imageScaler.pushSettings("clickScale", data);
-                            imageScaler.toggleClickScale(data);
                         }
                     ),
                     Form.spacer(3),

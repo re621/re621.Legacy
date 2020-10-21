@@ -1,8 +1,6 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { PageDefinition } from "../../components/data/Page";
 import { User } from "../../components/data/User";
-import { ModuleController } from "../../components/ModuleController";
-import { Post } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
@@ -10,15 +8,10 @@ import { RE6Module, Settings } from "../../components/RE6Module";
  */
 export class ImageScaler extends RE6Module {
 
-    private post: Post;
-    private image: JQuery<HTMLElement>;
-
-    private resizeSelector: JQuery<HTMLElement>;
-
     public constructor() {
         super(PageDefinition.post, true);
         this.registerHotkeys(
-            { keys: "hotkeyScale", fnct: () => { this.setScale(); } },
+            { keys: "hotkeyScale", fnct: this.cycleScaling },
             { keys: "hotkeyFullscreen", fnct: this.openFullscreen },
         );
     }
@@ -29,7 +22,7 @@ export class ImageScaler extends RE6Module {
      */
     protected getDefaultSettings(): Settings {
         return {
-            enabled: false,
+            enabled: true,
 
             hotkeyScale: "v|0",         // cycle through the various scaling modes
             hotkeyFullscreen: "",       // open the current post in fullscreen mode
@@ -48,123 +41,33 @@ export class ImageScaler extends RE6Module {
     public create(): void {
         super.create();
 
-        // Move the note preview to root
-        $("#note-preview").insertBefore("#page");
+        const $image = $("#image"),
+            $container = $("#image-container"),
+            $selector = $("#image-resize-selector");
 
-        // Create the selector
-        this.post = Post.getViewingPost();
-        this.image = $("img#image");
-
-        const resizeButtonContainer = $("#image-resize-cycle").empty();
-        if (this.image.attr("src") !== "/images/blacklisted-preview.png")
-            this.setImageSize(this.fetchSettings("size"));
-
-        this.resizeSelector = $("<select>")
-            .html(`
-                <option value="${ImageSize.Sample}">Sample</option>
-                <option value="${ImageSize.Fill}">Fill Screen</option>
-                <option value="${ImageSize.Fit}">Fit Horizontally</option>
-                <option value="${ImageSize.Original}">Original</option>
-            `)
-            .val(this.fetchSettings("size"))
-            .addClass("button btn-neutral")
-            .appendTo(resizeButtonContainer)
-            .on("change", async (event, save) => {
-                const size = $(event.target).val() + "";
-                this.setImageSize(size);
-                if (save !== false) {
-                    await this.pushSettings("size", size);
-                    switch (size) {
-                        case ImageSize.Sample: {
-                            await User.setSettings({ default_image_size: "large" });
-                            break;
-                        }
-                        case ImageSize.Fill:
-                        case ImageSize.Fit: {
-                            await User.setSettings({ default_image_size: "fit" });
-                            break;
-                        }
-                        case ImageSize.Original: {
-                            await User.setSettings({ default_image_size: "original" });
-                            break;
-                        }
-                    }
-                }
-            });
+        $selector.val(User.defaultImageSize);
 
         $("#image-download-link a").html("Fullscreen");
 
-        this.image.on("click", async () => {
-            if (!this.fetchSettings("clickScale") || await Danbooru.Note.TranslationMode.active()) return;
-            if (this.image.attr("src") == "/images/blacklisted-preview.png") {
-                if (this.fetchSettings("clickShowFiltered"))
-                    this.setScale("current", false);
+        $image.on("click", async () => {
+
+            // Workaround to un-blacklist images on mouse click
+            if ($container.hasClass("blacklisted-active-visible")) {
+                if (!this.fetchSettings("clickShowFiltered")) return;
+
+                $container.removeClass("blacklisted-active-visible");
+                const size = ($selector.val() || "large") + "";
+                Danbooru.Post.resize_to(size);
+
                 return;
             }
-            this.setScale("", false);
-        });
-        this.toggleClickScale(this.fetchSettings<boolean>("clickScale"));
 
-    }
+            // Disable this when notes are being edited
+            if (!this.fetchSettings("clickScale") || await Danbooru.Note.TranslationMode.active()) return;
 
-    /**
-     * Sets a new scale for the post image
-     * @param size New size. If none specified, cycles to the next in the list
-     * @param save Set to false to prevent saving the scale to settings
-     */
-    private setScale(size = "", save = true): void {
-        const selector = ModuleController.get(ImageScaler).resizeSelector;
-        if (size === "") {
-            const $next = selector.find("option:selected").next();
-            if ($next.length > 0) { size = $next.val() + ""; }
-            else { size = selector.find("option").first().val() + ""; }
-        } else if (size == "current")
-            size = selector.find("option:selected").val() + "";
-
-        selector.val(size).trigger("change", save);
-    }
-
-    /**
-     * Set the page image to the specified size
-     * @param size sample, fit-horizontal, fit-vertical, or original
-     */
-    private setImageSize(size: string): void {
-        this.image.removeClass();
-        this.image.parent().addClass("loading");
-
-        this.image.on("load", () => {
-            Danbooru.Note.Box.scale_all();
-            this.image.parent().removeClass("loading");
+            this.cycleScaling();
         });
 
-        switch (size) {
-            case (ImageSize.Sample): {
-                this.image.attr("src", this.post.file.sample);
-                break;
-            }
-            case (ImageSize.Fill): {
-                this.image.addClass("re621-fit-vertical");
-                if (this.image.attr("src") !== this.post.file.original) {
-                    this.image.attr("src", this.post.file.original);
-                } else { this.image.parent().removeClass("loading"); }
-                break;
-            }
-            case (ImageSize.Fit): {
-                this.image.addClass("re621-fit-horizontal");
-                if (this.image.attr("src") !== this.post.file.original) {
-                    this.image.attr("src", this.post.file.original);
-                } else { this.image.parent().removeClass("loading"); }
-                break;
-            }
-            case (ImageSize.Original): {
-                if (this.image.attr("src") !== this.post.file.original) {
-                    this.image.attr("src", this.post.file.original);
-                } else { this.image.parent().removeClass("loading"); }
-                break;
-            }
-        }
-
-        Danbooru.Note.Box.scale_all();
     }
 
     /** Opens the post in fullscreen mode */
@@ -172,9 +75,9 @@ export class ImageScaler extends RE6Module {
         $("#image-download-link a")[0].click();
     }
 
-    /** Sets the appropriate click-scale style */
-    public toggleClickScale(state = true): void {
-        $("#image-container").toggleClass("click-scale", state);
+    /** Cycles through scaling modes */
+    private cycleScaling(): void {
+        Danbooru.Post.resize_cycle_mode();
     }
 
 }

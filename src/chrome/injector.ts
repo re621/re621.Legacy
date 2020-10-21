@@ -32,6 +32,8 @@ const fnDanbooru = {
         "approve": (post_id, should_reload): void => { Danbooru.Post.approve(post_id, should_reload); },
         "disapprove": (post_id, reason, should_reload): void => { Danbooru.Post.disapprove(post_id, reason, should_reload); },
         "unapprove": (post_id): void => { Danbooru.Post.unapprove(post_id); },
+        "resize_cycle_mode": (): void => { Danbooru.Post.resize_cycle_mode(); },
+        "resize_to": (size: string): void => { Danbooru.Post.resize_to(size); },
     },
     "PostModeMenu": {
         "change": (): void => { Danbooru.PostModeMenu.change(); },
