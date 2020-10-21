@@ -1,3 +1,5 @@
+import { APIResponse } from "./APIResponse";
+
 export interface APIForumTopic extends APIResponse {
     id: number;
     creator_id: number;

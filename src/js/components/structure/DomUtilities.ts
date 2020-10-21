@@ -1,8 +1,6 @@
 import { Page, PageDefinition } from "../data/Page";
 import { Util } from "../utility/Util";
 
-declare const GM;
-
 /**
  * StructureUtilities  
  * DOM changes that don't belong to any specific project

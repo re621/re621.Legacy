@@ -3,6 +3,7 @@
 
 import { Debug } from "../utility/Debug";
 import { Util } from "../utility/Util";
+import { APIResponse } from "./responses/APIResponse";
 
 // All endpoints must be registered here.
 // Name is irrelevant, as long as it is unique.

@@ -951,7 +951,7 @@ export class FormElement {
     private label: JQuery<HTMLElement>;
     private content: FormElement[];
     private container: JQuery<HTMLElement>;
-    private postProcessing: Function;
+    private postProcessing: (wrapper: JQuery<HTMLElement>) => void;
 
     /**
      * Constructs a form element based on provided data.  
