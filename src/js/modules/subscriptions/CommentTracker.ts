@@ -132,7 +132,7 @@ export class CommentTracker extends RE6Module implements SubscriptionTracker {
 
         status.append(`<div>. . . formatting output</div>`);
         for (const comment of data.values()) {
-            if (new Date(comment.created_at).getTime() > lastUpdate && comment.updater_id !== User.getUserID())
+            if (new Date(comment.created_at).getTime() > lastUpdate && comment.updater_id !== User.userID)
                 results[new Date(comment.created_at).getTime()] = await this.formatCommentUpdate(comment, posts.get(comment.post_id));
 
             // Fetch and update the saved forum thread name

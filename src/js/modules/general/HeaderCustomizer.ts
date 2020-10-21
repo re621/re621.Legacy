@@ -360,8 +360,8 @@ export class HeaderCustomizer extends RE6Module {
      */
     private processTabVariables(text: string): string {
         return text
-            .replace(/%userid%/g, User.getUserID() + "")
-            .replace(/%username%/g, User.getUsername());
+            .replace(/%userid%/g, User.userID + "")
+            .replace(/%username%/g, User.username);
     }
 
     /**

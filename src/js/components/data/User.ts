@@ -7,60 +7,55 @@ import { APICurrentUser } from "../api/responses/APIUser";
  */
 export class User {
 
-    private static instance: User;
+    public static loggedIn: boolean;
+    public static username: string;
+    public static userID: number;
 
-    private loggedIn: boolean;
-    private username: string;
-    private userID: number;
+    public static canApprovePosts: boolean;
+    public static commentThreshold: number;
+    public static blacklistedTags: string;
+    public static blacklistUsers: boolean;
 
-    private level: string;
+    public static enableJSNavigation: boolean;
+    public static enableAutoComplete: boolean;
+    public static styleUsernames: boolean;
 
-    public constructor() {
+    public static defaultImageSize: string;
+
+    public static level: string;
+
+    public static init(): void {
         const $ref = $("body");
 
-        this.loggedIn = $ref.attr("data-user-is-anonymous") == "false";
-        this.username = $ref.attr("data-user-name") || "Anonymous";
-        this.userID = parseInt($ref.attr("data-user-id")) || 0;
-        this.level = $ref.attr("data-user-level-string") || "Guest";
-    }
+        User.loggedIn = getValue("current-user-name") == "Anonymous";
+        User.username = getValue("current-user-name");
+        User.userID = parseInt(getValue("current-user-id")) || -1;
 
-    /**
-     * Returns user's login state
-     * @returns boolean true if the user is logged in, false otherwise
-     */
-    public static isLoggedIn(): boolean {
-        return this.getInstance().loggedIn;
-    }
+        User.canApprovePosts = getValue("current-user-can-approve-posts") == "true";
+        User.commentThreshold = parseInt(getValue("user-comment-threshold")) || 3;
+        User.blacklistedTags = getValue("blacklisted-tags");
+        User.blacklistUsers = getValue("blacklist-users") == "true";
 
-    /**
-     * Returns user's name
-     * @returns string Username if the user is logged in, "Anonymous" otherwise
-     */
-    public static getUsername(): string {
-        return this.getInstance().username;
-    }
+        User.enableJSNavigation = getValue("enable-js-navigation") == "true";
+        User.enableAutoComplete = getValue("enable-auto-complete") == "true";
+        User.styleUsernames = getValue("style-usernames") == "true";
 
-    /**
-     * Returns user's ID
-     * @returns string User ID if the user is logged in, 0 otherwise
-     */
-    public static getUserID(): number {
-        return this.getInstance().userID;
-    }
+        User.defaultImageSize = getValue("default-image-size");
 
-    /**
-     * Returns user's group level
-     * @returns string Group if the user is logged in, "Guest" otherwise
-     */
-    public static getLevel(): string {
-        return this.getInstance().level;
+        User.level = $ref.attr("data-user-level-string") || "Guest";
+
+        function getValue(name: string): string {
+            const el = $(`meta[name="${name}"]`);
+            if (el.length == 0) return null;
+            return el.attr("content");
+        }
     }
 
     /**
      * @returns the users e6 site settings
      */
     public static async getCurrentSettings(): Promise<APICurrentUser> {
-        return E621.User.id(this.getUserID()).first<APICurrentUser>();
+        return E621.User.id(User.userID).first<APICurrentUser>();
     }
 
     /**
@@ -68,11 +63,7 @@ export class User {
      * There is no need to put the keys into array form, this happens automatically
      */
     public static async setSettings(data: {}): Promise<void> {
-        await E621.User.id(this.getUserID()).post({ user: data, "_method": "patch" });
+        await E621.User.id(User.userID).post({ user: data, "_method": "patch" });
     }
 
-    public static getInstance(): User {
-        if (this.instance == undefined) this.instance = new this();
-        return this.instance;
-    }
 }

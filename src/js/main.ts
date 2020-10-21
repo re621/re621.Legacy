@@ -6,6 +6,7 @@
 // Load Modules
 import { Danbooru } from "./components/api/Danbooru";
 import { Page, PageDefinition } from "./components/data/Page";
+import { User } from "./components/data/User";
 import { ModuleController } from "./components/ModuleController";
 import { CleanSlate } from "./components/structure/CleanSlate";
 import { DomUtilities } from "./components/structure/DomUtilities";
@@ -110,6 +111,8 @@ CleanSlate.createDOM().then(async () => {
     await Debug.init();
     await Patcher.patchConfig();
     await VersionChecker.init();
+
+    User.init();
 
     // Subscriptions have to be registered before the SubscriptionManager
     await ModuleController.register(subscriptions);

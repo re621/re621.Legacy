@@ -105,7 +105,7 @@ export class ForumTracker extends RE6Module implements SubscriptionTracker {
 
         status.append(`<div>. . . formatting output</div>`);
         for (const forumJson of apiData) {
-            if (new Date(forumJson.updated_at).getTime() > lastUpdate && forumJson.updater_id !== User.getUserID()) {
+            if (new Date(forumJson.updated_at).getTime() > lastUpdate && forumJson.updater_id !== User.userID) {
                 results[new Date(forumJson.updated_at).getTime()] = await this.formatForumUpdate(forumJson);
             }
 
