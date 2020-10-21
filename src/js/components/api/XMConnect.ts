@@ -2,9 +2,9 @@ import { Debug } from "../utility/Debug";
 import { XM } from "./XM";
 
 declare const GM: any;
-declare const GM_getResourceText: Function;
-declare const GM_getResourceURL: Function;
-declare const GM_xmlhttpRequest: Function;
+declare const GM_getResourceText: any;
+declare const GM_getResourceURL: any;
+declare const GM_xmlhttpRequest: any;
 
 export class XMConnect {
 
@@ -213,7 +213,7 @@ interface XMConnectDetails {
     url: string;
 
     /** **headers** ie. user-agent, referer, ... */
-    headers?: {} | string;
+    headers?: any | string;
 
     /** **data** some string to send via a POST request */
     data?: string;

@@ -1,3 +1,5 @@
+import { APIResponse } from "./APIResponse";
+
 export interface APINote extends APIResponse {
     id: number;
     created_at: string;

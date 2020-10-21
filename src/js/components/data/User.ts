@@ -67,7 +67,7 @@ export class User {
      * Saves the settings for the user
      * There is no need to put the keys into array form, this happens automatically
      */
-    public static async setSettings(data: {}): Promise<void> {
+    public static async setSettings(data: any): Promise<void> {
         await E621.User.id(this.getUserID()).post({ user: data, "_method": "patch" });
     }
 

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
 /**
  * ===== Injected Functions =====
  * Functions that cannot be called from the content script.  

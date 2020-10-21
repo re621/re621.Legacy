@@ -1,3 +1,5 @@
+import { APIResponse } from "./APIResponse";
+
 export interface APITag extends APIResponse {
     id: number;
     name: string;

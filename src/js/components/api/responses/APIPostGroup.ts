@@ -1,3 +1,5 @@
+import { APIResponse } from "./APIResponse";
+
 export interface APIPostGroup extends APIResponse {
     id: number;
     name: string;

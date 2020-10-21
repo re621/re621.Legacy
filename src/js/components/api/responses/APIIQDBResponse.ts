@@ -1,4 +1,5 @@
 import { PostRating } from "./APIPost";
+import { APIResponse } from "./APIResponse";
 
 // This. This is the worst thing.
 export interface APIIQDBResponse extends APIResponse {

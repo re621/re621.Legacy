@@ -1,3 +1,5 @@
+import { APIResponse } from "./APIResponse";
+
 export interface APIComment extends APIResponse {
     id: number;
     created_at: string;
