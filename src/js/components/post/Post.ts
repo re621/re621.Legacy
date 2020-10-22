@@ -47,10 +47,12 @@ export class Post implements PostData {
         ext: string;                        // file extension
         md5: string;
         original: string;                   // full-resolution image. `null` if the post is deleted
-        sample: string;                     // sampled (~850px) image. for WEBM, same as original. for SFW, null or undefined
-        preview: string;                    // thumbnail (150px). for SFW, null or undefined
+        sample: string;                     // sampled (~850px) image. for WEBM, same as original. for SWF, null or undefined
+        preview: string;                    // thumbnail (150px). for SWF, null or undefined
         size: number;
         duration: number;                   // in seconds - for webm only, null for everything else
+        animated: boolean;                  // true if the file is animated in any way (gif, webm, swf, etc)
+        interactive: boolean;               // true if the file has interactive elements (webm / swf)
     };
     public loaded: LoadedFileType;          // currently loaded file size. used in hover loading mode
 
@@ -274,40 +276,39 @@ export class Post implements PostData {
      */
     public static make(data: APIPost, page?: string, imageRatioChange?: boolean): Post {
 
-        const tags = APIPost.getTagSet(data),
-            flags = PostFlag.get(data),
-            animated = tags.has("animated") || data.file.ext == "webm" || data.file.ext == "gif" || data.file.ext == "swf";
+        const post = PostData.fromAPI(data, page);
 
-        if (imageRatioChange == undefined) imageRatioChange = ModuleController.get(BetterSearch).fetchSettings("imageRatioChange");
+        // Fallback for a rare error where post data fails to load
+        // In that case, the post gets sent into the shadow realm
+        if (!post.file.original && !post.flags.has(PostFlag.Deleted)) {
+            Debug.log(`Post #${post.id} skipped: no file`);
+            return null;
+        }
 
         // Image container and post data store
         const $article = $("<post>")
             .attr({
-                "id": "entry_" + data.id,
-                "fav": data.is_favorited == true ? true : undefined,
+                "id": "entry_" + post.id,
+                "fav": post.is_favorited == true ? true : undefined,
                 "vote": undefined,
-                "animated": animated ? "true" : undefined,
-                "filetype": data.file.ext,
-                "deleted": flags.has(PostFlag.Deleted) ? true : undefined,
+                "animated": post.file.animated ? "true" : undefined,
+                "filetype": post.file.ext,
+                "deleted": post.flags.has(PostFlag.Deleted) ? true : undefined,
                 "rendered": false,
                 "page": page,
             })
             .data({
                 // Backwards compatibility for HoverZoom
-                "id": data.id,
-                "large-file-url": data.sample.url,
-                "file-ext": data.file.ext,
+                "id": post.id,
+                "large-file-url": post.file.sample,
+                "file-ext": post.file.ext,
             })
-            .html(data.id + "");
+            .html(post.id + "");
 
-        if (!imageRatioChange) $article.css("--img-ratio", (data.file.height / data.file.width) + "");
+        if (imageRatioChange == undefined) imageRatioChange = ModuleController.get(BetterSearch).fetchSettings("imageRatioChange");
+        if (!imageRatioChange) $article.css("--img-ratio", post.img.ratio + "");
 
-        const result = new Post(PostData.fromAPI(data, page), $article);
-
-        if (!result.file.original && !result.flags.has(PostFlag.Deleted)) {
-            Debug.log(`Post #${result.id} skipped: no file`);
-            return null;
-        }
+        const result = new Post(post, $article);
 
         // Register for blacklist and custom flagger
         result.updateFilters();
@@ -363,6 +364,8 @@ export interface PostData {
         preview: string;
         size: number;
         duration: number;
+        animated: boolean;
+        interactive: boolean;
     };
     loaded: LoadedFileType;
 
@@ -437,6 +440,8 @@ export namespace PostData {
                 preview: data.preview.url,
                 size: data.file.size,
                 duration: data.duration,
+                animated: tags.has("animated") || data.file.ext == "webm" || data.file.ext == "gif" || data.file.ext == "swf",
+                interactive: data.file.ext == "webm" || data.file.ext == "swf",
             },
             loaded: undefined,
 
@@ -514,7 +519,8 @@ export namespace PostData {
         const children: Set<number> = new Set();
 
         // Tags
-        const tagString = $article.attr("data-tags") || "";
+        const tagString = $article.attr("data-tags") || "",
+            tagSet = new Set(tagString.split(" "));
 
         // Dimensions
         const width = parseInt($article.attr("data-width")),
@@ -576,7 +582,7 @@ export namespace PostData {
 
             tagString: tagString,
             tags: {
-                all: new Set(tagString.split(" ")),
+                all: tagSet,
                 artist: new Set(),
                 real_artist: new Set(),
                 copyright: new Set(),
@@ -596,6 +602,8 @@ export namespace PostData {
                 preview: urls["preview"],
                 size: 0,
                 duration: null,
+                animated: tagSet.has("animated") || extension == "webm" || extension == "gif" || extension == "swf",
+                interactive: extension == "webm" || extension == "swf",
             },
             loaded: undefined,
 

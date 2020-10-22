@@ -1,6 +1,7 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { PageDefinition } from "../../components/data/Page";
 import { User } from "../../components/data/User";
+import { Post } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
@@ -29,6 +30,7 @@ export class ImageScaler extends RE6Module {
 
             clickScale: true,           // click on the image to change the scale
             clickShowFiltered: false,   // click on blacklisted image to show it
+            organizeModes: true,        // re-order the scaling modes
 
             size: ImageSize.Fill,
         };
@@ -45,11 +47,22 @@ export class ImageScaler extends RE6Module {
             $container = $("#image-container"),
             $selector = $("#image-resize-selector");
 
+        const isInteractive = Post.getViewingPost().file.interactive;
+
         // Fix to a vanilla bug - blacklisted posts would not have the correct size selected
         $selector.val(User.defaultImageSize);
 
+        // Rename the "download" button - actual downloading is provided by DownloadCustomizer
         $("#image-download-link a").html("Fullscreen");
 
+        // Re-order the scaling modes
+        if (this.fetchSettings("organizeModes")) {
+            $selector.find("option[value=fitv]").appendTo($selector);
+            $selector.find("option[value=fit]").appendTo($selector);
+            $selector.find("option[value=original]").appendTo($selector);
+        }
+
+        // Handle clicking on the post
         $image.on("click", async () => {
 
             // Workaround to un-blacklist images on mouse click
@@ -64,7 +77,9 @@ export class ImageScaler extends RE6Module {
             }
 
             // Disable this when notes are being edited
-            if (!this.fetchSettings("clickScale") || await Danbooru.Note.TranslationMode.active()) return;
+            if (!this.fetchSettings("clickScale")
+                || isInteractive
+                || await Danbooru.Note.TranslationMode.active()) return;
 
             this.cycleScaling();
         });

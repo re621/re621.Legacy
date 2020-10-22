@@ -103,6 +103,10 @@ export class Miscellaneous extends RE6Module {
             }
         }
 
+        // Move the ad leaderboard
+        $("#ad-leaderboard").prependTo("#content");
+
+        // Add a mail button
         DomUtilities.addSettingsButton({
             id: "header-button-dmail",
             name: `<i class="fas fa-envelope"></i>`,
