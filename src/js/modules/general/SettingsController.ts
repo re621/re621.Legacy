@@ -1515,6 +1515,35 @@ export class SettingsController extends RE6Module {
             ...createInputs(searchUtilities, "Remove from Set", "hotkeySwitchModeRemSet"),
             Form.hr(3),
 
+            // Tag Scripts
+            Form.section(
+                {
+                    name: "template-vars-pool",
+                    columns: 3,
+                    width: 3,
+                    wrapper: undefined, // TODO Hide from member-level users
+                },
+                [
+                    Form.header("Tag Scripts", 3),
+
+                    ...createInputs(searchUtilities, "Tag Script", "hotkeySwitchModeScript"),
+                    Form.spacer(3),
+
+                    ...createInputs(searchUtilities, "Script #1", "hotkeyScriptOne"),
+                    ...createInputs(searchUtilities, "Script #2", "hotkeyScriptTwo"),
+                    ...createInputs(searchUtilities, "Script #3", "hotkeyScriptThree"),
+                    ...createInputs(searchUtilities, "Script #4", "hotkeyScriptFour"),
+                    ...createInputs(searchUtilities, "Script #5", "hotkeyScriptFive"),
+                    ...createInputs(searchUtilities, "Script #6", "hotkeyScriptSix"),
+                    ...createInputs(searchUtilities, "Script #7", "hotkeyScriptSeven"),
+                    ...createInputs(searchUtilities, "Script #8", "hotkeyScriptEight"),
+                    ...createInputs(searchUtilities, "Script #9", "hotkeyScriptNine"),
+                    ...createInputs(searchUtilities, "Script #0", "hotkeyScriptTen"),
+                    Form.hr(3),
+                ]
+            ),
+
+
             // Tabs
             Form.header("Header Tabs", 3),
             ...createInputs(headerCustomizer, "Tab #1", "hotkeyTab1"),

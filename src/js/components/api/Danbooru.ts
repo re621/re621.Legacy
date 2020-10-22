@@ -104,6 +104,13 @@ export class Danbooru {
             if (Danbooru.hasModules()) Danbooru.getModules()["PostModeMenu"].click(e);
             else XM.Chrome.execInjectorRequest("Danbooru", "PostModeMenu", "click", [e]);
         },
+        change_tag_script(script: number): void {
+            if (Danbooru.hasModules()) {
+                const event = new CustomEvent("re621.dummy-event");
+                event["key"] = script;
+                Danbooru.getModules()["PostModeMenu"].change_tag_script(event);
+            } else XM.Chrome.execInjectorRequest("Danbooru", "PostModeMenu", "click", [script]);
+        },
     };
 
     public static Note = {
