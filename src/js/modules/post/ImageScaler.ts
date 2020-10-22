@@ -47,7 +47,7 @@ export class ImageScaler extends RE6Module {
             $container = $("#image-container"),
             $selector = $("#image-resize-selector");
 
-        const isInteractive = Post.getViewingPost().file.interactive;
+        const isInteractive = Post.getViewingPost().meta.interactive;
 
         // Fix to a vanilla bug - blacklisted posts would not have the correct size selected
         $selector.val(User.defaultImageSize);

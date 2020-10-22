@@ -50,9 +50,6 @@ export class Post implements PostData {
         sample: string;                     // sampled (~850px) image. for WEBM, same as original. for SWF, null or undefined
         preview: string;                    // thumbnail (150px). for SWF, null or undefined
         size: number;
-        duration: number;                   // in seconds - for webm only, null for everything else
-        animated: boolean;                  // true if the file is animated in any way (gif, webm, swf, etc)
-        interactive: boolean;               // true if the file has interactive elements (webm / swf)
     };
     public loaded: LoadedFileType;          // currently loaded file size. used in hover loading mode
 
@@ -71,6 +68,18 @@ export class Post implements PostData {
     public rel: {
         children: Set<number>;              // IDs of child posts
         parent: number;                     // ID of the parent post
+    }
+
+    public meta: {
+        duration: number;                   // in seconds - for webm only, null for everything else
+        animated: boolean;                  // file is animated in any way (gif, webm, swf, etc)
+        sound: boolean;                     // file has sound effects of any kind
+        interactive: boolean;               // file has interactive elements (webm / swf)
+    }
+
+    public warning: {
+        sound: boolean;                     // file is marked with a sound warning
+        epilepsy: boolean;                  // file is marked with epilepsy warning
     }
 
     private constructor(data: PostData, $ref: JQuery<HTMLElement>) {
@@ -130,7 +139,7 @@ export class Post implements PostData {
             .append(PostParts.renderInfo(this))              // Post info
 
         if (!conf.imageRatioChange) this.$ref.css("--img-ratio", this.img.ratio);
-        if (this.file.duration) this.$ref.css("--duration", this.file.duration);
+        if (this.meta.duration) this.$ref.css("--duration", this.meta.duration);
 
         // Refresh blacklist state
         this.updateVisibility();
@@ -291,7 +300,8 @@ export class Post implements PostData {
                 "id": "entry_" + post.id,
                 "fav": post.is_favorited == true ? true : undefined,
                 "vote": undefined,
-                "animated": post.file.animated ? "true" : undefined,
+                "animated": post.meta.animated ? "true" : undefined,
+                "sound": post.meta.sound ? "true" : undefined,
                 "filetype": post.file.ext,
                 "deleted": post.flags.has(PostFlag.Deleted) ? true : undefined,
                 "rendered": false,
@@ -363,9 +373,6 @@ export interface PostData {
         sample: string;
         preview: string;
         size: number;
-        duration: number;
-        animated: boolean;
-        interactive: boolean;
     };
     loaded: LoadedFileType;
 
@@ -384,6 +391,18 @@ export interface PostData {
     rel: {
         children: Set<number>;
         parent: number;
+    };
+
+    meta: {
+        duration: number;
+        animated: boolean;
+        sound: boolean;
+        interactive: boolean;
+    };
+
+    warning: {
+        sound: boolean;
+        epilepsy: boolean;
     };
 
 }
@@ -439,9 +458,6 @@ export namespace PostData {
                 sample: data.sample.has ? data.sample.url : data.file.url,
                 preview: data.preview.url,
                 size: data.file.size,
-                duration: data.duration,
-                animated: tags.has("animated") || data.file.ext == "webm" || data.file.ext == "gif" || data.file.ext == "swf",
-                interactive: data.file.ext == "webm" || data.file.ext == "swf",
             },
             loaded: undefined,
 
@@ -460,6 +476,18 @@ export namespace PostData {
             rel: {
                 children: new Set(data.relationships.children),
                 parent: data.relationships.parent_id,
+            },
+
+            meta: {
+                duration: data.duration,
+                animated: tags.has("animated") || data.file.ext == "webm" || data.file.ext == "gif" || data.file.ext == "swf",
+                sound: tags.has("sound"),
+                interactive: data.file.ext == "webm" || data.file.ext == "swf",
+            },
+
+            warning: {
+                sound: tags.has("sound_warning"),
+                epilepsy: tags.has("epilepsy_warning"),
             },
 
         };
@@ -601,9 +629,6 @@ export namespace PostData {
                 sample: urls["sample"],
                 preview: urls["preview"],
                 size: 0,
-                duration: null,
-                animated: tagSet.has("animated") || extension == "webm" || extension == "gif" || extension == "swf",
-                interactive: extension == "webm" || extension == "swf",
             },
             loaded: undefined,
 
@@ -622,6 +647,18 @@ export namespace PostData {
             rel: {
                 children: children,
                 parent: parseInt($article.attr("data-parent-id")) || null,
+            },
+
+            meta: {
+                duration: null,
+                animated: tagSet.has("animated") || extension == "webm" || extension == "gif" || extension == "swf",
+                sound: tagSet.has("sound"),
+                interactive: extension == "webm" || extension == "swf",
+            },
+
+            warning: {
+                sound: tagSet.has("sound_warning"),
+                epilepsy: tagSet.has("epilepsy_warning"),
             },
 
         };

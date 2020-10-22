@@ -24,10 +24,10 @@ export class PostParts {
             .append($("<post-loading>"));
 
 
-        if (post.file.duration)
+        if (post.meta.duration)
             $("<span>")
                 .addClass("video-duration")
-                .html(Util.Time.formatPlaytime(post.file.duration))
+                .html(Util.Time.formatPlaytime(post.meta.duration))
                 .appendTo($link);
 
         if (conf.clickAction !== ImageClickAction.Disabled) PostParts.handleDoubleClick($link, post, conf);
