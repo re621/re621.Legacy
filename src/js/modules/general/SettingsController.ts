@@ -1518,7 +1518,6 @@ export class SettingsController extends RE6Module {
             // Tag Scripts
             Form.section(
                 {
-                    name: "template-vars-pool",
                     columns: 3,
                     width: 3,
                     wrapper: undefined, // TODO Hide from member-level users
