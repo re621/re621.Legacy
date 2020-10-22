@@ -45,6 +45,7 @@ export class ImageScaler extends RE6Module {
             $container = $("#image-container"),
             $selector = $("#image-resize-selector");
 
+        // Fix to a vanilla bug - blacklisted posts would not have the correct size selected
         $selector.val(User.defaultImageSize);
 
         $("#image-download-link a").html("Fullscreen");
@@ -55,7 +56,7 @@ export class ImageScaler extends RE6Module {
             if ($container.hasClass("blacklisted-active-visible")) {
                 if (!this.fetchSettings("clickShowFiltered")) return;
 
-                $container.removeClass("blacklisted-active-visible");
+                $container.addClass("blacklisted").removeClass("blacklisted-active-visible");
                 const size = ($selector.val() || "large") + "";
                 Danbooru.Post.resize_to(size);
 

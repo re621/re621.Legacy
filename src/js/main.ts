@@ -105,6 +105,12 @@ Danbooru.Utility.disableShortcuts(true);
 // Create the basic DOM structure
 CleanSlate.createDOM().then(async () => {
 
+    // Disable existing keyboard shortcuts, again.
+    // Workaround made specificially for one user who presses 
+    // the Edit hotkey immediately after the post page loads.
+    // You know who you are.
+    Danbooru.Utility.disableShortcuts(true);
+
     DomUtilities.createSearchbox();
     DomUtilities.createTagList();
 
