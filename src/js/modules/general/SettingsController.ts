@@ -745,6 +745,19 @@ export class SettingsController extends RE6Module {
 
                     Form.checkbox(
                         {
+                            value: imageScaler.fetchSettings("organizeModes"),
+                            label: "<b>Organize Scaling Modes</b><br />Change the order of image scaling modes so that it actually makes sense",
+                            width: 2,
+                        },
+                        async (data) => {
+                            await imageScaler.pushSettings("organizeModes", data);
+                        }
+                    ),
+                    Form.requiresReload(),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
                             value: searchUtilities.fetchSettings("collapseCategories"),
                             label: "<b>Remember Collapsed Tag Categories</b><br />Preserve the minimized state of the tag categories in the sidebar",
                             width: 3,
