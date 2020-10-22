@@ -24,7 +24,7 @@ export class PostViewer extends RE6Module {
             { keys: "hotkeyAddFavorite", fnct: this.addFavorite },
             { keys: "hotkeyRemoveFavorite", fnct: this.removeFavorite },
 
-            { keys: "hotkeyHideNotes", fnct: this.toggleNotes },
+            { keys: "hotkeyHideNotes", fnct: () => { this.toggleNotes(); } },
             { keys: "hotkeyNewNote", fnct: this.switchNewNote },
 
             { keys: "hotkeyAddSet", fnct: this.addSet },
@@ -107,6 +107,7 @@ export class PostViewer extends RE6Module {
             .html("+ Pool")
             .appendTo($addToContainer);
 
+
         // Create the Note Toggle button
         const $noteToggleContainer = $("<div>").attr("id", "image-toggle-notes").insertAfter("div#image-add-links");
         $("<a>")
@@ -121,9 +122,23 @@ export class PostViewer extends RE6Module {
                 event.preventDefault();
                 this.toggleNotes();
             });
-        $("#note-container")
+        const $noteContainer = $("#note-container")
             .css("display", "")
             .attr("data-hidden", this.fetchSettings("hideNotes"));
+
+        // Move the note preview to root
+        $("#note-preview").insertBefore("#page");
+
+        $("#translate")
+            .appendTo("#image-toggle-notes")
+            .addClass("button btn-neutral")
+            .html("+ Note")
+            .on("click", async () => {
+                if (!await Danbooru.Note.TranslationMode.active()) return;
+                if ($noteContainer.attr("data-hidden") == "true")
+                    this.toggleNotes(false);
+            });
+
 
         // Move child/parent indicator, leave others as is, like marked for deletion
         if (this.fetchSettings("moveChildThumbs"))
@@ -237,7 +252,7 @@ export class PostViewer extends RE6Module {
     }
 
     /** Switches the notes container to its opposite state */
-    private async toggleNotes(): Promise<void> {
+    private async toggleNotes(updateSettings = true): Promise<void> {
         const module = ModuleController.get(PostViewer),
             hideNotes = module.fetchSettings("hideNotes");
 
@@ -249,7 +264,8 @@ export class PostViewer extends RE6Module {
             $("a#image-note-button").html("Notes: OFF");
         }
 
-        await module.pushSettings("hideNotes", !hideNotes);
+        if (updateSettings)
+            await module.pushSettings("hideNotes", !hideNotes);
     }
 
     /** Toggles the note editing interface */
