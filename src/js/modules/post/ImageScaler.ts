@@ -1,6 +1,7 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { PageDefinition } from "../../components/data/Page";
 import { User } from "../../components/data/User";
+import { Post } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 /**
@@ -45,6 +46,8 @@ export class ImageScaler extends RE6Module {
             $container = $("#image-container"),
             $selector = $("#image-resize-selector");
 
+        const isInteractive = Post.getViewingPost().file.interactive;
+
         // Fix to a vanilla bug - blacklisted posts would not have the correct size selected
         $selector.val(User.defaultImageSize);
 
@@ -64,7 +67,9 @@ export class ImageScaler extends RE6Module {
             }
 
             // Disable this when notes are being edited
-            if (!this.fetchSettings("clickScale") || await Danbooru.Note.TranslationMode.active()) return;
+            if (!this.fetchSettings("clickScale")
+                || isInteractive
+                || await Danbooru.Note.TranslationMode.active()) return;
 
             this.cycleScaling();
         });
