@@ -1,18 +1,17 @@
 const fs = require("fs"),
     https = require("https"),
-    rimraf = require("rimraf"),
     util = require("./util");
 
 // Get the build mode
 const prodMode = process.argv[2] === "prod";
 
 // Prepare the directory
-rimraf.sync("./build/extension");
+fs.rmdirSync("./build/extension", { recursive: true });
 fs.mkdirSync("./build/extension");
 fs.mkdirSync("./build/extension/src");
 fs.mkdirSync("./build/extension/src/lib");
 
-if (prodMode) rimraf.sync("./build/cache");
+if (prodMode) fs.rmdirSync("./build/cache", { recursive: true });
 if (!fs.existsSync("./build/cache")) fs.mkdirSync("./build/cache");
 
 const manifest = JSON.parse(util.parseTemplate(

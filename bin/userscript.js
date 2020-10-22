@@ -1,5 +1,4 @@
 const fs = require("fs"),
-    rimraf = require("rimraf"),
     util = require("./util");
 
 const headerData = JSON.parse(fs.readFileSync("./bin/userscript-header.json")),
@@ -9,7 +8,7 @@ const headerData = JSON.parse(fs.readFileSync("./bin/userscript-header.json")),
 
 // Prepare the directory
 if (mode !== "injector") {
-    rimraf.sync("./build/userscript");
+    fs.rmdirSync("./build/userscript", { recursive: true });
     fs.mkdirSync("./build/userscript");
 }
 
