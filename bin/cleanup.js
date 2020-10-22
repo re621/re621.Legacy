@@ -1,3 +1,4 @@
 const fs = require("fs");
 
-fs.rmdirSync("./build/tsc-temp/", { recursive: true });
+if (fs.existsSync("./build/tsc-temp"))
+    fs.rmdirSync("./build/tsc-temp/", { recursive: true });

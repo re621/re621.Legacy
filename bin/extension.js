@@ -6,12 +6,13 @@ const fs = require("fs"),
 const prodMode = process.argv[2] === "prod";
 
 // Prepare the directory
-fs.rmdirSync("./build/extension", { recursive: true });
+if (fs.existsSync("./build/extension"))
+    fs.rmdirSync("./build/extension", { recursive: true });
 fs.mkdirSync("./build/extension");
 fs.mkdirSync("./build/extension/src");
 fs.mkdirSync("./build/extension/src/lib");
 
-if (prodMode) fs.rmdirSync("./build/cache", { recursive: true });
+if (prodMode && fs.existsSync("./build/cache")) fs.rmdirSync("./build/cache", { recursive: true });
 if (!fs.existsSync("./build/cache")) fs.mkdirSync("./build/cache");
 
 const manifest = JSON.parse(util.parseTemplate(
