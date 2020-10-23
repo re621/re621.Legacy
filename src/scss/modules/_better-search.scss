@@ -385,7 +385,8 @@ search-content > post[animated=true] {
 }
 
 /* Duration Badges */
-search-content > post[filetype=webm] {
+search-content > post[filetype=webm],
+search-content > post[filetype=swf] {
 
     span.video-duration {
         position: absolute;
@@ -397,6 +398,30 @@ search-content > post[filetype=webm] {
         line-height: 0.85rem;
         padding: 0.05rem 0.125rem;
         border-radius: 0 0.25rem 0 0;
+    }
+}
+
+search-content > post[sound=true] {
+
+    span.post-sound {
+        position: absolute;
+        left: 0;
+        bottom: 1rem;
+        font-family: monospace;
+        color: white;
+        background: #00000080;
+        line-height: 0.85rem;
+        font-size: 0.75rem;
+        padding: 0.05rem 0.125rem;
+        border-radius: 0 0.25rem 0.25rem 0;
+
+        &[warning=true] { color: goldenrod; }
+
+        &::before {
+            content: unicode("f027");    
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+        }
     }
 }
 
