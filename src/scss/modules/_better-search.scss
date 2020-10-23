@@ -15,7 +15,7 @@ section#content {
 
     search-content {
         display: grid;
-        grid-template-columns: repeat(auto-fill, max(var(--img-width, 150px), 150px));
+        grid-template-columns: repeat(auto-fill, var(--img-width, 150px));
         grid-auto-rows: minmax(min-content, max-content);   // random space at the bottom otherwise
         grid-column-gap: 0.25rem;
         grid-row-gap: 0.5rem;
@@ -31,7 +31,6 @@ section#content {
             margin-top: -1rem;
 
             font-family: monospace;
-            font-size: 1rem;
             color: #ffffffaa;
 
             & > span {
@@ -308,7 +307,7 @@ span.post-info-rating {
 /* Un-rendered Post */
 search-content > post[rendered=false] {
     width: var(--img-width, 150px);
-    height: calc(max(var(--img-width, 150px), 150px) * var(--img-ratio, 1));
+    height: calc(var(--img-width, 150px) * var(--img-ratio, 1));
     max-height: var(--img-maxheight, 50vh);
     align-items: center;
 
@@ -352,9 +351,9 @@ search-content > post[deleted=true] > a:after { content: "DELETED" }
 /* Thumbnail Resizing */
 search-content > post img {
     object-fit: cover;
-    min-width: clamp(10%, var(--img-fit, 100%), 100%);
-    height: calc(max(var(--img-width, 150px), 150px) * var(--img-ratio, 1));
-    min-height: calc(max(var(--img-width, 150px), 150px) * 0.25);
+    min-width: var(--img-fit, 100%);
+    height: calc(var(--img-width, 150px) * var(--img-ratio, 1));
+    min-height: calc(var(--img-width, 150px) * 0.25);
     max-height: var(--img-maxheight, 50vh);
 }
 

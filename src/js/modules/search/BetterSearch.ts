@@ -456,7 +456,7 @@ export class BetterSearch extends RE6Module {
         this.$content.removeAttr("style");
         if (conf.imageSizeChange) this.$content.css("--img-width", conf.imageWidth + "px");
         if (conf.imageRatioChange) this.$content.css("--img-ratio", conf.imageRatio);
-        else this.$content.css("--img-fit", conf.imageMinWidth + "%");
+        else this.$content.css("--img-fit", Util.Math.clamp(conf.imageMinWidth, 10, 100) + "%");
         if (conf.compactMode) this.$content.css("--img-maxheight", (conf.imageSizeChange ? conf.imageWidth : 150) + "px");
 
         // Alternative ribbons

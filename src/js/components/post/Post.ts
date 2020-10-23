@@ -464,7 +464,7 @@ export namespace PostData {
             img: {
                 width: data.file.width,
                 height: data.file.height,
-                ratio: data.file.height / data.file.width,
+                ratio: Util.Math.round(data.file.height / data.file.width, 2),
             },
 
             has: {
