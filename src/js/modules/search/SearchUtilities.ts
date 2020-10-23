@@ -19,6 +19,18 @@ export class SearchUtilities extends RE6Module {
             { keys: "hotkeySwitchModeBlacklist", fnct: this.switchModeBlacklist },
             { keys: "hotkeySwitchModeAddSet", fnct: this.switchModeAddSet },
             { keys: "hotkeySwitchModeRemSet", fnct: this.switchModeRemSet },
+            { keys: "hotkeySwitchModeScript", fnct: this.switchModeScript },
+
+            { keys: "hotkeyScriptOne", fnct: () => { SearchUtilities.switchScript(1); } },
+            { keys: "hotkeyScriptTwo", fnct: () => { SearchUtilities.switchScript(2); } },
+            { keys: "hotkeyScriptThree", fnct: () => { SearchUtilities.switchScript(3); } },
+            { keys: "hotkeyScriptFour", fnct: () => { SearchUtilities.switchScript(4); } },
+            { keys: "hotkeyScriptFive", fnct: () => { SearchUtilities.switchScript(5); } },
+            { keys: "hotkeyScriptSix", fnct: () => { SearchUtilities.switchScript(6); } },
+            { keys: "hotkeyScriptSeven", fnct: () => { SearchUtilities.switchScript(7); } },
+            { keys: "hotkeyScriptEight", fnct: () => { SearchUtilities.switchScript(8); } },
+            { keys: "hotkeyScriptNine", fnct: () => { SearchUtilities.switchScript(9); } },
+            { keys: "hotkeyScriptTen", fnct: () => { SearchUtilities.switchScript(0); } },
         );
     }
 
@@ -48,6 +60,18 @@ export class SearchUtilities extends RE6Module {
             hotkeySwitchModeAddSet: "",
             hotkeySwitchModeRemSet: "",
             hotkeySwitchModeBlacklist: "",
+            hotkeySwitchModeScript: "",
+
+            hotkeyScriptOne: "alt+1|",
+            hotkeyScriptTwo: "alt+2|",
+            hotkeyScriptThree: "alt+3|",
+            hotkeyScriptFour: "alt+4|",
+            hotkeyScriptFive: "alt+5|",
+            hotkeyScriptSix: "alt+6|",
+            hotkeyScriptSeven: "alt+7|",
+            hotkeyScriptEight: "alt+8|",
+            hotkeyScriptNine: "alt+9|",
+            hotkeyScriptTen: "alt+0|",
         }
     }
 
@@ -155,6 +179,7 @@ export class SearchUtilities extends RE6Module {
         location.pathname = "/posts/random";
     }
 
+    // Search Modes
     private switchModeView(): void { SearchUtilities.switchMode("view"); }
     private switchModeEdit(): void { SearchUtilities.switchMode("edit"); }
     private switchModeOpen(): void { SearchUtilities.switchMode("open"); }
@@ -169,12 +194,19 @@ export class SearchUtilities extends RE6Module {
         SearchUtilities.switchMode("remove-from-set");
         $("#set-id").trigger("focus");
     }
+    private switchModeScript(): void { SearchUtilities.switchMode("tag-script"); }
 
     private static switchMode(mode: string): void {
         $("select#mode-box-mode").val(mode);
         Danbooru.PostModeMenu.change();
     }
 
+    /** Switches the tag script to the specified one */
+    private static switchScript(script: number): void {
+        Danbooru.PostModeMenu.change_tag_script(script);
+    }
+
+    /** Reset quick blacklist buttons */
     public initQuickBlacklist(state = true): void {
 
         if (!state) $("div.tag-actions span.tag-action-blacklist").html("");

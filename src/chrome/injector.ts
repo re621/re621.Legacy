@@ -39,6 +39,11 @@ const fnDanbooru = {
     "PostModeMenu": {
         "change": (): void => { Danbooru.PostModeMenu.change(); },
         "click": (e): void => { Danbooru.PostModeMenu.click(e); },
+        "change_tag_script": (script: number): void => {
+            const event = new CustomEvent("re621.dummy-event");
+            event["key"] = script;
+            Danbooru.PostModeMenu.change_tag_script(event);
+        },
     },
     "Note.Box": {
         "scale_all": (): void => { Danbooru.Note.Box.scale_all(); },
