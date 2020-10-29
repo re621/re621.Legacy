@@ -27,7 +27,7 @@ export class User {
     public static init(): void {
         const $ref = $("body");
 
-        User.loggedIn = getValue("current-user-name") == "Anonymous";
+        User.loggedIn = getValue("current-user-name") !== "Anonymous";
         User.username = getValue("current-user-name");
         User.userID = parseInt(getValue("current-user-id")) || -1;
 
