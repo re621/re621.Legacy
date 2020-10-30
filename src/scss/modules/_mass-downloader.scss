@@ -11,6 +11,12 @@ section#downloader-box {
         grid-column: span 2;
     }
 
+    a#download-select-all {
+        grid-column: span 2;
+        font-family: monospace;
+        text-align: center;
+    }
+
     a.button {
         text-align: center;
     }
@@ -87,6 +93,7 @@ section#downloader-box {
     &:not([data-interface=true]) {
 
         a#download-act,
+        a#download-select-all,
         div.download-info,
         div.download-file {
             display: none;

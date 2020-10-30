@@ -86,6 +86,19 @@ export class MassDownloader extends RE6Module {
                 this.processFiles();
             });
 
+        $("<a>")
+            .html("Select All Visible")
+            .attr("id", "download-select-all")
+            .appendTo(this.section)
+            .on("click", (event) => {
+                event.preventDefault();
+                Post.find("all").each((post) => {
+                    post.$ref
+                        .addClass("download-item")
+                        .attr("data-state", "ready");
+                });
+            });
+
         // Contains general info about the download
         this.infoText = $("<div>")
             .addClass("download-info")
