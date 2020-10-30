@@ -68,16 +68,13 @@ export class KeybindManager {
     public static record(callback: (sequence: string[]) => void): void {
         KeybindManager.listening = true;
         let keys = [];
-        console.log(replacedRegExp);
 
         $(document).on("keydown.re621.record", (event) => {
             const key = event.key
                 .toLowerCase()
                 .replace(replacedRegExp, (matched) => {
-                    console.log("replacing", matched, "with", replacedKeys[matched]);
                     return replacedKeys[matched];
                 });
-            console.log(key, validKeys.indexOf(key) == -1 ? "invalid" : "valid");
             if (validKeys.indexOf(key) == -1) return;
             keys.push(key);
         });
@@ -135,11 +132,6 @@ export class KeybindManager {
             // Create the executor
             if (!this.executors.has(key)) this.executors.set(key, {});
         }
-    }
-
-    public static getData(): void {
-        console.log(this.listeners);
-        console.log(this.executors);
     }
 
 }

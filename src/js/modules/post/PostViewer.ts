@@ -39,6 +39,10 @@ export class PostViewer extends RE6Module {
             { keys: "hotkeyAddSetCustom3", fnct: () => { this.addSetCustom("hotkeyAddSetCustom3_data"); } },
 
             { keys: "hotkeyOpenHistory", fnct: this.openImageHistory, },
+            { keys: "hotkeyOpenArtist", fnct: this.openArtist, },
+            { keys: "hotkeyOpenSource", fnct: this.openSource, },
+            { keys: "hotkeyOpenParent", fnct: this.openParent, },
+            { keys: "hotkeyToggleRel", fnct: this.toggleRelSection, },
         );
     }
 
@@ -76,6 +80,10 @@ export class PostViewer extends RE6Module {
             hotkeyAddSetCustom3_data: "0",
 
             hotkeyOpenHistory: "",      // Opens the post history for the current image
+            hotkeyOpenArtist: "",       // Opens the search page for the post's artist
+            hotkeyOpenSource: "",       // Opens the first image source in a new tab
+            hotkeyOpenParent: "",       // Opens the parent/child post, if there is one
+            hotkeyToggleRel: "",        // Toggles the relationship section
 
             upvoteOnFavorite: true,     // add an upvote when adding the post to favorites
             hideNotes: false,           // should the notes be hidden by default
@@ -331,6 +339,34 @@ export class PostViewer extends RE6Module {
     /** Redirects the page to the post history */
     private openImageHistory(): void {
         location.href = "/post_versions?search[post_id]=" + Post.getViewingPost().id;
+    }
+
+    /** Searches for other works by the artist, if there is one */
+    private openArtist(): void {
+        const lookup = $("li.category-1 a.search-tag").first();
+        if (lookup.length == 0) return;
+        lookup[0].click();
+    }
+
+    /** Opens the first source link */
+    private openSource(): void {
+        const lookup = $("div.source-link a").first();
+        if (lookup.length == 0) return;
+        lookup[0].click();
+    }
+
+    /** Opens the first source link */
+    private openParent(): void {
+        const lookup = $("#has-parent-relationship-preview a, #has-children-relationship-preview a").first();
+        if (lookup.length == 0) return;
+        lookup[0].click();
+    }
+
+    /** Toggles the visibility of the parent/child thumbnails */
+    private toggleRelSection(): void {
+        const lookup = $("#has-children-relationship-preview-link, #has-parent-relationship-preview-link").first();
+        if (lookup.length == 0) return;
+        lookup[0].click();
     }
 
 }

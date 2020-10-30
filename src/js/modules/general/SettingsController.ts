@@ -1460,6 +1460,7 @@ export class SettingsController extends RE6Module {
             Form.header("Listing", 3),
             ...createInputs(searchUtilities, "Search", "hotkeyFocusSearch"),
             ...createInputs(searchUtilities, "Random Post", "hotkeyRandomPost"),
+            ...createInputs(miscellaneous, "Toggle Blacklist", "hotkeyToggleBlacklist"),
             Form.hr(3),
 
             // Posts
@@ -1494,14 +1495,25 @@ export class SettingsController extends RE6Module {
             Form.hr(3),
 
             // Actions
-            Form.header("Actions", 3),
-            ...createInputs(miscellaneous, "New Comment", "hotkeyNewComment"),
-            ...createInputs(miscellaneous, "Edit Post", "hotkeyEditPost"),
-            ...createInputs(postViewer, "Toggle Notes", "hotkeyHideNotes"),
-            ...createInputs(postViewer, "Edit Notes", "hotkeyNewNote"),
-            ...createInputs(postViewer, "Post History", "hotkeyOpenHistory"),
-            ...createInputs(miscellaneous, "Toggle Blacklist", "hotkeyToggleBlacklist"),
-            Form.hr(3),
+            Form.section(
+                {
+                    columns: 3,
+                    width: 3,
+                },
+                [
+                    Form.header("Actions", 3),
+                    ...createInputs(miscellaneous, "New Comment", "hotkeyNewComment"),
+                    ...createInputs(miscellaneous, "Edit Post", "hotkeyEditPost"),
+                    ...createInputs(postViewer, "Toggle Notes", "hotkeyHideNotes"),
+                    ...createInputs(postViewer, "Edit Notes", "hotkeyNewNote"),
+                    ...createInputs(postViewer, "Post History", "hotkeyOpenHistory"),
+                    ...createInputs(postViewer, "Go To Artist", "hotkeyOpenArtist"),
+                    ...createInputs(postViewer, "Go To Source", "hotkeyOpenSource"),
+                    ...createInputs(postViewer, "Go To Parent", "hotkeyOpenParent"),
+                    ...createInputs(postViewer, "Toggle Child Posts", "hotkeyToggleRel"),
+                    Form.hr(3),
+                ]
+            ),
 
             // Modes
             Form.header("Search Modes", 3),
