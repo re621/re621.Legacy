@@ -270,15 +270,11 @@ export class SmartAlias extends RE6Module {
 
         // Fix typos
         // TODO Replace this with better error handling
-        /*
         if (this.fetchSettings<boolean>("fixCommonTypos")) {
             $textarea.val((index, currentValue) => {
-                return (currentValue
-                    .toLowerCase()
-                    .replace(/\-/g, "_"));
+                return (currentValue.toLowerCase());
             });
         }
-        */
 
         // Get the tags from the textarea
         const inputString = SmartAlias.getInputString($textarea);
