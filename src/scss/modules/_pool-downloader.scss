@@ -9,9 +9,12 @@ div.pool-container {
 
         button.pool-download-button {
             float: right;
-            margin: 0 0.5rem;
+            margin-right: 0.5rem;
             outline: none;
         }
+
+        &[processing] button.pool-download-act { display: none; }
+        &:not([processing=true]) button.pool-download-cancel { display: none; }
     }
 
     aside.pool-sidebar {

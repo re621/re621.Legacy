@@ -1,3 +1,4 @@
+import { Util } from "../utility/Util";
 import { XM } from "./XM";
 import { GMxmlHttpRequestEvent, GMxmlHttpRequestProgressEvent, GMxmlHttpRequestResponse } from "./XMConnect";
 
@@ -7,19 +8,25 @@ export class DownloadQueue {
 
     // Maximum concurrent HTTP connections, per domain. Most modern browsers have this limited to 6.  
     // If the limit is exceeded, the connections will stall, and the overall throughput will suffer.
-    private static concurrent = 4;
+    private maxThreads = 4;
+
+    // Unique downloader ID, used to cancel the download process
+    private id: string;
 
     private queue: QueuedFile[];
     private zip: any;
 
-    public constructor() {
+    public constructor(maxThreads = 4) {
+        this.id = Util.ID.make();
+        this.maxThreads = Util.Math.clamp(maxThreads, 1, 6);
+
         this.queue = [];
         this.zip = new JSZip();
     }
 
     /** Returns the maximum concurrent connections count */
     public getThreadCount(): number {
-        return DownloadQueue.concurrent;
+        return this.maxThreads;
     }
 
     /** Returns the number of items in the queue */
@@ -63,11 +70,20 @@ export class DownloadQueue {
         // If it is reversed here, the order becomes correct.
         this.queue = this.queue.reverse();
 
+        let cancelled = false,
+            saved = false;
+        Util.Events.one(`re621.dl-${this.id}.cancel`, (event, data) => {
+            if (data) saved = true;
+            cancelled = true;
+            this.queue = [];
+        });
+
         const processes: Promise<any>[] = [];
-        for (let i = 0; i < DownloadQueue.concurrent; i++) {
+        for (let i = 0; i < this.maxThreads; i++) {
             processes.push(this.createNewProcess(i));
         }
         return Promise.all(processes).then(() => {
+            if (cancelled && !saved) return null;
             return this.zip.generateAsync({
                 type: "blob",
                 compression: "STORE",
@@ -84,6 +100,10 @@ export class DownloadQueue {
      */
     private async createNewProcess(thread: number): Promise<any> {
         return new Promise(async (resolve) => {
+
+            Util.Events.one(`re621.dl-${this.id}.cancel`, () => {
+                resolve();
+            });
 
             let index: number,
                 item: QueuedFile;
@@ -147,6 +167,14 @@ export class DownloadQueue {
                 }
             });
         });
+    }
+
+    /**
+     * Preemptively aborts the download process
+     * @param save True to save already downloaded files
+     */
+    public abort(save = false): void {
+        Util.Events.trigger(`re621.dl-${this.id}.cancel`, save);
     }
 
 }

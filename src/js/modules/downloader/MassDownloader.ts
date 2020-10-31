@@ -18,6 +18,8 @@ export class MassDownloader extends RE6Module {
 
     private downloadOverSize = false;
 
+    private downloadQueue: DownloadQueue;
+
     // Value used to make downloaded file names unique
     private fileTimestamp: string = Util.Time.getDatetimeShort();
     private downloadIndex = 0;
@@ -73,6 +75,11 @@ export class MassDownloader extends RE6Module {
             .on("click", (event) => {
                 event.preventDefault();
                 this.toggleInterface();
+                if (this.downloadQueue) {
+                    this.downloadQueue.abort();
+                    $("post.download-item").attr("data-state", "ready");
+                }
+                this.processing = false;
             });
 
         // Processes selected files
@@ -84,6 +91,19 @@ export class MassDownloader extends RE6Module {
             .on("click", (event) => {
                 event.preventDefault();
                 this.processFiles();
+            });
+
+        $("<a>")
+            .html("Select All Visible")
+            .attr("id", "download-select-all")
+            .appendTo(this.section)
+            .on("click", (event) => {
+                event.preventDefault();
+                Post.find("all").each((post) => {
+                    post.$ref
+                        .addClass("download-item")
+                        .attr("data-state", "ready");
+                });
             });
 
         // Contains general info about the download
@@ -189,12 +209,12 @@ export class MassDownloader extends RE6Module {
         Debug.log(`downloading ${postList.size()} files`);
         Debug.log(postList);
 
-        const downloadQueue = new DownloadQueue();
+        this.downloadQueue = new DownloadQueue();
 
         // Create an interface to output queue status
         const threadInfo: JQuery<HTMLElement>[] = [];
         this.infoFile.html("");
-        for (let i = 0; i < downloadQueue.getThreadCount(); i++) {
+        for (let i = 0; i < this.downloadQueue.getThreadCount(); i++) {
             threadInfo.push($("<span>").appendTo(this.infoFile));
         }
 
@@ -218,7 +238,7 @@ export class MassDownloader extends RE6Module {
             }
 
             post.$ref.attr("data-state", "preparing");
-            downloadQueue.add(
+            this.downloadQueue.add(
                 {
                     name: this.createFilename(post),
                     path: post.file.original,
@@ -252,12 +272,12 @@ export class MassDownloader extends RE6Module {
             );
         }
 
-        queueSize = downloadQueue.getQueueLength();
+        queueSize = this.downloadQueue.getQueueLength();
 
         // Begin processing the queue
         this.infoText.html(`Processing . . . `);
 
-        const zipData = await downloadQueue.run((metadata) => {
+        const zipData = await this.downloadQueue.run((metadata) => {
             this.infoText.html(`Compressing . . . ${metadata.percent.toFixed(2)}%`);
             if (metadata.currentFile) { this.infoFile.html(metadata.currentFile); }
             else { this.infoFile.html(""); }

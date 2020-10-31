@@ -1202,11 +1202,10 @@ export class SettingsController extends RE6Module {
                             value: smartAlias.fetchSettings("fixCommonTypos"),
                             label: `<b>Fix Common Typos</b><br />Correct several common typos in the tag fields`,
                             width: 3,
-                            wrapper: "display-none",
                         },
                         (data) => { smartAlias.pushSettings("fixCommonTypos", data); }
                     ),
-                    // Form.spacer(3),
+                    Form.spacer(3),
 
                     Form.subheader("Tag Display Order", "How the tags should be arranged in the display box", 2),
                     Form.select(
@@ -1248,6 +1247,18 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.hr(3),
 
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("searchForm"),
+                            label: `<b>Search Form Aliases</b><br />Apply custom aliases in the tag search form`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await smartAlias.pushSettings("searchForm", data);
+                            await smartAlias.reload();
+                        }
+                    ),
+                    Form.spacer(3),
 
                     Form.checkbox(
                         {
