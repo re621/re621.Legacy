@@ -46,6 +46,7 @@ export class SmartAlias extends RE6Module {
 
             quickTagsForm: true,
             editTagsForm: true,
+            searchForm: true,
 
             uploadCharactersForm: true,
             uploadSexesForm: true,
@@ -110,10 +111,15 @@ export class SmartAlias extends RE6Module {
         $("smart-alias").remove();
         $("smart-tag-counter").remove();
         $("button.smart-alias-validate").remove();
+        $("#tags").off("input.re621.smart-alias");
     }
 
     public create(): void {
         super.create();
+
+        if (this.fetchSettings("searchForm") && Page.matches([PageDefinition.search, PageDefinition.post, PageDefinition.favorites])) {
+            this.handleSearchForm();
+        }
 
         // Abort the whole thing if the quick tags form is disabled in settings
         if (!this.fetchSettings("quickTagsForm") && Page.matches([PageDefinition.search, PageDefinition.favorites]))
@@ -293,52 +299,11 @@ export class SmartAlias extends RE6Module {
         // Step 1
         // Replace custom aliases with their contents
         // This is probably overcomplicated to all hell
-        const aliasCacheRaw = await this.fetchSettings<string>("data", true);
-        if (aliasCacheRaw.length !== SmartAlias.aliasCacheLength) {
-            SmartAlias.aliasCache = SmartAlias.getAliasData(aliasCacheRaw);
-            SmartAlias.aliasCacheLength = aliasCacheRaw.length;
-        }
+        await this.loadAliasCache();
 
         if (SmartAlias.aliasCache.length > 0) {
-            $textarea.val((index, currentValue) => {
-
-                // Run the the process as many times as needed until no more changes can be made
-                // This should take care of nested aliases while preventing infinite recursion
-                let changes = 0,
-                    iterations = 0;
-                do {
-                    changes = 0;
-                    for (const aliasDef of SmartAlias.aliasCache) {
-
-                        currentValue = currentValue.replace(
-                            getTagRegex(aliasDef.lookup),
-                            (...args) => {  // match, prefix, body, suffix1, suffix2, etc
-                                changes++;
-
-                                // Replace the wildcards in the output with values
-                                // Starts at fourth position to skip match, prefix, and alias body
-                                // Ends 2 positions before the end to skip number of hits and full string
-                                let output = aliasDef.output;
-                                for (let i = 3; i < args.length - 3; i++)
-                                    output = output.replace(new RegExp("\\$" + (i - 2), "gi"), args[i]);
-
-                                // Prevent duplicate tags from being added by aliases
-                                const result = new Set<string>();
-                                for (const part of output.split(" ")) {
-                                    if (getTagRegex(part).test(currentValue)) continue;
-                                    result.add(part);
-                                }
-
-                                if (result.size == 0) return " ";
-                                return args[1] + [...result].join(" ") + args[args.length - 3];
-                            }
-                        );
-
-                    }
-                    iterations++;
-                } while (changes != 0 && iterations < SmartAlias.ITERATIONS_LIMIT);
-
-                return currentValue;
+            $textarea.val((index, text) => {
+                return this.replaceInputAliases(text);;
             });
 
             // Regenerate the tags to account for replacements
@@ -405,7 +370,7 @@ export class SmartAlias extends RE6Module {
                 for (const [antecedent, consequent] of Object.entries(SmartAlias.tagAliases)) {
                     // console.log("`" + getTagRegex(antecedent) + "`");
                     currentValue = currentValue.replace(
-                        getTagRegex(antecedent),
+                        this.getTagRegex(antecedent),
                         "$1" + consequent + "$3"
                     );
                 }
@@ -521,21 +486,6 @@ export class SmartAlias extends RE6Module {
         }
 
         /**
-         * Dynamically creates a regex that should find individual in the textarea
-         * @param input Input, as a single string, an array, or a set
-         */
-        function getTagRegex(input: string | string[] | Set<string>): RegExp {
-            if (typeof input == "string") input = [input];
-            else input = [...input];
-
-            for (let i = 0; i < input.length; i++)
-                input[i] = input[i]
-                    .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
-                    .replace(/\*/g, "(\\S*)");
-            return new RegExp("(^|\n| )(" + input.join("|") + ")( |\n|$)", "gi");
-        }
-
-        /**
          * Clears and redraws the information display container
          * @param $container Container to refresh
          * @param tags Tags to display
@@ -624,6 +574,15 @@ export class SmartAlias extends RE6Module {
 
     }
 
+    /** Loads the alias cache from the settings */
+    private async loadAliasCache(): Promise<void> {
+        const aliasCacheRaw = await this.fetchSettings<string>("data", true);
+        if (aliasCacheRaw.length !== SmartAlias.aliasCacheLength) {
+            SmartAlias.aliasCache = SmartAlias.getAliasData(aliasCacheRaw);
+            SmartAlias.aliasCacheLength = aliasCacheRaw.length;
+        }
+    }
+
     /**
      * Processes the raw text value of the custom alias field and converts it into machine-readable format.  
      * TODO Optimize this as much as possible
@@ -677,6 +636,81 @@ export class SmartAlias extends RE6Module {
                 .trim()
                 .replace(/\s{2,}/g, " ");
         }
+    }
+
+    /**
+     * Dynamically creates a regex that should find individual in the textarea
+     * @param input Input, as a single string, an array, or a set
+     */
+    private getTagRegex(input: string | string[] | Set<string>): RegExp {
+        if (typeof input == "string") input = [input];
+        else input = [...input];
+
+        for (let i = 0; i < input.length; i++)
+            input[i] = input[i]
+                .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+                .replace(/\*/g, "(\\S*)");
+        return new RegExp("(^|\n| )(" + input.join("|") + ")( |\n|$)", "gi");
+    }
+
+    /**
+     * Replaces the custom aliases with their consequent values.  
+     * Note that an alias cache must be built beforehand via `loadAliasCache()`
+     * @param text Text to parse
+     */
+    private replaceInputAliases(text: string): string {
+
+        // Run the the process as many times as needed until no more changes can be made
+        // This should take care of nested aliases while preventing infinite recursion
+        let changes = 0,
+            iterations = 0;
+        do {
+            changes = 0;
+            for (const aliasDef of SmartAlias.aliasCache) {
+
+                text = text.replace(
+                    this.getTagRegex(aliasDef.lookup),
+                    (...args) => {  // match, prefix, body, suffix1, suffix2, etc
+                        changes++;
+
+                        // Replace the wildcards in the output with values
+                        // Starts at fourth position to skip match, prefix, and alias body
+                        // Ends 2 positions before the end to skip number of hits and full string
+                        let output = aliasDef.output;
+                        for (let i = 3; i < args.length - 3; i++)
+                            output = output.replace(new RegExp("\\$" + (i - 2), "gi"), args[i]);
+
+                        // Prevent duplicate tags from being added by aliases
+                        const result = new Set<string>();
+                        for (const part of output.split(" ")) {
+                            if (this.getTagRegex(part).test(text)) continue;
+                            result.add(part);
+                        }
+
+                        if (result.size == 0) return " ";
+                        return args[1] + [...result].join(" ") + args[args.length - 3];
+                    }
+                );
+
+            }
+            iterations++;
+        } while (changes != 0 && iterations < SmartAlias.ITERATIONS_LIMIT);
+
+        return text;
+    }
+
+    /** Handles alias replacement in the search form */
+    private handleSearchForm(): void {
+        let typingTimeout: number;
+        const input = $("#tags").on("input.re621.smart-alias", () => {
+            clearTimeout(typingTimeout);
+            typingTimeout = window.setTimeout(async () => {
+                await this.loadAliasCache();
+                input.val((index, text) => {
+                    return this.replaceInputAliases(text);
+                });
+            }, 500);
+        });
     }
 
     /**
