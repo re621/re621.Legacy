@@ -21,6 +21,9 @@ export class PoolDownloader extends RE6Module {
     private downloadOverSize = false;
     private batchOverSize = true;
 
+    // Download queue instance
+    private downloadQueue: DownloadQueue;
+
     // Value used to make downloaded file names unique
     private fileTimestamp: string = Util.Time.getDatetimeShort();
 
@@ -33,6 +36,7 @@ export class PoolDownloader extends RE6Module {
     private poolDownloaded: number[] = [];
 
     // Interface elements
+    private overview: JQuery<HTMLElement>;
     private section: JQuery<HTMLElement>;
 
     private actButton: JQuery<HTMLElement>;
@@ -63,19 +67,41 @@ export class PoolDownloader extends RE6Module {
 
         const container = $(base)
             .addClass("pool-container");
-        const overview = $("#a-show")
+        this.overview = $("#a-show")
             .addClass("pool-overview");
 
         // Toggle Button
         this.actButton = $("<button>")
-            .addClass("pool-download-button")
+            .addClass("pool-download-button pool-download-act")
             .addClass("button btn-neutral")
             .html("Download")
-            .prependTo(overview)
+            .prependTo(this.overview)
             .on("click", (event) => {
                 event.preventDefault();
                 container.attr("data-interface", "true");
                 this.processFiles();
+            });
+
+        $("<button>")   // Cancel
+            .addClass("pool-download-button pool-download-cancel")
+            .addClass("button btn-neutral")
+            .html("Abort")
+            .prependTo(this.overview)
+            .on("click", (event) => {
+                event.preventDefault();
+                if (this.downloadQueue)
+                    this.downloadQueue.abort();
+            });
+
+        $("<button>")   // Cancel and Save
+            .addClass("pool-download-button pool-download-cancel")
+            .addClass("button btn-neutral")
+            .html("Save & Cancel")
+            .prependTo(this.overview)
+            .on("click", (event) => {
+                event.preventDefault();
+                if (this.downloadQueue)
+                    this.downloadQueue.abort(true);
             });
 
         // Sidebar
@@ -87,8 +113,6 @@ export class PoolDownloader extends RE6Module {
             .attr("id", "pool-downloader-box")
             .html("<h1>Download</h1>")
             .appendTo(sidebar);
-
-        // Processes selected files
 
         // Contains general info about the download
         this.infoText = $("<div>")
@@ -105,7 +129,7 @@ export class PoolDownloader extends RE6Module {
     private processFiles(): void {
         if (this.processing) return;
         this.processing = true;
-        this.actButton.attr("disabled", "disabled");
+        this.overview.attr("processing", "loading");
 
         this.infoText
             .attr("data-state", "loading")
@@ -155,14 +179,18 @@ export class PoolDownloader extends RE6Module {
 
             return Promise.all(dataQueue);
         }).then((dataChunks) => {
+
+            // Show cancel buttons
+            this.overview.attr("processing", "true");
+
             // dataQueue needs to be reversed in order to start from top to bottom
             // downloadQueue will not use the exact order, but it's an improvement
-            const downloadQueue = new DownloadQueue();
+            this.downloadQueue = new DownloadQueue();
 
             // Create an interface to output queue status
             const threadInfo: JQuery<HTMLElement>[] = [];
             this.infoFile.html("");
-            for (let i = 0; i < downloadQueue.getThreadCount(); i++) {
+            for (let i = 0; i < this.downloadQueue.getThreadCount(); i++) {
                 threadInfo.push($("<span>").appendTo(this.infoFile));
             }
 
@@ -192,7 +220,7 @@ export class PoolDownloader extends RE6Module {
                     }
 
                     $("article.post-preview#post_" + post.id).attr("data-state", "preparing");
-                    downloadQueue.add(
+                    this.downloadQueue.add(
                         {
                             name: this.createFilename(post),
                             path: post.file.original,
@@ -203,6 +231,8 @@ export class PoolDownloader extends RE6Module {
                         },
                         {
                             onStart: (item, thread, index) => {
+                                if (this.infoText.attr("data-state") == "done") return;
+
                                 this.infoText.html(`Downloading ... <span class="float-right">` + (queueSize - index) + ` / ` + queueSize + `</span>`);
                                 threadInfo[thread]
                                     .html(item.file)
@@ -230,39 +260,47 @@ export class PoolDownloader extends RE6Module {
                 });
             });
 
-            queueSize = downloadQueue.getQueueLength();
+            queueSize = this.downloadQueue.getQueueLength();
 
             // Begin processing the queue
             this.infoText.html(`Processing . . . `);
 
-            return downloadQueue.run((metadata) => {
+            return this.downloadQueue.run((metadata) => {
                 this.infoText.html(`Compressing . . . ` + metadata.percent.toFixed(2) + `%`);
                 if (metadata.currentFile) { this.infoFile.html(metadata.currentFile); }
                 else { this.infoFile.html(""); }
             });
         }).then((zipData) => {
+
+            // Clear the queue instance
+            delete this.downloadQueue;
+
             let filename = this.createPoolFilename(poolName) + "-" + this.fileTimestamp;
             filename += this.downloadOverSize ? "-part" + this.downloadIndex + ".zip" : ".zip";
 
             this.infoText
                 .attr("data-state", "done")
-                .html(`Done! `);
+                .html(zipData ? "Done! " : "Cancelled");
             this.infoFile.html("");
 
             // Download the resulting ZIP
-            const $downloadLink = $("<a>")
-                .attr({
-                    "href": URL.createObjectURL(zipData),
-                    "download": filename,
-                })
-                .html("Download Archive")
-                .appendTo(this.infoText);
+            if (zipData) {
+                const $downloadLink = $("<a>")
+                    .attr({
+                        "href": URL.createObjectURL(zipData),
+                        "download": filename,
+                    })
+                    .html("Download Archive")
+                    .appendTo(this.infoText);
 
-            if (this.fetchSettings("autoDownloadArchive")) { $downloadLink.get(0).click(); }
+                if (this.fetchSettings("autoDownloadArchive")) { $downloadLink.get(0).click(); }
 
-            this.downloadIndex++;
+                this.downloadIndex++;
+            } else {
+                this.downloadIndex = 1;
+            }
 
-            this.actButton.removeAttr("disabled");
+            this.overview.removeAttr("processing");
             this.processing = false;
 
             if (this.batchOverSize) {
@@ -274,6 +312,9 @@ export class PoolDownloader extends RE6Module {
                         .html(`Download has exceeded the maximum file size.<br /><br />Click the download button again for the next part.`)
                         .appendTo(this.infoText);
                 }
+            } else {
+                // Clear the downloads list, in case the module needs to run again
+                this.poolDownloaded = [];
             }
 
         });
