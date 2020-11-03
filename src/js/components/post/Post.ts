@@ -580,7 +580,7 @@ export namespace PostData {
             };
             else urls = {
                 preview: $article.attr("data-preview-url") || null,
-                sample: (width < 850 || height < 850)
+                sample: (width < 850 || height < 850 || extension == "gif")
                     ? `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${extension}`
                     : `https://static1.e621.net/data/sample/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`,
                 original: `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${extension}`,
