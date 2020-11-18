@@ -478,7 +478,7 @@ export class BetterSearch extends RE6Module {
         this.$content.on("click", "post a", (event) => {
 
             const mode = $("#mode-box-mode").val();
-            if (mode == "view") return;
+            if (mode == "view" || !mode) return;
             event.preventDefault();
 
             const $article = $(event.currentTarget).parent(),
