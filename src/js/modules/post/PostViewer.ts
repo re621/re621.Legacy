@@ -43,6 +43,7 @@ export class PostViewer extends RE6Module {
             { keys: "hotkeyOpenSource", fnct: this.openSource, },
             { keys: "hotkeyOpenParent", fnct: this.openParent, },
             { keys: "hotkeyToggleRel", fnct: this.toggleRelSection, },
+            { keys: "hotkeyOpenIQDB", fnct: this.openIQDB, },
         );
     }
 
@@ -84,6 +85,7 @@ export class PostViewer extends RE6Module {
             hotkeyOpenSource: "",       // Opens the first image source in a new tab
             hotkeyOpenParent: "",       // Opens the parent/child post, if there is one
             hotkeyToggleRel: "",        // Toggles the relationship section
+            hotkeyOpenIQDB: "",         // Searches for similar posts
 
             upvoteOnFavorite: true,     // add an upvote when adding the post to favorites
             hideNotes: false,           // should the notes be hidden by default
@@ -341,32 +343,25 @@ export class PostViewer extends RE6Module {
         location.href = "/post_versions?search[post_id]=" + Post.getViewingPost().id;
     }
 
+    private static lookupClick(query: string): void {
+        const lookup = $(query).first();
+        if (lookup.length == 0) return;
+        lookup[0].click();
+    }
+
     /** Searches for other works by the artist, if there is one */
-    private openArtist(): void {
-        const lookup = $("li.category-1 a.search-tag").first();
-        if (lookup.length == 0) return;
-        lookup[0].click();
-    }
+    private openArtist(): void { PostViewer.lookupClick("li.category-1 a.search-tag"); }
 
     /** Opens the first source link */
-    private openSource(): void {
-        const lookup = $("div.source-link a").first();
-        if (lookup.length == 0) return;
-        lookup[0].click();
-    }
+    private openSource(): void { PostViewer.lookupClick("div.source-link a"); }
 
     /** Opens the first source link */
-    private openParent(): void {
-        const lookup = $("#has-parent-relationship-preview a, #has-children-relationship-preview a").first();
-        if (lookup.length == 0) return;
-        lookup[0].click();
-    }
+    private openParent(): void { PostViewer.lookupClick("#has-parent-relationship-preview a, #has-children-relationship-preview a"); }
 
     /** Toggles the visibility of the parent/child thumbnails */
-    private toggleRelSection(): void {
-        const lookup = $("#has-children-relationship-preview-link, #has-parent-relationship-preview-link").first();
-        if (lookup.length == 0) return;
-        lookup[0].click();
-    }
+    private toggleRelSection(): void { PostViewer.lookupClick("#has-children-relationship-preview-link, #has-parent-relationship-preview-link"); }
+
+    /** Opens IQDB page for the current page */
+    private openIQDB(): void { PostViewer.lookupClick("#post-related-images a[href*=iqdb_queries]"); }
 
 }

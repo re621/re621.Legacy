@@ -1522,6 +1522,7 @@ export class SettingsController extends RE6Module {
                     ...createInputs(postViewer, "Go To Source", "hotkeyOpenSource"),
                     ...createInputs(postViewer, "Go To Parent", "hotkeyOpenParent"),
                     ...createInputs(postViewer, "Toggle Child Posts", "hotkeyToggleRel"),
+                    ...createInputs(postViewer, "Open IQDB", "hotkeyOpenIQDB"),
                     Form.hr(3),
                 ]
             ),
