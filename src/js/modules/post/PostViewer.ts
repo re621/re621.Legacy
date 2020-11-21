@@ -198,7 +198,7 @@ export class PostViewer extends RE6Module {
     }
 
     private getSourceLink(limit: RISSizeLimit, useSample: boolean): string {
-        console.log(limit.toString());
+        // console.log(limit.toString());
         return (useSample || !limit.test(this.post))
             ? this.post.file.sample
             : this.post.file.original;
