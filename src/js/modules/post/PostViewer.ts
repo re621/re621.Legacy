@@ -4,6 +4,7 @@ import { ModuleController } from "../../components/ModuleController";
 import { Post } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { RISSizeLimit } from "../../components/utility/UtilSize";
 
 /**
  * Add various symbols to the titlebar depending on the posts state
@@ -92,6 +93,7 @@ export class PostViewer extends RE6Module {
 
             moveChildThumbs: true,      // Moves the parent/child post thumbnails to under the searchbar
             boldenTags: true,           // Restores the classic bold look on non-general tags
+            betterImageSearch: true,    // Uses larger version of the image for reverse image searches
         };
     }
 
@@ -165,9 +167,41 @@ export class PostViewer extends RE6Module {
             Danbooru.Post.vote(this.post.id, 1, true);
         });
 
-        // Add target="_blank" to external related links
-        for (const link of $("#post-related-images a[href^=http]").get())
-            $(link).attr("target", "_blank");
+        // Fix reverse image search links
+        // Google       20MB
+        // SauceNAO     15MB
+        // Derpibooru   20MB
+        // Kheina        8MB    weakest link
+        if ($("#post-related-images").length == 0) {
+            $("<section>")
+                .attr("id", "post-related-images")
+                .html(`
+                    <h1>Related</h1>
+                    <ul>
+                        <li><a href="/post_sets?post_id=${this.post.id}">Sets with this post</a></li>
+                        <li><a href="/iqdb_queries?post_id=${this.post.id}">Visually similar on E6</a></li>
+                    </ul>
+                `)
+                .insertAfter("#post-history")
+        } else {
+            const useSample = !this.fetchSettings("betterImageSearch");
+            $("#post-related-images ul").html(`
+                <li><a href="/post_sets?post_id=${this.post.id}">Sets with this post</a></li>
+                <li><a href="/iqdb_queries?post_id=${this.post.id}">Visually similar on E6</a></li>
+                <li><a href="https://www.google.com/searchbyimage?image_url=${this.getSourceLink(RISSizeLimit.Google, useSample)}" target="_blank">Reverse Google Search</a></li>
+                <li><a href="https://saucenao.com/search.php?url=${this.getSourceLink(RISSizeLimit.SauceNAO, useSample)}" target="_blank">Reverse SauceNAO Search</a></li>
+                <li><a href="https://inkbunny.net/search_process.php?text=${this.post.file.md5}&md5=yes" target="_blank">Inkbunny MD5 Search</a></li>
+                <li><a href="https://derpibooru.org/search/reverse?url=${this.getSourceLink(RISSizeLimit.Derpibooru, useSample)}" target="_blank">Reverse Derpibooru Search</a></li>
+                <li><a href="https://kheina.com/?url=${this.getSourceLink(RISSizeLimit.Kheina, useSample)}" target="_blank">Reverse Kheina Search</a></li>
+            `);
+        }
+    }
+
+    private getSourceLink(limit: RISSizeLimit, useSample: boolean): string {
+        console.log(limit.toString());
+        return (useSample || !limit.test(this.post))
+            ? this.post.file.sample
+            : this.post.file.original;
     }
 
     /** Toggles the boldened look on sidebar tags */

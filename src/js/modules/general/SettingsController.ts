@@ -790,6 +790,19 @@ export class SettingsController extends RE6Module {
                         }
                     ),
                     Form.requiresReload(),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: postViewer.fetchSettings("betterImageSearch"),
+                            label: "<b>Better Reverse Image Search</b><br />Dynamically select appropriate image resolutions",
+                            width: 2,
+                        },
+                        async (data) => {
+                            await postViewer.pushSettings("betterImageSearch", data)
+                        }
+                    ),
+                    Form.requiresReload(),
 
                 ]),
 
