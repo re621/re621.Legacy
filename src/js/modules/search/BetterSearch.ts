@@ -596,7 +596,7 @@ export class BetterSearch extends RE6Module {
                     this.$quickEdit.attr("postid", post.id)
 
                     const ratio = Util.formatRatio(post.img.width, post.img.height);
-                    this.$quickEdit.data("info").html(`${post.img.width} x ${post.img.height} (${ratio[0]}:${ratio[1]}), ${Util.formatBytes(post.file.size)}`);
+                    this.$quickEdit.data("info").html(`${post.img.width} x ${post.img.height} (${ratio[0]}:${ratio[1]}), ${Util.Size.format(post.file.size)}`);
                     this.$quickEdit.data("flags")
                         .toggleClass("display-none-important", post.flags.size == 0)
                         .html(post.flags.size > 0 ? [...post.flags].join(", ") : "");

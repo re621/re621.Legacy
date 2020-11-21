@@ -1,6 +1,7 @@
 import { UtilEvents } from "./UtilEvents";
 import { UtilID } from "./UtilID";
 import { UtilMath } from "./UtilMath";
+import { UtilSize } from "./UtilSize";
 import { UtilTime } from "./UtilTime";
 
 /**
@@ -12,6 +13,8 @@ export class Util {
     public static Events = UtilEvents;
     public static ID = UtilID;
     public static Math = UtilMath;
+    public static Size = UtilSize;
+
     public static LS = window.localStorage;
     public static SS = window.sessionStorage;
 
@@ -119,35 +122,6 @@ export class Util {
             .replace(/\[color\]([\s\S]*)\[\/color\]/g, "<span>$1</span>")       // Color
 
         return input;
-    }
-
-    /**
-     * Converts a byte number into a formatted string
-     * @param bytes Number
-     * @param decimals Decimal places
-     */
-    public static formatBytes(bytes: number, decimals = 2): string {
-        if (bytes === 0) return "0 B";
-
-        const k = 1024;
-        const dm = decimals < 0 ? 0 : decimals;
-        const sizes = ["B", "KB", "MB", "GB", "TB", "PB"];
-
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + sizes[i];
-    }
-
-    public static unformatBytes(input: string): number {
-        if (Util.Math.isNumeric(input)) return parseInt(input);
-
-        input = input.toUpperCase();
-        for (const [index, size] of [/\dB$/, /\dKB$/, /\dMB$/, /\dGB$/, /\dTB$/, /\dPB$/].entries()) {
-            if (size.test(input)) {
-                return parseInt(input) * Math.pow(1024, index);
-            }
-        }
-        return 0;
     }
 
     /**

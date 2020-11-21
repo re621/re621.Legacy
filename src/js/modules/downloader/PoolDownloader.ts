@@ -212,7 +212,7 @@ export class PoolDownloader extends RE6Module {
 
                     // Determine queue size
                     totalFileSize += post.file.size;
-                    Debug.log(`adding #${post.id} (${Util.formatBytes(post.file.size)}) to the queue: ${Util.formatBytes(totalFileSize)} total`)
+                    Debug.log(`adding #${post.id} (${Util.Size.format(post.file.size)}) to the queue: ${Util.Size.format(totalFileSize)} total`)
                     if (totalFileSize > PoolDownloader.maxBlobSize) {
                         this.batchOverSize = true;
                         this.downloadOverSize = true;

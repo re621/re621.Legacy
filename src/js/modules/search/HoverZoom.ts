@@ -175,7 +175,7 @@ export class HoverZoom extends RE6Module {
             // Write the image data into the info block
             this.$zoomInfo.html(
                 `${post.img.width} x ${post.img.height}` +
-                (post.file.size > 0 ? `, ${Util.formatBytes(post.file.size)}` : "") +
+                (post.file.size > 0 ? `, ${Util.Size.format(post.file.size)}` : "") +
                 ` | <span class="post-info-rating rating-${post.rating}">${post.rating}</span>` +
                 (post.date.raw !== "0" ? ` | ${this.fetchSettings("time") ? post.date.ago : Util.Time.format(post.date.raw)}` : "")
             );
