@@ -803,6 +803,19 @@ export class SettingsController extends RE6Module {
                         }
                     ),
                     Form.requiresReload(),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: miscellaneous.fetchSettings("disableCommentRules"),
+                            label: "<b>Hide the Comment Rules Warning</b><br />Removes the \"read the how to comment guide\" warning",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await miscellaneous.pushSettings("disableCommentRules", data)
+                            miscellaneous.handleCommentRules(data);
+                        }
+                    ),
 
                 ]),
 
