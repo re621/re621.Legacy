@@ -113,7 +113,22 @@ export class UploadUtilities extends RE6Module {
                 },
                 (error) => {
                     console.log(error);
-                    dupesContainer.html(`"<span class="fullspan error">IQDB server responded with: Internal Error ${error}</span>`);
+                    dupesContainer.html("");
+                    const errorMessage = $("<span>")
+                        .addClass("fullspan error")
+                        .html(
+                            (error.error && error.error == 429)
+                                ? "IQDB: Too Many Requests. "
+                                : `IQDB: Internal Error ${error.error ? error.error : 400} `
+                        )
+                        .appendTo(dupesContainer);
+                    $("<a>")
+                        .html("Retry?")
+                        .appendTo(errorMessage)
+                        .on("click", (event) => {
+                            event.preventDefault();
+                            $(fileContainer).find("input").trigger("input");
+                        });
                     working = false;
                 }
             );
