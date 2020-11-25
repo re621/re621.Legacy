@@ -83,7 +83,7 @@ export class SettingsController extends RE6Module {
                 { name: "Blacklist", structure: this.createBlacklistTab() },
                 { name: "Downloads", structure: this.createDownloadsTab() },
                 { name: "Custom Flags", structure: this.createFlagsTab() },
-                { name: "Smart Alias", structure: this.createUploadsTab() },
+                { name: "Uploads and Tags", structure: this.createUploadsTab() },
                 { name: "Hotkeys", structure: this.createHotkeysTab() },
                 { name: "Features", structure: this.createFeaturesTab() },
                 {
@@ -1171,7 +1171,7 @@ export class SettingsController extends RE6Module {
             Form.accordion({ name: "collapse", columns: 3, width: 3, active: 0 }, [
 
                 // Validator Configuration
-                Form.accordionTab({ name: "validatior", label: "Validation Configuration", columns: 3, width: 3 }, [
+                Form.accordionTab({ name: "uploads", label: "Upload Utilities", columns: 3, width: 3 }, [
 
                     Form.checkbox(
                         {
@@ -1197,8 +1197,26 @@ export class SettingsController extends RE6Module {
                         }
                     ),
                     Form.text(`<div class="text-center text-bold">Requires a page reload</div>`),
-                    Form.hr(3),
+                    Form.spacer(3),
 
+                    Form.checkbox(
+                        {
+                            value: uploadUtilities.fetchSettings("loadImageData"),
+                            label: `<b>Fetch Image Data</b><br />Displays image dimensions, format, and filesize`,
+                            width: 2,
+                        },
+                        async (data) => {
+                            await uploadUtilities.pushSettings("loadImageData", data);
+                        }
+                    ),
+                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`),
+                    Form.text(`This feature requires access to various domains not explicitly whitelisted by the script.<br />You will be prompted to approve a cross-origin request when that happens.`, 3),
+                    Form.spacer(3),
+
+                ]),
+
+                // Validator Configuration
+                Form.accordionTab({ name: "validatior", label: "Tag Validation", columns: 3, width: 3 }, [
 
                     Form.checkbox(
                         {

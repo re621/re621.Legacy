@@ -15,8 +15,11 @@ export class UploadUtilities extends RE6Module {
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
-            checkDuplicates: true,
-            addSourceLinks: true,
+
+            checkDuplicates: true,      // run uploads through e621's version of IQDB
+            addSourceLinks: true,       // improve source links fields somewhat
+
+            loadImageData: false,       // load image headers to get extra data
         };
     }
 
@@ -31,6 +34,9 @@ export class UploadUtilities extends RE6Module {
 
         // Add clickable links to sources
         if (this.fetchSettings("addSourceLinks")) this.handleSourceEnhancements();
+
+        // Load extra data from the image's header
+        if (this.fetchSettings("loadImageData")) this.handleImageData();
     }
 
     /**
@@ -207,6 +213,54 @@ export class UploadUtilities extends RE6Module {
             if (!link.startsWith("https")) return "http";
             return "";
         }
+    }
+
+    /** Load image file size and type */
+    private handleImageData(): void {
+
+        const output = $("#preview-sidebar div.upload_preview_dims").first();
+        const image = $("#preview-sidebar img.upload_preview_img").first();
+        image.on("load.resix", () => {
+
+            output.attr({
+                "data-width": $(image).prop("naturalWidth"),
+                "data-height": $(image).prop("naturalHeight"),
+                "data-size": "0",
+                "data-type": "unk",
+            });
+
+            // Debug.log("loading", image.attr("src"));
+
+            if (image.attr("src").startsWith("data:image")) {
+                output.html("");
+                return;
+            }
+
+            XM.Connect.xmlHttpRequest({
+                url: image.attr("src"),
+                method: "HEAD",
+                onload: (event) => {
+
+                    const headerStrings = event.responseHeaders.split(/\r?\n/);
+                    const data = {};
+                    for (const header of headerStrings) {
+                        const parts = header.split(": ");
+                        if (parts.length < 2) continue;
+                        data[parts[0]] = parts.slice(1).join(": ");
+                    }
+                    // Debug.log(data);
+
+                    output.attr({
+                        "data-size": data["content-length"] || "0",
+                        "data-type": (data["content-type"] || "UNK").replace("image/", ""),
+                    });
+                    output.html(`${output.attr("data-width")}x${output.attr("data-height")} | ${output.attr("data-type").toUpperCase()} | ${Util.Size.format(output.attr("data-size"))}`);
+                }
+            });
+        });
+
+        image.trigger("load.resix");
+
     }
 
 }
