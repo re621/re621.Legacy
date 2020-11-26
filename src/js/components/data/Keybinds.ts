@@ -29,15 +29,19 @@ export class KeybindManager {
     private static listeners: Map<string, ListenerFunction> = new Map();
     private static executors: Map<string, KeybindExecutor> = new Map();
 
-    private static enabled = true;
-    private static listening = false;
+    private static enabled = true;      // if false, stops executor functions from running
+    private static blocked = false;     // if true, stops listener functions from being created
+    private static listening = false;   // same as enabled, but for internal use only
 
     public static enable(): void { KeybindManager.enabled = true; }
     public static disable(): void { KeybindManager.enabled = false; }
+    public static block(): void { KeybindManager.blocked = true; }
 
     public static register(keybind: Keybind): void;
     public static register(keybind: Keybind[]): void;
     public static register(keybind: Keybind | Keybind[]): void {
+
+        if (KeybindManager.blocked) return;
 
         if (Array.isArray(keybind)) {
             for (const entry of keybind) this.register(entry);
@@ -121,6 +125,7 @@ export class KeybindManager {
                     if (keydown) return;
                     keydown = true;
                     if (!KeybindManager.enabled || KeybindManager.listening) return false;
+                    console.log("caught", key);
                     this.listeners.get(key)(event);
                 });
 

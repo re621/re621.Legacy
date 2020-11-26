@@ -101,7 +101,7 @@ export class CleanSlate {
                 selector: "#image-container",
                 action: () => {
                     if ($("#image-container").attr("data-file-ext") === "swf")
-                        KeybindManager.disable();
+                        KeybindManager.block();
                 }
             })
         }
