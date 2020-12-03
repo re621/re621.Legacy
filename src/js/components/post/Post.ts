@@ -197,9 +197,10 @@ export class Post implements PostData {
      * `undefined` is returned if the DOM element exists, but lacks data
      */
     public static get(post: number): Post;
+    public static get(post: Element): Post;
     public static get(post: JQuery<Element>): Post;
     public static get(type: "first" | "last" | "random"): Post;
-    public static get(post: number | JQuery<Element> | string): Post {
+    public static get(post: number | Element | JQuery<Element> | string): Post {
         if (typeof post == "number") {
             post = $("#entry_" + post).first();
             if (post.length == 0) return null;
@@ -225,7 +226,7 @@ export class Post implements PostData {
                 default: { return null; }
             }
         }
-        return post.data("wfpost");
+        return $(post).data("wfpost");
     }
 
     /**

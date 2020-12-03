@@ -148,10 +148,10 @@ export class BetterSearch extends RE6Module {
 
         // Event listener for article updates
         this.$content
-            .on("re621:render", "post", (event) => { Post.get($(event.currentTarget)).render(); })
-            .on("re621:reset", "post", (event) => { Post.get($(event.currentTarget)).reset(); })
-            .on("re621:filters", "post", (event) => { Post.get($(event.currentTarget)).updateFilters(); })
-            .on("re621:visibility", "post", (event) => { Post.get($(event.currentTarget)).updateVisibility(); });
+            .on("re621:render", "post", (event) => { Post.get(event.currentTarget).render(); })
+            .on("re621:reset", "post", (event) => { Post.get(event.currentTarget).reset(); })
+            .on("re621:filters", "post", (event) => { Post.get(event.currentTarget).updateFilters(); })
+            .on("re621:visibility", "post", (event) => { Post.get(event.currentTarget).updateVisibility(); });
         BetterSearch.on("postcount", () => { this.updatePostCount(); });
         BetterSearch.on("paginator", () => { this.reloadPaginator(); })
 
@@ -164,7 +164,7 @@ export class BetterSearch extends RE6Module {
         };
         this.observer = new IntersectionObserver((entries) => {
             entries.forEach((value) => {
-                const post = Post.get($(value.target)),
+                const post = Post.get(value.target),
                     has = intersecting.has(post.id);
 
                 // element left the viewport
