@@ -108,4 +108,5 @@ export const PageDefinition = {
     comments: /^\/comments\??.*/,
     settings: /^\/users\/\d+\/edit$/,
     changes: /^\/post_versions.*/,
+    tickets: /^\/tickets.*/,
 };
