@@ -348,7 +348,7 @@ export class Miscellaneous extends RE6Module {
      */
     private fixTicketTypos(): void {
         $("a:contains('blakclist')").text((index, text) => {
-            return text.replace("blakclist", "blacklist");
+            return text.replace(/([bB])lakclist/, "$1lacklist");
         });
     }
 
