@@ -17,7 +17,7 @@ jobs:
         ref: dev
   
     - name: Fetch the latest Git tag
-      uses: olegtarasov/get-tag@v2
+      uses: little-core-labs/get-git-tag@v3.0.2
       
     - name: Set up Node
       uses: actions/setup-node@v1
