@@ -46,6 +46,7 @@ export class Miscellaneous extends RE6Module {
 
             avatarClick: true,
             commitWikiLinks: false,     // change the post search links on the comit pages to wiki links
+            disableCommentRules: true,  // Disable the "read the how to comment guide" warning
 
             fixForumTitle: true,
         };
@@ -80,6 +81,9 @@ export class Miscellaneous extends RE6Module {
         // Double-clicking avatars
         this.handleAvatarClick(this.fetchSettings("avatarClick"));
 
+        // How to comment guide
+        this.handleCommentRules(this.fetchSettings("disableCommentRules"));
+
         // Fix the forum title
         if (this.fetchSettings("fixForumTitle") && Page.matches(PageDefinition.forum)) {
             const title = /^(?:Forum - )(.+)(?: - (e621|e926))$/g.exec(document.title);
@@ -102,6 +106,10 @@ export class Miscellaneous extends RE6Module {
                 $link.attr("href", "/wiki_pages/show_or_new?title=" + $link.text());
             }
         }
+
+        // Fix typos on the ticket page
+        if (Page.matches(PageDefinition.tickets))
+            this.fixTicketTypos();
 
         // Move the ad leaderboard
         $("#ad-leaderboard").prependTo("#content");
@@ -327,6 +335,21 @@ export class Miscellaneous extends RE6Module {
     private randomSetPost(): void {
         if (!Page.matches(PageDefinition.set)) return;
         $("#set-random-post")[0].click();
+    }
+
+    /** Disables the "read the how to comment guide" warning */
+    public handleCommentRules(disable = true): void {
+        $("div.new-comment").find("h2").first().toggleClass("display-none", disable);
+    }
+
+    /**
+     * Replaces all instances of "blakclist" in the tickets with "blacklist".
+     * Is it petty? It most definitely is.
+     */
+    private fixTicketTypos(): void {
+        $("a:contains('blakclist')").text((index, text) => {
+            return text.replace("blakclist", "blacklist");
+        });
     }
 
 }

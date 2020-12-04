@@ -148,10 +148,10 @@ export class BetterSearch extends RE6Module {
 
         // Event listener for article updates
         this.$content
-            .on("re621:render", "post", (event) => { Post.get($(event.currentTarget)).render(); })
-            .on("re621:reset", "post", (event) => { Post.get($(event.currentTarget)).reset(); })
-            .on("re621:filters", "post", (event) => { Post.get($(event.currentTarget)).updateFilters(); })
-            .on("re621:visibility", "post", (event) => { Post.get($(event.currentTarget)).updateVisibility(); });
+            .on("re621:render", "post", (event) => { Post.get(event.currentTarget).render(); })
+            .on("re621:reset", "post", (event) => { Post.get(event.currentTarget).reset(); })
+            .on("re621:filters", "post", (event) => { Post.get(event.currentTarget).updateFilters(); })
+            .on("re621:visibility", "post", (event) => { Post.get(event.currentTarget).updateVisibility(); });
         BetterSearch.on("postcount", () => { this.updatePostCount(); });
         BetterSearch.on("paginator", () => { this.reloadPaginator(); })
 
@@ -164,7 +164,7 @@ export class BetterSearch extends RE6Module {
         };
         this.observer = new IntersectionObserver((entries) => {
             entries.forEach((value) => {
-                const post = Post.get($(value.target)),
+                const post = Post.get(value.target),
                     has = intersecting.has(post.id);
 
                 // element left the viewport
@@ -478,7 +478,7 @@ export class BetterSearch extends RE6Module {
         this.$content.on("click", "post a", (event) => {
 
             const mode = $("#mode-box-mode").val();
-            if (mode == "view") return;
+            if (mode == "view" || !mode) return;
             event.preventDefault();
 
             const $article = $(event.currentTarget).parent(),
@@ -596,7 +596,7 @@ export class BetterSearch extends RE6Module {
                     this.$quickEdit.attr("postid", post.id)
 
                     const ratio = Util.formatRatio(post.img.width, post.img.height);
-                    this.$quickEdit.data("info").html(`${post.img.width} x ${post.img.height} (${ratio[0]}:${ratio[1]}), ${Util.formatBytes(post.file.size)}`);
+                    this.$quickEdit.data("info").html(`${post.img.width} x ${post.img.height} (${ratio[0]}:${ratio[1]}), ${Util.Size.format(post.file.size)}`);
                     this.$quickEdit.data("flags")
                         .toggleClass("display-none-important", post.flags.size == 0)
                         .html(post.flags.size > 0 ? [...post.flags].join(", ") : "");

@@ -17,6 +17,7 @@ import { VersionChecker } from "./components/utility/VersionChecker";
 import { FavDownloader } from "./modules/downloader/FavDownloader";
 import { MassDownloader } from "./modules/downloader/MassDownloader";
 import { PoolDownloader } from "./modules/downloader/PoolDownloader";
+import { CompatibilityPatcher } from "./modules/general/CompatibilityPatcher";
 import { FormattingManager } from "./modules/general/FormattingHelper";
 import { HeaderCustomizer } from "./modules/general/HeaderCustomizer";
 import { Miscellaneous } from "./modules/general/Miscellaneous";
@@ -80,6 +81,7 @@ const loadOrder = [
     MassDownloader,
 
     SubscriptionManager,
+    CompatibilityPatcher,
     SettingsController,
 ];
 

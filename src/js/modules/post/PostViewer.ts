@@ -4,6 +4,7 @@ import { ModuleController } from "../../components/ModuleController";
 import { Post } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { RISSizeLimit } from "../../components/utility/UtilSize";
 
 /**
  * Add various symbols to the titlebar depending on the posts state
@@ -43,6 +44,7 @@ export class PostViewer extends RE6Module {
             { keys: "hotkeyOpenSource", fnct: this.openSource, },
             { keys: "hotkeyOpenParent", fnct: this.openParent, },
             { keys: "hotkeyToggleRel", fnct: this.toggleRelSection, },
+            { keys: "hotkeyOpenIQDB", fnct: this.openIQDB, },
         );
     }
 
@@ -84,12 +86,14 @@ export class PostViewer extends RE6Module {
             hotkeyOpenSource: "",       // Opens the first image source in a new tab
             hotkeyOpenParent: "",       // Opens the parent/child post, if there is one
             hotkeyToggleRel: "",        // Toggles the relationship section
+            hotkeyOpenIQDB: "",         // Searches for similar posts
 
             upvoteOnFavorite: true,     // add an upvote when adding the post to favorites
             hideNotes: false,           // should the notes be hidden by default
 
             moveChildThumbs: true,      // Moves the parent/child post thumbnails to under the searchbar
             boldenTags: true,           // Restores the classic bold look on non-general tags
+            betterImageSearch: true,    // Uses larger version of the image for reverse image searches
         };
     }
 
@@ -163,9 +167,41 @@ export class PostViewer extends RE6Module {
             Danbooru.Post.vote(this.post.id, 1, true);
         });
 
-        // Add target="_blank" to external related links
-        for (const link of $("#post-related-images a[href^=http]").get())
-            $(link).attr("target", "_blank");
+        // Fix reverse image search links
+        // Google       20MB
+        // SauceNAO     15MB
+        // Derpibooru   20MB
+        // Kheina        8MB    weakest link
+        if ($("#post-related-images").length == 0) {
+            $("<section>")
+                .attr("id", "post-related-images")
+                .html(`
+                    <h1>Related</h1>
+                    <ul>
+                        <li><a href="/post_sets?post_id=${this.post.id}">Sets with this post</a></li>
+                        <li><a href="/iqdb_queries?post_id=${this.post.id}">Visually similar on E6</a></li>
+                    </ul>
+                `)
+                .insertAfter("#post-history")
+        } else {
+            const useSample = !this.fetchSettings("betterImageSearch");
+            $("#post-related-images ul").html(`
+                <li><a href="/post_sets?post_id=${this.post.id}">Sets with this post</a></li>
+                <li><a href="/iqdb_queries?post_id=${this.post.id}">Visually similar on E6</a></li>
+                <li><a href="https://www.google.com/searchbyimage?image_url=${this.getSourceLink(RISSizeLimit.Google, useSample)}" target="_blank">Reverse Google Search</a></li>
+                <li><a href="https://saucenao.com/search.php?url=${this.getSourceLink(RISSizeLimit.SauceNAO, useSample)}" target="_blank">Reverse SauceNAO Search</a></li>
+                <li><a href="https://inkbunny.net/search_process.php?text=${this.post.file.md5}&md5=yes" target="_blank">Inkbunny MD5 Search</a></li>
+                <li><a href="https://derpibooru.org/search/reverse?url=${this.getSourceLink(RISSizeLimit.Derpibooru, useSample)}" target="_blank">Reverse Derpibooru Search</a></li>
+                <li><a href="https://kheina.com/?url=${this.getSourceLink(RISSizeLimit.Kheina, useSample)}" target="_blank">Reverse Kheina Search</a></li>
+            `);
+        }
+    }
+
+    private getSourceLink(limit: RISSizeLimit, useSample: boolean): string {
+        // console.log(limit.toString());
+        return (useSample || !limit.test(this.post))
+            ? this.post.file.sample
+            : this.post.file.original;
     }
 
     /** Toggles the boldened look on sidebar tags */
@@ -341,32 +377,25 @@ export class PostViewer extends RE6Module {
         location.href = "/post_versions?search[post_id]=" + Post.getViewingPost().id;
     }
 
+    private static lookupClick(query: string): void {
+        const lookup = $(query).first();
+        if (lookup.length == 0) return;
+        lookup[0].click();
+    }
+
     /** Searches for other works by the artist, if there is one */
-    private openArtist(): void {
-        const lookup = $("li.category-1 a.search-tag").first();
-        if (lookup.length == 0) return;
-        lookup[0].click();
-    }
+    private openArtist(): void { PostViewer.lookupClick("li.category-1 a.search-tag"); }
 
     /** Opens the first source link */
-    private openSource(): void {
-        const lookup = $("div.source-link a").first();
-        if (lookup.length == 0) return;
-        lookup[0].click();
-    }
+    private openSource(): void { PostViewer.lookupClick("div.source-link a"); }
 
     /** Opens the first source link */
-    private openParent(): void {
-        const lookup = $("#has-parent-relationship-preview a, #has-children-relationship-preview a").first();
-        if (lookup.length == 0) return;
-        lookup[0].click();
-    }
+    private openParent(): void { PostViewer.lookupClick("#has-parent-relationship-preview a, #has-children-relationship-preview a"); }
 
     /** Toggles the visibility of the parent/child thumbnails */
-    private toggleRelSection(): void {
-        const lookup = $("#has-children-relationship-preview-link, #has-parent-relationship-preview-link").first();
-        if (lookup.length == 0) return;
-        lookup[0].click();
-    }
+    private toggleRelSection(): void { PostViewer.lookupClick("#has-children-relationship-preview-link, #has-parent-relationship-preview-link"); }
+
+    /** Opens IQDB page for the current page */
+    private openIQDB(): void { PostViewer.lookupClick("#post-related-images a[href*=iqdb_queries]"); }
 
 }

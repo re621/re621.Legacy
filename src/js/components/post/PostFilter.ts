@@ -54,7 +54,7 @@ export class PostFilter {
             // Convert some values immediately
             switch (filterType) {
                 case FilterType.Size:
-                    filter = Util.unformatBytes(filter) + "";
+                    filter = Util.Size.unformat(filter) + "";
                     break;
             }
 
