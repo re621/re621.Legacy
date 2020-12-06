@@ -29,6 +29,11 @@ export class XM {
         } else return GM.info;
     }
 
+    /** Returns true if the current script instance is a userscript, false for extension */
+    public static isUserscript(): boolean {
+        return window["re621"].type == "script";
+    }
+
 }
 
 interface GMInfo {

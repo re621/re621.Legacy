@@ -60,7 +60,10 @@ Promise.all(downloadQueue).then((resolved) => {
     fs.writeFileSync(
         "./build/extension/src/script.js",
         resourceString +
-        (fs.readFileSync("./build/script.js") + "").replace(/%BUILDTYPE%/g, "ChromeExt")
+        (fs.readFileSync("./build/script.js") + "")
+        .replace(/%BUILDTYPE%/g, "ChromeExt")
+        .replace(/"%PRIVACY%"/g, false)
+        .replace(/\/\/%STYLESHEET%/g, "")
     );
     manifest["content_scripts"][0]["js"].push("script.js");
 

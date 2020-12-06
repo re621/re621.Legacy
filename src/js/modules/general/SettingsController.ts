@@ -1199,19 +1199,28 @@ export class SettingsController extends RE6Module {
                     Form.text(`<div class="text-center text-bold">Requires a page reload</div>`),
                     Form.spacer(3),
 
-                    Form.checkbox(
+                    Form.section(
                         {
-                            value: uploadUtilities.fetchSettings("loadImageData"),
-                            label: `<b>Fetch Image Data</b><br />Displays image dimensions, format, and filesize`,
-                            width: 2,
+                            width: 3,
+                            wrapper: window["re621"].privacy ? "display-none" : undefined,
                         },
-                        async (data) => {
-                            await uploadUtilities.pushSettings("loadImageData", data);
-                        }
-                    ),
-                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`),
-                    Form.text(`This feature requires access to various domains not explicitly whitelisted by the script.<br />You will be prompted to approve a cross-origin request when that happens.`, 3),
-                    Form.spacer(3),
+                        [
+                            Form.checkbox(
+                                {
+                                    value: uploadUtilities.fetchSettings("loadImageData"),
+                                    label: `<b>Fetch Image Data</b><br />Displays image dimensions, format, and filesize`,
+                                    width: 2,
+                                },
+                                async (data) => {
+                                    await uploadUtilities.pushSettings("loadImageData", data);
+                                }
+                            ),
+                            Form.text(
+                                `<div class="text-center text-bold">Requires a page reload</div>`
+                            ),
+                            Form.text(`This feature requires access to various domains not explicitly whitelisted by the script.<br />You will be prompted to approve a cross-origin request when that happens.`, 3),
+                            Form.spacer(3),
+                        ]),
 
                 ]),
 

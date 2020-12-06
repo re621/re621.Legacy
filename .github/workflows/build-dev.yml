@@ -41,7 +41,7 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         allowUpdates: true
-        artifacts: "./build/userscript/script.user.js,./build/userscript/script.meta.js,./build/userscript/style.min.css,./build/extension/re621.zip"
+        artifacts: "./build/userscript/script.user.js,./build/userscript/script.meta.js,./build/userscript/altver.user.js,./build/userscript/altver.meta.js,./build/extension/re621.zip"
         replacesArtifacts: true
         omitBody: true
         prerelease: true

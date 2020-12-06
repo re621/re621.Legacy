@@ -5,7 +5,7 @@ import { ErrorHandler } from "./ErrorHandler";
 
 export class Patcher {
 
-    public static version: number;
+    public static version = 0;
 
     /**
      * Runs patch-ups on the settings to preserve backwards compatibility.  
