@@ -12,7 +12,10 @@ window.re621 = new function() {
         forum: "https://e621.net/forum_topics/25872",
     };
     this.useragent = "%NAME%:%BUILDTYPE%/%VERSHORT%";
+    this.privacy = "%PRIVACY%";
     this.debug = true;
 };
 
 /* This is a minified build. To see the source, visit the project's github page. */
+
+//%STYLESHEET%

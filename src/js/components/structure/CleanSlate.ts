@@ -8,6 +8,7 @@ import { DomUtilities } from "./DomUtilities";
 
 
 declare const GM: any;
+declare const attachedStylesheet: string;
 
 export class CleanSlate {
 
@@ -19,8 +20,11 @@ export class CleanSlate {
             selector: "head",
             action: async () => {
                 try {
-                    const css = await XM.Connect.getResourceText("re621_css")
-                    const stylesheet = DomUtilities.addStyle(css);
+                    const stylesheet = DomUtilities.addStyle(
+                        XM.isUserscript()
+                            ? attachedStylesheet
+                            : await XM.Connect.getResourceText("re621_css")
+                    );
                     // Move the stylesheet to the bottom on load
                     // This prevents other styles from overriding it
                     $(() => { stylesheet.appendTo("head"); });

@@ -28,7 +28,7 @@
 
         "compile-sass:prod": "npm-run-all sass:prod autoprefixer",
         "compile-sass:dev": "npm-run-all sass:dev autoprefixer",
-        "sass:prod": "sass ./src/scss/style.scss ./build/style.css --no-source-map --style compressed",
+        "sass:prod": "sass ./src/scss/style.scss ./build/style.css --no-source-map --style expanded",
         "sass:dev": "sass ./src/scss/style.scss ./build/style.css --no-source-map --style expanded",
         "autoprefixer": "postcss ./build/style.css --no-map --use autoprefixer -r",
 

@@ -27,8 +27,6 @@ for (let [key, value] of Object.entries(headerData)) {
     }
 }
 
-fs.createReadStream("./build/style.css").pipe(fs.createWriteStream("./build/userscript/style.min.css"));
-
 switch (mode) {
     case "injector": {
         // Injector script
@@ -42,18 +40,30 @@ switch (mode) {
         break;
     }
     case "prod": {
+        const metaBody = util.parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n", package);
         // Metadata file
+        fs.writeFileSync("./build/userscript/script.meta.js", metaBody);
         fs.writeFileSync(
-            "./build/userscript/script.meta.js",
-            util.parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n", package)
+            "./build/userscript/altver.meta.js",
+            metaBody
+            .replace(/\/\/ @connect +\*[\n\r]/g, "")
+            .replace(/download\/script\./g, "download/altver.")
         );
     }
     default: {
         // Normal mode
-        fs.writeFileSync(
-            "./build/userscript/script.user.js",
+        const scriptBody =
             util.parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n", package) + "\n\n" +
-            (fs.readFileSync("./build/script.js") + "").replace(/%BUILDTYPE%/g, "script")
+            (fs.readFileSync("./build/script.js") + "")
+            .replace(/%BUILDTYPE%/g, "script")
+            .replace(/\/\/%STYLESHEET%/g, "const attachedStylesheet = `" + JSON.stringify(fs.readFileSync("./build/style.css").toString(), null, 2) + "`;");
+        fs.writeFileSync("./build/userscript/script.user.js", scriptBody.replace(/"%PRIVACY%"/g, false));
+        fs.writeFileSync(
+            "./build/userscript/altver.user.js",
+            scriptBody
+            .replace(/"%PRIVACY%"/g, true)
+            .replace(/\/\/ @connect +\*[\n\r]/g, "")
+            .replace(/download\/script\./g, "download/altver.")
         );
     }
 }

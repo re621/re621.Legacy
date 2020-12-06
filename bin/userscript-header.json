@@ -19,9 +19,6 @@
         "https://cdnjs.cloudflare.com/ajax/libs/jquery.hotkeys/0.1.0/jquery.hotkeys.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"
     ],
-    "resource": {
-        "re621_css": "%GITHUB%/releases/download/%VERSIONREPO%/style.min.css"
-    },
     "grant": [
         "GM.info",
         "GM.setValue",
