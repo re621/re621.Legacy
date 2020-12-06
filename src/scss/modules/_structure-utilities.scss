@@ -347,3 +347,8 @@ div#page div#c-sets div#a-show span.set-viewposts {
 body[data-hide-blacklist=true] section#blacklist-box {
     display: none !important;
 }
+
+/* Fix the overflow in the diff-list */
+.diff-list del, .diff-list ins {
+    white-space: nowrap;
+}
