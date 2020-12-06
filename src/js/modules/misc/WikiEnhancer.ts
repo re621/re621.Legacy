@@ -21,7 +21,7 @@ export class WikiEnhancer extends RE6Module {
             ? $("#a-show h1").first()
             : $("#wiki-page-title");
         const tagName = $title.text().trim()
-            .replace(/^((Species|Character|Copyright|Artist|Lore|Meta): )/g, "")
+            .replace(/^.+: /g, "")
             .replace(/ /g, "_");
 
         $("<button>")
