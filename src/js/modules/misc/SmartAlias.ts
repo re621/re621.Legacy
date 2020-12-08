@@ -528,7 +528,7 @@ export class SmartAlias extends RE6Module {
                     symbol = "info";
                     color = "info";
                     text = "duplicate";
-                } else if (data.invalid) {
+                } else if (data.invalid || data.category == 6) {
                     symbol = "error";
                     color = "error";
                     text = "invalid";
