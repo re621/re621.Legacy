@@ -1,5 +1,5 @@
 import { E621 } from "../../components/api/E621";
-import { APITag } from "../../components/api/responses/APITag";
+import { APITag, TagCategory } from "../../components/api/responses/APITag";
 import { APITagAlias } from "../../components/api/responses/APITagAlias";
 import { AvoidPosting } from "../../components/cache/AvoidPosting";
 import { TagCache } from "../../components/cache/TagCache";
@@ -431,7 +431,7 @@ export class SmartAlias extends RE6Module {
             for (const tagName of lookup) {
                 SmartAlias.tagData[tagName] = {
                     count: -1,
-                    category: -1,
+                    category: TagCategory.Unknown,
 
                     ambiguous: false,
                     invalid: true,
@@ -528,7 +528,7 @@ export class SmartAlias extends RE6Module {
                     symbol = "info";
                     color = "info";
                     text = "duplicate";
-                } else if (data.invalid || data.category == 6) {
+                } else if (data.invalid || data.category == TagCategory.Invalid) {
                     symbol = "error";
                     color = "error";
                     text = "invalid";
@@ -730,7 +730,7 @@ interface TagData {
 
 interface Tag {
     count: number;
-    category: number;
+    category: TagCategory;
 
     invalid: boolean;
     ambiguous: boolean;

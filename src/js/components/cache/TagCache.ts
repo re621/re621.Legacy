@@ -1,3 +1,4 @@
+import { TagCategory } from "../api/responses/APITag";
 import { Debug } from "../utility/Debug";
 import { Util } from "../utility/Util";
 
@@ -51,7 +52,7 @@ export class TagCache {
     }
 
     /** Adds the tag data to cache */
-    public static add(tag: string, count: number, category: number): void {
+    public static add(tag: string, count: number, category: TagCategory): void {
         TagCache.getCache().set(tag, { count: count, category: category, expires: Util.Time.now() + (count > 100000 ? Util.Time.WEEK : Util.Time.DAY) });
     }
 
@@ -59,6 +60,6 @@ export class TagCache {
 
 interface TagData {
     count: number;
-    category: number;
+    category: TagCategory;
     expires: number;
 }
