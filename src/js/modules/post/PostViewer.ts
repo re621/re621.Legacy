@@ -1,5 +1,5 @@
 import { Danbooru } from "../../components/api/Danbooru";
-import { PageDefinition } from "../../components/data/Page";
+import { Page, PageDefinition } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { Post } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
@@ -14,37 +14,39 @@ export class PostViewer extends RE6Module {
     private post: Post;
 
     public constructor() {
-        super(PageDefinition.post, true);
+        super([PageDefinition.post, PageDefinition.changes], true);
+
+        const reqPage = PageDefinition.post;
         this.registerHotkeys(
-            { keys: "hotkeyUpvote", fnct: this.triggerUpvote },
-            { keys: "hotkeyUpvoteNU", fnct: this.triggerUpvoteNU },
-            { keys: "hotkeyDownvote", fnct: this.triggerDownvote },
-            { keys: "hotkeyDownvoteNU", fnct: this.triggerDownvoteNU },
+            { keys: "hotkeyUpvote", fnct: this.triggerUpvote, page: reqPage },
+            { keys: "hotkeyUpvoteNU", fnct: this.triggerUpvoteNU, page: reqPage },
+            { keys: "hotkeyDownvote", fnct: this.triggerDownvote, page: reqPage },
+            { keys: "hotkeyDownvoteNU", fnct: this.triggerDownvoteNU, page: reqPage },
 
-            { keys: "hotkeyFavorite", fnct: this.toggleFavorite },
-            { keys: "hotkeyAddFavorite", fnct: this.addFavorite },
-            { keys: "hotkeyRemoveFavorite", fnct: this.removeFavorite },
+            { keys: "hotkeyFavorite", fnct: this.toggleFavorite, page: reqPage },
+            { keys: "hotkeyAddFavorite", fnct: this.addFavorite, page: reqPage },
+            { keys: "hotkeyRemoveFavorite", fnct: this.removeFavorite, page: reqPage },
 
-            { keys: "hotkeyHideNotes", fnct: () => { this.toggleNotes(); } },
-            { keys: "hotkeyNewNote", fnct: this.switchNewNote },
+            { keys: "hotkeyHideNotes", fnct: () => { this.toggleNotes(); }, page: reqPage },
+            { keys: "hotkeyNewNote", fnct: this.switchNewNote, page: reqPage },
 
-            { keys: "hotkeyAddSet", fnct: this.addSet },
-            { keys: "hotkeyAddPool", fnct: this.addPool },
+            { keys: "hotkeyAddSet", fnct: this.addSet, page: reqPage },
+            { keys: "hotkeyAddPool", fnct: this.addPool, page: reqPage },
 
-            { keys: "hotkeyToggleSetLatest", fnct: this.toggleSetLatest, },
-            { keys: "hotkeyAddSetLatest", fnct: this.addSetLatest, },
-            { keys: "hotkeyRemoveSetLatest", fnct: this.removeSetLatest, },
+            { keys: "hotkeyToggleSetLatest", fnct: this.toggleSetLatest, page: reqPage },
+            { keys: "hotkeyAddSetLatest", fnct: this.addSetLatest, page: reqPage },
+            { keys: "hotkeyRemoveSetLatest", fnct: this.removeSetLatest, page: reqPage },
 
-            { keys: "hotkeyAddSetCustom1", fnct: () => { this.addSetCustom("hotkeyAddSetCustom1_data"); } },
-            { keys: "hotkeyAddSetCustom2", fnct: () => { this.addSetCustom("hotkeyAddSetCustom2_data"); } },
-            { keys: "hotkeyAddSetCustom3", fnct: () => { this.addSetCustom("hotkeyAddSetCustom3_data"); } },
+            { keys: "hotkeyAddSetCustom1", fnct: () => { this.addSetCustom("hotkeyAddSetCustom1_data"); }, page: reqPage },
+            { keys: "hotkeyAddSetCustom2", fnct: () => { this.addSetCustom("hotkeyAddSetCustom2_data"); }, page: reqPage },
+            { keys: "hotkeyAddSetCustom3", fnct: () => { this.addSetCustom("hotkeyAddSetCustom3_data"); }, page: reqPage },
 
             { keys: "hotkeyOpenHistory", fnct: this.openImageHistory, },
-            { keys: "hotkeyOpenArtist", fnct: this.openArtist, },
-            { keys: "hotkeyOpenSource", fnct: this.openSource, },
-            { keys: "hotkeyOpenParent", fnct: this.openParent, },
-            { keys: "hotkeyToggleRel", fnct: this.toggleRelSection, },
-            { keys: "hotkeyOpenIQDB", fnct: this.openIQDB, },
+            { keys: "hotkeyOpenArtist", fnct: this.openArtist, page: reqPage },
+            { keys: "hotkeyOpenSource", fnct: this.openSource, page: reqPage },
+            { keys: "hotkeyOpenParent", fnct: this.openParent, page: reqPage },
+            { keys: "hotkeyToggleRel", fnct: this.toggleRelSection, page: reqPage },
+            { keys: "hotkeyOpenIQDB", fnct: this.openIQDB, page: reqPage },
         );
     }
 
@@ -103,6 +105,8 @@ export class PostViewer extends RE6Module {
      */
     public create(): void {
         super.create();
+
+        if (Page.matches(PageDefinition.changes)) return;
 
         this.post = Post.getViewingPost()
 
@@ -374,7 +378,11 @@ export class PostViewer extends RE6Module {
 
     /** Redirects the page to the post history */
     private openImageHistory(): void {
-        location.href = "/post_versions?search[post_id]=" + Post.getViewingPost().id;
+        if (Page.matches(PageDefinition.post))
+            location.href = "/post_versions?search[post_id]=" + Post.getViewingPost().id;
+        else if (Page.hasQueryParameter("search[post_id]"))
+            location.href = "/posts/" + Page.getQueryParameter("search[post_id]");
+
     }
 
     private static lookupClick(query: string): void {

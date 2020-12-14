@@ -287,7 +287,7 @@ export class RE6Module {
                 keys: this.fetchSettings(keybind.keys).split("|"),
                 fnct: keybind.fnct,
                 bindMeta: meta,
-                enabled: enabled,
+                enabled: enabled && (!keybind.page || Page.matches(keybind.page)),
                 element: keybind.element,
                 selector: keybind.selector,
             })
@@ -360,6 +360,7 @@ interface KeybindDefinition {
     fnct: ResponseFunction;     // Function that is executed when the key is pressed
     element?: string;           // Element to which the listener gets bound. Defaults to `document`
     selector?: string;          // Selector within the element for deferred listeners. Defaults to `null`
+    page?: RegExp | RegExp[];   // Pages on which the shortcuts must work. Leave blank for all.
 }
 
 export type Settings = {

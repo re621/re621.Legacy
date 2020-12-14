@@ -39,6 +39,14 @@ export class Page {
     }
 
     /**
+     * Returns true if the search parameters has the provided key, false otherwise
+     * @param key 
+     */
+    public static hasQueryParameter(key: string): boolean {
+        return this.getInstance().url.searchParams.has(key);
+    }
+
+    /**
      * Sets a query parameter in the current url  
      * If there is already one with the same key, it will get overridden
      * @param key 
