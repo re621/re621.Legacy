@@ -263,13 +263,18 @@ export class UploadUtilities extends RE6Module {
                         if (parts.length < 2) continue;
                         data[parts[0]] = parts.slice(1).join(": ");
                     }
-                    // Debug.log(data);
+                    // console.log(data);
 
                     output.attr({
                         "data-size": data["content-length"] || "0",
                         "data-type": (data["content-type"] || "UNK").replace("image/", ""),
+                        "data-year": data["last-modified"] ? new Date(data["last-modified"]).getFullYear() : -1,
                     });
-                    output.html(`${output.attr("data-width")}x${output.attr("data-height")} | ${output.attr("data-type").toUpperCase()} | ${Util.Size.format(output.attr("data-size"))}`);
+                    output.html([
+                        `${output.attr("data-width")}x${output.attr("data-height")}`,
+                        `${output.attr("data-type").toUpperCase()}`,
+                        `${Util.Size.format(output.attr("data-size"))}`
+                    ].join("&emsp;"));
                 }
             });
         });
