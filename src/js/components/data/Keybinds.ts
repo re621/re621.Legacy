@@ -109,7 +109,7 @@ export class KeybindManager {
                 this.listeners.set(key, (event: Event) => {
                     if (KeybindManager.listening) return;
                     const listenerExecutor = this.executors.get(key);
-                    Debug.log("[" + key + "]: triggered " + Object.entries(listenerExecutor).length + " executors");
+                    Debug.log(`[${key}]: triggered ${Object.entries(listenerExecutor).length} executors`);
                     for (const [bindMeta, keyObj] of Object.entries(listenerExecutor)) {
                         if (!keyObj.enabled) continue;
                         keyObj.fnct(event, bindMeta);
@@ -125,7 +125,7 @@ export class KeybindManager {
                     if (keydown) return;
                     keydown = true;
                     if (!KeybindManager.enabled || KeybindManager.listening) return false;
-                    console.log("caught", key);
+                    Debug.log(`[${key}]: caught`);
                     this.listeners.get(key)(event);
                 });
 
