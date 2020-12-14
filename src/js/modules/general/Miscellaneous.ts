@@ -103,7 +103,7 @@ export class Miscellaneous extends RE6Module {
         if (Page.matches(PageDefinition.changes) && this.fetchSettings("commitWikiLinks")) {
             for (const link of $(".diff-list a").get()) {
                 const $link = $(link);
-                $link.attr("href", "/wiki_pages/show_or_new?title=" + $link.text());
+                $link.attr("href", "/wiki_pages/show_or_new?title=" + encodeURIComponent($link.text()));
             }
         }
 
