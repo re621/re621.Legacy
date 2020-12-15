@@ -4,6 +4,7 @@ import { XM } from "../../components/api/XM";
 import { PageDefinition } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
+import { TagSuggester } from "./TagSuggester";
 
 export class UploadUtilities extends RE6Module {
 
@@ -275,6 +276,8 @@ export class UploadUtilities extends RE6Module {
                         `${output.attr("data-type").toUpperCase()}`,
                         `${Util.Size.format(output.attr("data-size"))}`
                     ].join("&emsp;"));
+
+                    TagSuggester.trigger("update");
                 }
             });
         });
