@@ -248,38 +248,64 @@ export class UploadUtilities extends RE6Module {
             // Debug.log("loading", image.attr("src"));
 
             if (image.attr("src").startsWith("data:image")) {
-                output.html("");
-                return;
-            }
 
-            XM.Connect.xmlHttpRequest({
-                url: image.attr("src"),
-                method: "HEAD",
-                onload: (event) => {
+                // Local file upload
 
-                    const headerStrings = event.responseHeaders.split(/\r?\n/);
-                    const data = {};
-                    for (const header of headerStrings) {
-                        const parts = header.split(": ");
-                        if (parts.length < 2) continue;
-                        data[parts[0]] = parts.slice(1).join(": ");
-                    }
-                    // console.log(data);
-
-                    output.attr({
-                        "data-size": data["content-length"] || "0",
-                        "data-type": (data["content-type"] || "UNK").replace("image/", ""),
-                        "data-year": data["last-modified"] ? new Date(data["last-modified"]).getFullYear() : -1,
-                    });
-                    output.html([
-                        `${output.attr("data-width")}x${output.attr("data-height")}`,
-                        `${output.attr("data-type").toUpperCase()}`,
-                        `${Util.Size.format(output.attr("data-size"))}`
-                    ].join("&emsp;"));
-
-                    TagSuggester.trigger("update");
+                const fileData = $("#file-container input[type=file]").first()[0]["files"];
+                if (!fileData || fileData.length == 0) {
+                    output.html("");
+                    return;
                 }
-            });
+
+                const file = fileData[0];
+
+                output.attr({
+                    "data-size": file["size"] || "0",
+                    "data-type": (file["type"] || "UNK").replace("image/", ""),
+                    "data-year": file["lastModifiedDate"] ? new Date(file["lastModifiedDate"]).getFullYear() : -1,
+                });
+                output.html([
+                    `${output.attr("data-width")}x${output.attr("data-height")}`,
+                    `${output.attr("data-type").toUpperCase()}`,
+                    `${Util.Size.format(output.attr("data-size"))}`
+                ].join("&emsp;"));
+
+                TagSuggester.trigger("update");
+
+            } else {
+
+                // Remote file URL
+
+                XM.Connect.xmlHttpRequest({
+                    url: image.attr("src"),
+                    method: "HEAD",
+                    onload: (event) => {
+
+                        const headerStrings = event.responseHeaders.split(/\r?\n/);
+                        const data = {};
+                        for (const header of headerStrings) {
+                            const parts = header.split(": ");
+                            if (parts.length < 2) continue;
+                            data[parts[0]] = parts.slice(1).join(": ");
+                        }
+                        // console.log(data);
+
+                        output.attr({
+                            "data-size": data["content-length"] || "0",
+                            "data-type": (data["content-type"] || "UNK").replace("image/", ""),
+                            "data-year": data["last-modified"] ? new Date(data["last-modified"]).getFullYear() : -1,
+                        });
+                        output.html([
+                            `${output.attr("data-width")}x${output.attr("data-height")}`,
+                            `${output.attr("data-type").toUpperCase()}`,
+                            `${Util.Size.format(output.attr("data-size"))}`
+                        ].join("&emsp;"));
+
+                        TagSuggester.trigger("update");
+                    }
+                });
+
+            }
         });
 
         image.trigger("load.resix");
