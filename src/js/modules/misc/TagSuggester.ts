@@ -29,7 +29,6 @@ export class TagSuggester extends RE6Module {
             // this ensures that it will not result in an infinite loop
             if (this.textarea.data("vue-event-alt") === "true") {
                 this.textarea.data("vue-event-alt", "false");
-                console.log("vue event");
                 return;
             }
 
@@ -46,8 +45,6 @@ export class TagSuggester extends RE6Module {
     }
 
     private update(): void {
-        console.log("Updating Tag Suggestions");
-
         const textarea = this.textarea;
         const container = this.container
             .html("")
