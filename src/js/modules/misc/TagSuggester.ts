@@ -62,7 +62,7 @@ export class TagSuggester extends RE6Module {
 
             // Ratio
             if (output.data("width") && output.data("height")) {
-                const ratio = TagSuggester.getImageRatio(output.data("height") / output.data("width"));
+                const ratio = TagSuggester.getImageRatio(output.data("width") / output.data("height"));
                 if (ratio) addSuggestion(ratio);
             }
 
