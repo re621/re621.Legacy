@@ -124,7 +124,6 @@ export class TagSuggester extends RE6Module {
     }
 
     private static getImageRatio(ratio: number): string {
-        ratio = parseFloat(ratio.toFixed(2));
         for (const [name, value] of Object.entries(ImageRatio))
             if (value == ratio) return name;
         return null;
