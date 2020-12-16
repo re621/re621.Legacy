@@ -58,17 +58,17 @@ export class TagSuggester extends RE6Module {
 
             // Year
             if (output.data("year"))
-                addSuggestion(output.data("year"));
+                addSuggestion(output.data("year"), "Might not be accurate. Based on the file's last modified date.");
 
             // Ratio
             if (output.data("width") && output.data("height")) {
                 const ratio = TagSuggester.getImageRatio(output.data("width") / output.data("height"));
-                if (ratio) addSuggestion(ratio);
+                if (ratio) addSuggestion(ratio, "Aspect ratio based on the image's dimensions");
             }
 
             // Filesize
             if (output.data("size") && output.data("size") > 31457280)
-                addSuggestion("huge_filesize");
+                addSuggestion("huge_filesize", "Filesize exceeds 30MB");
         }
 
         container.attr({
@@ -80,10 +80,12 @@ export class TagSuggester extends RE6Module {
          * Adds a new suggestion to the list
          * @param tagName Name of the tag to suggest
          */
-        function addSuggestion(tagName: string): void {
+        function addSuggestion(tagName: string, hover?: string): void {
             if (tags.has(tagName + "")) return;
 
-            const wrapper = $("<tag-entry>").appendTo(container);
+            const wrapper = $("<tag-entry>")
+                .attr("title", hover)
+                .appendTo(container);
 
             $("<a>")
                 .attr({
