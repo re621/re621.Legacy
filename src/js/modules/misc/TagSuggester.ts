@@ -133,32 +133,34 @@ export class TagSuggester extends RE6Module {
 }
 
 enum ImageRatio {
-    "1:1" = 1,          // Icons / Avatars
-    "1:4" = 0.25,
-    "9:32" = 0.28,
-    "1:2" = 0.5,
-    "9:21" = 0.43,
-    "9:17" = 0.53,      // NOT META
-    "9:16" = 0.56,
-    "4:7" = 0.57,       // NOT META
-    "10:16" = 0.63,
-    "9:14" = 0.64,
-    "2:3" = 0.67,       // Common Phone Ratio
-    "3:4" = 0.75,
-    "4:5" = 0.8,
-    "5:6" = 0.83,
-    "6:5" = 1.2,        // NOT META
-    "5:4" = 1.25,       // Common Desktop Ratio
-    "4:3" = 1.33,       // Common Desktop Ratio
-    "3:2" = 1.5,        // Common Desktop Ratio
-    "14:9" = 1.56,      // 4:3 / 16:9 compromise
-    "16:10" = 1.6,      // Common Desktop Ratio
-    "7:4" = 1.75,
-    "16:9" = 1.78,      // Common Desktop Ratio
-    "17:9" = 1.89,      // NOT META
-    "256:135" = 1.9,    // Digital Cinema 4k
-    "2:1" = 2,          // VR Resolution
-    "21:9" = 2.33,      // Ultrawide
-    "32:9" = 3.55,      // Samsung Ultrawide
-    "4:1" = 4,          // Twitter Header Image
+    "1:1" = 1,              // Icons / Avatars
+    "1:4" = 1 / 4,
+    "9:32" = 9 / 32,
+    "1:2" = 1 / 2,
+    "9:21" = 9 / 21,
+    "9:17" = 9 / 17,        // NOT META
+    "9:16" = 9 / 16,
+    "4:7" = 4 / 7,          // NOT META
+    "10:16" = 10 / 16,
+    "9:14" = 9 / 14,
+    "2:3" = 2 / 3,          // Common Phone Ratio
+    "3:4" = 3 / 4,
+    "4:5" = 4 / 5,
+    "5:6" = 5 / 6,
+    "6:5" = 6 / 5,          // NOT META
+    "5:4" = 5 / 4,          // Common Desktop Ratio
+    "4:3" = 4 / 3,          // Common Desktop Ratio
+    "3:2" = 3 / 2,          // Common Desktop Ratio
+    "14:9" = 14 / 9,        // 4:3 / 16:9 compromise
+    "16:10" = 16 / 10,      // Common Desktop Ratio
+    "7:4" = 7 / 4,
+    "16:9" = 16 / 9,        // Common Desktop Ratio
+    "17:9" = 17 / 9,        // NOT META
+    "256:135" = 256 / 135,  // Digital Cinema 4k
+    "2:1" = 2,              // VR Resolution
+    "21:9" = 21 / 9,        // Ultrawide
+    "32:9" = 32 / 9,        // Samsung Ultrawide
+    "4:1" = 4,              // Twitter Header Image
+}
+
 }
