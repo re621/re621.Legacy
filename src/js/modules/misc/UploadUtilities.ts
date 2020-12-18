@@ -38,6 +38,9 @@ export class UploadUtilities extends RE6Module {
 
         // Load extra data from the image's header
         if (this.fetchSettings("loadImageData")) this.handleImageData();
+
+        // Add a class to the "Submit" button
+        $("button:contains('Upload')").addClass("submit-upload");
     }
 
     /**
