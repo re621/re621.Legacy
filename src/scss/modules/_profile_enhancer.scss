@@ -74,3 +74,8 @@ div#c-users div#a-show {
     }
 
 }
+
+div#c-users div#a-show .user-statistics th {
+    min-width: fit-content;
+    white-space: nowrap;
+}
