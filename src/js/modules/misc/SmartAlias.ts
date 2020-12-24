@@ -475,10 +475,7 @@ export class SmartAlias extends RE6Module {
          * @param $textarea Textarea input
          */
         function triggerUpdateEvent($textarea: JQuery<HTMLElement>): void {
-            const e = document.createEvent('HTMLEvents');
-            e.initEvent("input", true, true);
-            $textarea.data("vue-event", "true");
-            $textarea[0].dispatchEvent(e);
+            Util.Events.triggerVueEvent($textarea, "input", "vue-event");
         }
 
         /**

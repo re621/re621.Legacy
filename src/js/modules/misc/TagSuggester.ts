@@ -119,8 +119,7 @@ export class TagSuggester extends RE6Module {
                             + tagName
                             + " ";
                     });
-                    triggerUpdateEvent();
-                    // TagSuggester.trigger("update");
+                    Util.Events.triggerVueEvent(textarea, "input", "vue-event-alt");
                 })
                 .html(tagName)
                 .appendTo(wrapper);
@@ -148,17 +147,6 @@ export class TagSuggester extends RE6Module {
             return results.join(" AND ");
         }
 
-
-        /**
-         * Fix for Vue data-attribute binding  
-         * This needs to be executed every time the textarea value gets changed
-         */
-        function triggerUpdateEvent(): void {
-            const e = document.createEvent('HTMLEvents');
-            e.initEvent("input", true, true);
-            textarea.data("vue-event-alt", "true")
-            textarea[0].dispatchEvent(e);
-        }
     }
 
     private static getImageRatio(ratio: number): string {
