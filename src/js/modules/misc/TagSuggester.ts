@@ -50,7 +50,8 @@ export class TagSuggester extends RE6Module {
             .html("")
             .attr("ready", "false");
 
-        const tags = new Set(Util.getTags(this.textarea));
+        const tags = new Set(Util.getTags(this.textarea)),
+            suggestions = {};
 
         // Data derived from the file
         const output = $("#preview-sidebar div.upload_preview_dims").first();
@@ -58,18 +59,31 @@ export class TagSuggester extends RE6Module {
 
             // Year
             if (output.data("year"))
-                addSuggestion(output.data("year"), "Might not be accurate. Based on the file's last modified date.");
+                suggestions[output.data("year")] = "Might not be accurate. Based on the file's last modified date.";
 
             // Ratio
-            if (output.data("width") && output.data("height")) {
+            if (output.data("width") && output.data("height") && output.data("width") > 1) {
                 const ratio = TagSuggester.getImageRatio(output.data("width") / output.data("height"));
-                if (ratio) addSuggestion(ratio, "Aspect ratio based on the image's dimensions");
+                if (ratio) suggestions[ratio] = "Aspect ratio based on the image's dimensions";
             }
 
             // Filesize
             if (output.data("size") && output.data("size") > 31457280)
-                addSuggestion("huge_filesize", "Filesize exceeds 30MB");
+                suggestions["huge_filesize"] = "Filesize exceeds 30MB";
         }
+
+        // Derived from the added tags
+        for (const [key, matches] of Object.entries(TagSuggestions)) {
+            if (tags.has(key) || Object.keys(suggestions).includes(key)) continue;
+            let matchCount = 0;
+            for (const entry of tags)
+                if (testMatches(matches, entry)) matchCount++;
+            if (matchCount == matches.length)
+                suggestions[key] = "Existing tags: " + formatMatchRegex(matches);
+        }
+
+        for (const [tag, description] of Object.entries(suggestions))
+            addSuggestion(tag, description + "");
 
         container.attr({
             "ready": "true",
@@ -110,6 +124,28 @@ export class TagSuggester extends RE6Module {
                 })
                 .html(tagName)
                 .appendTo(wrapper);
+        }
+
+        function testMatches(matches: RegExp | RegExp[], entry: string): boolean {
+            if (!Array.isArray(matches)) matches = [matches];
+            for (const match of matches)
+                if (match.test(entry)) return true;
+            return false;
+        }
+
+        function formatMatchRegex(matches: RegExp | RegExp[]): string {
+            if (!Array.isArray(matches)) matches = [matches];
+
+            const results = [];
+            for (const match of matches)
+                results.push(
+                    (match + "")
+                        .replace(/\/\^|\$\//g, "")
+                        .replace(/^\((.*)\)$/g, "$1")
+                        .replace(/\.\+/g, "*")
+                        .replace(/\|/g, " / ")
+                );
+            return results.join(" AND ");
         }
 
 
@@ -162,5 +198,10 @@ enum ImageRatio {
     "32:9" = 32 / 9,        // Samsung Ultrawide
     "4:1" = 4,              // Twitter Header Image
 }
+
+const TagSuggestions = {
+
+    "sex": [/^(.+_penetrating_.+|.+_penetration)$/],
+
 
 }
