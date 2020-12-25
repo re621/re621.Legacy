@@ -19,9 +19,11 @@ export class TagSuggester extends RE6Module {
             .attr("ready", "true")
             .appendTo(this.textarea.parent());
 
+        // Listen for updates from other modules
         TagSuggester.on("update.main", () => { this.update(); })
         this.update();
 
+        // Update the suggestions on user tag input
         let typingTimeout: number;
         this.textarea.on("input", () => {
 
@@ -58,17 +60,17 @@ export class TagSuggester extends RE6Module {
         if (output.length) {
 
             // Year
-            if (output.data("year"))
-                suggestions[output.data("year")] = "Might not be accurate. Based on the file's last modified date.";
+            if (output.attr("data-year"))
+                suggestions[output.attr("data-year")] = "Might not be accurate. Based on the file's last modified date.";
 
             // Ratio
-            if (output.data("width") && output.data("height") && output.data("width") > 1) {
-                const ratio = TagSuggester.getImageRatio(output.data("width") / output.data("height"));
+            if (output.attr("data-width") && output.attr("data-height") && parseInt(output.attr("data-width")) > 1) {
+                const ratio = TagSuggester.getImageRatio(output.attr("data-width"), output.attr("data-height"));
                 if (ratio) suggestions[ratio] = "Aspect ratio based on the image's dimensions";
             }
 
             // Filesize
-            if (output.data("size") && output.data("size") > 31457280)
+            if (output.attr("data-size") && parseInt(output.attr("data-size")) > 31457280)
                 suggestions["huge_filesize"] = "Filesize exceeds 30MB";
         }
 
@@ -149,7 +151,12 @@ export class TagSuggester extends RE6Module {
 
     }
 
-    private static getImageRatio(ratio: number): string {
+    private static getImageRatio(width: number | string, height: number | string): string {
+        if (typeof width == "string") width = parseInt(width);
+        if (typeof height == "string") height = parseInt(height);
+        if (!width || !height) return null;
+
+        const ratio = width / height;
         for (const [name, value] of Object.entries(ImageRatio))
             if (value == ratio) return name;
         return null;
