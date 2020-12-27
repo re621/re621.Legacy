@@ -59,18 +59,30 @@ export class TagSuggester extends RE6Module {
         const output = $("#preview-sidebar div.upload_preview_dims").first();
         if (output.length) {
 
+            const data = {
+                "year": parseInt(output.attr("data-year")) || -1,
+                "width": parseInt(output.attr("data-width")) || -1,
+                "height": parseInt(output.attr("data-height")) || -1,
+                "size": parseInt(output.attr("data-size")) || -1,
+                "file": output.attr("data-file") == "true",
+            }
+
             // Year
-            if (output.attr("data-year"))
-                suggestions[output.attr("data-year")] = "Might not be accurate. Based on the file's last modified date.";
+            if (data.year && data.year > 0)
+                suggestions[data.year] = "Might not be accurate. Based on the file's last modified date.";
 
             // Ratio
-            if (output.attr("data-width") && output.attr("data-height") && parseInt(output.attr("data-width")) > 1) {
-                const ratio = TagSuggester.getImageRatio(output.attr("data-width"), output.attr("data-height"));
+            if (data.width && data.height && data.width > 1) {
+                const ratio = TagSuggester.getImageRatio(data.width, data.height);
                 if (ratio) suggestions[ratio] = "Aspect ratio based on the image's dimensions";
+
+                // 4k
+                if (matchDimensions(data.width, data.height, [[3840, 2160], [4096, 2160]]))
+                    suggestions["4k"] = "Image dimensions fit the 4K resolution";
             }
 
             // Filesize
-            if (output.attr("data-size") && parseInt(output.attr("data-size")) > 31457280)
+            if (data.size && data.size > 31457280)
                 suggestions["huge_filesize"] = "Filesize exceeds 30MB";
         }
 
@@ -147,6 +159,14 @@ export class TagSuggester extends RE6Module {
                         .replace(/\|/g, " / ")
                 );
             return results.join(" AND ");
+        }
+
+        function matchDimensions(width: number, height: number, matches: [number, number][]): boolean {
+            for (const [matchWidth, matchHeight] of matches) {
+                if ((width == matchWidth && height == matchHeight) || (width == matchHeight && height == matchWidth))
+                    return true;
+            }
+            return false;
         }
 
     }
