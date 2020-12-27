@@ -252,6 +252,7 @@ export class UploadUtilities extends RE6Module {
                 "data-height": $(image).prop("naturalHeight"),
                 "data-size": "0",
                 "data-type": "unk",
+                "data-file": false,
             });
 
             // Debug.log("loading", image.attr("src"));
@@ -272,6 +273,7 @@ export class UploadUtilities extends RE6Module {
                     "data-size": file["size"] || "0",
                     "data-type": (file["type"] || "UNK").replace("image/", ""),
                     "data-year": file["lastModifiedDate"] ? new Date(file["lastModifiedDate"]).getFullYear() : -1,
+                    "data-file": true,
                 });
                 output.html([
                     `${output.attr("data-width")}x${output.attr("data-height")}`,
@@ -303,6 +305,7 @@ export class UploadUtilities extends RE6Module {
                             "data-size": data["content-length"] || "0",
                             "data-type": (data["content-type"] || "UNK").replace("image/", ""),
                             "data-year": data["last-modified"] ? new Date(data["last-modified"]).getFullYear() : -1,
+                            "data-file": false,
                         });
                         output.html([
                             `${output.attr("data-width")}x${output.attr("data-height")}`,

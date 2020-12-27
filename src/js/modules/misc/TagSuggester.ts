@@ -68,7 +68,7 @@ export class TagSuggester extends RE6Module {
             }
 
             // Year
-            if (data.year && data.year > 0)
+            if (data.year && data.year > 0 && !data.file)
                 suggestions[data.year] = "Might not be accurate. Based on the file's last modified date.";
 
             // Ratio
