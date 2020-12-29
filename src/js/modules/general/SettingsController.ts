@@ -1199,6 +1199,18 @@ export class SettingsController extends RE6Module {
                     Form.text(`<div class="text-center text-bold">Requires a page reload</div>`),
                     Form.spacer(3),
 
+                    Form.checkbox(
+                        {
+                            value: uploadUtilities.fetchSettings("cleanSourceLinks"),
+                            label: `<b>Clean Source Links</b><br />Convert source links to https, and remove the "www" prefix`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await uploadUtilities.pushSettings("cleanSourceLinks", data);
+                        }
+                    ),
+                    Form.spacer(3),
+
                     Form.section(
                         {
                             width: 3,

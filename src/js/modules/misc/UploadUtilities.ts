@@ -19,7 +19,7 @@ export class UploadUtilities extends RE6Module {
 
             checkDuplicates: true,      // run uploads through e621's version of IQDB
             addSourceLinks: true,       // improve source links fields somewhat
-
+            cleanSourceLinks: true,    // convert linkst to https and remove the www
             loadImageData: false,       // load image headers to get extra data
         };
     }
@@ -199,6 +199,8 @@ export class UploadUtilities extends RE6Module {
             .children("div").eq(1)
             .attr("id", "source-container");
 
+        const urlMatch = /(http(?:s)?\:\/\/)(www\.)?/;
+        let timer: number;
         $(sourceContainer).on("input", "input.upload-source-input", (event) => {
             const $input = $(event.target),
                 $parent = $input.parent();
@@ -209,6 +211,17 @@ export class UploadUtilities extends RE6Module {
 
             if ($input.val() == "") return;
 
+            // Fix the source links
+            if (timer) clearTimeout(timer);
+            timer = window.setTimeout(() => {
+                if (!this.fetchSettings("cleanSourceLinks")) return;
+                $input.val((index, value) => {
+                    if (!urlMatch.test(value)) return value;
+                    return value.replace(urlMatch, "https://");
+                })
+            }, 500);
+
+            // Create buttons
             $("<button>")
                 .addClass("source-copy")
                 .html("copy")
