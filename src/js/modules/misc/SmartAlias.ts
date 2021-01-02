@@ -94,6 +94,7 @@ export class SmartAlias extends RE6Module {
      */
     public async reload(): Promise<void> {
         this.destroy();
+        if (!this.fetchSettings("enabled")) return;
         return new Promise((resolve) => {
             setTimeout(() => {
                 this.create();
