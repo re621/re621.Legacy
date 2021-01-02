@@ -15,7 +15,7 @@ export class SmartAlias extends RE6Module {
     // Elements to which smart alias instances are to be attached
     private static inputSelector = new Set([
         "#post_tag_string",     // editing form tags
-        "#re621_qedit_tags",   // re621's version
+        "#re621_qedit_tags",    // re621's version
 
         // Yes, this is correct
         "#post_characters",     // artist
@@ -24,6 +24,8 @@ export class SmartAlias extends RE6Module {
         "#post_themes",         // themes
         "#post_tags",           // other tags
     ]);
+
+    private inputElements: JQuery<HTMLElement>[] = [];
 
     private static aliasCache: AliasDefinition[];
     private static aliasCacheLength: number;
@@ -92,6 +94,7 @@ export class SmartAlias extends RE6Module {
      */
     public async reload(): Promise<void> {
         this.destroy();
+        if (!this.fetchSettings("enabled")) return;
         return new Promise((resolve) => {
             setTimeout(() => {
                 this.create();
@@ -112,6 +115,9 @@ export class SmartAlias extends RE6Module {
         $("smart-tag-counter").remove();
         $("button.smart-alias-validate").remove();
         $("#tags").off("input.re621.smart-alias");
+
+        for (const element of this.inputElements)
+            element.off("input.smartalias");
     }
 
     public create(): void {
@@ -154,10 +160,13 @@ export class SmartAlias extends RE6Module {
         if (!enabledInputs.uploadThemesForm) inputs.delete("#post_themes");
         if (!enabledInputs.uploadTagsForm) inputs.delete("#post_tags");
 
+        this.inputElements = [];
+
         // Initializes SmartAlias for all appropriate inputs
         const mode = this.fetchSettings<boolean>("autoLoad");
         for (const inputElement of $([...inputs].join(", ")).get()) {
             const $textarea = $(inputElement);
+            this.inputElements.push($textarea);
             const $container = $("<smart-alias>")
                 .attr("ready", "true")
                 .insertAfter($textarea);
@@ -213,7 +222,7 @@ export class SmartAlias extends RE6Module {
 
         // Wait for the user to stop typing before processing
         let typingTimeout: number;
-        $textarea.on("input", () => {
+        $textarea.on("input.smartalias", () => {
 
             // handleTagInput triggers an input event to properly fill in the data bindings
             // this ensures that it will not result in an infinite loop
@@ -560,7 +569,7 @@ export class SmartAlias extends RE6Module {
                         "color": color,
                         "title": title,
                     })
-                    .html(`<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tagName)}" target="_blank">${displayName}</a> ${text}`)
+                    .html(`<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tagName)}" target="_blank" tabindex="-1">${displayName}</a> ${text}`)
                     .appendTo($container);
             }
         }

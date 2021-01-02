@@ -24,7 +24,9 @@ import { Miscellaneous } from "./modules/general/Miscellaneous";
 import { SettingsController } from "./modules/general/SettingsController";
 import { ThemeCustomizer } from "./modules/general/ThemeCustomizer";
 import { EditTracker } from "./modules/misc/EditTracker";
+import { ProfileEnhancer } from "./modules/misc/ProfileEnhancer";
 import { SmartAlias } from "./modules/misc/SmartAlias";
+import { TagSuggester } from "./modules/misc/TagSuggester";
 import { UploadUtilities } from "./modules/misc/UploadUtilities";
 import { WikiEnhancer } from "./modules/misc/WikiEnhancer";
 import { DownloadCustomizer } from "./modules/post/DownloadCustomizer";
@@ -69,10 +71,11 @@ const loadOrder = [
 
     PostSuggester,
     SearchUtilities,
+    ProfileEnhancer,
     Miscellaneous,
 
     SmartAlias,
-    // TagSuggester,
+    TagSuggester,
     EditTracker,
     WikiEnhancer,
     UploadUtilities,

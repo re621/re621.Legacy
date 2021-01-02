@@ -18,6 +18,7 @@ import { FavDownloader } from "../downloader/FavDownloader";
 import { MassDownloader } from "../downloader/MassDownloader";
 import { PoolDownloader } from "../downloader/PoolDownloader";
 import { SmartAlias } from "../misc/SmartAlias";
+import { TagSuggester } from "../misc/TagSuggester";
 import { UploadUtilities } from "../misc/UploadUtilities";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { ImageScaler } from "../post/ImageScaler";
@@ -1160,7 +1161,8 @@ export class SettingsController extends RE6Module {
     /** Creates the SmartAlias settings tab */
     private createUploadsTab(): Form {
         const smartAlias = ModuleController.get(SmartAlias),
-            uploadUtilities = ModuleController.get(UploadUtilities);
+            uploadUtilities = ModuleController.get(UploadUtilities),
+            tagSuggester = ModuleController.get(TagSuggester);
 
         const aliasContainer = $("<textarea>")
             .attr("id", "alias-list-container")
@@ -1197,6 +1199,31 @@ export class SettingsController extends RE6Module {
                         }
                     ),
                     Form.text(`<div class="text-center text-bold">Requires a page reload</div>`),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: uploadUtilities.fetchSettings("cleanSourceLinks"),
+                            label: `<b>Clean Source Links</b><br />Convert source links to https, and remove the "www" prefix`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await uploadUtilities.pushSettings("cleanSourceLinks", data);
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: tagSuggester.fetchSettings("enabled"),
+                            label: `<b>Tag Suggestions</b><br />Suggest potentially applicable tags during the upload process`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await tagSuggester.pushSettings("enabled", data);
+                            await tagSuggester.reload();
+                        }
+                    ),
                     Form.spacer(3),
 
                     Form.section(

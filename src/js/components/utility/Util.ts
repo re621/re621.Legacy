@@ -171,7 +171,15 @@ export class Util {
 
     public static getTags(input: string): string[];
     public static getTags(input: JQuery<HTMLElement>): string[];
-    public static getTags(input: string | JQuery<HTMLElement>): string[] {
+    public static getTags(input: JQuery<HTMLElement>[]): string[];
+    public static getTags(input: string | JQuery<HTMLElement> | JQuery<HTMLElement>[]): string[] {
+        if (Array.isArray(input)) {
+            const result = [];
+            for (const element of input)
+                result.push(...Util.getTags(element));
+            return result;
+        }
+
         return (typeof input === "string" ? input : Util.getTagString(input))
             .split(" ")
             .filter((el) => { return el != null && el != ""; });
