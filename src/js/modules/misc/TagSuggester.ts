@@ -128,6 +128,7 @@ export class TagSuggester extends RE6Module {
     }
 
     private update(): void {
+        const tagOutput = this.tagOutput;
         const container = this.container
             .html("")
             .attr("ready", "false");
@@ -210,13 +211,13 @@ export class TagSuggester extends RE6Module {
                 .attr("href", "javascript://")
                 .on("click", (event) => {
                     event.preventDefault();
-                    this.tagOutput.val((index: number, value: string) => {
+                    tagOutput.val((index: number, value: string) => {
                         return value
                             + ((value.length == 0 || value.endsWith(" ")) ? "" : " ")
                             + tagName
                             + " ";
                     });
-                    Util.Events.triggerVueEvent(this.tagOutput, "input", "vue-event-alt");
+                    Util.Events.triggerVueEvent(tagOutput, "input", "vue-event-alt");
                 })
                 .html(tagName)
                 .appendTo(wrapper);
