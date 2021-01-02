@@ -200,10 +200,22 @@ export class UploadUtilities extends RE6Module {
             .attr("id", "source-container");
 
         const urlMatch = /(http(?:s)?\:\/\/)(www\.)?/;
-        let timer: number;
+        const timers = {};
         $(sourceContainer).on("input", "input.upload-source-input", (event) => {
-            const $input = $(event.target),
+            const $input = $(event.currentTarget),
                 $parent = $input.parent();
+
+            if ($input.data("vue-event") === "true") {
+                $input.data("vue-event", "false");
+                return;
+            }
+
+            let id = $input.attr("data-timer");
+            if (!id) {
+                id = Util.ID.make();
+                $input.attr("data-timer", id);
+                timers[id] = 0;
+            }
 
             $parent.find("button.source-copy").remove();
             $parent.find("button.source-link").remove();
@@ -212,13 +224,14 @@ export class UploadUtilities extends RE6Module {
             if ($input.val() == "") return;
 
             // Fix the source links
-            if (timer) clearTimeout(timer);
-            timer = window.setTimeout(() => {
+            if (timers[id]) clearTimeout(timers[id]);
+            timers[id] = window.setTimeout(() => {
                 if (!this.fetchSettings("cleanSourceLinks")) return;
                 $input.val((index, value) => {
                     if (!urlMatch.test(value)) return value;
                     return value.replace(urlMatch, "https://");
-                })
+                });
+                Util.Events.triggerVueEvent($input, "input", "vue-event");
             }, 500);
 
             // Create buttons
