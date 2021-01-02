@@ -15,7 +15,7 @@ tag-suggester {
 
     &:not([count="0"]):before {
         content: "Suggested Tags";
-        grid-column: span 10;
+        grid-column: 1/-1;
         padding: 0.075rem 0 0.075rem 1.35rem;
     }
 
