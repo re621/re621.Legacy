@@ -173,10 +173,7 @@ export class TagSuggester extends RE6Module {
         // Derived from the added tags
         for (const [key, matches] of Object.entries(TagSuggestions)) {
             if (tags.has(key) || Object.keys(suggestions).includes(key)) continue;
-            let matchCount = 0;
-            for (const entry of tags)
-                if (testMatches(matches, entry)) matchCount++;
-            if (matchCount == matches.length)
+            if (tagsMatchRegex(matches, tags))
                 suggestions[key] = "Existing tags: " + formatMatchRegex(matches);
         }
 
@@ -223,11 +220,22 @@ export class TagSuggester extends RE6Module {
                 .appendTo(wrapper);
         }
 
-        function testMatches(matches: RegExp | RegExp[], entry: string): boolean {
-            if (!Array.isArray(matches)) matches = [matches];
-            for (const match of matches)
-                if (match.test(entry)) return true;
-            return false;
+        /**
+         * Returns true if the provided tags match *all* of the specified regular expressions
+         * @param matches Regular expressions to test against
+         * @param tags Tags to check
+         */
+        function tagsMatchRegex(matches: RegExp | RegExp[], tags: Set<string>): boolean {
+            const regexSet = new Set(Array.isArray(matches) ? [...matches] : [matches]);
+
+            for (const regex of regexSet) {
+                for (const tag of tags) {
+                    if (!regex.test(tag)) continue;
+                    regexSet.delete(regex);
+                    break;
+                }
+            }
+            return regexSet.size == 0;
         }
 
         function formatMatchRegex(matches: RegExp | RegExp[]): string {
