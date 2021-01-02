@@ -159,7 +159,7 @@ export class BlacklistEnhancer extends RE6Module {
                 .appendTo(BlacklistEnhancer.$content);
             $("<a>")
                 .attr("href", "/posts?tags=" + tags.replace(" ", "+"))
-                .html(tags.replace(/_/g, "&#8203;_"))
+                .html(tags.replace(/_/g, "&#8203;_").replace(/ -/, " &#8209;"))
                 .appendTo(entry);
 
             $("<span>")
