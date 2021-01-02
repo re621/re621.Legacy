@@ -1,5 +1,5 @@
 import { PageDefinition } from "../../components/data/Page";
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 
 export class TagSuggester extends RE6Module {
@@ -25,13 +25,19 @@ export class TagSuggester extends RE6Module {
     };
 
     // Actual input elements
-    private tagInput: JQuery<HTMLElement>[];
+    private tagInput: JQuery<HTMLElement>[] = [];
 
     // Element to which suggester pushes tags
     private tagOutput: JQuery<HTMLElement>;
 
     public constructor() {
         super([PageDefinition.upload], true);
+    }
+
+    public getDefaultSettings(): Settings {
+        return {
+            enabled: false,
+        }
     }
 
     public create(): void {
@@ -99,7 +105,7 @@ export class TagSuggester extends RE6Module {
     public destroy(): void {
         super.destroy();
 
-        this.container.remove();
+        if (this.container) this.container.remove();
         for (const input of this.tagInput)
             input.off("input.tagsuggester");
         this.tagInput = [];
@@ -112,6 +118,7 @@ export class TagSuggester extends RE6Module {
      */
     public async reload(): Promise<void> {
         this.destroy();
+        if (!this.fetchSettings("enabled")) return;
         return new Promise((resolve) => {
             setTimeout(() => {
                 this.create();
