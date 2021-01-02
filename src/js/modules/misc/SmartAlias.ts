@@ -560,7 +560,7 @@ export class SmartAlias extends RE6Module {
                         "color": color,
                         "title": title,
                     })
-                    .html(`<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tagName)}" target="_blank">${displayName}</a> ${text}`)
+                    .html(`<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tagName)}" target="_blank" tabindex="-1">${displayName}</a> ${text}`)
                     .appendTo($container);
             }
         }
