@@ -238,6 +238,10 @@ export class TagSuggester extends RE6Module {
             return regexSet.size == 0;
         }
 
+        /**
+         * Formats the regular expressions into human-readable format
+         * @param matches Regular expressions to format
+         */
         function formatMatchRegex(matches: RegExp | RegExp[]): string {
             if (!Array.isArray(matches)) matches = [matches];
 
@@ -246,6 +250,7 @@ export class TagSuggester extends RE6Module {
                 results.push(
                     (match + "")
                         .replace(/\/\^|\$\//g, "")
+                        .replace(/^\/|\/$/g, "")
                         .replace(/^\((.*)\)$/g, "$1")
                         .replace(/\.\+/g, "*")
                         .replace(/\|/g, " / ")
@@ -311,19 +316,19 @@ const TagSuggestions = {
     "sex": [/^(.+_penetrating_.+|.+_penetration)$/],
 
     // Penetration
-    "male_penetrating": [/^male_penetrating_.+/],
-    "female_penetrating": [/^female_penetrating_.+/],
-    "andromorph_penetrating": [/^andromorph_penetrating_.+/],
-    "gynomorph_penetrating": [/^gynomorph_penetrating_.+/],
-    "herm_penetrating": [/^herm_penetrating_.+/],
-    "maleherm_penetrating": [/^maleherm_penetrating_.+/],
+    "male_penetrating": [/^male_penetrating_.+$/],
+    "female_penetrating": [/^female_penetrating_.+$/],
+    "andromorph_penetrating": [/^andromorph_penetrating_.+$/],
+    "gynomorph_penetrating": [/^gynomorph_penetrating_.+$/],
+    "herm_penetrating": [/^herm_penetrating_.+$/],
+    "maleherm_penetrating": [/^maleherm_penetrating_.+$/],
 
-    "male_penetrated": [/^.+_penetrating_male/],
-    "female_penetrated": [/^.+_penetrating_female/],
-    "andromorph_penetrated": [/^.+_penetrating_andromorph/],
-    "gynomorph_penetrated": [/^.+_penetrating_gynomorph/],
-    "herm_penetrated": [/^.+_penetrating_herm/],
-    "maleherm_penetrated": [/^.+_penetrating_maleherm/],
+    "male_penetrated": [/^.+_penetrating_male$/],
+    "female_penetrated": [/^.+_penetrating_female$/],
+    "andromorph_penetrated": [/^.+_penetrating_andromorph$/],
+    "gynomorph_penetrated": [/^.+_penetrating_gynomorph$/],
+    "herm_penetrated": [/^.+_penetrating_herm$/],
+    "maleherm_penetrated": [/^.+_penetrating_maleherm$/],
 
     // Anatomy
     "butt": [/^presenting_hindquarters$/],
