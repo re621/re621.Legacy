@@ -117,4 +117,5 @@ export const PageDefinition = {
     settings: /^\/users\/\d+\/edit$/,
     changes: /^\/post_versions.*/,
     tickets: /^\/tickets.*/,
+    profile: /^\/users\/\d+$/,
 };
