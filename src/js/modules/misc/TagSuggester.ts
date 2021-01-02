@@ -5,7 +5,30 @@ import { Util } from "../../components/utility/Util";
 export class TagSuggester extends RE6Module {
 
     private container: JQuery<HTMLElement>;
-    private textarea: JQuery<HTMLElement>;
+
+    // Element selectors that TagSuggester should track
+    private static inputSelectors = new Set([
+        "#post_characters",     // artist
+        "#post_sexes",          // characters
+        "#post_bodyTypes",      // body types
+        "#post_themes",         // themes
+        "#post_tags",           // other tags
+    ]);
+
+    private static buttonTagExceptions = {
+        "Hermaphrodite": "herm",
+        "Male-Herm": "maleherm",
+        "Ambiguous": "ambiguous_gender",
+        "Explicit": "rating:e",
+        "Questionable": "rating:q",
+        "Safe": "rating:s",
+    };
+
+    // Actual input elements
+    private tagInput: JQuery<HTMLElement>[];
+
+    // Element to which suggester pushes tags
+    private tagOutput: JQuery<HTMLElement>;
 
     public constructor() {
         super([PageDefinition.upload], true);
@@ -14,46 +37,99 @@ export class TagSuggester extends RE6Module {
     public create(): void {
         super.create();
 
-        this.textarea = $("#post_tags");
+        // Mark up the toggle buttons (if there are any)
+        for (const element of $("button.toggle-button").get()) {
+            const $element = $(element);
+            const text = $element.text().trim();
+            if (TagSuggester.buttonTagExceptions[text])
+                $element.attr("data-tag", TagSuggester.buttonTagExceptions[text]);
+            else $element.attr("data-tag", text.toLowerCase().replace(/ /, "_"));
+        }
+
+        // Create the element structure
+        this.tagOutput = $("#post_tags");
         this.container = $("<tag-suggester>")
             .attr("ready", "true")
-            .appendTo(this.textarea.parent());
+            .appendTo(this.tagOutput.parent());
+
+        // Fix the secret switch breaking the module
+        $(".the_secret_switch").one("click", () => { this.reload(); });
+
+        // Initialize the listeners
+        this.tagInput = [];
+        for (const selector of TagSuggester.inputSelectors) {
+            const input = $(selector);
+            if (input.length == 0) continue;
+
+            this.tagInput.push(input);
+
+            // Update the suggestions on user tag input
+            let typingTimeout: number;
+            input.on("input.tagsuggester", () => {
+
+                // handleTagInput triggers an input event to properly fill in the data bindings
+                // this ensures that it will not result in an infinite loop
+                if (input.data("vue-event-alt") === "true") {
+                    input.data("vue-event-alt", "false");
+                    return;
+                }
+
+                // If the data is currently processing, but the user keeps typing,
+                // check every second to make sure the last input is caught
+                window.clearInterval(typingTimeout);
+                typingTimeout = window.setInterval(() => {
+                    if (this.container.attr("ready") !== "true") return;
+
+                    window.clearInterval(typingTimeout);
+                    this.update();
+                }, 1000);
+            });
+        }
+
+        // Listen to toggle button clicks
+        $("button.toggle-button").on("click.tagsuggester", () => {
+            this.update();
+        });
 
         // Listen for updates from other modules
         TagSuggester.on("update.main", () => { this.update(); })
         this.update();
+    }
 
-        // Update the suggestions on user tag input
-        let typingTimeout: number;
-        this.textarea.on("input", () => {
+    public destroy(): void {
+        super.destroy();
 
-            // handleTagInput triggers an input event to properly fill in the data bindings
-            // this ensures that it will not result in an infinite loop
-            if (this.textarea.data("vue-event-alt") === "true") {
-                this.textarea.data("vue-event-alt", "false");
-                return;
-            }
+        this.container.remove();
+        for (const input of this.tagInput)
+            input.off("input.tagsuggester");
+        this.tagInput = [];
+        $("button.toggle-button").off("click.tagsuggester");
+    }
 
-            // If the data is currently processing, but the user keeps typing,
-            // check every second to make sure the last input is caught
-            window.clearInterval(typingTimeout);
-            typingTimeout = window.setInterval(() => {
-                if (this.container.attr("ready") !== "true") return;
-
-                window.clearInterval(typingTimeout);
-                this.update();
-            }, 1000);
-        });
+    /**
+     * Destroys and re-creates the entire module as a method of reloading it.  
+     * It's stupid, but it's the easiest and hassle-free method of resetting some things.
+     */
+    public async reload(): Promise<void> {
+        this.destroy();
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                this.create();
+                resolve();
+            }, 100);
+        })
     }
 
     private update(): void {
-        const textarea = this.textarea;
         const container = this.container
             .html("")
             .attr("ready", "false");
 
-        const tags = new Set(Util.getTags(this.textarea)),
+        const tags = new Set(Util.getTags(this.tagInput)),
             suggestions = {};
+
+        for (const element of $("button.toggle-button.active").get())
+            tags.add($(element).data("tag"));
 
         // Data derived from the file
         const output = $("#preview-sidebar div.upload_preview_dims").first();
@@ -127,13 +203,13 @@ export class TagSuggester extends RE6Module {
                 .attr("href", "javascript://")
                 .on("click", (event) => {
                     event.preventDefault();
-                    textarea.val((index, value) => {
+                    this.tagOutput.val((index: number, value: string) => {
                         return value
                             + ((value.length == 0 || value.endsWith(" ")) ? "" : " ")
                             + tagName
                             + " ";
                     });
-                    Util.Events.triggerVueEvent(textarea, "input", "vue-event-alt");
+                    Util.Events.triggerVueEvent(this.tagOutput, "input", "vue-event-alt");
                 })
                 .html(tagName)
                 .appendTo(wrapper);
@@ -158,7 +234,7 @@ export class TagSuggester extends RE6Module {
                         .replace(/\.\+/g, "*")
                         .replace(/\|/g, " / ")
                 );
-            return results.join(" AND ");
+            return results.join(" + ");
         }
 
         function matchDimensions(width: number, height: number, matches: [number, number][]): boolean {
@@ -217,6 +293,51 @@ enum ImageRatio {
 const TagSuggestions = {
 
     "sex": [/^(.+_penetrating_.+|.+_penetration)$/],
+
+    // Penetration
+    "male_penetrating": [/^male_penetrating_.+/],
+    "female_penetrating": [/^female_penetrating_.+/],
+    "andromorph_penetrating": [/^andromorph_penetrating_.+/],
+    "gynomorph_penetrating": [/^gynomorph_penetrating_.+/],
+    "herm_penetrating": [/^herm_penetrating_.+/],
+    "maleherm_penetrating": [/^maleherm_penetrating_.+/],
+
+    "male_penetrated": [/^.+_penetrating_male/],
+    "female_penetrated": [/^.+_penetrating_female/],
+    "andromorph_penetrated": [/^.+_penetrating_andromorph/],
+    "gynomorph_penetrated": [/^.+_penetrating_gynomorph/],
+    "herm_penetrated": [/^.+_penetrating_herm/],
+    "maleherm_penetrated": [/^.+_penetrating_maleherm/],
+
+    // Anatomy
+    "butt": [/^presenting_hindquarters$/],
+    "non-mammal_breasts": [/^breasts$/, /^(reptile|marine|avian|arthropod)$/],
+
+    "muscular_anthro": [/^muscular/, /^anthro$/],
+    "muscular_feral": [/^muscular/, /^feral$/],
+    "muscular_humanoid": [/^muscular/, /^humanoid$/],
+    "muscular_human": [/^muscular/, /^human$/],
+    "muscular_taur": [/^muscular/, /^taur$/],
+
+    "muscular_male": [/^muscular/, /^male$/],
+    "muscular_female": [/^muscular/, /^female$/],
+    "muscular_andromorph": [/^muscular/, /^andromorph$/],
+    "muscular_gynomorph": [/^muscular/, /^gynomorph$/],
+    "muscular_herm": [/^muscular/, /^herm$/],
+    "muscular_maleherm": [/^muscular/, /^maleherm$/],
+
+    "overweight_anthro": [/^overweight/, /^anthro$/],
+    "overweight_feral": [/^overweight/, /^feral$/],
+    "overweight_humanoid": [/^overweight/, /^humanoid$/],
+    "overweight_human": [/^overweight/, /^human$/],
+    "overweight_taur": [/^overweight/, /^taur$/],
+
+    "overweight_male": [/^overweight/, /^male$/],
+    "overweight_female": [/^overweight/, /^female$/],
+    "overweight_andromorph": [/^overweight/, /^andromorph$/],
+    "overweight_gynomorph": [/^overweight/, /^gynomorph$/],
+    "overweight_herm": [/^overweight/, /^herm$/],
+    "overweight_maleherm": [/^overweight/, /^maleherm$/],
 
 
 }
