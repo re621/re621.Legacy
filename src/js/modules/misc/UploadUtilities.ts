@@ -37,7 +37,7 @@ export class UploadUtilities extends RE6Module {
         if (this.fetchSettings("addSourceLinks")) this.handleSourceEnhancements();
 
         // Load extra data from the image's header
-        if (this.fetchSettings("loadImageData")) this.handleImageData();
+        this.handleImageData();
 
         // Fix the thumbnail not getting updated properly when copy-pasting
         const imageUrlInput = $("#file-container input[type=text]").on("paste", async () => {
@@ -102,7 +102,7 @@ export class UploadUtilities extends RE6Module {
 
             E621.IQDBQueries.get<APIIQDBResponse>({ "url": value }).then(
                 (response) => {
-                    console.log(response);
+                    // console.log(response);
                     dupesContainer.html("");
 
                     // Sometimes, an empty response is just an empty array
@@ -301,18 +301,27 @@ export class UploadUtilities extends RE6Module {
                     "data-year": file["lastModifiedDate"] ? new Date(file["lastModifiedDate"]).getFullYear() : -1,
                     "data-file": true,
                 });
-                output.html([
-                    `${output.attr("data-width")}x${output.attr("data-height")}`,
-                    `${output.attr("data-type").toUpperCase()}`,
-                    `${Util.Size.format(output.attr("data-size"))}`
-                ].join("&emsp;"));
+                refreshFileData();
 
                 TagSuggester.trigger("update");
 
             } else {
 
-                // Remote file URL
+                // Fallback - in case the loading of external data is disabled
+                if (!this.fetchSettings("loadImageData")) {
 
+                    output.attr({
+                        "data-size": -1,
+                        "data-type": "UNK",
+                        "data-year": -1,
+                        "data-file": false,
+                    });
+                    refreshFileData();
+                    TagSuggester.trigger("update");
+                    return;
+                }
+
+                // Remote file URL
                 XM.Connect.xmlHttpRequest({
                     url: image.attr("src"),
                     method: "HEAD",
@@ -333,12 +342,7 @@ export class UploadUtilities extends RE6Module {
                             "data-year": data["last-modified"] ? new Date(data["last-modified"]).getFullYear() : -1,
                             "data-file": false,
                         });
-                        output.html([
-                            `${output.attr("data-width")}x${output.attr("data-height")}`,
-                            `${output.attr("data-type").toUpperCase()}`,
-                            `${Util.Size.format(output.attr("data-size"))}`
-                        ].join("&emsp;"));
-
+                        refreshFileData();
                         TagSuggester.trigger("update");
                     }
                 });
@@ -347,6 +351,14 @@ export class UploadUtilities extends RE6Module {
         });
 
         image.trigger("load.resix");
+
+        function refreshFileData(): void {
+            output.html([
+                `${output.attr("data-width")}×${output.attr("data-height")}`,
+                output.attr("data-type") !== "UNK" ? `${output.attr("data-type").toUpperCase()}` : undefined,
+                output.attr("data-size") !== "-1" ? `${Util.Size.format(output.attr("data-size"))}` : undefined
+            ].filter(n => n).join("&emsp;"));
+        }
 
     }
 
