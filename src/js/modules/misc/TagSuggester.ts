@@ -364,6 +364,9 @@ const TagSuggestions: SuggestionSet = {
     "multiple_images": { has: [/^solo$/, /^duo$/, /^group$/], matchCount: 2, not: /^multiple_scenes$/ },
     "multiple_scenes": { has: [/^solo$/, /^duo$/, /^group$/], matchCount: 2, not: /^multiple_images$/ },
 
+    // Situation
+    "rear_view": { has: /^looking_back$/ },
+
     // Penetration
     "male_penetrating": { has: /^male_penetrating_.+$/ },
     "female_penetrating": { has: /^female_penetrating_.+$/ },
@@ -382,10 +385,17 @@ const TagSuggestions: SuggestionSet = {
     // Activities
     "sex": { has: /^(.+_penetrating_.+|.+_penetration)$/ },
     "rape": { has: /^forced$/ },
+    "pregnant_sex": { has: [/^pregnant$/, /^sex$/] },
+    "penis": { has: /(handjob|fellatio|penile)/ },
+    "pussy": { has: /vaginal/ },
 
     // Anatomy
     "butt": { has: /^presenting_hindquarters$/ },
-    "non-mammal_breasts": { has: [/^breasts$/, /^(reptile|marine|avian|arthropod)$/] },
+    "non-mammal_breasts": { has: [/^breasts$/, /^(reptile|lizard|marine|avian|arthropod)$/] },
+    "knot": { has: /^canine_penis$/ },
+    "sheath": { has: /^canine_penis$/ },
+    "erection": { has: /penis/, not: /^flaccid$/ },
+    "flaccid": { has: /penis/, not: /^erection$/ },
 
     "muscular_anthro": { has: [/^muscular/, /^anthro$/] },
     "muscular_feral": { has: [/^muscular/, /^feral$/] },
