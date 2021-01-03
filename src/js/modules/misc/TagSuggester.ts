@@ -275,6 +275,7 @@ enum ImageRatio {
     "9:17" = 9 / 17,        // NOT META
     "9:16" = 9 / 16,
     "4:7" = 4 / 7,          // NOT META
+    "3:5" = 3 / 5,
     "10:16" = 10 / 16,
     "9:14" = 9 / 14,
     "2:3" = 2 / 3,          // Common Phone Ratio
@@ -287,6 +288,7 @@ enum ImageRatio {
     "3:2" = 3 / 2,          // Common Desktop Ratio
     "14:9" = 14 / 9,        // 4:3 / 16:9 compromise
     "16:10" = 16 / 10,      // Common Desktop Ratio
+    "5:3" = 5 / 3,
     "7:4" = 7 / 4,
     "16:9" = 16 / 9,        // Common Desktop Ratio
     "17:9" = 17 / 9,        // NOT META
