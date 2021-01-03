@@ -225,37 +225,84 @@ export class TagSuggester extends RE6Module {
          * @param matches Regular expressions to test against
          * @param tags Tags to check
          */
-        function tagsMatchRegex(matches: RegExp | RegExp[], tags: Set<string>): boolean {
-            const regexSet = new Set(Array.isArray(matches) ? [...matches] : [matches]);
+        function tagsMatchRegex(suggestion: Suggestion, tags: Set<string>): boolean {
 
-            for (const regex of regexSet) {
-                for (const tag of tags) {
-                    if (!regex.test(tag)) continue;
-                    regexSet.delete(regex);
-                    break;
+            let matchHas = true;
+            if (suggestion.has) {
+                if (!Array.isArray(suggestion.has)) suggestion.has = [suggestion.has];
+                if (!suggestion.matchCount) suggestion.matchCount = suggestion.has.length;
+
+                const regexHas = new Set(suggestion.has);
+                for (const regex of regexHas) {
+                    for (const tag of tags) {
+                        if (!regex.test(tag)) continue;
+                        regexHas.delete(regex);
+                        break;
+                    }
+                }
+
+                matchHas = regexHas.size <= (suggestion.has.length - suggestion.matchCount);
+            }
+
+            let matchNot = true;
+            if (suggestion.not) {
+                if (!Array.isArray(suggestion.not)) suggestion.not = [suggestion.not];
+
+                const regexNot = new Set(suggestion.not);
+                for (const regex of regexNot) {
+                    for (const tag of tags) {
+                        if (!regex.test(tag)) continue;
+                        matchNot = false;
+                        break;
+                    }
+                    if (!matchNot) break;
                 }
             }
-            return regexSet.size == 0;
+
+            return matchHas && matchNot;
         }
 
         /**
          * Formats the regular expressions into human-readable format
          * @param matches Regular expressions to format
          */
-        function formatMatchRegex(matches: RegExp | RegExp[]): string {
-            if (!Array.isArray(matches)) matches = [matches];
+        function formatMatchRegex(suggestion: Suggestion): string {
 
-            const results = [];
-            for (const match of matches)
-                results.push(
-                    (match + "")
-                        .replace(/\/\^|\$\//g, "")
-                        .replace(/^\/|\/$/g, "")
-                        .replace(/^\((.*)\)$/g, "$1")
-                        .replace(/\.\+/g, "*")
-                        .replace(/\|/g, " / ")
-                );
-            return results.join(" + ");
+            const resultsHas = [];
+            if (suggestion.has) {
+                if (!Array.isArray(suggestion.has)) suggestion.has = [suggestion.has];
+                for (const match of suggestion.has)
+                    resultsHas.push(
+                        (match + "")
+                            .replace(/\/\^|\$\//g, "")
+                            .replace(/^\/|\/$/g, "")
+                            .replace(/^\((.*)\)$/g, "$1")
+                            .replace(/\.\+/g, "*")
+                            .replace(/\|/g, " / ")
+                    );
+            }
+
+            const resultsNot = [];
+            if (suggestion.not) {
+                if (!Array.isArray(suggestion.not)) suggestion.not = [suggestion.not];
+                for (const match of suggestion.not)
+                    resultsNot.push(
+                        (match + "")
+                            .replace(/\/\^|\$\//g, "")
+                            .replace(/^\/|\/$/g, "")
+                            .replace(/^\((.*)\)$/g, "$1")
+                            .replace(/\.\+/g, "*")
+                            .replace(/\|/g, " / ")
+                    );
+            }
+
+            if (resultsHas.length > 0 && resultsNot.length > 0)
+                return resultsHas.join(", ") + ", but not " + resultsNot.join(", ");
+            else if (resultsHas.length > 0)
+                return resultsHas.join(", ");
+            else if (resultsNot.length > 0)
+                return "not " + resultsNot.join(", ");
+            return "???";
         }
 
         function matchDimensions(width: number, height: number, matches: [number, number][]): boolean {
@@ -311,54 +358,75 @@ enum ImageRatio {
     "4:1" = 4,              // Twitter Header Image
 }
 
-const TagSuggestions = {
+const TagSuggestions: SuggestionSet = {
 
-    "sex": [/^(.+_penetrating_.+|.+_penetration)$/],
+    // Groups
+    "multiple_images": { has: [/^solo$/, /^duo$/, /^group$/], matchCount: 2, not: /^multiple_scenes$/ },
+    "multiple_scenes": { has: [/^solo$/, /^duo$/, /^group$/], matchCount: 2, not: /^multiple_images$/ },
 
     // Penetration
-    "male_penetrating": [/^male_penetrating_.+$/],
-    "female_penetrating": [/^female_penetrating_.+$/],
-    "andromorph_penetrating": [/^andromorph_penetrating_.+$/],
-    "gynomorph_penetrating": [/^gynomorph_penetrating_.+$/],
-    "herm_penetrating": [/^herm_penetrating_.+$/],
-    "maleherm_penetrating": [/^maleherm_penetrating_.+$/],
+    "male_penetrating": { has: /^male_penetrating_.+$/ },
+    "female_penetrating": { has: /^female_penetrating_.+$/ },
+    "andromorph_penetrating": { has: /^andromorph_penetrating_.+$/ },
+    "gynomorph_penetrating": { has: /^gynomorph_penetrating_.+$/ },
+    "herm_penetrating": { has: /^herm_penetrating_.+$/ },
+    "maleherm_penetrating": { has: /^maleherm_penetrating_.+$/ },
 
-    "male_penetrated": [/^.+_penetrating_male$/],
-    "female_penetrated": [/^.+_penetrating_female$/],
-    "andromorph_penetrated": [/^.+_penetrating_andromorph$/],
-    "gynomorph_penetrated": [/^.+_penetrating_gynomorph$/],
-    "herm_penetrated": [/^.+_penetrating_herm$/],
-    "maleherm_penetrated": [/^.+_penetrating_maleherm$/],
+    "male_penetrated": { has: /^.+_penetrating_male$/ },
+    "female_penetrated": { has: /^.+_penetrating_female$/ },
+    "andromorph_penetrated": { has: /^.+_penetrating_andromorph$/ },
+    "gynomorph_penetrated": { has: /^.+_penetrating_gynomorph$/ },
+    "herm_penetrated": { has: /^.+_penetrating_herm$/ },
+    "maleherm_penetrated": { has: /^.+_penetrating_maleherm$/ },
+
+    // Activities
+    "sex": { has: /^(.+_penetrating_.+|.+_penetration)$/ },
+    "rape": { has: /^forced$/ },
 
     // Anatomy
-    "butt": [/^presenting_hindquarters$/],
-    "non-mammal_breasts": [/^breasts$/, /^(reptile|marine|avian|arthropod)$/],
+    "butt": { has: /^presenting_hindquarters$/ },
+    "non-mammal_breasts": { has: [/^breasts$/, /^(reptile|marine|avian|arthropod)$/] },
 
-    "muscular_anthro": [/^muscular/, /^anthro$/],
-    "muscular_feral": [/^muscular/, /^feral$/],
-    "muscular_humanoid": [/^muscular/, /^humanoid$/],
-    "muscular_human": [/^muscular/, /^human$/],
-    "muscular_taur": [/^muscular/, /^taur$/],
+    "muscular_anthro": { has: [/^muscular/, /^anthro$/] },
+    "muscular_feral": { has: [/^muscular/, /^feral$/] },
+    "muscular_humanoid": { has: [/^muscular/, /^humanoid$/] },
+    "muscular_human": { has: [/^muscular/, /^human$/] },
+    "muscular_taur": { has: [/^muscular/, /^taur$/] },
 
-    "muscular_male": [/^muscular/, /^male$/],
-    "muscular_female": [/^muscular/, /^female$/],
-    "muscular_andromorph": [/^muscular/, /^andromorph$/],
-    "muscular_gynomorph": [/^muscular/, /^gynomorph$/],
-    "muscular_herm": [/^muscular/, /^herm$/],
-    "muscular_maleherm": [/^muscular/, /^maleherm$/],
+    "muscular_male": { has: [/^muscular/, /^male$/] },
+    "muscular_female": { has: [/^muscular/, /^female$/] },
+    "muscular_andromorph": { has: [/^muscular/, /^andromorph$/] },
+    "muscular_gynomorph": { has: [/^muscular/, /^gynomorph$/] },
+    "muscular_herm": { has: [/^muscular/, /^herm$/] },
+    "muscular_maleherm": { has: [/^muscular/, /^maleherm$/] },
 
-    "overweight_anthro": [/^overweight/, /^anthro$/],
-    "overweight_feral": [/^overweight/, /^feral$/],
-    "overweight_humanoid": [/^overweight/, /^humanoid$/],
-    "overweight_human": [/^overweight/, /^human$/],
-    "overweight_taur": [/^overweight/, /^taur$/],
+    "overweight_anthro": { has: [/^overweight/, /^anthro$/] },
+    "overweight_feral": { has: [/^overweight/, /^feral$/] },
+    "overweight_humanoid": { has: [/^overweight/, /^humanoid$/] },
+    "overweight_human": { has: [/^overweight/, /^human$/] },
+    "overweight_taur": { has: [/^overweight/, /^taur$/] },
 
-    "overweight_male": [/^overweight/, /^male$/],
-    "overweight_female": [/^overweight/, /^female$/],
-    "overweight_andromorph": [/^overweight/, /^andromorph$/],
-    "overweight_gynomorph": [/^overweight/, /^gynomorph$/],
-    "overweight_herm": [/^overweight/, /^herm$/],
-    "overweight_maleherm": [/^overweight/, /^maleherm$/],
+    "overweight_male": { has: [/^overweight/, /^male$/] },
+    "overweight_female": { has: [/^overweight/, /^female$/] },
+    "overweight_andromorph": { has: [/^overweight/, /^andromorph$/] },
+    "overweight_gynomorph": { has: [/^overweight/, /^gynomorph$/] },
+    "overweight_herm": { has: [/^overweight/, /^herm$/] },
+    "overweight_maleherm": { has: [/^overweight/, /^maleherm$/] },
 
+    // Body Parts
+    "biped": { has: /^anthro$/, not: /^(uniped|triped)$/ },
+    "quadruped": { has: /^feral$/, not: /^(hexapod)$/ },
 
 }
+
+type SuggestionSet = {
+    [prop: string]: Suggestion;
+};
+
+type Suggestion = {
+    has?: SuggestionParam;
+    not?: SuggestionParam;
+    matchCount?: number;
+}
+
+type SuggestionParam = RegExp | RegExp[];
