@@ -172,9 +172,12 @@ export class TagSuggester extends RE6Module {
 
         // Derived from the added tags
         for (const [key, matches] of Object.entries(TagSuggestions)) {
-            if (tags.has(key) || Object.keys(suggestions).includes(key)) continue;
-            if (tagsMatchRegex(matches, tags))
-                suggestions[key] = "Existing tags: " + formatMatchRegex(matches);
+            const keyset = key.split("|");
+            if (tagAlreadyPresent(tags, Object.keys(suggestions), keyset)) continue;
+            if (tagsMatchRegex(matches, tags)) {
+                for (const keyEntry of keyset)
+                    suggestions[keyEntry] = "Existing tags: " + formatMatchRegex(matches);
+            }
         }
 
         for (const [tag, description] of Object.entries(suggestions))
@@ -184,6 +187,13 @@ export class TagSuggester extends RE6Module {
             "ready": "true",
             "count": container.children().length,
         });
+
+        /** Checks if the specieid key set is already present in the tags or in suggestions */
+        function tagAlreadyPresent(tags: Set<string>, suggestions: string[], keyset: string[]): boolean {
+            for (const key of keyset)
+                if (tags.has(key) || suggestions.includes(key)) return true;
+            return false;
+        }
 
         /**
          * Adds a new suggestion to the list
@@ -376,8 +386,7 @@ const ImageRatios = {
 // List of suggested tags, in no particular order
 // The key is the proposed tag, corresponding object - conditions under which it applies
 //
-// TODO Currently, if several tags may apply under the same conditions, every one of those tags
-//      has to be checked separately. Perhaps, a way to allow tag variants is necessary.
+// Key can include several (mutually exclusive) tags, separated by a pipe character `|`.
 //
 // The object's parameters are as follows:
 // * `has`: unless matchCount is specified, all of these tags must be present
@@ -391,8 +400,12 @@ const ImageRatios = {
 const TagSuggestions: SuggestionSet = {
 
     // Groups
-    "multiple_images": { has: ["solo", "duo", "group"], matchCount: 2, not: "multiple_scenes" },
-    "multiple_scenes": { has: ["solo", "duo", "group"], matchCount: 2, not: "multiple_images" },
+    "multiple_images|multiple_scenes": { has: ["solo", "duo", "group"], matchCount: 2, not: ["multiple_images", "multiple_scenes"] },
+
+    // Characters
+    "faceless_human": { has: [/^faceless_/, "human"] },
+    "faceless_anthro": { has: [/^faceless_/, "anthro"] },
+    "faceless_feral": { has: [/^faceless_/, "feral"] },
 
     // Situation
     "rear_view": { has: "looking_back" },
@@ -422,10 +435,18 @@ const TagSuggestions: SuggestionSet = {
     // Anatomy
     "butt": { has: "presenting_hindquarters" },
     "non-mammal_breasts": { has: ["breasts", /^(reptile|lizard|marine|avian|arthropod)$/] },
+    "nipples": { has: "breasts", not: "featureless_breasts" },
+    "areola": { has: "nipples" },
+    "erection|flaccid|half-erect": { has: /penis|penile/, not: ["erection", "flaccid", "half-erect"] },
+
+    "canine_penis": { has: "knot" },
     "knot": { has: "canine_penis" },
     "sheath": { has: "canine_penis" },
-    "erection": { has: /penis|penile/, not: "flaccid" },
-    "flaccid": { has: /penis|penile/, not: "erection" },
+
+    "equine_penis": { has: "medial_ring", },
+    "knotted_equine_penis": { has: ["medial_ring", "knot"] },
+    "medial_ring": { has: "equine_penis" },
+    "flared_penis": { has: "equine_penis" },
 
     "muscular_anthro": { has: [/^muscular/, "anthro"] },
     "muscular_feral": { has: [/^muscular/, "feral"] },
@@ -456,6 +477,7 @@ const TagSuggestions: SuggestionSet = {
     // Body Parts
     "biped": { has: "anthro", not: /^(uniped|triped)$/ },
     "quadruped": { has: "feral", not: /^(hexapod)$/ },
+    "legless": { has: /^(naga|lamia|merfolk)$/ },
 
 }
 
