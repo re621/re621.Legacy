@@ -234,10 +234,15 @@ export class TagSuggester extends RE6Module {
 
                 const regexHas = new Set(suggestion.has);
                 for (const regex of regexHas) {
-                    for (const tag of tags) {
-                        if (!regex.test(tag)) continue;
+                    if (typeof regex == "string") {
+                        if (!tags.has(regex)) continue;
                         regexHas.delete(regex);
-                        break;
+                    } else {
+                        for (const tag of tags) {
+                            if (!regex.test(tag)) continue;
+                            regexHas.delete(regex);
+                            break;
+                        }
                     }
                 }
 
@@ -250,12 +255,17 @@ export class TagSuggester extends RE6Module {
 
                 const regexNot = new Set(suggestion.not);
                 for (const regex of regexNot) {
-                    for (const tag of tags) {
-                        if (!regex.test(tag)) continue;
+                    if (typeof regex == "string") {
+                        if (!tags.has(regex)) continue;
                         matchNot = false;
-                        break;
+                    } else {
+                        for (const tag of tags) {
+                            if (!regex.test(tag)) continue;
+                            matchNot = false;
+                            break;
+                        }
+                        if (!matchNot) break;
                     }
-                    if (!matchNot) break;
                 }
             }
 
@@ -360,14 +370,29 @@ enum ImageRatio {
     "4:1" = 4,              // Twitter Header Image
 }
 
+// List of suggested tags, in no particular order
+// The key is the proposed tag, corresponding object - conditions under which it applies
+//
+// TODO Currently, if several tags may apply under the same conditions, every one of those tags
+//      has to be checked separately. Perhaps, a way to allow tag variants is necessary.
+//
+// The object's parameters are as follows:
+// * `has`: unless matchCount is specified, all of these tags must be present
+// * `matchCount`: if specified, this number of tags from the `has` field must be present (any combination)
+// * `not`: none of these tags must be present
+//
+// The tags can be listed as either strings or regular expressions.
+// * String tags are better for performance, but must be matched **exactly**.
+// * Regular expressions can be anything, but are slightly worse performance-wise
+// Tag lists can be single value or arrays. Mixed arrays are permitted.
 const TagSuggestions: SuggestionSet = {
 
     // Groups
-    "multiple_images": { has: [/^solo$/, /^duo$/, /^group$/], matchCount: 2, not: /^multiple_scenes$/ },
-    "multiple_scenes": { has: [/^solo$/, /^duo$/, /^group$/], matchCount: 2, not: /^multiple_images$/ },
+    "multiple_images": { has: ["solo", "duo", "group"], matchCount: 2, not: "multiple_scenes" },
+    "multiple_scenes": { has: ["solo", "duo", "group"], matchCount: 2, not: "multiple_images" },
 
     // Situation
-    "rear_view": { has: /^looking_back$/ },
+    "rear_view": { has: "looking_back" },
 
     // Penetration
     "male_penetrating": { has: /^male_penetrating_.+$/ },
@@ -386,48 +411,48 @@ const TagSuggestions: SuggestionSet = {
 
     // Activities
     "sex": { has: /^(.+_penetrating_.+|.+_penetration)$/ },
-    "rape": { has: /^forced$/ },
-    "pregnant_sex": { has: [/^pregnant$/, /^sex$/] },
+    "rape": { has: "forced" },
+    "pregnant_sex": { has: ["pregnant", "sex"] },
     "penis": { has: /(handjob|fellatio|penile)/ },
     "pussy": { has: /vaginal/ },
 
     // Anatomy
-    "butt": { has: /^presenting_hindquarters$/ },
-    "non-mammal_breasts": { has: [/^breasts$/, /^(reptile|lizard|marine|avian|arthropod)$/] },
-    "knot": { has: /^canine_penis$/ },
-    "sheath": { has: /^canine_penis$/ },
-    "erection": { has: /penis/, not: /^flaccid$/ },
-    "flaccid": { has: /penis/, not: /^erection$/ },
+    "butt": { has: "presenting_hindquarters" },
+    "non-mammal_breasts": { has: ["breasts", /^(reptile|lizard|marine|avian|arthropod)$/] },
+    "knot": { has: "canine_penis" },
+    "sheath": { has: "canine_penis" },
+    "erection": { has: /penis|penile/, not: "flaccid" },
+    "flaccid": { has: /penis|penile/, not: "erection" },
 
-    "muscular_anthro": { has: [/^muscular/, /^anthro$/] },
-    "muscular_feral": { has: [/^muscular/, /^feral$/] },
-    "muscular_humanoid": { has: [/^muscular/, /^humanoid$/] },
-    "muscular_human": { has: [/^muscular/, /^human$/] },
-    "muscular_taur": { has: [/^muscular/, /^taur$/] },
+    "muscular_anthro": { has: [/^muscular/, "anthro"] },
+    "muscular_feral": { has: [/^muscular/, "feral"] },
+    "muscular_humanoid": { has: [/^muscular/, "humanoid"] },
+    "muscular_human": { has: [/^muscular/, "human"] },
+    "muscular_taur": { has: [/^muscular/, "taur"] },
 
-    "muscular_male": { has: [/^muscular/, /^male$/] },
-    "muscular_female": { has: [/^muscular/, /^female$/] },
-    "muscular_andromorph": { has: [/^muscular/, /^andromorph$/] },
-    "muscular_gynomorph": { has: [/^muscular/, /^gynomorph$/] },
-    "muscular_herm": { has: [/^muscular/, /^herm$/] },
-    "muscular_maleherm": { has: [/^muscular/, /^maleherm$/] },
+    "muscular_male": { has: [/^muscular/, "male"] },
+    "muscular_female": { has: [/^muscular/, "female"] },
+    "muscular_andromorph": { has: [/^muscular/, "andromorph"] },
+    "muscular_gynomorph": { has: [/^muscular/, "gynomorph"] },
+    "muscular_herm": { has: [/^muscular/, "herm"] },
+    "muscular_maleherm": { has: [/^muscular/, "maleherm"] },
 
-    "overweight_anthro": { has: [/^overweight/, /^anthro$/] },
-    "overweight_feral": { has: [/^overweight/, /^feral$/] },
-    "overweight_humanoid": { has: [/^overweight/, /^humanoid$/] },
-    "overweight_human": { has: [/^overweight/, /^human$/] },
-    "overweight_taur": { has: [/^overweight/, /^taur$/] },
+    "overweight_anthro": { has: [/^overweight/, "anthro"] },
+    "overweight_feral": { has: [/^overweight/, "feral"] },
+    "overweight_humanoid": { has: [/^overweight/, "humanoid"] },
+    "overweight_human": { has: [/^overweight/, "human"] },
+    "overweight_taur": { has: [/^overweight/, "taur"] },
 
-    "overweight_male": { has: [/^overweight/, /^male$/] },
-    "overweight_female": { has: [/^overweight/, /^female$/] },
-    "overweight_andromorph": { has: [/^overweight/, /^andromorph$/] },
-    "overweight_gynomorph": { has: [/^overweight/, /^gynomorph$/] },
-    "overweight_herm": { has: [/^overweight/, /^herm$/] },
-    "overweight_maleherm": { has: [/^overweight/, /^maleherm$/] },
+    "overweight_male": { has: [/^overweight/, "male"] },
+    "overweight_female": { has: [/^overweight/, "female"] },
+    "overweight_andromorph": { has: [/^overweight/, "andromorph"] },
+    "overweight_gynomorph": { has: [/^overweight/, "gynomorph"] },
+    "overweight_herm": { has: [/^overweight/, "herm"] },
+    "overweight_maleherm": { has: [/^overweight/, "maleherm"] },
 
     // Body Parts
-    "biped": { has: /^anthro$/, not: /^(uniped|triped)$/ },
-    "quadruped": { has: /^feral$/, not: /^(hexapod)$/ },
+    "biped": { has: "anthro", not: /^(uniped|triped)$/ },
+    "quadruped": { has: "feral", not: /^(hexapod)$/ },
 
 }
 
@@ -441,4 +466,4 @@ type Suggestion = {
     matchCount?: number;
 }
 
-type SuggestionParam = RegExp | RegExp[];
+type SuggestionParam = RegExp | string | (RegExp | string)[];
