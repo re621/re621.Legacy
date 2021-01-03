@@ -325,49 +325,52 @@ export class TagSuggester extends RE6Module {
 
     }
 
+    /**
+     * Returns the image ratio based on the image width and height
+     * @param width Image width
+     * @param height Image height
+     * @returns Image ratio if applicable, undefined if none applies, and null if an error occurs
+     */
     private static getImageRatio(width: number | string, height: number | string): string {
         if (typeof width == "string") width = parseInt(width);
         if (typeof height == "string") height = parseInt(height);
         if (!width || !height) return null;
 
-        const ratio = width / height;
-        for (const [name, value] of Object.entries(ImageRatio))
-            if (value == ratio) return name;
-        return null;
+        return ImageRatios[(width / height).toFixed(6)];
     }
 }
 
-enum ImageRatio {
-    "1:1" = 1,              // Icons / Avatars
-    "1:4" = 1 / 4,
-    "9:32" = 9 / 32,
-    "1:2" = 1 / 2,
-    "9:21" = 9 / 21,
-    "9:17" = 9 / 17,        // NOT META
-    "9:16" = 9 / 16,
-    "4:7" = 4 / 7,          // NOT META
-    "3:5" = 3 / 5,
-    "10:16" = 10 / 16,
-    "9:14" = 9 / 14,
-    "2:3" = 2 / 3,          // Common Phone Ratio
-    "3:4" = 3 / 4,
-    "4:5" = 4 / 5,
-    "5:6" = 5 / 6,
-    "6:5" = 6 / 5,          // NOT META
-    "5:4" = 5 / 4,          // Common Desktop Ratio
-    "4:3" = 4 / 3,          // Common Desktop Ratio
-    "3:2" = 3 / 2,          // Common Desktop Ratio
-    "14:9" = 14 / 9,        // 4:3 / 16:9 compromise
-    "16:10" = 16 / 10,      // Common Desktop Ratio
-    "5:3" = 5 / 3,
-    "7:4" = 7 / 4,
-    "16:9" = 16 / 9,        // Common Desktop Ratio
-    "17:9" = 17 / 9,        // NOT META
-    "256:135" = 256 / 135,  // Digital Cinema 4k
-    "2:1" = 2,              // VR Resolution
-    "21:9" = 21 / 9,        // Ultrawide
-    "32:9" = 32 / 9,        // Samsung Ultrawide
-    "4:1" = 4,              // Twitter Header Image
+const ImageRatios = {
+    "1.000000": "1:1",          // Icons / Avatars
+    "0.250000": "1:4",          // 
+    "0.281250": "9:32",         // 
+    "0.500000": "1:2",          // 
+    "0.428571": "9:21",         // 
+    "0.529412": "9:17",         // NOT META
+    "0.562500": "9:16",         // 
+    "0.571429": "4:7",          // NOT META
+    "0.600000": "3:5",          // 
+    "0.625000": "10:16",        // 
+    "0.642857": "9:14",         // 
+    "0.666667": "2:3",          // Common Phone Ratio
+    "0.750000": "3:4",          // 
+    "0.800000": "4:5",          // 
+    "0.833333": "5:6",          // 
+    "1.200000": "6:5",          // NOT META
+    "1.250000": "5:4",          // Common Desktop Ratio
+    "1.333333": "4:3",          // Common Desktop Ratio
+    "1.500000": "3:2",          // Common Desktop Ratio
+    "1.555556": "14:9",         // 4:3 / 16:9 compromise
+    "1.600000": "16:10",        // Common Desktop Ratio
+    "1.666667": "5:3",          // 
+    "1.750000": "7:4",          // 
+    "1.777778": "16:9",         // Common Desktop Ratio
+    "1.888889": "17:9",         // NOT META
+    "1.896296": "256:135",      // Digital Cinema 4k
+    "2.000000": "2:1",          // VR Resolution
+    "2.333333": "21:9",         // Ultrawide
+    "3.555556": "32:9",         // Samsung Ultrawide
+    "4.000000": "4:1",          // Twitter Header Image
 }
 
 // List of suggested tags, in no particular order
