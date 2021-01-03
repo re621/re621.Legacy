@@ -307,11 +307,11 @@ export class TagSuggester extends RE6Module {
             }
 
             if (resultsHas.length > 0 && resultsNot.length > 0)
-                return resultsHas.join(", ") + ", but not " + resultsNot.join(", ");
+                return Util.prettyPrintArray(resultsHas) + ", but not " + Util.prettyPrintArray(resultsNot, "or");
             else if (resultsHas.length > 0)
-                return resultsHas.join(", ");
+                return Util.prettyPrintArray(resultsHas);
             else if (resultsNot.length > 0)
-                return "not " + resultsNot.join(", ");
+                return "not " + Util.prettyPrintArray(resultsNot, "or");
             return "???";
         }
 

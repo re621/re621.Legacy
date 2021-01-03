@@ -248,4 +248,18 @@ export class Util {
         return 0;
     }
 
+    /**
+     * Formats an array into a string via a non-standard join method.  
+     * Ex. ["one"] => "one"
+     *     ["one", "two"] => "one and two"
+     *     ["one", "two", "three"] => "one, two, and three"
+     * @param array Array to format
+     * @param delimiter Delimiter for the last element
+     */
+    public static prettyPrintArray(array: string[], delimiter = "and"): string {
+        if (array.length == 1) return array[0];
+        else if (array.length == 2) return array[0] + " " + delimiter + " " + array[1];
+        return array.slice(0, -1).join(", ") + ", " + delimiter + " " + array.slice(-1);
+    }
+
 }
