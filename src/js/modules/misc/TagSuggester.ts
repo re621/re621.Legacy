@@ -412,6 +412,7 @@ const TagSuggestions: SuggestionSet = {
 
     // Situation
     "rear_view": { has: "looking_back" },
+    "solo_focus": { has: [/^faceless_/, /^(duo|group)$/] },
 
     // Penetration
     "male_penetrating": { has: /^male_penetrating_.+$/ },
@@ -430,16 +431,18 @@ const TagSuggestions: SuggestionSet = {
 
     // Activities
     "sex": { has: /^(.+_penetrating_.+|.+_penetration)$/ },
-    "rape": { has: "forced" },
+    "rape": { has: [/^forced/, /rating:q|rating:e/] },
     "pregnant_sex": { has: ["pregnant", "sex"] },
-    "penis": { has: /(handjob|fellatio|penile)/ },
-    "pussy": { has: /vaginal/ },
+    "penile_masturbation": { has: ["penis", "masturbation"] },
+    "vaginal_masturbation": { has: ["pussy", "masturbation"] },
 
     // Anatomy
     "butt": { has: "presenting_hindquarters" },
-    "non-mammal_breasts": { has: ["breasts", /^(reptile|lizard|marine|avian|arthropod)$/] },
+    "non-mammal_breasts": { has: ["breasts", /^(reptile|lizard|marine|avian|arthropod|flora_fauna|insect)$/] },
     "nipples": { has: "breasts", not: "featureless_breasts" },
     "areola": { has: "nipples" },
+    "penis": { has: /(handjob|fellatio|penile)/ },
+    "pussy": { has: /vaginal/ },
     "erection|flaccid|half-erect": { has: /penis|penile/, not: ["erection", "flaccid", "half-erect"] },
 
     "canine_penis": { has: "knot" },
