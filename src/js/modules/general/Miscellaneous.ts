@@ -339,7 +339,7 @@ export class Miscellaneous extends RE6Module {
 
     /** Disables the "read the how to comment guide" warning */
     public handleCommentRules(disable = true): void {
-        $("div.new-comment").find("h2").first().toggleClass("display-none", disable);
+        $("div.new-comment > h2 > a[href='/wiki_pages?search%5Btitle%5D=howto%3Acomment']").parent("h2").toggleClass("display-none", disable);
     }
 
     /**
