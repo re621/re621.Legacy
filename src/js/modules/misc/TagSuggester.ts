@@ -148,8 +148,11 @@ export class TagSuggester extends RE6Module {
                 "width": parseInt(output.attr("data-width")) || -1,
                 "height": parseInt(output.attr("data-height")) || -1,
                 "size": parseInt(output.attr("data-size")) || -1,
+                "type": output.attr("data-type") || "unk",
                 "file": output.attr("data-file") == "true",
             }
+
+            if (data.type !== "unk") tags.add("type:" + data.type);
 
             // Year
             if (data.year && data.year > 0 && !data.file)
