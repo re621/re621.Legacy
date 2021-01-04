@@ -720,6 +720,57 @@ export class SettingsController extends RE6Module {
                 ]),
 
                 // Miscellaneous
+                Form.accordionTab({ name: "postpage", label: "Post Page", columns: 3, width: 3 }, [
+
+                    Form.subheader("Adaptive Scaling", "Dynamically select the scaling mode according to settings below", 2),
+                    Form.select(
+                        {
+                            name: "hoverzoom",
+                            value: imageScaler.fetchSettings("dynSizeMode"),
+                        },
+                        {
+                            0: "Disabled",
+                            1: "Aspect Scaling",
+                            2: "Tag-Based Scaling",
+                        },
+                        async (data) => {
+                            await imageScaler.pushSettings("dynSizeMode", data);
+                        }
+                    ),
+                    Form.spacer(3, true),
+
+                    Form.text(`
+                        <b>Aspect Scaling:</b> Wide images are fitted to height, tall images - to width.<br />
+                        <b>Tag-Based Scaling:</b> Defaults to fit to height, but switches to fit to width when certain tags match.
+                        `, 3),
+                    Form.spacer(3, true),
+
+                    Form.subheader("Aspect Ratio Deadzone", "Negative for fit-to-height bias, positive for fit-to-width bias", 2),
+                    Form.input(
+                        {
+                            value: imageScaler.fetchSettings("dynSizeDeadzone"),
+                            required: true,
+                            pattern: "^-?(1|(0(\\.\\d+)?))$",
+                            title: "Number between -1 and 1",
+                        },
+                        async (data, input) => {
+                            if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                            await imageScaler.pushSettings("dynSizeDeadzone", parseFloat(data));
+                        }
+                    ),
+                    Form.spacer(3, true),
+
+                    Form.subheader("Tall Image Tags", "Posts with these tags are considered tall, and will be scaled to width", 2),
+                    Form.input(
+                        {
+                            value: imageScaler.fetchSettings("dynSizeTags"),
+                            width: 1,
+                        },
+                        async (data) => { await imageScaler.pushSettings("dynSizeTags", data); }
+                    ),
+                ]),
+
+                // Miscellaneous
                 Form.accordionTab({ name: "misc", label: "Other", columns: 3, width: 3 }, [
 
                     Form.checkbox(

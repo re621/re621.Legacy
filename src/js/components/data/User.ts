@@ -20,7 +20,7 @@ export class User {
     public static enableAutoComplete: boolean;
     public static styleUsernames: boolean;
 
-    public static defaultImageSize: string;
+    public static defaultImageSize: ImageScalingMode;
 
     public static level: string;
 
@@ -40,7 +40,7 @@ export class User {
         User.enableAutoComplete = getValue("enable-auto-complete") == "true";
         User.styleUsernames = getValue("style-usernames") == "true";
 
-        User.defaultImageSize = getValue("default-image-size");
+        User.defaultImageSize = ImageScalingMode.get(getValue("default-image-size"));
 
         User.level = $ref.attr("data-user-level-string") || "Guest";
 
@@ -66,4 +66,23 @@ export class User {
         await E621.User.id(this.userID).post({ user: data, "_method": "patch" });
     }
 
+}
+
+export enum ImageScalingMode {
+    Sample = "large",
+    FitHeight = "fitv",
+    FitWidth = "fit",
+    Original = "original",
+}
+
+export namespace ImageScalingMode {
+    export function get(mode: string): ImageScalingMode {
+        switch (mode) {
+            case "large": return ImageScalingMode.Sample;
+            case "fitv": return ImageScalingMode.FitHeight;
+            case "fit": return ImageScalingMode.FitWidth;
+            case "original": return ImageScalingMode.Original;
+        }
+        return ImageScalingMode.Sample;
+    }
 }
