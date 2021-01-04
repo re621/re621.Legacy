@@ -271,23 +271,34 @@ export class UploadUtilities extends RE6Module {
 
         const output = $("#preview-sidebar div.upload_preview_dims").first();
         const image = $("#preview-sidebar img.upload_preview_img").first();
-        image.on("load.resix", () => {
 
+        // WEBM files send two error messages
+        // This is here so that the second one can get ignored
+        let prevRequest = "";
+        let prevData = {};
+
+        // Listening for image load (or failing to load) is better,
+        // since that guarantees that the image dimensions are accessible.
+        image.on("load.resix error.resix", (event) => {
+
+            // Reset the output attributes
             output.attr({
-                "data-width": $(image).prop("naturalWidth"),
-                "data-height": $(image).prop("naturalHeight"),
+                "data-width": event.type == "error" ? -1 : $(image).prop("naturalWidth"),
+                "data-height": event.type == "error" ? -1 : $(image).prop("naturalHeight"),
                 "data-size": "0",
                 "data-type": "unk",
+                "data-year": -1,
                 "data-file": false,
             });
 
             // Debug.log("loading", image.attr("src"));
+            const fileInput = $("#file-container input[type=file]").first(),
+                urlInput = $("#file-container input[type=text]").first();
 
-            if (image.attr("src").startsWith("data:image")) {
+            if (fileInput.length > 0 && urlInput.length > 0) return;    // Form is reset
+            else if (fileInput.length > 0) {                            // Local file upload
 
-                // Local file upload
-
-                const fileData = $("#file-container input[type=file]").first()[0]["files"];
+                const fileData = fileInput[0]["files"];
                 if (!fileData || fileData.length == 0) {
                     output.html("");
                     return;
@@ -297,15 +308,16 @@ export class UploadUtilities extends RE6Module {
 
                 output.attr({
                     "data-size": file["size"] || "0",
-                    "data-type": (file["type"] || "UNK").replace("image/", ""),
+                    "data-type": (file["type"] || "UNK").replace(/(image\/|video\/|\/plain)/g, "").replace("application/x-shockwave-flash", "swf"),
                     "data-year": file["lastModifiedDate"] ? new Date(file["lastModifiedDate"]).getFullYear() : -1,
                     "data-file": true,
                 });
-                refreshFileData();
 
+                prevRequest = "";
+                refreshFileData();
                 TagSuggester.trigger("update");
 
-            } else {
+            } else if (urlInput.length > 0) {                           // Remote file URL
 
                 // Fallback - in case the loading of external data is disabled
                 if (!this.fetchSettings("loadImageData")) {
@@ -316,14 +328,25 @@ export class UploadUtilities extends RE6Module {
                         "data-year": -1,
                         "data-file": false,
                     });
+
+                    prevRequest = "";
                     refreshFileData();
                     TagSuggester.trigger("update");
                     return;
                 }
 
-                // Remote file URL
+                const curRequest = (urlInput.val() + "").trim();
+                console.log("attempting", prevRequest == curRequest);
+                if (curRequest == prevRequest) {
+                    output.attr(prevData);
+                    refreshFileData();
+                    TagSuggester.trigger("update");
+                    return;
+                }
+                prevRequest = curRequest;
+
                 XM.Connect.xmlHttpRequest({
-                    url: image.attr("src"),
+                    url: urlInput.val() + "",
                     method: "HEAD",
                     onload: (event) => {
 
@@ -334,14 +357,23 @@ export class UploadUtilities extends RE6Module {
                             if (parts.length < 2) continue;
                             data[parts[0]] = parts.slice(1).join(": ");
                         }
-                        // console.log(data);
+                        console.log(data);
 
                         output.attr({
                             "data-size": data["content-length"] || "0",
-                            "data-type": (data["content-type"] || "UNK").replace("image/", ""),
+                            "data-type": (data["content-type"] || "UNK").replace(/(image\/|video\/|\/plain)/g, "").replace("application/x-shockwave-flash", "swf"),
                             "data-year": data["last-modified"] ? new Date(data["last-modified"]).getFullYear() : -1,
                             "data-file": false,
                         });
+                        prevData = {
+                            "data-width": output.attr("data-width"),
+                            "data-height": output.attr("data-height"),
+                            "data-size": output.attr("data-size"),
+                            "data-type": output.attr("data-type"),
+                            "data-year": output.attr("data-year"),
+                            "data-file": false,
+                        }
+
                         refreshFileData();
                         TagSuggester.trigger("update");
                     }
@@ -354,7 +386,7 @@ export class UploadUtilities extends RE6Module {
 
         function refreshFileData(): void {
             output.html([
-                `${output.attr("data-width")}×${output.attr("data-height")}`,
+                output.attr("data-width") == "-1" ? "0×0" : `${output.attr("data-width")}×${output.attr("data-height")}`,
                 output.attr("data-type") !== "UNK" ? `${output.attr("data-type").toUpperCase()}` : undefined,
                 output.attr("data-size") !== "-1" ? `${Util.Size.format(output.attr("data-size"))}` : undefined
             ].filter(n => n).join("&emsp;"));
