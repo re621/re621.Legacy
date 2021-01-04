@@ -159,7 +159,7 @@ export class TagSuggester extends RE6Module {
                 suggestions[data.year] = "Might not be accurate. Based on the file's last modified date.";
 
             // Ratio
-            if (data.width && data.height && data.width > 1) {
+            if (data.width && data.height && data.width > 1 && data.type !== "swf") {
                 const ratio = TagSuggester.getImageRatio(data.width, data.height);
                 if (ratio) suggestions[ratio] = "Aspect ratio based on the image's dimensions";
 
