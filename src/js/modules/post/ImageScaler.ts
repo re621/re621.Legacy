@@ -34,7 +34,7 @@ export class ImageScaler extends RE6Module {
 
             dynSizeMode: DynSizeMode.Disabled,  // dynamic scaling mode
             dynSizeDeadzone: 0.1,               // only for DynSizeMode.AspectScale - negative for height bias, positive for width
-            dynSizeTags: "comic portrait",      // only for DynSizeMode.TagScale - tags that cause the scale to flip to fit-width
+            dynSizeTags: "comic",               // only for DynSizeMode.TagScale - tags that cause the scale to flip to fit-width
         };
     }
 
