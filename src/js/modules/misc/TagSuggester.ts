@@ -430,7 +430,7 @@ const TagSuggestions: SuggestionSet = {
     "maleherm_penetrated": { has: /^.+_penetrating_maleherm$/ },
 
     // Activities
-    "sex": { has: /^(.+_penetrating_.+|.+_penetration)$/ },
+    "sex": { has: /^(.+_penetrating_.+|.+_penetration|.+_position)$/ },
     "rape": { has: [/^forced/, /rating:q|rating:e/] },
     "pregnant_sex": { has: ["pregnant", "sex"] },
     "penile_masturbation": { has: ["penis", "masturbation"] },
@@ -453,6 +453,8 @@ const TagSuggestions: SuggestionSet = {
     "knotted_equine_penis": { has: ["medial_ring", "knot"] },
     "medial_ring": { has: "equine_penis" },
     "flared_penis": { has: "equine_penis" },
+
+    "hooves": { has: "underhoof" },
 
     "muscular_anthro": { has: [/^muscular/, "anthro"] },
     "muscular_feral": { has: [/^muscular/, "feral"] },
