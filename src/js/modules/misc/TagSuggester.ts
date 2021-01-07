@@ -148,15 +148,18 @@ export class TagSuggester extends RE6Module {
                 "width": parseInt(output.attr("data-width")) || -1,
                 "height": parseInt(output.attr("data-height")) || -1,
                 "size": parseInt(output.attr("data-size")) || -1,
+                "type": output.attr("data-type") || "unk",
                 "file": output.attr("data-file") == "true",
             }
+
+            if (data.type !== "unk") tags.add("type:" + data.type);
 
             // Year
             if (data.year && data.year > 0 && !data.file)
                 suggestions[data.year] = "Might not be accurate. Based on the file's last modified date.";
 
             // Ratio
-            if (data.width && data.height && data.width > 1) {
+            if (data.width && data.height && data.width > 1 && data.type !== "swf") {
                 const ratio = TagSuggester.getImageRatio(data.width, data.height);
                 if (ratio) suggestions[ratio] = "Aspect ratio based on the image's dimensions";
 
@@ -172,9 +175,12 @@ export class TagSuggester extends RE6Module {
 
         // Derived from the added tags
         for (const [key, matches] of Object.entries(TagSuggestions)) {
-            if (tags.has(key) || Object.keys(suggestions).includes(key)) continue;
-            if (tagsMatchRegex(matches, tags))
-                suggestions[key] = "Existing tags: " + formatMatchRegex(matches);
+            const keyset = key.split("|");
+            if (tagAlreadyPresent(tags, Object.keys(suggestions), keyset)) continue;
+            if (tagsMatchRegex(matches, tags)) {
+                for (const keyEntry of keyset)
+                    suggestions[keyEntry] = "Existing tags: " + formatMatchRegex(matches);
+            }
         }
 
         for (const [tag, description] of Object.entries(suggestions))
@@ -184,6 +190,13 @@ export class TagSuggester extends RE6Module {
             "ready": "true",
             "count": container.children().length,
         });
+
+        /** Checks if the specieid key set is already present in the tags or in suggestions */
+        function tagAlreadyPresent(tags: Set<string>, suggestions: string[], keyset: string[]): boolean {
+            for (const key of keyset)
+                if (tags.has(key) || suggestions.includes(key)) return true;
+            return false;
+        }
 
         /**
          * Adds a new suggestion to the list
@@ -234,10 +247,15 @@ export class TagSuggester extends RE6Module {
 
                 const regexHas = new Set(suggestion.has);
                 for (const regex of regexHas) {
-                    for (const tag of tags) {
-                        if (!regex.test(tag)) continue;
+                    if (typeof regex == "string") {
+                        if (!tags.has(regex)) continue;
                         regexHas.delete(regex);
-                        break;
+                    } else {
+                        for (const tag of tags) {
+                            if (!regex.test(tag)) continue;
+                            regexHas.delete(regex);
+                            break;
+                        }
                     }
                 }
 
@@ -250,12 +268,17 @@ export class TagSuggester extends RE6Module {
 
                 const regexNot = new Set(suggestion.not);
                 for (const regex of regexNot) {
-                    for (const tag of tags) {
-                        if (!regex.test(tag)) continue;
+                    if (typeof regex == "string") {
+                        if (!tags.has(regex)) continue;
                         matchNot = false;
-                        break;
+                    } else {
+                        for (const tag of tags) {
+                            if (!regex.test(tag)) continue;
+                            matchNot = false;
+                            break;
+                        }
+                        if (!matchNot) break;
                     }
-                    if (!matchNot) break;
                 }
             }
 
@@ -297,11 +320,11 @@ export class TagSuggester extends RE6Module {
             }
 
             if (resultsHas.length > 0 && resultsNot.length > 0)
-                return resultsHas.join(", ") + ", but not " + resultsNot.join(", ");
+                return Util.prettyPrintArray(resultsHas) + ", but not " + Util.prettyPrintArray(resultsNot, "or");
             else if (resultsHas.length > 0)
-                return resultsHas.join(", ");
+                return Util.prettyPrintArray(resultsHas);
             else if (resultsNot.length > 0)
-                return "not " + resultsNot.join(", ");
+                return "not " + Util.prettyPrintArray(resultsNot, "or");
             return "???";
         }
 
@@ -315,57 +338,81 @@ export class TagSuggester extends RE6Module {
 
     }
 
+    /**
+     * Returns the image ratio based on the image width and height
+     * @param width Image width
+     * @param height Image height
+     * @returns Image ratio if applicable, undefined if none applies, and null if an error occurs
+     */
     private static getImageRatio(width: number | string, height: number | string): string {
         if (typeof width == "string") width = parseInt(width);
         if (typeof height == "string") height = parseInt(height);
         if (!width || !height) return null;
 
-        const ratio = width / height;
-        for (const [name, value] of Object.entries(ImageRatio))
-            if (value == ratio) return name;
-        return null;
+        return ImageRatios[(width / height).toFixed(6)];
     }
 }
 
-enum ImageRatio {
-    "1:1" = 1,              // Icons / Avatars
-    "1:4" = 1 / 4,
-    "9:32" = 9 / 32,
-    "1:2" = 1 / 2,
-    "9:21" = 9 / 21,
-    "9:17" = 9 / 17,        // NOT META
-    "9:16" = 9 / 16,
-    "4:7" = 4 / 7,          // NOT META
-    "10:16" = 10 / 16,
-    "9:14" = 9 / 14,
-    "2:3" = 2 / 3,          // Common Phone Ratio
-    "3:4" = 3 / 4,
-    "4:5" = 4 / 5,
-    "5:6" = 5 / 6,
-    "6:5" = 6 / 5,          // NOT META
-    "5:4" = 5 / 4,          // Common Desktop Ratio
-    "4:3" = 4 / 3,          // Common Desktop Ratio
-    "3:2" = 3 / 2,          // Common Desktop Ratio
-    "14:9" = 14 / 9,        // 4:3 / 16:9 compromise
-    "16:10" = 16 / 10,      // Common Desktop Ratio
-    "7:4" = 7 / 4,
-    "16:9" = 16 / 9,        // Common Desktop Ratio
-    "17:9" = 17 / 9,        // NOT META
-    "256:135" = 256 / 135,  // Digital Cinema 4k
-    "2:1" = 2,              // VR Resolution
-    "21:9" = 21 / 9,        // Ultrawide
-    "32:9" = 32 / 9,        // Samsung Ultrawide
-    "4:1" = 4,              // Twitter Header Image
+const ImageRatios = {
+    "1.000000": "1:1",          // Icons / Avatars
+    "0.250000": "1:4",          // 
+    "0.281250": "9:32",         // 
+    "0.500000": "1:2",          // 
+    "0.428571": "9:21",         // 
+    "0.529412": "9:17",         // NOT META
+    "0.562500": "9:16",         // 
+    "0.571429": "4:7",          // NOT META
+    "0.600000": "3:5",          // 
+    "0.625000": "10:16",        // 
+    "0.642857": "9:14",         // 
+    "0.666667": "2:3",          // Common Phone Ratio
+    "0.750000": "3:4",          // 
+    "0.800000": "4:5",          // 
+    "0.833333": "5:6",          // 
+    "1.200000": "6:5",          // NOT META
+    "1.250000": "5:4",          // Common Desktop Ratio
+    "1.333333": "4:3",          // Common Desktop Ratio
+    "1.500000": "3:2",          // Common Desktop Ratio
+    "1.555556": "14:9",         // 4:3 / 16:9 compromise
+    "1.600000": "16:10",        // Common Desktop Ratio
+    "1.666667": "5:3",          // 
+    "1.750000": "7:4",          // 
+    "1.777778": "16:9",         // Common Desktop Ratio
+    "1.888889": "17:9",         // NOT META
+    "1.896296": "256:135",      // Digital Cinema 4k
+    "2.000000": "2:1",          // VR Resolution
+    "2.333333": "21:9",         // Ultrawide
+    "3.555556": "32:9",         // Samsung Ultrawide
+    "4.000000": "4:1",          // Twitter Header Image
 }
 
+// List of suggested tags, in no particular order
+// The key is the proposed tag, corresponding object - conditions under which it applies
+//
+// Key can include several (mutually exclusive) tags, separated by a pipe character `|`.
+//
+// The object's parameters are as follows:
+// * `has`: unless matchCount is specified, all of these tags must be present
+// * `matchCount`: if specified, this number of tags from the `has` field must be present (any combination)
+// * `not`: none of these tags must be present
+//
+// The tags can be listed as either strings or regular expressions.
+// * String tags are better for performance, but must be matched **exactly**.
+// * Regular expressions can be anything, but are slightly worse performance-wise
+// Tag lists can be single value or arrays. Mixed arrays are permitted.
 const TagSuggestions: SuggestionSet = {
 
     // Groups
-    "multiple_images": { has: [/^solo$/, /^duo$/, /^group$/], matchCount: 2, not: /^multiple_scenes$/ },
-    "multiple_scenes": { has: [/^solo$/, /^duo$/, /^group$/], matchCount: 2, not: /^multiple_images$/ },
+    "multiple_images|multiple_scenes": { has: ["solo", "duo", "group"], matchCount: 2, not: ["multiple_images", "multiple_scenes"] },
+
+    // Characters
+    "faceless_human": { has: [/^faceless_/, "human"] },
+    "faceless_anthro": { has: [/^faceless_/, "anthro"] },
+    "faceless_feral": { has: [/^faceless_/, "feral"] },
 
     // Situation
-    "rear_view": { has: /^looking_back$/ },
+    "rear_view": { has: "looking_back" },
+    "solo_focus": { has: [/^faceless_/, /^(duo|group)$/] },
 
     // Penetration
     "male_penetrating": { has: /^male_penetrating_.+$/ },
@@ -383,49 +430,62 @@ const TagSuggestions: SuggestionSet = {
     "maleherm_penetrated": { has: /^.+_penetrating_maleherm$/ },
 
     // Activities
-    "sex": { has: /^(.+_penetrating_.+|.+_penetration)$/ },
-    "rape": { has: /^forced$/ },
-    "pregnant_sex": { has: [/^pregnant$/, /^sex$/] },
-    "penis": { has: /(handjob|fellatio|penile)/ },
-    "pussy": { has: /vaginal/ },
+    "sex": { has: /^(.+_penetrating_.+|.+_penetration|.+_position)$/ },
+    "rape": { has: [/^forced/, /rating:q|rating:e/] },
+    "pregnant_sex": { has: ["pregnant", "sex"] },
+    "penile_masturbation": { has: ["penis", "masturbation"] },
+    "vaginal_masturbation": { has: ["pussy", "masturbation"] },
 
     // Anatomy
-    "butt": { has: /^presenting_hindquarters$/ },
-    "non-mammal_breasts": { has: [/^breasts$/, /^(reptile|lizard|marine|avian|arthropod)$/] },
-    "knot": { has: /^canine_penis$/ },
-    "sheath": { has: /^canine_penis$/ },
-    "erection": { has: /penis/, not: /^flaccid$/ },
-    "flaccid": { has: /penis/, not: /^erection$/ },
+    "butt": { has: "presenting_hindquarters" },
+    "non-mammal_breasts": { has: ["breasts", /^(reptile|lizard|marine|avian|arthropod|flora_fauna|insect)$/] },
+    "nipples": { has: "breasts", not: "featureless_breasts" },
+    "areola": { has: "nipples" },
+    "penis": { has: /(handjob|fellatio|penile)/ },
+    "pussy": { has: /vaginal/ },
+    "erection|flaccid|half-erect": { has: /penis|penile/, not: ["erection", "flaccid", "half-erect"] },
 
-    "muscular_anthro": { has: [/^muscular/, /^anthro$/] },
-    "muscular_feral": { has: [/^muscular/, /^feral$/] },
-    "muscular_humanoid": { has: [/^muscular/, /^humanoid$/] },
-    "muscular_human": { has: [/^muscular/, /^human$/] },
-    "muscular_taur": { has: [/^muscular/, /^taur$/] },
+    "canine_penis": { has: "knot" },
+    "knot": { has: "canine_penis" },
+    "sheath": { has: "canine_penis" },
 
-    "muscular_male": { has: [/^muscular/, /^male$/] },
-    "muscular_female": { has: [/^muscular/, /^female$/] },
-    "muscular_andromorph": { has: [/^muscular/, /^andromorph$/] },
-    "muscular_gynomorph": { has: [/^muscular/, /^gynomorph$/] },
-    "muscular_herm": { has: [/^muscular/, /^herm$/] },
-    "muscular_maleherm": { has: [/^muscular/, /^maleherm$/] },
+    "equine_penis": { has: "medial_ring", },
+    "knotted_equine_penis": { has: ["medial_ring", "knot"] },
+    "medial_ring": { has: "equine_penis" },
+    "flared_penis": { has: "equine_penis" },
 
-    "overweight_anthro": { has: [/^overweight/, /^anthro$/] },
-    "overweight_feral": { has: [/^overweight/, /^feral$/] },
-    "overweight_humanoid": { has: [/^overweight/, /^humanoid$/] },
-    "overweight_human": { has: [/^overweight/, /^human$/] },
-    "overweight_taur": { has: [/^overweight/, /^taur$/] },
+    "hooves": { has: "underhoof" },
 
-    "overweight_male": { has: [/^overweight/, /^male$/] },
-    "overweight_female": { has: [/^overweight/, /^female$/] },
-    "overweight_andromorph": { has: [/^overweight/, /^andromorph$/] },
-    "overweight_gynomorph": { has: [/^overweight/, /^gynomorph$/] },
-    "overweight_herm": { has: [/^overweight/, /^herm$/] },
-    "overweight_maleherm": { has: [/^overweight/, /^maleherm$/] },
+    "muscular_anthro": { has: [/^muscular/, "anthro"] },
+    "muscular_feral": { has: [/^muscular/, "feral"] },
+    "muscular_humanoid": { has: [/^muscular/, "humanoid"] },
+    "muscular_human": { has: [/^muscular/, "human"] },
+    "muscular_taur": { has: [/^muscular/, "taur"] },
+
+    "muscular_male": { has: [/^muscular/, "male"] },
+    "muscular_female": { has: [/^muscular/, "female"] },
+    "muscular_andromorph": { has: [/^muscular/, "andromorph"] },
+    "muscular_gynomorph": { has: [/^muscular/, "gynomorph"] },
+    "muscular_herm": { has: [/^muscular/, "herm"] },
+    "muscular_maleherm": { has: [/^muscular/, "maleherm"] },
+
+    "overweight_anthro": { has: [/^overweight/, "anthro"] },
+    "overweight_feral": { has: [/^overweight/, "feral"] },
+    "overweight_humanoid": { has: [/^overweight/, "humanoid"] },
+    "overweight_human": { has: [/^overweight/, "human"] },
+    "overweight_taur": { has: [/^overweight/, "taur"] },
+
+    "overweight_male": { has: [/^overweight/, "male"] },
+    "overweight_female": { has: [/^overweight/, "female"] },
+    "overweight_andromorph": { has: [/^overweight/, "andromorph"] },
+    "overweight_gynomorph": { has: [/^overweight/, "gynomorph"] },
+    "overweight_herm": { has: [/^overweight/, "herm"] },
+    "overweight_maleherm": { has: [/^overweight/, "maleherm"] },
 
     // Body Parts
-    "biped": { has: /^anthro$/, not: /^(uniped|triped)$/ },
-    "quadruped": { has: /^feral$/, not: /^(hexapod)$/ },
+    "biped": { has: "anthro", not: /^(uniped|triped)$/ },
+    "quadruped": { has: "feral", not: /^(hexapod)$/ },
+    "legless": { has: /^(naga|lamia|merfolk)$/ },
 
 }
 
@@ -439,4 +499,4 @@ type Suggestion = {
     matchCount?: number;
 }
 
-type SuggestionParam = RegExp | RegExp[];
+type SuggestionParam = RegExp | string | (RegExp | string)[];

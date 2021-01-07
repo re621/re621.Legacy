@@ -74,10 +74,20 @@ export class VersionChecker {
         });
     }
 
+    /**
+     * Fetches the release data from Github's API
+     * @param node Version number, or "latest"
+     */
     private static async getGithubData(node: string): Promise<any> {
         return XM.Connect.xmlHttpPromise({ url: "https://api.github.com/repos/re621/re621/releases/" + node, method: "GET" }).then(
             (response: GMxmlHttpRequestResponse) => { return Promise.resolve(JSON.parse(response.responseText)); },
-            () => { throw Error("Failed to fetch Github release data"); }
+            () => {
+                console.error("Failed to fetch Github release data");
+                return {
+                    name: "0.0.0",
+                    body: "Error: Unable to fetch the changelog",
+                };
+            }
         );
     }
 
