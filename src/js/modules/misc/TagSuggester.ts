@@ -36,7 +36,7 @@ export class TagSuggester extends RE6Module {
 
     public getDefaultSettings(): Settings {
         return {
-            enabled: false,
+            enabled: true,
         }
     }
 
