@@ -435,6 +435,7 @@ const TagSuggestions: SuggestionSet = {
     "pregnant_sex": { has: ["pregnant", "sex"] },
     "penile_masturbation": { has: ["penis", "masturbation"] },
     "vaginal_masturbation": { has: ["pussy", "masturbation"] },
+    "speech_bubble|though_bubble": { has: "dialogue", },
 
     // Anatomy
     "butt": { has: "presenting_hindquarters" },
@@ -484,7 +485,7 @@ const TagSuggestions: SuggestionSet = {
 
     // Body Parts
     "biped": { has: "anthro", not: /^(uniped|triped)$/ },
-    "quadruped": { has: "feral", not: /^(hexapod)$/ },
+    "quadruped": { has: "feral", not: /^(hexapod|semi-anthro)$/ },
     "legless": { has: /^(naga|lamia|merfolk)$/ },
 
 }
