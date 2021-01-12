@@ -365,6 +365,37 @@ export class SettingsController extends RE6Module {
                         async (data) => {
                             await betterSearch.pushSettings("autoPlayGIFs", data);
                             if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
+
+                            $("#conf-general-collapse-thumb-maxPlayingGIFs-desc").toggleClass("input-disabled", data);
+                            $("#conf-general-collapse-thumb-maxPlayingGIFs")
+                                .prop("disabled", data)
+                                .parent()
+                                .toggleClass("input-disabled", data);
+                        }
+                    ),
+                    Form.spacer(3, true),
+
+                    Form.subheader(
+                        "Maximum number of playing GIFs",
+                        "How many GIFs can be playing at one time. Set to -1 to disable.",
+                        2,
+                        "maxPlayingGIFs-desc",
+                        betterSearch.fetchSettings("autoPlayGIFs") ? "input-disabled" : undefined,
+                    ),
+                    Form.input(
+                        {
+                            name: "maxPlayingGIFs",
+                            value: betterSearch.fetchSettings("maxPlayingGIFs"),
+                            title: "Number between 1 and 320",
+                            required: true,
+                            pattern: "^(-1|[1-9][0-9]?|1[0-9][0-9]|2[0-4][0-9]|250)$",
+                            wrapper: betterSearch.fetchSettings("autoPlayGIFs") ? "input-disabled" : undefined,
+                            disabled: betterSearch.fetchSettings("autoPlayGIFs"),
+                        },
+                        async (data, input) => {
+                            if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                            await betterSearch.pushSettings("maxPlayingGIFs", parseInt(data));
+                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
                         }
                     ),
                     Form.spacer(3, true),

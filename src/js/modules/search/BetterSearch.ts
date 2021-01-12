@@ -47,6 +47,7 @@ export class BetterSearch extends RE6Module {
 
             imageLoadMethod: ImageLoadMethod.Disabled,      // Whether the image should be loaded as a preview, as a sample immediately, or on hover
             autoPlayGIFs: true,                             // If false, animated GIFs will use the `hover` load method even if that is set to `always`
+            maxPlayingGIFs: 5,                              // If autoPlayGIFs is false, limits the number of actively playing gifs to this
 
             imageSizeChange: false,                         // If true, resizes the image in accordance with `imageWidth`
             imageWidth: 150,                                // Width if the resized image

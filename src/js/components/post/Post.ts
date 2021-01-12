@@ -116,7 +116,8 @@ export class Post implements PostData {
         const conf = ModuleController.get(BetterSearch).fetchSettings([
             "imageRatioChange",                                 // renderArticle
             "clickAction",                                      // renderLink
-            "imageLoadMethod", "autoPlayGIFs", "hoverTags",     // renderImage
+            "imageLoadMethod", "hoverTags",                     // renderImage
+            "autoPlayGIFs", "maxPlayingGIFs",
             "ribbonsFlag", "ribbonsRel",                        // renderRibbons
             "buttonsVote", "buttonsFav",                        // renderButtons
         ]);
