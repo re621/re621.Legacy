@@ -1,5 +1,6 @@
 import { XM } from "../../components/api/XM";
 import { PageDefinition } from "../../components/data/Page";
+import { ModuleController } from "../../components/ModuleController";
 import { Post } from "../../components/post/Post";
 import { PostParts } from "../../components/post/PostParts";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -95,18 +96,27 @@ export class DownloadCustomizer extends RE6Module {
      * @returns string Download link
      */
     private parseTemplate(ext?: string): string {
-        return this.fetchSettings("template")
-            .replace(/%postid%/g, this.post.id)
-            .replace(/%artist%/g, tagSetToString(this.post.tags.real_artist))
-            .replace(/%copyright%/g, tagSetToString(this.post.tags.copyright))
-            .replace(/%species%/g, tagSetToString(this.post.tags.species))
-            .replace(/%character%/g, tagSetToString(this.post.tags.character))
-            .replace(/%meta%/g, tagSetToString(this.post.tags.meta))
-            .replace(/%md5%/g, this.post.file.md5)
+        return DownloadCustomizer.getFileName(this.post, this.fetchSettings("template"), ext);
+    }
+
+    /**
+     * Parses the download link template, replacing variables with their corresponding values
+     * @returns string Download link
+     */
+    public static getFileName(post: Post, template?: string, ext?: string): string {
+        if (!template) template = ModuleController.fetchSettings<string>(DownloadCustomizer, "template");
+        return template
+            .replace(/%postid%/g, post.id + "")
+            .replace(/%artist%/g, tagSetToString(post.tags.real_artist))
+            .replace(/%copyright%/g, tagSetToString(post.tags.copyright))
+            .replace(/%species%/g, tagSetToString(post.tags.species))
+            .replace(/%character%/g, tagSetToString(post.tags.character))
+            .replace(/%meta%/g, tagSetToString(post.tags.meta))
+            .replace(/%md5%/g, post.file.md5)
             .slice(0, 128)
             .replace(/-{2,}/g, "-")
             .replace(/-*$/g, "")
-            + "." + (ext ? ext : this.post.file.ext);
+            + "." + (ext ? ext : post.file.ext);
 
         function tagSetToString(tags: Set<string>): string {
             return [...tags].join("-");

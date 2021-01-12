@@ -10,6 +10,7 @@ import { PostActions } from "../../components/post/PostActions";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
+import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
 
 export class BetterSearch extends RE6Module {
@@ -47,6 +48,7 @@ export class BetterSearch extends RE6Module {
 
             imageLoadMethod: ImageLoadMethod.Disabled,      // Whether the image should be loaded as a preview, as a sample immediately, or on hover
             autoPlayGIFs: true,                             // If false, animated GIFs will use the `hover` load method even if that is set to `always`
+            maxPlayingGIFs: 5,                              // If autoPlayGIFs is false, limits the number of actively playing gifs to this
 
             imageSizeChange: false,                         // If true, resizes the image in accordance with `imageWidth`
             imageWidth: 150,                                // Width if the resized image
@@ -334,6 +336,7 @@ export class BetterSearch extends RE6Module {
 
         // Search Modes
         $(`<option value="open">Fullscreen</option>`).insertAfter("#mode-box-mode option[value=edit]");
+        $(`<option value="download">Download</option>`).insertAfter("#mode-box-mode option[value=remove-fav]");
         $(`<option value="blacklist">Blacklist</option>`).insertAfter("#mode-box-mode option[value=remove-fav]");
 
         // Quick Edit Form
@@ -524,6 +527,13 @@ export class BetterSearch extends RE6Module {
                 }
                 case "open": {
                     XM.Util.openInTab(post.file.original, false);
+                    break;
+                }
+                case "download": {
+                    XM.Connect.download({
+                        url: post.file.original,
+                        name: DownloadCustomizer.getFileName(post),
+                    });
                     break;
                 }
                 case "blacklist": {

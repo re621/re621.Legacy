@@ -82,4 +82,9 @@ export class ModuleController {
     public static getAll(): Map<string, RE6Module> {
         return this.modules;
     }
+
+    /** Equivalent of ModuleController.get(...).fetchSettings(...) */
+    public static fetchSettings<N>(module: { new(): RE6Module }, property: string): N {
+        return this.get(module.prototype.constructor.name).fetchSettings<N>(property);
+    }
 }

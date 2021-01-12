@@ -9,9 +9,12 @@ import { DomUtilities } from "../structure/DomUtilities";
 import { Util } from "../utility/Util";
 import { LoadedFileType, Post, PostData } from "./Post";
 import { PostActions } from "./PostActions";
+import { PostSet } from "./PostSet";
 
 /** Handles the rendering of individual post elements. Called from the main Post class. */
 export class PostParts {
+
+    private static renderedGIFs: PostSet = new PostSet();
 
     public static renderImage(post: Post, conf: any): JQuery<HTMLElement> {
 
@@ -161,6 +164,15 @@ export class PostParts {
                             post.$ref.removeAttr("loading");
                             $image.off("mouseenter.re621.upscale")
                                 .off("mouseleave.re621.upscale");
+
+                            // Limit the number of actively playing GIFs for performance reasons
+                            if (typeof conf.maxPlayingGIFs !== "number" || conf.maxPlayingGIFs == -1) return;
+                            PostParts.renderedGIFs.push(post);
+                            if (PostParts.renderedGIFs.size() > conf.maxPlayingGIFs) {
+                                const trimmed = PostParts.renderedGIFs.shift();
+                                trimmed.loaded = LoadedFileType.PREVIEW;
+                                trimmed.render();
+                            }
                         });
                     }, 200);
                 });

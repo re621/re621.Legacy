@@ -14,9 +14,14 @@ export class PostSet {
         this.posts.push(post);
     }
 
-    /** Pops the last post from the set */
+    /** Removes the last post from the set and returns it */
     public pop(): Post {
         return this.posts.pop();
+    }
+
+    /** Removes the first element from the set and returns it */
+    public shift(): Post {
+        return this.posts.shift();
     }
 
     /** Returns the number of posts in the set */
