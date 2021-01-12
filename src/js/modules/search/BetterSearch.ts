@@ -10,6 +10,7 @@ import { PostActions } from "../../components/post/PostActions";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
+import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
 
 export class BetterSearch extends RE6Module {
@@ -335,6 +336,7 @@ export class BetterSearch extends RE6Module {
 
         // Search Modes
         $(`<option value="open">Fullscreen</option>`).insertAfter("#mode-box-mode option[value=edit]");
+        $(`<option value="download">Download</option>`).insertAfter("#mode-box-mode option[value=remove-fav]");
         $(`<option value="blacklist">Blacklist</option>`).insertAfter("#mode-box-mode option[value=remove-fav]");
 
         // Quick Edit Form
@@ -525,6 +527,13 @@ export class BetterSearch extends RE6Module {
                 }
                 case "open": {
                     XM.Util.openInTab(post.file.original, false);
+                    break;
+                }
+                case "download": {
+                    XM.Connect.download({
+                        url: post.file.original,
+                        name: DownloadCustomizer.getFileName(post),
+                    });
                     break;
                 }
                 case "blacklist": {
