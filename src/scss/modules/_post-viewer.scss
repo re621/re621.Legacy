@@ -120,10 +120,23 @@ div#nav-links-left {
         height: unset !important;
         flex-wrap: wrap;
         justify-content: center !important;
+        position: relative;
 
-        div.post-nav-switch-box.vis-hidden { display: none; }
+        div.post-nav-switch-box {
+            position: absolute;
+            left: 0;
+            top: 0.125rem;
+            &.vis-hidden { display: none; }
+        }
         span.search-name { white-space: inherit; }
-        span.pool-name { padding: 0 0.5rem; }
+        span.pool-name {
+            padding: 0 1.25rem !important;
+            max-width: unset !important;
+        }
+        div.vis-hidden + span.pool-name {
+            padding: 0 0.5rem !important;
+        }
+
         div.nav-left-down {
             display: flex;
             justify-content: space-around;
