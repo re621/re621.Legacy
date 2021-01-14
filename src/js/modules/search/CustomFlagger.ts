@@ -1,42 +1,70 @@
-import { Page, PageDefinition } from "../../components/data/Page";
+import { PageDefinition } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { Post, PostData } from "../../components/post/Post";
 import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { BetterSearch } from "./BetterSearch";
 
 export class CustomFlagger extends RE6Module {
 
     private static filters: Map<string, FilterPair>;
 
     public constructor() {
-        super([PageDefinition.post, PageDefinition.search, PageDefinition.favorites, PageDefinition.popular], true, false, [BetterSearch]);
+        super(PageDefinition.post, true);
     }
 
     protected getDefaultSettings(): Settings {
         return {
-            enabled: false,
+            enabled: true,
             flags: [
-                //    { name: "CHARS", color: "#800000", tags: "-solo -duo -group -zero_pictured" },
-                //    { name: "TAGS", color: "#008000", tags: "tagcount:<5" },
-                //    { name: "SEXES", color: "#000080", tags: "-zero_pictured -male -female -herm -maleherm -andromorph -gynomorph -intersex -ambiguous_gender" },
+                { name: "CHARS", color: "#800000", tags: "-solo -duo -group -zero_pictured", show: false },
+                { name: "TAGS", color: "#008000", tags: "tagcount:<5", show: false },
+                { name: "SEXES", color: "#000080", tags: "-zero_pictured -male -female -herm -maleherm -andromorph -gynomorph -intersex -ambiguous_gender", show: false },
             ],
         };
     }
 
     public create(): void {
-        if (Page.matches(PageDefinition.post))
-            this.createPostPage();
+        super.create();
+
+        const post = Post.getViewingPost();
+        CustomFlagger.addPost(post);
+
+        const flagContainer = $("<div>").insertBefore("div.input#tags-container");
+        let activeFlags = 0;
+
+        // Fill in the filters and add flags to matching ones
+        for (const flag of CustomFlagger.getFlags(post)) {
+            $("<div>")
+                .addClass("custom-flag")
+                .html(`<span class="custom-flag-title" style="--flag-color: ${flag.color}">${flag.name}</span> ${flag.tags}`)
+                .appendTo(flagContainer);
+            activeFlags++;
+        }
+
+        // Add a header if any flags have been added
+        if (activeFlags > 0)
+            $("<b>")
+                .html("Flags")
+                .addClass("display-block")
+                .prependTo(flagContainer);
     }
 
     private static get(): Map<string, FilterPair> {
         if (CustomFlagger.filters == undefined) {
             CustomFlagger.filters = new Map();
-            for (const flag of ModuleController.get(CustomFlagger).fetchSettings<FlagDefinition[]>("flags")) {
+            for (const flag of ModuleController.fetchSettings<FlagDefinition[]>(CustomFlagger, "flags")) {
                 if (CustomFlagger.filters.get(flag.tags)) continue;
+
+                // Backwards compatibility
+                if (flag.show == undefined) flag.show = true;
+
                 CustomFlagger.filters.set(
                     flag.tags,
-                    { data: flag, filter: new PostFilter(flag.tags, true) }
+                    {
+                        data: flag,
+                        filter: new PostFilter(flag.tags, true),
+                        show: flag.show,
+                    }
                 );
             }
         }
@@ -70,39 +98,10 @@ export class CustomFlagger extends RE6Module {
         if (typeof post !== "number") post = post.id;
         const output: FlagDefinition[] = [];
         for (const filterPair of CustomFlagger.get().values()) {
-            if (filterPair.filter.matchesID(post))
+            if (filterPair.filter.matchesID(post) && filterPair.show)
                 output.push(filterPair.data);
         }
         return output;
-    }
-
-    /**
-     * Special case for the individual post page.  
-     * Flags are added to the editing form, under the list of tags
-     */
-    private createPostPage(): void {
-
-        const post = Post.getViewingPost();
-        CustomFlagger.addPost(post);
-
-        const flagContainer = $("<div>").insertBefore("div.input#tags-container");
-        let activeFlags = 0;
-
-        // Fill in the filters and add flags to matching ones
-        for (const flag of CustomFlagger.getFlags(post)) {
-            $("<div>")
-                .addClass("custom-flag")
-                .html(`<span class="custom-flag-title" style="--flag-color: ${flag.color}">${flag.name}</span> ${flag.tags}`)
-                .appendTo(flagContainer);
-            activeFlags++;
-        }
-
-        // Add a header if any flags have been added
-        if (activeFlags > 0)
-            $("<b>")
-                .html("Flags")
-                .addClass("display-block")
-                .prependTo(flagContainer);
     }
 
 }
@@ -111,9 +110,11 @@ export interface FlagDefinition {
     name: string;
     color: string;
     tags: string;
+    show: boolean;
 }
 
 export interface FilterPair {
     data: FlagDefinition;
     filter: PostFilter;
+    show: boolean;
 }

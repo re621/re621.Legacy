@@ -8,9 +8,10 @@ textarea#settings-flags-defs {
 
 .flag-defs-inputs {
     display: grid;
-    grid-template-columns: 1fr 1fr 5fr 2rem;
+    grid-template-columns: 1rem 1fr 1fr 5fr 2rem;
     grid-column-gap: 0.5rem;
     margin-bottom: 0.5rem;
+    align-items: center;
 
     input {
         box-sizing: border-box;

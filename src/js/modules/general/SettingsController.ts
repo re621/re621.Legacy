@@ -1149,6 +1149,7 @@ export class SettingsController extends RE6Module {
                         name: "",
                         color: "#" + Math.floor(Math.random() * 16777215).toString(16),     // Random HEX color
                         tags: "",
+                        show: true,
                     }).appendTo(defsContainer);
                 }
             ),
@@ -1165,15 +1166,17 @@ export class SettingsController extends RE6Module {
                     for (const inputContainer of defInputs) {
                         const inputs = $(inputContainer).find("input").get();
 
-                        const name = $(inputs[0]),
-                            color = $(inputs[1]),
-                            tags = $(inputs[2]);
+                        const show = $(inputs[0]),
+                            name = $(inputs[1]),
+                            color = $(inputs[2]),
+                            tags = $(inputs[3]);
 
                         if ((name.val() as string).length == 0) name.val("FLAG");
                         if (!(color.val() as string).match(/^#(?:[0-9a-f]{3}){1,2}$/i)) color.val("#800000");
                         if ((tags.val() as string).length == 0) continue;
 
                         defData.push({
+                            show: show.is(":checked"),
                             name: name.val() as string,
                             color: color.val() as string,
                             tags: tags.val() as string,
@@ -1200,6 +1203,12 @@ export class SettingsController extends RE6Module {
         function makeDefInput(flag?: FlagDefinition): JQuery<HTMLElement> {
             const flagContainer = $("<div>")
                 .addClass("flag-defs-inputs")
+            $("<input>")
+                .attr({
+                    "type": "checkbox",
+                    "checked": flag.show ? "checked" : undefined,
+                })
+                .appendTo(flagContainer);
             $("<input>")
                 .attr({
                     "type": "text",
