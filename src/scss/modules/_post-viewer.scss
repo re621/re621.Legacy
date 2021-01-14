@@ -99,3 +99,36 @@ div#note-container {
         display: none !important;
     }
 }
+
+/* Special, left-positioned navbar */
+body:not([re621-data-th-nav="true"]) div#nav-links-left { display: none; }
+body[re621-data-th-nav="true"] div#nav-links-top { display: none; }
+
+div#nav-links-left {
+
+    & > div:not(:last-child),
+    & > div > ul > li:not(:last-child) {
+        border-bottom: 1px solid #666;
+        padding-bottom: 0.5rem;
+    }
+
+    // if there are multiple elements, give the last one some space
+    & > div > ul > li:last-child { padding-top: 0.5rem; }
+    & > div > ul > li:first-child { padding-top: 0; }
+
+    li.post-nav {
+        height: unset !important;
+        flex-wrap: wrap;
+        justify-content: center !important;
+
+        div.post-nav-switch-box.vis-hidden { display: none; }
+        span.search-name { white-space: inherit; }
+        span.pool-name { padding: 0 0.5rem; }
+        div.nav-left-down {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 0.5rem;
+            flex: 0 0 100%;
+        }
+    }
+}

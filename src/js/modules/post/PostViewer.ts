@@ -4,7 +4,9 @@ import { ModuleController } from "../../components/ModuleController";
 import { Post } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Util } from "../../components/utility/Util";
 import { RISSizeLimit } from "../../components/utility/UtilSize";
+import { ThemeCustomizer } from "../general/ThemeCustomizer";
 
 /**
  * Add various symbols to the titlebar depending on the posts state
@@ -161,6 +163,27 @@ export class PostViewer extends RE6Module {
             $(".parent-children")
                 .addClass("children-moved")
                 .insertAfter($("#search-box"));
+
+        // Add a "left" option for navbars
+        if (Page.matches(PageDefinition.post)) {
+
+            const navbarContainer = $("#nav-links-top");
+            if (navbarContainer.length > 0) {
+                navbarContainer.clone().insertBefore("#tag-list").attr("id", "nav-links-left");
+                for (const el of $("#nav-links-left").find("li.post-nav").get()) {
+                    const navbar = $(el);
+                    const lower = $("<div>").addClass("nav-left-down").appendTo(navbar);
+
+                    navbar.find("div.post-nav-spacer").remove();
+                    navbar.find(".first, .prev, .next, .last").appendTo(lower);
+                }
+            }
+
+            if (Util.LS.getItem("re621-theme-nav") == "left") {
+                $("body").attr("re621-data-th-nav", "true");
+                ThemeCustomizer.trigger("switch.navbar", "left");
+            } else $("body").attr("re621-data-th-nav", "false");
+        }
 
         // Bolden the tags
         this.toggleBoldenedTags(this.fetchSettings<boolean>("boldenTags"));
