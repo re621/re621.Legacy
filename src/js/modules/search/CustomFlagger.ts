@@ -17,8 +17,9 @@ export class CustomFlagger extends RE6Module {
             enabled: true,
             flags: [
                 { name: "CHARS", color: "#800000", tags: "-solo -duo -group -zero_pictured", show: false },
-                { name: "TAGS", color: "#008000", tags: "tagcount:<5", show: false },
                 { name: "SEXES", color: "#000080", tags: "-zero_pictured -male -female -herm -maleherm -andromorph -gynomorph -intersex -ambiguous_gender", show: false },
+                { name: "NTAGS", color: "#008000", tags: "tagcount:<5", show: false },
+                { name: "INVAL", color: "#FFA500", tags: "invtags:>0", show: false },
             ],
         };
     }
