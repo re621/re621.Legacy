@@ -440,7 +440,7 @@ const TagSuggestions: SuggestionSet = {
     // Anatomy
     "butt": { has: "presenting_hindquarters" },
     "non-mammal_breasts": { has: ["breasts", /^(reptile|lizard|marine|avian|arthropod|flora_fauna|insect)$/] },
-    "nipples": { has: "breasts", not: "featureless_breasts" },
+    "nipples": { has: /^(breasts|teats)$/, not: "featureless_breasts" },
     "areola": { has: "nipples" },
     "penis": { has: /(handjob|fellatio|penile)/ },
     "pussy": { has: /vaginal/ },
