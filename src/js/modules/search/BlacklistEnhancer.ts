@@ -128,18 +128,20 @@ export class BlacklistEnhancer extends RE6Module {
 
     /** Reloads the blacklist header */
     public static updateHeader(): void {
-        let enabled = 0,
-            disabled = 0;
-        for (const entry of BlacklistEnhancer.$content.find("filter")) {
-            const filter = $(entry);
-            if (filter.attr("enabled") == "true") enabled += parseInt(filter.attr("count")) || 0;
-            else disabled += parseInt(filter.attr("count")) || 0;
+
+        let filteredPosts = new Set<number>(),
+            unfilteredPosts = new Set<number>();
+
+        // "active" does not mean what you think it means
+        for (const filter of Blacklist.getActiveFilters().values()) {
+            if (filter.isEnabled()) filteredPosts = new Set([...filteredPosts, ...filter.getMatches()]);
+            else unfilteredPosts = new Set([...unfilteredPosts, ...filter.getMatches()]);
         }
 
-        BlacklistEnhancer.$header.html(`Blacklisted (${enabled})`);
+        BlacklistEnhancer.$header.html(`Blacklisted (${filteredPosts.size})`);
         BlacklistEnhancer.$wrapper.attr({
-            "count": enabled,
-            "discount": disabled,
+            "count": filteredPosts.size,
+            "discount": unfilteredPosts.size,
         });
     }
 
