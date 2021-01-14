@@ -1,6 +1,7 @@
 /* Pool Navigator Styles */
 
-div#nav-links,      // Old version
+div#nav-links,      // Old version,
+div#nav-links-left, // Alt version
 div#nav-links-top,  // New version
 div#nav-links-bottom {
 
@@ -43,4 +44,10 @@ div#nav-links-bottom {
 
     .first { margin-right: 1rem; }
     .last { margin-left: 1rem; }
+}
+
+div#nav-links-left {
+    li.post-nav div.post-nav-switch-box {
+        margin: 0;
+    }
 }

@@ -2,6 +2,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Form } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
+import { Util } from "../../components/utility/Util";
 
 /**
  * ThemeCustomizer  
@@ -72,16 +73,22 @@ export class ThemeCustomizer extends RE6Module {
                 }
             ),
             Form.select(
-                { label: "Post Navbar", value: window.localStorage.getItem("theme-nav") || "top", },
+                { label: "Post Navbar", value: Util.LS.getItem("re621-theme-nav") || Util.LS.getItem("theme-nav") || "top", },
                 {
                     "top": "Top",
                     "bottom": "Bottom",
                     "both": "Both",
+                    "left": "Sidebar",
                     "none": "None",
                 },
                 (data) => {
-                    window.localStorage.setItem("theme-nav", data);
+                    if (data == "left") Util.LS.setItem("theme-nav", "top");
+                    else Util.LS.setItem("theme-nav", data);
+                    Util.LS.setItem("re621-theme-nav", data);
+
                     $("body").attr("data-th-nav", data);
+                    $("body").attr("re621-data-th-nav", data == "left" ? "true" : "false");
+
                     ThemeCustomizer.trigger("switch.navbar", data);
                 }
             ),

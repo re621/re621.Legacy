@@ -22,6 +22,7 @@ export class Post implements PostData {
     public comments: number;                // total number of comments
     public rating: PostRating;              // rating in the one-letter lowercase format (s, q, e)
     public uploader: number;                // uploader ID
+    public approver: number;                // approver ID, or -1 if there isn't one
     public page: string;                    // search page. can either be numeric, or in a- / b- format
 
     public date: {
@@ -346,6 +347,7 @@ export interface PostData {
     comments: number;
     rating: PostRating;
     uploader: number;
+    approver: number;
 
     page: string;
 
@@ -431,6 +433,7 @@ export namespace PostData {
             comments: data.comment_count,
             rating: PostRating.fromValue(data.rating),
             uploader: data.uploader_id,
+            approver: data.approver_id ? data.approver_id : -1,
 
             page: page,
 
@@ -552,6 +555,13 @@ export namespace PostData {
         const tagString = $article.attr("data-tags") || "",
             tagSet = new Set(tagString.split(" "));
 
+        // Uploader
+        // This is slightly nuts
+        const approverLink = $("#post-information li a.user-post-approver");
+        const approver = approverLink.length > 0
+            ? (parseInt(approverLink.attr("href").replace("/users/", "")) || -1)
+            : -1;
+
         // Dimensions
         const width = parseInt($article.attr("data-width")),
             height = parseInt($article.attr("data-height"));
@@ -602,6 +612,7 @@ export namespace PostData {
             comments: -1,
             rating: PostRating.fromValue($article.attr("data-rating")),
             uploader: parseInt($article.attr("data-uploader-id")) || 0,
+            approver: approver,
 
             page: "-1",
 

@@ -1,3 +1,4 @@
+import { FlagDefinition } from "../../modules/search/CustomFlagger";
 import { ImageZoomMode } from "../../modules/search/HoverZoom";
 import { XM } from "../api/XM";
 import { Debug } from "./Debug";
@@ -19,7 +20,6 @@ export class Patcher {
 
         try {
             switch (Patcher.version) {
-
                 case 0: counter += await this.patch1();
                 case 1: counter += await this.patch2();
                 case 2: counter += await this.patch3();
@@ -29,6 +29,7 @@ export class Patcher {
                 case 6:
                 case 7: counter += await this.patch8();
                 case 8: counter += await this.patch9();
+                case 9: counter += await this.patch10();
             }
         } catch (error) { ErrorHandler.error("Patcher", error.stack, "patch " + Patcher.version); }
 
@@ -246,6 +247,38 @@ export class Patcher {
         await XM.Storage.setValue("re621.BetterSearch", betterSearch);
         await XM.Storage.setValue("re621.HoverZoom", hoverZoom);
         Patcher.version = 9;
+
+        return counter;
+    }
+
+    // Patch 10: 1.4.44
+    // Fixed and expanded the CustomFlagger
+    private static async patch10(): Promise<number> {
+        let counter = 0;
+
+        const customFlagger = await XM.Storage.getValue("re621.CustomFlagger", {});
+
+        // Fix the custom flagger being disabled by default
+        if (!customFlagger["enabled"]) {
+            customFlagger["enabled"] = true;
+            counter++;
+        }
+
+        // Fix the 
+        if (customFlagger["flags"] !== undefined && Array.isArray(customFlagger["flags"])) {
+            const result = [];
+            for (const flag of customFlagger["flags"] as FlagDefinition[]) {
+                if (flag.show == undefined) {
+                    flag.show = true;
+                    counter++;
+                }
+                result.push(flag);
+            }
+            customFlagger["flags"] = result;
+        }
+        await XM.Storage.setValue("re621.CustomFlagger", customFlagger);
+
+        Patcher.version = 10;
 
         return counter;
     }

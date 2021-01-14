@@ -83,7 +83,6 @@ export class SettingsController extends RE6Module {
                 { name: "General", structure: this.createGeneralTab() },
                 { name: "Blacklist", structure: this.createBlacklistTab() },
                 { name: "Downloads", structure: this.createDownloadsTab() },
-                { name: "Custom Flags", structure: this.createFlagsTab() },
                 { name: "Uploads and Tags", structure: this.createUploadsTab() },
                 { name: "Hotkeys", structure: this.createHotkeysTab() },
                 { name: "Features", structure: this.createFeaturesTab() },
@@ -1128,127 +1127,24 @@ export class SettingsController extends RE6Module {
         ]);
     }
 
-    /** Creates the Custom Flagger tab */
-    private createFlagsTab(): Form {
-        const customFlagger = ModuleController.get(CustomFlagger);
-
-        const defsContainer = $("<div>")
-            .attr("id", "flag-defs-container");
-        const flagDefs = customFlagger.fetchSettings("flags");
-
-        flagDefs.forEach((flag) => {
-            makeDefInput(flag).appendTo(defsContainer);
-        });
-
-        return new Form({ name: "conf-flags", columns: 3, width: 3 }, [
-            Form.header("Flag Definitions", 2),
-            Form.button(
-                { value: "New Flag" },
-                async () => {
-                    makeDefInput({
-                        name: "",
-                        color: "#" + Math.floor(Math.random() * 16777215).toString(16),     // Random HEX color
-                        tags: "",
-                    }).appendTo(defsContainer);
-                }
-            ),
-            Form.div({ value: defsContainer, width: 3 }),
-
-            Form.button(
-                { value: "Save" },
-                async () => {
-                    const confirmBox = $("span#defs-confirm").html("Saving . . .");
-
-                    const defData: FlagDefinition[] = [];
-                    const defInputs = $(defsContainer).find("div.flag-defs-inputs").get();
-
-                    for (const inputContainer of defInputs) {
-                        const inputs = $(inputContainer).find("input").get();
-
-                        const name = $(inputs[0]),
-                            color = $(inputs[1]),
-                            tags = $(inputs[2]);
-
-                        if ((name.val() as string).length == 0) name.val("FLAG");
-                        if (!(color.val() as string).match(/^#(?:[0-9a-f]{3}){1,2}$/i)) color.val("#800000");
-                        if ((tags.val() as string).length == 0) continue;
-
-                        defData.push({
-                            name: name.val() as string,
-                            color: color.val() as string,
-                            tags: tags.val() as string,
-                        });
-                    }
-
-                    await customFlagger.pushSettings("flags", defData);
-                    confirmBox.html("Settings Saved");
-                    window.setTimeout(() => { confirmBox.html(""); }, 1000);
-                }
-            ),
-            Form.div({ value: `<span id="defs-confirm"></span>` }),
-
-            Form.div({
-                value: `
-                <b>Custom Flags</b> allow you to automatically highlight posts that match specified tags. For example:<br />
-                <pre>-solo -duo -group -zero_pictured</pre>: posts that do not include character count tags.<br />
-                <pre>tagcount:&lt;5</pre>: posts with less than 5 tags<br />
-                Flag names must be unique. Duplicate tag strings are allowed, but their corresponding flag may not display.`,
-                width: 3
-            }),
-        ]);
-
-        function makeDefInput(flag?: FlagDefinition): JQuery<HTMLElement> {
-            const flagContainer = $("<div>")
-                .addClass("flag-defs-inputs")
-            $("<input>")
-                .attr({
-                    "type": "text",
-                    "placeholder": "name",
-                })
-                .val(flag === undefined ? "" : flag.name)
-                .appendTo(flagContainer);
-            $("<input>")
-                .attr({
-                    "type": "text",
-                    "placeholder": "color",
-                })
-                .val(flag === undefined ? "" : flag.color)
-                .css("border-left-color", flag === undefined ? "transparent" : flag.color)
-                .appendTo(flagContainer)
-                .on("keyup", (event) => {
-                    const $target = $(event.target);
-                    if (($target.val() + "").match(/^#(?:[0-9a-f]{3}){1,2}$/i)) {
-                        $target.css("border-left-color", $target.val() + "");
-                    }
-                });
-            $("<input>")
-                .attr({
-                    "type": "text",
-                    "placeholder": "tags",
-                })
-                .val(flag === undefined ? "" : flag.tags)
-                .appendTo(flagContainer);
-
-            $("<button>")
-                .html(`<i class="far fa-trash-alt"></i>`)
-                .appendTo(flagContainer)
-                .on("click", () => {
-                    flagContainer.remove();
-                });
-
-            return flagContainer;
-        }
-    }
-
     /** Creates the SmartAlias settings tab */
     private createUploadsTab(): Form {
         const smartAlias = ModuleController.get(SmartAlias),
             uploadUtilities = ModuleController.get(UploadUtilities),
-            tagSuggester = ModuleController.get(TagSuggester);
+            tagSuggester = ModuleController.get(TagSuggester),
+            customFlagger = ModuleController.get(CustomFlagger);
 
         const aliasContainer = $("<textarea>")
             .attr("id", "alias-list-container")
             .val(smartAlias.fetchSettings<string>("data"));
+
+        const flagDefsContainer = $("<div>")
+            .attr("id", "flag-defs-container");
+        const flagDefs = customFlagger.fetchSettings("flags");
+
+        flagDefs.forEach((flag) => {
+            makeFlagDefInput(flag).appendTo(flagDefsContainer);
+        });
 
         return new Form({ name: "conf-alias", columns: 3, width: 3 }, [
 
@@ -1331,6 +1227,66 @@ export class SettingsController extends RE6Module {
                             Form.spacer(3),
                         ]),
 
+                ]),
+
+                Form.accordionTab({ name: "conf-flags", label: "Custom Flags", columns: 3, width: 3 }, [
+                    Form.header("Flag Definitions", 2),
+                    Form.button(
+                        { value: "New Flag" },
+                        async () => {
+                            makeFlagDefInput({
+                                name: "",
+                                color: "#" + Math.floor(Math.random() * 16777215).toString(16),     // Random HEX color
+                                tags: "",
+                                show: true,
+                            }).appendTo(flagDefsContainer);
+                        }
+                    ),
+                    Form.div({ value: flagDefsContainer, width: 3 }),
+
+                    Form.button(
+                        { value: "Save" },
+                        async () => {
+                            const confirmBox = $("span#defs-confirm").html("Saving . . .");
+
+                            const defData: FlagDefinition[] = [];
+                            const defInputs = $(flagDefsContainer).find("div.flag-defs-inputs").get();
+
+                            for (const inputContainer of defInputs) {
+                                const inputs = $(inputContainer).find("input").get();
+
+                                const show = $(inputs[0]),
+                                    name = $(inputs[1]),
+                                    color = $(inputs[2]),
+                                    tags = $(inputs[3]);
+
+                                if ((name.val() as string).length == 0) name.val("FLAG");
+                                if (!(color.val() as string).match(/^#(?:[0-9a-f]{3}){1,2}$/i)) color.val("#800000");
+                                if ((tags.val() as string).length == 0) continue;
+
+                                defData.push({
+                                    show: show.is(":checked"),
+                                    name: name.val() as string,
+                                    color: color.val() as string,
+                                    tags: tags.val() as string,
+                                });
+                            }
+
+                            await customFlagger.pushSettings("flags", defData);
+                            confirmBox.html("Settings Saved");
+                            window.setTimeout(() => { confirmBox.html(""); }, 1000);
+                        }
+                    ),
+                    Form.div({ value: `<span id="defs-confirm"></span>` }),
+
+                    Form.div({
+                        value: `
+                        <b>Custom Flags</b> allow you to automatically highlight posts that match specified tags. For example:<br />
+                        <pre>-solo -duo -group -zero_pictured</pre>: posts that do not include character count tags.<br />
+                        <pre>tagcount:&lt;5</pre>: posts with less than 5 tags<br />
+                        Flag names must be unique. Duplicate tag strings are allowed, but their corresponding flag may not display.`,
+                        width: 3
+                    }),
                 ]),
 
                 // Validator Configuration
@@ -1553,6 +1509,54 @@ export class SettingsController extends RE6Module {
 
             ]),
         ]);
+
+        function makeFlagDefInput(flag?: FlagDefinition): JQuery<HTMLElement> {
+            const flagContainer = $("<div>")
+                .addClass("flag-defs-inputs")
+            $("<input>")
+                .attr({
+                    "type": "checkbox",
+                    "checked": flag.show ? "checked" : undefined,
+                })
+                .appendTo(flagContainer);
+            $("<input>")
+                .attr({
+                    "type": "text",
+                    "placeholder": "name",
+                })
+                .val(flag === undefined ? "" : flag.name)
+                .appendTo(flagContainer);
+            $("<input>")
+                .attr({
+                    "type": "text",
+                    "placeholder": "color",
+                })
+                .val(flag === undefined ? "" : flag.color)
+                .css("border-left-color", flag === undefined ? "transparent" : flag.color)
+                .appendTo(flagContainer)
+                .on("keyup", (event) => {
+                    const $target = $(event.target);
+                    if (($target.val() + "").match(/^#(?:[0-9a-f]{3}){1,2}$/i)) {
+                        $target.css("border-left-color", $target.val() + "");
+                    }
+                });
+            $("<input>")
+                .attr({
+                    "type": "text",
+                    "placeholder": "tags",
+                })
+                .val(flag === undefined ? "" : flag.tags)
+                .appendTo(flagContainer);
+
+            $("<button>")
+                .html(`<i class="far fa-trash-alt"></i>`)
+                .appendTo(flagContainer)
+                .on("click", () => {
+                    flagContainer.remove();
+                });
+
+            return flagContainer;
+        }
 
     }
 

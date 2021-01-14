@@ -435,14 +435,14 @@ const TagSuggestions: SuggestionSet = {
     "pregnant_sex": { has: ["pregnant", "sex"] },
     "penile_masturbation": { has: ["penis", "masturbation"] },
     "vaginal_masturbation": { has: ["pussy", "masturbation"] },
-    "speech_bubble|though_bubble": { has: "dialogue", },
+    "speech_bubble|thought_bubble": { has: "dialogue", },
 
     // Anatomy
     "butt": { has: "presenting_hindquarters" },
     "non-mammal_breasts": { has: ["breasts", /^(reptile|lizard|marine|avian|arthropod|flora_fauna|insect)$/] },
-    "nipples": { has: "breasts", not: "featureless_breasts" },
+    "nipples": { has: /^(breasts|teats)$/, not: "featureless_breasts" },
     "areola": { has: "nipples" },
-    "penis": { has: /(handjob|fellatio|penile)/ },
+    "penis": { has: /(handjob|fellatio|penile|knot|medial_ring|penis)/ },
     "pussy": { has: /vaginal/ },
     "erection|flaccid|half-erect": { has: /penis|penile/, not: ["erection", "flaccid", "half-erect"] },
 
@@ -455,7 +455,8 @@ const TagSuggestions: SuggestionSet = {
     "medial_ring": { has: "equine_penis" },
     "flared_penis": { has: "equine_penis" },
 
-    "hooves": { has: "underhoof" },
+    "hooves": { has: /^(underhoof|fetlocks)$/ },
+    "paws": { has: "claws" },
 
     "muscular_anthro": { has: [/^muscular/, "anthro"] },
     "muscular_feral": { has: [/^muscular/, "feral"] },

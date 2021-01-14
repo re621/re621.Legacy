@@ -44,7 +44,7 @@ export class PostFilter {
             // Get filter type: tag, id, score, rating, etc.
             const filterType = FilterType.test(filter);
             if (filterType !== FilterType.Tag)
-                filter = filter.substring(filterType.length);
+                filter = filter.substring(filterType.length + 1);
 
             // Get comparison methods: equals, smaller then, etc
             const comparison = ComparisonType.test(filter);
@@ -92,31 +92,37 @@ export class PostFilter {
 
             const value = filter.value;
             switch (filter.type) {
-                case FilterType.Flag:
-                    result = post.flags.has(PostFlag.fromSingle(value));
+                case FilterType.Tag:
+                    result = PostFilterUtils.tagsMatchesFilter(post, value);
                     break;
                 case FilterType.Id:
                     result = PostFilterUtils.compareNumbers(post.id, parseInt(value), filter.comparison);
                     break;
-                case FilterType.Rating:
-                    result = post.rating === PostRating.fromValue(value);
-                    break;
                 case FilterType.Score:
                     result = PostFilterUtils.compareNumbers(post.score, parseInt(value), filter.comparison);
-                    break;
-                case FilterType.FavCount:
-                    result = PostFilterUtils.compareNumbers(post.favorites, parseInt(value), filter.comparison);
-                    break;
-                case FilterType.Tag:
-                    result = PostFilterUtils.tagsMatchesFilter(post, value);
-                    break;
-                case FilterType.Uploader:
-                case FilterType.UserID:
-                    result = post.uploader === parseInt(value);
                     break;
                 case FilterType.Fav:
                     result = post.is_favorited;
                     break;
+                case FilterType.FavCount:
+                    result = PostFilterUtils.compareNumbers(post.favorites, parseInt(value), filter.comparison);
+                    break;
+                case FilterType.Rating:
+                    result = post.rating === PostRating.fromValue(value);
+                    break;
+                case FilterType.Flag:
+                    result = post.flags.has(PostFlag.fromSingle(value));
+                    break;
+
+                case FilterType.Uploader:
+                case FilterType.User:
+                case FilterType.UserID:
+                    result = post.uploader === parseInt(value);
+                    break;
+                case FilterType.Approver:
+                    result = post.approver === parseInt(value);
+                    break;
+
                 case FilterType.Height:
                     result = PostFilterUtils.compareNumbers(post.img.height, parseInt(value), filter.comparison);
                     break;
@@ -128,6 +134,34 @@ export class PostFilter {
                     break;
                 case FilterType.Duration:
                     result = post.meta.duration == null || PostFilterUtils.compareNumbers(post.meta.duration, parseFloat(value), filter.comparison);
+                    break;
+                case FilterType.Ratio:
+                    result = PostFilterUtils.compareNumbers(post.img.ratio, parseFloat(value), filter.comparison);
+                    break;
+
+                case FilterType.TagCount:
+                    result = PostFilterUtils.compareNumbers(post.tags.all.size, parseInt(value), filter.comparison)
+                    break;
+                case FilterType.GenTags:
+                    result = PostFilterUtils.compareNumbers(post.tags.general.size, parseInt(value), filter.comparison)
+                    break;
+                case FilterType.ArtTags:
+                    result = PostFilterUtils.compareNumbers(post.tags.artist.size, parseInt(value), filter.comparison)
+                    break;
+                case FilterType.CharTags:
+                    result = PostFilterUtils.compareNumbers(post.tags.character.size, parseInt(value), filter.comparison)
+                    break;
+                case FilterType.CopyTags:
+                    result = PostFilterUtils.compareNumbers(post.tags.copyright.size, parseInt(value), filter.comparison)
+                    break;
+                case FilterType.SpecTags:
+                    result = PostFilterUtils.compareNumbers(post.tags.species.size, parseInt(value), filter.comparison)
+                    break;
+                case FilterType.InvTags:
+                    result = PostFilterUtils.compareNumbers(post.tags.invalid.size, parseInt(value), filter.comparison)
+                    break;
+                case FilterType.MetaTags:
+                    result = PostFilterUtils.compareNumbers(post.tags.meta.size, parseInt(value), filter.comparison)
                     break;
             }
 
@@ -219,26 +253,43 @@ interface Filter {
 }
 
 enum FilterType {
-    Tag = "tag:",
-    Id = "id:",
-    Score = "score:",
-    FavCount = "favcount:",
-    Rating = "rating:",
-    Uploader = "uploader:",
-    UserID = "userid:",
-    Flag = "status:",
-    Fav = "fav:",
-    Height = "height:",
-    Width = "width:",
-    Size = "filesize:",
-    Duration = "duration:",
+    Tag = "tag",
+    Id = "id",
+    Score = "score",
+    Fav = "fav",
+    FavCount = "favcount",
+    Rating = "rating",
+    Flag = "status",
+
+    Uploader = "uploader",
+    User = "user",
+    UserID = "userid",
+    Approver = "approvedby",
+
+    Height = "height",
+    Width = "width",
+    Size = "filesize",
+    Type = "type",
+    Duration = "duration",
+    Ratio = "ratio",
+
+    // TODO Date ???
+
+    TagCount = "tagcount",
+    GenTags = "gentags",
+    ArtTags = "arttags",
+    CharTags = "chartags",
+    CopyTags = "copytags",
+    SpecTags = "spectags",
+    InvTags = "invtags",
+    MetaTags = "metatags",
 }
 
 namespace FilterType {
     export function test(input: string): FilterType {
         input = input.toLowerCase();
         for (const key of Object.keys(FilterType))
-            if (input.startsWith(FilterType[key])) return FilterType[key];
+            if (input.startsWith(FilterType[key] + ":")) return FilterType[key];
         return FilterType.Tag;
     }
 }

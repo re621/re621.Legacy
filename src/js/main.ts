@@ -57,8 +57,8 @@ const loadOrder = [
 
     DownloadCustomizer,
     ImageScaler,
-    PoolNavigator,
     PostViewer,
+    PoolNavigator,
     TitleCustomizer,
 
     BlacklistEnhancer,
