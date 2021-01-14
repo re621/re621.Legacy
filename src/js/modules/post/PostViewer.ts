@@ -169,7 +169,7 @@ export class PostViewer extends RE6Module {
 
             const navbarContainer = $("#nav-links-top");
             if (navbarContainer.length > 0) {
-                navbarContainer.clone().insertBefore("#tag-list").attr("id", "nav-links-left");
+                navbarContainer.clone().insertAfter("#re621-search").attr("id", "nav-links-left");
                 for (const el of $("#nav-links-left").find("li.post-nav").get()) {
                     const navbar = $(el);
                     const lower = $("<div>").addClass("nav-left-down").appendTo(navbar);
