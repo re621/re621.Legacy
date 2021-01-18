@@ -22,6 +22,7 @@ export class WikiEnhancer extends RE6Module {
             : $("#wiki-page-title");
         const tagName = $title.text().trim()
             .replace(/^.+: /g, "")
+            .replace("\n\n          (locked)", "")
             .replace(/ /g, "_");
 
         $("<button>")
