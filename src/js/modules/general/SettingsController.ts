@@ -1568,7 +1568,8 @@ export class SettingsController extends RE6Module {
             miscellaneous = ModuleController.get(Miscellaneous),
             headerCustomizer = ModuleController.get(HeaderCustomizer),
             subscriptionManager = ModuleController.get(SubscriptionManager),
-            searchUtilities = ModuleController.get(SearchUtilities);
+            searchUtilities = ModuleController.get(SearchUtilities),
+            downloadCustomizer = ModuleController.get(DownloadCustomizer);
 
         /** Creates and returns two keybind inputs and a label */
         function createInputs(module: RE6Module, label: string, settingsKey: string): FormElement[] {
@@ -1653,10 +1654,13 @@ export class SettingsController extends RE6Module {
             ...createInputs(imageScaler, "Fullscreen Mode", "hotkeyFullscreen"),
             Form.spacer(3, true),
 
-            ...createInputs(poolNavigator, "Previous Post", "hotkeyPrev"),
-            ...createInputs(poolNavigator, "Next Post", "hotkeyNext"),
             ...createInputs(poolNavigator, "Cycle Navigation", "hotkeyCycle"),
             ...createInputs(imageScaler, "Change Scale", "hotkeyScale"),
+            ...createInputs(downloadCustomizer, "Download", "hotkeyDownload"),
+            Form.spacer(3, true),
+
+            ...createInputs(poolNavigator, "Previous Post", "hotkeyPrev"),
+            ...createInputs(poolNavigator, "Next Post", "hotkeyNext"),
             Form.spacer(3, true),
 
             ...createInputs(postViewer, "Open `Add to Set` Dialog", "hotkeyAddSet"),
@@ -1689,6 +1693,7 @@ export class SettingsController extends RE6Module {
                     ...createInputs(postViewer, "Go To Parent", "hotkeyOpenParent"),
                     ...createInputs(postViewer, "Toggle Child Posts", "hotkeyToggleRel"),
                     ...createInputs(postViewer, "Open IQDB", "hotkeyOpenIQDB"),
+                    ...createInputs(postViewer, "Open API Page", "hotkeyOpenAPI"),
                     Form.hr(3),
                 ]
             ),

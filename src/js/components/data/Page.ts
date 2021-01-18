@@ -118,4 +118,5 @@ export const PageDefinition = {
     changes: /^\/post_versions.*/,
     tickets: /^\/tickets.*/,
     profile: /^\/users\/\d+$/,
+    iqdb: /^\/iqdb_queries.*/,
 };

@@ -14,6 +14,9 @@ export class DownloadCustomizer extends RE6Module {
 
     public constructor() {
         super(PageDefinition.post, true);
+        this.registerHotkeys(
+            { keys: "hotkeyDownload", fnct: this.hotkeyDownload },
+        );
     }
 
     /**
@@ -24,6 +27,7 @@ export class DownloadCustomizer extends RE6Module {
         return {
             enabled: true,
             template: "%postid%-%artist%-%copyright%-%character%",
+            hotkeyDownload: "",
         };
     }
 
@@ -89,6 +93,10 @@ export class DownloadCustomizer extends RE6Module {
             [PostParts.formatHoverText(this.post)],
             { type: 'text/plain' }
         ));
+    }
+
+    private hotkeyDownload(): void {
+        $("#image-custom-download-file").click();
     }
 
     /**
