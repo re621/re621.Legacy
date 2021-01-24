@@ -192,6 +192,7 @@ export class HoverZoom extends RE6Module {
                     .attr("src", post.file.sample)
                     .one("load", () => {
                         this.$zoomBlock.attr("status", "ready");
+                        this.$zoomImage.css("background-image", "");
                     });
             }
 
