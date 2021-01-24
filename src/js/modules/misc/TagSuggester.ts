@@ -484,6 +484,9 @@ const TagSuggestions: SuggestionSet = {
     "overweight_herm": { has: [/^overweight/, "herm"] },
     "overweight_maleherm": { has: [/^overweight/, "maleherm"] },
 
+    "countershade_fur": { has: [/^countershad(e|ing)/, /fur/] },
+    "countershade_scales": { has: [/^countershad(e|ing)/, /scales/] },
+
     // Body Parts
     "biped": { has: "anthro", not: /^(uniped|triped)$/ },
     "quadruped": { has: "feral", not: /^(hexapod|semi-anthro)$/ },
