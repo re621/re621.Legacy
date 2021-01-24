@@ -1,9 +1,11 @@
 import { PostFlag } from "../../components/api/responses/APIPost";
+import { XM } from "../../components/api/XM";
 import { Post, PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
+import { DownloadCustomizer } from "../post/DownloadCustomizer";
 
 export class HoverZoom extends RE6Module {
 
@@ -17,8 +19,14 @@ export class HoverZoom extends RE6Module {
 
     private shiftPressed = false;               // Used to block zoom in onshift mode
 
+    private static curPost: PostData = null;    // Post over which the user currently hovers, or null if there isn't one
+
     public constructor() {
         super([], true);
+
+        this.registerHotkeys(
+            { keys: "hotkeyDownload", fnct: this.downloadCurPost, ignoreShift: true },
+        );
     }
 
     public getDefaultSettings(): Settings {
@@ -28,6 +36,8 @@ export class HoverZoom extends RE6Module {
             mode: ImageZoomMode.OnShift,                // How should the hover zoom be triggered
             tags: true,                                 // Show a list of tags under the zoomed-in image
             time: true,                                 // If true, shows the timestamp in "x ago" format
+
+            hotkeyDownload: "",                         // downloads the currently hovered over post
         };
     }
 
@@ -124,6 +134,8 @@ export class HoverZoom extends RE6Module {
             const post = $ref.is("post")
                 ? Post.get($ref)
                 : PostData.fromThumbnail($ref);
+
+            HoverZoom.curPost = post;
 
             // Skip deleted and flash files
             if (post.flags.has(PostFlag.Deleted) || post.file.ext == "swf") return;
@@ -231,6 +243,8 @@ export class HoverZoom extends RE6Module {
         HoverZoom.on("zoom.stop", (event, data) => {
             $(document).off("mousemove.re621.zoom");
 
+            HoverZoom.curPost = null;
+
             const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}]`).first();
 
             const $img = $ref.find("img").first();
@@ -260,6 +274,15 @@ export class HoverZoom extends RE6Module {
             this.$zoomTags
                 .removeAttr("style")
                 .html("");
+        });
+    }
+
+    private downloadCurPost(): void {
+        Debug.log("hovering over", HoverZoom.curPost);
+        if (HoverZoom.curPost == null) return;
+        XM.Connect.download({
+            url: HoverZoom.curPost.file.original,
+            name: DownloadCustomizer.getFileName(HoverZoom.curPost),
         });
     }
 

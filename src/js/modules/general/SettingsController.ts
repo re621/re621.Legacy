@@ -1569,7 +1569,8 @@ export class SettingsController extends RE6Module {
             headerCustomizer = ModuleController.get(HeaderCustomizer),
             subscriptionManager = ModuleController.get(SubscriptionManager),
             searchUtilities = ModuleController.get(SearchUtilities),
-            downloadCustomizer = ModuleController.get(DownloadCustomizer);
+            downloadCustomizer = ModuleController.get(DownloadCustomizer),
+            hoverZoom = ModuleController.get(HoverZoom);
 
         /** Creates and returns two keybind inputs and a label */
         function createInputs(module: RE6Module, label: string, settingsKey: string): FormElement[] {
@@ -1708,6 +1709,11 @@ export class SettingsController extends RE6Module {
             ...createInputs(searchUtilities, "Blacklist", "hotkeySwitchModeBlacklist"),
             ...createInputs(searchUtilities, "Add to Set", "hotkeySwitchModeAddSet"),
             ...createInputs(searchUtilities, "Remove from Set", "hotkeySwitchModeRemSet"),
+            Form.hr(3),
+
+            // Hover Zoon
+            Form.header("Hover Zoom", 3),
+            ...createInputs(hoverZoom, "Download Current Post", "hotkeyDownload"),
             Form.hr(3),
 
             // Tag Scripts

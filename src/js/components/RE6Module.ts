@@ -283,8 +283,15 @@ export class RE6Module {
         for (const keybind of this.keybinds) {
             const meta = this.getSettingsTag() + "." + keybind.keys;
 
+            const keys = this.fetchSettings(keybind.keys).split("|");
+            if (keybind.ignoreShift) {
+                // This is dumb, but it works for most cases
+                // The function will be executed even if shift is also pressed
+                for (const key of [...keys]) keys.push("shift+" + key);
+            }
+
             keybindObj.push({
-                keys: this.fetchSettings(keybind.keys).split("|"),
+                keys: keys,
                 fnct: keybind.fnct,
                 bindMeta: meta,
                 enabled: enabled && (!keybind.page || Page.matches(keybind.page)),
@@ -361,6 +368,7 @@ interface KeybindDefinition {
     element?: string;           // Element to which the listener gets bound. Defaults to `document`
     selector?: string;          // Selector within the element for deferred listeners. Defaults to `null`
     page?: RegExp | RegExp[];   // Pages on which the shortcuts must work. Leave blank for all.
+    ignoreShift?: boolean;       // If true, the hotkey will work regardless if it's accompanied by a shift
 }
 
 export type Settings = {
