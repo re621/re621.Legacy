@@ -747,6 +747,22 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3, true),
 
+                    Form.subheader("Trigger Delay", "How quickly the zoom will activate, in seconds. Set to 0 to disable.", 2),
+                    Form.input(
+                        {
+                            value: hoverZoom.fetchSettings("zoomDelay"),
+                            required: true,
+                            pattern: "^\\d+(\\.\\d+)?$",
+                            title: "Any positive number",
+                        },
+                        async (data, input) => {
+                            if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                            await hoverZoom.pushSettings("zoomDelay", Util.Math.round(parseFloat(data) * Util.Time.SECOND, 0));
+                            if (hoverZoom.isInitialized()) hoverZoom.reloadEventListeners();
+                        }
+                    ),
+                    Form.spacer(3, true),
+
                 ]),
 
                 // Miscellaneous

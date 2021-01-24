@@ -37,6 +37,8 @@ export class HoverZoom extends RE6Module {
             tags: true,                                 // Show a list of tags under the zoomed-in image
             time: true,                                 // If true, shows the timestamp in "x ago" format
 
+            zoomDelay: 0,                               // Delay until the zoom is triggered, in milliseconds
+
             hotkeyDownload: "",                         // downloads the currently hovered over post
         };
     }
@@ -89,15 +91,24 @@ export class HoverZoom extends RE6Module {
         if (zoomMode == ImageZoomMode.Disabled) return;
 
         // Listen for mouse hover over thumbnails
+        let timer = 0;
+        const zoomDelay = this.fetchSettings("zoomDelay");
         $("#page")
             .on("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail", (event) => {
                 const $ref = $(event.currentTarget);
                 $ref.attr("hovering", "true");
-                HoverZoom.trigger("zoom.start", { post: $ref.data("id"), pageX: event.pageX, pageY: event.pageY });
+
+                if (timer) window.clearTimeout(timer);
+                timer = window.setTimeout(() => {
+                    HoverZoom.trigger("zoom.start", { post: $ref.data("id"), pageX: event.pageX, pageY: event.pageY });
+                }, zoomDelay);
             })
             .on("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail", (event) => {
                 const $ref = $(event.currentTarget);
                 $ref.removeAttr("hovering");
+
+                if (timer) window.clearTimeout(timer);
+
                 HoverZoom.trigger("zoom.stop", { post: $ref.data("id"), pageX: event.pageX, pageY: event.pageY });
             });
 

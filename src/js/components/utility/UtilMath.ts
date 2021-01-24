@@ -13,7 +13,8 @@ export class UtilMath {
     }
 
     public static round(num: number, decimal = 2): number {
-        return parseFloat(num.toFixed(decimal));
+        if (decimal == 0) return parseInt(num.toFixed(decimal));
+        else return parseFloat(num.toFixed(decimal));
     }
 
 }
