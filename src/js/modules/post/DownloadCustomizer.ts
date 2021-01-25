@@ -27,6 +27,7 @@ export class DownloadCustomizer extends RE6Module {
         return {
             enabled: true,
             template: "%postid%-%artist%-%copyright%-%character%",
+            confirmDownload: false,
             hotkeyDownload: "",
         };
     }
@@ -57,9 +58,10 @@ export class DownloadCustomizer extends RE6Module {
                 event.preventDefault();
                 event.stopImmediatePropagation();
                 link.attr("loading", "true");
-                XM.Connect.download({
+                XM.Connect.browserDownload({
                     url: link.attr("href"),
                     name: link.attr("download"),
+                    saveAs: this.fetchSettings<boolean>("confirmDownload"),
                     onload: () => { link.removeAttr("loading"); }
                 });
             });

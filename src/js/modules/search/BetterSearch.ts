@@ -5,6 +5,7 @@ import { XM } from "../../components/api/XM";
 import { Blacklist } from "../../components/data/Blacklist";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { User } from "../../components/data/User";
+import { ModuleController } from "../../components/ModuleController";
 import { Post } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -530,9 +531,10 @@ export class BetterSearch extends RE6Module {
                     break;
                 }
                 case "download": {
-                    XM.Connect.download({
+                    XM.Connect.browserDownload({
                         url: post.file.original,
                         name: DownloadCustomizer.getFileName(post),
+                        saveAs: ModuleController.fetchSettings<boolean>(DownloadCustomizer, "confirmDownload"),
                     });
                     break;
                 }

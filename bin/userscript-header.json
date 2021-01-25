@@ -33,6 +33,8 @@
         "GM.xmlHttpRequest",
         "GM_xmlhttpRequest",
 
+        "GM_download",
+
         "GM_addValueChangeListener",
         "GM_removeValueChangeListener",
 

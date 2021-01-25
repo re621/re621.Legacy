@@ -90,6 +90,14 @@ export class XMChrome {
         return chrome.extension.getURL(name);
     }
 
+    public static download(url: string, name?: string, saveAs?: boolean): string {
+        return chrome.downloads.download({
+            url: url,
+            filename: name,
+            saveAs: saveAs,
+        });
+    }
+
 }
 
 interface MessageRequest {

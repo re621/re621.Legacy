@@ -5,6 +5,7 @@ declare const GM: any;
 declare const GM_getResourceText: any;
 declare const GM_getResourceURL: any;
 declare const GM_xmlhttpRequest: any;
+declare const GM_download: any;
 
 export class XMConnect {
 
@@ -203,6 +204,19 @@ export class XMConnect {
         });
     };
 
+    /**
+     * Alternative to the normal download method above, using GM_download method.  
+     * @param details Download details
+     */
+    public static browserDownload(url: string, name?: string, saveAs?: boolean): void;
+    public static browserDownload(defaults: GMDownloadDetails): void;
+    public static browserDownload(a: any, b?: string, c?: boolean): void {
+        if (typeof a === "string") a = { url: a, name: b, saveAs: c };
+
+        if (typeof GM_xmlhttpRequest === "function") GM_download(a);
+        else XM.Chrome.download(a, b, c);
+    }
+
 }
 
 interface XMConnectDetails {
@@ -363,6 +377,9 @@ export interface GMDownloadDetails {
 
     /** **headers** - see GM_xmlhttpRequest for more details */
     headers?: string;
+
+    /** **saveAs** - boolean value, show a saveAs dialog */
+    saveAs?: boolean;
 
     /** **onerror** callback to be executed if this download ended up with an error */
     onerror?(event: GMxmlHttpRequestEvent): void;

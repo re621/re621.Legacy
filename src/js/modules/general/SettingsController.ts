@@ -1049,6 +1049,7 @@ export class SettingsController extends RE6Module {
                         if (downloadCustomizer.isInitialized()) downloadCustomizer.refreshDownloadLink();
                     }
                 ),
+
                 Form.section({ columns: 3, width: 3 }, [
                     Form.div({ value: `<div class="notice unmargin">The following variables can be used:</div>`, width: 3 }),
                     Form.copy({ value: "%postid%", label: "Post ID" }),
@@ -1059,6 +1060,16 @@ export class SettingsController extends RE6Module {
                     Form.copy({ value: "%meta%", label: "Meta" }),
                     Form.copy({ value: "%md5%", label: "MD5" }),
                 ]),
+                Form.spacer(3),
+
+                Form.checkbox(
+                    {
+                        value: downloadCustomizer.fetchSettings("confirmDownload"),
+                        label: `<b>Confirm Downloads</b><br />Show the "Save As" dialog for every file.<br />Requires "Download Mode" to be set to "Browser API" in script manager settings`,
+                        width: 3,
+                    },
+                    async (data) => { await downloadCustomizer.pushSettings("confirmDownload", data); }
+                ),
             ]),
             Form.spacer(3),
 

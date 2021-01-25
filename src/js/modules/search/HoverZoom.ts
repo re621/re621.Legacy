@@ -1,5 +1,6 @@
 import { PostFlag } from "../../components/api/responses/APIPost";
 import { XM } from "../../components/api/XM";
+import { ModuleController } from "../../components/ModuleController";
 import { Post, PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
@@ -312,9 +313,10 @@ export class HoverZoom extends RE6Module {
     private downloadCurPost(): void {
         Debug.log("hovering over", HoverZoom.curPost);
         if (HoverZoom.curPost == null) return;
-        XM.Connect.download({
+        XM.Connect.browserDownload({
             url: HoverZoom.curPost.file.original,
             name: DownloadCustomizer.getFileName(HoverZoom.curPost),
+            saveAs: ModuleController.fetchSettings<boolean>(DownloadCustomizer, "confirmDownload"),
         });
     }
 
