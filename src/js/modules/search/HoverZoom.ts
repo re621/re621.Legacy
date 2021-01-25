@@ -85,6 +85,9 @@ export class HoverZoom extends RE6Module {
             .off("keydown.re621.zoom")
             .off("keyup.re621.zoom");
 
+        $(window)
+            .off("blur.re621.zoom");
+
         $("#page")
             .off("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail")
             .off("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail");
@@ -142,6 +145,9 @@ export class HoverZoom extends RE6Module {
                 if (!this.shiftPressed || (event.originalEvent as KeyboardEvent).key !== "Shift") return;
                 this.shiftPressed = false;
             });
+        $(window).on("blur.re621.zoom", () => {
+            this.shiftPressed = false;
+        });
     }
 
     /** Initialize the event listeners for the hover zoom functionality */
