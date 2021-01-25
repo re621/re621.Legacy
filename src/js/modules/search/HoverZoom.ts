@@ -81,6 +81,7 @@ export class HoverZoom extends RE6Module {
         const zoomMode = this.fetchSettings("mode");
 
         $(document)
+            .off("scroll.re621.zoom")
             .off("keydown.re621.zoom")
             .off("keyup.re621.zoom");
 
@@ -92,9 +93,12 @@ export class HoverZoom extends RE6Module {
 
         // Listen for mouse hover over thumbnails
         let timer = 0;
+        let scrolling = false;
         const zoomDelay = this.fetchSettings("zoomDelay");
         $("#page")
             .on("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail", (event) => {
+                if (scrolling) return;
+
                 const $ref = $(event.currentTarget);
                 $ref.attr("hovering", "true");
 
@@ -111,6 +115,15 @@ export class HoverZoom extends RE6Module {
 
                 HoverZoom.trigger("zoom.stop", { post: $ref.data("id"), pageX: event.pageX, pageY: event.pageY });
             });
+
+        let scrollTimer = 0;
+        $(document).on("scroll.re621.zoom", () => {
+            if (scrollTimer) window.clearTimeout(scrollTimer);
+            scrollTimer = window.setTimeout(() => {
+                scrolling = false;
+            }, 100);
+            scrolling = true;
+        })
 
         // Listen for the Shift button being held
         if (zoomMode !== ImageZoomMode.OnShift) return;
