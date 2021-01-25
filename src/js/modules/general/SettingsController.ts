@@ -1729,7 +1729,8 @@ export class SettingsController extends RE6Module {
 
             // Hover Zoon
             Form.header("Hover Zoom", 3),
-            ...createInputs(hoverZoom, "Download Current Post", "hotkeyDownload"),
+            ...createInputs(hoverZoom, "Download Hovered Post", "hotkeyDownload"),
+            ...createInputs(hoverZoom, "Open Fullscreen Image", "hotkeyFullscreen"),
             Form.hr(3),
 
             // Tag Scripts

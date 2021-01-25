@@ -26,6 +26,7 @@ export class HoverZoom extends RE6Module {
 
         this.registerHotkeys(
             { keys: "hotkeyDownload", fnct: this.downloadCurPost, ignoreShift: true },
+            { keys: "hotkeyFullscreen", fnct: this.fullscreenCurPost, ignoreShift: true },
         );
     }
 
@@ -40,6 +41,7 @@ export class HoverZoom extends RE6Module {
             zoomDelay: 0,                               // Delay until the zoom is triggered, in milliseconds
 
             hotkeyDownload: "",                         // downloads the currently hovered over post
+            hotkeyFullscreen: "",                       // opens the currently hovered over post in new tab
         };
     }
 
@@ -105,7 +107,9 @@ export class HoverZoom extends RE6Module {
                 const $ref = $(event.currentTarget);
                 $ref.attr("hovering", "true");
 
-                if (timer) window.clearTimeout(timer);
+                HoverZoom.curPost = $ref.is("post") ? Post.get($ref) : PostData.fromThumbnail($ref);
+
+                window.clearTimeout(timer);
                 timer = window.setTimeout(() => {
                     HoverZoom.trigger("zoom.start", { post: $ref.data("id"), pageX: event.pageX, pageY: event.pageY });
                 }, zoomDelay);
@@ -114,8 +118,9 @@ export class HoverZoom extends RE6Module {
                 const $ref = $(event.currentTarget);
                 $ref.removeAttr("hovering");
 
-                if (timer) window.clearTimeout(timer);
+                HoverZoom.curPost = null;
 
+                window.clearTimeout(timer);
                 HoverZoom.trigger("zoom.stop", { post: $ref.data("id"), pageX: event.pageX, pageY: event.pageY });
             });
 
@@ -164,8 +169,6 @@ export class HoverZoom extends RE6Module {
             const post = $ref.is("post")
                 ? Post.get($ref)
                 : PostData.fromThumbnail($ref);
-
-            HoverZoom.curPost = post;
 
             // Skip deleted and flash files
             if (post.flags.has(PostFlag.Deleted) || post.file.ext == "swf") return;
@@ -274,8 +277,6 @@ export class HoverZoom extends RE6Module {
         HoverZoom.on("zoom.stop", (event, data) => {
             $(document).off("mousemove.re621.zoom");
 
-            HoverZoom.curPost = null;
-
             const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}]`).first();
 
             const $img = $ref.find("img").first();
@@ -315,6 +316,13 @@ export class HoverZoom extends RE6Module {
             url: HoverZoom.curPost.file.original,
             name: DownloadCustomizer.getFileName(HoverZoom.curPost),
         });
+    }
+
+    private fullscreenCurPost(): void {
+        Debug.log("hovering over", HoverZoom.curPost);
+        if (HoverZoom.curPost == null) return;
+        const win = window.open(HoverZoom.curPost.file.original, '_blank');
+        win.focus();
     }
 
 }
