@@ -1544,7 +1544,7 @@ export class SettingsController extends RE6Module {
                 .appendTo(flagContainer);
             $("<input>")
                 .attr({
-                    "type": "text",
+                    "type": "color",
                     "placeholder": "color",
                 })
                 .val(flag === undefined ? "" : flag.color)
