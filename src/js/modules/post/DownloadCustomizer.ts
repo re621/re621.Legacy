@@ -1,7 +1,7 @@
 import { XM } from "../../components/api/XM";
 import { PageDefinition } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
-import { Post } from "../../components/post/Post";
+import { Post, PostData } from "../../components/post/Post";
 import { PostParts } from "../../components/post/PostParts";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
@@ -14,6 +14,9 @@ export class DownloadCustomizer extends RE6Module {
 
     public constructor() {
         super(PageDefinition.post, true);
+        this.registerHotkeys(
+            { keys: "hotkeyDownload", fnct: this.hotkeyDownload },
+        );
     }
 
     /**
@@ -24,6 +27,7 @@ export class DownloadCustomizer extends RE6Module {
         return {
             enabled: true,
             template: "%postid%-%artist%-%copyright%-%character%",
+            hotkeyDownload: "",
         };
     }
 
@@ -91,6 +95,10 @@ export class DownloadCustomizer extends RE6Module {
         ));
     }
 
+    private hotkeyDownload(): void {
+        $("#image-custom-download-file").click();
+    }
+
     /**
      * Parses the download link template, replacing variables with their corresponding values
      * @returns string Download link
@@ -103,7 +111,7 @@ export class DownloadCustomizer extends RE6Module {
      * Parses the download link template, replacing variables with their corresponding values
      * @returns string Download link
      */
-    public static getFileName(post: Post, template?: string, ext?: string): string {
+    public static getFileName(post: PostData, template?: string, ext?: string): string {
         if (!template) template = ModuleController.fetchSettings<string>(DownloadCustomizer, "template");
         return template
             .replace(/%postid%/g, post.id + "")

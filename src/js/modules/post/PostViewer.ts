@@ -16,7 +16,7 @@ export class PostViewer extends RE6Module {
     private post: Post;
 
     public constructor() {
-        super([PageDefinition.post, PageDefinition.changes], true);
+        super([PageDefinition.post, PageDefinition.changes, PageDefinition.iqdb], true);
 
         const reqPage = PageDefinition.post;
         this.registerHotkeys(
@@ -49,6 +49,7 @@ export class PostViewer extends RE6Module {
             { keys: "hotkeyOpenParent", fnct: this.openParent, page: reqPage },
             { keys: "hotkeyToggleRel", fnct: this.toggleRelSection, page: reqPage },
             { keys: "hotkeyOpenIQDB", fnct: this.openIQDB, page: reqPage },
+            { keys: "hotkeyOpenAPI", fnct: this.openAPI, },
         );
     }
 
@@ -91,6 +92,7 @@ export class PostViewer extends RE6Module {
             hotkeyOpenParent: "",       // Opens the parent/child post, if there is one
             hotkeyToggleRel: "",        // Toggles the relationship section
             hotkeyOpenIQDB: "",         // Searches for similar posts
+            hotkeyOpenAPI: "",          // Shows raw post data
 
             upvoteOnFavorite: true,     // add an upvote when adding the post to favorites
             hideNotes: false,           // should the notes be hidden by default
@@ -428,5 +430,8 @@ export class PostViewer extends RE6Module {
 
     /** Opens IQDB page for the current page */
     private openIQDB(): void { PostViewer.lookupClick("#post-related-images a[href*=iqdb_queries]"); }
+
+    /** Opens the raw API data for the current post */
+    private openAPI(): void { location.href = location.origin + location.pathname + ".json" + location.search; }
 
 }

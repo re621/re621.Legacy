@@ -132,6 +132,10 @@ export class KeybindManager {
                 $element.on("keyup.re621.hotkey-" + key, selector, key, () => {
                     keydown = false;
                 });
+
+                $(window).on("blur", () => {
+                    keydown = false;
+                });
             }
 
             // Create the executor

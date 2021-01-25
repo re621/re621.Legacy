@@ -608,7 +608,7 @@ search-content  {
 zoom-container {
     position: fixed;
     top: 100vh;
-    z-index: 800;
+    z-index: 10000;
     pointer-events: none;
 
     & > img {

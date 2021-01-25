@@ -747,6 +747,22 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3, true),
 
+                    Form.subheader("Trigger Delay", "How quickly the zoom will activate, in seconds. Set to 0 to disable.", 2),
+                    Form.input(
+                        {
+                            value: Util.Math.round(hoverZoom.fetchSettings("zoomDelay") / Util.Time.SECOND, 3),
+                            required: true,
+                            pattern: "^\\d+(\\.\\d+)?$",
+                            title: "Any positive number",
+                        },
+                        async (data, input) => {
+                            if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                            await hoverZoom.pushSettings("zoomDelay", Util.Math.round(parseFloat(data) * Util.Time.SECOND, 0));
+                            if (hoverZoom.isInitialized()) hoverZoom.reloadEventListeners();
+                        }
+                    ),
+                    Form.spacer(3, true),
+
                 ]),
 
                 // Miscellaneous
@@ -1528,7 +1544,7 @@ export class SettingsController extends RE6Module {
                 .appendTo(flagContainer);
             $("<input>")
                 .attr({
-                    "type": "text",
+                    "type": "color",
                     "placeholder": "color",
                 })
                 .val(flag === undefined ? "" : flag.color)
@@ -1568,7 +1584,9 @@ export class SettingsController extends RE6Module {
             miscellaneous = ModuleController.get(Miscellaneous),
             headerCustomizer = ModuleController.get(HeaderCustomizer),
             subscriptionManager = ModuleController.get(SubscriptionManager),
-            searchUtilities = ModuleController.get(SearchUtilities);
+            searchUtilities = ModuleController.get(SearchUtilities),
+            downloadCustomizer = ModuleController.get(DownloadCustomizer),
+            hoverZoom = ModuleController.get(HoverZoom);
 
         /** Creates and returns two keybind inputs and a label */
         function createInputs(module: RE6Module, label: string, settingsKey: string): FormElement[] {
@@ -1653,10 +1671,13 @@ export class SettingsController extends RE6Module {
             ...createInputs(imageScaler, "Fullscreen Mode", "hotkeyFullscreen"),
             Form.spacer(3, true),
 
-            ...createInputs(poolNavigator, "Previous Post", "hotkeyPrev"),
-            ...createInputs(poolNavigator, "Next Post", "hotkeyNext"),
             ...createInputs(poolNavigator, "Cycle Navigation", "hotkeyCycle"),
             ...createInputs(imageScaler, "Change Scale", "hotkeyScale"),
+            ...createInputs(downloadCustomizer, "Download", "hotkeyDownload"),
+            Form.spacer(3, true),
+
+            ...createInputs(poolNavigator, "Previous Post", "hotkeyPrev"),
+            ...createInputs(poolNavigator, "Next Post", "hotkeyNext"),
             Form.spacer(3, true),
 
             ...createInputs(postViewer, "Open `Add to Set` Dialog", "hotkeyAddSet"),
@@ -1689,6 +1710,7 @@ export class SettingsController extends RE6Module {
                     ...createInputs(postViewer, "Go To Parent", "hotkeyOpenParent"),
                     ...createInputs(postViewer, "Toggle Child Posts", "hotkeyToggleRel"),
                     ...createInputs(postViewer, "Open IQDB", "hotkeyOpenIQDB"),
+                    ...createInputs(postViewer, "Open API Page", "hotkeyOpenAPI"),
                     Form.hr(3),
                 ]
             ),
@@ -1703,6 +1725,12 @@ export class SettingsController extends RE6Module {
             ...createInputs(searchUtilities, "Blacklist", "hotkeySwitchModeBlacklist"),
             ...createInputs(searchUtilities, "Add to Set", "hotkeySwitchModeAddSet"),
             ...createInputs(searchUtilities, "Remove from Set", "hotkeySwitchModeRemSet"),
+            Form.hr(3),
+
+            // Hover Zoon
+            Form.header("Hover Zoom", 3),
+            ...createInputs(hoverZoom, "Download Hovered Post", "hotkeyDownload"),
+            ...createInputs(hoverZoom, "Open Fullscreen Image", "hotkeyFullscreen"),
             Form.hr(3),
 
             // Tag Scripts
