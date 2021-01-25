@@ -750,7 +750,7 @@ export class SettingsController extends RE6Module {
                     Form.subheader("Trigger Delay", "How quickly the zoom will activate, in seconds. Set to 0 to disable.", 2),
                     Form.input(
                         {
-                            value: hoverZoom.fetchSettings("zoomDelay"),
+                            value: Util.Math.round(hoverZoom.fetchSettings("zoomDelay") / Util.Time.SECOND, 3),
                             required: true,
                             pattern: "^\\d+(\\.\\d+)?$",
                             title: "Any positive number",
