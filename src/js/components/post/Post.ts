@@ -15,7 +15,11 @@ export class Post implements PostData {
 
     public id: number;
     public flags: Set<PostFlag>;
-    public score: number;                   // post total score
+    public score: {
+        up: number;
+        down: number;
+        total: number;
+    }
     public user_score: number;              // user's current vote. might be undefined if no vote has been registered this session
     public favorites: number;               // total number of favorites
     public is_favorited: boolean;           // true if the post is in the user's favorites
@@ -340,7 +344,11 @@ export interface PostData {
 
     id: number;
     flags: Set<PostFlag>;
-    score: number;
+    score: {
+        up: number;
+        down: number;
+        total: number;
+    };
     user_score: number;
     favorites: number;
     is_favorited: boolean;
@@ -426,7 +434,11 @@ export namespace PostData {
         return {
             id: data.id,
             flags: flags,
-            score: data.score.total,
+            score: {
+                up: data.score.up,
+                down: data.score.down,
+                total: data.score.total
+            },
             user_score: undefined,
             favorites: data.fav_count,
             is_favorited: data.is_favorited == true,
@@ -602,10 +614,17 @@ export namespace PostData {
         // Date
         const rawDate = $article.attr("data-created-at") || "0";
 
+        // Score
+        const score = parseInt($article.attr("data-score") || "0");
+
         return {
             id: id,
             flags: PostFlag.fromString($article.attr("data-flags") || ""),
-            score: parseInt($article.attr("data-score") || "0"),
+            score: {
+                up: score > 0 ? score : 0,
+                down: score < 0 ? score : 0,
+                total: score,
+            },
             user_score: 0,
             favorites: parseInt($article.attr("data-fav-count")) || 0,
             is_favorited: $article.attr("data-is-favorited") == "true",
