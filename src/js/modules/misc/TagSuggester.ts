@@ -430,7 +430,7 @@ const TagSuggestions: SuggestionSet = {
     "maleherm_penetrated": { has: /^.+_penetrating_maleherm$/ },
 
     // Activities
-    "sex": { has: /^(.+_penetrating_.+|.+_penetration|.+_position)$/ },
+    "sex": { has: /^(.+_penetrating_.+|.+_penetration|.+_position|cunnilingus|fellatio|rimming)$/ },
     "rape": { has: [/^forced/, /rating:q|rating:e/] },
     "pregnant_sex": { has: ["pregnant", "sex"] },
     "penile_masturbation": { has: ["penis", "masturbation"] },
