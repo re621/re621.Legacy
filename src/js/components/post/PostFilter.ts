@@ -99,7 +99,7 @@ export class PostFilter {
                     result = PostFilterUtils.compareNumbers(post.id, parseInt(value), filter.comparison);
                     break;
                 case FilterType.Score:
-                    result = PostFilterUtils.compareNumbers(post.score, parseInt(value), filter.comparison);
+                    result = PostFilterUtils.compareNumbers(post.score.total, parseInt(value), filter.comparison);
                     break;
                 case FilterType.Fav:
                     result = post.is_favorited;

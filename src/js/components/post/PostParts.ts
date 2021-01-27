@@ -6,6 +6,7 @@ import { XM } from "../api/XM";
 import { Blacklist } from "../data/Blacklist";
 import { Page } from "../data/Page";
 import { DomUtilities } from "../structure/DomUtilities";
+import { Debug } from "../utility/Debug";
 import { Util } from "../utility/Util";
 import { LoadedFileType, Post, PostData } from "./Post";
 import { PostActions } from "./PostActions";
@@ -287,14 +288,18 @@ export class PostParts {
 
                     PostActions.vote(post.id, 1, firstVote).then(
                         (response) => {
-                            // console.log(response);
+                            Debug.log(response);
 
                             if (response.action == 0) {
                                 if (firstVote) post.$ref.attr("vote", "1");
                                 else post.$ref.attr("vote", "0");
                             } else post.$ref.attr("vote", response.action);
 
-                            post.score = response.score;
+                            post.score = {
+                                up: response.up || 0,
+                                down: response.down || 0,
+                                total: response.score || 0,
+                            };
                             post.$ref.trigger("re621:update");
                         },
                         (error) => {
@@ -315,14 +320,18 @@ export class PostParts {
 
                     PostActions.vote(post.id, -1, firstVote).then(
                         (response) => {
-                            // console.log(response);
+                            Debug.log(response);
 
                             if (response.action == 0) {
                                 if (firstVote) post.$ref.attr("vote", "-1");
                                 else post.$ref.attr("vote", "0");
                             } else post.$ref.attr("vote", response.action);
 
-                            post.score = response.score;
+                            post.score = {
+                                up: response.up || 0,
+                                down: response.down || 0,
+                                total: response.score || 0,
+                            };
                             post.$ref.trigger("re621:update");
                         },
                         (error) => {
@@ -393,9 +402,9 @@ export class PostParts {
         return $infoBlock;
 
         function getPostInfo(post: Post): string {
-            const scoreClass = post.score > 0 ? "positive" : (post.score < 0 ? "negative" : "neutral");
+            const scoreClass = post.score.total > 0 ? "positive" : (post.score.total < 0 ? "negative" : "neutral");
             return `
-                <span class="post-info-score score-${scoreClass}">${post.score}</span>
+                <span class="post-info-score score-${scoreClass}" title="${post.score.up} up / ${Math.abs(post.score.down)} down">${post.score.total}</span>
                 <span class="post-info-favorites">${post.favorites}</span>
                 <span class="post-info-comments">${post.comments}</span>
                 <span class="post-info-rating rating-${post.rating}">${post.rating}</span>

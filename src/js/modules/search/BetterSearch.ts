@@ -554,7 +554,11 @@ export class BetterSearch extends RE6Module {
                                 else post.$ref.attr("vote", "0");
                             } else post.$ref.attr("vote", response.action);
 
-                            post.score = response.score;
+                            post.score = {
+                                up: response.up || 0,
+                                down: response.down || 0,
+                                total: response.score || 0,
+                            };
                             post.$ref.trigger("re621:update");
                         },
                         (error) => {
@@ -576,7 +580,11 @@ export class BetterSearch extends RE6Module {
                                 else post.$ref.attr("vote", "0");
                             } else post.$ref.attr("vote", response.action);
 
-                            post.score = response.score;
+                            post.score = {
+                                up: response.up || 0,
+                                down: response.down || 0,
+                                total: response.score || 0,
+                            };
                             post.$ref.trigger("re621:update");
                         },
                         (error) => {

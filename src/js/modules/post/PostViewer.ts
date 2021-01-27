@@ -32,8 +32,8 @@ export class PostViewer extends RE6Module {
             { keys: "hotkeyHideNotes", fnct: () => { this.toggleNotes(); }, page: reqPage },
             { keys: "hotkeyNewNote", fnct: this.switchNewNote, page: reqPage },
 
-            { keys: "hotkeyAddSet", fnct: this.addSet, page: reqPage },
-            { keys: "hotkeyAddPool", fnct: this.addPool, page: reqPage },
+            { keys: "hotkeyAddSet", fnct: this.openSetDialogue, page: reqPage },
+            { keys: "hotkeyAddPool", fnct: this.openPoolDialogue, page: reqPage },
 
             { keys: "hotkeyToggleSetLatest", fnct: this.toggleSetLatest, page: reqPage },
             { keys: "hotkeyAddSetLatest", fnct: this.addSetLatest, page: reqPage },
@@ -351,7 +351,7 @@ export class PostViewer extends RE6Module {
     }
 
     /** Opens the dialog to add the post to the set */
-    private addSet(): void {
+    private openSetDialogue(): void {
         $("a#set")[0].click();
     }
 
@@ -397,7 +397,8 @@ export class PostViewer extends RE6Module {
     }
 
     /** Opens the dialog to add the post to the pool */
-    private addPool(): void {
+    private async openPoolDialogue(): Promise<void> {
+        await Util.sleep(50);
         $("a#pool")[0].click();
     }
 
