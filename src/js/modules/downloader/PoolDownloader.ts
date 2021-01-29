@@ -4,10 +4,12 @@ import { APIPool } from "../../components/api/responses/APIPool";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { APIPostGroup } from "../../components/api/responses/APIPostGroup";
 import { Page, PageDefinition } from "../../components/data/Page";
+import { ModuleController } from "../../components/ModuleController";
 import { PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
+import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { MassDownloader } from "./MassDownloader";
 
 export class PoolDownloader extends RE6Module {
@@ -198,6 +200,9 @@ export class PoolDownloader extends RE6Module {
                 queueSize = 0;
             this.batchOverSize = false;
 
+            // Fetch DownloadCustomizer settings
+            const downloadSamples = ModuleController.fetchSettings<boolean>(DownloadCustomizer, "downloadSamples");
+
             // Add post data from the chunks to the queue
             dataChunks.forEach((chunk) => {
 
@@ -222,9 +227,9 @@ export class PoolDownloader extends RE6Module {
                     $("article.post-preview#post_" + post.id).attr("data-state", "preparing");
                     this.downloadQueue.add(
                         {
-                            name: this.createFilename(post),
-                            path: post.file.original,
-                            file: post.file.original.match(/.{32}\..*$/g)[0],
+                            name: this.createFilename(post, downloadSamples),
+                            path: downloadSamples ? post.file.sample : post.file.original,
+                            file: (downloadSamples ? post.file.sample : post.file.original).match(/.{32}\..*$/g)[0],
                             unid: post.id,
                             date: new Date(post.date.raw),
                             tags: post.tagString,
@@ -324,14 +329,15 @@ export class PoolDownloader extends RE6Module {
      * Creates a filename from the post data based on the current template
      * @param data Post data
      */
-    private createFilename(post: PostData): string {
+    private createFilename(post: PostData, downloadSamples = false): string {
         return MassDownloader.createFilenameBase(this.fetchSettings<string>("template"), post)
             .replace(/%pool%/g, this.poolName)
             .replace(/%index%/g, "" + (this.poolFiles.indexOf(post.id) + 1))
             .slice(0, 128)
             .replace(/-{2,}/g, "-")
             .replace(/-*$/g, "")
-            + "." + post.file.ext;
+            + "."
+            + ((downloadSamples && post.has.sample) ? "jpg" : post.file.ext);
     }
 
     /**

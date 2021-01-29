@@ -1070,6 +1070,19 @@ export class SettingsController extends RE6Module {
                     },
                     async (data) => { await downloadCustomizer.pushSettings("confirmDownload", data); }
                 ),
+                Form.spacer(3),
+
+                Form.checkbox(
+                    {
+                        value: downloadCustomizer.fetchSettings("downloadSamples"),
+                        label: `<b>Download Samples</b><br />Download the sampled (800px) images instead of the full original versions`,
+                        width: 3,
+                    },
+                    async (data) => {
+                        await downloadCustomizer.pushSettings("downloadSamples", data);
+                        if (downloadCustomizer.isInitialized()) downloadCustomizer.refreshDownloadLink();
+                    }
+                ),
             ]),
             Form.spacer(3),
 

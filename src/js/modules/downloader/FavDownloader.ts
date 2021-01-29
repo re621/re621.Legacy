@@ -2,10 +2,12 @@ import { DownloadQueue } from "../../components/api/DownloadQueue";
 import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { Page, PageDefinition } from "../../components/data/Page";
+import { ModuleController } from "../../components/ModuleController";
 import { Post, PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
+import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { BetterSearch } from "../search/BetterSearch";
 import { MassDownloader } from "./MassDownloader";
 
@@ -165,6 +167,9 @@ export class FavDownloader extends RE6Module {
             queueSize = 0;
         this.batchOverSize = false;
 
+        // Fetch DownloadCustomizer settings
+        const downloadSamples = ModuleController.fetchSettings<boolean>(DownloadCustomizer, "downloadSamples");
+
         // Add post data to the queue
         let queuedPost: PostData;
         while (queuedPost = this.posts.pop()) {
@@ -186,9 +191,9 @@ export class FavDownloader extends RE6Module {
                 .attr("data-state", "preparing");
             downloadQueue.add(
                 {
-                    name: this.createFilename(post),
-                    path: post.file.original,
-                    file: post.file.original.match(/.{32}\..*$/g)[0],
+                    name: this.createFilename(post, downloadSamples),
+                    path: downloadSamples ? post.file.sample : post.file.original,
+                    file: (downloadSamples ? post.file.sample : post.file.original).match(/.{32}\..*$/g)[0],
                     unid: post.id,
                     date: new Date(post.date.raw),
                     tags: post.tagString,
@@ -275,12 +280,13 @@ export class FavDownloader extends RE6Module {
      * Creates a filename from the post data based on the current template
      * @param data Post data
      */
-    private createFilename(post: PostData): string {
+    private createFilename(post: PostData, downloadSamples = false): string {
         return MassDownloader.createFilenameBase(this.fetchSettings<string>("template"), post)
             .slice(0, 128)
             .replace(/-{2,}/g, "-")
             .replace(/-*$/g, "")
-            + "." + post.file.ext;
+            + "."
+            + ((downloadSamples && post.has.sample) ? "jpg" : post.file.ext);
     }
 
 }
