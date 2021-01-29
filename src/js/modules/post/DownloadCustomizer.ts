@@ -28,6 +28,7 @@ export class DownloadCustomizer extends RE6Module {
             enabled: true,
             template: "%postid%-%artist%-%copyright%-%character%",
             confirmDownload: false,
+            downloadSamples: false,
             hotkeyDownload: "",
         };
     }
@@ -48,7 +49,7 @@ export class DownloadCustomizer extends RE6Module {
         const link = $("<a>")
             .attr({
                 id: "image-custom-download-file",
-                href: this.post.file.original,
+                href: this.fetchSettings<boolean>("downloadSamples") ? this.post.file.sample : this.post.file.original,
                 download: this.parseTemplate(),
             })
             .html("Download")
@@ -59,7 +60,7 @@ export class DownloadCustomizer extends RE6Module {
                 event.stopImmediatePropagation();
                 link.attr("loading", "true");
                 XM.Connect.browserDownload({
-                    url: link.attr("href"),
+                    url: this.fetchSettings<boolean>("downloadSamples") ? this.post.file.sample : this.post.file.original,
                     name: link.attr("download"),
                     saveAs: this.fetchSettings<boolean>("confirmDownload"),
                     onload: () => { link.removeAttr("loading"); }
@@ -87,7 +88,10 @@ export class DownloadCustomizer extends RE6Module {
 
     /** Creates a download link with the saved template */
     public refreshDownloadLink(): void {
-        $("#image-custom-download-file").attr("download", this.parseTemplate());
+        $("#image-custom-download-file").attr({
+            href: this.fetchSettings<boolean>("downloadSamples") ? this.post.file.sample : this.post.file.original,
+            download: this.parseTemplate(),
+        });
     }
 
     private getTagsBlock(): string {
@@ -98,7 +102,7 @@ export class DownloadCustomizer extends RE6Module {
     }
 
     private hotkeyDownload(): void {
-        $("#image-custom-download-file").click();
+        $("#image-custom-download-file")[0].click();
     }
 
     /**

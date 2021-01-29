@@ -56,6 +56,7 @@ export class TagSuggester extends RE6Module {
         this.tagOutput = $("#post_tags");
         this.container = $("<tag-suggester>")
             .attr("ready", "true")
+            .on("recount", () => { this.container.attr("count", this.container.children().length); })
             .appendTo(this.tagOutput.parent());
 
         // Fix the secret switch breaking the module
@@ -186,10 +187,9 @@ export class TagSuggester extends RE6Module {
         for (const [tag, description] of Object.entries(suggestions))
             addSuggestion(tag, description + "");
 
-        container.attr({
-            "ready": "true",
-            "count": container.children().length,
-        });
+        container
+            .attr("ready", "true")
+            .trigger("recount");
 
         /** Checks if the specieid key set is already present in the tags or in suggestions */
         function tagAlreadyPresent(tags: Set<string>, suggestions: string[], keyset: string[]): boolean {
@@ -221,12 +221,20 @@ export class TagSuggester extends RE6Module {
                 .attr("href", "javascript://")
                 .on("click", (event) => {
                     event.preventDefault();
+
+                    // Add the tag to the list
                     tagOutput.val((index: number, value: string) => {
                         return value
                             + ((value.length == 0 || value.endsWith(" ")) ? "" : " ")
                             + tagName
                             + " ";
                     });
+
+                    // Remove the suggestion
+                    $(event.currentTarget).parent("tag-entry").remove();
+                    container.trigger("recount");
+
+                    // Trigger SmartAlias update
                     Util.Events.triggerVueEvent(tagOutput, "input", "vue-event-alt");
                 })
                 .html(tagName)

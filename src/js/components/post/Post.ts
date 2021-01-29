@@ -68,6 +68,7 @@ export class Post implements PostData {
         file: boolean;                      // true if the post wasn't deleted, and is not on the anon blacklist
         children: boolean;                  // whether the post has any children
         parent: boolean;                    // whether the post has a parent
+        sample: boolean;                    // whether the post has a sampled version
     };
 
     public rel: {
@@ -398,6 +399,7 @@ export interface PostData {
         file: boolean;
         children: boolean;
         parent: boolean;
+        sample: boolean;
     };
 
     rel: {
@@ -488,6 +490,7 @@ export namespace PostData {
                 file: data.file.url !== null,
                 children: data.relationships.has_active_children,
                 parent: data.relationships.parent_id !== undefined && data.relationships.parent_id !== null,
+                sample: data.sample.has,
             },
 
             rel: {
@@ -674,6 +677,7 @@ export namespace PostData {
                 file: $article.attr("data-file-url") !== undefined,
                 children: $article.attr("data-has-active-children") == "true",
                 parent: $article.attr("data-parent-id") !== undefined,
+                sample: urls["original"] !== urls["sample"],
             },
 
             rel: {

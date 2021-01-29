@@ -99,7 +99,7 @@ export class DownloadQueue {
      * @param thread Thread number that this process belongs to
      */
     private async createNewProcess(thread: number): Promise<any> {
-        return new Promise(async (resolve) => {
+        return new Promise<void>(async (resolve) => {
 
             Util.Events.one(`re621.dl-${this.id}.cancel`, () => {
                 resolve();
