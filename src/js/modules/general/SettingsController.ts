@@ -167,127 +167,6 @@ export class SettingsController extends RE6Module {
                         },
                         (value) => { Util.LS.setItem("re621.mainpage", value); }
                     ),
-                    Form.spacer(3, true),
-
-                    Form.input(
-                        {
-                            name: "template", value: titleCustomizer.fetchSettings("template"),
-                            label: `<b>Page Title</b>`,
-                            width: 3,
-                        },
-                        async (data) => {
-                            await titleCustomizer.pushSettings("template", data);
-                            if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
-                        }
-                    ),
-                    Form.section({ columns: 3, width: 3, }, [
-                        Form.div({ value: `<div class="notice">The following variables can be used:</div>`, width: 3 }),
-                        Form.copy({ value: "%postid%", label: "Post ID" }),
-                        Form.copy({ value: "%artist%", label: "Artist" }),
-                        Form.copy({ value: "%copyright%", label: "Copyright" }),
-                        Form.copy({ value: "%character%", label: "Characters" }),
-                        Form.copy({ value: "%species%", label: "Species" }),
-                        Form.copy({ value: "%general%", label: "General" }),
-                        Form.copy({ value: "%meta%", label: "Meta" }),
-                        Form.copy({ value: "%all%", label: "All Tags" }),
-                    ]),
-                    Form.spacer(3, true),
-
-                    Form.checkbox(
-                        { value: titleCustomizer.fetchSettings("symbolsEnabled"), label: "<b>Title Icons</b>", width: 3 },
-                        async (data) => {
-                            await titleCustomizer.pushSettings("symbolsEnabled", data);
-                            if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
-                        }
-                    ),
-                    Form.input(
-                        { value: titleCustomizer.fetchSettings("symbolFav"), label: "Favorite" },
-                        async (data) => {
-                            await titleCustomizer.pushSettings("symbolFav", data);
-                            if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
-                        }
-                    ),
-                    Form.input({ value: titleCustomizer.fetchSettings("symbolVoteUp"), label: "Upvoted", },
-                        async (data) => {
-                            await titleCustomizer.pushSettings("symbolVoteUp", data);
-                            if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
-                        }
-                    ),
-                    Form.input({ value: titleCustomizer.fetchSettings("symbolVoteDown"), label: "Downvoted", },
-                        async (data) => {
-                            await titleCustomizer.pushSettings("symbolVoteDown", data);
-                            if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
-                        }
-                    ),
-
-                ]),
-
-                // Page Layout
-                Form.accordionTab({ name: "layout", label: "Page Layout", columns: 3, width: 3 }, [
-
-                    Form.checkbox(
-                        {
-                            value: searchUtilities.fetchSettings("improveTagCount"),
-                            label: "<b>Expanded Tag Count</b><br />Replace the rounded tag count in the sidebar with the precise one",
-                            width: 3,
-                        },
-                        async (data) => {
-                            await searchUtilities.pushSettings("improveTagCount", data);
-                            if (searchUtilities.isInitialized()) searchUtilities.improveTagCount(data);
-                        }
-                    ),
-                    Form.spacer(3),
-
-                    Form.checkbox(
-                        {
-                            value: searchUtilities.fetchSettings("shortenTagNames"),
-                            label: "<b>Shorten Tag Names</b><br />Cut off long tag names to make them fit on one line",
-                            width: 3,
-                        },
-                        async (data) => {
-                            await searchUtilities.pushSettings("shortenTagNames", data);
-                            if (searchUtilities.isInitialized()) searchUtilities.shortenTagNames(data);
-                        }
-                    ),
-                    Form.spacer(3),
-
-                    Form.checkbox(
-                        {
-                            value: searchUtilities.fetchSettings("hidePlusMinusIcons"),
-                            label: "<b>Hide + and - Icons</b><br />Remove these icons from view",
-                            width: 3,
-                        },
-                        async (data) => {
-                            await searchUtilities.pushSettings("hidePlusMinusIcons", data);
-                            if (searchUtilities.isInitialized()) searchUtilities.hidePlusMinusIcons(data);
-                        }
-                    ),
-                    Form.spacer(3),
-
-                    Form.checkbox(
-                        {
-                            value: postViewer.fetchSettings("moveChildThumbs"),
-                            label: "<b>Move Related Thumbnails</b><br />Moves the parent / child thumbnails to the sidebar",
-                            width: 2,
-                        },
-                        async (data) => {
-                            await postViewer.pushSettings("moveChildThumbs", data);
-                        }
-                    ),
-                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
-                    Form.spacer(3),
-
-                    Form.checkbox(
-                        {
-                            value: postViewer.fetchSettings("boldenTags"),
-                            label: "<b>Boldened Tags</b><br />Restore the classic boldened look on the sidebar tags",
-                            width: 3,
-                        },
-                        async (data) => {
-                            await postViewer.pushSettings("boldenTags", data);
-                            postViewer.toggleBoldenedTags(data);
-                        }
-                    ),
                     Form.hr(3),
 
                     // ------------------------------------------ //
@@ -331,6 +210,76 @@ export class SettingsController extends RE6Module {
                             miscellaneous.createStickyEditBox(data);
                         }
                     ),
+
+                ]),
+
+                // Sidebar
+                Form.accordionTab({ name: "sidebar", label: "Sidebar", columns: 3, width: 3 }, [
+
+                    Form.checkbox(
+                        {
+                            value: searchUtilities.fetchSettings("autoFocusSearch"),
+                            label: "<b>Auto Focus Search</b><br />If true, the cursor will be set to the search bar automatically",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await searchUtilities.pushSettings("autoFocusSearch", data);
+                        }
+                    ),
+                    Form.hr(3),
+
+                    Form.checkbox(
+                        {
+                            value: searchUtilities.fetchSettings("improveTagCount"),
+                            label: "<b>Expanded Tag Count</b><br />Replace the rounded tag count in the sidebar with the precise one",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await searchUtilities.pushSettings("improveTagCount", data);
+                            if (searchUtilities.isInitialized()) searchUtilities.improveTagCount(data);
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: searchUtilities.fetchSettings("shortenTagNames"),
+                            label: "<b>Shorten Tag Names</b><br />Cut off long tag names to make them fit on one line",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await searchUtilities.pushSettings("shortenTagNames", data);
+                            if (searchUtilities.isInitialized()) searchUtilities.shortenTagNames(data);
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: searchUtilities.fetchSettings("hidePlusMinusIcons"),
+                            label: "<b>Hide + and - Icons</b><br />Remove these icons from view",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await searchUtilities.pushSettings("hidePlusMinusIcons", data);
+                            if (searchUtilities.isInitialized()) searchUtilities.hidePlusMinusIcons(data);
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: postViewer.fetchSettings("boldenTags"),
+                            label: "<b>Boldened Tags</b><br />Restore the classic boldened look on the sidebar tags",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await postViewer.pushSettings("boldenTags", data);
+                            postViewer.toggleBoldenedTags(data);
+                        }
+                    ),
+                    // Form.spacer(3),
+
                 ]),
 
                 // Thumbnail Enhancer
@@ -765,8 +714,77 @@ export class SettingsController extends RE6Module {
 
                 ]),
 
-                // Miscellaneous
+                // Post Page
                 Form.accordionTab({ name: "postpage", label: "Post Page", columns: 3, width: 3 }, [
+
+                    Form.input(
+                        {
+                            name: "template", value: titleCustomizer.fetchSettings("template"),
+                            label: `<b>Page Title</b>`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await titleCustomizer.pushSettings("template", data);
+                            if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
+                        }
+                    ),
+                    Form.section({ columns: 3, width: 3, }, [
+                        Form.div({ value: `<div class="notice">The following variables can be used:</div>`, width: 3 }),
+                        Form.copy({ value: "%postid%", label: "Post ID" }),
+                        Form.copy({ value: "%artist%", label: "Artist" }),
+                        Form.copy({ value: "%copyright%", label: "Copyright" }),
+                        Form.copy({ value: "%character%", label: "Characters" }),
+                        Form.copy({ value: "%species%", label: "Species" }),
+                        Form.copy({ value: "%general%", label: "General" }),
+                        Form.copy({ value: "%meta%", label: "Meta" }),
+                        Form.copy({ value: "%all%", label: "All Tags" }),
+                    ]),
+                    Form.spacer(3, true),
+
+                    Form.checkbox(
+                        { value: titleCustomizer.fetchSettings("symbolsEnabled"), label: "<b>Title Icons</b>", width: 3 },
+                        async (data) => {
+                            await titleCustomizer.pushSettings("symbolsEnabled", data);
+                            if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
+                        }
+                    ),
+                    Form.input(
+                        { value: titleCustomizer.fetchSettings("symbolFav"), label: "Favorite" },
+                        async (data) => {
+                            await titleCustomizer.pushSettings("symbolFav", data);
+                            if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
+                        }
+                    ),
+                    Form.input({ value: titleCustomizer.fetchSettings("symbolVoteUp"), label: "Upvoted", },
+                        async (data) => {
+                            await titleCustomizer.pushSettings("symbolVoteUp", data);
+                            if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
+                        }
+                    ),
+                    Form.input({ value: titleCustomizer.fetchSettings("symbolVoteDown"), label: "Downvoted", },
+                        async (data) => {
+                            await titleCustomizer.pushSettings("symbolVoteDown", data);
+                            if (titleCustomizer.isInitialized()) titleCustomizer.refreshPageTitle();
+                        }
+                    ),
+                    Form.hr(3),
+
+                    // ------------------------------------------ //
+
+                    Form.checkbox(
+                        {
+                            value: postViewer.fetchSettings("moveChildThumbs"),
+                            label: "<b>Move Related Thumbnails</b><br />Moves the parent / child thumbnails to the sidebar",
+                            width: 2,
+                        },
+                        async (data) => {
+                            await postViewer.pushSettings("moveChildThumbs", data);
+                        }
+                    ),
+                    Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
+                    Form.hr(3),
+
+                    // ------------------------------------------ //
 
                     Form.subheader("Adaptive Scaling", "Dynamically select the scaling mode according to settings below", 2),
                     Form.select(
