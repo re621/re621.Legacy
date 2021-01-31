@@ -218,6 +218,18 @@ export class SettingsController extends RE6Module {
 
                     Form.checkbox(
                         {
+                            value: searchUtilities.fetchSettings("autoFocusSearch"),
+                            label: "<b>Auto Focus Search</b><br />If true, the cursor will be set to the search bar automatically",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await searchUtilities.pushSettings("autoFocusSearch", data);
+                        }
+                    ),
+                    Form.hr(3),
+
+                    Form.checkbox(
+                        {
                             value: searchUtilities.fetchSettings("improveTagCount"),
                             label: "<b>Expanded Tag Count</b><br />Replace the rounded tag count in the sidebar with the precise one",
                             width: 3,

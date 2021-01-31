@@ -41,6 +41,7 @@ export class SearchUtilities extends RE6Module {
             improveTagCount: true,
             shortenTagNames: true,
             hidePlusMinusIcons: false,
+            autoFocusSearch: false,
 
             collapseCategories: true,
             categoryData: [],
@@ -79,7 +80,7 @@ export class SearchUtilities extends RE6Module {
         super.create();
 
         // Auto-focus on the searchbar
-        if (Page.matches(PageDefinition.search)) {
+        if (Page.matches(PageDefinition.search) && this.fetchSettings<boolean>("autoFocusSearch")) {
             const searchbox = $("section#search-box input");
             if (searchbox.val() == "") searchbox.trigger("focus");
         }
