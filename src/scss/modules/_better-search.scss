@@ -348,6 +348,13 @@ search-content > post[filetype=swf] > a:after { content: "FLASH" }
 search-content > post[deleted=true] > a:after { content: "DELETED" }
 
 
+/* Visited Highlights */
+search-content[highlight-visited=true] > post > a { border-bottom: 0.125rem solid #444; }
+search-content[highlight-visited=true] > post > a:visited { border-bottom-color: #d2a109; }
+search-content[highlight-visited=true] > post[rendered=false] {
+    border-bottom: 1.125rem solid #ffffff25;
+}
+
 /* Thumbnail Resizing */
 search-content > post img {
     object-fit: cover;

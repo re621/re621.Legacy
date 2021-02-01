@@ -72,6 +72,8 @@ export class BetterSearch extends RE6Module {
             loadAutomatically: true,                        // Load posts automatically while scrolling down
             loadPrevPages: false,                           // If enabled, will load 3 pages before the current one (if available)
             hidePageBreaks: true,                           // Show a visual separator between different pages
+
+            highlightVisited: true,                         // Adds a colored border to visited posts
         };
     }
 
@@ -454,6 +456,7 @@ export class BetterSearch extends RE6Module {
             "ribbonsAlt",
 
             "hidePageBreaks",
+            "highlightVisited",
         ]);
 
         // Scaling Settings
@@ -470,6 +473,10 @@ export class BetterSearch extends RE6Module {
         // InfScroll separators
         if (conf.hidePageBreaks) this.$content.attr("hide-page-breaks", "true");
         else this.$content.removeAttr("hide-page-breaks");
+
+        // Add border to visited pages
+        if (conf.highlightVisited) this.$content.attr("highlight-visited", "true");
+        else this.$content.removeAttr("highlight-visited");
     }
 
     /** Restarts various event listeners used by the module */
