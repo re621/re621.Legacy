@@ -107,8 +107,8 @@ class APIEndpoint {
      * @param data Data to be sent with the request
      * @param delay Optional delay override, in milliseconds
      */
-    public async post(data?: APIQuery, delay?: number): Promise<any> {
-        return this.queue.createRequest(this.getParsedPath(), {}, "POST", this.formatParam(data), this.name, this.node, delay).then(
+    public async post(data?: APIQuery, delay?: number, noEncode?: boolean): Promise<any> {
+        return this.queue.createRequest(this.getParsedPath(), {}, "POST", this.formatParam(data, noEncode), this.name, this.node, delay).then(
             (data) => {
                 return Promise.resolve(data);
             },
@@ -148,9 +148,9 @@ class APIEndpoint {
      * Ensures that the provided APIQuery is in the correct format.  
      * Flattens objects and arrays in order to return a list of key-value pairs.
      * @param input APIQuery to format
-     * @param encode If true, the values are URI encoded
+     * @param noEncode If true, the values are not URI encoded
      */
-    private formatParam(input: APIQuery): FormattedAPIQuery {
+    private formatParam(input: APIQuery, noEncode = false): FormattedAPIQuery {
         Debug.log("input", input);
         if (input === undefined || input === null) return {};
 
@@ -160,18 +160,18 @@ class APIEndpoint {
 
             if (Array.isArray(value)) {
                 for (const [index, elem] of value.entries())
-                    value[index] = cleanURIComponent(elem);
+                    value[index] = cleanURIComponent(elem, noEncode);
                 response[key] = value.join("+");
             } else if (typeof value == "object") {
                 for (const [subKey, subValue] of Object.entries(value)) {
                     if (Array.isArray(subValue)) {
                         for (const [index, subElement] of subValue.entries())
-                            subValue[index] = cleanURIComponent(subElement);
+                            subValue[index] = cleanURIComponent(subElement, noEncode);
                         response[`${key}[${subKey}]`] = subValue.join("+");
-                    } else response[`${key}[${subKey}]`] = cleanURIComponent(subValue);
+                    } else response[`${key}[${subKey}]`] = cleanURIComponent(subValue, noEncode);
                 }
             } else {
-                response[key] = cleanURIComponent(value);
+                response[key] = cleanURIComponent(value, noEncode);
             }
         }
 
@@ -179,8 +179,8 @@ class APIEndpoint {
         return response;
 
         /** Prevent double-encoding the values */
-        function cleanURIComponent(value: APIQueryEntry): string {
-            return encodeURIComponent(decodeURIComponent(value + ""));
+        function cleanURIComponent(value: APIQueryEntry, noEncode: boolean): string {
+            return noEncode ? encodeURIComponent(value + "") : encodeURIComponent(decodeURIComponent(value + ""));
         }
     }
 
@@ -309,6 +309,7 @@ export class E621 {
         query["_client"] = window["re621"]["useragent"];
 
         const entry = new Request(location.origin + "/" + path + "?" + FormattedAPIQuery.stringify(query), requestInfo);
+        console.log(path, requestInfo);
         const index = this.requestIndex++;
         const final = new Promise<any>((resolve, reject) => {
             this.emitter.one("api.re621.result-" + index, (e, data, status, endpoint, node) => {
@@ -344,7 +345,7 @@ export class E621 {
             const item = this.queue.shift();
             Debug.connectLog(item.request.url);
 
-            await new Promise(async (resolve) => {
+            await new Promise<void>(async (resolve) => {
                 fetch(item.request).then(
                     async (response) => {
                         if (response.ok) {
