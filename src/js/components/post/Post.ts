@@ -48,6 +48,9 @@ export class Post implements PostData {
         lore: Set<string>;
     };
 
+    public sources: string[];
+    public description: string;
+
     public file: {
         ext: string;                        // file extension
         md5: string;
@@ -379,6 +382,9 @@ export interface PostData {
         lore: Set<string>;
     };
 
+    sources: string[];
+    description: string;
+
     file: {
         ext: string;
         md5: string;
@@ -470,6 +476,9 @@ export namespace PostData {
                 lore: new Set(data.tags.lore),
             },
 
+            sources: data.sources,
+            description: data.description,
+
             file: {
                 ext: data.file.ext,
                 md5: data.file.md5,
@@ -533,6 +542,14 @@ export namespace PostData {
             meta: getTags("meta"),
             species: getTags("species"),
         };
+
+        // Sources formatting is incorrect
+        // All sources are dumped into the first element, separated by newlines
+        if (data.sources.length > 0)
+            data.sources = data.sources[0].split("\n");
+
+        // Rating is missing from the data
+        data.rating = PostRating.fromValue($article.attr("data-rating"));
 
         // Restore the preview image. Not used anywhere, but avoids an error.
         const md5 = data["file"]["md5"],
@@ -656,6 +673,9 @@ export namespace PostData {
                 meta: new Set(),
                 lore: new Set(),
             },
+
+            sources: [],
+            description: "",
 
             file: {
                 ext: extension,
