@@ -123,7 +123,6 @@ export class Miscellaneous extends RE6Module {
                 if (post.sources.length > 0) attributes.push("sources=" + uriEncodeArray(post.sources));
                 if (post.description.length > 0) attributes.push("description=" + encodeURIComponent(post.description));
                 attributes.push("tags=" + encodeURIComponent(post.tagString));
-                attributes.push("parent=" + post.id);
                 attributes.push("simple-form=true");
                 attributes.push("rating=" + post.rating);
 
