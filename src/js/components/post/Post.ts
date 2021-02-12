@@ -138,6 +138,7 @@ export class Post implements PostData {
                 "rendered": true,
             })
             .removeAttr("style")
+            .removeAttr("error")
             .html("");
 
         // Render elements
@@ -166,6 +167,7 @@ export class Post implements PostData {
                 "rendered": false,
                 "loading": false,
             })
+            .removeAttr("error")
             .html(this.id + "")
             .children().remove();
 

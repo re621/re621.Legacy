@@ -326,6 +326,7 @@ search-content > post[deleted=true] {
 
 
 /* Placeholder Images */
+search-content > post[error=true] > a:after,
 search-content > post[filetype=swf] > a:after,
 search-content > post[deleted=true] > a:after {
     content: "PLACEHOLDER";
@@ -344,6 +345,7 @@ search-content > post[deleted=true] > a:after {
     font-size: 1.5rem;
     color: #999;
 }
+search-content > post[error=true] > a:after { content: "ERROR" }
 search-content > post[filetype=swf] > a:after { content: "FLASH" }
 search-content > post[deleted=true] > a:after { content: "DELETED" }
 
