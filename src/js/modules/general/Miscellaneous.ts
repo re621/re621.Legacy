@@ -116,7 +116,7 @@ export class Miscellaneous extends RE6Module {
             this.fixTicketTypos();
 
         // Add "Upload Superior" button
-        $(() => {
+        $(async () => {
             if (Page.matches(PageDefinition.post)) {
                 const post = Post.getViewingPost();
                 const attributes = [];
@@ -139,9 +139,11 @@ export class Miscellaneous extends RE6Module {
                     $(".the_secret_switch")[0].click();
 
                 // Add a space after the tags, or autocomplete triggers
-                const tagsEl = $("#post_tags").val((index, cur) => cur + " ");
-                console.log("val", tagsEl.val());
-                Util.Events.triggerVueEvent(tagsEl, "input");
+                const tags = Page.getQueryParameter("tags");
+                if (tags) {
+                    const tagsEl = $("#post_tags").val(tags + " ");
+                    Util.Events.triggerVueEvent(tagsEl, "input");
+                }
 
                 // Fill in the post rating
                 const rating = Page.getQueryParameter("rating");
