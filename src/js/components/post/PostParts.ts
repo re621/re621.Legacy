@@ -137,9 +137,23 @@ export class PostParts {
 
         const $image = $("<img>")
             .attr("src", DomUtilities.getPlaceholderImage())
-            .one("load", () => { post.$ref.removeAttr("loading"); });
+            .one("load", () => {
+                post.$ref.removeAttr("loading");
+                if (conf.hoverTags)
+                    $image.attr("title", PostParts.formatHoverText(post));
+            })
+            .one("error", () => {
+                post.$ref
+                    .removeAttr("loading")
+                    .attr("error", "true");
 
-        if (conf.hoverTags) $image.attr("title", PostParts.formatHoverText(post));
+                $image
+                    .attr("src", DomUtilities.getPlaceholderImage())
+                    .off("mouseenter.re621.upscale")
+                    .off("mouseleave.re621.upscale");
+
+                post.loaded = LoadedFileType.ORIGINAL;
+            });
 
         // Load appropriate image
         if (post.flags.has(PostFlag.Deleted)) {

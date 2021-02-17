@@ -367,20 +367,6 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3, true),
 
-                    // Preserve Hover Text
-                    Form.checkbox(
-                        {
-                            value: betterSearch.fetchSettings("hoverTags"),
-                            label: "<b>Preserve Hover Text</b><br />Restores text displayed when hovering over the thumbnail",
-                            width: 3,
-                        },
-                        async (data) => {
-                            await betterSearch.pushSettings("hoverTags", data);
-                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
-                        }
-                    ),
-                    Form.spacer(3, true),
-
                     Form.collapse({ name: "scaling", columns: 3, width: 3, title: "Scaling Options", collapsed: true }, [
 
                         // Thumbnail Scaling
@@ -519,74 +505,106 @@ export class SettingsController extends RE6Module {
                     ]),
                     Form.spacer(3, true),
 
-                    // Voting Buttons
+                    Form.collapse({ name: "elements", columns: 3, width: 3, title: "Thumbnail Elements", collapsed: true }, [
+
+                        // Preserve Hover Text
+                        Form.checkbox(
+                            {
+                                value: betterSearch.fetchSettings("hoverTags"),
+                                label: "<b>Preserve Hover Text</b><br />Restores text displayed when hovering over the thumbnail",
+                                width: 3,
+                            },
+                            async (data) => {
+                                await betterSearch.pushSettings("hoverTags", data);
+                                if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
+                            }
+                        ),
+                        Form.spacer(3, true),
+
+                        // Voting Buttons
+                        Form.checkbox(
+                            {
+                                name: "votebutton",
+                                value: betterSearch.fetchSettings("buttonsVote"),
+                                label: "<b>Voting Buttons</b><br />Adds voting buttons when hovering over a thumbnail",
+                                width: 3,
+                            },
+                            async (data) => {
+                                await betterSearch.pushSettings("buttonsVote", data);
+                                if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
+                            }
+                        ),
+                        Form.spacer(3, true),
+
+                        // Favorite Button
+                        Form.checkbox(
+                            {
+                                name: "favbutton",
+                                value: betterSearch.fetchSettings("buttonsFav"),
+                                label: "<b>Favorite Button</b><br />Adds a +favorite button when hovering over a thumbnail",
+                                width: 3
+                            },
+                            async (data) => {
+                                await betterSearch.pushSettings("buttonsFav", data);
+                                if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
+                            }
+                        ),
+                        Form.spacer(3, true),
+
+                        // Ribbons
+                        Form.checkbox(
+                            {
+                                value: betterSearch.fetchSettings("ribbonsRel"),
+                                label: "<b>Relations Ribbons</b><br />Display ribbons for parent/child relationships",
+                                width: 3,
+                            },
+                            async (data) => {
+                                await betterSearch.pushSettings("ribbonsRel", data);
+                                if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
+                            }
+                        ),
+                        Form.spacer(3, true),
+
+                        Form.checkbox(
+                            {
+                                value: betterSearch.fetchSettings("ribbonsFlag"),
+                                label: "<b>Status Ribbons</b><br />Display post status as a colored ribbon on the post",
+                                width: 3,
+                            },
+                            async (data) => {
+                                await betterSearch.pushSettings("ribbonsFlag", data);
+                                if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
+                            }
+                        ),
+                        Form.spacer(3, true),
+
+                        Form.checkbox(
+                            {
+                                value: betterSearch.fetchSettings("ribbonsAlt"),
+                                label: "<b>Alternative Ribbons</b><br />Place the ribbons on the bottom of the thumbnail",
+                                width: 3,
+                            },
+                            async (data) => {
+                                await betterSearch.pushSettings("ribbonsAlt", data);
+                                if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
+                            }
+                        ),
+                    ]),
+                    Form.spacer(3, true),
+
+                    // Underlined Visited Posts
                     Form.checkbox(
                         {
-                            name: "votebutton",
-                            value: betterSearch.fetchSettings("buttonsVote"),
-                            label: "<b>Voting Buttons</b><br />Adds voting buttons when hovering over a thumbnail",
+                            value: betterSearch.fetchSettings("highlightVisited"),
+                            label: "<b>Underline Visited Posts</b><br />Adds an orange bottom border to visited posts",
                             width: 3,
                         },
                         async (data) => {
-                            await betterSearch.pushSettings("buttonsVote", data);
-                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
-                        }
-                    ),
-                    Form.spacer(3, true),
-
-                    // Favorite Button
-                    Form.checkbox(
-                        {
-                            name: "favbutton",
-                            value: betterSearch.fetchSettings("buttonsFav"),
-                            label: "<b>Favorite Button</b><br />Adds a +favorite button when hovering over a thumbnail",
-                            width: 3
-                        },
-                        async (data) => {
-                            await betterSearch.pushSettings("buttonsFav", data);
-                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
-                        }
-                    ),
-                    Form.spacer(3, true),
-
-                    // Ribbons
-                    Form.checkbox(
-                        {
-                            value: betterSearch.fetchSettings("ribbonsRel"),
-                            label: "<b>Relations Ribbons</b><br />Display ribbons for parent/child relationships",
-                            width: 3,
-                        },
-                        async (data) => {
-                            await betterSearch.pushSettings("ribbonsRel", data);
-                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
-                        }
-                    ),
-                    Form.spacer(3, true),
-
-                    Form.checkbox(
-                        {
-                            value: betterSearch.fetchSettings("ribbonsFlag"),
-                            label: "<b>Status Ribbons</b><br />Display post status as a colored ribbon on the post",
-                            width: 3,
-                        },
-                        async (data) => {
-                            await betterSearch.pushSettings("ribbonsFlag", data);
-                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
-                        }
-                    ),
-                    Form.spacer(3, true),
-
-                    Form.checkbox(
-                        {
-                            value: betterSearch.fetchSettings("ribbonsAlt"),
-                            label: "<b>Alternative Ribbons</b><br />Place the ribbons on the bottom of the thumbnail",
-                            width: 3,
-                        },
-                        async (data) => {
-                            await betterSearch.pushSettings("ribbonsAlt", data);
+                            await betterSearch.pushSettings("highlightVisited", data);
                             if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                         }
                     ),
+                    Form.spacer(3, true),
 
                 ]),
 
@@ -1420,6 +1438,16 @@ export class SettingsController extends RE6Module {
                             if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
                             smartAlias.pushSettings("minCachedTags", data);
                         }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("asciiWarning"),
+                            label: `<b>Flag Non-ASCII Tags</b><br />Flags that contain certain characters are invalid and should be replaced`,
+                            width: 3,
+                        },
+                        (data) => { smartAlias.pushSettings("asciiWarning", data); }
                     ),
                     Form.hr(3),
 

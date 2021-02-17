@@ -5,6 +5,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Prompt } from "../../components/structure/Prompt";
+import { Debug } from "../../components/utility/Debug";
 
 // Available icons for formatting buttons
 const iconDefinitions = {
@@ -535,7 +536,9 @@ class FormattingHelper {
             this.$toggleTabs.find("a").toggleClass("active");
 
             // format the text
-            E621.DTextPreview.post({ "body": this.$textarea.val() }).then((response) => {
+            // Debug.log(`[${this.$textarea.val()}]`);
+            E621.DTextPreview.post({ "body": this.$textarea.val() }, undefined, true).then((response) => {
+                Debug.log(response);
                 this.$preview.html(response[0].html);
                 Danbooru.E621.addDeferredPosts(response[0].posts);
                 Danbooru.Thumbnails.initialize();

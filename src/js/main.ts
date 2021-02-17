@@ -25,6 +25,7 @@ import { SettingsController } from "./modules/general/SettingsController";
 import { ThemeCustomizer } from "./modules/general/ThemeCustomizer";
 import { EditTracker } from "./modules/misc/EditTracker";
 import { ProfileEnhancer } from "./modules/misc/ProfileEnhancer";
+import { ScriptAssistant } from "./modules/misc/ScriptAssistant";
 import { SmartAlias } from "./modules/misc/SmartAlias";
 import { TagSuggester } from "./modules/misc/TagSuggester";
 import { UploadUtilities } from "./modules/misc/UploadUtilities";
@@ -79,6 +80,7 @@ const loadOrder = [
     EditTracker,
     WikiEnhancer,
     UploadUtilities,
+    ScriptAssistant,
 
     FavDownloader,
     PoolDownloader,

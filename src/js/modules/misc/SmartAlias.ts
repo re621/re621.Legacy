@@ -5,6 +5,7 @@ import { AvoidPosting } from "../../components/cache/AvoidPosting";
 import { TagCache } from "../../components/cache/TagCache";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { TagValidator } from "../../components/utility/TagValidator";
 import { Util } from "../../components/utility/Util";
 
 export class SmartAlias extends RE6Module {
@@ -58,6 +59,7 @@ export class SmartAlias extends RE6Module {
 
             replaceAliasedTags: true,
             fixCommonTypos: false,
+            asciiWarning: true,
             minPostsWarning: 20,
             compactOutput: false,
 
@@ -298,6 +300,7 @@ export class SmartAlias extends RE6Module {
 
         // Get the settings
         const minPostsWarning = this.fetchSettings<number>("minPostsWarning"),
+            asciiWarning = this.fetchSettings<boolean>("asciiWarning"),
             tagOrder = this.fetchSettings<TagOrder>("tagOrder");
 
 
@@ -326,7 +329,7 @@ export class SmartAlias extends RE6Module {
         }
 
         // Redraw the container to indicate loading
-        redrawContainerContents($container, tags, minPostsWarning, tagOrder, lookup);
+        redrawContainerContents($container, tags, minPostsWarning, asciiWarning, tagOrder, lookup);
 
 
         // Step 3
@@ -403,6 +406,7 @@ export class SmartAlias extends RE6Module {
                 ambiguous: false,
                 invalid: false,
                 dnp: AvoidPosting.has(tag),
+                errors: TagValidator.runVerbose(tag),
 
                 cached: true,
             };
@@ -430,6 +434,7 @@ export class SmartAlias extends RE6Module {
                         ambiguous: ambiguousTags.has(result.name),
                         invalid: invalidTags.has(result.name),
                         dnp: AvoidPosting.has(result.name),
+                        errors: TagValidator.runVerbose(result.name),
 
                         cached: false,
                     };
@@ -445,6 +450,7 @@ export class SmartAlias extends RE6Module {
                     ambiguous: false,
                     invalid: true,
                     dnp: AvoidPosting.has(tagName),
+                    errors: TagValidator.runVerbose(tagName),
 
                     cached: false,
                 };
@@ -468,7 +474,7 @@ export class SmartAlias extends RE6Module {
         // Step 6
         // Redraw the tag data output container
         // console.log("data", SmartAlias.tagData);
-        redrawContainerContents($container, tags, minPostsWarning, tagOrder);
+        redrawContainerContents($container, tags, minPostsWarning, asciiWarning, tagOrder);
 
 
         // Step 7
@@ -493,7 +499,7 @@ export class SmartAlias extends RE6Module {
          * @param tags Tags to display
          * @param loading Tags to mark as loading
          */
-        function redrawContainerContents($container: JQuery<HTMLElement>, tags: string[], minPostsWarning: number, tagOrder: TagOrder, loading = new Set<string>()): void {
+        function redrawContainerContents($container: JQuery<HTMLElement>, tags: string[], minPostsWarning: number, asciiWarning: boolean, tagOrder: TagOrder, loading = new Set<string>()): void {
             $container
                 .html("")
                 .toggleClass("grouped", tagOrder == TagOrder.Grouped);
@@ -569,7 +575,14 @@ export class SmartAlias extends RE6Module {
                         "color": color,
                         "title": title,
                     })
-                    .html(`<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tagName)}" target="_blank" tabindex="-1">${displayName}</a> ${text}`)
+                    .html(
+                        `<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tagName)}" target="_blank" tabindex="-1">${displayName}</a> ${text}`
+                        + (
+                            (asciiWarning && data && data.errors.length > 0 && !data.dnp)
+                                ? ` <span class="fas fa-exclamation-triangle tag-warning" title="${data.errors.join("\n")}"></span>`
+                                : ``
+                        )
+                    )
                     .appendTo($container);
             }
         }
@@ -741,6 +754,7 @@ interface Tag {
     invalid: boolean;
     ambiguous: boolean;
     dnp: boolean;
+    errors: string[];
 
     cached: boolean;
 }

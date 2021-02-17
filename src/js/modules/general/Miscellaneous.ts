@@ -4,8 +4,10 @@ import { APIPost } from "../../components/api/responses/APIPost";
 import { XM } from "../../components/api/XM";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
+import { Post } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
+import { Util } from "../../components/utility/Util";
 import { BetterSearch, ImageClickAction } from "../search/BetterSearch";
 
 /**
@@ -113,6 +115,43 @@ export class Miscellaneous extends RE6Module {
         if (Page.matches(PageDefinition.tickets))
             this.fixTicketTypos();
 
+        // Add "Upload Superior" button
+        $(async () => {
+            if (Page.matches(PageDefinition.post)) {
+                const post = Post.getViewingPost();
+                const attributes = [];
+                if (post.sources.length > 0) attributes.push("sources=" + uriEncodeArray(post.sources));
+                if (post.description.length > 0) attributes.push("description=" + encodeURIComponent(post.description));
+                attributes.push("tags=" + encodeURIComponent(post.tagString));
+                attributes.push("simple-form=true");
+                attributes.push("rating=" + post.rating);
+
+                $("<a>")
+                    .attr("href", "/uploads/new?" + attributes.join("&"))
+                    .html("Reupload")
+                    .appendTo($("<li>").appendTo("#post-history ul"));
+            }
+
+            if (Page.matches(PageDefinition.upload)) {
+
+                // Switch to the simple form
+                if (Page.getQueryParameter("simple-form") && $("#post_characters").length > 0)
+                    $(".the_secret_switch")[0].click();
+
+                // Add a space after the tags, or autocomplete triggers
+                const tags = Page.getQueryParameter("tags");
+                if (tags) {
+                    const tagsEl = $("#post_tags").val(tags + " ");
+                    Util.Events.triggerVueEvent(tagsEl, "input");
+                }
+
+                // Fill in the post rating
+                const rating = Page.getQueryParameter("rating");
+                if (rating && rating !== "undefined") $("button.toggle-button.rating-" + rating)[0].click();
+
+            }
+        });
+
         // Move the ad leaderboard
         $("#ad-leaderboard").prependTo("#content");
 
@@ -123,6 +162,12 @@ export class Miscellaneous extends RE6Module {
             href: "/dmails",
             title: "DMail",
         });
+
+        function uriEncodeArray(array: string[], delimiter = ","): string {
+            const result = [];
+            for (const el of array) result.push(encodeURIComponent(el));
+            return result.join(delimiter);
+        }
     }
 
     /** Emulates the clicking on "New Comment" link */
