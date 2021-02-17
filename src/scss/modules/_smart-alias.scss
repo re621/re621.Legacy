@@ -64,6 +64,12 @@ smart-alias {
             color: #d8c;
         }
 
+        & > span.tag-warning {
+            color: orange;
+            cursor: help;
+            font-size: 70%;
+        }
+
     }
 
     // Grouped by category

@@ -1439,6 +1439,16 @@ export class SettingsController extends RE6Module {
                             smartAlias.pushSettings("minCachedTags", data);
                         }
                     ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: smartAlias.fetchSettings("asciiWarning"),
+                            label: `<b>Flag Non-ASCII Tags</b><br />Flags that contain certain characters are invalid and should be replaced`,
+                            width: 3,
+                        },
+                        (data) => { smartAlias.pushSettings("asciiWarning", data); }
+                    ),
                     Form.hr(3),
 
                     Form.checkbox(
