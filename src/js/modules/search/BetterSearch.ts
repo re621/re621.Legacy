@@ -486,13 +486,18 @@ export class BetterSearch extends RE6Module {
     }
 
     public reloadModeSwitchListener(): void {
-        this.$content.on("click", "post a", (event) => {
+        this.$content
+            .on("click", "post a", (event) => { executeListener(event); })
+            .on("pseudoclick", "post", (event) => { executeListener(event); });
+
+        function executeListener(event: JQuery.ClickEvent | JQuery.TriggeredEvent): void {
 
             const mode = $("#mode-box-mode").val();
             if (mode == "view" || !mode) return;
             event.preventDefault();
 
-            const $article = $(event.currentTarget).parent(),
+            const $target = $(event.currentTarget),
+                $article = $target.is("post") ? $target : $target.parent(),
                 post = Post.get($article);
 
             switch (mode) {
@@ -644,7 +649,7 @@ export class BetterSearch extends RE6Module {
 
             // console.log(post.id, mode);
 
-        });
+        }
     }
 
     /** Restarts the even listeners used by the infinite scroll submodule. */

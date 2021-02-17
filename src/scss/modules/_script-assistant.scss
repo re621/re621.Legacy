@@ -1,0 +1,10 @@
+
+button#tag-script-all {
+    margin-top: 0.5em;
+    float: right;
+}
+
+// Hides the button if the field is not visible
+#tag-script-field[style*='display: none'] ~ #tag-script-all {
+    display: none;
+}
