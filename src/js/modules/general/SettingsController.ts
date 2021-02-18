@@ -2266,6 +2266,12 @@ export class SettingsController extends RE6Module {
             Form.div({ value: `Thank you for downloading and using this script. We hope that you enjoy the experience.`, width: 3 }),
             Form.spacer(3),
 
+            Form.div({
+                value: `<a href='https://ko-fi.com/A0A43OM71' target='_blank'><img height='36' style='border:0px;height:36px;' src='${DomUtilities.getKoFiImage()}' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>`,
+                width: 3,
+            }),
+            Form.spacer(3),
+
             Form.checkbox(
                 {
                     label: "<b>Show Update Notification</b><br />Display a red dot over the settings icon if an update is available",
