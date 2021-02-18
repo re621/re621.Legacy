@@ -56,14 +56,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/re621/re621.git"
+        "url": "git+https://github.com/bitWolfy/re621.git"
     },
     "license": "GPLv3",
     "bugs": {
-        "url": "https://github.com/re621/re621/issues"
+        "url": "https://github.com/bitWolfy/re621/issues"
     },
     "homepage": "https://e621.net/forum_topics/25872",
-    "github": "https://github.com/re621/re621",
+    "github": "https://github.com/bitWolfy/re621",
     "dependencies": {
         "jquery": "^3.5.1",
         "jquery-ui": "^1.12.1"
