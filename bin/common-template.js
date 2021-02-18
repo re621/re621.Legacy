@@ -6,7 +6,7 @@ window.re621 = new function() {
     this.type = "%BUILDTYPE%";
     this.links = {
         website: "%HOMEPAGE%",
-        repository: "%GITHUB%/",
+        repository: "%GITHUB%",
         issues: "%GITHUB%/issues/",
         releases: "%GITHUB%/releases",
         forum: "https://e621.net/forum_topics/25872",

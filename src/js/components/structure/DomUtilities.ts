@@ -113,6 +113,10 @@ export class DomUtilities {
         return "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
     }
 
+    public static getKoFiImage(): string {
+        return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALsAAAAkBAMAAAAjjlbPAAAAHlBMVEVDS1dDS1dDS1f+/v5DS1fi4uOLjpO8vcD/X1z/p6boDZakAAAAA3RSTlMCtVgF8JOLAAACCElEQVRIx+3XMW7bMBQGYLUnCIoeoENv8OuZ8NbAP8kDUBTRWbRyANLxAbKwc1AguW0H2nJSq6kBV0sRDhpI4BP19PhINs3Hz1yofWqapllMJ2+a5sNyOm+b5uuCPL8sGRvypllS57d3/gLe+KmF+O95jVOTuCiP1eGLxvFySftoffw7Lw5S+xKgLuadj8nnN/j1T3x/BFo61FmksMPFvJDuzeCU8lyKQ8sN6ixSJrin7XRmIBmSsuio0ZE0TnmSFooaPXcIW3hukWnRz/BSSinlES31ke9HoaNuNx2FJATOKcILyUGckHSC6DxyggzACKeYPOI5vz7ngdUrnkNrxK6YMumyFdIIjVUc2hqcTUs3Cod2NjgHfjjyYYf4ghcOHUWLdx0ppJBWkbqlXVV+EI+9eDfHP5VSfgCtcYcfmjJTfsVvKu/zxK9+5/2deN/NZU4p5QGQKR3P+aGj6LoqHE0NDrWiXk3BoVV/yPunUmrqH16ewh4x9anbqO1p9gb3LpIpJCGJPo24d13lrew9XZ/yHL8uDwCAwBfLSgPRQE48E4SkrX1bSBwgx7xPUNxiLnMAPAOAmipBLQpjJMdRSEYaMtae47MORzKShjTjaWS+KLTnK9KGpK4raXbiuxkeyFfW+4mfq8YmXrtb3XnvfQj7/L7X/i/8wofAhY+wCx/AF74+LHv5+QUPP47PCU3CGwAAAABJRU5ErkJggg==";
+    }
+
 }
 
 interface SettingsButton {

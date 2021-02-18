@@ -1589,7 +1589,7 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.div({ value: `<span id="defs-confirm"></span>` }),
                     Form.div({
-                        value: `<div class="float-right">[ <a href="https://github.com/re621/re621/wiki/SmartAlias">syntax help</a> ]</div>`
+                        value: `<div class="float-right">[ <a href="${window["re621"]["links"]["repository"]}/wiki/SmartAlias">syntax help</a> ]</div>`
                     })
                 ]),
 
@@ -2264,6 +2264,12 @@ export class SettingsController extends RE6Module {
                 width: 3
             }),
             Form.div({ value: `Thank you for downloading and using this script. We hope that you enjoy the experience.`, width: 3 }),
+            Form.spacer(3),
+
+            Form.div({
+                value: `<a href='https://ko-fi.com/A0A43OM71' target='_blank'><img height='36' style='border:0px;height:36px;' src='${DomUtilities.getKoFiImage()}' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>`,
+                width: 3,
+            }),
             Form.spacer(3),
 
             Form.checkbox(
