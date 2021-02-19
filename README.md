@@ -3,7 +3,8 @@ RE:621
 
 ## e621, Reimagined
 
-RE621 is a comprehensive project created to improve the basic user experience while browsing e621.net. It consists of several different modules that enhance the entire site, top to bottom - literally.
+RE621 is a comprehensive project created to improve the basic user experience while browsing e621.net.
+It consists of several different modules that enhance the entire site, top to bottom - literally.
 
 ## Installation
 
@@ -13,7 +14,7 @@ With a script manager installed, click on [this link](https://github.com/bitWolf
 
 ## Features
 
-For a complete feature overview visit the projects website, found under [re621.github.io](https://re621.github.io/)
+For a complete feature overview visit the projects website, found under [re621.github.io](https://re621.bitwolfy.com/)
 
 ## Contributing
 
