@@ -33,6 +33,6 @@ export class Tag {
      * @param string 
      */
     public static escapeSearchToRegex(string: string): RegExp {
-        return new RegExp(string.replace(/[-\/\\^$+?.()|[\]{}]/g, "\\$&").replace(/\*/g, "[\\S]\*\?"));
+        return new RegExp(string.replace(/[-\/\\^$+?.()|[\]{}]/g, "\\$&").replace(/\*/g, "[\\S]*?"));
     }
 }
