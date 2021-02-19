@@ -655,6 +655,20 @@ zoom-container {
         box-sizing: border-box;
     }
 
+    & > #zoom-info {
+        color: white;
+        padding-right: 0.35rem;
+
+        & > span:not(:last-child)::after {
+            content: " | ";
+            color: white;
+        }
+    }
+
+    & > #zoom-tags {
+        color: white;
+    }
+
     &[status=waiting] { display: none; }
     &[status=loading] {
         &::after {
