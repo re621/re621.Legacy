@@ -409,7 +409,7 @@ export class BetterSearch extends RE6Module {
                         .update(response[0]["post"])
                         .render();
 
-                    Danbooru.notice(`Post <a href="/posts/${postID}" target="_blank">#${postID}</a> updated (<a href="/post_versions?search[post_id]=${postID}">history</a>)`);
+                    Danbooru.notice(`Post <a href="/posts/${postID}" target="_blank" rel="noopener noreferrer">#${postID}</a> updated (<a href="/post_versions?search[post_id]=${postID}">history</a>)`);
                     this.$quickEdit.hide("fast");
                 },
                 (error) => {

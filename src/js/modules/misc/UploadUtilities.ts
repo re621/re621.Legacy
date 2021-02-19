@@ -92,7 +92,7 @@ export class UploadUtilities extends RE6Module {
 
             // Input is not a URL
             if (!/^https?:\/\//.test(value)) {
-                dupesContainer.html(`<span class="fullspan">Unable to parse image path. <a href="/iqdb_queries" target="_blank">Check manually</a>?</span>`);
+                dupesContainer.html(`<span class="fullspan">Unable to parse image path. <a href="/iqdb_queries" target="_blank" rel="noopener noreferrer">Check manually</a>?</span>`);
                 risContainer.html("");
                 return;
             }
@@ -113,7 +113,7 @@ export class UploadUtilities extends RE6Module {
                     }
 
                     $("<h3>")
-                        .html(`<a href="/iqdb_queries?url=${encodeURI(value)}" target="_blank">Duplicates Found:</a> ${response.length}`)
+                        .html(`<a href="/iqdb_queries?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">Duplicates Found:</a> ${response.length}`)
                         .appendTo(dupesContainer);
 
                     for (const entry of response)
@@ -144,11 +144,11 @@ export class UploadUtilities extends RE6Module {
             );
 
             risContainer.html(`
-                <a href="/iqdb_queries?url=${encodeURI(value)}" target="_blank">e621</a>
-                <a href="https://www.google.com/searchbyimage?image_url=${encodeURI(value)}" target="_blank">Google</a>
-                <a href="https://saucenao.com/search.php?url=${encodeURI(value)}" target="_blank">SauceNAO</a>
-                <a href="https://derpibooru.org/search/reverse?url=${encodeURI(value)}" target="_blank">Derpibooru</a>
-                <a href="https://kheina.com/?url=${encodeURI(value)}" target="_blank">Kheina</a>
+                <a href="/iqdb_queries?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">e621</a>
+                <a href="https://www.google.com/searchbyimage?image_url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">Google</a>
+                <a href="https://saucenao.com/search.php?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">SauceNAO</a>
+                <a href="https://derpibooru.org/search/reverse?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">Derpibooru</a>
+                <a href="https://kheina.com/?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">Kheina</a>
             `);
         });
 
@@ -166,6 +166,7 @@ export class UploadUtilities extends RE6Module {
                 .attr({
                     href: "/posts/" + postData.id,
                     target: "_blank",
+                    rel: "noopener noreferrer",
                 })
                 .appendTo(article);
 
