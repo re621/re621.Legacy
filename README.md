@@ -14,7 +14,7 @@ With a script manager installed, click on [this link](https://github.com/bitWolf
 
 ## Features
 
-For a complete feature overview visit the projects website, found under [re621.github.io](https://re621.bitwolfy.com/)
+For a complete feature overview visit the projects website, found under [re621.bitwolfy.com](https://re621.bitwolfy.com/)
 
 ## Contributing
 
