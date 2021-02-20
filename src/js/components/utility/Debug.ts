@@ -5,20 +5,22 @@ export class Debug {
     private static enabled: boolean;
     private static connect: boolean;
     private static perform: boolean;
+    private static vivaldi: boolean;
 
     /** Initialize the debug logger */
     public static async init(): Promise<boolean> {
         Debug.enabled = await XM.Storage.getValue("re621.debug.enabled", false);
         Debug.connect = await XM.Storage.getValue("re621.debug.connect", false);
         Debug.perform = await XM.Storage.getValue("re621.debug.perform", false);
+        Debug.perform = await XM.Storage.getValue("re621.debug.vivaldi", false);
         return Promise.resolve(true);
     }
 
-    public static getState(type: "enabled" | "connect" | "perform"): boolean {
+    public static getState(type: DebugFlag): boolean {
         return Debug[type];
     }
 
-    public static setState(type: "enabled" | "connect" | "perform", enabled: boolean): void {
+    public static setState(type: DebugFlag, enabled: boolean): void {
         Debug[type] = enabled;
         if (enabled) XM.Storage.setValue("re621.debug." + type, enabled);
         else XM.Storage.deleteValue("re621.debug." + type);
@@ -45,3 +47,5 @@ export class Debug {
     }
 
 }
+
+type DebugFlag = "enabled" | "connect" | "perform" | "vivaldi";
