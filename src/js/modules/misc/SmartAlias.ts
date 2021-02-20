@@ -576,7 +576,7 @@ export class SmartAlias extends RE6Module {
                         "title": title,
                     })
                     .html(
-                        `<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tagName)}" target="_blank" tabindex="-1">${displayName}</a> ${text}`
+                        `<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tagName)}" target="_blank" rel="noopener noreferrer" tabindex="-1">${displayName}</a> ${text}`
                         + (
                             (asciiWarning && data && data.errors.length > 0 && !data.dnp)
                                 ? ` <span class="fas fa-exclamation-triangle tag-warning" title="${data.errors.join("\n")}"></span>`

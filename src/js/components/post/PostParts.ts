@@ -104,7 +104,7 @@ export class PostParts {
                 }
                 case ImageClickAction.CopyID: {
                     XM.Util.setClipboard(post.id + "", "text");
-                    Danbooru.notice(`Copied post ID to clipboard: <a href="/posts/${post.id}" target="_blank">#${post.id}</a>`);
+                    Danbooru.notice(`Copied post ID to clipboard: <a href="/posts/${post.id}" target="_blank" rel="noopener noreferrer">#${post.id}</a>`);
                     break;
                 }
                 case ImageClickAction.Blacklist: {

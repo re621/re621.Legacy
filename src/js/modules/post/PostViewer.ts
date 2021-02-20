@@ -217,11 +217,11 @@ export class PostViewer extends RE6Module {
             $("#post-related-images ul").html(`
                 <li><a href="/post_sets?post_id=${this.post.id}">Sets with this post</a></li>
                 <li><a href="/iqdb_queries?post_id=${this.post.id}">Visually similar on E6</a></li>
-                <li><a href="https://www.google.com/searchbyimage?image_url=${this.getSourceLink(RISSizeLimit.Google, useSample)}" target="_blank">Reverse Google Search</a></li>
-                <li><a href="https://saucenao.com/search.php?url=${this.getSourceLink(RISSizeLimit.SauceNAO, useSample)}" target="_blank">Reverse SauceNAO Search</a></li>
-                <li><a href="https://inkbunny.net/search_process.php?text=${this.post.file.md5}&md5=yes" target="_blank">Inkbunny MD5 Search</a></li>
-                <li><a href="https://derpibooru.org/search/reverse?url=${this.getSourceLink(RISSizeLimit.Derpibooru, useSample)}" target="_blank">Reverse Derpibooru Search</a></li>
-                <li><a href="https://kheina.com/?url=${this.getSourceLink(RISSizeLimit.Kheina, useSample)}" target="_blank">Reverse Kheina Search</a></li>
+                <li><a href="https://www.google.com/searchbyimage?image_url=${this.getSourceLink(RISSizeLimit.Google, useSample)}" target="_blank" rel="noopener noreferrer">Reverse Google Search</a></li>
+                <li><a href="https://saucenao.com/search.php?url=${this.getSourceLink(RISSizeLimit.SauceNAO, useSample)}" target="_blank" rel="noopener noreferrer">Reverse SauceNAO Search</a></li>
+                <li><a href="https://inkbunny.net/search_process.php?text=${this.post.file.md5}&md5=yes" target="_blank" rel="noopener noreferrer">Inkbunny MD5 Search</a></li>
+                <li><a href="https://derpibooru.org/search/reverse?url=${this.getSourceLink(RISSizeLimit.Derpibooru, useSample)}" target="_blank" rel="noopener noreferrer">Reverse Derpibooru Search</a></li>
+                <li><a href="https://kheina.com/?url=${this.getSourceLink(RISSizeLimit.Kheina, useSample)}" target="_blank" rel="noopener noreferrer">Reverse Kheina Search</a></li>
             `);
         }
     }

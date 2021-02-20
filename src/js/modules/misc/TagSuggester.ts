@@ -211,8 +211,9 @@ export class TagSuggester extends RE6Module {
 
             $("<a>")
                 .attr({
-                    "href": "/wiki_pages/show_or_new?title=" + encodeURIComponent(tagName),
-                    "target": "_blank",
+                    href: "/wiki_pages/show_or_new?title=" + encodeURIComponent(tagName),
+                    target: "_blank",
+                    rel: "noopener noreferrer",
                 })
                 .html("?")
                 .appendTo(wrapper);

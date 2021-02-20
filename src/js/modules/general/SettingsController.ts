@@ -2239,14 +2239,14 @@ export class SettingsController extends RE6Module {
             // About
             Form.div({
                 value:
-                    `<h3 class="display-inline"><a href="${window["re621"]["links"]["website"]}" target="_blank">${window["re621"]["name"]} v.${VersionChecker.scriptBuild}</a></h3>` +
+                    `<h3 class="display-inline"><a href="${window["re621"]["links"]["website"]}" target="_blank" rel="noopener noreferrer">${window["re621"]["name"]} v.${VersionChecker.scriptBuild}</a></h3>` +
                     ` <span class="display-inline">build ${window["re621"]["build"]}:${Patcher.version}</span>`,
                 width: 2
             }),
             Form.div({
                 value:
                     `<span class="float-right" id="project-update-button" data-available="${VersionChecker.hasUpdate}">
-                    <a href="${window["re621"]["links"]["releases"]}" target="_blank">Update Available</a>
+                    <a href="${window["re621"]["links"]["releases"]}" target="_blank" rel="noopener noreferrer">Update Available</a>
                     </span>`
             }),
             Form.div({
@@ -2258,8 +2258,8 @@ export class SettingsController extends RE6Module {
             Form.div({
                 value:
                     `Keeping the script - and the website - fully functional is our highest priority. ` +
-                    `If you are experiencing bugs or issues, do not hesitate to create a new ticket on <a href="${window["re621"]["links"]["issues"]}">github</a>, ` +
-                    `or leave us a message in the <a href="${window["re621"]["links"]["forum"]}">forum thread</a>. ` +
+                    `If you are experiencing bugs or issues, do not hesitate to create a new ticket on <a href="${window["re621"]["links"]["issues"]}" target="_blank" rel="noopener noreferrer">github</a>, ` +
+                    `or leave us a message in the <a href="${window["re621"]["links"]["forum"]}" target="_blank" rel="noopener noreferrer">forum thread</a>. ` +
                     `Feature requests, comments, and overall feedback are also appreciated.`,
                 width: 3
             }),
@@ -2267,7 +2267,7 @@ export class SettingsController extends RE6Module {
             Form.spacer(3),
 
             Form.div({
-                value: `<a href='https://ko-fi.com/A0A43OM71' target='_blank'><img height='36' style='border:0px;height:36px;' src='${DomUtilities.getKoFiImage()}' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>`,
+                value: `<a href="https://ko-fi.com/A0A43OM71" target="_blank" rel="noopener noreferrer"><img height="36" style="border:0px; height:36px;" src="${DomUtilities.getKoFiImage()}" border="0" alt="Buy Me a Coffee at ko-fi.com" /></a>`,
                 width: 3,
             }),
             Form.spacer(3),
@@ -2286,7 +2286,7 @@ export class SettingsController extends RE6Module {
             Form.spacer(3),
 
             // Changelog
-            Form.header(`<a href="${window["re621"]["links"]["releases"]}" target="_blank" class="unmargin">What's new?</a>`, 3),
+            Form.header(`<a href="${window["re621"]["links"]["releases"]}" target="_blank" rel="noopener noreferrer" class="unmargin">What's new?</a>`, 3),
             Form.div({ value: `<div id="changelog-list"><h5>Version ${VersionChecker.latestBuild}</h5>${VersionChecker.changesHTML}</div>`, width: 3 })
         ]);
     }
