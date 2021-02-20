@@ -2103,6 +2103,17 @@ export class SettingsController extends RE6Module {
                         }
                     ),
                     Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: Debug.getState("vivaldi"),
+                            label: `<b>Compatibility Mode</b><br />Use fallback functions to avoid crashes in some browsers`,
+                            width: 3,
+                        },
+                        (data) => {
+                            Debug.setState("vivaldi", data);
+                        }
+                    ),
                 ]),
             ]),
         ]);

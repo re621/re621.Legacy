@@ -213,7 +213,12 @@ export class XMConnect {
     public static browserDownload(a: any, b?: string, c?: boolean): void {
         if (typeof a === "string") a = { url: a, name: b, saveAs: c };
 
-        if (typeof GM_xmlhttpRequest === "function") GM_download(a);
+        if (Debug.getState("vivaldi")) {
+            XM.Connect.download(a);
+            return;
+        }
+
+        if (typeof GM_download === "function") GM_download(a);
         else XM.Chrome.download(a, b, c);
     }
 
