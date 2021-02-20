@@ -1,7 +1,7 @@
 {
     "name": "re621",
     "displayName": "re621 - e621 Reimagined",
-    "namespace": "re621.github.io",
+    "namespace": "re621.bitwolfy.com",
     "version": "1.4.0",
     "description": "Subscription manager, mass downloader, thumbnail enhancer, and more for e621",
     "author": "bitWolfy",
