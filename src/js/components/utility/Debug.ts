@@ -12,7 +12,7 @@ export class Debug {
         Debug.enabled = await XM.Storage.getValue("re621.debug.enabled", false);
         Debug.connect = await XM.Storage.getValue("re621.debug.connect", false);
         Debug.perform = await XM.Storage.getValue("re621.debug.perform", false);
-        Debug.perform = await XM.Storage.getValue("re621.debug.vivaldi", false);
+        Debug.vivaldi = await XM.Storage.getValue("re621.debug.vivaldi", false);
         return Promise.resolve(true);
     }
 
