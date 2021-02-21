@@ -39,12 +39,6 @@ export class UploadUtilities extends RE6Module {
         // Load extra data from the image's header
         this.handleImageData();
 
-        // Fix the thumbnail not getting updated properly when copy-pasting
-        const imageUrlInput = $("#file-container input[type=text]").on("paste", async () => {
-            await Util.sleep(50);   // Paste event fires immediately, before the input changes
-            Util.Events.triggerVueEvent(imageUrlInput, "keyup");
-        });
-
         // Add a class to the "Submit" button
         $("button:contains('Upload')").addClass("submit-upload");
     }
