@@ -490,6 +490,8 @@ export class BetterSearch extends RE6Module {
             .on("click", "post a", (event) => { executeListener(event); })
             .on("pseudoclick", "post", (event) => { executeListener(event); });
 
+        const $quickEdit = this.$quickEdit;
+
         function executeListener(event: JQuery.ClickEvent | JQuery.TriggeredEvent): void {
 
             const mode = $("#mode-box-mode").val();
@@ -621,23 +623,23 @@ export class BetterSearch extends RE6Module {
                     break;
                 }
                 case "edit": {
-                    if ($("body").attr("data-sticky-header") == "true") this.$quickEdit.css("top", $("#top").height() + "px");
-                    else this.$quickEdit.css("top", "");
+                    if ($("body").attr("data-sticky-header") == "true") $quickEdit.css("top", $("#top").height() + "px");
+                    else $quickEdit.css("top", "");
 
-                    this.$quickEdit.show("fast");
-                    this.$quickEdit.attr("postid", post.id)
+                    $quickEdit.show("fast");
+                    $quickEdit.attr("postid", post.id)
 
                     const ratio = Util.formatRatio(post.img.width, post.img.height);
-                    this.$quickEdit.data("info").html(`${post.img.width} x ${post.img.height} (${ratio[0]}:${ratio[1]}), ${Util.Size.format(post.file.size)}`);
-                    this.$quickEdit.data("flags")
+                    $quickEdit.data("info").html(`${post.img.width} x ${post.img.height} (${ratio[0]}:${ratio[1]}), ${Util.Size.format(post.file.size)}`);
+                    $quickEdit.data("flags")
                         .toggleClass("display-none-important", post.flags.size == 0)
                         .html(post.flags.size > 0 ? [...post.flags].join(", ") : "");
-                    this.$quickEdit.data("history").attr("href", `https://e621.net/post_versions?search[post_id]=${post.id}`);
+                    $quickEdit.data("history").attr("href", `https://e621.net/post_versions?search[post_id]=${post.id}`);
 
-                    this.$quickEdit.data("tags").val(post.tagString + " ").trigger("re621:input").focus();
-                    this.$quickEdit.data("reason").val("");
-                    this.$quickEdit.data("parent").val(post.rel.parent);
-                    this.$quickEdit.data("rating").val(post.rating);
+                    $quickEdit.data("tags").val(post.tagString + " ").trigger("re621:input").focus();
+                    $quickEdit.data("reason").val("");
+                    $quickEdit.data("parent").val(post.rel.parent);
+                    $quickEdit.data("rating").val(post.rating);
                     break;
                 }
                 default: {
