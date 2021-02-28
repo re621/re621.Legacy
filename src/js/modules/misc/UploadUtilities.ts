@@ -34,7 +34,13 @@ export class UploadUtilities extends RE6Module {
         if (this.fetchSettings("checkDuplicates")) this.handleDuplicateCheck();
 
         // Add clickable links to sources
-        if (this.fetchSettings("addSourceLinks")) this.handleSourceEnhancements();
+        if (this.fetchSettings("addSourceLinks")) {
+            this.handleSourceEnhancements();
+            const noSourceCheckbox = $("#no_source").on("change", () => {
+                if (noSourceCheckbox.prop("checked")) return;
+                this.handleSourceEnhancements();
+            });
+        }
 
         // Load extra data from the image's header
         this.handleImageData();
