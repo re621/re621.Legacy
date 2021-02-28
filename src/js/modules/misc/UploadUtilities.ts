@@ -202,7 +202,7 @@ export class UploadUtilities extends RE6Module {
 
         const urlMatch = /(http(?:s)?\:\/\/)(www\.)?/;
         const timers = {};
-        $(sourceContainer).on("input", "input.upload-source-input", (event) => {
+        $(sourceContainer).on("input re621:input", "input.upload-source-input", (event) => {
             const $input = $(event.currentTarget),
                 $parent = $input.parent();
 
@@ -233,6 +233,7 @@ export class UploadUtilities extends RE6Module {
                     return value.replace(urlMatch, "https://");
                 });
                 Util.Events.triggerVueEvent($input, "input", "vue-event");
+                $input.trigger("re621:input"); // This is stupid, but it works
             }, 500);
 
             // Create buttons
