@@ -51,6 +51,11 @@ header#top nav#nav {
             }
 
         }
+
+        a.tab-login {
+            font-weight: 700;
+            color: red;
+        }
     }
 
     menu.main.custom[data-editing=true] li {
