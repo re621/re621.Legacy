@@ -120,7 +120,9 @@ export class SmartAlias extends RE6Module {
         $("#tags").off("input.re621.smart-alias");
 
         for (const element of this.inputElements)
-            element.off("input.smartalias blur.smartalias blur.smartalias.spacefix");
+            element
+                .off("input.smartalias blur.smartalias blur.smartalias.spacefix")
+                .removeData("re621:smartalias");
     }
 
     public create(): void {
@@ -169,6 +171,11 @@ export class SmartAlias extends RE6Module {
         const mode = this.fetchSettings<boolean>("autoLoad");
         for (const inputElement of $([...inputs].join(", ")).get()) {
             const $textarea = $(inputElement);
+
+            // Ignore already initialized inputs
+            if ($textarea.data("re621:smartalias")) continue;
+            $textarea.data("re621:smartalias", true);
+
             this.inputElements.push($textarea);
             const $container = $("<smart-alias>")
                 .attr("ready", "true")
