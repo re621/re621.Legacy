@@ -192,7 +192,7 @@ export class PostViewer extends RE6Module {
 
         // Listen to favorites button click
         $("#add-fav-button, #add-to-favorites").on("click", () => {
-            if (!this.fetchSettings("upvoteOnFavorite")) return;
+            if (!this.fetchSettings("upvoteOnFavorite") || $("a.post-vote-up-link span").hasClass("score-positive")) return;
             Danbooru.Post.vote(this.post.id, 1, true);
         });
 
