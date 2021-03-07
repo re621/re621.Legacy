@@ -112,6 +112,11 @@ export class SearchUtilities extends RE6Module {
                 $tagInput.val($tagInput.val() + " " + persistentTags);
                 return true;
             });
+
+            $("a.search-tag").each((index, el) => {
+                const $el = $(el);
+                $el.attr("href", $el.attr("href") + "+" + persistentTags.split(" ").join("+"));
+            });
         }
 
         // Initialize the quick-blacklist buttons
