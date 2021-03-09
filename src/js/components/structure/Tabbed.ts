@@ -39,8 +39,9 @@ export class Tabbed implements PreparedStructure {
                 .attr("id", this.id + "-fragment-" + index)
                 .appendTo(this.$container);
 
-            if (entry.content) elem.append(entry.content);
             if (entry.structure) elem.append(entry.structure.render());
+            else if (entry.content) elem.append(entry.content);
+            else elem.append($("<span>ERROR: Missing Tabbed Content</span>"));
         });
 
         this.$container.tabs({
