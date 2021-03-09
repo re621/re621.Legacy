@@ -227,9 +227,9 @@ export class HoverZoom extends RE6Module {
                 .addClass("post-info-rating rating-" + post.rating)
                 .text(post.rating)
                 .appendTo(this.$zoomInfo);
-            if (post.date.raw !== "0")
+            if (post.date.iso !== "0")
                 $("<span>")
-                    .text(this.fetchSettings("time") ? post.date.ago : Util.Time.format(post.date.raw))
+                    .text(this.fetchSettings("time") ? post.date.ago : Util.Time.format(post.date.iso))
                     .appendTo(this.$zoomInfo);
 
             // Append the tags block

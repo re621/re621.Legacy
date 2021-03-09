@@ -30,8 +30,9 @@ export class Post implements PostData {
     public page: string;                    // search page. can either be numeric, or in a- / b- format
 
     public date: {
-        raw: string;                        // upload time, in `Fri Aug 21 2020 12:32:52 GMT-0700` format
+        iso: string;                        // upload time, in `Fri Aug 21 2020 12:32:52 GMT-0700` format
         ago: string;                        // relative time, aka `5 minutes ago`
+        obj: Date;                          // date object
     };
 
     public tagString: string;               // string with space-separated tags. Makes outputting tags easier
@@ -366,8 +367,9 @@ export interface PostData {
     page: string;
 
     date: {
-        raw: string;
+        iso: string;
         ago: string;
+        obj: Date;
     };
 
     tagString: string;
@@ -460,8 +462,9 @@ export namespace PostData {
             page: page,
 
             date: {
-                raw: data.created_at == null ? data.updated_at : data.created_at,
+                iso: data.created_at == null ? data.updated_at : data.created_at,
                 ago: Util.Time.ago(data.created_at == null ? data.updated_at : data.created_at),
+                obj: new Date(data.created_at == null ? data.updated_at : data.created_at),
             },
 
             tagString: [...tags].sort().join(" "),
@@ -658,8 +661,9 @@ export namespace PostData {
             page: "-1",
 
             date: {
-                raw: rawDate,
+                iso: rawDate,
                 ago: Util.Time.ago(rawDate),
+                obj: new Date(rawDate),
             },
 
             tagString: tagString,

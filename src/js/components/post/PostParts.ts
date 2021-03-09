@@ -436,7 +436,7 @@ export class PostParts {
                 `${[...post.tags.general, ...post.tags.invalid, ...post.tags.lore, ...post.tags.meta].join(" ")}` +
                 ``;
         return `` +
-            `Post #${post.id}, posted on: ${Util.Time.format(post.date.raw)} (${post.date.ago})${br}` +
+            `Post #${post.id}, uploaded on: ${Util.Time.format(post.date.iso)} (${post.date.ago})${br}` +
             `${[...post.tags.artist, ...post.tags.copyright].join(" ")}${br}` +
             `${[...post.tags.character, ...post.tags.species].join(" ")}${br}` +
             `${[...post.tags.general, ...post.tags.invalid, ...post.tags.lore, ...post.tags.meta].join(" ")}${br}` +
