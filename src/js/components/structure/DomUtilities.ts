@@ -84,6 +84,9 @@ export class DomUtilities {
             })
             .appendTo($tab);
 
+        if (config.onClick !== undefined)
+            $link.on("click", () => { config.onClick($link); });
+
         if (config.href) { $link.attr("href", config.href); }
         if (config.tabClass) { $tab.addClass(config.tabClass); }
         if (config.linkClass) { $link.addClass(config.linkClass); }
@@ -138,4 +141,6 @@ interface SettingsButton {
 
     /** Name-value pairs of the attribute to set */
     attr?: { [prop: string]: string };
+
+    onClick?: ($element: JQuery<HTMLElement>) => void;
 }
