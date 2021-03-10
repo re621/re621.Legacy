@@ -1,279 +1,31 @@
-/* Subscription Manager Styles */
 
-.update-notification:not([data-updates="0"]) {
-    &::after {
-        content: unicode('f111');
-        font-family: 'Font Awesome 5 Free';
-        font-weight: 900;
-        font-size: 0.5em;
-        color: red;
-
-        position: absolute;
-        top: 0;
-    }
+.subscription-wrapper {
+    // I don't know why it's 31.9rem, and I don't care enough to find out
+    width: 31.9rem !important;
 }
 
-.update-notification[data-loading=true] {
-
-    position: relative;
-
-    @keyframes spinner {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-
-    &::after {
-        content: unicode('f110');
-        font-family: "Font Awesome 5 Free";
-        font-weight: 900;
-        font-size: 0.75em;
-        line-height: 0.75em;
-        text-align: center;
-        color: inherit;
-
-        position: absolute;
-
-        animation: spinner 1.0s linear infinite;
-    }
-}
-
-button.large-subscribe-button {
-    float: right;
-    padding: 0.25rem 0.5rem;
-    outline: 0;
-    box-shadow: 0 0 10px -5px black;
-    border-radius: 4px;
-}
-
-#tag-box>ul>li,
-#tag-list>ul>li {
-
-    div.tag-actions a.tag-subscription-button.unsubscribe {
-        visibility: visible;
-    }
-}
-
-// Common styles for the subscription list
-div.subscriptions-list {
-    position: relative;
+subscription-canvas {
+    display: block;
     width: 31.5rem;
-    overflow: hidden auto;
+}
 
+/** Tag Updates **/
+subscription-canvas[content-type="tags"] {
     display: grid;
-    grid-template-columns: 1fr;
-    grid-column-gap: 0.25rem;
-    grid-row-gap: 0.25rem;
+    grid-template-columns: repeat(auto-fit, 122px);
+    grid-column-gap: 5px;
+    grid-row-gap: 5px;
 
-    div.subscription-update.notice {
-
-        &.notice-cached {
-            display: grid;
-            grid-template-columns: auto auto;
-            font-weight: 900;
-            font-size: 0.85rem;
-            color: darkgrey;
-
-            div.subscription-update-title {
-                grid-column: span 2;
-                display: flex;
-                align-items: center;
-                text-align: center;
-
-                color: #ffffff50;
-
-                &::before,
-                &::after {
-                    content: '';
-                    flex: 1;
-                    border-bottom: 1px solid #ffffff50;
-                }
-
-                &::before {
-                    margin-right: .25em;
-                }
-
-                &::after {
-                    margin-left: .25em;
-                }
-            }
-        }
-
-        div.subscription-update-preview,
-        div.subscription-update-remove,
-        div.subscription-update-full,
-        div.subscription-update-date {
-            display: none;
-        }
-    }
-
-    div.subscription-update:not(.notice) {
-        display: grid;
-        grid-template-columns: 4rem auto auto min-content;
-        background: #ffffff33;
-
-        &:last-child {
-            margin-bottom: 0;
-        }
-
-        &.new,
-        &.new-viewed {
-            order: -1;
-        }
-
-        div.subscription-update-preview {
-            grid-row: span 2;
-
-            img {
-                width: 100%;
-                height: 4rem;
-                object-fit: cover;
-            }
-        }
-
-        div.subscription-update-title {
-            grid-column: span 2;
-            font-size: 1.1em;
-            font-weight: bold;
-            margin: 0.5rem 0.5rem 0
-        }
-
-        div.subscription-update-remove {
-            margin: 0.5rem;
-        }
-
-        div.subscription-update-full {
-            display: flex;
-            align-self: end;
-            margin: 0rem 0.5rem 0.5rem;
-            font-size: 0.9em;
-        }
-
-        div.subscription-update-date {
-            grid-column: span 2;
-            display: flex;
-            align-self: end;
-            font-size: 0.9em;
-            margin: 0rem 0.5rem 0.5rem;
-            justify-content: flex-end;
-        }
-    }
-
-    div.subscription-load-status {
-        width: fit-content;
-        margin: 3rem auto;
-        grid-column: span 4;
-        font-family: monospace;
-        font-size: 1.5em;
-
-        div {
-            color: #aaa;
-            margin-top: 0.5rem;
-        }
-    }
-
-}
-
-// Forum Subscriptions
-.subscriptions-list[data-subscription-class=ForumTracker] {
-
-    div.subscription-update:not(.notice) {
-
-        div.subscription-update-preview {
-            display: none;
-        }
-
-        div.subscription-update-title {
-            grid-column: span 3;
-        }
-
-        div.subscription-update-full {
-            grid-column: span 2;
-        }
-    }
-}
-
-// Tag Subscriptions
-.subscriptions-list[data-subscription-class=TagTracker] {
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-
-    div.subscription-update.notice {
-        grid-column: span 4;
-    }
-
-    div.subscription-update:not(.notice) {
+    subitem {
         display: block;
-        margin-bottom: 0;
-        position: relative;
-
-        div.subscription-update-title,
-        div.subscription-update-full,
-        div.subscription-update-date {
-            display: none;
-        }
-
-        div.subscription-update-preview {
-
-            img {
-                height: 6rem;
-            }
-        }
-
-        div.subscription-update-remove {
-            visibility: hidden;
-            position: absolute;
-            top: 0;
-            right: 0;
-            margin: 0.25rem;
-
-            i.fas {
-                text-shadow: 0px 0px 10px black;
-                color: red;
-
-                &:hover {
-                    color: darkred;
-                }
-            }
-        }
-
-        &:hover div.subscription-update-remove {
-            visibility: visible;
-        }
-    }
-}
-
-// Comment Subscriptions
-.subscriptions-list[data-subscription-class=CommentTracker] {
-
-    div.subscription-update:not(.notice) {
-
-        div.subscription-update-title {
-            font-weight: inherit;
-            font-size: 1em;
-
-            a::after {
-                content: ": ";
-            }
-        }
-    }
-}
-
-// Subscription Management
-.subscriptions-manage-list {
-    display: grid;
-    grid-template-columns: 1fr;
-
-    &.col-2 {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    item {
-        display: inline-block;
-        white-space: nowrap;
+        width: 122px;
+        height: 122px;
         overflow: hidden;
 
-        a.sub-manage-unsub {
-            margin-right: 0.25rem;
+        img {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
         }
     }
 }

@@ -48,8 +48,8 @@ import { ThumbnailTweaks } from "./modules/search/ThumbnailTweaks";
 import { CommentTracker } from "./modules/subscriptions/CommentTracker";
 import { ForumTracker } from "./modules/subscriptions/ForumTracker";
 import { PoolTracker } from "./modules/subscriptions/PoolTracker";
-import { SubscriptionManager } from "./modules/subscriptions/SubscriptionManager";
 import { TagTracker } from "./modules/subscriptions/TagTracker";
+import { SubscriptionManager } from "./modules/subscriptions/_SubscriptionManager";
 
 
 const loadOrder = [

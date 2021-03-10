@@ -32,7 +32,7 @@ import { HoverZoom } from "../search/HoverZoom";
 import { SearchUtilities } from "../search/SearchUtilities";
 import { ForumTracker } from "../subscriptions/ForumTracker";
 import { PoolTracker } from "../subscriptions/PoolTracker";
-import { SubscriptionManager } from "../subscriptions/SubscriptionManager";
+import { SubscriptionManager } from "../subscriptions/_SubscriptionManager";
 import { HeaderCustomizer } from "./HeaderCustomizer";
 import { Miscellaneous } from "./Miscellaneous";
 
