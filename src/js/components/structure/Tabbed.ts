@@ -24,7 +24,7 @@ export class Tabbed implements PreparedStructure {
         if (this.$container !== undefined && !clearCache)
             return this.$container;
 
-        this.$container = $("<div>");
+        this.$container = $("<tabbed>");
         const $tabList = $("<ul>").appendTo(this.$container);
 
         this.config.content.forEach((entry, index) => {
