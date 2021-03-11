@@ -12,25 +12,35 @@ export class TagTracker extends SubscriptionTracker {
     protected batchSize = 40;
 
     public async fetchUpdatedEntries(): Promise<UpdateData> {
+
         const result: UpdateData = {};
+        this.clearStatus();
+        this.writeStatus("Updating Tag Subscriptions");
 
         // Retrieving settings
+        this.writeStatus(`. . . retrieving settings`);
         const subscriptions = ["horse"]; //await this.fetchSettings<string[]>("data2", true); // TODO Changed this back
         const lastUpdate = await this.fetchSettings<number>("lastUpdate", true);
         if (Object.keys(subscriptions).length == 0) return result;
 
         // Sending an API request
+        this.writeStatus(`. . . sending an API request`);
         const subscriptionsChunks = Util.chunkArray(subscriptions, this.batchSize);
         const apiResponse: { [timestamp: number]: APIPost } = {};
 
         for (const [index, chunk] of subscriptionsChunks.entries()) {
 
             // Processing batch #index
+            if (subscriptionsChunks.length > 1) this.writeStatus(`&nbsp; &nbsp; &nbsp; - processing batch #${index}`);
+            if (index == 10) this.writeStatus(`<span style="color:gold">warning</span> connection throttled`)
 
             for (const post of await E621.Posts.get<APIPost>({ "tags": chunk.map(el => "~" + el), "limit": 320 }, index < 10 ? 500 : 1000))
                 apiResponse[new Date(post.created_at).getTime()] = post;
         }
 
+        // Parsing output
+        this.writeStatus(`. . . formatting output`);
+        await Util.sleep(500);
         for (const index of Object.keys(apiResponse).sort()) {
             const post = PostData.fromAPI(apiResponse[index]);
 
@@ -49,6 +59,8 @@ export class TagTracker extends SubscriptionTracker {
                 new: true,
             };
         }
+
+        this.writeStatus(`. . . displaying results`);
 
         return result;
     }

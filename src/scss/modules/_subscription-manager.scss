@@ -4,13 +4,24 @@
     width: 31.9rem !important;
 }
 
-subscription-canvas {
+sb-ctwrap {
     display: block;
     width: 31.5rem;
+
+    &[state=done] sb-status { display: none !important; }
+    &:not([state=done]) sb-canvas { display: none !important; }
+}
+
+/** Status Output **/
+sb-status {
+    display: block;
+    padding: 6rem;
+    font-family: monospace;
+    font-size: 1.25rem;
 }
 
 /** Tag Updates **/
-subscription-canvas[content-type="tags"] {
+sb-ctwrap[content=tags] sb-canvas {
     display: grid;
     grid-template-columns: repeat(auto-fit, 122px);
     grid-column-gap: 5px;

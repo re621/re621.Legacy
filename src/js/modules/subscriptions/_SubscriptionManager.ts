@@ -12,8 +12,6 @@ export class SubscriptionManager extends RE6Module {
     // List of trackers - needs to be registered from the main file
     private static trackers: SubscriptionTracker[] = [];
 
-    private openSubscriptionsButton: JQuery<HTMLElement>;
-
     public constructor() {
         super();
         SubscriptionCache.validateCacheVersion();
@@ -22,43 +20,58 @@ export class SubscriptionManager extends RE6Module {
     public create(): void {
         super.create();
 
-        // Create a button in the header
-        this.openSubscriptionsButton = DomUtilities.addSettingsButton({
+        // Create a notifications button
+        const openSubscriptionsButton = DomUtilities.addSettingsButton({
             id: "header-button-settings",
             name: `<i class="fas fa-bell"></i>`,
             title: "Notifications",
             attr: {
-                "data-loading": "false",
-                "data-updates": "0",
+                loading: "false",
+                updates: "0",
             },
             linkClass: "update-notification",
             onClick: () => { SubscriptionManager.trigger("windowOpen"); },
         });
 
+        // Create tab headers and content
         const trackerPages: TabContent[] = [];
         for (const tracker of SubscriptionManager.trackers)
             trackerPages.push({
-                name: tracker.getTabTitle(),
-                content: tracker.getCanvas(),
+                name: tracker.getOutputTab(),
+                content: tracker.getOutputContainer(),
             });
 
         // Establish the settings window contents
-        const $settings = new Tabbed({
+        const content = new Tabbed({
             name: "notifications-tabs",
             content: [
                 ...trackerPages,
                 // info page
             ]
+        }).render().on("re621:update", () => {
+            let loading = false,
+                updates = 0;
+            for (const trackerTab of trackerPages) {
+                if (typeof trackerTab.name == "string") continue;
+
+                if (trackerTab.name.attr("loading") == "true") loading = true;
+                updates += (parseInt(trackerTab.name.attr("updates")) || 0);
+            }
+
+            openSubscriptionsButton.attr({
+                loading: loading,
+                updates: updates,
+            });
         });
 
         // Create the modal
         const modal = new Modal({
             title: "Notifications",
-            triggers: [{ element: this.openSubscriptionsButton }],
+            triggers: [{ element: openSubscriptionsButton }],
             escapable: false,
             fixed: true,
             reserveHeight: true,
-            content: $settings.render(),
+            content: content,
             position: { my: "right", at: "right" },
         });
         modal.getElement().addClass("subscription-wrapper");
