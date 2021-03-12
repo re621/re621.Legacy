@@ -57,6 +57,7 @@ export class PostFilter {
                     filter = Util.Size.unformat(filter) + "";
                     break;
             }
+            filter = filter.toLowerCase();
 
             this.entries.push({ type: filterType, value: filter, inverted: inverse, optional: optional, comparison: comparison });
         }
@@ -131,6 +132,9 @@ export class PostFilter {
                     break;
                 case FilterType.Size:
                     result = PostFilterUtils.compareNumbers(post.file.size, parseInt(value), filter.comparison);
+                    break;
+                case FilterType.Type:
+                    result = post.file.ext === value;
                     break;
                 case FilterType.Duration:
                     result = post.meta.duration == null || PostFilterUtils.compareNumbers(post.meta.duration, parseFloat(value), filter.comparison);
