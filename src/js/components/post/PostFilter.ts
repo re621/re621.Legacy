@@ -86,7 +86,7 @@ export class PostFilter {
         }
 
         // Check if the post matches the filter
-        let result = true;
+        let result = false;
         let optionalHits = 0;
         for (const filter of this.entries) {
 
@@ -163,6 +163,8 @@ export class PostFilter {
                 case FilterType.MetaTags:
                     result = PostFilterUtils.compareNumbers(post.tags.meta.size, parseInt(value), filter.comparison)
                     break;
+                default:
+                    result = false;
             }
 
             // Invert the result if necessary
