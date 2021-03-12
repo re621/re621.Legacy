@@ -53,6 +53,7 @@ export class RISSizeLimit {
     static readonly SauceNAO = new RISSizeLimit(15 * UtilSize.Megabyte);
     static readonly Derpibooru = new RISSizeLimit(20 * UtilSize.Megabyte);
     static readonly Kheina = new RISSizeLimit(8 * UtilSize.Megabyte, 7500, 7500);
+    static readonly Yandex = new RISSizeLimit(100 * UtilSize.Megabyte, 150000, 150000);
 
     public readonly size: number;
     public readonly width: number;

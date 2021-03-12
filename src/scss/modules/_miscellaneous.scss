@@ -1,0 +1,9 @@
+
+/* Fixes the ticket display overflow if the ticket is too long */
+.ticket-subject a {
+    display: inline-block;
+    line-height: 1.25em;
+    height: 1.25em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

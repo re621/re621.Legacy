@@ -1393,6 +1393,16 @@ export class SettingsController extends RE6Module {
 
                     Form.checkbox(
                         {
+                            value: !smartAlias.fetchSettings("replaceLastTag"),
+                            label: `<b>Ignore Last Tag</b><br />Don't replace the last tag with its alias, in case you are still thinking about it`,
+                            width: 3,
+                        },
+                        (data) => { smartAlias.pushSettings("replaceLastTag", !data); }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
                             value: smartAlias.fetchSettings("fixCommonTypos"),
                             label: `<b>Fix Common Typos</b><br />Correct several common typos in the tag fields`,
                             width: 3,

@@ -309,7 +309,7 @@ export class E621 {
         query["_client"] = window["re621"]["useragent"];
 
         const entry = new Request(location.origin + "/" + path + "?" + FormattedAPIQuery.stringify(query), requestInfo);
-        console.log(path, requestInfo);
+        // console.log(path, requestInfo);
         const index = this.requestIndex++;
         const final = new Promise<any>((resolve, reject) => {
             this.emitter.one("api.re621.result-" + index, (e, data, status, endpoint, node) => {

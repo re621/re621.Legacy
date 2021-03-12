@@ -192,7 +192,7 @@ export class PostViewer extends RE6Module {
 
         // Listen to favorites button click
         $("#add-fav-button, #add-to-favorites").on("click", () => {
-            if (!this.fetchSettings("upvoteOnFavorite")) return;
+            if (!this.fetchSettings("upvoteOnFavorite") || $("a.post-vote-up-link span").hasClass("score-positive")) return;
             Danbooru.Post.vote(this.post.id, 1, true);
         });
 
@@ -214,15 +214,27 @@ export class PostViewer extends RE6Module {
                 .insertAfter("#post-history")
         } else {
             const useSample = !this.fetchSettings("betterImageSearch");
-            $("#post-related-images ul").html(`
-                <li><a href="/post_sets?post_id=${this.post.id}">Sets with this post</a></li>
-                <li><a href="/iqdb_queries?post_id=${this.post.id}">Visually similar on E6</a></li>
-                <li><a href="https://www.google.com/searchbyimage?image_url=${this.getSourceLink(RISSizeLimit.Google, useSample)}" target="_blank" rel="noopener noreferrer">Reverse Google Search</a></li>
-                <li><a href="https://saucenao.com/search.php?url=${this.getSourceLink(RISSizeLimit.SauceNAO, useSample)}" target="_blank" rel="noopener noreferrer">Reverse SauceNAO Search</a></li>
-                <li><a href="https://inkbunny.net/search_process.php?text=${this.post.file.md5}&md5=yes" target="_blank" rel="noopener noreferrer">Inkbunny MD5 Search</a></li>
-                <li><a href="https://derpibooru.org/search/reverse?url=${this.getSourceLink(RISSizeLimit.Derpibooru, useSample)}" target="_blank" rel="noopener noreferrer">Reverse Derpibooru Search</a></li>
-                <li><a href="https://kheina.com/?url=${this.getSourceLink(RISSizeLimit.Kheina, useSample)}" target="_blank" rel="noopener noreferrer">Reverse Kheina Search</a></li>
-            `);
+            const links = [
+                ["/post_sets?post_id=" + this.post.id, "Sets with this post", true],
+                ["/iqdb_queries?post_id=" + this.post.id, "Visually similar on E6", true],
+                null,
+                ["https://saucenao.com/search.php?url=" + this.getSourceLink(RISSizeLimit.SauceNAO, useSample), "SauceNAO"],
+                ["https://kheina.com/?url=" + this.getSourceLink(RISSizeLimit.Kheina, useSample), "Kheina"],
+                ["https://www.google.com/searchbyimage?image_url=" + this.getSourceLink(RISSizeLimit.Google, useSample), "Google"],
+                ["https://yandex.ru/images/search?url=" + this.getSourceLink(RISSizeLimit.Yandex, useSample), "Yandex"],
+                null,
+                ["https://derpibooru.org/search/reverse?url=" + this.getSourceLink(RISSizeLimit.Derpibooru, useSample), "Derpibooru"],
+                ["https://inkbunny.net/search_process.php?text=" + this.post.file.md5 + "&md5=yes", "Inkbunny (MD5)"],
+            ];
+            $("#post-related-images ul").html(() => {
+                const htmlContent = [];
+                for (const link of links)
+                    htmlContent.push(
+                        link == null
+                            ? `<li class="list-break"></li>`
+                            : `<li><a href="${link[0]}" ${link[2] ? "" : `target="_blank" rel="noopener noreferrer"`}>${link[1]}</a></li>`);
+                return htmlContent.join("\n");
+            });
         }
     }
 

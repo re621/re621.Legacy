@@ -34,16 +34,16 @@ export class UploadUtilities extends RE6Module {
         if (this.fetchSettings("checkDuplicates")) this.handleDuplicateCheck();
 
         // Add clickable links to sources
-        if (this.fetchSettings("addSourceLinks")) this.handleSourceEnhancements();
+        if (this.fetchSettings("addSourceLinks")) {
+            this.handleSourceEnhancements();
+            const noSourceCheckbox = $("#no_source").on("change", () => {
+                if (noSourceCheckbox.prop("checked")) return;
+                this.handleSourceEnhancements();
+            });
+        }
 
         // Load extra data from the image's header
         this.handleImageData();
-
-        // Fix the thumbnail not getting updated properly when copy-pasting
-        const imageUrlInput = $("#file-container input[type=text]").on("paste", async () => {
-            await Util.sleep(50);   // Paste event fires immediately, before the input changes
-            Util.Events.triggerVueEvent(imageUrlInput, "keyup");
-        });
 
         // Add a class to the "Submit" button
         $("button:contains('Upload')").addClass("submit-upload");
@@ -202,7 +202,7 @@ export class UploadUtilities extends RE6Module {
 
         const urlMatch = /(http(?:s)?\:\/\/)(www\.)?/;
         const timers = {};
-        $(sourceContainer).on("input", "input.upload-source-input", (event) => {
+        $(sourceContainer).on("input re621:input", "input.upload-source-input", (event) => {
             const $input = $(event.currentTarget),
                 $parent = $input.parent();
 
@@ -233,6 +233,7 @@ export class UploadUtilities extends RE6Module {
                     return value.replace(urlMatch, "https://");
                 });
                 Util.Events.triggerVueEvent($input, "input", "vue-event");
+                $input.trigger("re621:input"); // This is stupid, but it works
             }, 500);
 
             // Create buttons

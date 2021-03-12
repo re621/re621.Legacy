@@ -97,6 +97,16 @@ export class Page {
         if (this.instance === undefined) this.instance = new Page();
         return this.instance;
     }
+
+    /**
+     * Returns the type of the page, according to the definitions below
+     * @returns Page type, as a string
+     */
+    public static getPageType(): string {
+        for (const [name, regex] of Object.entries(PageDefinition))
+            if (Page.matches(regex)) return name;
+        return null;
+    }
 }
 
 export const PageDefinition = {
@@ -119,4 +129,7 @@ export const PageDefinition = {
     tickets: /^\/tickets.*/,
     profile: /^\/users\/\d+$/,
     iqdb: /^\/iqdb_queries.*/,
+    deleted_posts: /^\/deleted_posts.*/,
+    blips: /^\/blips.*/,
+    help: /^\/help.*/,
 };

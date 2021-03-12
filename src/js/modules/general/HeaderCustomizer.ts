@@ -58,7 +58,7 @@ export class HeaderCustomizer extends RE6Module {
             hotkeyTab9: "9",
 
             tabs: [
-                { name: "Account", href: "/users/home" },
+                { name: "Profile", href: "/users/%userid%" },
                 { name: "Posts", href: "/posts" },
                 { name: "Comments", href: "/comments?group_by=post" },
                 { name: "Artists", href: "/artists" },
@@ -289,6 +289,12 @@ export class HeaderCustomizer extends RE6Module {
 
         if (config.href === "/forum_topics" && this.hasForumUpdates)
             $link.addClass("tab-has-updates");
+        else if ((config.href == "/users/%userid%" || config.href == "/users/home") && !User.loggedIn) {
+            $link
+                .attr("href", "/session/new")
+                .addClass("tab-login")
+                .html("Sign In");
+        }
 
         if (triggerUpdate) { this.saveNavbarSettings(); }
 

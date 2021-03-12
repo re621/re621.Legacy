@@ -58,6 +58,7 @@ export class SmartAlias extends RE6Module {
             uploadTagsForm: true,
 
             replaceAliasedTags: true,
+            replaceLastTag: false,
             fixCommonTypos: false,
             asciiWarning: true,
             minPostsWarning: 20,
@@ -119,7 +120,9 @@ export class SmartAlias extends RE6Module {
         $("#tags").off("input.re621.smart-alias");
 
         for (const element of this.inputElements)
-            element.off("input.smartalias");
+            element
+                .off("input.smartalias blur.smartalias blur.smartalias.spacefix")
+                .removeData("re621:smartalias");
     }
 
     public create(): void {
@@ -168,6 +171,11 @@ export class SmartAlias extends RE6Module {
         const mode = this.fetchSettings<boolean>("autoLoad");
         for (const inputElement of $([...inputs].join(", ")).get()) {
             const $textarea = $(inputElement);
+
+            // Ignore already initialized inputs
+            if ($textarea.data("re621:smartalias")) continue;
+            $textarea.data("re621:smartalias", true);
+
             this.inputElements.push($textarea);
             const $container = $("<smart-alias>")
                 .attr("ready", "true")
@@ -224,25 +232,31 @@ export class SmartAlias extends RE6Module {
 
         // Wait for the user to stop typing before processing
         let typingTimeout: number;
-        $textarea.on("input.smartalias", () => {
+        $textarea
+            .on("input.smartalias blur.smartalias", () => {
 
-            // handleTagInput triggers an input event to properly fill in the data bindings
-            // this ensures that it will not result in an infinite loop
-            if ($textarea.data("vue-event") === "true") {
-                $textarea.data("vue-event", "false");
-                return;
-            }
+                // handleTagInput triggers an input event to properly fill in the data bindings
+                // this ensures that it will not result in an infinite loop
+                if ($textarea.data("vue-event") === "true") {
+                    $textarea.data("vue-event", "false");
+                    return;
+                }
 
-            // If the data is currently processing, but the user keeps typing,
-            // check every second to make sure the last input is caught
-            window.clearInterval(typingTimeout);
-            typingTimeout = window.setInterval(() => {
-                if ($container.attr("ready") !== "true") return;
-
+                // If the data is currently processing, but the user keeps typing,
+                // check every second to make sure the last input is caught
                 window.clearInterval(typingTimeout);
-                this.handleTagInput($textarea, $container);
-            }, 1000);
-        });
+                typingTimeout = window.setInterval(() => {
+                    if ($container.attr("ready") !== "true") return;
+
+                    window.clearInterval(typingTimeout);
+                    this.handleTagInput($textarea, $container);
+                }, 1000);
+            })
+            .on("blur.smartalias.spacefix", () => {
+                $textarea.val((index, value) => {
+                    return value.endsWith(" ") ? value : (value + " ");
+                })
+            });
 
         // Skip the waiting and go straight to parsing
         $textarea.on("re621:input", () => {
@@ -260,7 +274,8 @@ export class SmartAlias extends RE6Module {
             .html("Validate")
             .addClass("smart-alias-validate")
             .insertBefore($container)
-            .on("click", () => {
+            .on("click", (event) => {
+                event.preventDefault();
                 this.handleTagInput($textarea, $container, false);
             });
 
@@ -375,8 +390,13 @@ export class SmartAlias extends RE6Module {
         if (this.fetchSettings("replaceAliasedTags")) {
             // console.log(SmartAlias.tagAliases);
             $textarea.val((index, currentValue) => {
+                const lastTag = (this.fetchSettings("replaceLastTag") || currentValue.endsWith(" ") || !$textarea.is(":focus"))
+                    ? null
+                    : Util.getTags($textarea).pop();
+                console.log("[" + lastTag + "]", this.fetchSettings("replaceLastTag"), $textarea.is(":focus"));
                 for (const [antecedent, consequent] of Object.entries(SmartAlias.tagAliases)) {
-                    // console.log("`" + getTagRegex(antecedent) + "`");
+                    if (antecedent == lastTag) continue;
+                    console.log("replacing [" + antecedent + "] with [" + consequent + "]", antecedent == lastTag);
                     currentValue = currentValue.replace(
                         this.getTagRegex(antecedent),
                         "$1" + consequent + "$3"

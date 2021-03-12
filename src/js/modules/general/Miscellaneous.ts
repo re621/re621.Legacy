@@ -397,6 +397,11 @@ export class Miscellaneous extends RE6Module {
         $("a:contains('blakclist')").text((index, text) => {
             return text.replace(/([bB])lakclist/, "$1lacklist");
         });
+
+        for (const el of $(".ticket-subject a").get()) {
+            const $el = $(el);
+            $el.text($el.parent("td.ticket-subject").attr("title"));
+        }
     }
 
 }
