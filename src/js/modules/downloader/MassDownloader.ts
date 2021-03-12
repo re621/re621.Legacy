@@ -295,26 +295,34 @@ export class MassDownloader extends RE6Module {
 
         // Download the resulting ZIP
         this.downloadIndex++;
-        const filename = `e621-${this.fileTimestamp}-${this.downloadIndex}.zip`;
-        const $downloadLink = $("<a>")
-            .attr({
-                "href": URL.createObjectURL(zipData),
-                "download": filename,
-            })
-            .html("Download Archive")
-            .appendTo(this.infoText);
 
-        if (this.fetchSettings("autoDownloadArchive")) {
-            $downloadLink.get(0).click();
-            if (this.downloadOverSize) {
-                this.setProcessing(false);
-                this.actButton.get(0).click();
-                return;
+        if (zipData) {
+            const filename = `e621-${this.fileTimestamp}-${this.downloadIndex}.zip`;
+            const $downloadLink = $("<a>")
+                .attr({
+                    "href": URL.createObjectURL(zipData),
+                    "download": filename,
+                })
+                .html("Download Archive")
+                .appendTo(this.infoText);
+
+            if (this.fetchSettings("autoDownloadArchive")) {
+                $downloadLink.get(0).click();
+                if (this.downloadOverSize) {
+                    this.setProcessing(false);
+                    this.actButton.get(0).click();
+                    return;
+                }
+            } else if (this.downloadOverSize) {
+                $("<div>")
+                    .addClass("download-notice")
+                    .html(`Download has exceeded the maximum file size.<br /><br />Click the download button again for the next part.`)
+                    .appendTo(this.infoText);
             }
-        } else if (this.downloadOverSize) {
-            $("<div>")
-                .addClass("download-notice")
-                .html(`Download has exceeded the maximum file size.<br /><br />Click the download button again for the next part.`)
+        } else {
+            // Fallback, in case the download process failed
+            $("<span>")
+                .html("Error: malformed archive")
                 .appendTo(this.infoText);
         }
 
