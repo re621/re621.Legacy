@@ -3,7 +3,6 @@ import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed, TabContent } from "../../components/structure/Tabbed";
 import { Util } from "../../components/utility/Util";
-import { SubscriptionCache } from "./_SubscriptionCache";
 import { SubscriptionTracker } from "./_SubscriptionTracker";
 
 
@@ -11,11 +10,6 @@ export class SubscriptionManager extends RE6Module {
 
     // List of trackers - needs to be registered from the main file
     private static trackers: SubscriptionTracker[] = [];
-
-    public constructor() {
-        super();
-        SubscriptionCache.validateCacheVersion();
-    }
 
     public create(): void {
         super.create();
@@ -94,6 +88,7 @@ export class SubscriptionManager extends RE6Module {
 
         // Establish heartbeat
         setInterval(() => { SubscriptionManager.trigger("heartbeat"); }, Util.Time.MINUTE);
+        SubscriptionManager.trigger("heartbeat");
 
     }
 

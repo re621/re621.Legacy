@@ -26,8 +26,9 @@ export class SubscriptionTracker extends RE6Module {
         this.trackerID = this.getSettingsTag().replace("Tracker", "") + "s";
 
         // Fires every minute, refreshes the timers and triggers an update if necessary
-        SubscriptionManager.on("heartbeat." + this.trackerID, () => {
-            if (this.isUpdateRequired()) this.update();
+        SubscriptionManager.on("heartbeat." + this.trackerID, async () => {
+            if (await this.isUpdateRequired())
+                await this.update();
         });
 
         // Fires several times when the update is underway:
@@ -137,21 +138,11 @@ export class SubscriptionTracker extends RE6Module {
         await this.cache.fetch();
 
         SubscriptionManager.trigger("inprogress." + this.trackerID, true);
-        this.updateInProgress = false;
-        this.ctwrap
-            .attr("state", TrackerState.Done)
-            .trigger("re621:update");
+        await this.draw();
     }
 
     /** Outputs the items currently in cache onto the canvas */
     public async draw(): Promise<void> {
-
-        // Debug only
-        this.ctwrap
-            .attr("state", TrackerState.Load)
-            .trigger("re621:update");
-        await this.cache.fetch();
-
         this.canvas.html("");
         this.ctwrap.attr("state", TrackerState.Draw);
         this.cache.forEach((data, timestamp) => {
@@ -160,7 +151,6 @@ export class SubscriptionTracker extends RE6Module {
         this.ctwrap
             .attr("state", TrackerState.Done)
             .trigger("re621:update");
-
     }
 
     /**

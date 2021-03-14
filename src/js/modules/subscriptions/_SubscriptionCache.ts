@@ -7,7 +7,7 @@ export class SubscriptionCache {
 
     // Hard-coded cache version. If the stored value is different from this, the cache gets cleared
     private static cacheVersion = 3;
-    private static cacheValid = false;
+    private static cacheValid: boolean;
 
     // Instance of the tracker this cache belongs to
     // Needs to be here because fetching data is different between trackers
@@ -25,7 +25,10 @@ export class SubscriptionCache {
         this.data = {}
         this.index = [];
 
-        if (!SubscriptionCache.cacheValid) Util.LS.setItem(this.storageTag, "{}");
+        // Cache isn't expected to be backwards compatible. Just delete it if the version differs.
+        if (!SubscriptionCache.isCacheValid()) Util.LS.setItem(this.storageTag, "{}");
+
+        this.load();
     }
 
     /** Loads the cache from local storage */
@@ -61,15 +64,15 @@ export class SubscriptionCache {
      */
     public async fetch(): Promise<boolean> {
         const updates = await this.tracker.fetchUpdatedEntries();
-        if (Object.keys(updates).length > 0) {
-            Object.keys(updates).forEach((key) => {
-                this.data[key] = updates[key];
-            });
-            this.updateIndex();
-            this.trim();
-            return this.save();
-        }
-        return Promise.resolve(false);
+        console.log("cache", Object.keys(updates).length, this.index.length);
+        if (Object.keys(updates).length == 0) Promise.resolve(false);
+
+        Object.keys(updates).forEach((key) => {
+            this.data[key] = updates[key];
+        });
+        this.updateIndex();
+        this.trim();
+        return this.save();
     }
 
     /** Re-creates the timestamp index from the stored data */
@@ -128,9 +131,17 @@ export class SubscriptionCache {
         });
     }
 
-    public static validateCacheVersion(): boolean {
-        if (SubscriptionCache.cacheVersion == (parseInt(Util.LS.getItem("re621.SubscriptionManager.cacheVersion")) || 0)) SubscriptionCache.cacheValid = true;
-        else Util.LS.setItem("re621.SubscriptionManager.cacheVersion", SubscriptionCache.cacheVersion + "");
+    /**
+     * Checks if the stored cache version is the same as the hardcoded one.
+     * @returns True if the cache is valid, false otherwise
+     */
+    public static isCacheValid(): boolean {
+        if (typeof SubscriptionCache.cacheValid !== "undefined")
+            return SubscriptionCache.cacheValid;
+
+        SubscriptionCache.cacheValid = SubscriptionCache.cacheVersion == (parseInt(Util.LS.getItem("re621.SubscriptionManager.cacheVersion")) || 0);
+        if (!SubscriptionCache.cacheValid) Util.LS.setItem("re621.SubscriptionManager.cacheVersion", SubscriptionCache.cacheVersion + "");
+
         return SubscriptionCache.cacheValid;
     }
 
