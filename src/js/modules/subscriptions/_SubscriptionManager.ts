@@ -92,6 +92,9 @@ export class SubscriptionManager extends RE6Module {
         for (const tracker of SubscriptionManager.trackers)
             tracker.draw();
 
+        // Establish heartbeat
+        setInterval(() => { SubscriptionManager.trigger("heartbeat"); }, Util.Time.MINUTE);
+
     }
 
     /**

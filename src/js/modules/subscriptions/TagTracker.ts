@@ -4,6 +4,7 @@ import { Blacklist } from "../../components/data/Blacklist";
 import { PostData } from "../../components/post/Post";
 import { Util } from "../../components/utility/Util";
 import { UpdateContent, UpdateData } from "./_SubscriptionCache";
+import { SubscriptionManager } from "./_SubscriptionManager";
 import { SubscriptionTracker } from "./_SubscriptionTracker";
 
 export class TagTracker extends SubscriptionTracker {
@@ -17,13 +18,13 @@ export class TagTracker extends SubscriptionTracker {
         this.clearStatus();
         this.writeStatus("Updating Tag Subscriptions");
 
-        // Retrieving settings
+        // Fetching the list of subscriptions
         this.writeStatus(`. . . retrieving settings`);
         const subscriptions = ["horse"]; //await this.fetchSettings<string[]>("data2", true); // TODO Changed this back
         const lastUpdate = await this.fetchSettings<number>("lastUpdate", true);
         if (Object.keys(subscriptions).length == 0) return result;
 
-        // Sending an API request
+        // Splitting subscriptions into batches and sending API requests
         this.writeStatus(`. . . sending an API request`);
         const subscriptionsChunks = Util.chunkArray(subscriptions, this.batchSize);
         const apiResponse: { [timestamp: number]: APIPost } = {};
@@ -36,19 +37,26 @@ export class TagTracker extends SubscriptionTracker {
 
             for (const post of await E621.Posts.get<APIPost>({ "tags": chunk.map(el => "~" + el), "limit": 320 }, index < 10 ? 500 : 1000))
                 apiResponse[new Date(post.created_at).getTime()] = post;
+
+            // This should prevent the tracker from double-updating if the process takes more than 5 minutes
+            // There are definitely users who are subscribed to enough tags to warrant this
+            SubscriptionManager.trigger("inprogress." + this.trackerID);
         }
 
-        // Parsing output
+        // Parsing output, discarding irrelevant data
         this.writeStatus(`. . . formatting output`);
         await Util.sleep(500);
         for (const index of Object.keys(apiResponse).sort()) {
+
+            // This is needed exclusively for the Blacklist below
             const post = PostData.fromAPI(apiResponse[index]);
 
-            // Timestamp
+            // Don't include updates posted before the last update timestamp
             const timestamp = post.date.obj.getTime();
             if (timestamp < lastUpdate) continue;
 
-            // Blacklist
+            // Avoid posts with blacklisted tags
+            // This is kind of excessive, but it works
             Blacklist.addPost(post);
             if (Blacklist.checkPost(post.id, true)) continue;
 
