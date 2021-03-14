@@ -27,6 +27,8 @@ export class Tabbed implements PreparedStructure {
         this.$container = $("<tabbed>");
         const $tabList = $("<ul>").appendTo(this.$container);
 
+        if (this.config.class) this.$container.addClass(this.config.class);
+
         this.config.content.forEach((entry, index) => {
             let $tab: JQuery<HTMLElement>;
             if (typeof entry.name === "string")
@@ -69,6 +71,7 @@ export class Tabbed implements PreparedStructure {
 
 interface TabbedConfig {
     name: string;
+    class?: string;
     content: TabContent[];
 }
 

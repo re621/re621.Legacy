@@ -44,6 +44,7 @@ export class SubscriptionManager extends RE6Module {
         // Establish the settings window contents
         const content = new Tabbed({
             name: "notifications-tabs",
+            class: "config-tabs",
             content: [
                 ...trackerPages,
                 // info page

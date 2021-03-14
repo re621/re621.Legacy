@@ -1,12 +1,35 @@
 
-.subscription-wrapper {
-    // I don't know why it's 31.9rem, and I don't care enough to find out
-    width: 31.9rem !important;
+tabbed.config-tabs {
+    position: relative;
+    display: grid;
+    height: 100%;
+    box-sizing: border-box;
+
+    grid-template-columns: 2rem auto;
+    margin-left: -0.75rem;
+    padding-top: 0.5rem;
+
+    ul.ui-tabs-nav {
+        padding-top: 0.5rem;
+        border-right: 1px solid #333 !important;
+        border-radius: 0;
+
+        li.ui-tabs-tab {
+            writing-mode: vertical-rl;
+            text-orientation: sideways;
+            transform: rotate(180deg);
+            padding: 0.5rem;
+        }
+    }
+
+    div.ui-tabs-panel {
+        margin-left: 0.5rem;
+    }
 }
 
 sb-ctwrap {
     display: block;
-    width: 31.5rem;
+    width: 37rem; // based on the tag updates grid
 
     &[state=done] sb-status { display: none !important; }
     &:not([state=done]) sb-canvas { display: none !important; }
@@ -22,21 +45,30 @@ sb-status {
 
 /** Tag Updates **/
 sb-ctwrap[content=tags] sb-canvas {
+
+    $sub-row: 7rem;
+    $sub-rowgap: 0.5rem;
+    $sub-col: 7rem;
+    $sub-colgap: 0.5rem;
+    
+    $sub-colcount: 5;
+
     display: grid;
-    grid-template-columns: repeat(auto-fit, 122px);
-    grid-column-gap: 5px;
-    grid-row-gap: 5px;
+    width: ($sub-col * $sub-colcount) + ($sub-colgap * ($sub-colcount - 1));
+
+    grid-template-columns: repeat($sub-colcount, $sub-col);
+    grid-template-rows: repeat(auto-fit, $sub-row);
+    grid-column-gap: $sub-colgap;
+    grid-row-gap: $sub-rowgap;
 
     subitem {
         display: block;
-        width: 122px;
-        height: 122px;
         overflow: hidden;
 
         img {
             object-fit: cover;
             width: 100%;
-            height: 100%;
+            height: $sub-col;
         }
     }
 }
