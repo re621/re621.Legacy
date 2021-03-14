@@ -47,7 +47,7 @@ export class SubscriptionTracker extends RE6Module {
             // User-customizable settings
             updateInterval: Util.Time.DAY,  // how often an update event occurs
             cacheMaxAge: 0,                 // cache entries older than this get trimmed
-            cacheSize: 10,                  // how many subscription updates are kept
+            cacheSize: 60,                  // how many subscription updates are kept
 
             // Utility values
             lastUpdate: 0,                  // last time an update has been completed
@@ -138,6 +138,9 @@ export class SubscriptionTracker extends RE6Module {
 
         SubscriptionManager.trigger("inprogress." + this.trackerID, true);
         this.updateInProgress = false;
+        this.ctwrap
+            .attr("state", TrackerState.Done)
+            .trigger("re621:update");
     }
 
     /** Outputs the items currently in cache onto the canvas */
