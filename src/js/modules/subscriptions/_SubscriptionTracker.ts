@@ -15,7 +15,7 @@ export class SubscriptionTracker extends RE6Module {
     private canvas: JQuery<HTMLElement>;    // canvas onto which the updates are drawn
     private status: JQuery<HTMLElement>;    // used to display status updates
 
-    private cache: SubscriptionCache;       // object containing update data
+    protected cache: SubscriptionCache;     // object containing update data
 
     private updateInProgress = false;       // the tracker is currently fetching updates
 
@@ -27,17 +27,60 @@ export class SubscriptionTracker extends RE6Module {
 
         // Fires every minute, refreshes the timers and triggers an update if necessary
         SubscriptionManager.on("heartbeat." + this.trackerID, async () => {
+            console.log("heartbeat." + this.trackerID, await this.isUpdateRequired());
             if (await this.isUpdateRequired())
                 await this.update();
         });
 
-        // Fires several times when the update is underway:
+        // Fires several times when the update is underway
         // - when an update starts
         // - on every API call
         // - when the update ends
-        SubscriptionManager.on("inprogress." + this.trackerID, (event, data) => {
-            if (data) this.pushSettings("lastUpdate", Util.Time.now());
-            this.pushSettings("lastAttempt", data ? 0 : Util.Time.now());
+        // Receives data through the event - if set to `true`,
+        // the update is considered concluded, and update timer is set.
+        SubscriptionManager.on("inprogress." + this.trackerID, (event, isUpdateFinished) => {
+            if (isUpdateFinished) this.pushSettings("lastUpdate", Util.Time.now());
+            this.pushSettings("lastAttempt", isUpdateFinished ? 0 : Util.Time.now());
+        });
+
+        // Fires whenever the number of entries changes
+        // - when a subscription update starts and ends
+        // - when the user deletes a post from cache
+        SubscriptionManager.on("attributes." + this.trackerID, () => {
+            const ctwrap = this.getOutputContainer();
+
+            ctwrap.attr({
+                posts: this.canvas.find("subitem").length,
+                added: this.canvas.find("subitem[new]").length,
+            });
+
+            this.tabbtn.attr({
+                loading: ctwrap.attr("state") == TrackerState.Load,
+                updates: this.canvas.find("subitem[new=true]").length,
+            });
+
+            SubscriptionManager.trigger("notification")
+        });
+
+        // Fires when the user sees the tracker's canvas
+        // Receives data through the event as a boolean value.
+        // True means that the user opened the page, false that they closed it
+        SubscriptionManager.on("intersect." + this.trackerID, async (event, isIntersecting) => {
+
+            // Just in case the wrapper does not exist yet, somehow
+            this.getOutputContainer();
+
+            for (const el of this.canvas.find("subitem").get()) {
+                const $el = $(el);
+                if (isIntersecting && $el.attr("new") == "true") $el.attr("new", "maybe");
+                else if ($el.attr("new") == "maybe")
+                    $el.removeAttr("new");
+            }
+
+            if (isIntersecting) this.cache.purgeNew();
+
+            await Util.sleep(500);
+            SubscriptionManager.trigger("attributes." + this.trackerID);
         });
     }
 
@@ -46,7 +89,7 @@ export class SubscriptionTracker extends RE6Module {
             enabled: true,
 
             // User-customizable settings
-            updateInterval: Util.Time.DAY,  // how often an update event occurs
+            updateInterval: Util.Time.MINUTE, //Util.Time.DAY,  // how often an update event occurs
             cacheMaxAge: 0,                 // cache entries older than this get trimmed
             cacheSize: 60,                  // how many subscription updates are kept
 
@@ -85,15 +128,7 @@ export class SubscriptionTracker extends RE6Module {
                 loading: false,
                 updates: 0,
             })
-            .html(this.getTrackerID())
-            .on("re621:update", () => {
-                const ctwrap = this.getOutputContainer();
-                this.tabbtn.attr({
-                    loading: ctwrap.attr("state") == TrackerState.Load,
-                    updates: ctwrap.children().length,
-                });
-                this.ctwrap.parents("tabbed").trigger("re621:update");
-            });
+            .html(this.getTrackerID());
 
         return this.tabbtn;
     }
@@ -104,7 +139,7 @@ export class SubscriptionTracker extends RE6Module {
 
         this.ctwrap = $("<sb-ctwrap>")
             .attr({
-                content: this.getTrackerID().toLowerCase(),
+                content: this.getTrackerID(),
                 state: TrackerState.Init,
             });
 
@@ -119,6 +154,17 @@ export class SubscriptionTracker extends RE6Module {
     }
 
     /**
+     * Returns the actual canvas element corresponding to this tracker.  
+     * Should not normally be used - this is only here for the benefit of
+     * the IntersectionObserver, since viewing the wrapper can cause issues
+     * @returns JQuery DOM object
+     */
+    public getCanvasElement(): JQuery<HTMLElement> {
+        if (this.canvas == undefined) this.getOutputContainer();
+        return this.canvas;
+    }
+
+    /**
      * Calls the API and fetches the updated entries for this tracker.  
      * This method **must** be overridden by the child class.  
      * Only used within the cache's `fetch()` method.
@@ -129,14 +175,14 @@ export class SubscriptionTracker extends RE6Module {
 
     /** Sets up and executes a subscription update */
     public async update(): Promise<void> {
-        this.ctwrap
-            .attr("state", TrackerState.Load)
-            .trigger("re621:update");
+        this.ctwrap.attr("state", TrackerState.Load);
+        SubscriptionManager.trigger("attributes." + this.trackerID);
         this.updateInProgress = true;
         SubscriptionManager.trigger("inprogress." + this.trackerID);
 
         await this.cache.fetch();
 
+        this.updateInProgress = false;
         SubscriptionManager.trigger("inprogress." + this.trackerID, true);
         await this.draw();
     }
@@ -144,13 +190,16 @@ export class SubscriptionTracker extends RE6Module {
     /** Outputs the items currently in cache onto the canvas */
     public async draw(): Promise<void> {
         this.canvas.html("");
-        this.ctwrap.attr("state", TrackerState.Draw);
+        this.ctwrap.attr({ state: TrackerState.Draw });
+        SubscriptionManager.trigger("attributes." + this.trackerID);
+
+        this.canvas.append(this.drawNewUpdatesDivider());
         this.cache.forEach((data, timestamp) => {
             this.canvas.append(this.drawUpdateEntry(data, timestamp));
         });
-        this.ctwrap
-            .attr("state", TrackerState.Done)
-            .trigger("re621:update");
+
+        this.ctwrap.attr({ state: TrackerState.Done });
+        SubscriptionManager.trigger("attributes." + this.trackerID);
     }
 
     /**
@@ -158,10 +207,18 @@ export class SubscriptionTracker extends RE6Module {
      * This method **must** be overridden by the child class.  
      * @param data Subscription update data
      * @param timestamp Update timestamp
-     * @returns JQuery HTML object based on provided data
+     * @returns JQuery DOM object based on provided data
      */
     protected drawUpdateEntry(data: UpdateContent, timestamp: number): JQuery<HTMLElement> {
         return $(`<subitem>post #${data.uid} (${timestamp}</subitem>`);
+    }
+
+    /**
+     * Returns a divider that splits older updates from ones just added
+     * @returns JQuery DOM object
+     */
+    protected drawNewUpdatesDivider(): JQuery<HTMLElement> {
+        return $("<subdivider>Older Updates</subdivider>");
     }
 
     /** Clears the status screen of all entries */

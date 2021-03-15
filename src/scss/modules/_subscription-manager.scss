@@ -10,7 +10,14 @@ tabbed.config-tabs {
     padding-top: 0.5rem;
 
     ul.ui-tabs-nav {
-        padding-top: 0.5rem;
+        position: fixed;
+        width: 2rem;
+        display: grid;
+        grid-template-rows: 0 min-content min-content min-content min-content auto 0;
+        grid-row-gap: 0.5rem;
+        align-items: baseline;
+        height: 81vh;
+
         border-right: 1px solid #333 !important;
         border-radius: 0;
 
@@ -19,11 +26,19 @@ tabbed.config-tabs {
             text-orientation: sideways;
             transform: rotate(180deg);
             padding: 0.5rem;
+            align-self: end;
+            border-radius: 0;
+
+            &:hover, &.ui-tabs-active {
+                background-color: #ffffff20;
+            }
         }
     }
 
     div.ui-tabs-panel {
         margin-left: 0.5rem;
+        grid-column: 2;
+        width: 37rem;
     }
 }
 
@@ -33,6 +48,36 @@ sb-ctwrap {
 
     &[state=done] sb-status { display: none !important; }
     &:not([state=done]) sb-canvas { display: none !important; }
+
+    sb-canvas {
+        subitem { order: 20; }
+        subitem[new=true],
+        subitem[new=maybe] { order: 0; }
+
+        subdivider {
+            display: flex;
+            grid-column: span 5;
+            align-items: center;
+            text-align: center;
+            order: 10;
+
+            color: #ffffff50;
+
+            &::before,
+            &::after {
+                content: '';
+                flex: 1;
+                border-bottom: 1px solid #ffffff50;
+            }
+
+            &::before { margin-right: 1rem; }
+            &::after { margin-left: 1rem; }
+        }
+    }
+
+    &[added="0"] sb-canvas subdivider {
+        display: none;
+    }
 }
 
 /** Status Output **/
@@ -44,7 +89,7 @@ sb-status {
 }
 
 /** Tag Updates **/
-sb-ctwrap[content=tags] sb-canvas {
+sb-ctwrap[content=Tags] sb-canvas {
 
     $sub-row: 7rem;
     $sub-rowgap: 0.5rem;
@@ -57,18 +102,46 @@ sb-ctwrap[content=tags] sb-canvas {
     width: ($sub-col * $sub-colcount) + ($sub-colgap * ($sub-colcount - 1));
 
     grid-template-columns: repeat($sub-colcount, $sub-col);
-    grid-template-rows: repeat(auto-fit, $sub-row);
     grid-column-gap: $sub-colgap;
     grid-row-gap: $sub-rowgap;
 
     subitem {
         display: block;
         overflow: hidden;
+        position: relative;
 
         img {
             object-fit: cover;
             width: 100%;
-            height: $sub-col;
+            height: $sub-row;
         }
+
+        a.delete-link {
+            position: absolute;
+            top: -0.75rem;
+            right: -1.25rem;
+            width: 3rem;
+            height: 2rem;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            background: #96181877;
+            transform: rotate(45deg);
+            transform-origin: center;
+            box-shadow: 1px 1px 5px 0px #00000060;
+            padding-bottom: 0.05rem;
+            box-sizing: border-box;
+
+            visibility: hidden;
+
+            &:hover {
+                background: #961818;
+                color: white;
+            }
+
+            span { transform: rotate(-45deg); }
+        }
+
+        &:hover a.delete-link { visibility: visible; }
     }
 }

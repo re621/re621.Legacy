@@ -75,6 +75,40 @@ export class SubscriptionCache {
         return this.save();
     }
 
+    /**
+     * Returns an item corresponding to the provided timestamp
+     * @param timestamp Timestamp to look for
+     */
+    public getItem(timestamp: number): UpdateContent {
+        return this.data[timestamp];
+    }
+
+    /**
+     * Removes an item with the provided timestamp from cache
+     * @param timestamp Timestamp to look for
+     */
+    public async deleteItem(timestamp: number): Promise<boolean> {
+        const el = this.index.indexOf(timestamp);
+        console.log("locating", timestamp, el);
+        if (el == -1) return false;
+
+        delete this.data[timestamp];
+        this.updateIndex();
+        return this.save();
+    }
+
+    /** Returns the number of items in cache */
+    public count(): number {
+        return this.index.length;
+    }
+
+    /** Strips all `new` entries of that status */
+    public async purgeNew(): Promise<boolean> {
+        for (const timestamp of this.index)
+            delete this.data[timestamp].new;
+        return this.save();
+    }
+
     /** Re-creates the timestamp index from the stored data */
     private updateIndex(): void {
         this.index = Object.keys(this.data)

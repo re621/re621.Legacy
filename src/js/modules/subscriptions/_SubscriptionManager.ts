@@ -11,6 +11,12 @@ export class SubscriptionManager extends RE6Module {
     // List of trackers - needs to be registered from the main file
     private static trackers: SubscriptionTracker[] = [];
 
+    public static readonly observerConfig = {
+        root: null,
+        rootMargin: "100% 50% 100% 50%",
+        threshold: 0.5,
+    };
+
     public create(): void {
         super.create();
 
@@ -28,12 +34,24 @@ export class SubscriptionManager extends RE6Module {
         });
 
         // Create tab headers and content
+        // This is a more robust way to track when the user sees the updates page,
+        // even though it is admittedly more complicated than listening to various
+        // button clicks and window opens.
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((value) => {
+                console.log($(value.target).parent().attr("content"), value.isIntersecting);
+                SubscriptionManager.trigger("intersect." + $(value.target).parent().attr("content"), value.isIntersecting);
+            });
+        }, SubscriptionManager.observerConfig);
+
         const trackerPages: TabContent[] = [];
-        for (const tracker of SubscriptionManager.trackers)
+        for (const tracker of SubscriptionManager.trackers) {
             trackerPages.push({
                 name: tracker.getOutputTab(),
                 content: tracker.getOutputContainer(),
             });
+            observer.observe(tracker.getCanvasElement()[0]);
+        }
 
         // Establish the settings window contents
         const content = new Tabbed({
@@ -41,9 +59,15 @@ export class SubscriptionManager extends RE6Module {
             class: "config-tabs",
             content: [
                 ...trackerPages,
-                // info page
+                {
+                    name: "Settings",
+                    content: $("<div>").html("TODO"),
+                }
             ]
-        }).render().on("re621:update", () => {
+        });
+
+        // Update the notifications button when updates occur
+        SubscriptionManager.on("notification", () => {
             let loading = false,
                 updates = 0;
             for (const trackerTab of trackerPages) {
@@ -66,7 +90,7 @@ export class SubscriptionManager extends RE6Module {
             escapable: false,
             fixed: true,
             reserveHeight: true,
-            content: content,
+            content: content.render(),
             position: { my: "right", at: "right" },
         });
         modal.getElement().addClass("subscription-wrapper");

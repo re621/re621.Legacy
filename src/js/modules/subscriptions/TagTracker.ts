@@ -20,7 +20,7 @@ export class TagTracker extends SubscriptionTracker {
 
         // Fetching the list of subscriptions
         this.writeStatus(`. . . retrieving settings`);
-        const subscriptions = ["horse"]; //await this.fetchSettings<string[]>("data2", true); // TODO Changed this back
+        const subscriptions = ["mammal"]; //await this.fetchSettings<string[]>("data2", true); // TODO Changed this back
         const lastUpdate = await this.fetchSettings<number>("lastUpdate", true);
         if (Object.keys(subscriptions).length == 0) return result;
 
@@ -77,6 +77,10 @@ export class TagTracker extends SubscriptionTracker {
         const postData = data.ext.split("|");
         const result = $("<subitem>")
             .attr({
+                // Output ordering
+                "new": data.new,
+
+                // Necessary data for the HoverZoom
                 "data-large-file-url": getSampleLink(data.md5, postData[1] == "true", postData[2]),
                 "data-file-ext": postData[2],
                 "data-rating": postData[0] || "s",
@@ -85,9 +89,23 @@ export class TagTracker extends SubscriptionTracker {
         const link = $("<a>")
             .attr({ href: "/posts/" + data.uid, })
             .appendTo(result);
+
         $("<img>")
             .attr({ src: getPreviewLink(data.md5), })
             .appendTo(link);
+
+        $("<a>")
+            .addClass("delete-link")
+            .html(`<span><i class="fas fa-times"></i></span>`)
+            .appendTo(result)
+            .on("click", (event) => {
+                event.preventDefault;
+                this.cache.deleteItem(timestamp);
+                result.remove();
+                console.log("deleting", timestamp);
+                SubscriptionManager.trigger("attributes." + this.trackerID);
+            });
+
         return result;
 
         function getPreviewLink(md5: string): string {
