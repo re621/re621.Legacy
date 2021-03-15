@@ -32,7 +32,7 @@ export class SubscriptionCache {
     }
 
     /** Loads the cache from local storage */
-    private async load(): Promise<boolean> {
+    public async load(): Promise<boolean> {
         try { this.data = JSON.parse(Util.LS.getItem(this.storageTag) || "{}"); }
         catch (error) {
             await this.clear();
@@ -43,13 +43,13 @@ export class SubscriptionCache {
     }
 
     /** Saves update cache to storage */
-    private async save(): Promise<boolean> {
+    public async save(): Promise<boolean> {
         Util.LS.setItem(this.storageTag, JSON.stringify(this.data));
         return XM.Storage.setValue(this.storageTag, Util.Time.now());
     }
 
     /** Irreversibly clears the update cache */
-    private async clear(): Promise<boolean> {
+    public async clear(): Promise<boolean> {
         this.data = {};
         this.index = [];
         return this.save();

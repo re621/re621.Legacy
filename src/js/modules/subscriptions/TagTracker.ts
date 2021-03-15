@@ -73,7 +73,7 @@ export class TagTracker extends SubscriptionTracker {
         return result;
     }
 
-    protected drawUpdateEntry(data: UpdateContent, timestamp: number): JQuery<HTMLElement> {
+    protected drawUpdateEntry(data: UpdateContent, timestamp: number, deleteFunction): JQuery<HTMLElement> {
         const postData = data.ext.split("|");
         const result = $("<subitem>")
             .attr({
@@ -100,10 +100,7 @@ export class TagTracker extends SubscriptionTracker {
             .appendTo(result)
             .on("click", (event) => {
                 event.preventDefault;
-                this.cache.deleteItem(timestamp);
-                result.remove();
-                console.log("deleting", timestamp);
-                SubscriptionManager.trigger("attributes." + this.trackerID);
+                deleteFunction(timestamp, result);
             });
 
         return result;

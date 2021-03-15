@@ -1,4 +1,6 @@
+import { XM } from "../../components/api/XM";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
 import { SubscriptionCache, UpdateContent, UpdateData } from "./_SubscriptionCache";
 import { SubscriptionManager } from "./_SubscriptionManager";
@@ -27,7 +29,7 @@ export class SubscriptionTracker extends RE6Module {
 
         // Fires every minute, refreshes the timers and triggers an update if necessary
         SubscriptionManager.on("heartbeat." + this.trackerID, async () => {
-            console.log("heartbeat." + this.trackerID, await this.isUpdateRequired());
+            Debug.log(`Sub[${this.trackerID}]: heartbeat`, await this.isUpdateRequired());
             if (await this.isUpdateRequired())
                 await this.update();
         });
@@ -82,6 +84,18 @@ export class SubscriptionTracker extends RE6Module {
             await Util.sleep(500);
             SubscriptionManager.trigger("attributes." + this.trackerID);
         });
+
+        // Fires when the tracker updates in another tab
+        XM.Storage.addListener(
+            "re621." + this.getSettingsTag() + ".cache",
+            async (name, oldValue, newValue, remote) => {
+                console.log(name, oldValue, newValue, remote);
+                if (!remote) return;
+                Debug.log(`Sub[${this.trackerID}]: Cache Updated`);
+                await this.cache.load();
+                this.draw();
+            }
+        )
     }
 
     public getDefaultSettings(): Settings {
@@ -196,7 +210,12 @@ export class SubscriptionTracker extends RE6Module {
 
         this.canvas.append(this.drawNewUpdatesDivider());
         this.cache.forEach((data, timestamp) => {
-            this.canvas.append(this.drawUpdateEntry(data, timestamp));
+            this.canvas.append(this.drawUpdateEntry(data, timestamp, (timestamp, result) => {
+                this.cache.deleteItem(timestamp);
+                result.remove();
+                Debug.log(`Sub${this.trackerID}: Deleting ${timestamp}`);
+                SubscriptionManager.trigger("attributes." + this.trackerID);
+            }));
         });
 
         this.ctwrap.attr({ state: TrackerState.Done });
@@ -210,8 +229,10 @@ export class SubscriptionTracker extends RE6Module {
      * @param timestamp Update timestamp
      * @returns JQuery DOM object based on provided data
      */
-    protected drawUpdateEntry(data: UpdateContent, timestamp: number): JQuery<HTMLElement> {
-        return $(`<subitem>post #${data.uid} (${timestamp})</subitem>`);
+    protected drawUpdateEntry(data: UpdateContent, timestamp: number, deleteFunction: DeleteEntryFunction): JQuery<HTMLElement> {
+        const result = $(`<subitem>post #${data.uid} (${timestamp})</subitem>`);
+        deleteFunction(timestamp, result);
+        return result;
     }
 
     /**
@@ -240,3 +261,5 @@ enum TrackerState {
     Draw = "draw",
     Done = "done",
 }
+
+type DeleteEntryFunction = (timestamp: number, result: JQuery<HTMLElement>) => void;
