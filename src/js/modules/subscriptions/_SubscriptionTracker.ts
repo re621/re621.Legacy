@@ -128,6 +128,7 @@ export class SubscriptionTracker extends RE6Module {
                 loading: false,
                 updates: 0,
             })
+            .addClass("notification")
             .html(this.getTrackerID());
 
         return this.tabbtn;
@@ -210,7 +211,7 @@ export class SubscriptionTracker extends RE6Module {
      * @returns JQuery DOM object based on provided data
      */
     protected drawUpdateEntry(data: UpdateContent, timestamp: number): JQuery<HTMLElement> {
-        return $(`<subitem>post #${data.uid} (${timestamp}</subitem>`);
+        return $(`<subitem>post #${data.uid} (${timestamp})</subitem>`);
     }
 
     /**

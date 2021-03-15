@@ -26,8 +26,8 @@ export class SubscriptionManager extends RE6Module {
             name: `<i class="fas fa-bell"></i>`,
             title: "Notifications",
             attr: {
-                loading: "false",
-                updates: "0",
+                "data-loading": "false",
+                "data-updates": "0",
             },
             linkClass: "update-notification",
             onClick: () => { SubscriptionManager.trigger("windowOpen"); },
@@ -78,8 +78,8 @@ export class SubscriptionManager extends RE6Module {
             }
 
             openSubscriptionsButton.attr({
-                loading: loading,
-                updates: updates,
+                "data-loading": loading,
+                "data-updates": updates,
             });
         });
 

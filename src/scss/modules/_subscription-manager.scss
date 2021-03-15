@@ -28,9 +28,45 @@ tabbed.config-tabs {
             padding: 0.5rem;
             align-self: end;
             border-radius: 0;
+            position: relative;
 
             &:hover, &.ui-tabs-active {
                 background-color: #ffffff20;
+            }
+
+            a.notification {
+
+                @keyframes spinner {
+                    to {
+                        transform: rotate(360deg);
+                    }
+                }
+
+                &:not([updates="0"])::after {
+                    content: unicode("f111");
+                    font-family: "Font Awesome 5 Free";
+                    font-weight: 900;
+                    font-size: 0.5em;
+                    color: red;
+
+                    position: absolute;
+                    bottom: 0.125rem;
+                    right: 0.25rem;
+                }
+
+                &[loading=true]::after {
+                    content: unicode("f110");
+                    font-family: "Font Awesome 5 Free";
+                    font-weight: 900;
+                    font-size: 0.5em;
+                    color: inherit;
+
+                    position: absolute;
+                    bottom: 0.05rem;
+                    right: 0.25rem;
+                    
+                    animation: spinner 1s linear infinite;
+                }
             }
         }
     }
