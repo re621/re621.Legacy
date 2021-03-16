@@ -1,4 +1,5 @@
 
+// Notifications window custom tabs
 tabbed.config-tabs {
     position: relative;
     display: grid;
@@ -37,9 +38,7 @@ tabbed.config-tabs {
             a.notification {
 
                 @keyframes spinner {
-                    to {
-                        transform: rotate(360deg);
-                    }
+                    to { transform: rotate(360deg); }
                 }
 
                 &:not([updates="0"])::after {
@@ -64,7 +63,7 @@ tabbed.config-tabs {
                     position: absolute;
                     bottom: 0.05rem;
                     right: 0.25rem;
-                    
+
                     animation: spinner 1s linear infinite;
                 }
             }
@@ -78,6 +77,75 @@ tabbed.config-tabs {
     }
 }
 
+
+// Notifications window settings tab
+tabbed.config-tabs form.form-section {
+    margin-left: 0.25rem;
+}
+
+tabbed.config-tabs form.form-section:not([columns]),
+tabbed.config-tabs form.form-section[columns="1"],
+tabbed.config-tabs form-section:not([columns]),
+tabbed.config-tabs form-section[columns="1"] {
+    width: 100%;
+    grid-template-columns: 5.625rem 12rem;
+}
+tabbed.config-tabs form.form-section[formspan="2"],
+tabbed.config-tabs form.form-section[columns="2"],
+tabbed.config-tabs form-section[columns="2"] {
+    width: 100%;
+    grid-template-columns: 5.625rem 12rem 5.625rem 12rem;
+}
+
+tabbed.config-tabs form-section.subscription-settings > form-section {
+    grid-template-columns: 5.25rem 12rem !important;
+    &:nth-child(odd) {
+        padding-right: 0.25rem;
+    }
+    &:nth-child(even) {
+        justify-content: right;
+    }
+    &:not(:nth-last-of-type(-n+2)) {
+        margin-bottom: 0.5rem;
+    }
+}
+
+.subscription-tutorial {
+    font-family: monospace;
+    margin-bottom: -0.5rem;
+    font-size: 0.9rem;
+}
+
+sb-enwrap {
+    input.sb-enfind {
+        width: 100%;
+        margin-bottom: 0.5rem;
+        border-radius: 0;
+    }
+
+    sb-encont {
+        display: grid;
+        max-height: 40vh;
+        overflow: hidden auto;
+
+        @include scrollbars;
+
+        sb-enitem {
+            display: block;
+            a.sb-unsub { margin-right: 0.5rem; }
+        }
+    }
+}
+
+sb-enwrap[content=Tags] {
+
+    sb-encont {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+
+// Generic subscription update entry
 sb-ctwrap {
     display: block;
     width: 37rem; // based on the tag updates grid
@@ -85,7 +153,7 @@ sb-ctwrap {
     &[state=done] sb-status { display: none !important; }
     &:not([state=done]) sb-canvas { display: none !important; }
 
-    sb-canvas {
+    sb-canvas { // Notifications canvas
         subitem { order: 20; }
         subitem[new=true],
         subitem[new=maybe] { order: 0; }
@@ -114,17 +182,17 @@ sb-ctwrap {
     &[added="0"] sb-canvas subdivider {
         display: none;
     }
+
+    sb-status { // Notifications status log
+        display: block;
+        padding: 6rem;
+        font-family: monospace;
+        font-size: 1.25rem;
+    }
 }
 
-/** Status Output **/
-sb-status {
-    display: block;
-    padding: 6rem;
-    font-family: monospace;
-    font-size: 1.25rem;
-}
 
-/** Tag Updates **/
+// TagTracker style overrides
 sb-ctwrap[content=Tags] sb-canvas {
 
     $sub-row: 7rem;

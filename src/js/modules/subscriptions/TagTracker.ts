@@ -116,4 +116,28 @@ export class TagTracker extends SubscriptionTracker {
         }
     }
 
+    protected formatSubscriptionListEntry(id: string, value: any, unsub: (name: string) => void): JQuery<HTMLElement> {
+
+        const formattedID = id.replace(/_/g, " ");
+        const result = $("<sb-enitem>")
+            .attr({ content: id + " " + formattedID, });
+
+        $("<a>")
+            .addClass("sb-unsub")
+            .html(`<i class="fas fa-times"></i>`)
+            .attr({ "title": "Unsubscribe", })
+            .appendTo(result)
+            .on("click", (event) => {
+                event.preventDefault();
+                unsub(id);
+            });
+
+        $("<a>")
+            .html(formattedID)
+            .attr({ "href": "/posts/" + id })
+            .appendTo(result);
+
+        return result;
+    }
+
 }

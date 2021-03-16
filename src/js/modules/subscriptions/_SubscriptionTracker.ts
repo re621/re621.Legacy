@@ -17,6 +17,9 @@ export class SubscriptionTracker extends RE6Module {
     private canvas: JQuery<HTMLElement>;    // canvas onto which the updates are drawn
     private status: JQuery<HTMLElement>;    // used to display status updates
 
+    private sblist: JQuery<HTMLElement>;    // displays a list of subscribed items
+    private sbadge: JQuery<HTMLElement>;    // displays the total number of subscribed items
+
     protected cache: SubscriptionCache;     // object containing update data
 
     private updateInProgress = false;       // the tracker is currently fetching updates
@@ -101,6 +104,9 @@ export class SubscriptionTracker extends RE6Module {
     public getDefaultSettings(): Settings {
         return {
             enabled: true,
+
+            // Legacy storage medium
+            data: "{}",
 
             // User-customizable settings
             updateInterval: Util.Time.MINUTE, //Util.Time.DAY,  // how often an update event occurs
@@ -222,6 +228,14 @@ export class SubscriptionTracker extends RE6Module {
         SubscriptionManager.trigger("attributes." + this.trackerID);
     }
 
+    /** Clears all update entries from cache */
+    public async clear(): Promise<void> {
+        await this.cache.clear();
+        this.canvas.html("");
+        this.ctwrap.attr({ state: TrackerState.Done });
+        SubscriptionManager.trigger("attributes." + this.trackerID);
+    }
+
     /**
      * Takes in the update data, and returns an HTML object that will be drawn onto the canvas.  
      * This method **must** be overridden by the child class.  
@@ -253,6 +267,88 @@ export class SubscriptionTracker extends RE6Module {
         return $("<div>").html(text).appendTo(this.status);
     }
 
+    /**
+     * Outputs a list of items to which the user is currently subscribed.  
+     * Note that this reads the subscriptions currently loaded into memory,
+     * not taking into account changes made in other tabs.
+     */
+    public getSubscriptionList(): JQuery<HTMLElement> {
+        if (this.sblist !== undefined) return this.sblist;
+
+        const sbcont = $("<sb-encont>");
+        const search = $("<input>")
+            .addClass("sb-enfind")
+            .attr({
+                placeholder: "Search",
+            })
+            .on("input", () => {
+                const value = search.val() + "";
+                if (value == "") {
+                    this.sblist.find("sb-enitem").each((index, el) => {
+                        $(el).removeClass("display-none");
+                    });
+                } else {
+                    this.sblist.find("sb-enitem").each((index, el) => {
+                        $(el).addClass("display-none");
+                    });
+                    this.sblist.find(`sb-enitem[content*="${value}"]`).removeClass("display-none");
+                }
+            });
+
+        this.sblist = $("<sb-enwrap>")
+            .attr("content", this.trackerID)
+            .append(search)
+            .append(sbcont)
+            .on("re621:update", () => {
+                sbcont.html("");
+                const subscriptions = this.fetchSettings<SubscriptionList>("data") || {};
+                for (const [name, value] of Object.entries(subscriptions))
+                    this.formatSubscriptionListEntry(name, value, (name: string) => {
+                        console.log("Unsubscribing from", name);
+                    }).appendTo(sbcont);
+            });
+
+        this.sblist.trigger("re621:update");
+
+        return this.sblist;
+    }
+
+    /** Creates and returns an entry for the subscription list */
+    protected formatSubscriptionListEntry(id: string, value: any, unsub: SubscribeFunction): JQuery<HTMLElement> {
+        const result = $("<sb-enitem>")
+            .attr({ content: id + (value.text ? value.text : ""), })
+            .html(value.text ? value.text : id);
+
+        $("<a>")
+            .addClass("sb-unsub")
+            .html(`<i class="fas fa-times"></i>`)
+            .attr({ "title": "Unsubscribe", })
+            .prependTo(result)
+            .on("click", (event) => {
+                event.preventDefault();
+                unsub(id);
+            });
+
+        return result;
+    }
+
+    /**
+     * REturns the 
+     */
+    public getSubscriptionBadge(): JQuery<HTMLElement> {
+        if (this.sbadge !== undefined) return this.sbadge;
+
+        this.sbadge = $("<sb-badge>").html("0").on("re621:update", () => {
+
+            console.log(this.fetchSettings<SubscriptionList>("data"));
+            this.sbadge.html(Object.keys(this.fetchSettings<SubscriptionList>("data") || {}).length + "");
+        });
+        console.log(this.sbadge);
+        this.sbadge.trigger("re621:update");
+
+        return this.sbadge;
+    }
+
 }
 
 enum TrackerState {
@@ -263,3 +359,10 @@ enum TrackerState {
 }
 
 type DeleteEntryFunction = (timestamp: number, result: JQuery<HTMLElement>) => void;
+type SubscribeFunction = (name: string) => void;
+type SubscriptionList = {
+    [name: string]: {
+        text?: string;
+        data?: any;
+    };
+}
