@@ -221,7 +221,7 @@ export class Form implements PreparedStructure {
      * @param options Section configuration
      * @param content Form elements
      */
-    public static collapse(options?: SectionOptions & { title?: string; badge?: JQuery<HTMLElement>; collapsed?: boolean }, content?: FormElement[]): FormElement {
+    public static collapse(options?: SectionOptions & { title?: string; badge?: JQuery<HTMLElement>; collapsed?: boolean }, content?: FormElement[], onActivate?: (id: string, state: boolean) => void): FormElement {
         if (!options.name) options.name = Util.ID.make();
         if (!options.columns) options.columns = 1;
         if (!options.width) options.width = options.columns;
@@ -260,6 +260,10 @@ export class Form implements PreparedStructure {
             animate: false,
             collapsible: true,
             header: "h3",
+            beforeActivate: () => {
+                if (onActivate == undefined) return;
+                onActivate(header.attr("id"), header.attr("aria-expanded") == "true");
+            },
         });
 
         return new FormElement($element, undefined, $label, content, container);
