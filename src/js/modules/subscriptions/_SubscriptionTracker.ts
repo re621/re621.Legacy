@@ -1,4 +1,5 @@
 import { XM } from "../../components/api/XM";
+import { Page } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 import { SubscriptionCache, UpdateContent, UpdateData } from "./_SubscriptionCache";
@@ -7,6 +8,11 @@ import { SubscriptionManager } from "./_SubscriptionManager";
 export class SubscriptionTracker extends RE6Module {
 
     protected batchSize = 100;              // maximum number of subscribed entries per API request
+
+    protected buttonSelect: {               // defines which elements should receive
+        minor?: SubscribeButtonSelector;    // subscription buttons, and on what pages
+        major?: SubscribeButtonSelector;
+    } = {};
 
     protected trackerID: string;            // used in several places as a unique identifier
 
@@ -106,6 +112,9 @@ export class SubscriptionTracker extends RE6Module {
             // Legacy storage medium
             data: "{}",
 
+            // Modern storage medium
+            list: [],
+
             // User-customizable settings
             updateInterval: Util.Time.MINUTE, //Util.Time.DAY,  // how often an update event occurs
             cacheMaxAge: 0,                 // cache entries older than this get trimmed
@@ -135,6 +144,126 @@ export class SubscriptionTracker extends RE6Module {
             return now - time.lastAttempt >= 5 * Util.Time.MINUTE;
 
         return now - time.lastUpdate >= time.updateInterval;    // Interval has elapsed
+    }
+
+    /**
+     * Returns true if the user is currently subscribed to the specified item.  
+     * Note that this method only checks the settings currently loaded into memory.
+     */
+    private isSubscribedSync(id: string): boolean {
+        return this.fetchSettings<string[]>("list").includes(id);
+    }
+
+    /** Returns true if the user is currently subscribed to the specified item. */
+    public async isSubscribed(id: string): Promise<boolean> {
+        return (await this.fetchSettings<string[]>("list", true)).includes(id);
+    }
+
+    /** Subscribes the user to the specified item */
+    private async subscribe(id: string): Promise<void> {
+        const list = await this.fetchSettings<string[]>("list", true);
+        list.push(id + "");
+        list.sort();
+        await this.pushSettings("list", list);
+    }
+
+    /** Unsubscribes the user from the specified item */
+    private async unsubscribe(id: string): Promise<void> {
+        const list = new Set(await this.fetchSettings<string[]>("list", true));
+        list.delete(id);
+        await this.pushSettings("list", Array.from(list).sort());
+    }
+
+    /** Append sub / unsub buttons to pages */
+    public appendSubscribeButton(): void {
+
+        if (this.buttonSelect.minor && Page.matches(this.buttonSelect.minor.regex)) {
+            for (const el of $(this.buttonSelect.minor.selector).get()) {
+                const $el = $(el);
+                this.createSubscribeMinorButton(
+                    this.fetchMinorSubscriptionName($el),
+                    (id) => { this.subscribe(id); },
+                    (id) => { this.unsubscribe(id); }
+                ).appendTo($el);
+            }
+        }
+
+        if (this.buttonSelect.major && Page.matches(this.buttonSelect.major.regex)) {
+            for (const el of $(this.buttonSelect.major.selector).get()) {
+                const $el = $(el);
+                this.createSubscribeMajorButton(
+                    this.fetchMajorSubscriptionName($el),
+                    (id) => { this.subscribe(id); },
+                    (id) => { this.unsubscribe(id); }
+                ).appendTo($el);
+            }
+        }
+    }
+
+    /** Generated and return a styled sub / unsub button */
+    protected createSubscribeMinorButton(id: string, subscribe: SubscribeFunction, unsubscribe: SubscribeFunction): JQuery<HTMLElement> {
+        const result = $("<a>")
+            .addClass("subscribe-button-minor")
+            .attr({
+                name: id,
+                subscribed: this.isSubscribedSync(id),
+            }).on("click", (event) => {
+                event.preventDefault();
+                if (result.attr("subscribed") == "true") {
+                    unsubscribe(result.attr("name"));
+                    result.attr("subscribed", "false");
+                } else {
+                    subscribe(result.attr("name"));
+                    result.attr("subscribed", "true");
+                }
+            });
+        return result;
+    }
+
+    /**
+     * Takes in the parent element defined in `buttonSelect` and returns the corresponding subscription ID.  
+     * Needless to say, this has to be overridden by the child class
+     * @param parent Parent element
+     * @returns Subscription name, as a string
+     */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    protected fetchMinorSubscriptionName(parent: JQuery<HTMLElement>): string {
+        return "unknown";
+    }
+
+    /** Generated and return a styled sub / unsub button */
+    protected createSubscribeMajorButton(id: string, subscribe: SubscribeFunction, unsubscribe: SubscribeFunction): JQuery<HTMLElement> {
+        const subscribed = this.isSubscribedSync(id);
+        const result = $("<a>")
+            .html(subscribed ? "Unsubscribe" : "Subscribe")
+            .addClass("subscribe-button-major")
+            .attr({
+                name: id,
+                subscribed: subscribed,
+            }).on("click", (event) => {
+                event.preventDefault();
+                if (result.attr("subscribed") == "true") {
+                    unsubscribe(result.attr("name"));
+                    result.attr("subscribed", "false");
+                    result.html("Subscribe");
+                } else {
+                    subscribe(result.attr("name"));
+                    result.attr("subscribed", "true");
+                    result.html("Unsubscribe");
+                }
+            });
+        return result;
+    }
+
+    /**
+     * Takes in the parent element defined in `buttonSelect` and returns the corresponding subscription ID.  
+     * Needless to say, this has to be overridden by the child class
+     * @param parent Parent element
+     * @returns Subscription name, as a string
+     */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    protected fetchMajorSubscriptionName(parent: JQuery<HTMLElement>): string {
+        return "unknown";
     }
 
     /** Returns the tab button corresponding to this tracker */
@@ -355,10 +484,16 @@ enum TrackerState {
 }
 
 type DeleteEntryFunction = (timestamp: number, result: JQuery<HTMLElement>) => void;
-type SubscribeFunction = (name: string) => void;
+export type SubscribeFunction = (name: string) => void;
+
 type SubscriptionList = {
     [name: string]: {
         text?: string;
         data?: any;
     };
+}
+
+type SubscribeButtonSelector = {
+    regex: RegExp | RegExp[];
+    selector: string;
 }

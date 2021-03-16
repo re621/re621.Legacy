@@ -1,8 +1,10 @@
 import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { Blacklist } from "../../components/data/Blacklist";
+import { PageDefinition } from "../../components/data/Page";
 import { PostData } from "../../components/post/Post";
 import { Util } from "../../components/utility/Util";
+import { WikiEnhancer } from "../misc/WikiEnhancer";
 import { UpdateContent, UpdateData } from "./_SubscriptionCache";
 import { SubscriptionManager } from "./_SubscriptionManager";
 import { SubscriptionTracker } from "./_SubscriptionTracker";
@@ -11,6 +13,25 @@ export class TagTracker extends SubscriptionTracker {
 
     // Needs to be overridden due to lower lookup batch sizes
     protected batchSize = 40;
+
+    protected buttonSelect = {
+        minor: {
+            regex: [PageDefinition.search, PageDefinition.post],
+            selector: "#tag-box li span.tag-action-subscribe, #tag-list li span.tag-action-subscribe",
+        },
+        major: {
+            regex: [PageDefinition.wiki, PageDefinition.artist],
+            selector: "#c-wiki-pages > #a-show > #content > h1:first, #c-artists > #a-show > h1:first",
+        }
+    };
+
+    protected fetchMinorSubscriptionName(element: JQuery<HTMLElement>): string {
+        return element.parent().attr("data-tag");
+    }
+
+    protected fetchMajorSubscriptionName(element: JQuery<HTMLElement>): string {
+        return WikiEnhancer.sanitizeWikiTagName(element.find("a:first").text());
+    }
 
     public async fetchUpdatedEntries(): Promise<UpdateData> {
 

@@ -78,6 +78,46 @@ tabbed.config-tabs {
 }
 
 
+// Subscribe / Unsubscribe buttons
+a.subscribe-button-minor {
+
+    &::after {
+        content: unicode("f004");
+        font-family: "Font Awesome 5 Free";
+        font-weight: 500;
+    }
+
+    &[subscribed=true]::after {
+        font-weight: 700;
+    }
+}
+
+a.subscribe-button-major {
+    display: block;
+    box-sizing: border-box;
+    border-radius: 6px;
+    font-size: 1rem;
+    line-height: 1.25rem;
+    padding: .25rem .5rem;
+    border: 0;
+
+    background: #006400;
+    color: #fff;
+    float: right;
+    box-shadow: 0px 0px 1px 0px black;
+
+    &:hover {
+        background: #004b00;
+        color: #fff;
+    }
+
+    &[subscribed=true] {
+        background: maroon;
+        &:hover { background: #670000; }
+    }
+}
+
+
 // Notifications window settings tab
 tabbed.config-tabs form.form-section {
     margin-left: 0.25rem;

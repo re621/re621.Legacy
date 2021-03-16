@@ -233,7 +233,7 @@ div#page aside#sidebar {
                         display: none;
                     }
 
-                    &.tag-action-subscribe a.subscribe {
+                    &.tag-action-subscribe a[subscribed=false] {
                         visibility: hidden;
                     }
                 }
@@ -260,7 +260,7 @@ div#page aside#sidebar {
                             display: inline-block;
                         }
 
-                        &.tag-action-subscribe a.subscribe {
+                        &.tag-action-subscribe a {
                             visibility: visible;
                         }
                     }

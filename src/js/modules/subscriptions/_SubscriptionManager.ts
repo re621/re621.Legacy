@@ -18,6 +18,10 @@ export class SubscriptionManager extends RE6Module {
         threshold: 0.5,
     };
 
+    public constructor() {
+        super([], true);
+    }
+
     public create(): void {
         super.create();
 
@@ -47,6 +51,7 @@ export class SubscriptionManager extends RE6Module {
 
         const trackerPages: TabContent[] = [];
         for (const tracker of SubscriptionManager.trackers) {
+            tracker.appendSubscribeButton();
             trackerPages.push({
                 name: tracker.getOutputTab(),
                 content: tracker.getOutputContainer(),
