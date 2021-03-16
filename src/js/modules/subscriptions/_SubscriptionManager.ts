@@ -252,31 +252,33 @@ export class SubscriptionManager extends RE6Module {
                     }
                 ),
 
-                Form.button({ value: "Manual Update", }, async (value, button) => {
-                    if (working) return;
-                    working = true;
+                Form.section({ wrapper: "subscription-control-btn", width: 1, columns: 1, }, [
+                    Form.button({ value: "Manual Update", }, async (value, button) => {
+                        if (working) return;
+                        working = true;
 
-                    button.html(`<i class="fas fa-spinner fa-spin"></i>`);
-                    await instance.update();
-                    button.html(`Done!`);
-                    await Util.sleep(1000);
-                    button.html("Manual Update");
+                        button.html(`<i class="fas fa-spinner fa-spin"></i>`);
+                        await instance.update();
+                        button.html(`Done!`);
+                        await Util.sleep(1000);
+                        button.html("Manual Update");
 
-                    working = false;
-                }),
+                        working = false;
+                    }),
 
-                Form.button({ value: "Clear Cache", }, async (value, button) => {
-                    if (working) return;
-                    working = true;
+                    Form.button({ value: "Clear Cache", }, async (value, button) => {
+                        if (working) return;
+                        working = true;
 
-                    button.html(`<i class="fas fa-spinner fa-spin"></i>`);
-                    await instance.clear();
-                    button.html(`Done!`);
-                    await Util.sleep(1000);
-                    button.html("Clear Cache");
+                        button.html(`<i class="fas fa-spinner fa-spin"></i>`);
+                        await instance.clear();
+                        button.html(`Done!`);
+                        await Util.sleep(1000);
+                        button.html("Clear Cache");
 
-                    working = false;
-                }),
+                        working = false;
+                    }),
+                ]),
             ]);
         }
     }

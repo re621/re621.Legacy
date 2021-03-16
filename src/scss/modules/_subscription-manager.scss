@@ -75,6 +75,12 @@ tabbed.config-tabs {
         grid-column: 2;
         width: 37rem;
     }
+
+    // More compact "Manual Update" / "Clear Cache" buttons
+    form-section:not([columns]).subscription-control-btn {
+        grid-template-columns: 1fr 1fr;
+        form-input { grid-column: span 1; }
+    }
 }
 
 
