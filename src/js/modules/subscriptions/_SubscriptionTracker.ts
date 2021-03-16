@@ -1,6 +1,5 @@
 import { XM } from "../../components/api/XM";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
 import { SubscriptionCache, UpdateContent, UpdateData } from "./_SubscriptionCache";
 import { SubscriptionManager } from "./_SubscriptionManager";
@@ -32,7 +31,7 @@ export class SubscriptionTracker extends RE6Module {
 
         // Fires every minute, refreshes the timers and triggers an update if necessary
         SubscriptionManager.on("heartbeat." + this.trackerID, async () => {
-            Debug.log(`Sub[${this.trackerID}]: heartbeat`, await this.isUpdateRequired());
+            // Debug.log(`Sub[${this.trackerID}]: heartbeat`, await this.isUpdateRequired());
             if (await this.isUpdateRequired())
                 await this.update();
         });
@@ -92,9 +91,8 @@ export class SubscriptionTracker extends RE6Module {
         XM.Storage.addListener(
             "re621." + this.getSettingsTag() + ".cache",
             async (name, oldValue, newValue, remote) => {
-                console.log(name, oldValue, newValue, remote);
                 if (!remote) return;
-                Debug.log(`Sub[${this.trackerID}]: Cache Updated`);
+                // Debug.log(`Sub[${this.trackerID}]: Cache Sync`);
                 await this.cache.load();
                 this.draw();
             }
@@ -219,7 +217,7 @@ export class SubscriptionTracker extends RE6Module {
             this.canvas.append(this.drawUpdateEntry(data, timestamp, (timestamp, result) => {
                 this.cache.deleteItem(timestamp);
                 result.remove();
-                Debug.log(`Sub${this.trackerID}: Deleting ${timestamp}`);
+                // Debug.log(`Sub${this.trackerID}: Deleting ${timestamp}`);
                 SubscriptionManager.trigger("attributes." + this.trackerID);
             }));
         });
@@ -304,9 +302,10 @@ export class SubscriptionTracker extends RE6Module {
                 const subscriptions = this.fetchSettings<SubscriptionList>("data") || {};
                 for (const [name, value] of Object.entries(subscriptions))
                     this.formatSubscriptionListEntry(name, value, (name: string) => {
-                        console.log("Unsubscribing from", name);
+                        console.log("Unsubscribing from", name); // TODO Fix this
                     }).appendTo(sbcont);
             });
+        // TODO Actually trigger updates accross tabs when subscribing / unsubscribing
 
         this.sblist.trigger("re621:update");
 
@@ -339,11 +338,8 @@ export class SubscriptionTracker extends RE6Module {
         if (this.sbadge !== undefined) return this.sbadge;
 
         this.sbadge = $("<sb-badge>").html("0").on("re621:update", () => {
-
-            console.log(this.fetchSettings<SubscriptionList>("data"));
             this.sbadge.html(Object.keys(this.fetchSettings<SubscriptionList>("data") || {}).length + "");
         });
-        console.log(this.sbadge);
         this.sbadge.trigger("re621:update");
 
         return this.sbadge;
