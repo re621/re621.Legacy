@@ -206,7 +206,7 @@ export class SubscriptionManager extends RE6Module {
                         title: "How often should the subscriptions be checked for updates",
                     },
                     {
-                        "-1": "Manually",
+                        "-1": "Manual Only",
                         "1": "1 hour",
                         "6": "6 hours",
                         "12": "12 hours",
@@ -235,7 +235,7 @@ export class SubscriptionManager extends RE6Module {
 
                 Form.select(
                     {
-                        label: "Cache Age",
+                        label: "Max Age",
                         value: instance.fetchSettings("cacheMaxAge") / Util.Time.WEEK,
                         title: "Updates older than this are removed automatically",
                     },
