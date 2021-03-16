@@ -41,9 +41,9 @@ export class TagTracker extends SubscriptionTracker {
 
         // Fetching the list of subscriptions
         this.writeStatus(`. . . retrieving settings`);
-        const subscriptions = ["mammal"]; //await this.fetchSettings<string[]>("data2", true); // TODO Changed this back
+        const subscriptions = this.slist.get();
         const lastUpdate = await this.fetchSettings<number>("lastUpdate", true);
-        if (Object.keys(subscriptions).length == 0) return result;
+        if (subscriptions.size == 0) return result;
 
         // Splitting subscriptions into batches and sending API requests
         this.writeStatus(`. . . sending an API request`);
@@ -155,7 +155,7 @@ export class TagTracker extends SubscriptionTracker {
 
         $("<a>")
             .html(formattedID)
-            .attr({ "href": "/posts/" + id })
+            .attr({ "href": "/wiki_pages/show_or_new?title=" + id })
             .appendTo(result);
 
         return result;

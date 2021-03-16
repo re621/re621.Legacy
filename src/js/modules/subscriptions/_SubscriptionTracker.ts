@@ -3,6 +3,7 @@ import { Page } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 import { SubscriptionCache, UpdateContent, UpdateData } from "./_SubscriptionCache";
+import { SubscriptionList } from "./_SubscriptionList";
 import { SubscriptionManager } from "./_SubscriptionManager";
 
 export class SubscriptionTracker extends RE6Module {
@@ -26,14 +27,22 @@ export class SubscriptionTracker extends RE6Module {
     private sbadge: JQuery<HTMLElement>;    // displays the total number of subscribed items
 
     protected cache: SubscriptionCache;     // object containing update data
+    protected slist: SubscriptionList;      // object containing subscribed items
 
     private updateInProgress = false;       // the tracker is currently fetching updates
 
     public constructor() {
         super();
+
         this.cache = new SubscriptionCache(this);
+        this.slist = new SubscriptionList(this);
 
         this.trackerID = this.getSettingsTag().replace("Tracker", "") + "s";
+    }
+
+    /** Performs the initialization and setup of the tracker */
+    public async init(): Promise<void> {
+        await this.slist.fetchSubscriptions();
 
         // Fires every minute, refreshes the timers and triggers an update if necessary
         SubscriptionManager.on("heartbeat." + this.trackerID, async () => {
@@ -103,17 +112,19 @@ export class SubscriptionTracker extends RE6Module {
                 this.draw();
             }
         )
+
+        // Fires when the tracker settings update
+        // Used to refresh the subscriptions list
+        SubscriptionManager.on("listupdate." + this.trackerID, () => {
+            this.getSubscriptionList().trigger("re621:update");
+            this.getSubscriptionBadge().trigger("re621:update");
+            $("a.subscribe-button-major, a.subscribe-button-minor").trigger("re621:update");
+        });
     }
 
     public getDefaultSettings(): Settings {
         return {
             enabled: true,
-
-            // Legacy storage medium
-            data: "{}",
-
-            // Modern storage medium
-            list: [],
 
             // User-customizable settings
             updateInterval: Util.Time.MINUTE, //Util.Time.DAY,  // how often an update event occurs
@@ -146,34 +157,6 @@ export class SubscriptionTracker extends RE6Module {
         return now - time.lastUpdate >= time.updateInterval;    // Interval has elapsed
     }
 
-    /**
-     * Returns true if the user is currently subscribed to the specified item.  
-     * Note that this method only checks the settings currently loaded into memory.
-     */
-    private isSubscribedSync(id: string): boolean {
-        return this.fetchSettings<string[]>("list").includes(id);
-    }
-
-    /** Returns true if the user is currently subscribed to the specified item. */
-    public async isSubscribed(id: string): Promise<boolean> {
-        return (await this.fetchSettings<string[]>("list", true)).includes(id);
-    }
-
-    /** Subscribes the user to the specified item */
-    private async subscribe(id: string): Promise<void> {
-        const list = await this.fetchSettings<string[]>("list", true);
-        list.push(id + "");
-        list.sort();
-        await this.pushSettings("list", list);
-    }
-
-    /** Unsubscribes the user from the specified item */
-    private async unsubscribe(id: string): Promise<void> {
-        const list = new Set(await this.fetchSettings<string[]>("list", true));
-        list.delete(id);
-        await this.pushSettings("list", Array.from(list).sort());
-    }
-
     /** Append sub / unsub buttons to pages */
     public appendSubscribeButton(): void {
 
@@ -182,8 +165,8 @@ export class SubscriptionTracker extends RE6Module {
                 const $el = $(el);
                 this.createSubscribeMinorButton(
                     this.fetchMinorSubscriptionName($el),
-                    (id) => { this.subscribe(id); },
-                    (id) => { this.unsubscribe(id); }
+                    (id) => { this.slist.subscribe(id); },
+                    (id) => { this.slist.unsubscribe(id); }
                 ).appendTo($el);
             }
         }
@@ -193,8 +176,8 @@ export class SubscriptionTracker extends RE6Module {
                 const $el = $(el);
                 this.createSubscribeMajorButton(
                     this.fetchMajorSubscriptionName($el),
-                    (id) => { this.subscribe(id); },
-                    (id) => { this.unsubscribe(id); }
+                    (id) => { this.slist.subscribe(id); },
+                    (id) => { this.slist.unsubscribe(id); }
                 ).appendTo($el);
             }
         }
@@ -203,20 +186,19 @@ export class SubscriptionTracker extends RE6Module {
     /** Generated and return a styled sub / unsub button */
     protected createSubscribeMinorButton(id: string, subscribe: SubscribeFunction, unsubscribe: SubscribeFunction): JQuery<HTMLElement> {
         const result = $("<a>")
+            .attr("name", id)
             .addClass("subscribe-button-minor")
-            .attr({
-                name: id,
-                subscribed: this.isSubscribedSync(id),
-            }).on("click", (event) => {
+            .on("click", (event) => {
                 event.preventDefault();
-                if (result.attr("subscribed") == "true") {
+                if (result.attr("subscribed") == "true")
                     unsubscribe(result.attr("name"));
-                    result.attr("subscribed", "false");
-                } else {
-                    subscribe(result.attr("name"));
-                    result.attr("subscribed", "true");
-                }
+                else subscribe(result.attr("name"));
+
+            })
+            .on("re621:update", () => {
+                result.attr("subscribed", this.slist.isSubscribed(id) + "");
             });
+        result.trigger("re621:update");
         return result;
     }
 
@@ -233,25 +215,29 @@ export class SubscriptionTracker extends RE6Module {
 
     /** Generated and return a styled sub / unsub button */
     protected createSubscribeMajorButton(id: string, subscribe: SubscribeFunction, unsubscribe: SubscribeFunction): JQuery<HTMLElement> {
-        const subscribed = this.isSubscribedSync(id);
+        let eventLock = false;
         const result = $("<a>")
-            .html(subscribed ? "Unsubscribe" : "Subscribe")
+            .attr("name", id)
             .addClass("subscribe-button-major")
-            .attr({
-                name: id,
-                subscribed: subscribed,
-            }).on("click", (event) => {
+            .on("click", async (event) => {
                 event.preventDefault();
-                if (result.attr("subscribed") == "true") {
+
+                if (eventLock) return;
+                eventLock = true;
+
+                if (result.attr("subscribed") == "true")
                     unsubscribe(result.attr("name"));
-                    result.attr("subscribed", "false");
-                    result.html("Subscribe");
-                } else {
-                    subscribe(result.attr("name"));
-                    result.attr("subscribed", "true");
-                    result.html("Unsubscribe");
-                }
+                else subscribe(result.attr("name"));
+
+                eventLock = false;
+            })
+            .on("re621:update", () => {
+                const subscribed = this.slist.isSubscribed(id);
+                result
+                    .html(subscribed ? "Unsubscribe" : "Subscribe")
+                    .attr("subscribed", subscribed + "");
             });
+        result.trigger("re621:update");
         return result;
     }
 
@@ -428,13 +414,11 @@ export class SubscriptionTracker extends RE6Module {
             .append(sbcont)
             .on("re621:update", () => {
                 sbcont.html("");
-                const subscriptions = this.fetchSettings<SubscriptionList>("data") || {};
-                for (const [name, value] of Object.entries(subscriptions))
-                    this.formatSubscriptionListEntry(name, value, (name: string) => {
-                        console.log("Unsubscribing from", name); // TODO Fix this
+                for (const name of this.slist.get())
+                    this.formatSubscriptionListEntry(name, {}, (name: string) => { // TODO FIX THIS
+                        this.slist.unsubscribe(name);
                     }).appendTo(sbcont);
             });
-        // TODO Actually trigger updates accross tabs when subscribing / unsubscribing
 
         this.sblist.trigger("re621:update");
 
@@ -467,7 +451,7 @@ export class SubscriptionTracker extends RE6Module {
         if (this.sbadge !== undefined) return this.sbadge;
 
         this.sbadge = $("<sb-badge>").html("0").on("re621:update", () => {
-            this.sbadge.html(Object.keys(this.fetchSettings<SubscriptionList>("data") || {}).length + "");
+            this.sbadge.html(this.slist.count() + "");
         });
         this.sbadge.trigger("re621:update");
 
@@ -485,13 +469,6 @@ enum TrackerState {
 
 type DeleteEntryFunction = (timestamp: number, result: JQuery<HTMLElement>) => void;
 export type SubscribeFunction = (name: string) => void;
-
-type SubscriptionList = {
-    [name: string]: {
-        text?: string;
-        data?: any;
-    };
-}
 
 type SubscribeButtonSelector = {
     regex: RegExp | RegExp[];

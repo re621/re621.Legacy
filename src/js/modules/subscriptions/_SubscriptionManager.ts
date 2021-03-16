@@ -44,7 +44,7 @@ export class SubscriptionManager extends RE6Module {
         // button clicks and window opens.
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((value) => {
-                console.log($(value.target).parent().attr("content"), value.isIntersecting);
+                // console.log(`Sub${$(value.target).parent().attr("content")}: ` + (value.isIntersecting ? "Entering" : "Leaving"));
                 SubscriptionManager.trigger("intersect." + $(value.target).parent().attr("content"), value.isIntersecting);
             });
         }, SubscriptionManager.observerConfig);
@@ -129,8 +129,11 @@ export class SubscriptionManager extends RE6Module {
      */
     public static async register(moduleList: any | any[]): Promise<number> {
         if (!Array.isArray(moduleList)) moduleList = [moduleList];
-        for (const moduleClass of moduleList)
-            this.trackers.push(moduleClass.getInstance());
+        for (const moduleClass of moduleList) {
+            const instance = moduleClass.getInstance();
+            await instance.init();
+            this.trackers.push(instance);
+        }
         return Promise.resolve(this.trackers.length);
     }
 
