@@ -107,7 +107,7 @@ export class SubscriptionTracker extends RE6Module {
             "re621." + this.getSettingsTag() + ".cache",
             async (name, oldValue, newValue, remote) => {
                 if (!remote) return;
-                // Debug.log(`Sub[${this.trackerID}]: Cache Sync`);
+                // console.log(`Sub[${this.trackerID}]: Cache Sync`);
                 await this.cache.load();
                 this.draw();
             }

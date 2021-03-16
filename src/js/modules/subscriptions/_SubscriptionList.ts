@@ -1,21 +1,27 @@
 import { XM } from "../../components/api/XM";
+import { Util } from "../../components/utility/Util";
 import { SubscriptionManager } from "./_SubscriptionManager";
 import { SubscriptionTracker } from "./_SubscriptionTracker";
 
 export class SubscriptionList {
 
     private instance: SubscriptionTracker;
-    private settingsTag: string;
+
+    private storageTag: string;                 // XM // primary storage for subscriptions
+    private extraTag: string;                   // LS // subscription extra data
 
     private subscriptions: Set<string>;
+    private extra: { [id: string]: ExtraData };
 
     public constructor(instance: SubscriptionTracker) {
         this.instance = instance;
-        this.settingsTag = "re621." + instance.getSettingsTag() + ".list";
+        this.storageTag = "re621." + instance.getSettingsTag() + ".list";
+        this.extraTag = "re621." + instance.getSettingsTag() + ".extra";
 
         this.subscriptions = new Set();
+        this.extra = {};
 
-        XM.Storage.addListener(this.settingsTag, async () => {
+        XM.Storage.addListener(this.storageTag, async () => {
             console.log(`Sub${this.instance.getTrackerID()}: List Update`);
             await this.fetchSubscriptions();
             SubscriptionManager.trigger("listupdate." + this.instance.getTrackerID());
@@ -28,7 +34,15 @@ export class SubscriptionList {
      * in the constructor - it needs to be run separately after initialization
      */
     public async fetchSubscriptions(): Promise<void> {
-        this.subscriptions = new Set(await XM.Storage.getValue(this.settingsTag, []));
+
+        // This is the dumbest thing ever, but the event listener won't trigger
+        // unless the data actually changes. So, an extraneous element is added
+        // to the list every time subscriptions are saved, and get removed here
+        const data: string[] = await XM.Storage.getValue(this.storageTag, []);
+        data.pop();
+
+        this.subscriptions = new Set(data);
+        this.extra = JSON.parse(Util.LS.getItem(this.extraTag) || "{}");
     }
 
     /**
@@ -37,7 +51,12 @@ export class SubscriptionList {
      * to avoid overwriting changes made in other tabs.
      */
     public async pushSubscriptions(): Promise<void> {
-        await XM.Storage.setValue(this.settingsTag, Array.from(this.subscriptions));
+        Util.LS.setItem(this.extraTag, JSON.stringify(this.extra));
+
+        // See `fetchSubscriptions()` for an explanation
+        const data = Array.from(this.subscriptions);
+        data.push("re621:" + Util.ID.rand());
+        await XM.Storage.setValue(this.storageTag, data);
     }
 
     /**
@@ -74,4 +93,17 @@ export class SubscriptionList {
         return this.pushSubscriptions();
     }
 
+    public getExtraData(name: string): ExtraData {
+        return this.extra[name];
+    }
+
+    public deleteExtraData(name: string): void {
+        delete this.extra[name];
+    }
+
+}
+
+type ExtraData = {
+    name?: string;
+    data?: string;
 }
