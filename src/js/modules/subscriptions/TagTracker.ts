@@ -3,6 +3,7 @@ import { APIPost } from "../../components/api/responses/APIPost";
 import { Blacklist } from "../../components/data/Blacklist";
 import { PageDefinition } from "../../components/data/Page";
 import { PostData } from "../../components/post/Post";
+import { Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 import { WikiEnhancer } from "../misc/WikiEnhancer";
 import { UpdateContent, UpdateData } from "./_SubscriptionCache";
@@ -24,6 +25,14 @@ export class TagTracker extends SubscriptionTracker {
             selector: "#c-wiki-pages > #a-show > #content > h1:first, #c-artists > #a-show > h1:first",
         }
     };
+
+    public getDefaultSettings(): Settings {
+        return {
+            ...super.getDefaultSettings(),
+
+            cacheSize: 500,                 // how many subscription updates are kept
+        };
+    }
 
     protected fetchMinorSubscriptionName(element: JQuery<HTMLElement>): string {
         return element.parent().attr("data-tag");

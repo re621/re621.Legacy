@@ -5,17 +5,10 @@ export class CommentTracker extends SubscriptionTracker {
 
     public getDefaultSettings(): Settings {
         return {
-            enabled: true,
+            ...super.getDefaultSettings(),
 
-            // User-customizable settings
-            updateInterval: -1,
-            cacheMaxAge: 0,                 // cache entries older than this get trimmed
-            cacheSize: 60,                  // how many subscription updates are kept
-
-            // Utility values
-            lastUpdate: 0,                  // last time an update has been completed
-            lastAttempt: 0,                 // last time an update was attempted. 0 if not applicable.
-        }
+            cacheSize: 20,                  // how many subscription updates are kept
+        };
     }
 
 

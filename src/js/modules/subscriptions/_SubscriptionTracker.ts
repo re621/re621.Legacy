@@ -136,9 +136,9 @@ export class SubscriptionTracker extends RE6Module {
             enabled: true,
 
             // User-customizable settings
-            updateInterval: Util.Time.MINUTE, //Util.Time.DAY,  // how often an update event occurs
+            updateInterval: Util.Time.HOUR, // how often an update event occurs
             cacheMaxAge: 0,                 // cache entries older than this get trimmed
-            cacheSize: 60,                  // how many subscription updates are kept
+            cacheSize: 50,                  // how many subscription updates are kept
 
             // Utility values
             lastUpdate: 0,                  // last time an update has been completed
