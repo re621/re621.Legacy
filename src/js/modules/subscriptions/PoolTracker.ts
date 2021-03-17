@@ -149,4 +149,28 @@ export class PoolTracker extends SubscriptionTracker {
         }
     }
 
+    protected formatSubscriptionListEntry(id: string, value: any, unsub: (name: string) => void): JQuery<HTMLElement> {
+
+        const poolData = this.slist.getExtraData(id) || {};
+        const result = $("<sb-enitem>")
+            .attr({ content: id + (poolData.name ? (" " + poolData.name) : ""), });
+
+        $("<a>")
+            .addClass("sb-unsub")
+            .html(`<i class="fas fa-times"></i>`)
+            .attr({ "title": "Unsubscribe", })
+            .appendTo(result)
+            .on("click", (event) => {
+                event.preventDefault();
+                unsub(id);
+            });
+
+        $("<a>")
+            .html(poolData.name ? poolData.name : `pool #${id}`)
+            .attr({ "href": "/wiki_pages/show_or_new?title=" + id })
+            .appendTo(result);
+
+        return result;
+    }
+
 }
