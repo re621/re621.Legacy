@@ -404,7 +404,7 @@ export class SubscriptionTracker extends RE6Module {
                 placeholder: "Search",
             })
             .on("input", () => {
-                const value = search.val() + "";
+                const value = (search.val() + "").toLowerCase();
                 if (value == "") {
                     this.sblist.find("sb-enitem").each((index, el) => {
                         $(el).removeClass("display-none");

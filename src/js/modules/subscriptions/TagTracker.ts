@@ -139,7 +139,7 @@ export class TagTracker extends SubscriptionTracker {
 
     protected formatSubscriptionListEntry(id: string, value: any, unsub: (name: string) => void): JQuery<HTMLElement> {
 
-        const formattedID = id.replace(/_/g, " ");
+        const formattedID = id.replace(/_/g, " ").toLowerCase();
         const result = $("<sb-enitem>")
             .attr({ content: id + " " + formattedID, });
 
