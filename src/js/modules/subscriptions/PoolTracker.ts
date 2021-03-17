@@ -73,7 +73,6 @@ export class PoolTracker extends SubscriptionTracker {
 
             const poolExtra = this.slist.getExtraData(pool.id + "") || {};
             poolExtra.name = pool.name.replace(/_/g, " ");
-            console.log(poolExtra.data, typeof poolExtra.data);
             if (typeof poolExtra.data == "undefined") {
                 // TODO It would be better to just gather the post IDs, then
                 // search for all of them at once. But these are only used
@@ -95,8 +94,6 @@ export class PoolTracker extends SubscriptionTracker {
 
             this.slist.addExtraData(pool.id + "", poolExtra);
         }
-
-        console.log("adding", result);
 
         this.slist.pushSubscriptions();
         this.writeStatus(`. . . displaying results`);
