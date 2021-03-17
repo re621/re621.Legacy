@@ -108,49 +108,55 @@ export class PoolTracker extends SubscriptionTracker {
 
         const postData = data.ext.split("|");
         const result = $("<subitem>")
-            .attr({ "new": data.new, });
+            .attr({ new: data.new, })
+            .on("re621:render", () => {
 
-        const link = $("<a>")
-            .addClass("img-link")
-            .attr({ href: "/pools/" + data.uid, })
-            .appendTo(result);
+                const link = $("<a>")
+                    .addClass("img-link")
+                    .attr({ href: "/pools/" + data.uid, })
+                    .appendTo(result);
 
-        const img = $("<img>")
-            .attr({ src: data.md5 ? getPreviewLink(data.md5) : "https://e621.net/images/deleted-preview.png", })
-            .on("error", () => {
-                img.attr("src", "https://e621.net/images/deleted-preview.png");
-                const extraData = this.slist.getExtraData(data.uid + "") || {};
-                delete extraData.data;
-                this.slist.addExtraData(data.uid + "", extraData);
-                this.slist.pushSubscriptions();
+                const img = $("<img>")
+                    .attr({ src: data.md5 ? getPreviewLink(data.md5) : "https://e621.net/images/deleted-preview.png", })
+                    .on("error", () => {
+                        img.attr("src", "https://e621.net/images/deleted-preview.png");
+                        const extraData = this.slist.getExtraData(data.uid + "") || {};
+                        delete extraData.data;
+                        this.slist.addExtraData(data.uid + "", extraData);
+                        this.slist.pushSubscriptions();
+                    })
+                    .appendTo(link);
+
+                const mainSection = $("<div>")
+                    .addClass("info-section")
+                    .appendTo(result);
+
+                $("<a>")
+                    .html(postData[0])
+                    .attr({ "href": this.slist.getExtraData(data.uid + "").last, })
+                    .appendTo(mainSection);
+
+                $("<div>")
+                    .html("Updated " + Util.Time.ago(timestamp))
+                    .appendTo(mainSection);
+
+                $("<a>")
+                    .addClass("all-link")
+                    .html(`View all ${postData[1]} posts`)
+                    .appendTo(result);
+
+                $("<a>")
+                    .addClass("delete-link")
+                    .html(`<span><i class="fas fa-times"></i></span>`)
+                    .appendTo(result)
+                    .on("click", (event) => {
+                        event.preventDefault;
+                        deleteFunction(timestamp, result);
+                    });
+
             })
-            .appendTo(link);
-
-        const mainSection = $("<div>")
-            .addClass("info-section")
-            .appendTo(result);
-
-        $("<a>")
-            .html(postData[0])
-            .attr({ "href": this.slist.getExtraData(data.uid + "").last, })
-            .appendTo(mainSection);
-
-        $("<div>")
-            .html("Updated " + Util.Time.ago(timestamp))
-            .appendTo(mainSection);
-
-        $("<a>")
-            .addClass("all-link")
-            .html(`View all ${postData[1]} posts`)
-            .appendTo(result);
-
-        $("<a>")
-            .addClass("delete-link")
-            .html(`<span><i class="fas fa-times"></i></span>`)
-            .appendTo(result)
-            .on("click", (event) => {
-                event.preventDefault;
-                deleteFunction(timestamp, result);
+            .on("re621:reset", () => {
+                result.html("");
             });
 
         return result;

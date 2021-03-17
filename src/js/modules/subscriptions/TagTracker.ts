@@ -106,22 +106,27 @@ export class TagTracker extends SubscriptionTracker {
                 "data-file-ext": postData[2],
                 "data-rating": postData[0] || "s",
                 "data-created-at": new Date(timestamp).toString(),
-            });
-        const link = $("<a>")
-            .attr({ href: "/posts/" + data.uid, })
-            .appendTo(result);
+            })
+            .on("re621:render", () => {
+                const link = $("<a>")
+                    .attr({ href: "/posts/" + data.uid, })
+                    .appendTo(result);
 
-        $("<img>")
-            .attr({ src: getPreviewLink(data.md5), })
-            .appendTo(link);
+                $("<img>")
+                    .attr({ src: getPreviewLink(data.md5), })
+                    .appendTo(link);
 
-        $("<a>")
-            .addClass("delete-link")
-            .html(`<span><i class="fas fa-times"></i></span>`)
-            .appendTo(result)
-            .on("click", (event) => {
-                event.preventDefault;
-                deleteFunction(timestamp, result);
+                $("<a>")
+                    .addClass("delete-link")
+                    .html(`<span><i class="fas fa-times"></i></span>`)
+                    .appendTo(result)
+                    .on("click", (event) => {
+                        event.preventDefault;
+                        deleteFunction(timestamp, result);
+                    });
+            })
+            .on("re621:reset", () => {
+                result.html("");
             });
 
         return result;

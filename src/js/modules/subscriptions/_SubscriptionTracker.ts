@@ -101,7 +101,10 @@ export class SubscriptionTracker extends RE6Module {
                     $el.removeAttr("new");
             }
 
-            if (isIntersecting) this.cache.purgeNew();
+            if (isIntersecting) {
+                this.cache.purgeNew();
+                this.canvas.children("subitem").trigger("re621:render");
+            } else this.canvas.children("subitem").trigger("re621:reset");
 
             await Util.sleep(500);
             SubscriptionManager.trigger("attributes." + this.trackerID);
@@ -332,6 +335,10 @@ export class SubscriptionTracker extends RE6Module {
 
     /** Outputs the items currently in cache onto the canvas */
     public async draw(): Promise<void> {
+
+        // console.log(`Sub${this.trackerID}: Drawing ${this.cache.count()}`);
+
+        // Reset the canvas to base state
         this.canvas.html("");
         this.ctwrap.attr({ state: TrackerState.Draw });
         SubscriptionManager.trigger("attributes." + this.trackerID);
@@ -367,7 +374,7 @@ export class SubscriptionTracker extends RE6Module {
      */
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected drawUpdateEntry(data: UpdateContent, timestamp: number, deleteFunction: DeleteEntryFunction): JQuery<HTMLElement> {
-        const result = $(`<subitem>post #${data.uid} (${timestamp})</subitem>`);
+        const result = $(`<subitem uid="${data.uid}">post #${data.uid} (${timestamp})</subitem>`);
         return result;
     }
 
