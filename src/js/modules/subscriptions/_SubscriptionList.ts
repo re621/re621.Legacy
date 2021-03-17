@@ -90,11 +90,16 @@ export class SubscriptionList {
     /** Deletes the provided item from the list of subscriptions */
     public async unsubscribe(id: string): Promise<void> {
         this.subscriptions.delete(id);
+        delete this.extra[id];
         return this.pushSubscriptions();
     }
 
     public getExtraData(name: string): ExtraData {
         return this.extra[name];
+    }
+
+    public addExtraData(uid: string, data: ExtraData): void {
+        this.extra[uid] = data;
     }
 
     public deleteExtraData(name: string): void {
@@ -106,4 +111,5 @@ export class SubscriptionList {
 type ExtraData = {
     name?: string;
     data?: string;
+    last?: number;
 }
