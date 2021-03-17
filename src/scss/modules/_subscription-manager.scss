@@ -106,6 +106,8 @@ a.subscribe-button-major {
     line-height: 1.25rem;
     padding: .25rem .5rem;
     border: 0;
+    margin: 0 0.5rem;
+    font-weight: 500;
 
     background: #006400;
     color: #fff;
@@ -296,5 +298,68 @@ sb-ctwrap[content=Tags] sb-canvas {
         }
 
         &:hover a.delete-link { visibility: visible; }
+    }
+}
+
+
+// PoolTracker style override
+sb-ctwrap[content=Pools] sb-canvas {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-row-gap: 0.5rem;
+
+    subitem {
+        // I don't know why, but this is necessary
+        grid-column: 1;
+
+        display: grid;
+        grid-template-columns: 7rem auto 1rem;
+        grid-template-rows: auto 1.25rem;
+        grid-column-gap: 0.5rem;
+        height: 5rem;
+        background: #ffffff10;
+        margin-right: -0.5rem;
+
+        a.img-link {
+            grid-row: span 2;
+
+            img {
+                width: 7rem;
+                height: 5rem;
+                object-fit: cover;
+            }
+        }
+
+        div.info-section {
+            grid-area: 1 / 2;
+
+            a {
+                display: block;
+                font-size: 1.5rem;
+                max-width: 28.5rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            div { color: #777; }
+        }
+
+        a.all-link {
+            grid-area: 2 / 2;
+            align-self: center;
+        }
+
+        a.delete-link {
+            grid-area: 1 / 3 / span 2;
+            background: #ffffff10;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ddd;
+
+            &:hover { background: #ffffff25; }
+        }
     }
 }

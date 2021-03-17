@@ -332,7 +332,7 @@ export class SubscriptionTracker extends RE6Module {
             this.canvas.append(this.drawUpdateEntry(data, timestamp, (timestamp, result) => {
                 this.cache.deleteItem(timestamp);
                 result.remove();
-                // Debug.log(`Sub${this.trackerID}: Deleting ${timestamp}`);
+                // console.log(`Sub${this.trackerID}: Deleting ${timestamp}`);
                 SubscriptionManager.trigger("attributes." + this.trackerID);
             }));
         });
@@ -356,9 +356,9 @@ export class SubscriptionTracker extends RE6Module {
      * @param timestamp Update timestamp
      * @returns JQuery DOM object based on provided data
      */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected drawUpdateEntry(data: UpdateContent, timestamp: number, deleteFunction: DeleteEntryFunction): JQuery<HTMLElement> {
         const result = $(`<subitem>post #${data.uid} (${timestamp})</subitem>`);
-        deleteFunction(timestamp, result);
         return result;
     }
 
