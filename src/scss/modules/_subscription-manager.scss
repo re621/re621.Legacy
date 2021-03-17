@@ -156,9 +156,15 @@ tabbed.config-tabs form-section.subscription-settings > form-section {
     &:not(:nth-last-of-type(-n+2)) {
         margin-bottom: 0.5rem;
     }
-    input[type=text] {
-        padding-left: 0.7rem;
+    input[type=text] { padding: 0 0.75rem; }
+    .update-timer {
+        opacity: 0.5;
+        input {
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
     }
+    .failed-attempt {  color: gold; }
 }
 
 .subscription-tutorial {

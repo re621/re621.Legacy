@@ -216,7 +216,7 @@ export class SubscriptionManager extends RE6Module {
                         data = Math.max(parseFloat(data) * Util.Time.HOUR, -1);
                         if (data < Util.Time.HOUR && data != -1) data = Util.Time.HOUR;
                         await instance.pushSettings("updateInterval", data);
-                        SubscriptionManager.trigger("timerRefresh");
+                        SubscriptionManager.trigger("timer." + instance.getTrackerID());
                     }
                 ),
 
@@ -240,7 +240,7 @@ export class SubscriptionManager extends RE6Module {
                         title: "Updates older than this are removed automatically",
                     },
                     {
-                        "0": "Never",
+                        "0": "None",
                         "7": "1 week",
                         "2": "2 weeks",
                         "4": "1 month",
@@ -248,9 +248,77 @@ export class SubscriptionManager extends RE6Module {
                     },
                     async (data) => {
                         await instance.pushSettings("cacheMaxAge", parseInt(data) * Util.Time.WEEK);
-                        SubscriptionManager.trigger("timerRefresh");
                     }
                 ),
+
+                Form.input({
+                    label: "Next Update",
+                    value: ($el) => {
+                        let timer: number;
+                        $el.val("Initializing");
+
+                        SubscriptionManager.on("timer." + instance.getTrackerID(), async () => {
+                            clearInterval(timer);
+                            $el.removeAttr("title");
+
+                            if (instance.isUpdateInProgress()) {
+                                $el.val("In Progress");
+                                return;
+                            }
+
+                            await instance.refreshSettings();
+
+                            const period = instance.fetchSettings<number>("updateInterval");
+                            if (period == -1) {
+                                $el.val("Never");
+                                return;
+                            }
+
+                            const lastUpdate = instance.fetchSettings<number>("lastUpdate"),
+                                lastAttempt = instance.fetchSettings<number>("lastAttempt");
+                            const date = lastAttempt
+                                ? lastAttempt + SubscriptionTracker.attemptCooldown
+                                : lastUpdate + period;
+
+                            $el.toggleClass("failed-attempt", lastAttempt > 0);
+
+                            $el.attr("title",
+                                (lastAttempt ? `Previous update attempt failed.\n` : ``)
+                                + (lastAttempt ? `Last attempt: ${Util.Time.format(lastAttempt)}\n` : ``)
+                                + (lastUpdate ? `Last updated: ${Util.Time.format(lastUpdate)}\n` : ``)
+                                + `Next Update: ${Util.Time.format(date)}`
+                            )
+
+                            let tick = true;
+                            timer = setInterval(() => {
+                                const now = Util.Time.now();
+                                const distance = date - now;
+
+                                const hours = Math.floor(distance / Util.Time.HOUR);
+                                const minutes = Math.floor((distance % Util.Time.HOUR) / Util.Time.MINUTE);
+                                const seconds = Math.floor((distance % Util.Time.MINUTE) / Util.Time.SECOND);
+
+                                const parts = [leftpad(minutes), leftpad(seconds)];
+                                if (hours) parts.unshift(leftpad(hours));
+                                $el.val(parts.join(tick ? "   " : " : "));
+                                tick = !tick;
+
+                                if (distance < 0) {
+                                    clearInterval(timer);
+                                    $el.val("Pending");
+                                    $el.attr("title", "An update has been scheduled.")
+                                }
+                            }, 0.5 * Util.Time.SECOND);
+                        });
+                        SubscriptionManager.trigger("timer." + instance.getTrackerID());
+
+                        function leftpad(value: number): string {
+                            return (value < 10 ? "0" : "") + value;
+                        }
+                    },
+                    disabled: true,
+                    wrapper: "update-timer",
+                }),
 
                 Form.section({ wrapper: "subscription-control-btn", width: 1, columns: 1, }, [
                     Form.button({ value: "Manual Update", }, async (value, button) => {

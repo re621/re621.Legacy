@@ -8,6 +8,9 @@ import { SubscriptionManager } from "./_SubscriptionManager";
 
 export class SubscriptionTracker extends RE6Module {
 
+    // When should the tracker re-attempt an update if the previous one failed
+    public static readonly attemptCooldown = 5 * Util.Time.MINUTE;
+
     protected batchSize = 100;              // maximum number of subscribed entries per API request
 
     protected buttonSelect: {               // defines which elements should receive
@@ -49,6 +52,7 @@ export class SubscriptionTracker extends RE6Module {
             // Debug.log(`Sub[${this.trackerID}]: heartbeat`, await this.isUpdateRequired());
             if (await this.isUpdateRequired())
                 await this.update();
+            SubscriptionManager.trigger("timer." + this.trackerID);
         });
 
         // Fires several times when the update is underway
@@ -60,6 +64,7 @@ export class SubscriptionTracker extends RE6Module {
         SubscriptionManager.on("inprogress." + this.trackerID, (event, isUpdateFinished) => {
             if (isUpdateFinished) this.pushSettings("lastUpdate", Util.Time.now());
             this.pushSettings("lastAttempt", isUpdateFinished ? 0 : Util.Time.now());
+            SubscriptionManager.trigger("timer." + this.trackerID);
         });
 
         // Fires whenever the number of entries changes
@@ -110,6 +115,7 @@ export class SubscriptionTracker extends RE6Module {
                 // console.log(`Sub[${this.trackerID}]: Cache Sync`);
                 await this.cache.load();
                 this.draw();
+                SubscriptionManager.trigger("timer." + this.trackerID);
             }
         )
 
@@ -140,6 +146,9 @@ export class SubscriptionTracker extends RE6Module {
     /** Returns the unique identifier for this tracker */
     public getTrackerID(): string { return this.trackerID; }
 
+    /** Returns true if the update is currently in progress */
+    public isUpdateInProgress(): boolean { return this.updateInProgress; }
+
     /** Determines whether subscription updates need to be fetched */
     private async isUpdateRequired(): Promise<boolean> {
 
@@ -152,7 +161,7 @@ export class SubscriptionTracker extends RE6Module {
 
         if (time.updateInterval == -1) return false;            // Tracker set to manual updates only
         if (time.lastAttempt !== 0)                             // Either updating in another tab, or previous update failed
-            return now - time.lastAttempt >= 5 * Util.Time.MINUTE;
+            return now - time.lastAttempt >= SubscriptionTracker.attemptCooldown;
 
         return now - time.lastUpdate >= time.updateInterval;    // Interval has elapsed
     }
