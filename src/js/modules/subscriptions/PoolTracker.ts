@@ -83,7 +83,7 @@ export class PoolTracker extends SubscriptionTracker {
             }
             if (!poolExtra.last) poolExtra.last = pool.post_ids.slice(-1)[0];
 
-            if ((pool.post_ids.length - 0) > pool.post_ids.indexOf(poolExtra.last)) {
+            if ((pool.post_ids.length - 1) > pool.post_ids.indexOf(poolExtra.last)) {
                 result[new Date(pool.updated_at).getTime()] = {
                     uid: pool.id,
                     md5: poolExtra.data,
