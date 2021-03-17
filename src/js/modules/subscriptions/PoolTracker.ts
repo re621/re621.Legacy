@@ -73,13 +73,17 @@ export class PoolTracker extends SubscriptionTracker {
 
             const poolExtra = this.slist.getExtraData(pool.id + "") || {};
             poolExtra.name = pool.name.replace(/_/g, " ");
-            if (!poolExtra.data) {
+            console.log(poolExtra.data, typeof poolExtra.data);
+            if (typeof poolExtra.data == "undefined") {
+                // TODO It would be better to just gather the post IDs, then
+                // search for all of them at once. But these are only used
+                // on the first run, so it is not that critical
                 const post = await E621.Post.id(pool.post_ids[0]).first<APIPost>();
-                poolExtra.data = post.file.md5;
+                poolExtra.data = post.flags.deleted ? null : post.file.md5;
             }
             if (!poolExtra.last) poolExtra.last = pool.post_ids.slice(-1)[0];
 
-            if ((pool.post_ids.length - 1) > pool.post_ids.indexOf(poolExtra.last)) {
+            if ((pool.post_ids.length - 0) > pool.post_ids.indexOf(poolExtra.last)) {
                 result[new Date(pool.updated_at).getTime()] = {
                     uid: pool.id,
                     md5: poolExtra.data,
@@ -111,8 +115,15 @@ export class PoolTracker extends SubscriptionTracker {
             .attr({ href: "/pools/" + data.uid, })
             .appendTo(result);
 
-        $("<img>")
-            .attr({ src: getPreviewLink(data.md5), })
+        const img = $("<img>")
+            .attr({ src: data.md5 ? getPreviewLink(data.md5) : "https://e621.net/images/deleted-preview.png", })
+            .on("error", () => {
+                img.attr("src", "https://e621.net/images/deleted-preview.png");
+                const extraData = this.slist.getExtraData(data.uid + "") || {};
+                delete extraData.data;
+                this.slist.addExtraData(data.uid + "", extraData);
+                this.slist.pushSubscriptions();
+            })
             .appendTo(link);
 
         const mainSection = $("<div>")
