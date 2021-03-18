@@ -108,7 +108,7 @@ export class PoolTracker extends SubscriptionTracker {
 
                 const img = $("<img>")
                     .attr({ src: data.md5 ? getPreviewLink(data.md5) : "https://e621.net/images/deleted-preview.png", })
-                    .on("error", () => {
+                    .one("error", () => {
                         img.attr("src", "https://e621.net/images/deleted-preview.png");
                         const extraData = this.slist.getExtraData(data.uid + "") || {};
                         delete extraData.data;
