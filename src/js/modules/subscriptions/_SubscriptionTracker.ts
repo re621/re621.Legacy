@@ -57,16 +57,19 @@ export class SubscriptionTracker extends RE6Module {
         });
 
         // Fires several times when the update is underway
-        // - when an update starts
-        // - on every API call
-        // - when the update ends
-        // Receives data through the event - if set to `true`,
-        // the update is considered concluded, and update timer is set.
-        SubscriptionManager.on("inprogress." + this.trackerID, (event, isUpdateFinished) => {
-            // console.log(`Sub[${this.trackerID}]: inprogress`, isUpdateFinished);
-            if (isUpdateFinished) this.pushSettings("lastUpdate", Util.Time.now());
-            this.pushSettings("lastAttempt", isUpdateFinished ? 0 : Util.Time.now());
-            SubscriptionManager.trigger("timer." + this.trackerID);
+        // Receives a status code through the event, corresponding to the following situations:
+        // - 0: when an update starts
+        // - 1: on every API call
+        // - 2: when the update ends
+        // 
+        SubscriptionManager.on("inprogress." + this.trackerID, (event, statusCode) => {
+
+            // console.log(`Sub[${this.trackerID}]: inprogress`, statusCode);
+            if (statusCode == 2) this.pushSettings("lastUpdate", Util.Time.now());
+            this.pushSettings("lastAttempt", statusCode == 2 ? 0 : Util.Time.now());
+
+            // Skip the API calls to avoid timer spam
+            if (statusCode != 1) SubscriptionManager.trigger("timer." + this.trackerID);
         });
 
         // Fires whenever the number of entries changes
@@ -337,12 +340,12 @@ export class SubscriptionTracker extends RE6Module {
         this.ctwrap.attr("state", TrackerState.Load);
         SubscriptionManager.trigger("attributes." + this.trackerID);
         this.updateInProgress = true;
-        SubscriptionManager.trigger("inprogress." + this.trackerID);
+        SubscriptionManager.trigger("inprogress." + this.trackerID, 0);
 
         await this.cache.fetch();
 
         this.updateInProgress = false;
-        SubscriptionManager.trigger("inprogress." + this.trackerID, true);
+        SubscriptionManager.trigger("inprogress." + this.trackerID, 2);
         await this.draw();
     }
 

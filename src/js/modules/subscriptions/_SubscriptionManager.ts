@@ -189,7 +189,7 @@ export class SubscriptionManager extends RE6Module {
             // Fix for the update timer heading into the eternity
             if (updateInterval > Util.Time.HOUR * 24 || (updateInterval < Util.Time.HOUR && updateInterval != -1)) {
                 updateInterval = Util.Time.HOUR;
-                this.pushSettings("updateInterval", updateInterval);
+                instance.pushSettings("updateInterval", updateInterval);
             }
 
             // Convert into a usable format
@@ -254,17 +254,24 @@ export class SubscriptionManager extends RE6Module {
                 Form.input({
                     label: "Next Update",
                     value: ($el) => {
-                        let timer: number;
+
                         $el.val("Initializing");
 
+                        let eventLock = false;
                         SubscriptionManager.on("timer." + instance.getTrackerID(), async () => {
+                            if (eventLock) return;
+                            eventLock = true;
+
                             // console.log(`Sub${instance.getTrackerID()}: timer`);
 
+                            let timer = parseInt($el.data("timer") || "0");
+                            // console.log(`Sub${instance.getTrackerID()}: timer end ${timer}`);
                             clearInterval(timer);
-                            $el.removeAttr("title");
+                            $el.removeData("timer");
 
                             if (instance.isUpdateInProgress()) {
                                 $el.val("In Progress");
+                                eventLock = false;
                                 return;
                             }
 
@@ -273,6 +280,7 @@ export class SubscriptionManager extends RE6Module {
                             const period = instance.fetchSettings<number>("updateInterval");
                             if (period == -1) {
                                 $el.val("Never");
+                                eventLock = false;
                                 return;
                             }
 
@@ -291,6 +299,13 @@ export class SubscriptionManager extends RE6Module {
                                 + `Next Update: ${Util.Time.format(date)}`
                             )
 
+                            timer = parseInt($el.data("timer") || "0");
+                            if (timer) {
+                                // console.log(`Sub${instance.getTrackerID()}: timer exists ${timer}`);
+                                eventLock = false;
+                                return;
+                            }
+
                             let tick = true;
                             timer = setInterval(() => {
                                 const now = Util.Time.now();
@@ -306,11 +321,17 @@ export class SubscriptionManager extends RE6Module {
                                 tick = !tick;
 
                                 if (distance < 0) {
+                                    // console.log(`Sub${instance.getTrackerID()}: timer end ${timer}`);
                                     clearInterval(timer);
-                                    $el.val("Pending");
-                                    $el.attr("title", "An update has been scheduled.")
+                                    $el.removeData("timer")
+                                        .val("Pending")
+                                        .attr("title", "An update has been scheduled.");
                                 }
                             }, 0.5 * Util.Time.SECOND);
+                            $el.data("timer", timer);
+
+                            // console.log(`Sub${instance.getTrackerID()}: timer setup ${timer}`);
+                            eventLock = false;
                         });
                         SubscriptionManager.trigger("timer." + instance.getTrackerID());
 

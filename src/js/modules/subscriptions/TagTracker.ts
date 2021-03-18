@@ -70,7 +70,7 @@ export class TagTracker extends SubscriptionTracker {
 
             // This should prevent the tracker from double-updating if the process takes more than 5 minutes
             // There are definitely users who are subscribed to enough tags to warrant this
-            SubscriptionManager.trigger("inprogress." + this.trackerID);
+            SubscriptionManager.trigger("inprogress." + this.trackerID, 1);
         }
 
         // Parsing output, discarding irrelevant data
