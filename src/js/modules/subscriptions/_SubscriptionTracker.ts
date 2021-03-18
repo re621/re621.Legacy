@@ -1,5 +1,6 @@
 import { XM } from "../../components/api/XM";
 import { Page } from "../../components/data/Page";
+import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 import { SubscriptionCache, UpdateContent, UpdateData } from "./_SubscriptionCache";
@@ -32,8 +33,9 @@ export class SubscriptionTracker extends RE6Module {
     protected cache: SubscriptionCache;     // object containing update data
     protected slist: SubscriptionList;      // object containing subscribed items
 
-    private updateInProgress = false;       // the tracker is currently fetching updates
-    private isVisible = false;              // the notifications tab is currently open
+    private updateInProgress = false;       // tracker is currently fetching updates
+    private isVisible = false;              // notifications tab is currently open
+    private networkOffline = false;         // unable to connect to the internet
 
     public constructor() {
         super();
@@ -61,7 +63,7 @@ export class SubscriptionTracker extends RE6Module {
         // - 0: when an update starts
         // - 1: on every API call
         // - 2: when the update ends
-        // 
+        // - 3: if the update fails
         SubscriptionManager.on("inprogress." + this.trackerID, (event, statusCode) => {
 
             // console.log(`Sub[${this.trackerID}]: inprogress`, statusCode);
@@ -127,6 +129,7 @@ export class SubscriptionTracker extends RE6Module {
                 this.clearStatus();
                 this.writeStatus("... synchronizing data");
                 this.ctwrap.attr({ state: TrackerState.Sync });
+                this.networkOffline = false;
 
                 await Util.sleep(100);
 
@@ -164,6 +167,9 @@ export class SubscriptionTracker extends RE6Module {
 
     /** Returns the unique identifier for this tracker */
     public getTrackerID(): string { return this.trackerID; }
+
+    /** Returns the current network status */
+    public isNetworkOffline(): boolean { return this.networkOffline; }
 
     /** Returns true if the update is currently in progress */
     public isUpdateInProgress(): boolean { return this.updateInProgress; }
@@ -342,10 +348,17 @@ export class SubscriptionTracker extends RE6Module {
         this.updateInProgress = true;
         SubscriptionManager.trigger("inprogress." + this.trackerID, 0);
 
-        await this.cache.fetch();
+        if (ModuleController.fetchSettings(SubscriptionManager, "skipPreflightChecks") || await Util.Network.isOnline()) {
+            await this.cache.fetch();
+            this.networkOffline = false;
+            this.updateInProgress = false;
+            SubscriptionManager.trigger("inprogress." + this.trackerID, 2);
+        } else {
+            this.networkOffline = true;
+            this.updateInProgress = false;
+            SubscriptionManager.trigger("inprogress." + this.trackerID, 3);
+        }
 
-        this.updateInProgress = false;
-        SubscriptionManager.trigger("inprogress." + this.trackerID, 2);
         await this.draw();
     }
 

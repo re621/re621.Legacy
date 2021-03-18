@@ -1,4 +1,4 @@
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
@@ -20,6 +20,14 @@ export class SubscriptionManager extends RE6Module {
 
     public constructor() {
         super([], true);
+    }
+
+    public getDefaultSettings(): Settings {
+        return {
+            enabled: true,
+
+            skipPreflightChecks: false,     // suppresses the network status check before the update
+        }
     }
 
     public create(): void {
@@ -161,6 +169,18 @@ export class SubscriptionManager extends RE6Module {
             Form.text(`Interval: How often should the subscriptions be checked for updates`, 2, "subscription-tutorial"),
             Form.text(`Cache Size: Maximum number of updates stored. Must be at least 10, but no more than 500.`, 2, "subscription-tutorial"),
             Form.text(`Cache Age: Updates older than this are removed automatically`, 2, "subscription-tutorial"),
+            Form.hr(2),
+
+            Form.checkbox(
+                {
+                    value: this.fetchSettings("skipPreflightChecks"),
+                    label: "<b>Skip Preflight Checks</b><br />Disables the extra network checks before updating the subscriptions",
+                    width: 3,
+                },
+                async (data) => {
+                    await this.pushSettings("skipPreflightChecks", data);
+                }
+            ),
         ]);
 
         function makeSubscriptionSection(instance: SubscriptionTracker): FormElement {
@@ -270,7 +290,16 @@ export class SubscriptionManager extends RE6Module {
                             $el.removeData("timer");
 
                             if (instance.isUpdateInProgress()) {
-                                $el.val("In Progress");
+                                $el.val("In Progress")
+                                    .attr("title", "An update is currently in progress.\nPlease, stand by.");
+                                eventLock = false;
+                                return;
+                            }
+
+                            if (instance.isNetworkOffline()) {
+                                $el.val("Network Offline")
+                                    .attr("title", "Unable to reach e621 servers.\nPlease, check your Internet connection.")
+                                    .addClass("failed-attempt");
                                 eventLock = false;
                                 return;
                             }

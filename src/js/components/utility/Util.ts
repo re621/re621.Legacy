@@ -1,6 +1,7 @@
 import { UtilEvents } from "./UtilEvents";
 import { UtilID } from "./UtilID";
 import { UtilMath } from "./UtilMath";
+import { UtilNetwork } from "./UtilNetwork";
 import { UtilSize } from "./UtilSize";
 import { UtilTime } from "./UtilTime";
 
@@ -13,6 +14,7 @@ export class Util {
     public static Events = UtilEvents;
     public static ID = UtilID;
     public static Math = UtilMath;
+    public static Network = UtilNetwork;
     public static Size = UtilSize;
 
     public static LS = window.localStorage;
