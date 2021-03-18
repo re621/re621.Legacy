@@ -258,6 +258,8 @@ export class SubscriptionManager extends RE6Module {
                         $el.val("Initializing");
 
                         SubscriptionManager.on("timer." + instance.getTrackerID(), async () => {
+                            // console.log(`Sub${instance.getTrackerID()}: timer`);
+
                             clearInterval(timer);
                             $el.removeAttr("title");
 

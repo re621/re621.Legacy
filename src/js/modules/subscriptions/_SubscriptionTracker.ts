@@ -33,6 +33,7 @@ export class SubscriptionTracker extends RE6Module {
     protected slist: SubscriptionList;      // object containing subscribed items
 
     private updateInProgress = false;       // the tracker is currently fetching updates
+    private isVisible = false;              // the notifications tab is currently open
 
     public constructor() {
         super();
@@ -49,7 +50,7 @@ export class SubscriptionTracker extends RE6Module {
 
         // Fires every minute, refreshes the timers and triggers an update if necessary
         SubscriptionManager.on("heartbeat." + this.trackerID, async () => {
-            // Debug.log(`Sub[${this.trackerID}]: heartbeat`, await this.isUpdateRequired());
+            // console.log(`Sub[${this.trackerID}]: heartbeat`, await this.isUpdateRequired());
             if (await this.isUpdateRequired())
                 await this.update();
             SubscriptionManager.trigger("timer." + this.trackerID);
@@ -62,6 +63,7 @@ export class SubscriptionTracker extends RE6Module {
         // Receives data through the event - if set to `true`,
         // the update is considered concluded, and update timer is set.
         SubscriptionManager.on("inprogress." + this.trackerID, (event, isUpdateFinished) => {
+            // console.log(`Sub[${this.trackerID}]: inprogress`, isUpdateFinished);
             if (isUpdateFinished) this.pushSettings("lastUpdate", Util.Time.now());
             this.pushSettings("lastAttempt", isUpdateFinished ? 0 : Util.Time.now());
             SubscriptionManager.trigger("timer." + this.trackerID);
@@ -91,6 +93,8 @@ export class SubscriptionTracker extends RE6Module {
         // True means that the user opened the page, false that they closed it
         SubscriptionManager.on("intersect." + this.trackerID, async (event, isIntersecting) => {
 
+            this.isVisible = isIntersecting;
+
             // Just in case the wrapper does not exist yet, somehow
             this.getOutputContainer();
 
@@ -102,7 +106,8 @@ export class SubscriptionTracker extends RE6Module {
             }
 
             if (isIntersecting) {
-                this.cache.purgeNew();
+                if (document.hasFocus() && parseInt(this.ctwrap.attr("added")) > 0)
+                    this.cache.purgeNew();
                 this.canvas.children("subitem").trigger("re621:render");
             } else this.canvas.children("subitem").trigger("re621:reset");
 
@@ -116,8 +121,16 @@ export class SubscriptionTracker extends RE6Module {
             async (name, oldValue, newValue, remote) => {
                 if (!remote) return;
                 // console.log(`Sub[${this.trackerID}]: Cache Sync`);
+                this.clearStatus();
+                this.writeStatus("... synchronizing data");
+                this.ctwrap.attr({ state: TrackerState.Sync });
+
+                await Util.sleep(100);
+
                 await this.cache.load();
                 this.draw();
+
+                // This is here to synchronize the timer if an update happened in another tab
                 SubscriptionManager.trigger("timer." + this.trackerID);
             }
         )
@@ -345,12 +358,17 @@ export class SubscriptionTracker extends RE6Module {
 
         this.canvas.append(this.drawNewUpdatesDivider());
         this.cache.forEach((data, timestamp) => {
-            this.canvas.append(this.drawUpdateEntry(data, timestamp, (timestamp, result) => {
+            const entry = this.drawUpdateEntry(data, timestamp, (timestamp, result) => {
                 this.cache.deleteItem(timestamp);
                 result.remove();
                 // console.log(`Sub${this.trackerID}: Deleting ${timestamp}`);
                 SubscriptionManager.trigger("attributes." + this.trackerID);
-            }));
+            });
+
+            if (!document.hasFocus() && this.isVisible)
+                entry.trigger("re621:render");
+
+            this.canvas.append(entry);
         });
 
         this.ctwrap.attr({ state: TrackerState.Done });
@@ -479,6 +497,7 @@ export class SubscriptionTracker extends RE6Module {
 enum TrackerState {
     Init = "init",
     Load = "load",
+    Sync = "sync",
     Draw = "draw",
     Done = "done",
 }

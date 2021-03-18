@@ -64,7 +64,7 @@ export class SubscriptionCache {
      */
     public async fetch(): Promise<boolean> {
         const updates = await this.tracker.fetchUpdatedEntries();
-        // console.log("cache.fetch", Object.keys(updates).length, this.index.length);
+        // console.log(`Sub${this.tracker.getTrackerID()}: ${Object.keys(updates).length} new, ${this.index.length} total`);
         if (Object.keys(updates).length == 0) Promise.resolve(false);
 
         Object.keys(updates).forEach((key) => {
