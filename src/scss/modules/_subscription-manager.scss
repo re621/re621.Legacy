@@ -367,7 +367,53 @@ sb-ctwrap[content=Pools] sb-canvas {
             align-items: center;
             justify-content: center;
             color: #ddd;
-            padding-bottom: 0.25rem;
+
+            &:hover { background: #ffffff25; }
+        }
+    }
+}
+
+
+// ForumTracker style override
+sb-ctwrap[content=Forums] sb-canvas {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-row-gap: 0.5rem;
+
+    subitem {
+        // I don't know why, but this is necessary
+        grid-column: 1;
+
+        display: grid;
+        grid-template-columns: auto 1rem;
+        grid-column-gap: 0.5rem;
+        height: 5rem;
+        background: #ffffff10;
+        margin-right: -0.5rem;
+
+        div.info-section {
+            align-self: center;
+            padding-left: 0.5rem;
+
+            a {
+                display: block;
+                font-size: 1.25rem;
+                max-width: 28.5rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            div { color: #777; }
+        }
+
+        a.delete-link {
+            background: #ffffff10;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ddd;
 
             &:hover { background: #ffffff25; }
         }
