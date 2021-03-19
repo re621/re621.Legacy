@@ -18,10 +18,6 @@ export class SubscriptionManager extends RE6Module {
         threshold: 0.5,
     };
 
-    public constructor() {
-        super([], true);
-    }
-
     public getDefaultSettings(): Settings {
         return {
             enabled: true,
