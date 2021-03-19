@@ -581,7 +581,13 @@ export namespace PostData {
      * Unlike `fromDOM()`, works on native thumbnails (ex. `<article>`)
      * @param $article Article to parse for data
      */
-    export function fromThumbnail($article: JQuery<HTMLElement>): PostData {
+    export function fromThumbnail($article: JQuery<HTMLElement>, cached = true): PostData {
+
+        // Cache the data, since the calculations below cause some lag that is
+        // noticeable when this has to be done on the fly, like in HoverZoom.
+        // TODO Actually optimize the code below
+        if (cached && $article.data("wfpost"))
+            return $article.data("wfpost");
 
         const id = parseInt($article.attr("data-id")) || 0;
 
@@ -627,12 +633,18 @@ export namespace PostData {
                 sample: `/images/deleted-preview.png`,
                 original: `/images/deleted-preview.png`,
             };
-            else urls = {
-                preview: $article.attr("data-preview-url") || null,
-                sample: (width < 850 || height < 850 || extension == "gif")
-                    ? `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${extension}`
-                    : `https://static1.e621.net/data/sample/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`,
-                original: `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${extension}`,
+            else {
+                urls = {
+                    preview: $article.attr("data-preview-url")
+                        ? $article.attr("data-preview-url")
+                        : `https://static1.e621.net/data/preview/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`,
+                    sample: $article.attr("data-large-file-url")    // This is horrifying.
+                        ? $article.attr("data-large-file-url")      // I am truly sorry...
+                        : ((width < 850 || height < 850 || extension == "gif")
+                            ? `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${extension}`
+                            : `https://static1.e621.net/data/sample/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`),
+                    original: `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${extension}`,
+                };
             }
         }
 
@@ -642,7 +654,7 @@ export namespace PostData {
         // Score
         const score = parseInt($article.attr("data-score") || "0");
 
-        return {
+        const result = {
             id: id,
             flags: PostFlag.fromString($article.attr("data-flags") || ""),
             score: {
@@ -669,15 +681,15 @@ export namespace PostData {
             tagString: tagString,
             tags: {
                 all: tagSet,
-                artist: new Set(),
-                real_artist: new Set(),
-                copyright: new Set(),
-                species: new Set(),
-                character: new Set(),
-                general: new Set(),
-                invalid: new Set(),
-                meta: new Set(),
-                lore: new Set(),
+                artist: new Set<string>(),
+                real_artist: new Set<string>(),
+                copyright: new Set<string>(),
+                species: new Set<string>(),
+                character: new Set<string>(),
+                general: new Set<string>(),
+                invalid: new Set<string>(),
+                meta: new Set<string>(),
+                lore: new Set<string>(),
             },
 
             sources: [],
@@ -724,6 +736,8 @@ export namespace PostData {
             },
 
         };
+        $article.data("wfpost", result);
+        return result;
     }
 
     /**
