@@ -201,6 +201,13 @@ sb-enwrap[content=Tags] {
     }
 }
 
+sb-enwrap[content=Comments] {
+
+    sb-encont {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
 
 // Generic subscription update entry
 sb-ctwrap {
