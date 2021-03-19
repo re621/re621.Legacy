@@ -101,20 +101,22 @@ export class HoverZoom extends RE6Module {
         let scrolling = false;
         const zoomDelay = this.fetchSettings("zoomDelay");
         $("#page")
-            .on("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail", (event) => {
+            .on("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap[content=Tags] subitem", (event) => {
                 if (scrolling) return;
 
                 const $ref = $(event.currentTarget);
                 $ref.attr("hovering", "true");
 
-                HoverZoom.curPost = $ref.is("post") ? Post.get($ref) : PostData.fromThumbnail($ref);
+                HoverZoom.curPost = $ref.is("post")
+                    ? Post.get($ref)
+                    : PostData.fromThumbnail($ref);
 
                 window.clearTimeout(timer);
                 timer = window.setTimeout(() => {
                     HoverZoom.trigger("zoom.start", { post: $ref.data("id"), pageX: event.pageX, pageY: event.pageY });
                 }, zoomDelay);
             })
-            .on("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail", (event) => {
+            .on("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap[content=Tags] subitem", (event) => {
                 const $ref = $(event.currentTarget);
                 $ref.removeAttr("hovering");
 
@@ -165,7 +167,7 @@ export class HoverZoom extends RE6Module {
             if (HoverZoom.paused || (this.fetchSettings("mode") == ImageZoomMode.OnShift && !this.shiftPressed))
                 return;
 
-            const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}]`).first();
+            const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}], subitem[data-id=${data.post}]`).first();
             const post = $ref.is("post")
                 ? Post.get($ref)
                 : PostData.fromThumbnail($ref);

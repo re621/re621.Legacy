@@ -111,6 +111,9 @@ export class TagTracker extends SubscriptionTracker {
                 "new": data.new,
 
                 // Necessary data for the HoverZoom
+                "data-id": data.uid,
+                "data-md5": data.md5,
+                "data-preview-url": getPreviewLink(data.md5),
                 "data-large-file-url": getSampleLink(data.md5, postData[1] == "true", postData[2]),
                 "data-file-ext": postData[2],
                 "data-rating": postData[0] || "s",
