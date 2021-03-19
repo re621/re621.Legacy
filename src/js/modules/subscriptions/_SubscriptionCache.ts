@@ -126,7 +126,8 @@ export class SubscriptionCache {
         // If cacheMaxAge is set to never, its value is 0
         const ageLimit = params.cacheMaxAge === 0 ? 0 : Util.Time.now() - params.cacheMaxAge;
 
-        const uniqueKeys = [];
+        const uniqueKeys = new Set();
+        const uniqueParentKeys = new Set();
         this.index.forEach((timestamp) => {
             const update: UpdateContent = this.data[timestamp];
 
@@ -138,9 +139,17 @@ export class SubscriptionCache {
 
             // Remove all non-unique updates
             // Forum posts may get replies all the time, only the recent one is important
-            if (uniqueKeys.indexOf(update.uid) === -1)
-                uniqueKeys.push(update.uid);
-            else delete this.data[timestamp];
+            if (uniqueKeys.has(update.uid))
+                delete this.data[timestamp];
+            else uniqueKeys.add(update.uid);
+
+            // Remove entries with non-unique parent keys
+            // This is mainly used for the comment tracker
+            if (update.par) {
+                if (uniqueParentKeys.has(update.par))
+                    delete this.data[timestamp];
+                else uniqueParentKeys.add(update.par);
+            }
 
         });
 
@@ -186,9 +195,10 @@ export interface UpdateData {
 }
 
 export interface UpdateContent {
-    uid: number;
-    md5?: string;
-    ext?: string;
+    uid: number;        // unique ID of the update entry
+    md5?: string;       // md5 hash of the image, if available
+    ext?: string;       // any extraneous information that needs to be stored
+    par?: number;       // unique ID of the parent element, if available
 
     new?: boolean;
 }

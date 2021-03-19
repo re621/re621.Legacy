@@ -84,6 +84,7 @@ export class CommentTracker extends SubscriptionTracker {
                     uid: comment.id,
                     md5: postExtra.data,
                     ext: encodeURIComponent(Util.stripDText(comment.body).slice(0, 256)) + "|" + postID + "|" + comment.creator_name,
+                    par: postID,
                     new: true,
                 };
             }
