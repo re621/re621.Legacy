@@ -79,7 +79,7 @@ export class PoolTracker extends SubscriptionTracker {
                 result[new Date(pool.updated_at).getTime()] = {
                     uid: pool.id,
                     md5: poolExtra.data,
-                    ext: pool.name.replace(/_/g, " ") + "|" + pool.post_count,
+                    ext: encodeURIComponent(pool.name.replace(/_/g, " ")) + "|" + pool.post_count,
                     new: true,
                 }
                 poolExtra.last = pool.post_ids.slice(-1)[0];
@@ -97,6 +97,7 @@ export class PoolTracker extends SubscriptionTracker {
     protected drawUpdateEntry(data: UpdateContent, timestamp: number, deleteFunction): JQuery<HTMLElement> {
 
         const postData = data.ext.split("|");
+        let extraData = this.slist.getExtraData(data.uid + "") || {};
         const result = $("<subitem>")
             .attr({ new: data.new, })
             .on("re621:render", () => {
@@ -110,7 +111,7 @@ export class PoolTracker extends SubscriptionTracker {
                     .attr({ src: data.md5 ? getPreviewLink(data.md5) : "https://e621.net/images/deleted-preview.png", })
                     .one("error", () => {
                         img.attr("src", "https://e621.net/images/deleted-preview.png");
-                        const extraData = this.slist.getExtraData(data.uid + "") || {};
+                        extraData = this.slist.getExtraData(data.uid + "") || {};
                         delete extraData.data;
                         this.slist.addExtraData(data.uid + "", extraData);
                         this.slist.pushSubscriptions();
@@ -122,8 +123,8 @@ export class PoolTracker extends SubscriptionTracker {
                     .appendTo(result);
 
                 $("<a>")
-                    .html(postData[0])
-                    .attr({ "href": this.slist.getExtraData(data.uid + "").last, })
+                    .html(decodeURIComponent(postData[0]))
+                    .attr({ "href": `/posts/${extraData.last}?pool_id=${data.uid}`, })
                     .appendTo(mainSection);
 
                 $("<div>")
@@ -132,6 +133,7 @@ export class PoolTracker extends SubscriptionTracker {
 
                 $("<a>")
                     .addClass("all-link")
+                    .attr("href", `/pools/${data.uid}`)
                     .html(`View all ${postData[1]} posts`)
                     .appendTo(result);
 
@@ -174,7 +176,7 @@ export class PoolTracker extends SubscriptionTracker {
 
         $("<a>")
             .html(poolData.name ? poolData.name : `pool #${id}`)
-            .attr({ "href": "/wiki_pages/show_or_new?title=" + id })
+            .attr({ "href": `/pools/${id}` })
             .appendTo(result);
 
         return result;
