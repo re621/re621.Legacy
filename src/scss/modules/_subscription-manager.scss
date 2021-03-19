@@ -419,3 +419,64 @@ sb-ctwrap[content=Forums] sb-canvas {
         }
     }
 }
+
+
+sb-ctwrap[content=Comments] sb-canvas {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-row-gap: 0.5rem;
+
+    subitem {
+        // I don't know why, but this is necessary
+        grid-column: 1;
+
+        display: grid;
+        grid-template-columns: 7rem auto 1rem;
+        grid-column-gap: 0.5rem;
+        height: 5rem;
+        background: #ffffff10;
+        margin-right: -0.5rem;
+
+        a.img-link {
+
+            img {
+                width: 7rem;
+                height: 5rem;
+                object-fit: cover;
+            }
+        }
+
+        div.info-section {
+            padding-top: 0.25rem;
+
+            a {
+                display: block;
+                font-size: 1rem;
+                max-width: 28.5rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            div { color: #777; }
+            div.comment-body {
+                height: 2.2rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                width: 28rem;
+                color: #ccc;
+            }
+        }
+
+        a.delete-link {
+            background: #ffffff10;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ddd;
+
+            &:hover { background: #ffffff25; }
+        }
+    }
+}
