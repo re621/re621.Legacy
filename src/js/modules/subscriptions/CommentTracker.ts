@@ -157,4 +157,27 @@ export class CommentTracker extends SubscriptionTracker {
         }
     }
 
+    protected formatSubscriptionListEntry(id: string, value: any, unsub: (name: string) => void): JQuery<HTMLElement> {
+
+        const result = $("<sb-enitem>")
+            .attr({ content: id, });
+
+        $("<a>")
+            .addClass("sb-unsub")
+            .html(`<i class="fas fa-times"></i>`)
+            .attr({ "title": "Unsubscribe", })
+            .appendTo(result)
+            .on("click", (event) => {
+                event.preventDefault();
+                unsub(id);
+            });
+
+        $("<a>")
+            .html(`post #${id}`)
+            .attr({ "href": `/posts/${id}` })
+            .appendTo(result);
+
+        return result;
+    }
+
 }
