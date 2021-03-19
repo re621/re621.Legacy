@@ -55,7 +55,7 @@ export class SubscriptionManager extends RE6Module {
 
         const trackerPages: TabContent[] = [];
         for (const tracker of SubscriptionManager.trackers) {
-            tracker.appendSubscribeButton();
+            $(() => { tracker.appendSubscribeButton(); });
             trackerPages.push({
                 name: tracker.getOutputTab(),
                 content: tracker.getOutputContainer(),
