@@ -1,5 +1,4 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed, TabContent } from "../../components/structure/Tabbed";
@@ -30,7 +29,7 @@ export class SubscriptionManager extends RE6Module {
         super.create();
 
         // Create a notifications button
-        const openSubscriptionsButton = DomUtilities.addSettingsButton({
+        const openSubscriptionsButton = Util.DOM.addSettingsButton({
             id: "header-button-settings",
             name: `<i class="fas fa-bell"></i>`,
             title: "Notifications",

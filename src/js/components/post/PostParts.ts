@@ -5,7 +5,6 @@ import { PostFlag } from "../api/responses/APIPost";
 import { XM } from "../api/XM";
 import { Blacklist } from "../data/Blacklist";
 import { Page } from "../data/Page";
-import { DomUtilities } from "../structure/DomUtilities";
 import { Debug } from "../utility/Debug";
 import { Util } from "../utility/Util";
 import { LoadedFileType, Post, PostData } from "./Post";
@@ -136,7 +135,7 @@ export class PostParts {
         post.$ref.attr("loading", "true");
 
         const $image = $("<img>")
-            .attr("src", DomUtilities.getPlaceholderImage())
+            .attr("src", Util.DOM.getPlaceholderImage())
             .one("load", () => {
                 post.$ref.removeAttr("loading");
                 if (conf.hoverTags)
@@ -148,7 +147,7 @@ export class PostParts {
                     .attr("error", "true");
 
                 $image
-                    .attr("src", DomUtilities.getPlaceholderImage())
+                    .attr("src", Util.DOM.getPlaceholderImage())
                     .off("mouseenter.re621.upscale")
                     .off("mouseleave.re621.upscale");
 

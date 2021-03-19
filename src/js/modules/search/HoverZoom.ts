@@ -3,7 +3,6 @@ import { XM } from "../../components/api/XM";
 import { ModuleController } from "../../components/ModuleController";
 import { Post, PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
@@ -62,7 +61,7 @@ export class HoverZoom extends RE6Module {
             .attr("id", "zoom-info")
             .appendTo(this.$zoomBlock);
         this.$zoomImage = $("<img>")
-            .attr("src", DomUtilities.getPlaceholderImage())
+            .attr("src", Util.DOM.getPlaceholderImage())
             .addClass("display-none")
             .appendTo(this.$zoomBlock);
         this.$zoomVideo = $("<video controls autoplay loop muted></video>")
@@ -299,7 +298,7 @@ export class HoverZoom extends RE6Module {
             this.$zoomImage
                 .addClass("display-none")
                 .removeAttr("style")
-                .attr("src", DomUtilities.getPlaceholderImage());
+                .attr("src", Util.DOM.getPlaceholderImage());
             this.$zoomVideo
                 .addClass("display-none")
                 .attr({ "muted": "", });

@@ -1,5 +1,4 @@
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Form } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Util } from "../../components/utility/Util";
@@ -31,7 +30,7 @@ export class ThemeCustomizer extends RE6Module {
         // Done by the site itself, as well as in the DomUtilities
 
         // === Create a button in the header
-        const openCustomizerButton = DomUtilities.addSettingsButton({
+        const openCustomizerButton = Util.DOM.addSettingsButton({
             id: "header-button-theme",
             name: `<i class="fas fa-paint-brush"></i>`,
             title: "Change Theme",

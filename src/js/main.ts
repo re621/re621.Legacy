@@ -9,7 +9,7 @@ import { Page, PageDefinition } from "./components/data/Page";
 import { User } from "./components/data/User";
 import { ModuleController } from "./components/ModuleController";
 import { CleanSlate } from "./components/structure/CleanSlate";
-import { DomUtilities } from "./components/structure/DomUtilities";
+import { StartupTasks } from "./components/structure/StartupTasks";
 import { Debug } from "./components/utility/Debug";
 import { Patcher } from "./components/utility/Patcher";
 import { Util } from "./components/utility/Util";
@@ -121,8 +121,8 @@ CleanSlate.createDOM().then(async () => {
     // You know who you are.
     Danbooru.Utility.disableShortcuts(true);
 
-    DomUtilities.createSearchbox();
-    DomUtilities.createTagList();
+    StartupTasks.createSearchbox();
+    StartupTasks.createTagList();
 
     await Debug.init();
     await Patcher.patchConfig();

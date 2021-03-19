@@ -4,7 +4,6 @@ import { Blacklist } from "../../components/data/Blacklist";
 import { PageDefinition } from "../../components/data/Page";
 import { PostData } from "../../components/post/Post";
 import { Settings } from "../../components/RE6Module";
-import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Util } from "../../components/utility/Util";
 import { WikiEnhancer } from "../misc/WikiEnhancer";
 import { UpdateContent, UpdateData } from "./_SubscriptionCache";
@@ -126,7 +125,7 @@ export class TagTracker extends SubscriptionTracker {
                     .attr({ src: getPreviewLink(data.md5), })
                     .appendTo(link)
                     .one("error", () => {
-                        image.attr("src", DomUtilities.getPlaceholderImage());
+                        image.attr("src", Util.DOM.getPlaceholderImage());
                     });
 
                 $("<a>")

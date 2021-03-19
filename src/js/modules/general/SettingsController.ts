@@ -6,7 +6,6 @@ import { TagCache } from "../../components/cache/TagCache";
 import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
@@ -64,7 +63,7 @@ export class SettingsController extends RE6Module {
     public create(): void {
 
         // Create a button in the header
-        this.openSettingsButton = DomUtilities.addSettingsButton({
+        this.openSettingsButton = Util.DOM.addSettingsButton({
             id: "header-button-settings",
             name: `<i class="fas fa-wrench"></i>`,
             title: "Settings",
@@ -2288,7 +2287,7 @@ export class SettingsController extends RE6Module {
             Form.spacer(3),
 
             Form.div({
-                value: `<a href="https://ko-fi.com/A0A43OM71" target="_blank" rel="noopener noreferrer"><img height="36" style="border:0px; height:36px;" src="${DomUtilities.getKoFiImage()}" border="0" alt="Buy Me a Coffee at ko-fi.com" /></a>`,
+                value: `<a href="https://ko-fi.com/A0A43OM71" target="_blank" rel="noopener noreferrer"><img height="36" style="border:0px; height:36px;" src="${Util.DOM.getKoFiImage()}" border="0" alt="Buy Me a Coffee at ko-fi.com" /></a>`,
                 width: 3,
             }),
             Form.spacer(3),
