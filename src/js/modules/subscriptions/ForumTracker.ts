@@ -142,7 +142,7 @@ export class ForumTracker extends SubscriptionTracker {
 
         $("<a>")
             .html(threadData.name ? threadData.name : `thread #${id}`)
-            .attr({ "href": `/forum_topics/${id}}` })
+            .attr({ "href": `/forum_topics/${id}` })
             .appendTo(result);
 
         return result;
