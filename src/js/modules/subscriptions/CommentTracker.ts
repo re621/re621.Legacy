@@ -13,7 +13,7 @@ export class CommentTracker extends SubscriptionTracker {
     protected buttonSelect = {
         major: {
             regex: [PageDefinition.post],
-            selector: "section#comments > div.comments-for-post > div.row.notices:first",
+            selector: "menu#post-sections",
         }
     };
 
@@ -60,35 +60,35 @@ export class CommentTracker extends SubscriptionTracker {
         this.writeStatus(`. . . sorting results`);
         const data: Map<number, APIComment> = new Map();
         for (const comment of apiResponse) {
-            if (data.get(comment.post_id) == undefined || data.get(comment.post_id).created_at < comment.created_at)
+            if (!data.has(comment.post_id) || data.get(comment.post_id).created_at < comment.created_at)
                 data.set(comment.post_id, comment);
         }
 
         // Parsing output, discarding irrelevant data
         const lastUpdate = this.fetchSettings<number>("lastUpdate") || 0;
         this.writeStatus(`. . . formatting output`);
-        for (const [commentID, comment] of data.entries()) {
+        for (const [postID, comment] of data.entries()) {
 
-            const postExtra = this.slist.getExtraData(comment.post_id + "") || {};
+            const postExtra = this.slist.getExtraData(postID + "") || {};
             if (typeof postExtra.data == "undefined") {
                 // TODO It would be better to just gather the post IDs, then
                 // search for all of them at once. But these are only used
                 // on the first run, so it is not that critical
-                const post = await E621.Post.id(comment.post_id).first<APIPost>();
+                const post = await E621.Post.id(postID).first<APIPost>();
                 postExtra.data = post.flags.deleted ? null : post.file.md5;
             }
 
             const createdAt = new Date(comment.created_at).getTime();
             if (createdAt > lastUpdate) {
                 result[createdAt] = {
-                    uid: commentID,
+                    uid: comment.id,
                     md5: postExtra.data,
-                    ext: encodeURIComponent(comment.body.slice(0, 256)) + "|" + comment.post_id + "|" + comment.creator_name,
+                    ext: encodeURIComponent(Util.stripDText(comment.body).slice(0, 256)) + "|" + postID + "|" + comment.creator_name,
                     new: true,
                 };
             }
 
-            this.slist.addExtraData(comment.post_id + "", postExtra);
+            this.slist.addExtraData(postID + "", postExtra);
         }
 
         this.slist.pushSubscriptions();
@@ -124,8 +124,7 @@ export class CommentTracker extends SubscriptionTracker {
 
                 $("<a>")
                     .html(commentData[2] + " said:")
-                    // TODO Does this link actually work?
-                    .attr({ "href": this.slist.getExtraData(data.uid + "").last, })
+                    .attr({ "href": `/posts/${commentData[1]}#comment-${data.uid}`, })
                     .appendTo(mainSection);
 
                 $("<div>")
@@ -134,7 +133,7 @@ export class CommentTracker extends SubscriptionTracker {
                     .appendTo(mainSection);
 
                 $("<div>")
-                    .html("Updated " + Util.Time.ago(timestamp))
+                    .html("Posted " + Util.Time.ago(timestamp))
                     .appendTo(mainSection);
 
                 $("<a>")

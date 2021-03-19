@@ -105,7 +105,7 @@ export class Util {
      * @param input Input to process
      * @param removeSections If true, removes `quote`, `code`, and `sections` blocks altogether
      */
-    public static parseDText(input: string, removeSections = true): string {
+    public static stripDText(input: string, removeSections = true): string {
         if (removeSections) {
             input = input.replace(/\[quote\][\s\S]*\[\/quote\]/g, "")
                 .replace(/\[code\][\s\S]*\[\/code\]/g, "")
