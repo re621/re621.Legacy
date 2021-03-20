@@ -730,6 +730,18 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3, true),
 
+                    Form.checkbox(
+                        {
+                            value: hoverZoom.fetchSettings("skipBlacklisted"),
+                            label: "<b>Skip Blacklisted</b><br />Don't trigger HoverZoom for blacklisted posts",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await hoverZoom.pushSettings("skipBlacklisted", data);
+                        }
+                    ),
+                    Form.spacer(3, true),
+
                 ]),
 
                 // Post Page
