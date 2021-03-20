@@ -168,7 +168,7 @@ export class HoverZoom extends RE6Module {
             if (HoverZoom.paused || (this.fetchSettings("mode") == ImageZoomMode.OnShift && !this.shiftPressed))
                 return;
 
-            const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}]`).first();
+            const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}], subitem[data-id=${data.post}]`).first();
             let post: PostData;
             if ($ref.is("post")) post = Post.get($ref);
             else {
