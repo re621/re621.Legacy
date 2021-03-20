@@ -71,7 +71,7 @@ export class Page {
     private static refreshCurrentUrl(): void {
         const url = this.getInstance().url;
         const searchPrefix = url.searchParams.toString().length === 0 ? "" : "?";
-        history.replaceState({}, "", url.origin + url.pathname + searchPrefix + url.searchParams.toString());
+        history.replaceState({}, "", url.origin + url.pathname + searchPrefix + url.searchParams.toString() + url.hash);
     }
 
     /**

@@ -292,7 +292,7 @@ export class PoolDownloader extends RE6Module {
             if (zipData) {
                 const $downloadLink = $("<a>")
                     .attr({
-                        "href": URL.createObjectURL(zipData),
+                        "href": zipData ? URL.createObjectURL(zipData) : undefined,
                         "download": filename,
                     })
                     .html("Download Archive")

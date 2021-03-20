@@ -1,5 +1,6 @@
 import { PostFlag } from "../../components/api/responses/APIPost";
 import { XM } from "../../components/api/XM";
+import { Blacklist } from "../../components/data/Blacklist";
 import { ModuleController } from "../../components/ModuleController";
 import { Post, PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -167,10 +168,16 @@ export class HoverZoom extends RE6Module {
             if (HoverZoom.paused || (this.fetchSettings("mode") == ImageZoomMode.OnShift && !this.shiftPressed))
                 return;
 
-            const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}], subitem[data-id=${data.post}]`).first();
-            const post = $ref.is("post")
-                ? Post.get($ref)
-                : PostData.fromThumbnail($ref);
+            const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}]`).first();
+            let post: PostData;
+            if ($ref.is("post")) post = Post.get($ref);
+            else {
+                post = PostData.fromThumbnail($ref);
+                Blacklist.addPost(post);
+            }
+
+            // Skip blacklisted posts, if necessary
+            if (this.fetchSettings("skipBlacklisted") && Blacklist.checkPost(post)) return;
 
             // Skip deleted and flash files
             if (post.flags.has(PostFlag.Deleted) || post.file.ext == "swf") return;

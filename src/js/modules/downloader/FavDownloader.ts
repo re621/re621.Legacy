@@ -244,15 +244,22 @@ export class FavDownloader extends RE6Module {
         this.infoFile.html("");
 
         // Download the resulting ZIP
-        const $downloadLink = $("<a>")
-            .attr({
-                "href": URL.createObjectURL(zipData),
-                "download": filename,
-            })
-            .html("Download Archive")
-            .appendTo(this.infoText);
+        if (zipData) {
+            const $downloadLink = $("<a>")
+                .attr({
+                    "href": URL.createObjectURL(zipData),
+                    "download": filename,
+                })
+                .html("Download Archive")
+                .appendTo(this.infoText);
 
-        if (this.fetchSettings("autoDownloadArchive")) { $downloadLink.get(0).click(); }
+            if (this.fetchSettings("autoDownloadArchive")) { $downloadLink.get(0).click(); }
+        } else {
+            // Fallback, in case the download process failed
+            $("<span>")
+                .html("Error: malformed archive")
+                .appendTo(this.infoText);
+        }
 
         this.downloadIndex++;
 
