@@ -349,7 +349,9 @@ export class SubscriptionTracker extends RE6Module {
         SubscriptionManager.trigger("inprogress." + this.trackerID, 0);
 
         if (ModuleController.fetchSettings(SubscriptionManager, "skipPreflightChecks") || await Util.Network.isOnline()) {
+            this.execPreUpdate();
             await this.cache.fetch();
+            this.execPostUpdate();
             this.networkOffline = false;
             this.updateInProgress = false;
             SubscriptionManager.trigger("inprogress." + this.trackerID, 2);
@@ -362,6 +364,11 @@ export class SubscriptionTracker extends RE6Module {
         await this.draw();
     }
 
+    /** Executed just before the update runs */
+    protected execPreUpdate(): void { return; }
+    /** Executed just after the update runs */
+    protected execPostUpdate(): void { return; }
+
     /** Outputs the items currently in cache onto the canvas */
     public async draw(): Promise<void> {
 
@@ -372,6 +379,7 @@ export class SubscriptionTracker extends RE6Module {
         this.ctwrap.attr({ state: TrackerState.Draw });
         SubscriptionManager.trigger("attributes." + this.trackerID);
 
+        this.execPreDraw();
         this.canvas.append(this.drawNewUpdatesDivider());
         this.cache.forEach((data, timestamp) => {
             const entry = this.drawUpdateEntry(data, timestamp, (timestamp, result) => {
@@ -386,10 +394,16 @@ export class SubscriptionTracker extends RE6Module {
 
             this.canvas.append(entry);
         });
+        this.execPostDraw();
 
         this.ctwrap.attr({ state: TrackerState.Done });
         SubscriptionManager.trigger("attributes." + this.trackerID);
     }
+
+    /** Executed just before the update runs */
+    protected execPreDraw(): void { return; }
+    /** Executed just after the update runs */
+    protected execPostDraw(): void { return; }
 
     /** Clears all update entries from cache */
     public async clear(): Promise<void> {
