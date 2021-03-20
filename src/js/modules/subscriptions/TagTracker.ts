@@ -2,10 +2,12 @@ import { E621 } from "../../components/api/E621";
 import { APIPost } from "../../components/api/responses/APIPost";
 import { Blacklist } from "../../components/data/Blacklist";
 import { PageDefinition } from "../../components/data/Page";
+import { ModuleController } from "../../components/ModuleController";
 import { PostData } from "../../components/post/Post";
 import { Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 import { WikiEnhancer } from "../misc/WikiEnhancer";
+import { BetterSearch, ImageLoadMethod } from "../search/BetterSearch";
 import { UpdateContent, UpdateData } from "./_SubscriptionCache";
 import { SubscriptionManager } from "./_SubscriptionManager";
 import { SubscriptionTracker } from "./_SubscriptionTracker";
@@ -25,6 +27,8 @@ export class TagTracker extends SubscriptionTracker {
             selector: "#c-wiki-pages > #a-show > #content > h1:first, #c-artists > #a-show > h1:first",
         }
     };
+
+    private loadLargeThumbs = false;
 
     public getDefaultSettings(): Settings {
         return {
@@ -125,7 +129,11 @@ export class TagTracker extends SubscriptionTracker {
                     .appendTo(result);
 
                 const image = $("<img>")
-                    .attr({ src: getPreviewLink(data.md5), })
+                    .attr({
+                        src: this.loadLargeThumbs
+                            ? getSampleLink(data.md5, postData[1] == "true", postData[2])
+                            : getPreviewLink(data.md5),
+                    })
                     .appendTo(link)
                     .one("error", () => {
                         image.attr("src", Util.DOM.getPlaceholderImage());
@@ -155,6 +163,10 @@ export class TagTracker extends SubscriptionTracker {
                 ? `https://static1.e621.net/data/sample/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`
                 : `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${ext}`;
         }
+    }
+
+    protected execPreDraw(): void {
+        this.loadLargeThumbs = ModuleController.fetchSettings(BetterSearch, "imageLoadMethod") !== ImageLoadMethod.Disabled;
     }
 
     protected formatSubscriptionListEntry(id: string, value: any, unsub: (name: string) => void): JQuery<HTMLElement> {
