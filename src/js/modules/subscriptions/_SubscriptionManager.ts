@@ -11,12 +11,6 @@ export class SubscriptionManager extends RE6Module {
     // List of trackers - needs to be registered from the main file
     private static trackers: SubscriptionTracker[] = [];
 
-    public static readonly observerConfig = {
-        root: null,
-        rootMargin: "100% 50% 100% 50%",
-        threshold: 0.5,
-    };
-
     public getDefaultSettings(): Settings {
         return {
             enabled: true,
@@ -47,10 +41,13 @@ export class SubscriptionManager extends RE6Module {
         // button clicks and window opens.
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((value) => {
-                // console.log(`Sub${$(value.target).parent().attr("content")}: ` + (value.isIntersecting ? "Entering" : "Leaving"));
+                console.log(`Sub${$(value.target).parent().attr("content")}: ` + (value.isIntersecting ? "Entering" : "Leaving"));
                 SubscriptionManager.trigger("intersect." + $(value.target).parent().attr("content"), value.isIntersecting);
             });
-        }, SubscriptionManager.observerConfig);
+        }, {
+            root: null,
+            threshold: 0,
+        });
 
         const trackerPages: TabContent[] = [];
         for (const tracker of SubscriptionManager.trackers) {
