@@ -144,6 +144,7 @@ export class CommentTracker extends SubscriptionTracker {
                         src: this.loadLargeThumbs
                             ? getSampleLink(imageData[0], imageData[1] == "true", imageData[2])
                             : getPreviewLink(imageData[0]),
+                        hztarget: "subitem",
                     })
                     .one("error", () => {
                         img.attr("src", "https://e621.net/images/deleted-preview.png");

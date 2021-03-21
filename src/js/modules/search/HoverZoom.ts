@@ -102,10 +102,12 @@ export class HoverZoom extends RE6Module {
         let scrolling = false;
         const zoomDelay = this.fetchSettings("zoomDelay");
         $("#page")
-            .on("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap[content=Tags] subitem", (event) => {
+            .on("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap subitem[data-id] img", (event) => {
                 if (scrolling) return;
 
-                const $ref = $(event.currentTarget);
+                let $ref = $(event.currentTarget);
+                if ($ref.attr("hztarget"))
+                    $ref = $ref.parents($ref.attr("hztarget"));
                 $ref.attr("hovering", "true");
 
                 HoverZoom.curPost = $ref.is("post")
@@ -117,7 +119,7 @@ export class HoverZoom extends RE6Module {
                     HoverZoom.trigger("zoom.start", { post: $ref.data("id"), pageX: event.pageX, pageY: event.pageY });
                 }, zoomDelay);
             })
-            .on("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap[content=Tags] subitem", (event) => {
+            .on("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap subitem[data-id] img", (event) => {
                 const $ref = $(event.currentTarget);
                 $ref.removeAttr("hovering");
 

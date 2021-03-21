@@ -146,6 +146,7 @@ export class TagTracker extends SubscriptionTracker {
                         src: this.loadLargeThumbs
                             ? getSampleLink(imageData[0], imageData[1] == "true", imageData[2])
                             : getPreviewLink(imageData[0]),
+                        hztarget: "subitem",
                     })
                     .appendTo(link)
                     .one("error", () => {
