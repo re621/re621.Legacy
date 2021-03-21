@@ -1,7 +1,8 @@
 import { E621 } from "../../components/api/E621";
 import { APIComment } from "../../components/api/responses/APIComment";
-import { APIPost } from "../../components/api/responses/APIPost";
+import { APIPost, PostFlag } from "../../components/api/responses/APIPost";
 import { Page, PageDefinition } from "../../components/data/Page";
+import { PostData } from "../../components/post/Post";
 import { Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 import { UpdateContent, UpdateData } from "./_SubscriptionCache";
@@ -74,8 +75,18 @@ export class CommentTracker extends SubscriptionTracker {
                 // TODO It would be better to just gather the post IDs, then
                 // search for all of them at once. But these are only used
                 // on the first run, so it is not that critical
-                const post = await E621.Post.id(postID).first<APIPost>();
-                postExtra.data = post.flags.deleted ? null : post.file.md5;
+                const postAPI = await E621.Post.id(postID).first<APIPost>();
+                if (postAPI) {
+                    const post = PostData.fromAPI(postAPI);
+                    postExtra.data = ((post.file.ext == "swf" || post.flags.has(PostFlag.Deleted)) ? "" : post.file.md5)
+                        + "|" + post.has.sample     // sample       boolean
+                        + "|" + post.file.ext       // extension    string
+                        + "|" + post.rating         // rating       E | Q | S
+                        + "|" + post.img.width      // width        int
+                        + "|" + post.img.height     // height       int
+                        + "|" + post.file.size      // filesize     int
+                        ;
+                }
             }
 
             const createdAt = new Date(comment.created_at).getTime();
@@ -101,8 +112,26 @@ export class CommentTracker extends SubscriptionTracker {
     protected drawUpdateEntry(data: UpdateContent, timestamp: number, deleteFunction): JQuery<HTMLElement> {
 
         const commentData = data.ext.split("|");
+        const imageData = data.md5.split("|");
+
         const result = $("<subitem>")
-            .attr({ new: data.new, })
+            .attr({
+                // Output ordering
+                "new": data.new,
+
+                // Necessary data for the HoverZoom
+                "data-id": data.uid,
+                "data-md5": imageData[0],
+                "data-preview-url": getPreviewLink(imageData[0]),
+                "data-large-file-url": getSampleLink(imageData[0], imageData[1] == "true", imageData[2]),
+                "data-file-ext": imageData[2],
+                "data-rating": imageData[3] || "e",
+                "data-created-at": new Date(timestamp).toString(),
+
+                "data-width": imageData[4],
+                "data-height": imageData[5],
+                "data-filesize": imageData[6],
+            })
             .on("re621:render", () => {
 
                 const link = $("<a>")
@@ -111,7 +140,11 @@ export class CommentTracker extends SubscriptionTracker {
                     .appendTo(result);
 
                 const img = $("<img>")
-                    .attr({ src: data.md5 ? getPreviewLink(data.md5) : "https://e621.net/images/deleted-preview.png", })
+                    .attr({
+                        src: this.loadLargeThumbs
+                            ? getSampleLink(imageData[0], imageData[1] == "true", imageData[2])
+                            : getPreviewLink(imageData[0]),
+                    })
                     .one("error", () => {
                         img.attr("src", "https://e621.net/images/deleted-preview.png");
                         this.slist.deleteExtraData(commentData[1]);
@@ -154,7 +187,15 @@ export class CommentTracker extends SubscriptionTracker {
         return result;
 
         function getPreviewLink(md5: string): string {
-            return `https://static1.e621.net/data/preview/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`
+            if (!md5) return "https://e621.net/images/deleted-preview.png";
+            return `https://static1.e621.net/data/preview/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`;;
+        }
+
+        function getSampleLink(md5: string, hasSample: boolean, ext = "jpg"): string {
+            if (!md5) return "https://e621.net/images/deleted-preview.png";
+            return hasSample
+                ? `https://static1.e621.net/data/sample/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`
+                : `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${ext}`;
         }
     }
 

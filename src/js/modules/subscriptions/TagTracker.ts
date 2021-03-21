@@ -1,13 +1,11 @@
 import { E621 } from "../../components/api/E621";
-import { APIPost } from "../../components/api/responses/APIPost";
+import { APIPost, PostFlag } from "../../components/api/responses/APIPost";
 import { Blacklist } from "../../components/data/Blacklist";
 import { PageDefinition } from "../../components/data/Page";
-import { ModuleController } from "../../components/ModuleController";
 import { PostData } from "../../components/post/Post";
 import { Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 import { WikiEnhancer } from "../misc/WikiEnhancer";
-import { BetterSearch, ImageLoadMethod } from "../search/BetterSearch";
 import { UpdateContent, UpdateData } from "./_SubscriptionCache";
 import { SubscriptionManager } from "./_SubscriptionManager";
 import { SubscriptionTracker } from "./_SubscriptionTracker";
@@ -27,8 +25,6 @@ export class TagTracker extends SubscriptionTracker {
             selector: "#c-wiki-pages > #a-show > #content > h1:first, #c-artists > #a-show > h1:first",
         }
     };
-
-    private loadLargeThumbs = false;
 
     public getDefaultSettings(): Settings {
         return {
@@ -96,8 +92,15 @@ export class TagTracker extends SubscriptionTracker {
 
             result[timestamp] = {
                 uid: post.id,
-                md5: post.file.ext == "swf" ? "" : post.file.md5,
-                ext: post.rating + "|" + post.has.sample + "|" + post.file.ext,
+                md5:
+                    ((post.file.ext == "swf" || post.flags.has(PostFlag.Deleted)) ? "" : post.file.md5)
+                    + "|" + post.has.sample     // sample       boolean
+                    + "|" + post.file.ext       // extension    string
+                    + "|" + post.rating         // rating       E | Q | S
+                    + "|" + post.img.width      // width        int
+                    + "|" + post.img.height     // height       int
+                    + "|" + post.file.size      // filesize     int
+                ,
                 new: true,
             };
         }
@@ -108,7 +111,13 @@ export class TagTracker extends SubscriptionTracker {
     }
 
     protected drawUpdateEntry(data: UpdateContent, timestamp: number, deleteFunction): JQuery<HTMLElement> {
-        const postData = data.ext.split("|");
+
+        if (!data.md5) {
+            console.error("Error: Invalid data in cache");
+            return;
+        }
+
+        const imageData = data.md5.split("|");
         const result = $("<subitem>")
             .attr({
                 // Output ordering
@@ -116,12 +125,16 @@ export class TagTracker extends SubscriptionTracker {
 
                 // Necessary data for the HoverZoom
                 "data-id": data.uid,
-                "data-md5": data.md5,
-                "data-preview-url": getPreviewLink(data.md5),
-                "data-large-file-url": getSampleLink(data.md5, postData[1] == "true", postData[2]),
-                "data-file-ext": postData[2],
-                "data-rating": postData[0] || "s",
+                "data-md5": imageData[0],
+                "data-preview-url": getPreviewLink(imageData[0]),
+                "data-large-file-url": getSampleLink(imageData[0], imageData[1] == "true", imageData[2]),
+                "data-file-ext": imageData[2],
+                "data-rating": imageData[3] || "e",
                 "data-created-at": new Date(timestamp).toString(),
+
+                "data-width": imageData[4],
+                "data-height": imageData[5],
+                "data-filesize": imageData[6],
             })
             .on("re621:render", () => {
                 const link = $("<a>")
@@ -131,8 +144,8 @@ export class TagTracker extends SubscriptionTracker {
                 const image = $("<img>")
                     .attr({
                         src: this.loadLargeThumbs
-                            ? getSampleLink(data.md5, postData[1] == "true", postData[2])
-                            : getPreviewLink(data.md5),
+                            ? getSampleLink(imageData[0], imageData[1] == "true", imageData[2])
+                            : getPreviewLink(imageData[0]),
                     })
                     .appendTo(link)
                     .one("error", () => {
@@ -155,18 +168,16 @@ export class TagTracker extends SubscriptionTracker {
         return result;
 
         function getPreviewLink(md5: string): string {
-            return `https://static1.e621.net/data/preview/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`
+            if (!md5) return "https://e621.net/images/deleted-preview.png";
+            return `https://static1.e621.net/data/preview/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`;;
         }
 
         function getSampleLink(md5: string, hasSample: boolean, ext = "jpg"): string {
+            if (!md5) return "https://e621.net/images/deleted-preview.png";
             return hasSample
                 ? `https://static1.e621.net/data/sample/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`
                 : `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${ext}`;
         }
-    }
-
-    protected execPreDraw(): void {
-        this.loadLargeThumbs = ModuleController.fetchSettings(BetterSearch, "imageLoadMethod") !== ImageLoadMethod.Disabled;
     }
 
     protected formatSubscriptionListEntry(id: string, value: any, unsub: (name: string) => void): JQuery<HTMLElement> {

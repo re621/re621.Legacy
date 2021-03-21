@@ -37,6 +37,8 @@ export class SubscriptionTracker extends RE6Module {
     private isVisible = false;              // notifications tab is currently open
     private networkOffline = false;         // unable to connect to the internet
 
+    protected loadLargeThumbs = false;        // thumbnail resolution - sample / preview
+
     public constructor() {
         super();
 
@@ -380,6 +382,7 @@ export class SubscriptionTracker extends RE6Module {
         SubscriptionManager.trigger("attributes." + this.trackerID);
 
         this.execPreDraw();
+        // this.loadLargeThumbs = ModuleController.fetchSettings(BetterSearch, "imageLoadMethod") !== ImageLoadMethod.Disabled;
         this.canvas.append(this.drawNewUpdatesDivider());
         this.cache.forEach((data, timestamp) => {
             const entry = this.drawUpdateEntry(data, timestamp, (timestamp, result) => {
@@ -408,6 +411,10 @@ export class SubscriptionTracker extends RE6Module {
     /** Clears all update entries from cache */
     public async clear(): Promise<void> {
         await this.cache.clear();
+
+        this.slist.clearExtraData();
+        this.slist.pushSubscriptions();
+
         this.canvas.html("");
         this.ctwrap.attr({ state: TrackerState.Done });
         SubscriptionManager.trigger("attributes." + this.trackerID);
