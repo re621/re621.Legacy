@@ -106,6 +106,10 @@ export class SubscriptionList {
         delete this.extra[name];
     }
 
+    public clearExtraData(): void {
+        this.extra = {};
+    }
+
 }
 
 type ExtraData = {
