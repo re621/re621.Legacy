@@ -701,7 +701,7 @@ export namespace PostData {
                 original: urls["original"],
                 sample: urls["sample"],
                 preview: urls["preview"],
-                size: 0,
+                size: parseInt($article.attr("data-filesize") || "0"),
             },
             loaded: undefined,
 
