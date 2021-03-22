@@ -120,7 +120,9 @@ export class HoverZoom extends RE6Module {
                 }, zoomDelay);
             })
             .on("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap subitem[data-id] img", (event) => {
-                const $ref = $(event.currentTarget);
+                let $ref = $(event.currentTarget);
+                if ($ref.attr("hztarget"))
+                    $ref = $ref.parents($ref.attr("hztarget"));
                 $ref.removeAttr("hovering");
 
                 HoverZoom.curPost = null;
