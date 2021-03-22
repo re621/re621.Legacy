@@ -4,7 +4,6 @@ import { Blacklist } from "../../components/data/Blacklist";
 import { ModuleController } from "../../components/ModuleController";
 import { Post, PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
@@ -63,7 +62,7 @@ export class HoverZoom extends RE6Module {
             .attr("id", "zoom-info")
             .appendTo(this.$zoomBlock);
         this.$zoomImage = $("<img>")
-            .attr("src", DomUtilities.getPlaceholderImage())
+            .attr("src", Util.DOM.getPlaceholderImage())
             .addClass("display-none")
             .appendTo(this.$zoomBlock);
         this.$zoomVideo = $("<video controls autoplay loop muted></video>")
@@ -103,21 +102,27 @@ export class HoverZoom extends RE6Module {
         let scrolling = false;
         const zoomDelay = this.fetchSettings("zoomDelay");
         $("#page")
-            .on("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail", (event) => {
+            .on("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap subitem[data-id] img", (event) => {
                 if (scrolling) return;
 
-                const $ref = $(event.currentTarget);
+                let $ref = $(event.currentTarget);
+                if ($ref.attr("hztarget"))
+                    $ref = $ref.parents($ref.attr("hztarget"));
                 $ref.attr("hovering", "true");
 
-                HoverZoom.curPost = $ref.is("post") ? Post.get($ref) : PostData.fromThumbnail($ref);
+                HoverZoom.curPost = $ref.is("post")
+                    ? Post.get($ref)
+                    : PostData.fromThumbnail($ref);
 
                 window.clearTimeout(timer);
                 timer = window.setTimeout(() => {
                     HoverZoom.trigger("zoom.start", { post: $ref.data("id"), pageX: event.pageX, pageY: event.pageY });
                 }, zoomDelay);
             })
-            .on("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail", (event) => {
-                const $ref = $(event.currentTarget);
+            .on("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap subitem[data-id] img", (event) => {
+                let $ref = $(event.currentTarget);
+                if ($ref.attr("hztarget"))
+                    $ref = $ref.parents($ref.attr("hztarget"));
                 $ref.removeAttr("hovering");
 
                 HoverZoom.curPost = null;
@@ -167,7 +172,7 @@ export class HoverZoom extends RE6Module {
             if (HoverZoom.paused || (this.fetchSettings("mode") == ImageZoomMode.OnShift && !this.shiftPressed))
                 return;
 
-            const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}]`).first();
+            const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}], subitem[data-id=${data.post}]`).first();
             let post: PostData;
             if ($ref.is("post")) post = Post.get($ref);
             else {
@@ -231,16 +236,18 @@ export class HoverZoom extends RE6Module {
             }
 
             // Write the image data into the info block
-            $("<span>") // dimensions and filesize
-                .text(`${post.img.width} x ${post.img.height}` + (post.file.size > 0 ? `, ${Util.Size.format(post.file.size)}` : ""))
-                .appendTo(this.$zoomInfo);
-            $("<span>") // rating
-                .addClass("post-info-rating rating-" + post.rating)
-                .text(post.rating)
-                .appendTo(this.$zoomInfo);
-            if (post.date.raw !== "0")
+            if (post.img.width && post.img.height)
+                $("<span>") // dimensions and filesize
+                    .text(`${post.img.width} x ${post.img.height}` + (post.file.size > 0 ? `, ${Util.Size.format(post.file.size)}` : ""))
+                    .appendTo(this.$zoomInfo);
+            if (post.rating)
+                $("<span>") // rating
+                    .addClass("post-info-rating rating-" + post.rating)
+                    .text(post.rating)
+                    .appendTo(this.$zoomInfo);
+            if (post.date.iso !== "0")
                 $("<span>")
-                    .text(this.fetchSettings("time") ? post.date.ago : Util.Time.format(post.date.raw))
+                    .text(this.fetchSettings("time") ? post.date.ago : Util.Time.format(post.date.iso))
                     .appendTo(this.$zoomInfo);
 
             // Append the tags block
@@ -310,7 +317,7 @@ export class HoverZoom extends RE6Module {
             this.$zoomImage
                 .addClass("display-none")
                 .removeAttr("style")
-                .attr("src", DomUtilities.getPlaceholderImage());
+                .attr("src", Util.DOM.getPlaceholderImage());
             this.$zoomVideo
                 .addClass("display-none")
                 .attr({ "muted": "", });

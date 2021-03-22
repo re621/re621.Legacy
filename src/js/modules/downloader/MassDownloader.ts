@@ -249,7 +249,7 @@ export class MassDownloader extends RE6Module {
                     path: downloadSamples ? post.file.sample : post.file.original,
                     file: (downloadSamples ? post.file.sample : post.file.original).match(/.{32}\..*$/g)[0],
                     unid: post.id,
-                    date: new Date(post.date.raw),
+                    date: post.date.obj,
                     tags: post.tagString,
                 },
                 {

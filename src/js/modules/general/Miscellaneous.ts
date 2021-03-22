@@ -6,7 +6,6 @@ import { Page, PageDefinition } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { Post } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { DomUtilities } from "../../components/structure/DomUtilities";
 import { Util } from "../../components/utility/Util";
 import { BetterSearch, ImageClickAction } from "../search/BetterSearch";
 
@@ -156,7 +155,7 @@ export class Miscellaneous extends RE6Module {
         $("#ad-leaderboard").prependTo("#content");
 
         // Add a mail button
-        DomUtilities.addSettingsButton({
+        Util.DOM.addSettingsButton({
             id: "header-button-dmail",
             name: `<i class="fas fa-envelope"></i>`,
             href: "/dmails",

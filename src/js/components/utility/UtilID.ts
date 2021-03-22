@@ -1,3 +1,4 @@
+import { Util } from "./Util";
 
 export class UtilID {
 
@@ -46,6 +47,11 @@ export class UtilID {
         if (!UtilID.has(id)) return false;
         UtilID.uniqueIDs.delete(id);
         return true;
+    }
+
+    /** Returns a pseudo-random number. Don't use for anything serious, please. */
+    public static rand(): string {
+        return (Util.Time.now() + "").slice(-5);
     }
 
 }

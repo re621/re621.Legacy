@@ -9,7 +9,7 @@ import { Page, PageDefinition } from "./components/data/Page";
 import { User } from "./components/data/User";
 import { ModuleController } from "./components/ModuleController";
 import { CleanSlate } from "./components/structure/CleanSlate";
-import { DomUtilities } from "./components/structure/DomUtilities";
+import { StartupTasks } from "./components/structure/StartupTasks";
 import { Debug } from "./components/utility/Debug";
 import { Patcher } from "./components/utility/Patcher";
 import { Util } from "./components/utility/Util";
@@ -48,8 +48,8 @@ import { ThumbnailTweaks } from "./modules/search/ThumbnailTweaks";
 import { CommentTracker } from "./modules/subscriptions/CommentTracker";
 import { ForumTracker } from "./modules/subscriptions/ForumTracker";
 import { PoolTracker } from "./modules/subscriptions/PoolTracker";
-import { SubscriptionManager } from "./modules/subscriptions/SubscriptionManager";
 import { TagTracker } from "./modules/subscriptions/TagTracker";
+import { SubscriptionManager } from "./modules/subscriptions/_SubscriptionManager";
 
 
 const loadOrder = [
@@ -121,8 +121,8 @@ CleanSlate.createDOM().then(async () => {
     // You know who you are.
     Danbooru.Utility.disableShortcuts(true);
 
-    DomUtilities.createSearchbox();
-    DomUtilities.createTagList();
+    StartupTasks.createSearchbox();
+    StartupTasks.createTagList();
 
     await Debug.init();
     await Patcher.patchConfig();

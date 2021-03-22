@@ -233,7 +233,7 @@ div#page aside#sidebar {
                         display: none;
                     }
 
-                    &.tag-action-subscribe a.subscribe {
+                    &.tag-action-subscribe a[subscribed=false] {
                         visibility: hidden;
                     }
                 }
@@ -260,7 +260,7 @@ div#page aside#sidebar {
                             display: inline-block;
                         }
 
-                        &.tag-action-subscribe a.subscribe {
+                        &.tag-action-subscribe a {
                             visibility: visible;
                         }
                     }
@@ -351,4 +351,46 @@ body[data-hide-blacklist=true] section#blacklist-box {
 /* Fix the overflow in the diff-list */
 .diff-list del, .diff-list ins {
     white-space: nowrap;
+}
+
+
+/* Update Notifications */
+// This was copied from the old subscriptions manager
+// It needs to be streamlined for its actual purpose
+.update-notification:not([data-updates="0"]) {
+    &::after {
+        content: unicode('f111');
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        font-size: 0.5em;
+        color: red;
+
+        position: absolute;
+        top: 0;
+    }
+}
+
+.update-notification[data-loading=true] {
+
+    position: relative;
+
+    @keyframes spinner {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    &::after {
+        content: unicode('f110');
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        font-size: 0.75em;
+        line-height: 0.75em;
+        text-align: center;
+        color: inherit;
+
+        position: absolute;
+
+        animation: spinner 1.0s linear infinite;
+    }
 }

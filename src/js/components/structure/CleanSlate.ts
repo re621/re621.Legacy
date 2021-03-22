@@ -4,7 +4,6 @@ import { Page, PageDefinition } from "../data/Page";
 import { Debug } from "../utility/Debug";
 import { ErrorHandler } from "../utility/ErrorHandler";
 import { Util } from "../utility/Util";
-import { DomUtilities } from "./DomUtilities";
 
 
 declare const GM: any;
@@ -20,7 +19,7 @@ export class CleanSlate {
             selector: "head",
             action: async () => {
                 try {
-                    const stylesheet = DomUtilities.addStyle(
+                    const stylesheet = Util.DOM.addStyle(
                         XM.isUserscript()
                             ? attachedStylesheet
                             : await XM.Connect.getResourceText("re621_css")

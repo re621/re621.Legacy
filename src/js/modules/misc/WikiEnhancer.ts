@@ -20,10 +20,7 @@ export class WikiEnhancer extends RE6Module {
         const $title = Page.matches(PageDefinition.artist)
             ? $("#a-show h1").first()
             : $("#wiki-page-title");
-        const tagName = $title.text().trim()
-            .replace(/^.+: /g, "")
-            .replace("\n\n          (locked)", "")
-            .replace(/ /g, "_");
+        const tagName = WikiEnhancer.sanitizeWikiTagName($title.text());
 
         $("<button>")
             .attr("id", "wiki-page-copy-tag")
@@ -39,5 +36,12 @@ export class WikiEnhancer extends RE6Module {
         if (!this.isInitialized()) return;
         super.destroy();
         $("#wiki-page-copy-tag").remove();
+    }
+
+    public static sanitizeWikiTagName(raw: string): string {
+        return raw.trim()
+            .replace(/^.+: /g, "")
+            .replace("\n\n          (locked)", "")
+            .replace(/ /g, "_");
     }
 }
