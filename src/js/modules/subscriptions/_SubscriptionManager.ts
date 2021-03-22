@@ -316,8 +316,8 @@ export class SubscriptionManager extends RE6Module {
                             $el.attr("title",
                                 (lastAttempt ? `Previous update attempt failed.\n` : ``)
                                 + (lastAttempt ? `Last attempt: ${Util.Time.format(lastAttempt)}\n` : ``)
-                                + (lastUpdate ? `Last updated: ${Util.Time.format(lastUpdate)}\n` : ``)
-                                + `Next Update: ${Util.Time.format(date)}`
+                                + (lastUpdate ? `Last update: ${Util.Time.format(lastUpdate)}\n` : ``)
+                                + `Next update: ${Util.Time.format(date)}`
                             )
 
                             timer = parseInt($el.data("timer") || "0");
