@@ -185,7 +185,10 @@ export class TagTracker extends SubscriptionTracker {
 
         const formattedID = id.replace(/_/g, " ").toLowerCase();
         const result = $("<sb-enitem>")
-            .attr({ content: id + " " + formattedID, });
+            .attr({
+                content: id + " " + formattedID,
+                sort: id.toLowerCase(),
+            });
 
         $("<a>")
             .addClass("sb-unsub")

@@ -485,10 +485,16 @@ export class SubscriptionTracker extends RE6Module {
             .append(sbcont)
             .on("re621:update", () => {
                 sbcont.html("");
+                let list = [];
                 for (const name of this.slist.get())
-                    this.formatSubscriptionListEntry(name, {}, (name: string) => { // TODO FIX THIS
+                    list.push(this.formatSubscriptionListEntry(name, (this.slist.getExtraData(name) || {}), (name: string) => {
                         this.slist.unsubscribe(name);
-                    }).appendTo(sbcont);
+                    }));
+
+                list = list.sort((a, b) => {
+                    return $(a).attr("sort").localeCompare($(b).attr("sort"));
+                });
+                sbcont.append(list);
             });
 
         this.sblist.trigger("re621:update");

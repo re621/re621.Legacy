@@ -206,7 +206,10 @@ export class PoolTracker extends SubscriptionTracker {
 
         const poolData = this.slist.getExtraData(id) || {};
         const result = $("<sb-enitem>")
-            .attr({ content: id + (poolData.name ? (" " + poolData.name.toLowerCase()) : ""), });
+            .attr({
+                content: id + (poolData.name ? (" " + poolData.name.toLowerCase()) : ""),
+                sort: poolData.name ? poolData.name.toLowerCase() : id,
+            });
 
         $("<a>")
             .addClass("sb-unsub")

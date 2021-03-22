@@ -128,7 +128,10 @@ export class ForumTracker extends SubscriptionTracker {
 
         const threadData = this.slist.getExtraData(id) || {};
         const result = $("<sb-enitem>")
-            .attr({ content: id + (threadData.name ? (" " + threadData.name.toLowerCase()) : ""), });
+            .attr({
+                content: id + (threadData.name ? (" " + threadData.name.toLowerCase()) : ""),
+                sort: threadData.name ? threadData.name.toLowerCase() : id,
+            });
 
         $("<a>")
             .addClass("sb-unsub")

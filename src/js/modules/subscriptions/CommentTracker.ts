@@ -203,7 +203,10 @@ export class CommentTracker extends SubscriptionTracker {
     protected formatSubscriptionListEntry(id: string, value: any, unsub: (name: string) => void): JQuery<HTMLElement> {
 
         const result = $("<sb-enitem>")
-            .attr({ content: "post #" + id, });
+            .attr({
+                content: "post #" + id,
+                sort: id,
+            });
 
         $("<a>")
             .addClass("sb-unsub")
