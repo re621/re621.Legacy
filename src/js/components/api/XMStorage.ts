@@ -12,9 +12,9 @@ export class XMStorage {
      * @param value Data value
      */
     public static async setValue(name: string, value: any): Promise<boolean> {
-        return new Promise(async (resolve) => {
+        return new Promise<boolean>(async (resolve) => {
             if (typeof GM === "undefined") {
-                await new Promise((resolve) => {
+                await new Promise<void>((resolve) => {
                     chrome.storage.sync.set({ [name]: value }, () => { resolve(); });
                 });
             } else await GM.setValue(name, value);
@@ -44,9 +44,9 @@ export class XMStorage {
      * @param name Name of the data entry
      */
     public static async deleteValue(name: string): Promise<void> {
-        return new Promise(async (resolve) => {
+        return new Promise<void>(async (resolve) => {
             if (typeof GM === "undefined") {
-                await new Promise((resolve) => {
+                await new Promise<void>((resolve) => {
                     chrome.storage.sync.set({ name: undefined }, () => {
                         resolve();
                     });
