@@ -176,7 +176,11 @@ export class HoverZoom extends RE6Module {
             }
 
             // Skip blacklisted posts, if necessary
-            if (this.fetchSettings("skipBlacklisted") && Blacklist.checkPost(post)) return;
+            if (this.fetchSettings("skipBlacklisted")
+                && (post["$ref"]                    // Placeholder until feat:thumb gets finished
+                    ? Blacklist.checkPost(post)     // Non-RE621 blacklist does not work properly with this
+                    : $ref.find("img:first").attr("src") == "/images/blacklisted-preview.png")
+            ) return;
 
             // Skip deleted and flash files
             if (post.flags.has(PostFlag.Deleted) || post.file.ext == "swf") return;
