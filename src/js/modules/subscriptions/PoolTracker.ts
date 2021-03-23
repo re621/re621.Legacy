@@ -15,6 +15,7 @@ export class PoolTracker extends SubscriptionTracker {
         major: {
             regex: [PageDefinition.pool],
             selector: "#c-pools > #a-show > h2:first",
+            method: "before",
         }
     };
 

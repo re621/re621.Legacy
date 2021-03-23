@@ -125,6 +125,18 @@ a.subscribe-button-major {
     }
 }
 
+// Override for ForumTracker
+div#c-forum-topics div#a-show h1:first-of-type {
+    position: relative;
+    padding-right: 8rem;
+
+    a.subscribe-button-major {
+        position: absolute;
+        right: 0;
+        top: 0.25rem;
+    }
+}
+
 
 // Notifications window settings tab
 tabbed.config-tabs form.form-section {

@@ -199,22 +199,52 @@ export class SubscriptionTracker extends RE6Module {
         if (this.buttonSelect.minor && Page.matches(this.buttonSelect.minor.regex)) {
             for (const el of $(this.buttonSelect.minor.selector).get()) {
                 const $el = $(el);
-                this.createSubscribeMinorButton(
+                const button = this.createSubscribeMinorButton(
                     this.fetchMinorSubscriptionName($el),
                     (id) => { this.slist.subscribe(id); },
                     (id) => { this.slist.unsubscribe(id); }
-                ).appendTo($el);
+                );
+                switch (this.buttonSelect.minor.method) {
+                    case "before":
+                        button.insertBefore($el);
+                        break;
+                    case "after":
+                        button.insertAfter($el);
+                        break;
+                    case "prepend":
+                        button.prependTo($el);
+                        break;
+                    case "append":
+                    default:
+                        button.appendTo($el);
+                        break;
+                }
             }
         }
 
         if (this.buttonSelect.major && Page.matches(this.buttonSelect.major.regex)) {
             for (const el of $(this.buttonSelect.major.selector).get()) {
                 const $el = $(el);
-                this.createSubscribeMajorButton(
+                const button = this.createSubscribeMajorButton(
                     this.fetchMajorSubscriptionName($el),
                     (id) => { this.slist.subscribe(id); },
                     (id) => { this.slist.unsubscribe(id); }
-                ).appendTo($el);
+                );
+                switch (this.buttonSelect.major.method) {
+                    case "before":
+                        button.insertBefore($el);
+                        break;
+                    case "after":
+                        button.insertAfter($el);
+                        break;
+                    case "prepend":
+                        button.prependTo($el);
+                        break;
+                    case "append":
+                    default:
+                        button.appendTo($el);
+                        break;
+                }
             }
         }
     }
@@ -551,4 +581,5 @@ export type SubscribeFunction = (name: string) => void;
 type SubscribeButtonSelector = {
     regex: RegExp | RegExp[];
     selector: string;
+    method?: string; // "append" | "prepend" | "before" | "after";
 }
