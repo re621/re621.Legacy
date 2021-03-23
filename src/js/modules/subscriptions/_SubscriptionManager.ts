@@ -11,6 +11,10 @@ export class SubscriptionManager extends RE6Module {
     // List of trackers - needs to be registered from the main file
     private static trackers: SubscriptionTracker[] = [];
 
+
+    private static windowOpen = false;      // Whether or not the notifications window is open
+    private static activeTab: string;       // ID of the tracker tab that is open
+
     public getDefaultSettings(): Settings {
         return {
             enabled: true,
@@ -44,18 +48,17 @@ export class SubscriptionManager extends RE6Module {
                 // console.log(`Sub${$(value.target).parent().attr("content")}: ` + (value.isIntersecting ? "Entering" : "Leaving"));
                 SubscriptionManager.trigger("intersect." + $(value.target).parent().attr("content"), value.isIntersecting);
             });
-        }, {
-            root: null,
-            threshold: 0,
         });
 
         const trackerPages: TabContent[] = [];
+        const trackerIDs: string[] = [];
         for (const tracker of SubscriptionManager.trackers) {
             $(() => { tracker.appendSubscribeButton(); });
             trackerPages.push({
                 name: tracker.getOutputTab(),
                 content: tracker.getOutputContainer(),
             });
+            trackerIDs.push(tracker.getTrackerID());
             observer.observe(tracker.getCanvasElement()[0]);
         }
 
@@ -70,17 +73,41 @@ export class SubscriptionManager extends RE6Module {
                     content: this.createSettingsPage().render(),
                 }
             ]
+        }).render();
+
+        let windowAlreadyOpened = false;
+        const tabbedObserver = new IntersectionObserver((entries) => {
+            const tabbed = entries[0];
+            SubscriptionManager.windowOpen = tabbed.isIntersecting;
+            if (!windowAlreadyOpened) windowAlreadyOpened = true;
+            // console.log("notifications", SubscriptionManager.windowOpen, SubscriptionManager.activeTab);
         });
+        tabbedObserver.observe(content[0]);
+
+        content.on("tabsactivate", () => {
+            // console.log("tabs", trackerIDs[content.tabs("option", "active")]);
+            SubscriptionManager.activeTab = trackerIDs[content.tabs("option", "active")];
+        });
+        SubscriptionManager.activeTab = trackerIDs[content.tabs("option", "active")];
 
         // Update the notifications button when updates occur
         SubscriptionManager.on("notification", () => {
             let loading = false,
-                updates = 0;
+                updates = 0,
+                index = 0;
             for (const trackerTab of trackerPages) {
                 if (typeof trackerTab.name == "string") continue;
 
                 if (trackerTab.name.attr("loading") == "true") loading = true;
                 updates += (parseInt(trackerTab.name.attr("updates")) || 0);
+
+                if (!windowAlreadyOpened && updates > 0) {
+                    windowAlreadyOpened = true;
+                    content.tabs("option", "active", index);
+                    // console.log("tab opening", index);
+                }
+
+                index++;
             }
 
             openSubscriptionsButton.attr({
@@ -96,7 +123,7 @@ export class SubscriptionManager extends RE6Module {
             escapable: false,
             fixed: true,
             reserveHeight: true,
-            content: content.render(),
+            content: content,
             position: { my: "right", at: "right" },
         });
         modal.getElement().addClass("subscription-wrapper");
