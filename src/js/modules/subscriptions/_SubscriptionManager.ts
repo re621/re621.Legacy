@@ -41,7 +41,7 @@ export class SubscriptionManager extends RE6Module {
         // button clicks and window opens.
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((value) => {
-                console.log(`Sub${$(value.target).parent().attr("content")}: ` + (value.isIntersecting ? "Entering" : "Leaving"));
+                // console.log(`Sub${$(value.target).parent().attr("content")}: ` + (value.isIntersecting ? "Entering" : "Leaving"));
                 SubscriptionManager.trigger("intersect." + $(value.target).parent().attr("content"), value.isIntersecting);
             });
         }, {
