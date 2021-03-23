@@ -60,8 +60,10 @@ export class Page {
     /**
      * Removes a querystring from the url
      */
-    public static removeQueryParameter(key: string): void {
-        this.getInstance().url.searchParams.delete(key);
+    public static removeQueryParameter(keys: string | string[]): void {
+        if (!Array.isArray(keys)) keys = [keys];
+        for (const key of keys)
+            this.getInstance().url.searchParams.delete(key);
         this.refreshCurrentUrl();
     }
 

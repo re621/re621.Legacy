@@ -5,6 +5,8 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 
 export class SearchUtilities extends RE6Module {
 
+    private static randomPostURL = "";
+
     public constructor() {
         super([PageDefinition.search, PageDefinition.post, PageDefinition.favorites]);
         this.registerHotkeys(
@@ -86,8 +88,13 @@ export class SearchUtilities extends RE6Module {
         }
 
         // Remove the query string on posts
+        const queryParams = (Page.getQueryParameter("tags") || Page.getQueryParameter("q") || "").split(" ").filter(n => n);
+        const queryEncoded = [];
+        for (const part of queryParams) queryEncoded.push(encodeURIComponent(part));
+
+        SearchUtilities.randomPostURL = "/posts/random" + (queryEncoded.length ? ("?tags=" + queryEncoded.join("+")) : "");
         if (Page.matches(PageDefinition.post)) {
-            Page.removeQueryParameter("q");
+            Page.removeQueryParameter(["q", "tags"]);
         }
 
         // Replaces the tag count estimate with the real number
@@ -182,7 +189,7 @@ export class SearchUtilities extends RE6Module {
 
     /** Switches the location over to a random post */
     private randomPost(): void {
-        location.pathname = "/posts/random";
+        location.href = SearchUtilities.randomPostURL;
     }
 
     // Search Modes
