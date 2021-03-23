@@ -581,5 +581,5 @@ export type SubscribeFunction = (name: string) => void;
 type SubscribeButtonSelector = {
     regex: RegExp | RegExp[];
     selector: string;
-    method?: string; // "append" | "prepend" | "before" | "after";
+    method?: string;
 }
