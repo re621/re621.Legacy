@@ -150,7 +150,7 @@ export class TagTracker extends SubscriptionTracker {
                     })
                     .appendTo(link)
                     .one("error", () => {
-                        image.attr("src", Util.DOM.getPlaceholderImage());
+                        image.attr("src", "https://e621.net/images/deleted-preview.png");
                     });
 
                 $("<a>")
