@@ -146,12 +146,12 @@ export class HoverZoom extends RE6Module {
             .on("keydown.re621.zoom", (event) => {
                 if (this.shiftPressed || (event.originalEvent as KeyboardEvent).key !== "Shift") return;
                 this.shiftPressed = true;
-                let count = 0;
                 for (const el of $("[hovering=true]")) {
-                    $(el).trigger("mouseenter.re621.zoom");
-                    count++;
+                    const $el = $(el);
+                    if ($el.attr("hztrigger"))
+                        $el.find($el.attr("hztrigger")).trigger("mouseenter.re621.zoom")
+                    else $(el).trigger("mouseenter.re621.zoom");
                 }
-                Debug.log("hovering total", count);
             })
             .on("keyup.re621.zoom", (event) => {
                 if (!this.shiftPressed || (event.originalEvent as KeyboardEvent).key !== "Shift") return;

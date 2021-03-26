@@ -129,6 +129,8 @@ export class PoolTracker extends SubscriptionTracker {
                 "data-width": imageData[4],
                 "data-height": imageData[5],
                 "data-filesize": imageData[6],
+
+                "hztrigger": "img",
             })
             .on("re621:render", () => {
 
