@@ -1,8 +1,10 @@
 import { E621 } from "../../components/api/E621";
 import { APIComment } from "../../components/api/responses/APIComment";
 import { APIPost, PostFlag } from "../../components/api/responses/APIPost";
+import { XM } from "../../components/api/XM";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { PostData } from "../../components/post/Post";
+import { PostParts } from "../../components/post/PostParts";
 import { Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 import { UpdateContent, UpdateData } from "./_SubscriptionCache";
@@ -163,6 +165,10 @@ export class CommentTracker extends SubscriptionTracker {
                     .addClass("img-link")
                     .attr({ href: "/posts/" + commentData[1], })
                     .appendTo(result);
+
+                PostParts.bootstrapDoubleClick(link, () => false, () => {
+                    XM.Util.openInTab(window.location.origin + link.attr("href"), false);
+                });
 
                 const img = $("<img>")
                     .attr({

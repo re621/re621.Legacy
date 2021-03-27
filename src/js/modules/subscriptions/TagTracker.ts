@@ -1,8 +1,10 @@
 import { E621 } from "../../components/api/E621";
 import { APIPost, PostFlag } from "../../components/api/responses/APIPost";
+import { XM } from "../../components/api/XM";
 import { Blacklist } from "../../components/data/Blacklist";
 import { PageDefinition } from "../../components/data/Page";
 import { PostData } from "../../components/post/Post";
+import { PostParts } from "../../components/post/PostParts";
 import { Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 import { WikiEnhancer } from "../misc/WikiEnhancer";
@@ -142,6 +144,10 @@ export class TagTracker extends SubscriptionTracker {
                 const link = $("<a>")
                     .attr({ href: "/posts/" + data.uid, })
                     .appendTo(result);
+
+                PostParts.bootstrapDoubleClick(link, () => false, () => {
+                    XM.Util.openInTab(window.location.origin + link.attr("href"), false);
+                });
 
                 const image = $("<img>")
                     .attr({
