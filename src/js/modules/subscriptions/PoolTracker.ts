@@ -59,7 +59,7 @@ export class PoolTracker extends SubscriptionTracker {
         }
 
         // Fetching associated data
-        this.writeStatus(`. . . fetching pool data`);
+        this.writeStatus(`. . . fetching post data`);
         const postData: Map<number, APIPost> = new Map();
         for (const pool of apiResponse) {
 
@@ -74,12 +74,11 @@ export class PoolTracker extends SubscriptionTracker {
             for (const [index, chunk] of postsChunks.entries()) {
 
                 // Processing batch #index
-                if (subscriptionsChunks.length > 1) this.writeStatus(`&nbsp; &nbsp; &nbsp; - processing batch #${index}`);
+                if (postsChunks.length > 1) this.writeStatus(`&nbsp; &nbsp; &nbsp; - processing batch #${index}`);
                 for (const post of await E621.Posts.get<APIPost>({ "tags": "id:" + chunk.join(","), "limit": 320 }, index < 10 ? 500 : 1000))
                     postData.set(post.id, post);
 
-                // This should prevent the tracker from double-updating if the process takes more than 5 minutes
-                // There are definitely users who are subscribed to enough tags to warrant this
+                // Same as below - trigger to avoid update collisions
                 SubscriptionManager.trigger("inprogress." + this.trackerID, 1);
             }
         }
