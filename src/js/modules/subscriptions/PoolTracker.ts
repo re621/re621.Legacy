@@ -58,21 +58,47 @@ export class PoolTracker extends SubscriptionTracker {
             SubscriptionManager.trigger("inprogress." + this.trackerID, 1);
         }
 
+        // Fetching associated data
+        this.writeStatus(`. . . fetching pool data`);
+        const postData: Map<number, APIPost> = new Map();
+        for (const pool of apiResponse) {
+
+            if (pool.post_count == 0) continue;
+
+            const poolExtra = this.slist.getExtraData(pool.id + "") || {};
+            if (typeof poolExtra.data == "undefined") postData.set(pool.post_ids[0], null);
+        }
+
+        if (postData.size > 0) {
+            const postsChunks = Util.chunkArray(Array.from(postData.keys()), 100);
+            for (const [index, chunk] of postsChunks.entries()) {
+
+                // Processing batch #index
+                if (subscriptionsChunks.length > 1) this.writeStatus(`&nbsp; &nbsp; &nbsp; - processing batch #${index}`);
+                for (const post of await E621.Posts.get<APIPost>({ "tags": "id:" + chunk.join(","), "limit": 320 }, index < 10 ? 500 : 1000))
+                    postData.set(post.id, post);
+
+                // This should prevent the tracker from double-updating if the process takes more than 5 minutes
+                // There are definitely users who are subscribed to enough tags to warrant this
+                SubscriptionManager.trigger("inprogress." + this.trackerID, 1);
+            }
+        }
+
         // Parsing output, discarding irrelevant data
         this.writeStatus(`. . . formatting output`);
         for (const pool of apiResponse) {
 
             // Don't bother with empty pools
             const postCount = pool.post_count;
-            if (postCount == 0) return;
+            if (postCount == 0) continue;
 
             const poolExtra = this.slist.getExtraData(pool.id + "") || {};
             poolExtra.name = pool.name.replace(/_/g, " ");
             if (typeof poolExtra.data == "undefined") {
-                // TODO It would be better to just gather the post IDs, then
-                // search for all of them at once. But these are only used
-                // on the first run, so it is not that critical
-                const postAPI = await E621.Post.id(pool.post_ids[0]).first<APIPost>();
+
+                // If the scheduled fetching fails for whatever reason,
+                // fall back to the old method of getting that data
+                const postAPI = postData.get(pool.post_ids[0]) || await E621.Post.id(pool.post_ids[0]).first<APIPost>();
                 if (postAPI) {
                     const post = PostData.fromAPI(postAPI);
                     poolExtra.data = ((post.file.ext == "swf" || post.flags.has(PostFlag.Deleted)) ? "" : post.file.md5)
