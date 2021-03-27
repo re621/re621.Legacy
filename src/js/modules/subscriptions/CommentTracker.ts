@@ -65,6 +65,29 @@ export class CommentTracker extends SubscriptionTracker {
                 data.set(comment.post_id, comment);
         }
 
+        // Fetching associated data
+        this.writeStatus(`. . . fetching post data`);
+        const postData: Map<number, APIPost> = new Map();
+        for (const postID of data.keys()) {
+
+            const postExtra = this.slist.getExtraData(postID + "") || {};
+            if (typeof postExtra.data == "undefined") postData.set(postID, null);
+        }
+
+        if (postData.size > 0) {
+            const postsChunks = Util.chunkArray(Array.from(postData.keys()), 100);
+            for (const [index, chunk] of postsChunks.entries()) {
+
+                // Processing batch #index
+                if (postsChunks.length > 1) this.writeStatus(`&nbsp; &nbsp; &nbsp; - processing batch #${index}`);
+                for (const post of await E621.Posts.get<APIPost>({ "tags": "id:" + chunk.join(","), "limit": 320 }, index < 10 ? 500 : 1000))
+                    postData.set(post.id, post);
+
+                // Same as below - trigger to avoid update collisions
+                SubscriptionManager.trigger("inprogress." + this.trackerID, 1);
+            }
+        }
+
         // Parsing output, discarding irrelevant data
         const lastUpdate = this.fetchSettings<number>("lastUpdate") || 0;
         this.writeStatus(`. . . formatting output`);
@@ -72,10 +95,10 @@ export class CommentTracker extends SubscriptionTracker {
 
             const postExtra = this.slist.getExtraData(postID + "") || {};
             if (typeof postExtra.data == "undefined") {
-                // TODO It would be better to just gather the post IDs, then
-                // search for all of them at once. But these are only used
-                // on the first run, so it is not that critical
-                const postAPI = await E621.Post.id(postID).first<APIPost>();
+
+                // If the scheduled fetching fails for whatever reason,
+                // fall back to the old method of getting that data
+                const postAPI = postData.get(postID) || await E621.Post.id(postID).first<APIPost>();
                 if (postAPI) {
                     const post = PostData.fromAPI(postAPI);
                     postExtra.data = ((post.file.ext == "swf" || post.flags.has(PostFlag.Deleted)) ? "" : post.file.md5)
