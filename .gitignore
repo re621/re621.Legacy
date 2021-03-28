@@ -106,3 +106,6 @@ typings/
 # Build files
 /build/
 bin/extension-key.pem
+
+# TamperDAV server
+dav/
