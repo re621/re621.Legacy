@@ -186,7 +186,7 @@ export class SubscriptionManager extends RE6Module {
             Form.spacer(2),
 
             Form.text(`Interval: How often should the subscriptions be checked for updates`, 2, "subscription-tutorial"),
-            Form.text(`Cache Size: Maximum number of updates stored. Must be at least 10, but no more than 500.`, 2, "subscription-tutorial"),
+            Form.text(`Cache Size: Maximum number of updates stored, between 10 and 500`, 2, "subscription-tutorial"),
             Form.text(`Cache Age: Updates older than this are removed automatically`, 2, "subscription-tutorial"),
             Form.hr(2),
 
