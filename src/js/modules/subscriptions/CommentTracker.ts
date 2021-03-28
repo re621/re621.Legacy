@@ -166,7 +166,7 @@ export class CommentTracker extends SubscriptionTracker {
                     .attr({ href: "/posts/" + commentData[1], })
                     .appendTo(result);
 
-                PostParts.bootstrapDoubleClick(link, () => false, () => {
+                PostParts.bootstrapDoubleClick(link, () => {
                     XM.Util.openInTab(window.location.origin + link.attr("href"), false);
                 });
 

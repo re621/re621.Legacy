@@ -168,7 +168,7 @@ export class PoolTracker extends SubscriptionTracker {
                     .attr({ href: "/pools/" + data.uid, })
                     .appendTo(result);
 
-                PostParts.bootstrapDoubleClick(link, () => false, () => {
+                PostParts.bootstrapDoubleClick(link, () => {
                     XM.Util.openInTab(window.location.origin + link.attr("href"), false);
                 });
 

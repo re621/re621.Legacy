@@ -51,7 +51,6 @@ export class PostParts {
 
         PostParts.bootstrapDoubleClick(
             $link,
-            () => { return (BetterSearch.isPaused()) || $("#mode-box-mode").val() !== "view"; },
             () => {
 
                 post.$ref.addClass("highlight");
@@ -89,7 +88,8 @@ export class PostParts {
                     }
                 }
 
-            }
+            },
+            () => { return (BetterSearch.isPaused()) || $("#mode-box-mode").val() !== "view"; }
         );
     }
 
@@ -405,13 +405,30 @@ export class PostParts {
             ``;
     }
 
-    public static bootstrapDoubleClick($link: JQuery<HTMLElement>, isPaused: () => boolean, onDoubleClick: ($link: JQuery<HTMLElement>) => void): JQuery<HTMLElement> {
+    public static bootstrapDoubleClick(target: JQuery<HTMLElement> | string, onDoubleClick: ($link: JQuery<HTMLElement>) => void, isPaused: () => boolean = (): boolean => false): void {
+
+        console.log(target, typeof target);
+
+        let attachment: JQuery<HTMLElement>, selector: string;
+        if (typeof target == "string") {
+            attachment = $("body");
+            selector = target;
+        } else {
+            if (target.length > 1) {
+                for (const element of target.get())
+                    PostParts.bootstrapDoubleClick($(element), onDoubleClick, isPaused);
+                return;
+            }
+
+            attachment = target;
+            target = null;
+        }
 
         let dblclickTimer: number;
         let prevent = false;
 
         // Make it so that the double-click prevents the normal click event
-        $link.on("click.re621.dbl-extra", (event) => {
+        attachment.on("click.re621.dbl-extra", selector, (event) => {
             if (
                 // Ignore mouse clicks which are not left clicks
                 (event.button !== 0) ||
@@ -422,10 +439,11 @@ export class PostParts {
             ) return;
 
             event.preventDefault();
+            const $link = $(event.currentTarget);
 
             dblclickTimer = window.setTimeout(() => {
                 if (!prevent) {
-                    $link.off("click.re621.dbl-extra");
+                    attachment.off("click.re621.dbl-extra", selector);
                     $link[0].click();
                 }
                 prevent = false;
@@ -433,7 +451,7 @@ export class PostParts {
 
             return false;
         });
-        $link.on("dblclick.re621.dbl-extra", (event) => {
+        attachment.on("dblclick.re621.dbl-extra", selector, (event) => {
             if (
                 // Ignore mouse clicks which are not left clicks
                 (event.button !== 0) ||
@@ -444,13 +462,24 @@ export class PostParts {
             ) { return; }
 
             event.preventDefault();
+            const $link = $(event.currentTarget);
+
             window.clearTimeout(dblclickTimer);
             prevent = true;
 
             onDoubleClick($link);
         });
+    }
 
-        return $link;
+    public static unstrapDoubleClick(target: JQuery<HTMLElement> | string): void {
+        if (typeof target == "string")
+            $("body")
+                .off("click.re621.thumbnail", target)
+                .off("dblclick.re621.thumbnail", target);
+        else
+            target
+                .off("click.re621.thumbnail")
+                .off("dblclick.re621.thumbnail");
     }
 
 }

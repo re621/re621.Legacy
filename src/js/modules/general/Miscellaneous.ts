@@ -5,6 +5,7 @@ import { XM } from "../../components/api/XM";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { Post } from "../../components/post/Post";
+import { PostParts } from "../../components/post/PostParts";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 import { BetterSearch, ImageClickAction } from "../search/BetterSearch";
@@ -274,57 +275,17 @@ export class Miscellaneous extends RE6Module {
      * @param state True to enable, false to disable
      */
     private handleAvatarClick(state = true): void {
-        $("div.avatar > div.active > a")
-            .off("click.re621.thumbnail")
-            .off("dblclick.re621.thumbnail");
+
+        PostParts.unstrapDoubleClick("div.avatar > div.active > a");
 
         if (!state) return;
 
         /* Handle double-click */
-        const clickAction = ModuleController.get(BetterSearch).fetchSettings<ImageClickAction>("clickAction");
-
-        const avatars = $("div.avatar > div > a").get();
-        for (const element of avatars) {
-            const $link = $(element);
-            let dblclickTimer: number;
-            let prevent = false;
-
-            $link.on("click.re621.thumbnail", (event) => {
-                if (
-                    // Ignore mouse clicks which are not left clicks
-                    (event.button !== 0) ||
-                    // Ignore meta-key presses
-                    (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)
-                ) { return; }
-
-                event.preventDefault();
-
-                dblclickTimer = window.setTimeout(() => {
-                    if (!prevent) {
-                        $link.off("click.re621.thumbnail");
-                        $link[0].click();
-                    }
-                    prevent = false;
-                }, 200);
-            }).on("dblclick.re621.thumbnail", (event) => {
-                if (
-                    // Ignore mouse clicks which are not left clicks
-                    (event.button !== 0) ||
-                    // Ignore meta-key presses
-                    (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)
-                ) { return; }
-
-                event.preventDefault();
-                window.clearTimeout(dblclickTimer);
-                prevent = true;
-
-                if (clickAction === ImageClickAction.NewTab) XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
-                else {
-                    $link.off("click.re621.thumbnail");
-                    $link[0].click();
-                }
-            });
-        }
+        PostParts.bootstrapDoubleClick(
+            "div.avatar > div > a",
+            ($link) => { XM.Util.openInTab(window.location.origin + $link.attr("href"), false); },
+            () => ModuleController.get(BetterSearch).fetchSettings<ImageClickAction>("clickAction") !== ImageClickAction.NewTab
+        );
     }
 
     /*
