@@ -407,8 +407,6 @@ export class PostParts {
 
     public static bootstrapDoubleClick(target: JQuery<HTMLElement> | string, onDoubleClick: ($link: JQuery<HTMLElement>) => void, isPaused: () => boolean = (): boolean => false): void {
 
-        console.log(target, typeof target);
-
         let attachment: JQuery<HTMLElement>, selector: string;
         if (typeof target == "string") {
             attachment = $("body");
