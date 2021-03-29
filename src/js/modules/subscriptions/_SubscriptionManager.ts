@@ -1,3 +1,4 @@
+import { XM } from "../../components/api/XM";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
@@ -8,9 +9,12 @@ import { SubscriptionTracker } from "./_SubscriptionTracker";
 
 export class SubscriptionManager extends RE6Module {
 
+    // Hard-coded cache version. If the stored value is different from this, the cache gets cleared
+    private static cacheVersion = 3;
+    private static cacheValid: boolean;
+
     // List of trackers - needs to be registered from the main file
     private static trackers: SubscriptionTracker[] = [];
-
 
     private static windowOpen = false;      // Whether or not the notifications window is open
     private static activeTab: string;       // ID of the tracker tab that is open
@@ -18,6 +22,8 @@ export class SubscriptionManager extends RE6Module {
     public getDefaultSettings(): Settings {
         return {
             enabled: true,
+
+            cacheVersion: 0,                // utility variable, cache is cleared if it does not match the hardcoded one
 
             skipPreflightChecks: false,     // suppresses the network status check before the update
         }
@@ -420,6 +426,24 @@ export class SubscriptionManager extends RE6Module {
                 ]),
             ]);
         }
+    }
+
+    /**
+     * Checks if the stored cache version is the same as the hardcoded one.
+     * @returns True if the cache is valid, false otherwise
+     */
+    public static async isCacheValid(): Promise<boolean> {
+        if (typeof SubscriptionManager.cacheValid !== "undefined")
+            return SubscriptionManager.cacheValid;
+
+        const settings = await XM.Storage.getValue("re621.SubscriptionManager", {});
+        SubscriptionManager.cacheValid = SubscriptionManager.cacheVersion == ((settings).cacheVersion || 0);
+        if (!SubscriptionManager.cacheValid) {
+            settings.cacheVersion = SubscriptionManager.cacheVersion;
+            await XM.Storage.setValue("re621.SubscriptionManager", settings);
+        }
+
+        return SubscriptionManager.cacheValid;
     }
 
 }

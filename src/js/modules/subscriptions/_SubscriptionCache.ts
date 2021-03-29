@@ -1,18 +1,16 @@
 import { XM } from "../../components/api/XM";
 import { Util } from "../../components/utility/Util";
+import { SubscriptionManager } from "./_SubscriptionManager";
 import { SubscriptionTracker } from "./_SubscriptionTracker";
 
 /** Handles the loading and caching of the subscription update data */
 export class SubscriptionCache {
 
-    // Hard-coded cache version. If the stored value is different from this, the cache gets cleared
-    private static cacheVersion = 3;
-    private static cacheValid: boolean;
-
     // Instance of the tracker this cache belongs to
     // Needs to be here because fetching data is different between trackers
     private tracker: SubscriptionTracker;
     private storageTag: string;
+    private extraTag: string;
 
     // Data cache, and an index of timestamps for quicker sorting
     private data: UpdateData;
@@ -21,12 +19,18 @@ export class SubscriptionCache {
     public constructor(tracker: SubscriptionTracker) {
         this.tracker = tracker;
         this.storageTag = "re621." + tracker.getSettingsTag() + ".cache";
+        this.extraTag = "re621." + tracker.getSettingsTag() + ".extra";
 
         this.data = {}
         this.index = [];
+    }
 
+    public async init(): Promise<void> {
         // Cache isn't expected to be backwards compatible. Just delete it if the version differs.
-        if (!SubscriptionCache.isCacheValid()) Util.LS.setItem(this.storageTag, "{}");
+        if (!await SubscriptionManager.isCacheValid()) {
+            Util.LS.setItem(this.storageTag, "{}");
+            Util.LS.setItem(this.extraTag, "{}");
+        }
 
         this.load();
     }
@@ -172,20 +176,6 @@ export class SubscriptionCache {
             const result = fn(this.data[timestamp], timestamp);
             if (typeof result !== "undefined") this.data[timestamp] = result;
         });
-    }
-
-    /**
-     * Checks if the stored cache version is the same as the hardcoded one.
-     * @returns True if the cache is valid, false otherwise
-     */
-    public static isCacheValid(): boolean {
-        if (typeof SubscriptionCache.cacheValid !== "undefined")
-            return SubscriptionCache.cacheValid;
-
-        SubscriptionCache.cacheValid = SubscriptionCache.cacheVersion == (parseInt(Util.LS.getItem("re621.SubscriptionManager.cacheVersion")) || 0);
-        if (!SubscriptionCache.cacheValid) Util.LS.setItem("re621.SubscriptionManager.cacheVersion", SubscriptionCache.cacheVersion + "");
-
-        return SubscriptionCache.cacheValid;
     }
 
 }

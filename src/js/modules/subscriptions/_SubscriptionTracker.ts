@@ -50,6 +50,7 @@ export class SubscriptionTracker extends RE6Module {
 
     /** Performs the initialization and setup of the tracker */
     public async init(): Promise<void> {
+        await this.cache.init();
         await this.slist.fetchSubscriptions();
 
         // Fires every minute, refreshes the timers and triggers an update if necessary
