@@ -284,6 +284,9 @@ export class Patcher {
         return counter;
     }
 
+    // Patch 11: 1.5.0
+    // Replaced the old SubscriptionManager with a more modular one
+    // Old settings are to be converted to the new format, or removed
     private static async patch11(): Promise<number> {
         let counter = 0;
 
@@ -311,7 +314,14 @@ export class Patcher {
             await XM.Storage.setValue(`re621.${tracker}Tracker`, settings);
         }
 
-        Patcher.version = 10;
+        const settings = await XM.Storage.getValue(`re621.SubscriptionManager`, {});
+        for (const element of ["lastUpdate", "updateStarted", "cacheSize", "updateInterval", "cacheMaxAge"]) {
+            delete settings[element];
+            counter++;
+        }
+        await XM.Storage.setValue("re621.SubscriptionManager", settings);
+
+        Patcher.version = 11;
 
         return counter;
     }
