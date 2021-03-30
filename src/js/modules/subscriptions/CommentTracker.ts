@@ -77,7 +77,7 @@ export class CommentTracker extends SubscriptionTracker {
         }
 
         if (postData.size > 0) {
-            const postsChunks = Util.chunkArray(Array.from(postData.keys()), 100);
+            const postsChunks = Util.chunkArray(Array.from(postData.keys()), 100, "chunk");
             for (const [index, chunk] of postsChunks.entries()) {
 
                 // Processing batch #index

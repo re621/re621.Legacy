@@ -161,7 +161,7 @@ export class SubscriptionCache {
         this.updateIndex();
 
         // Trims the index to cacheSize, then removes the unwanted items from the data
-        const chunks = Util.chunkArray(this.index, params.cacheSize, true);
+        const chunks = Util.chunkArray(this.index, params.cacheSize, "split");
         this.index = chunks[0];
         chunks[1].forEach((entry: number) => { delete this.data[entry]; })
     }
