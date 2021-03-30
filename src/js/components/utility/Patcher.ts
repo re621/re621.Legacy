@@ -30,6 +30,7 @@ export class Patcher {
                 case 7: counter += await this.patch8();
                 case 8: counter += await this.patch9();
                 case 9: counter += await this.patch10();
+                case 10: counter += await this.patch11();
             }
         } catch (error) { ErrorHandler.error("Patcher", error.stack, "patch " + Patcher.version); }
 
@@ -279,6 +280,48 @@ export class Patcher {
         await XM.Storage.setValue("re621.CustomFlagger", customFlagger);
 
         Patcher.version = 10;
+
+        return counter;
+    }
+
+    // Patch 11: 1.5.0
+    // Replaced the old SubscriptionManager with a more modular one
+    // Old settings are to be converted to the new format, or removed
+    private static async patch11(): Promise<number> {
+        let counter = 0;
+
+        for (const tracker of ["Tag", "Pool", "Forum", "Comment"]) {
+            const settings = await XM.Storage.getValue(`re621.${tracker}Tracker`, {});
+            if (!settings.data) continue;
+
+            const subscriptions = Object.keys(settings.data) || [];
+            if (subscriptions.length == 0) continue;
+
+            counter += subscriptions.length;
+
+            const newSettings: string[] = await XM.Storage.getValue(`re621.${tracker}Tracker.list`, []);
+            const extraID = newSettings.pop();
+
+            const list = new Set<string>([
+                ...newSettings,
+                ...subscriptions,
+            ].sort())
+            if (extraID) list.add(extraID);
+
+            await XM.Storage.setValue(`re621.${tracker}Tracker.list`, Array.from(list));
+
+            delete settings.data;
+            await XM.Storage.setValue(`re621.${tracker}Tracker`, settings);
+        }
+
+        const settings = await XM.Storage.getValue(`re621.SubscriptionManager`, {});
+        for (const element of ["lastUpdate", "updateStarted", "cacheSize", "updateInterval", "cacheMaxAge"]) {
+            delete settings[element];
+            counter++;
+        }
+        await XM.Storage.setValue("re621.SubscriptionManager", settings);
+
+        Patcher.version = 11;
 
         return counter;
     }

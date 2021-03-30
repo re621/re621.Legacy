@@ -24,8 +24,10 @@ export class Tabbed implements PreparedStructure {
         if (this.$container !== undefined && !clearCache)
             return this.$container;
 
-        this.$container = $("<div>");
+        this.$container = $("<tabbed>");
         const $tabList = $("<ul>").appendTo(this.$container);
+
+        if (this.config.class) this.$container.addClass(this.config.class);
 
         this.config.content.forEach((entry, index) => {
             let $tab: JQuery<HTMLElement>;
@@ -39,8 +41,9 @@ export class Tabbed implements PreparedStructure {
                 .attr("id", this.id + "-fragment-" + index)
                 .appendTo(this.$container);
 
-            if (entry.content) elem.append(entry.content);
             if (entry.structure) elem.append(entry.structure.render());
+            else if (entry.content) elem.append(entry.content);
+            else elem.append($("<span>ERROR: Missing Tabbed Content</span>"));
         });
 
         this.$container.tabs({
@@ -68,6 +71,7 @@ export class Tabbed implements PreparedStructure {
 
 interface TabbedConfig {
     name: string;
+    class?: string;
     content: TabContent[];
 }
 

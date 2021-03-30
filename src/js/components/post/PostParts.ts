@@ -5,7 +5,6 @@ import { PostFlag } from "../api/responses/APIPost";
 import { XM } from "../api/XM";
 import { Blacklist } from "../data/Blacklist";
 import { Page } from "../data/Page";
-import { DomUtilities } from "../structure/DomUtilities";
 import { Debug } from "../utility/Debug";
 import { Util } from "../utility/Util";
 import { LoadedFileType, Post, PostData } from "./Post";
@@ -50,85 +49,48 @@ export class PostParts {
 
     private static handleDoubleClick($link: JQuery<HTMLElement>, post: Post, conf: any): void {
 
-        let dblclickTimer: number;
-        let prevent = false;
+        PostParts.bootstrapDoubleClick(
+            $link,
+            () => {
 
-        // Make it so that the double-click prevents the normal click event
-        $link.on("click.re621.dbl-extra", (event) => {
-            if (
-                // Ignore mouse clicks which are not left clicks
-                (event.button !== 0) ||
-                // Ignore meta-key presses
-                (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) ||
-                // Stop keeping track of double clicks if the zoom is paused
-                (BetterSearch.isPaused()) ||
-                // Only use double-click actions in the view mode
-                $("#mode-box-mode").val() !== "view"
-            ) return;
+                post.$ref.addClass("highlight");
+                window.setTimeout(() => post.$ref.removeClass("highlight"), 250);
 
-            event.preventDefault();
+                switch (conf.clickAction) {
+                    case ImageClickAction.NewTab: {
+                        XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
+                        break;
+                    }
+                    case ImageClickAction.CopyID: {
+                        XM.Util.setClipboard(post.id + "", "text");
+                        Danbooru.notice(`Copied post ID to clipboard: <a href="/posts/${post.id}" target="_blank" rel="noopener noreferrer">#${post.id}</a>`);
+                        break;
+                    }
+                    case ImageClickAction.Blacklist: {
+                        Blacklist.toggleBlacklistTag("id:" + post.id);
+                        break;
+                    }
+                    case ImageClickAction.AddToSet: {
+                        const lastSet = parseInt(window.localStorage.getItem("set"));
+                        if (!lastSet) Danbooru.error(`Error: no set selected`);
+                        else PostActions.addSet(lastSet, post.id);
+                        break;
+                    }
+                    case ImageClickAction.ToggleSet: {
+                        const lastSet = parseInt(window.localStorage.getItem("set"));
+                        if (!lastSet) Danbooru.error(`Error: no set selected`);
+                        else PostActions.toggleSet(lastSet, post.id);
+                        break;
+                    }
+                    default: {
+                        $link.off("click.re621.dbl-extra");
+                        $link[0].click();
+                    }
+                }
 
-            dblclickTimer = window.setTimeout(() => {
-                if (!prevent) {
-                    $link.off("click.re621.dbl-extra");
-                    $link[0].click();
-                }
-                prevent = false;
-            }, 200);
-
-            return false;
-        });
-        $link.on("dblclick.re621.dbl-extra", (event) => {
-            if (
-                // Ignore mouse clicks which are not left clicks
-                (event.button !== 0) ||
-                // Ignore meta-key presses
-                (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) ||
-                // Stop keeping track of double clicks if the zoom is paused
-                (BetterSearch.isPaused()) ||
-                // Only use double-click actions in the view mode
-                $("#mode-box-mode").val() !== "view"
-            ) { return; }
-
-            event.preventDefault();
-            window.clearTimeout(dblclickTimer);
-            prevent = true;
-
-            post.$ref.addClass("highlight");
-            window.setTimeout(() => post.$ref.removeClass("highlight"), 250);
-
-            switch (conf.clickAction) {
-                case ImageClickAction.NewTab: {
-                    XM.Util.openInTab(window.location.origin + $link.attr("href"), false);
-                    break;
-                }
-                case ImageClickAction.CopyID: {
-                    XM.Util.setClipboard(post.id + "", "text");
-                    Danbooru.notice(`Copied post ID to clipboard: <a href="/posts/${post.id}" target="_blank" rel="noopener noreferrer">#${post.id}</a>`);
-                    break;
-                }
-                case ImageClickAction.Blacklist: {
-                    Blacklist.toggleBlacklistTag("id:" + post.id);
-                    break;
-                }
-                case ImageClickAction.AddToSet: {
-                    const lastSet = parseInt(window.localStorage.getItem("set"));
-                    if (!lastSet) Danbooru.error(`Error: no set selected`);
-                    else PostActions.addSet(lastSet, post.id);
-                    break;
-                }
-                case ImageClickAction.ToggleSet: {
-                    const lastSet = parseInt(window.localStorage.getItem("set"));
-                    if (!lastSet) Danbooru.error(`Error: no set selected`);
-                    else PostActions.toggleSet(lastSet, post.id);
-                    break;
-                }
-                default: {
-                    $link.off("click.re621.dbl-extra");
-                    $link[0].click();
-                }
-            }
-        });
+            },
+            () => { return (BetterSearch.isPaused()) || $("#mode-box-mode").val() !== "view"; }
+        );
     }
 
     private static renderImageElement(post: Post, conf: any): JQuery<HTMLElement> {
@@ -136,7 +98,7 @@ export class PostParts {
         post.$ref.attr("loading", "true");
 
         const $image = $("<img>")
-            .attr("src", DomUtilities.getPlaceholderImage())
+            .attr("src", Util.DOM.getPlaceholderImage())
             .one("load", () => {
                 post.$ref.removeAttr("loading");
                 if (conf.hoverTags)
@@ -148,7 +110,7 @@ export class PostParts {
                     .attr("error", "true");
 
                 $image
-                    .attr("src", DomUtilities.getPlaceholderImage())
+                    .attr("src", Util.DOM.getPlaceholderImage())
                     .off("mouseenter.re621.upscale")
                     .off("mouseleave.re621.upscale");
 
@@ -436,11 +398,86 @@ export class PostParts {
                 `${[...post.tags.general, ...post.tags.invalid, ...post.tags.lore, ...post.tags.meta].join(" ")}` +
                 ``;
         return `` +
-            `Post #${post.id}, posted on: ${Util.Time.format(post.date.raw)} (${post.date.ago})${br}` +
+            `Post #${post.id}, uploaded on: ${Util.Time.format(post.date.iso)} (${post.date.ago})${br}` +
             `${[...post.tags.artist, ...post.tags.copyright].join(" ")}${br}` +
             `${[...post.tags.character, ...post.tags.species].join(" ")}${br}` +
             `${[...post.tags.general, ...post.tags.invalid, ...post.tags.lore, ...post.tags.meta].join(" ")}${br}` +
             ``;
+    }
+
+    public static bootstrapDoubleClick(target: JQuery<HTMLElement> | string, onDoubleClick: ($link: JQuery<HTMLElement>) => void, isPaused: () => boolean = (): boolean => false): void {
+
+        let attachment: JQuery<HTMLElement>, selector: string;
+        if (typeof target == "string") {
+            attachment = $("body");
+            selector = target;
+        } else {
+            if (target.length > 1) {
+                for (const element of target.get())
+                    PostParts.bootstrapDoubleClick($(element), onDoubleClick, isPaused);
+                return;
+            }
+
+            attachment = target;
+            target = null;
+        }
+
+        let dblclickTimer: number;
+        let prevent = false;
+
+        // Make it so that the double-click prevents the normal click event
+        attachment.on("click.re621.dbl-extra", selector, (event) => {
+            if (
+                // Ignore mouse clicks which are not left clicks
+                (event.button !== 0) ||
+                // Ignore meta-key presses
+                (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) ||
+                // Stop tracking double clicks if the module is paused
+                isPaused()
+            ) return;
+
+            event.preventDefault();
+            const $link = $(event.currentTarget);
+
+            dblclickTimer = window.setTimeout(() => {
+                if (!prevent) {
+                    attachment.off("click.re621.dbl-extra", selector);
+                    $link[0].click();
+                }
+                prevent = false;
+            }, 250);
+
+            return false;
+        });
+        attachment.on("dblclick.re621.dbl-extra", selector, (event) => {
+            if (
+                // Ignore mouse clicks which are not left clicks
+                (event.button !== 0) ||
+                // Ignore meta-key presses
+                (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) ||
+                // Stop tracking double clicks if the module is paused
+                isPaused()
+            ) { return; }
+
+            event.preventDefault();
+            const $link = $(event.currentTarget);
+
+            window.clearTimeout(dblclickTimer);
+            prevent = true;
+
+            onDoubleClick($link);
+        });
+    }
+
+    public static unstrapDoubleClick(target: JQuery<HTMLElement> | string): void {
+        if (typeof target == "string")
+            $("body")
+                .off("click.re621.thumbnail", target)
+                .off("dblclick.re621.thumbnail", target);
+        else
+            target
+                .off("click.re621.thumbnail")
+                .off("dblclick.re621.thumbnail");
     }
 
 }

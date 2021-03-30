@@ -1,6 +1,8 @@
+import { UtilDOM } from "./UtilDOM";
 import { UtilEvents } from "./UtilEvents";
 import { UtilID } from "./UtilID";
 import { UtilMath } from "./UtilMath";
+import { UtilNetwork } from "./UtilNetwork";
 import { UtilSize } from "./UtilSize";
 import { UtilTime } from "./UtilTime";
 
@@ -9,10 +11,12 @@ import { UtilTime } from "./UtilTime";
  */
 export class Util {
 
-    public static Time = UtilTime;
+    public static DOM = UtilDOM;
     public static Events = UtilEvents;
     public static ID = UtilID;
     public static Math = UtilMath;
+    public static Network = UtilNetwork;
+    public static Time = UtilTime;
     public static Size = UtilSize;
 
     public static LS = window.localStorage;
@@ -103,7 +107,7 @@ export class Util {
      * @param input Input to process
      * @param removeSections If true, removes `quote`, `code`, and `sections` blocks altogether
      */
-    public static parseDText(input: string, removeSections = true): string {
+    public static stripDText(input: string, removeSections = true): string {
         if (removeSections) {
             input = input.replace(/\[quote\][\s\S]*\[\/quote\]/g, "")
                 .replace(/\[code\][\s\S]*\[\/code\]/g, "")

@@ -30,8 +30,9 @@ export class Post implements PostData {
     public page: string;                    // search page. can either be numeric, or in a- / b- format
 
     public date: {
-        raw: string;                        // upload time, in `Fri Aug 21 2020 12:32:52 GMT-0700` format
+        iso: string;                        // upload time, in `Fri Aug 21 2020 12:32:52 GMT-0700` format
         ago: string;                        // relative time, aka `5 minutes ago`
+        obj: Date;                          // date object
     };
 
     public tagString: string;               // string with space-separated tags. Makes outputting tags easier
@@ -366,8 +367,9 @@ export interface PostData {
     page: string;
 
     date: {
-        raw: string;
+        iso: string;
         ago: string;
+        obj: Date;
     };
 
     tagString: string;
@@ -460,8 +462,9 @@ export namespace PostData {
             page: page,
 
             date: {
-                raw: data.created_at == null ? data.updated_at : data.created_at,
+                iso: data.created_at == null ? data.updated_at : data.created_at,
                 ago: Util.Time.ago(data.created_at == null ? data.updated_at : data.created_at),
+                obj: new Date(data.created_at == null ? data.updated_at : data.created_at),
             },
 
             tagString: [...tags].sort().join(" "),
@@ -578,7 +581,13 @@ export namespace PostData {
      * Unlike `fromDOM()`, works on native thumbnails (ex. `<article>`)
      * @param $article Article to parse for data
      */
-    export function fromThumbnail($article: JQuery<HTMLElement>): PostData {
+    export function fromThumbnail($article: JQuery<HTMLElement>, cached = true): PostData {
+
+        // Cache the data, since the calculations below cause some lag that is
+        // noticeable when this has to be done on the fly, like in HoverZoom.
+        // TODO Actually optimize the code below
+        if (cached && $article.data("wfpost"))
+            return $article.data("wfpost");
 
         const id = parseInt($article.attr("data-id")) || 0;
 
@@ -624,12 +633,18 @@ export namespace PostData {
                 sample: `/images/deleted-preview.png`,
                 original: `/images/deleted-preview.png`,
             };
-            else urls = {
-                preview: $article.attr("data-preview-url") || null,
-                sample: (width < 850 || height < 850 || extension == "gif")
-                    ? `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${extension}`
-                    : `https://static1.e621.net/data/sample/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`,
-                original: `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${extension}`,
+            else {
+                urls = {
+                    preview: $article.attr("data-preview-url")
+                        ? $article.attr("data-preview-url")
+                        : `https://static1.e621.net/data/preview/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`,
+                    sample: $article.attr("data-large-file-url")    // This is horrifying.
+                        ? $article.attr("data-large-file-url")      // I am truly sorry...
+                        : ((width < 850 || height < 850 || extension == "gif")
+                            ? `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${extension}`
+                            : `https://static1.e621.net/data/sample/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`),
+                    original: `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${extension}`,
+                };
             }
         }
 
@@ -639,7 +654,7 @@ export namespace PostData {
         // Score
         const score = parseInt($article.attr("data-score") || "0");
 
-        return {
+        const result = {
             id: id,
             flags: PostFlag.fromString($article.attr("data-flags") || ""),
             score: {
@@ -658,22 +673,23 @@ export namespace PostData {
             page: "-1",
 
             date: {
-                raw: rawDate,
+                iso: rawDate,
                 ago: Util.Time.ago(rawDate),
+                obj: new Date(rawDate),
             },
 
             tagString: tagString,
             tags: {
                 all: tagSet,
-                artist: new Set(),
-                real_artist: new Set(),
-                copyright: new Set(),
-                species: new Set(),
-                character: new Set(),
-                general: new Set(),
-                invalid: new Set(),
-                meta: new Set(),
-                lore: new Set(),
+                artist: new Set<string>(),
+                real_artist: new Set<string>(),
+                copyright: new Set<string>(),
+                species: new Set<string>(),
+                character: new Set<string>(),
+                general: new Set<string>(),
+                invalid: new Set<string>(),
+                meta: new Set<string>(),
+                lore: new Set<string>(),
             },
 
             sources: [],
@@ -685,7 +701,7 @@ export namespace PostData {
                 original: urls["original"],
                 sample: urls["sample"],
                 preview: urls["preview"],
-                size: 0,
+                size: parseInt($article.attr("data-filesize") || "0"),
             },
             loaded: undefined,
 
@@ -720,6 +736,8 @@ export namespace PostData {
             },
 
         };
+        $article.data("wfpost", result);
+        return result;
     }
 
     /**

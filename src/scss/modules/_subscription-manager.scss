@@ -1,279 +1,505 @@
-/* Subscription Manager Styles */
 
-.update-notification:not([data-updates="0"]) {
-    &::after {
-        content: unicode('f111');
-        font-family: 'Font Awesome 5 Free';
-        font-weight: 900;
-        font-size: 0.5em;
-        color: red;
-
-        position: absolute;
-        top: 0;
-    }
-}
-
-.update-notification[data-loading=true] {
-
+// Notifications window custom tabs
+tabbed.config-tabs {
     position: relative;
-
-    @keyframes spinner {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-
-    &::after {
-        content: unicode('f110');
-        font-family: "Font Awesome 5 Free";
-        font-weight: 900;
-        font-size: 0.75em;
-        line-height: 0.75em;
-        text-align: center;
-        color: inherit;
-
-        position: absolute;
-
-        animation: spinner 1.0s linear infinite;
-    }
-}
-
-button.large-subscribe-button {
-    float: right;
-    padding: 0.25rem 0.5rem;
-    outline: 0;
-    box-shadow: 0 0 10px -5px black;
-    border-radius: 4px;
-}
-
-#tag-box>ul>li,
-#tag-list>ul>li {
-
-    div.tag-actions a.tag-subscription-button.unsubscribe {
-        visibility: visible;
-    }
-}
-
-// Common styles for the subscription list
-div.subscriptions-list {
-    position: relative;
-    width: 31.5rem;
-    overflow: hidden auto;
-
     display: grid;
-    grid-template-columns: 1fr;
-    grid-column-gap: 0.25rem;
-    grid-row-gap: 0.25rem;
+    height: 100%;
+    box-sizing: border-box;
 
-    div.subscription-update.notice {
+    grid-template-columns: 2rem auto;
+    margin-left: -0.75rem;
+    padding-top: 0.5rem;
 
-        &.notice-cached {
-            display: grid;
-            grid-template-columns: auto auto;
-            font-weight: 900;
-            font-size: 0.85rem;
-            color: darkgrey;
+    ul.ui-tabs-nav {
+        position: fixed;
+        width: 2rem;
+        display: grid;
+        grid-template-rows: 0 min-content min-content min-content min-content auto 0;
+        grid-row-gap: 0.5rem;
+        align-items: baseline;
+        height: 81vh;
 
-            div.subscription-update-title {
-                grid-column: span 2;
-                display: flex;
-                align-items: center;
-                text-align: center;
+        border-right: 1px solid #ffffff30 !important;
+        border-radius: 0;
 
-                color: #ffffff50;
+        li.ui-tabs-tab {
+            writing-mode: vertical-rl;
+            text-orientation: sideways;
+            transform: rotate(180deg);
+            padding: 0.5rem;
+            align-self: end;
+            border-radius: 0;
+            position: relative;
 
-                &::before,
-                &::after {
-                    content: '';
-                    flex: 1;
-                    border-bottom: 1px solid #ffffff50;
+            &:hover, &.ui-tabs-active {
+                background-color: #ffffff20;
+            }
+
+            a.notification {
+
+                @keyframes spinner {
+                    to { transform: rotate(360deg); }
                 }
 
-                &::before {
-                    margin-right: .25em;
+                &:not([updates="0"])::after {
+                    content: unicode("f111");
+                    font-family: "Font Awesome 5 Free";
+                    font-weight: 900;
+                    font-size: 0.5em;
+                    color: red;
+
+                    position: absolute;
+                    bottom: 0.125rem;
+                    right: 0.25rem;
                 }
 
-                &::after {
-                    margin-left: .25em;
+                &[loading=true]::after {
+                    content: unicode("f110");
+                    font-family: "Font Awesome 5 Free";
+                    font-weight: 900;
+                    font-size: 0.5em;
+                    color: inherit;
+
+                    position: absolute;
+                    bottom: 0.05rem;
+                    right: 0.25rem;
+
+                    animation: spinner 1s linear infinite;
                 }
             }
         }
+    }
 
-        div.subscription-update-preview,
-        div.subscription-update-remove,
-        div.subscription-update-full,
-        div.subscription-update-date {
-            display: none;
+    div.ui-tabs-panel {
+        margin-left: 0.5rem;
+        grid-column: 2;
+        width: 37rem;
+    }
+
+    // More compact "Manual Update" / "Clear Cache" buttons
+    form-section:not([columns]).subscription-control-btn {
+        grid-template-columns: 1fr 1fr;
+        form-input { grid-column: span 1; }
+    }
+}
+
+
+// Subscribe / Unsubscribe buttons
+a.subscribe-button-minor {
+
+    &::after {
+        content: unicode("f004");
+        font-family: "Font Awesome 5 Free";
+        font-weight: 500;
+    }
+
+    &[subscribed=true]::after {
+        font-weight: 700;
+    }
+}
+
+a.subscribe-button-major {
+    display: block;
+    box-sizing: border-box;
+    border-radius: 6px;
+    font-size: 1rem;
+    line-height: 1.25rem;
+    padding: .25rem .5rem;
+    border: 0;
+    margin: 0 0.5rem;
+    font-weight: 500;
+
+    background: #006400;
+    color: #fff;
+    float: right;
+    box-shadow: 0px 0px 1px 0px black;
+
+    &:hover {
+        background: #004b00;
+        color: #fff;
+    }
+
+    &[subscribed=true] {
+        background: maroon;
+        &:hover { background: #670000; }
+    }
+}
+
+// Override for ForumTracker
+div#c-forum-topics div#a-show h1:first-of-type {
+    position: relative;
+    padding-right: 8rem;
+
+    a.subscribe-button-major {
+        position: absolute;
+        right: 0;
+        top: 0.25rem;
+    }
+}
+
+
+// Notifications window settings tab
+tabbed.config-tabs form.form-section {
+    margin-left: 0.25rem;
+}
+
+tabbed.config-tabs form.form-section:not([columns]),
+tabbed.config-tabs form.form-section[columns="1"],
+tabbed.config-tabs form-section:not([columns]),
+tabbed.config-tabs form-section[columns="1"] {
+    width: 100%;
+    grid-template-columns: 5.625rem 12rem;
+}
+tabbed.config-tabs form.form-section[formspan="2"],
+tabbed.config-tabs form.form-section[columns="2"],
+tabbed.config-tabs form-section[columns="2"] {
+    width: 100%;
+    grid-template-columns: 5.625rem 12rem 5.625rem 12rem;
+}
+
+tabbed.config-tabs form-section.subscription-settings > form-section {
+    grid-template-columns: 5.25rem 12rem !important;
+    &:nth-child(odd) {
+        padding-right: 0.25rem;
+    }
+    &:nth-child(even) {
+        justify-content: right;
+    }
+    &:not(:nth-last-of-type(-n+2)) {
+        margin-bottom: 0.5rem;
+    }
+    input[type=text] { padding: 0 0.75rem; }
+    .update-timer {
+        opacity: 0.5;
+        input {
+            font-family: monospace;
+            font-size: 1.1rem;
+            background: #ffffff20;
+        }
+    }
+    .failed-attempt {  color: gold; }
+}
+
+.subscription-tutorial {
+    font-family: monospace;
+    margin-bottom: -0.5rem;
+    font-size: 0.9rem;
+}
+
+sb-enwrap {
+    input.sb-enfind {
+        width: 100%;
+        margin-bottom: 0.5rem;
+        border-radius: 0;
+    }
+
+    sb-encont {
+        display: grid;
+        max-height: 40vh;
+        overflow: hidden auto;
+
+        @include scrollbars;
+
+        sb-enitem {
+            display: block;
+            a.sb-unsub { margin-right: 0.5rem; }
+        }
+    }
+}
+
+sb-enwrap[content=Tags] {
+
+    sb-encont {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+sb-enwrap[content=Comments] {
+
+    sb-encont {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+
+// Generic subscription update entry
+sb-ctwrap {
+    display: block;
+    width: 37rem; // based on the tag updates grid
+
+    &[state=done] sb-status { display: none !important; }
+    &:not([state=done]) sb-canvas { display: none !important; }
+
+    sb-canvas { // Notifications canvas
+        subitem { order: 20; }
+        subitem[new=true],
+        subitem[new=maybe] { order: 0; }
+
+        subdivider {
+            display: flex;
+            grid-column: span 5;
+            align-items: center;
+            text-align: center;
+            order: 10;
+
+            color: #ffffff50;
+
+            &::before,
+            &::after {
+                content: '';
+                flex: 1;
+                border-bottom: 1px solid #ffffff50;
+            }
+
+            &::before { margin-right: 1rem; }
+            &::after { margin-left: 1rem; }
         }
     }
 
-    div.subscription-update:not(.notice) {
+    &[added="0"] sb-canvas subdivider {
+        display: none;
+    }
+
+    sb-status { // Notifications status log
+        display: block;
+        padding: 6rem;
+        font-family: monospace;
+        font-size: 1.25rem;
+    }
+}
+
+
+// TagTracker style overrides
+sb-ctwrap[content=Tags] sb-canvas {
+
+    $sub-row: 7rem;
+    $sub-rowgap: 0.5rem;
+    $sub-col: 7rem;
+    $sub-colgap: 0.5rem;
+    
+    $sub-colcount: 5;
+
+    display: grid;
+    width: ($sub-col * $sub-colcount) + ($sub-colgap * ($sub-colcount - 1));
+
+    grid-template-columns: repeat($sub-colcount, $sub-col);
+    grid-column-gap: $sub-colgap;
+    grid-row-gap: $sub-rowgap;
+
+    subitem {
+        display: block;
+        overflow: hidden;
+        position: relative;
+        background: #ffffff05;
+        height: $sub-row;
+
+        img {
+            object-fit: cover;
+            width: 100%;
+            height: $sub-row;
+        }
+
+        a.delete-link {
+            position: absolute;
+            top: -0.75rem;
+            right: -1.25rem;
+            width: 3rem;
+            height: 2rem;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            background: #96181877;
+            transform: rotate(45deg);
+            transform-origin: center;
+            box-shadow: 1px 1px 5px 0px #00000060;
+            padding-bottom: 0.05rem;
+            box-sizing: border-box;
+
+            visibility: hidden;
+
+            &:hover {
+                background: #961818;
+                color: white;
+            }
+
+            span { transform: rotate(-45deg); }
+        }
+
+        &:hover a.delete-link { visibility: visible; }
+    }
+}
+
+
+// PoolTracker style override
+sb-ctwrap[content=Pools] sb-canvas {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-row-gap: 0.5rem;
+
+    subitem {
+        // I don't know why, but this is necessary
+        grid-column: 1;
+
         display: grid;
-        grid-template-columns: 4rem auto auto min-content;
-        background: #ffffff33;
+        grid-template-columns: 7rem auto 1rem;
+        grid-template-rows: auto 1.25rem;
+        grid-column-gap: 0.5rem;
+        height: 5rem;
+        background: #ffffff10;
+        margin-right: -0.5rem;
+        width: 100%;
 
-        &:last-child {
-            margin-bottom: 0;
-        }
-
-        &.new,
-        &.new-viewed {
-            order: -1;
-        }
-
-        div.subscription-update-preview {
+        a.img-link {
             grid-row: span 2;
 
             img {
-                width: 100%;
-                height: 4rem;
+                width: 7rem;
+                height: 5rem;
                 object-fit: cover;
             }
         }
 
-        div.subscription-update-title {
-            grid-column: span 2;
-            font-size: 1.1em;
-            font-weight: bold;
-            margin: 0.5rem 0.5rem 0
+        div.info-section {
+            grid-area: 1 / 2;
+            padding-top: 0.25rem;
+
+            a {
+                display: block;
+                font-size: 1.25rem;
+                max-width: 28.5rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            div { color: #777; }
         }
 
-        div.subscription-update-remove {
-            margin: 0.5rem;
+        a.all-link {
+            grid-area: 2 / 2;
+            align-self: center;
         }
 
-        div.subscription-update-full {
+        a.delete-link {
+            grid-area: 1 / 3 / span 2;
+            background: #ffffff10;
+            height: 100%;
             display: flex;
-            align-self: end;
-            margin: 0rem 0.5rem 0.5rem;
-            font-size: 0.9em;
-        }
+            align-items: center;
+            justify-content: center;
+            color: #ddd;
 
-        div.subscription-update-date {
-            grid-column: span 2;
-            display: flex;
-            align-self: end;
-            font-size: 0.9em;
-            margin: 0rem 0.5rem 0.5rem;
-            justify-content: flex-end;
-        }
-    }
-
-    div.subscription-load-status {
-        width: fit-content;
-        margin: 3rem auto;
-        grid-column: span 4;
-        font-family: monospace;
-        font-size: 1.5em;
-
-        div {
-            color: #aaa;
-            margin-top: 0.5rem;
-        }
-    }
-
-}
-
-// Forum Subscriptions
-.subscriptions-list[data-subscription-class=ForumTracker] {
-
-    div.subscription-update:not(.notice) {
-
-        div.subscription-update-preview {
-            display: none;
-        }
-
-        div.subscription-update-title {
-            grid-column: span 3;
-        }
-
-        div.subscription-update-full {
-            grid-column: span 2;
+            &:hover { background: #ffffff25; }
         }
     }
 }
 
-// Tag Subscriptions
-.subscriptions-list[data-subscription-class=TagTracker] {
-    grid-template-columns: 1fr 1fr 1fr 1fr;
 
-    div.subscription-update.notice {
-        grid-column: span 4;
-    }
-
-    div.subscription-update:not(.notice) {
-        display: block;
-        margin-bottom: 0;
-        position: relative;
-
-        div.subscription-update-title,
-        div.subscription-update-full,
-        div.subscription-update-date {
-            display: none;
-        }
-
-        div.subscription-update-preview {
-
-            img {
-                height: 6rem;
-            }
-        }
-
-        div.subscription-update-remove {
-            visibility: hidden;
-            position: absolute;
-            top: 0;
-            right: 0;
-            margin: 0.25rem;
-
-            i.fas {
-                text-shadow: 0px 0px 10px black;
-                color: red;
-
-                &:hover {
-                    color: darkred;
-                }
-            }
-        }
-
-        &:hover div.subscription-update-remove {
-            visibility: visible;
-        }
-    }
-}
-
-// Comment Subscriptions
-.subscriptions-list[data-subscription-class=CommentTracker] {
-
-    div.subscription-update:not(.notice) {
-
-        div.subscription-update-title {
-            font-weight: inherit;
-            font-size: 1em;
-
-            a::after {
-                content: ": ";
-            }
-        }
-    }
-}
-
-// Subscription Management
-.subscriptions-manage-list {
+// ForumTracker style override
+sb-ctwrap[content=Forums] sb-canvas {
     display: grid;
     grid-template-columns: 1fr;
+    grid-row-gap: 0.5rem;
 
-    &.col-2 {
-        grid-template-columns: 1fr 1fr;
+    subitem {
+        // I don't know why, but this is necessary
+        grid-column: 1;
+
+        display: grid;
+        grid-template-columns: auto 1rem;
+        grid-column-gap: 0.5rem;
+        height: 5rem;
+        background: #ffffff10;
+        margin-right: -0.5rem;
+        width: 100%;
+
+        div.info-section {
+            align-self: center;
+            padding-left: 0.5rem;
+
+            a {
+                display: block;
+                font-size: 1.25rem;
+                max-width: 28.5rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            div { color: #777; }
+        }
+
+        a.delete-link {
+            background: #ffffff10;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ddd;
+
+            &:hover { background: #ffffff25; }
+        }
     }
+}
 
-    item {
-        display: inline-block;
-        white-space: nowrap;
-        overflow: hidden;
 
-        a.sub-manage-unsub {
-            margin-right: 0.25rem;
+sb-ctwrap[content=Comments] sb-canvas {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-row-gap: 0.5rem;
+
+    subitem {
+        // I don't know why, but this is necessary
+        grid-column: 1;
+
+        display: grid;
+        grid-template-columns: 7rem auto 1rem;
+        grid-column-gap: 0.5rem;
+        height: 5rem;
+        background: #ffffff10;
+        margin-right: -0.5rem;
+        width: 100%;
+
+        a.img-link {
+
+            img {
+                width: 7rem;
+                height: 5rem;
+                object-fit: cover;
+            }
+        }
+
+        div.info-section {
+            padding-top: 0.25rem;
+
+            a {
+                display: block;
+                font-size: 1rem;
+                max-width: 28.5rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            div { color: #777; }
+            div.comment-body {
+                height: 2.2rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                width: 28rem;
+                color: #ccc;
+            }
+        }
+
+        a.delete-link {
+            background: #ffffff10;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ddd;
+
+            &:hover { background: #ffffff25; }
         }
     }
 }
