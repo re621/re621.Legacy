@@ -151,8 +151,15 @@ export class SubscriptionManager extends RE6Module {
             const modalEl = modal.getElement().parent();
             modalEl.addClass("vis-hidden");
             await Util.sleep(50);
-            modalEl.css("left", ($(document).outerWidth() - modalEl.outerWidth() - 16) + "px");
-            modalEl.css("top", $("#page").offset().top + "px");
+
+            // Calculates offsets relative to the page
+            // Document's width cannot be used, since some people have ridiculous profile descriptions that extend past that
+            // ex. Fenrick https://e621.net/users/87183
+            // Window's width is inconsistent and just generally not very useful
+            const $page = $("#page"), pageOffset = $page.offset();
+            modalEl.css("left", (pageOffset.left + $page.outerWidth() - modalEl.outerWidth()) + "px");
+            modalEl.css("top", pageOffset.top + "px");
+
             modalEl.removeClass("vis-hidden");
         });
 
