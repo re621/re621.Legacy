@@ -19,6 +19,8 @@ export class HoverZoom extends RE6Module {
     private $zoomTags: JQuery<HTMLElement>;     // Post's tags section displayed on hover
 
     private shiftPressed = false;               // Used to block zoom in onshift mode
+    private pageX = 0;                          // Mouse position
+    private pageY = 0;
 
     private static curPost: PostData = null;    // Post over which the user currently hovers, or null if there isn't one
 
@@ -86,7 +88,8 @@ export class HoverZoom extends RE6Module {
         $(document)
             .off("scroll.re621.zoom")
             .off("keydown.re621.zoom")
-            .off("keyup.re621.zoom");
+            .off("keyup.re621.zoom")
+            .off("mousemove.re621.zoom");
 
         $(window)
             .off("blur.re621.zoom");
@@ -96,6 +99,21 @@ export class HoverZoom extends RE6Module {
             .off("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail");
 
         if (zoomMode == ImageZoomMode.Disabled) return;
+
+        // Listen for mouse position
+        let throttled = false;
+        $(document).on("mousemove.re621.zoom", (event) => {
+
+            // Throttle the mousemove events to 40 frames per second
+            // Anything less than 30 feels choppy, but performance is a concern
+            if (throttled) return;
+            throttled = true;
+            window.setTimeout(() => { throttled = false }, 25);
+
+            this.pageX = event.pageX;
+            this.pageY = event.pageY;
+            HoverZoom.trigger("mousemove", { x: event.pageX, y: event.pageY, });
+        });
 
         // Listen for mouse hover over thumbnails
         let timer = 0;
@@ -257,49 +275,32 @@ export class HoverZoom extends RE6Module {
                     .css({ "max-width": width + "px" });
 
             // Listen for mouse movements to move the preview accordingly
-            let throttled = false;
-            $(document).on("mousemove.re621.zoom", (event) => {
+            HoverZoom.on("mousemove.tracking", () => {
+                alignWindow(viewport, this.$zoomBlock, this.pageX, this.pageY);
+            });
+            alignWindow(viewport, this.$zoomBlock, this.pageX, this.pageY);
 
-                // Throttle the mousemove events to 40 frames per second
-                // Anything less than 30 feels choppy, but performance is a concern
-                if (throttled) return;
-                throttled = true;
-                window.setTimeout(() => { throttled = false }, 25);
-
-                const imgHeight = this.$zoomBlock.height(),
-                    imgWidth = this.$zoomBlock.width(),
-                    cursorX = event.pageX,
-                    cursorY = event.pageY - viewport.scrollTop();
+            function alignWindow(viewport: JQuery<Window>, zoomBlock: JQuery<HTMLElement>, x: number, y: number): void {
+                const imgHeight = zoomBlock.height(),
+                    imgWidth = zoomBlock.width(),
+                    cursorX = x,
+                    cursorY = y - viewport.scrollTop();
 
                 const left = (cursorX < (viewport.width() / 2))
                     ? cursorX + 50                                  // left side of the screen
                     : cursorX - imgWidth - 50;                      // right side
                 const top = Util.Math.clamp(cursorY - (imgHeight / 2), 10, (viewport.height() - imgHeight - 10));
 
-                this.$zoomBlock.css({
+                zoomBlock.css({
                     "left": `${left}px`,
                     "top": `${top}px`,
                 });
+            }
 
-            });
-
-            // Emulate a mousemove event with data from the mouseover trigger
-            const offset = $ref.offset();
-            const e = $.Event("mousemove.re621.zoom");
-            const centerX = offset.left + ($ref.width() / 2),
-                centerY = offset.top + ($ref.height() / 2);
-            /*
-            // Alternative averaging method
-            e.pageX = data.pageX ? (data.pageX + centerX) / 2 : centerX;
-            e.pageY = data.pageY ? (data.pageY + centerY) / 2 : centerY;
-            */
-            e.pageX = data.pageX ? data.pageX : centerX;
-            e.pageY = data.pageY ? data.pageY : centerY;
-            $(document).trigger(e);
         });
 
         HoverZoom.on("zoom.stop", (event, data) => {
-            $(document).off("mousemove.re621.zoom");
+            HoverZoom.off("mousemove.tracking");
 
             const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}]`).first();
 
