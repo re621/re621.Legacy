@@ -3,7 +3,6 @@ import { Page } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
-import { BetterSearch, ImageLoadMethod } from "../search/BetterSearch";
 import { SubscriptionCache, UpdateContent, UpdateData } from "./_SubscriptionCache";
 import { SubscriptionList } from "./_SubscriptionList";
 import { SubscriptionManager } from "./_SubscriptionManager";
@@ -116,8 +115,11 @@ export class SubscriptionTracker extends RE6Module {
                     $el.removeAttr("new");
             }
 
-            if (isIntersecting && document.hasFocus() && parseInt(this.ctwrap.attr("added")) > 0)
-                this.cache.purgeNew();
+            if (isIntersecting) {
+                if (document.hasFocus() && parseInt(this.ctwrap.attr("added")) > 0)
+                    this.cache.purgeNew();
+                this.loadLargeThumbs = ModuleController.fetchSettings(SubscriptionManager, "loadLargeThumbs");
+            }
 
             await Util.sleep(500);
             SubscriptionManager.trigger("attributes." + this.trackerID);
@@ -446,7 +448,6 @@ export class SubscriptionTracker extends RE6Module {
         SubscriptionManager.trigger("attributes." + this.trackerID);
 
         this.execPreDraw();
-        this.loadLargeThumbs = ModuleController.fetchSettings(BetterSearch, "imageLoadMethod") !== ImageLoadMethod.Disabled;
         this.canvas.append(this.drawNewUpdatesDivider());
         this.cache.forEach((data, timestamp) => {
             const entry = this.drawUpdateEntry(data, timestamp, (timestamp, result) => {

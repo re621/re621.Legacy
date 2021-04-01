@@ -33,7 +33,7 @@ export class SubscriptionManager extends RE6Module {
             cacheVersion: 0,                // utility variable, cache is cleared if it does not match the hardcoded one
 
             skipPreflightChecks: false,     // suppresses the network status check before the update
-
+            loadLargeThumbs: false,         // replaces the preview-sized thumbnails with (animated) sample sized ones
 
             hotkeyOpenNotifications: "",    // hotkey that opens the notifications window
         }
@@ -199,7 +199,7 @@ export class SubscriptionManager extends RE6Module {
 
             Form.header("Settings", 2),
             Form.section({ wrapper: "subscription-settings", columns: 2, width: 2, }, trackerConfig),
-            Form.spacer(2),
+            Form.spacer(2, true),
 
             Form.text(`Interval: How often should the subscriptions be checked for updates`, 2, "subscription-tutorial"),
             Form.text(`Cache Size: Maximum number of updates stored, between 10 and 500`, 2, "subscription-tutorial"),
@@ -214,6 +214,18 @@ export class SubscriptionManager extends RE6Module {
                 },
                 async (data) => {
                     await this.pushSettings("skipPreflightChecks", data);
+                }
+            ),
+            Form.spacer(2, true),
+
+            Form.checkbox(
+                {
+                    value: this.fetchSettings("loadLargeThumbs"),
+                    label: "<b>Load Large Thumbnails</b><br />Use the larger animation-enabled thumbnails instead of the default ones",
+                    width: 3,
+                },
+                async (data) => {
+                    await this.pushSettings("loadLargeThumbs", data);
                 }
             ),
         ]);
