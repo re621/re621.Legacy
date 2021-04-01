@@ -3,6 +3,7 @@ import { Page } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
+import { BetterSearch, ImageLoadMethod } from "../search/BetterSearch";
 import { SubscriptionCache, UpdateContent, UpdateData } from "./_SubscriptionCache";
 import { SubscriptionList } from "./_SubscriptionList";
 import { SubscriptionManager } from "./_SubscriptionManager";
@@ -37,7 +38,7 @@ export class SubscriptionTracker extends RE6Module {
     private isVisible = false;              // notifications tab is currently open
     private networkOffline = false;         // unable to connect to the internet
 
-    protected loadLargeThumbs = false;        // thumbnail resolution - sample / preview
+    protected loadLargeThumbs = false;      // thumbnail resolution - sample / preview
 
     public constructor() {
         super();
@@ -413,7 +414,7 @@ export class SubscriptionTracker extends RE6Module {
         SubscriptionManager.trigger("attributes." + this.trackerID);
 
         this.execPreDraw();
-        // this.loadLargeThumbs = ModuleController.fetchSettings(BetterSearch, "imageLoadMethod") !== ImageLoadMethod.Disabled;
+        this.loadLargeThumbs = ModuleController.fetchSettings(BetterSearch, "imageLoadMethod") !== ImageLoadMethod.Disabled;
         this.canvas.append(this.drawNewUpdatesDivider());
         this.cache.forEach((data, timestamp) => {
             const entry = this.drawUpdateEntry(data, timestamp, (timestamp, result) => {
