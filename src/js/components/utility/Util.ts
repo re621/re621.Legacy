@@ -48,24 +48,35 @@ export class Util {
 
     /**
      * Split the array into chunks of specified size.  
-     * If `altMode` is set to true, splits array into two parts.  
-     * - [0] is the size specified by the `size` argument  
-     * - [1] is the remainder.  
-     * Otherwise, splits the array normally.
+     * The `method` parameter defines how the array is split.  
+     * - "balance": the chunks are at most `size` big, but otherwise of equal size
+     * - "chunk": all chunks except for the last one of equal size
+     * - "split": first chunk is `size` big, the second contains the remainder
      * @param input Original array
      * @param size Size of the resulting chunks
-     * @param altMode Alternative mode
+     * @param method Method by which the array is split
      * @returns Array of smaller arrays of specified size
      */
-    public static chunkArray<T>(input: T[] | Set<T>, size: number, altMode = false): T[][] {
+    public static chunkArray<T>(input: T[] | Set<T>, size: number, method: "balance" | "chunk" | "split" = "balance"): T[][] {
         if (!Array.isArray(input)) input = Array.from(input);
         const result = [];
-        if (altMode) {
-            result[0] = input.slice(0, size);
-            result[1] = input.slice(size);
-        } else {
-            for (let i = 0; i < input.length; i += size)
-                result.push(input.slice(i, i + size));
+        switch (method) {
+            case "chunk": {
+                for (let i = 0; i < input.length; i += size)
+                    result.push(input.slice(i, i + size));
+                break;
+            }
+            case "split": {
+                result[0] = input.slice(0, size);
+                result[1] = input.slice(size);
+                break;
+            }
+            case "balance":
+            default: {
+                const parts = Math.ceil(input.length / size);
+                for (let i = parts; i > 0; i--)
+                    result.push(input.splice(0, Math.ceil(input.length / i)));
+            }
         }
         return result;
     }
