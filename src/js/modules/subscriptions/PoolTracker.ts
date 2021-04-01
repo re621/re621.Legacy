@@ -52,8 +52,10 @@ export class PoolTracker extends SubscriptionTracker {
         for (const [index, chunk] of subscriptionsChunks.entries()) {
 
             // Processing batch #index
-            if (subscriptionsChunks.length > 1) this.writeStatus(`&nbsp; &nbsp; &nbsp; - processing batch #${index}`);
-            apiResponse.push(...await E621.Pools.get<APIPool>({ "search[id]": chunk.join(",") }, 500));
+            if (index == 10) this.writeStatus(`&nbsp; &nbsp; &nbsp; <span style="color:gold">connection throttled</span>`);
+            if (subscriptionsChunks.length > 1)
+                this.writeStatus(`&nbsp; &nbsp; - processing batch #${index} [<a href="/pools?search[id]=${chunk.join(",")}" target="_blank">${chunk.length}</a>]`);
+            apiResponse.push(...await E621.Pools.get<APIPool>({ "search[id]": chunk.join(",") }, index < 10 ? 500 : 1000));
 
             // This should prevent the tracker from double-updating if the process takes more than 5 minutes
             // There are definitely users who are subscribed to enough tags to warrant this
@@ -76,7 +78,9 @@ export class PoolTracker extends SubscriptionTracker {
             for (const [index, chunk] of postsChunks.entries()) {
 
                 // Processing batch #index
-                if (postsChunks.length > 1) this.writeStatus(`&nbsp; &nbsp; &nbsp; - processing batch #${index}`);
+                if (index == 10) this.writeStatus(`&nbsp; &nbsp; &nbsp; <span style="color:gold">connection throttled</span>`);
+                if (subscriptionsChunks.length > 1)
+                    this.writeStatus(`&nbsp; &nbsp; - processing batch #${index} [<a href="/posts?tags=id:${chunk.join(",")}" target="_blank">${chunk.length}</a>]`);
                 for (const post of await E621.Posts.get<APIPost>({ "tags": "id:" + chunk.join(","), "limit": 320 }, index < 10 ? 500 : 1000))
                     postData.set(post.id, post);
 
@@ -87,6 +91,7 @@ export class PoolTracker extends SubscriptionTracker {
 
         // Parsing output, discarding irrelevant data
         this.writeStatus(`. . . formatting output`);
+        // await Util.sleep(5000);
         for (const pool of apiResponse) {
 
             // Don't bother with empty pools

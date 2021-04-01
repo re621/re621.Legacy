@@ -64,10 +64,12 @@ export class TagTracker extends SubscriptionTracker {
         for (const [index, chunk] of subscriptionsChunks.entries()) {
 
             // Processing batch #index
-            if (subscriptionsChunks.length > 1) this.writeStatus(`&nbsp; &nbsp; &nbsp; - processing batch #${index}`);
-            if (index == 10) this.writeStatus(`<span style="color:gold">warning</span> connection throttled`)
+            const processedChunk = chunk.map(el => "~" + el);
+            if (index == 10) this.writeStatus(`&nbsp; &nbsp; &nbsp; <span style="color:gold">connection throttled</span>`);
+            if (subscriptionsChunks.length > 1)
+                this.writeStatus(`&nbsp; &nbsp; - processing batch #${index} [<a href="/posts?tags=${processedChunk.join("+")}" target="_blank">${chunk.length}</a>]`);
 
-            for (const post of await E621.Posts.get<APIPost>({ "tags": chunk.map(el => "~" + el), "limit": 320 }, index < 10 ? 500 : 1000))
+            for (const post of await E621.Posts.get<APIPost>({ "tags": processedChunk, "limit": 320 }, index < 10 ? 500 : 1000))
                 apiResponse[new Date(post.created_at).getTime()] = post;
 
             // This should prevent the tracker from double-updating if the process takes more than 5 minutes
@@ -77,7 +79,7 @@ export class TagTracker extends SubscriptionTracker {
 
         // Parsing output, discarding irrelevant data
         this.writeStatus(`. . . formatting output`);
-        await Util.sleep(500);
+        // await Util.sleep(5000);
         for (const index of Object.keys(apiResponse).sort()) {
 
             // This is needed exclusively for the Blacklist below

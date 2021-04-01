@@ -51,7 +51,9 @@ export class CommentTracker extends SubscriptionTracker {
         for (const [index, chunk] of subscriptionsChunks.entries()) {
 
             // Processing batch #index
-            if (subscriptionsChunks.length > 1) this.writeStatus(`&nbsp; &nbsp; &nbsp; - processing batch #${index}`);
+            if (index == 10) this.writeStatus(`&nbsp; &nbsp; &nbsp; <span style="color:gold">connection throttled</span>`);
+            if (subscriptionsChunks.length > 1)
+                this.writeStatus(`&nbsp; &nbsp; - processing batch #${index} [<a href="/comments?search[post_id]=${chunk.join(",")}&group_by=comment" target="_blank">${chunk.length}</a>]`);
             apiResponse.push(...await E621.Comments.get<APIComment>({ "group_by": "comment", "search[post_id]": chunk.join(",") }, 500));
 
             // This should prevent the tracker from double-updating if the process takes more than 5 minutes
@@ -81,7 +83,9 @@ export class CommentTracker extends SubscriptionTracker {
             for (const [index, chunk] of postsChunks.entries()) {
 
                 // Processing batch #index
-                if (postsChunks.length > 1) this.writeStatus(`&nbsp; &nbsp; &nbsp; - processing batch #${index}`);
+                if (index == 10) this.writeStatus(`&nbsp; &nbsp; &nbsp; <span style="color:gold">connection throttled</span>`);
+                if (subscriptionsChunks.length > 1)
+                    this.writeStatus(`&nbsp; &nbsp; - processing batch #${index} [<a href="/posts?tags=id:${chunk.join(",")}" target="_blank">${chunk.length}</a>]`);
                 for (const post of await E621.Posts.get<APIPost>({ "tags": "id:" + chunk.join(","), "limit": 320 }, index < 10 ? 500 : 1000))
                     postData.set(post.id, post);
 
