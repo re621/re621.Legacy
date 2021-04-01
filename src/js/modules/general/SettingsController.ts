@@ -1681,7 +1681,7 @@ export class SettingsController extends RE6Module {
 
         /** Creates and returns two keybind inputs and a label */
         function createInputs(module: RE6Module, label: string, settingsKey: string): FormElement[] {
-            const values = module.fetchSettings(settingsKey).split("|");
+            const values = (module.fetchSettings(settingsKey) || "").split("|");
             const bindings: string[] = [
                 values[0] === undefined ? "" : values[0],
                 values[1] === undefined ? "" : values[1],
