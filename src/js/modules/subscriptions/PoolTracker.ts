@@ -141,8 +141,8 @@ export class PoolTracker extends SubscriptionTracker {
         let extraData = this.slist.getExtraData(data.uid + "") || {};
         const result = $("<subitem>")
             .attr({
-                // Output ordering
-                "new": data.new,
+                "new": data.new,    // Output ordering
+                "uid": timestamp,   // Needed for dynamic rendering
 
                 // Necessary data for the HoverZoom
                 "data-id": data.uid,
@@ -172,15 +172,18 @@ export class PoolTracker extends SubscriptionTracker {
                     XM.Util.openInTab(window.location.origin + link.attr("href"), false);
                 });
 
-                const img = $("<img>")
+                const image = $("<img>")
                     .attr({
-                        src: this.loadLargeThumbs
-                            ? getSampleLink(imageData[0], imageData[1] == "true", imageData[2])
-                            : getPreviewLink(imageData[0]),
+                        src: getPreviewLink(imageData[0]),
                         hztarget: "subitem",
                     })
+                    .one("load", () => {
+                        // This is a workaround to avoid empty thumbnails
+                        // The preview gets loaded first, then a sample replaces it if necessary
+                        if (this.loadLargeThumbs) image.attr("src", getSampleLink(imageData[0], imageData[1] == "true", imageData[2]));
+                    })
                     .one("error", () => {
-                        img.attr("src", "https://e621.net/images/deleted-preview.png");
+                        image.attr("src", "https://e621.net/images/deleted-preview.png");
                         extraData = this.slist.getExtraData(data.uid + "") || {};
                         delete extraData.data;
                         this.slist.addExtraData(data.uid + "", extraData);

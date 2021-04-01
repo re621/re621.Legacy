@@ -40,6 +40,8 @@ export class SubscriptionTracker extends RE6Module {
 
     protected loadLargeThumbs = false;      // thumbnail resolution - sample / preview
 
+    private observer: IntersectionObserver; // renders the updates when they come into view
+
     public constructor() {
         super();
 
@@ -114,11 +116,8 @@ export class SubscriptionTracker extends RE6Module {
                     $el.removeAttr("new");
             }
 
-            if (isIntersecting) {
-                if (document.hasFocus() && parseInt(this.ctwrap.attr("added")) > 0)
-                    this.cache.purgeNew();
-                this.canvas.children("subitem").trigger("re621:render");
-            } else this.canvas.children("subitem").trigger("re621:reset");
+            if (isIntersecting && document.hasFocus() && parseInt(this.ctwrap.attr("added")) > 0)
+                this.cache.purgeNew();
 
             await Util.sleep(500);
             SubscriptionManager.trigger("attributes." + this.trackerID);
@@ -408,6 +407,39 @@ export class SubscriptionTracker extends RE6Module {
 
         // console.log(`Sub${this.trackerID}: Drawing ${this.cache.count()}`);
 
+        if (this.observer) this.observer.disconnect();
+        const intersecting: Set<number> = new Set();
+        this.observer = new IntersectionObserver((entries) => {
+            for (const object of entries) {
+                const element = $(object.target),
+                    id = parseInt(element.attr("uid")),
+                    has = intersecting.has(id);
+
+                // ID is missing or invalid
+                if (!id) continue;
+
+                // element left the viewport
+                if (has && !object.isIntersecting) {
+                    // console.log("object left", id);
+                    intersecting.delete(id);
+                    element.trigger("re621:reset");
+                }
+                // element entered viewport
+                if (!has && object.isIntersecting) {
+                    // console.log("object entered", id);
+                    intersecting.add(id);
+                    window.setTimeout(() => {
+                        if (!intersecting.has(id)) return;
+                        element.trigger("re621:render");
+                    }, 100);
+                }
+            }
+        }, {
+            root: this.ctwrap.parents("div.subscription-wrapper")[0],
+            rootMargin: "100% 50% 100% 50%",
+            threshold: 0.5,
+        });
+
         // Reset the canvas to base state
         this.canvas.html("");
         this.ctwrap.attr({ state: TrackerState.Draw });
@@ -424,9 +456,7 @@ export class SubscriptionTracker extends RE6Module {
                 SubscriptionManager.trigger("attributes." + this.trackerID);
             });
 
-            if (!document.hasFocus() && this.isVisible)
-                entry.trigger("re621:render");
-
+            this.observer.observe(entry[0]);
             this.canvas.append(entry);
         });
         this.execPostDraw();

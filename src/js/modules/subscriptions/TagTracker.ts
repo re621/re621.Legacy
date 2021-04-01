@@ -122,8 +122,8 @@ export class TagTracker extends SubscriptionTracker {
         const imageData = data.md5.split("|");
         const result = $("<subitem>")
             .attr({
-                // Output ordering
-                "new": data.new,
+                "new": data.new,    // Output ordering
+                "uid": timestamp,   // Needed for dynamic rendering
 
                 // Necessary data for the HoverZoom
                 "data-id": data.uid,
@@ -151,12 +151,15 @@ export class TagTracker extends SubscriptionTracker {
 
                 const image = $("<img>")
                     .attr({
-                        src: this.loadLargeThumbs
-                            ? getSampleLink(imageData[0], imageData[1] == "true", imageData[2])
-                            : getPreviewLink(imageData[0]),
+                        src: getPreviewLink(imageData[0]),
                         hztarget: "subitem",
                     })
                     .appendTo(link)
+                    .one("load", () => {
+                        // This is a workaround to avoid empty thumbnails
+                        // The preview gets loaded first, then a sample replaces it if necessary
+                        if (this.loadLargeThumbs) image.attr("src", getSampleLink(imageData[0], imageData[1] == "true", imageData[2]));
+                    })
                     .one("error", () => {
                         image.attr("src", "https://e621.net/images/deleted-preview.png");
                     });

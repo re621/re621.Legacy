@@ -90,7 +90,10 @@ export class ForumTracker extends SubscriptionTracker {
 
         const threadData = data.ext.split("|");
         const result = $("<subitem>")
-            .attr({ new: data.new, })
+            .attr({
+                "new": data.new,    // Output ordering
+                "uid": timestamp,   // Needed for dynamic rendering
+            })
             .on("re621:render", () => {
 
                 const mainSection = $("<div>")
