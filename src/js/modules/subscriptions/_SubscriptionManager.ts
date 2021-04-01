@@ -19,6 +19,13 @@ export class SubscriptionManager extends RE6Module {
     private static windowOpen = false;      // Whether or not the notifications window is open
     private static activeTab: string;       // ID of the tracker tab that is open
 
+    public constructor() {
+        super();
+        this.registerHotkeys(
+            { keys: "hotkeyOpenNotifications", fnct: this.openNotifications },
+        );
+    }
+
     public getDefaultSettings(): Settings {
         return {
             enabled: true,
@@ -26,6 +33,9 @@ export class SubscriptionManager extends RE6Module {
             cacheVersion: 0,                // utility variable, cache is cleared if it does not match the hardcoded one
 
             skipPreflightChecks: false,     // suppresses the network status check before the update
+
+
+            hotkeyOpenNotifications: "",    // hotkey that opens the notifications window
         }
     }
 
@@ -34,7 +44,7 @@ export class SubscriptionManager extends RE6Module {
 
         // Create a notifications button
         const openSubscriptionsButton = Util.DOM.addSettingsButton({
-            id: "header-button-settings",
+            id: "header-button-notifications",
             name: `<i class="fas fa-bell"></i>`,
             title: "Notifications",
             attr: {
@@ -444,6 +454,13 @@ export class SubscriptionManager extends RE6Module {
         }
 
         return SubscriptionManager.cacheValid;
+    }
+
+    /**
+     * Toggles the notifications window
+     */
+    private openNotifications(): void {
+        $("a#header-button-notifications")[0].click();
     }
 
 }
