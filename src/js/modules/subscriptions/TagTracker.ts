@@ -64,10 +64,12 @@ export class TagTracker extends SubscriptionTracker {
         for (const [index, chunk] of subscriptionsChunks.entries()) {
 
             // Processing batch #index
-            if (subscriptionsChunks.length > 1) this.writeStatus(`&nbsp; &nbsp; &nbsp; - processing batch #${index}`);
-            if (index == 10) this.writeStatus(`<span style="color:gold">warning</span> connection throttled`)
+            const processedChunk = chunk.map(el => "~" + el);
+            if (index == 10) this.writeStatus(`&nbsp; &nbsp; &nbsp; <span style="color:gold">connection throttled</span>`);
+            if (subscriptionsChunks.length > 1)
+                this.writeStatus(`&nbsp; &nbsp; - processing batch #${index} [<a href="/posts?tags=${processedChunk.join("+")}" target="_blank">${chunk.length}</a>]`);
 
-            for (const post of await E621.Posts.get<APIPost>({ "tags": chunk.map(el => "~" + el), "limit": 320 }, index < 10 ? 500 : 1000))
+            for (const post of await E621.Posts.get<APIPost>({ "tags": processedChunk, "limit": 320 }, index < 10 ? 500 : 1000))
                 apiResponse[new Date(post.created_at).getTime()] = post;
 
             // This should prevent the tracker from double-updating if the process takes more than 5 minutes
@@ -77,7 +79,7 @@ export class TagTracker extends SubscriptionTracker {
 
         // Parsing output, discarding irrelevant data
         this.writeStatus(`. . . formatting output`);
-        await Util.sleep(500);
+        // await Util.sleep(5000);
         for (const index of Object.keys(apiResponse).sort()) {
 
             // This is needed exclusively for the Blacklist below
@@ -122,8 +124,8 @@ export class TagTracker extends SubscriptionTracker {
         const imageData = data.md5.split("|");
         const result = $("<subitem>")
             .attr({
-                // Output ordering
-                "new": data.new,
+                "new": data.new,    // Output ordering
+                "uid": timestamp,   // Needed for dynamic rendering
 
                 // Necessary data for the HoverZoom
                 "data-id": data.uid,
@@ -151,12 +153,15 @@ export class TagTracker extends SubscriptionTracker {
 
                 const image = $("<img>")
                     .attr({
-                        src: this.loadLargeThumbs
-                            ? getSampleLink(imageData[0], imageData[1] == "true", imageData[2])
-                            : getPreviewLink(imageData[0]),
+                        src: getPreviewLink(imageData[0]),
                         hztarget: "subitem",
                     })
                     .appendTo(link)
+                    .one("load", () => {
+                        // This is a workaround to avoid empty thumbnails
+                        // The preview gets loaded first, then a sample replaces it if necessary
+                        if (this.loadLargeThumbs) image.attr("src", getSampleLink(imageData[0], imageData[1] == "true", imageData[2]));
+                    })
                     .one("error", () => {
                         image.attr("src", "https://e621.net/images/deleted-preview.png");
                     });

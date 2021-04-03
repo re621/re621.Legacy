@@ -51,7 +51,9 @@ export class CommentTracker extends SubscriptionTracker {
         for (const [index, chunk] of subscriptionsChunks.entries()) {
 
             // Processing batch #index
-            if (subscriptionsChunks.length > 1) this.writeStatus(`&nbsp; &nbsp; &nbsp; - processing batch #${index}`);
+            if (index == 10) this.writeStatus(`&nbsp; &nbsp; &nbsp; <span style="color:gold">connection throttled</span>`);
+            if (subscriptionsChunks.length > 1)
+                this.writeStatus(`&nbsp; &nbsp; - processing batch #${index} [<a href="/comments?search[post_id]=${chunk.join(",")}&group_by=comment" target="_blank">${chunk.length}</a>]`);
             apiResponse.push(...await E621.Comments.get<APIComment>({ "group_by": "comment", "search[post_id]": chunk.join(",") }, 500));
 
             // This should prevent the tracker from double-updating if the process takes more than 5 minutes
@@ -81,7 +83,9 @@ export class CommentTracker extends SubscriptionTracker {
             for (const [index, chunk] of postsChunks.entries()) {
 
                 // Processing batch #index
-                if (postsChunks.length > 1) this.writeStatus(`&nbsp; &nbsp; &nbsp; - processing batch #${index}`);
+                if (index == 10) this.writeStatus(`&nbsp; &nbsp; &nbsp; <span style="color:gold">connection throttled</span>`);
+                if (subscriptionsChunks.length > 1)
+                    this.writeStatus(`&nbsp; &nbsp; - processing batch #${index} [<a href="/posts?tags=id:${chunk.join(",")}" target="_blank">${chunk.length}</a>]`);
                 for (const post of await E621.Posts.get<APIPost>({ "tags": "id:" + chunk.join(","), "limit": 320 }, index < 10 ? 500 : 1000))
                     postData.set(post.id, post);
 
@@ -141,8 +145,8 @@ export class CommentTracker extends SubscriptionTracker {
 
         const result = $("<subitem>")
             .attr({
-                // Output ordering
-                "new": data.new,
+                "new": data.new,    // Output ordering
+                "uid": timestamp,   // Needed for dynamic rendering
 
                 // Necessary data for the HoverZoom
                 "data-id": data.uid,
@@ -170,15 +174,18 @@ export class CommentTracker extends SubscriptionTracker {
                     XM.Util.openInTab(window.location.origin + link.attr("href"), false);
                 });
 
-                const img = $("<img>")
+                const image = $("<img>")
                     .attr({
-                        src: this.loadLargeThumbs
-                            ? getSampleLink(imageData[0], imageData[1] == "true", imageData[2])
-                            : getPreviewLink(imageData[0]),
+                        src: getPreviewLink(imageData[0]),
                         hztarget: "subitem",
                     })
+                    .one("load", () => {
+                        // This is a workaround to avoid empty thumbnails
+                        // The preview gets loaded first, then a sample replaces it if necessary
+                        if (this.loadLargeThumbs) image.attr("src", getSampleLink(imageData[0], imageData[1] == "true", imageData[2]));
+                    })
                     .one("error", () => {
-                        img.attr("src", "https://e621.net/images/deleted-preview.png");
+                        image.attr("src", "https://e621.net/images/deleted-preview.png");
                         this.slist.deleteExtraData(commentData[1]);
                         this.slist.pushSubscriptions();
                     })

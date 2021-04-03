@@ -33,7 +33,7 @@ export class SubscriptionManager extends RE6Module {
             cacheVersion: 0,                // utility variable, cache is cleared if it does not match the hardcoded one
 
             skipPreflightChecks: false,     // suppresses the network status check before the update
-
+            loadLargeThumbs: false,         // replaces the preview-sized thumbnails with (animated) sample sized ones
 
             hotkeyOpenNotifications: "",    // hotkey that opens the notifications window
         }
@@ -151,8 +151,15 @@ export class SubscriptionManager extends RE6Module {
             const modalEl = modal.getElement().parent();
             modalEl.addClass("vis-hidden");
             await Util.sleep(50);
-            modalEl.css("left", ($(document).outerWidth() - modalEl.outerWidth() - 16) + "px");
-            modalEl.css("top", $("#page").offset().top + "px");
+
+            // Calculates offsets relative to the page
+            // Document's width cannot be used, since some people have ridiculous profile descriptions that extend past that
+            // ex. Fenrick https://e621.net/users/87183
+            // Window's width is inconsistent and just generally not very useful
+            const $page = $("#page"), pageOffset = $page.offset();
+            modalEl.css("left", (pageOffset.left + $page.outerWidth() - modalEl.outerWidth()) + "px");
+            modalEl.css("top", pageOffset.top + "px");
+
             modalEl.removeClass("vis-hidden");
         });
 
@@ -199,7 +206,7 @@ export class SubscriptionManager extends RE6Module {
 
             Form.header("Settings", 2),
             Form.section({ wrapper: "subscription-settings", columns: 2, width: 2, }, trackerConfig),
-            Form.spacer(2),
+            Form.spacer(2, true),
 
             Form.text(`Interval: How often should the subscriptions be checked for updates`, 2, "subscription-tutorial"),
             Form.text(`Cache Size: Maximum number of updates stored, between 10 and 500`, 2, "subscription-tutorial"),
@@ -214,6 +221,18 @@ export class SubscriptionManager extends RE6Module {
                 },
                 async (data) => {
                     await this.pushSettings("skipPreflightChecks", data);
+                }
+            ),
+            Form.spacer(2, true),
+
+            Form.checkbox(
+                {
+                    value: this.fetchSettings("loadLargeThumbs"),
+                    label: "<b>Load Large Thumbnails</b><br />Use the larger animation-enabled thumbnails instead of the default ones",
+                    width: 3,
+                },
+                async (data) => {
+                    await this.pushSettings("loadLargeThumbs", data);
                 }
             ),
         ]);

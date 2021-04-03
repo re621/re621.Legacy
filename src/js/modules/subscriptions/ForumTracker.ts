@@ -48,8 +48,10 @@ export class ForumTracker extends SubscriptionTracker {
         for (const [index, chunk] of subscriptionsChunks.entries()) {
 
             // Processing batch #index
-            if (subscriptionsChunks.length > 1) this.writeStatus(`&nbsp; &nbsp; &nbsp; - processing batch #${index}`);
-            apiResponse.push(...await E621.ForumTopics.get<APIForumTopic>({ "search[id]": chunk.join(",") }, 500));
+            if (index == 10) this.writeStatus(`&nbsp; &nbsp; &nbsp; <span style="color:gold">connection throttled</span>`);
+            if (subscriptionsChunks.length > 1)
+                this.writeStatus(`&nbsp; &nbsp; - processing batch #${index} [<a href="/forum_topics?search[id]=${chunk.join(",")}" target="_blank">${chunk.length}</a>]`);
+            apiResponse.push(...await E621.ForumTopics.get<APIForumTopic>({ "search[id]": chunk.join(",") }, index < 10 ? 500 : 1000));
 
             // This should prevent the tracker from double-updating if the process takes more than 5 minutes
             // There are definitely users who are subscribed to enough tags to warrant this
@@ -90,7 +92,10 @@ export class ForumTracker extends SubscriptionTracker {
 
         const threadData = data.ext.split("|");
         const result = $("<subitem>")
-            .attr({ new: data.new, })
+            .attr({
+                "new": data.new,    // Output ordering
+                "uid": timestamp,   // Needed for dynamic rendering
+            })
             .on("re621:render", () => {
 
                 const mainSection = $("<div>")
