@@ -158,7 +158,11 @@ export class BlacklistEnhancer extends RE6Module {
                     "enabled": filter.isEnabled()
                 })
                 .data("filter", filter)
-                .appendTo(BlacklistEnhancer.$content);
+                .appendTo(BlacklistEnhancer.$content)
+                .on("click", function (e) {
+                    if (e.target != this) return;
+                    $(e.target).find("a:first")[0].click();
+                });
             $("<a>")
                 .attr("href", "/posts?tags=" + tags.replace(" ", "+"))
                 .html(tags.replace(/_/g, "&#8203;_").replace(/ -/, " &#8209;"))
