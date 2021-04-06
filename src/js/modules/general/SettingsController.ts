@@ -32,6 +32,7 @@ import { SearchUtilities } from "../search/SearchUtilities";
 import { ForumTracker } from "../subscriptions/ForumTracker";
 import { PoolTracker } from "../subscriptions/PoolTracker";
 import { SubscriptionManager } from "../subscriptions/_SubscriptionManager";
+import { CommentBlacklist } from "./CommentBlacklist";
 import { HeaderCustomizer } from "./HeaderCustomizer";
 import { Miscellaneous } from "./Miscellaneous";
 
@@ -975,7 +976,12 @@ export class SettingsController extends RE6Module {
         const searchUtilities = ModuleController.get(SearchUtilities),
             miscellaneous = ModuleController.get(Miscellaneous),
             blacklistEnhancer = ModuleController.get(BlacklistEnhancer),
-            imageScaler = ModuleController.get(ImageScaler);
+            imageScaler = ModuleController.get(ImageScaler),
+            commentBlacklist = ModuleController.get(CommentBlacklist);
+
+        const blacklistInput = $("<textarea>")
+            .attr("id", "comblacklist-container")
+            .val(commentBlacklist.fetchSettings<string[]>("filters").join("\n"));
 
         return new Form({ name: "conf-blacklist", columns: 3, width: 3 }, [
 
@@ -1070,6 +1076,33 @@ export class SettingsController extends RE6Module {
             Form.text(`Tags added to every search, used to emulate server-side blacklisting`, 2),
             Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
             Form.spacer(3),
+
+            Form.text("<b>Comment Blacklist</b>", 3),
+            Form.text("Comments containing the following words will be hidden from view.<br />The syntax is similar to the one used in post blacklist.", 3),
+            Form.div({ value: blacklistInput, width: 3 }),
+
+            Form.button(
+                { value: "Save" },
+                async () => {
+                    const confirmBox = $("span#comblacklist-confirm").html("Saving . . .");
+
+                    const value = blacklistInput.val().toString().trim();
+                    let result = [];
+                    for (const line of value.split("\n"))
+                        result.push(line.toLowerCase());
+                    result = result.filter(n => n);
+                    await commentBlacklist.pushSettings("filters", result);
+
+                    confirmBox.html("Settings Saved");
+                    window.setTimeout(() => { confirmBox.html(""); }, 1000);
+                }
+            ),
+            Form.div({ value: `<span id="comblacklist-confirm"></span>` }),
+            /*
+            Form.div({
+                value: `<div class="float-right">[ <a href="${window["re621"]["links"]["repository"]}/wiki/CommentBlacklist">syntax help</a> ]</div>`
+            }),
+            */
 
         ]);
     }

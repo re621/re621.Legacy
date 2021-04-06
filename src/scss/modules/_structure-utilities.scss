@@ -329,6 +329,7 @@ div.blacklist-character-counter-box {
     margin-top: -1rem;
     font-size: 0.75rem;
     opacity: 0.5;
+    pointer-events: none;
 }
 
 /* Fix the issue with poorly colored upload form switches */
