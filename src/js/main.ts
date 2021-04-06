@@ -17,6 +17,7 @@ import { VersionChecker } from "./components/utility/VersionChecker";
 import { FavDownloader } from "./modules/downloader/FavDownloader";
 import { MassDownloader } from "./modules/downloader/MassDownloader";
 import { PoolDownloader } from "./modules/downloader/PoolDownloader";
+import { CommentBlacklist } from "./modules/general/CommentBlacklist";
 import { CompatibilityPatcher } from "./modules/general/CompatibilityPatcher";
 import { FormattingManager } from "./modules/general/FormattingHelper";
 import { HeaderCustomizer } from "./modules/general/HeaderCustomizer";
@@ -83,6 +84,7 @@ const loadOrder = [
     WikiEnhancer,
     UploadUtilities,
     ScriptAssistant,
+    CommentBlacklist,
 
     FavDownloader,
     PoolDownloader,

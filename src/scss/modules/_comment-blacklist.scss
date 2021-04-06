@@ -1,0 +1,11 @@
+
+.comment-blacklisted {
+    display: none !important;
+}
+
+textarea#comblacklist-container {
+    min-height: 14vh;
+    font-family: monospace;
+    font-size: 1.2em;
+    overflow: hidden auto;
+}
