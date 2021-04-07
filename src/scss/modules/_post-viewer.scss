@@ -76,6 +76,8 @@ div#c-posts div.parent-children.children-moved {
     & #has-parent-relationship-preview {
         display: grid;
         justify-items: center;
+        max-height: 50vh;
+        @include scrollbars;
     }
 }
 
