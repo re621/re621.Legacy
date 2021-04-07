@@ -1,0 +1,14 @@
+
+div.deletion-reason-suggestions {
+    padding: 1rem 0;
+
+    &::before {
+        content: "Reason";
+        font-weight: 900;
+    }
+    
+    & > a {
+        // This is a dumb hack, but I don't care
+        display: table;
+    }
+}

@@ -21,6 +21,7 @@ import { CommentBlacklist } from "./modules/general/CommentBlacklist";
 import { CompatibilityPatcher } from "./modules/general/CompatibilityPatcher";
 import { FormattingManager } from "./modules/general/FormattingHelper";
 import { HeaderCustomizer } from "./modules/general/HeaderCustomizer";
+import { JanitorEnhancements } from "./modules/general/JanitorEnhancements";
 import { Miscellaneous } from "./modules/general/Miscellaneous";
 import { SettingsController } from "./modules/general/SettingsController";
 import { ThemeCustomizer } from "./modules/general/ThemeCustomizer";
@@ -85,6 +86,7 @@ const loadOrder = [
     UploadUtilities,
     ScriptAssistant,
     CommentBlacklist,
+    JanitorEnhancements,
 
     FavDownloader,
     PoolDownloader,
