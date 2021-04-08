@@ -119,7 +119,7 @@ export class PostParts {
             });
 
         // Load appropriate image
-        if (post.flags.has(PostFlag.Deleted) && !User.canApprovePosts) {
+        if (post.flags.has(PostFlag.Deleted) && !User.isApprover) {
             post.img.ratio = 1;
             post.loaded = LoadedFileType.ORIGINAL;
         } else if (post.file.ext === "swf") {

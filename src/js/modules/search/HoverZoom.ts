@@ -207,7 +207,7 @@ export class HoverZoom extends RE6Module {
             ) return;
 
             // Skip deleted and flash files
-            if ((post.flags.has(PostFlag.Deleted) && !User.canApprovePosts) || post.file.ext == "swf") return;
+            if ((post.flags.has(PostFlag.Deleted) && !User.isApprover) || post.file.ext == "swf") return;
 
             const $img = $ref.find("img").first();
             $ref.data("stored-title", $img.attr("title") || "");

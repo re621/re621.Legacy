@@ -11,7 +11,27 @@ export class User {
     public static username: string;
     public static userID: number;
 
+    public static level: number;
+    public static levelString: string;
+
+    public static isMember: boolean;
+    public static isPrivileged: boolean;
+    public static isContributor: boolean;
+    public static isJanitor: boolean;
+    public static isModerator: boolean;
+    public static isAdmin: boolean;
+    public static isFormerStaff: boolean;
+
+    public static isVoter: boolean;
+    public static isVerified: boolean;
+    public static isApprover: boolean;
+    public static isBlocked: boolean;
+    public static isBanned: boolean;
+
     public static canApprovePosts: boolean;
+    public static canUploadFree: boolean;
+
+    public static postsPerPage: number;
     public static commentThreshold: number;
     public static blacklistedTags: string;
     public static blacklistUsers: boolean;
@@ -22,16 +42,35 @@ export class User {
 
     public static defaultImageSize: ImageScalingMode;
 
-    public static level: string;
-
     public static init(): void {
-        const $ref = $("body");
+        const data = $("body").data();
+        console.log(data);
 
-        User.loggedIn = getValue("current-user-name") !== "Anonymous";
-        User.username = getValue("current-user-name");
-        User.userID = parseInt(getValue("current-user-id")) || -1;
+        User.loggedIn = data.userIsAnonymous == false;
+        User.username = data.userName || "Anonymous";
+        User.userID = data.userId || -1;
 
-        User.canApprovePosts = getValue("current-user-can-approve-posts") == "true";
+        User.level = data.userLevel || 0;
+        User.levelString = data.userLevelString || "Anonymous";
+
+        User.isMember = data.userIsMemeber == true;
+        User.isPrivileged = data.userIsPrivileged == true;
+        User.isContributor = data.userIsContributor == true;
+        User.isJanitor = data.userIsJanitor == true;
+        User.isModerator = data.userIsModerator == true;
+        User.isAdmin = data.userIsAdmin == true;
+        User.isFormerStaff = data.userIsFormerStaff == true;
+
+        User.isVoter = data.userIsVoter == true;
+        User.isVerified = data.userIsVerified == true;
+        User.isApprover = data.userIsApprover == true;
+        User.isBlocked = data.userIsBlocked == true;
+        User.isBanned = data.userIsBanned == true;
+
+        User.canApprovePosts = data.userCanApprovePosts == true;
+        User.canUploadFree = data.userCanUploadFree == true;
+
+        User.postsPerPage = data.userPerPage || 75;
         User.commentThreshold = parseInt(getValue("user-comment-threshold")) || 3;
         User.blacklistedTags = getValue("blacklisted-tags");
         User.blacklistUsers = getValue("blacklist-users") == "true";
@@ -41,8 +80,6 @@ export class User {
         User.styleUsernames = getValue("style-usernames") == "true";
 
         User.defaultImageSize = ImageScalingMode.get(getValue("default-image-size"));
-
-        User.level = $ref.attr("data-user-level-string") || "Guest";
 
         function getValue(name: string): string {
             const el = $(`meta[name="${name}"]`);
