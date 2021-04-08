@@ -34,6 +34,7 @@ export class BetterSearch extends RE6Module {
     private queryLimit: number;                 // Maximum number of posts per request
 
     private pageResult: Promise<APIPost[]>;     // Post data, called in `prepare`, used in `create`
+    private pageResultCount: number;            // Number of posts loaded in the last fetch
 
     private lastPage: number;                   // Last page number from the vanilla pagination
     private hasMorePages: boolean;              // If false, there are no more posts to load
@@ -201,19 +202,31 @@ export class BetterSearch extends RE6Module {
             let pagesLoaded = 0;
 
             const pageResult = await this.pageResult;
+            this.pageResultCount = pageResult.length;
 
             // Create the statistics section
             const stats = $("<search-stats>")
                 .appendTo(this.$content);
 
             if (Util.Math.isNumeric(this.queryPage)) {
-                $("<span>")
+                const searchStatsCount = $("<span>")
                     .attr({
                         "id": "search-stats-count",
                         "title": "Approximate number of posts found",
                     })
-                    .html((this.lastPage > 1 ? "~" : "") + Util.formatK(pageResult.length * this.lastPage) + " Posts")
+                    .on("re621:update", () => {
+                        const results = (this.lastPage - 1) * User.postsPerPage + this.pageResultCount;
+                        const queryPageNum = parseInt(this.queryPage);
+                        if (!queryPageNum) searchStatsCount.html("");
+                        else searchStatsCount.html((
+                            this.lastPage == queryPageNum
+                                ? results
+                                : "~" + Util.formatK(results))
+                            + " Posts"
+                        );
+                    })
                     .appendTo(stats);
+                searchStatsCount.trigger("re621:update");
             }
 
             const order = this.queryTags.find(el => el.includes("order:"));
@@ -720,6 +733,8 @@ export class BetterSearch extends RE6Module {
             : this.queryPage = "b" + Post.get($("post:last")).id;
 
         const search = await this.fetchPosts(this.queryPage);
+        this.pageResultCount = search.length;
+        $("#search-stats-count").trigger("re621:update");
         if (search.length == 0) return Promise.resolve(false);
 
         const imageRatioChange = this.fetchSettings<boolean>("imageRatioChange");
