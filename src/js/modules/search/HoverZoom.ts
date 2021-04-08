@@ -1,6 +1,7 @@
 import { PostFlag } from "../../components/api/responses/APIPost";
 import { XM } from "../../components/api/XM";
 import { Blacklist } from "../../components/data/Blacklist";
+import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
 import { Post, PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -206,7 +207,7 @@ export class HoverZoom extends RE6Module {
             ) return;
 
             // Skip deleted and flash files
-            if (post.flags.has(PostFlag.Deleted) || post.file.ext == "swf") return;
+            if ((post.flags.has(PostFlag.Deleted) && !User.canApprovePosts) || post.file.ext == "swf") return;
 
             const $img = $ref.find("img").first();
             $ref.data("stored-title", $img.attr("title") || "");
