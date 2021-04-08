@@ -5,15 +5,18 @@ export class JanitorEnhancements extends RE6Module {
 
     private deletionReasons = [
         "Inferior version/duplicate of post #",
-        "Paysite/commercial content",
         "Irrelevant to site",
         "Excessive same base image set",
-        "The artist of this post is on the [[avoid posting list]]",
         "Colored base",
+        "",
         "Does not meet minimum quality standards (Artistic)",
         "Does not meet minimum quality standards. (Bad digitization of traditional media)",
         "Broken/corrupted file",
+        "JPG resaved as PNG",
+        "",
+        "Paysite/commercial content",
         "Conditional DNP: Only the artist is allowed to post",
+        "The artist of this post is on the [[avoid posting list]]",
     ];
 
     public constructor() {
@@ -37,7 +40,8 @@ export class JanitorEnhancements extends RE6Module {
             .appendTo(form);
 
         for (const reason of this.deletionReasons) {
-            $("<a>")
+            if (reason == "") $("<br />").appendTo(suggestionsWrapper);
+            else $("<a>")
                 .html(reason)
                 .appendTo(suggestionsWrapper)
                 .on("click", (event) => {
