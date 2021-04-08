@@ -344,6 +344,7 @@ search-content > post[deleted=true] > a:after {
     letter-spacing: 3px;
     font-size: 1.5rem;
     color: #999;
+    text-shadow: 1px 1px 0px #000000, 1px 0px 0px #000000, 0px 1px 0px #000, -1px -1px 0px #000;
 }
 search-content > post[error=true] > a:after { content: "ERROR" }
 search-content > post[filetype=swf] > a:after { content: "FLASH" }

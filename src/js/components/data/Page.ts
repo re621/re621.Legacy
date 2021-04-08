@@ -134,4 +134,6 @@ export const PageDefinition = {
     deleted_posts: /^\/deleted_posts.*/,
     blips: /^\/blips.*/,
     help: /^\/help.*/,
+
+    postConfirmDelete: /^\/moderator\/post\/posts\/.+\/confirm_delete.*/,
 };

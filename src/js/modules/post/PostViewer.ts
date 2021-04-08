@@ -48,7 +48,7 @@ export class PostViewer extends RE6Module {
             { keys: "hotkeyOpenSource", fnct: this.openSource, page: reqPage },
             { keys: "hotkeyOpenParent", fnct: this.openParent, page: reqPage },
             { keys: "hotkeyToggleRel", fnct: this.toggleRelSection, page: reqPage },
-            { keys: "hotkeyOpenIQDB", fnct: this.openIQDB, page: reqPage },
+            { keys: "hotkeyOpenIQDB", fnct: this.openIQDB },
             { keys: "hotkeyOpenAPI", fnct: this.openAPI, },
         );
     }
@@ -110,7 +110,7 @@ export class PostViewer extends RE6Module {
     public create(): void {
         super.create();
 
-        if (Page.matches(PageDefinition.changes)) return;
+        if (!Page.matches(PageDefinition.post)) return;
 
         this.post = Post.getViewingPost()
 
@@ -416,11 +416,15 @@ export class PostViewer extends RE6Module {
 
     /** Redirects the page to the post history */
     private openImageHistory(): void {
-        if (Page.matches(PageDefinition.post))
-            location.href = "/post_versions?search[post_id]=" + Post.getViewingPost().id;
-        else if (Page.hasQueryParameter("search[post_id]"))
+        if (Page.matches(PageDefinition.post)) {
+            location.href = "/post_versions?search[post_id]=" + Page.getPageID();
+        } else if (Page.matches(PageDefinition.iqdb)) {
+            if (!Page.hasQueryParameter("post_id")) return;
+            location.href = "/post_versions?search[post_id]=" + Page.getQueryParameter("post_id");
+        } else if (Page.matches(PageDefinition.changes)) {
+            if (!Page.hasQueryParameter("search[post_id]")) return;
             location.href = "/posts/" + Page.getQueryParameter("search[post_id]");
-
+        }
     }
 
     private static lookupClick(query: string): void {
@@ -442,7 +446,17 @@ export class PostViewer extends RE6Module {
     private toggleRelSection(): void { PostViewer.lookupClick("#has-children-relationship-preview-link, #has-parent-relationship-preview-link"); }
 
     /** Opens IQDB page for the current page */
-    private openIQDB(): void { PostViewer.lookupClick("#post-related-images a[href*=iqdb_queries]"); }
+    private openIQDB(): void {
+        if (Page.matches(PageDefinition.post)) {
+            location.href = "/iqdb_queries?post_id=" + Page.getPageID();
+        } else if (Page.matches(PageDefinition.iqdb)) {
+            if (!Page.hasQueryParameter("post_id")) return;
+            location.href = "/posts/" + Page.getQueryParameter("post_id");
+        } else if (Page.matches(PageDefinition.changes)) {
+            if (!Page.hasQueryParameter("search[post_id]")) return;
+            location.href = "/iqdb_queries?post_id=" + Page.getQueryParameter("search[post_id]");
+        }
+    }
 
     /** Opens the raw API data for the current post */
     private openAPI(): void { location.href = location.origin + location.pathname + ".json" + location.search; }
