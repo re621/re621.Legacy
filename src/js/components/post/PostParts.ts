@@ -5,6 +5,7 @@ import { PostFlag } from "../api/responses/APIPost";
 import { XM } from "../api/XM";
 import { Blacklist } from "../data/Blacklist";
 import { Page } from "../data/Page";
+import { User } from "../data/User";
 import { Debug } from "../utility/Debug";
 import { Util } from "../utility/Util";
 import { LoadedFileType, Post, PostData } from "./Post";
@@ -118,7 +119,7 @@ export class PostParts {
             });
 
         // Load appropriate image
-        if (post.flags.has(PostFlag.Deleted)) {
+        if (post.flags.has(PostFlag.Deleted) && !User.canApprovePosts) {
             post.img.ratio = 1;
             post.loaded = LoadedFileType.ORIGINAL;
         } else if (post.file.ext === "swf") {
