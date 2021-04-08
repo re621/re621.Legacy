@@ -77,7 +77,7 @@ export class UploadUtilities extends RE6Module {
             .appendTo("div.upload_preview_container");
 
         let working = false;
-        $(fileContainer).on("input", "input", (event) => {
+        $(fileContainer).on("input paste", "input", (event) => {
             if (working) return;
 
             const $input = $(event.target),
