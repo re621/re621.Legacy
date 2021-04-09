@@ -29,6 +29,10 @@ export class JanitorEnhancements extends RE6Module {
             this.appendDeletionReasons();
         }
 
+        if (Page.matches(PageDefinition.post)) {
+            this.cleanupRecords();
+        }
+
     }
 
     private appendDeletionReasons(): void {
@@ -52,6 +56,13 @@ export class JanitorEnhancements extends RE6Module {
                     });
                 });
         }
+    }
+
+    private cleanupRecords(): void {
+        for (const element of $("#post-information span.user-feedback-neutral, #post-information span.user-feedback-negative, #post-information span.user-feedback-positive").get()) {
+            $(element).html((index, value) => value.replace(/ (Neutral|Neg|Pos)$/, ""));
+        }
+        $("#post-information a[href^='/user_feedbacks']").html((index, html) => html.replace(/^\( /, "(").replace(/ \)$/, ")"));
     }
 
 }
