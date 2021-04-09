@@ -43,6 +43,15 @@ export class JanitorEnhancements extends RE6Module {
             .addClass("deletion-reason-suggestions")
             .appendTo(form);
 
+        $("<a>")
+            .html("=== Clear All ===")
+            .appendTo(suggestionsWrapper)
+            .on("click", (event) => {
+                event.preventDefault();
+                input.val("");
+            });
+        $("<br />").appendTo(suggestionsWrapper);
+
         for (const reason of this.deletionReasons) {
             if (reason == "") $("<br />").appendTo(suggestionsWrapper);
             else $("<a>")
