@@ -130,11 +130,16 @@ export class Miscellaneous extends RE6Module {
                 const attributes = [];
 
                 if (post.sources.length > 0) attributes.push("sources=" + uriEncodeArray(post.sources));
-                if (post.description.length > 0) attributes.push("description=" + encodeURIComponent(post.description));
 
                 attributes.push("tags=" + encodeURIComponent(Array.from(tags).join(" ")));
                 attributes.push("simple-form=true");
                 attributes.push("rating=" + post.rating);
+
+                if (post.description.length > 0) {
+                    if ((post.description.length + attributes.join("&").length) > 8000)
+                        attributes.push("description=" + encodeURIComponent("Copy Description Manually"));
+                    else attributes.push("description=" + encodeURIComponent(post.description));
+                }
 
                 $("<a>")
                     .attr("href", "/uploads/new?" + attributes.join("&"))
