@@ -96,8 +96,8 @@ export class HoverZoom extends RE6Module {
             .off("blur.re621.zoom");
 
         $("#page")
-            .off("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail")
-            .off("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail");
+            .off("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap subitem[data-id] img")
+            .off("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap subitem[data-id] img");
 
         if (zoomMode == ImageZoomMode.Disabled) return;
 
