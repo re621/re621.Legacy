@@ -44,7 +44,6 @@ export class User {
 
     public static init(): void {
         const data = $("body").data();
-        console.log(data);
 
         User.loggedIn = data.userIsAnonymous == false;
         User.username = data.userName || "Anonymous";
