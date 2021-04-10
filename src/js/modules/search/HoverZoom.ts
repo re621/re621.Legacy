@@ -43,6 +43,7 @@ export class HoverZoom extends RE6Module {
             time: true,                                 // If true, shows the timestamp in "x ago" format
 
             zoomDelay: 0,                               // Delay until the zoom is triggered, in milliseconds
+            stickyShift: false,                         // In onShift mode, zoom won't clear until mouse leaves the post
 
             hotkeyDownload: "",                         // downloads the currently hovered over post
             hotkeyFullscreen: "",                       // opens the currently hovered over post in new tab
@@ -85,6 +86,7 @@ export class HoverZoom extends RE6Module {
     public reloadEventListeners(): void {
 
         const zoomMode = this.fetchSettings("mode");
+        const stickyShift = this.fetchSettings("stickyShift");
 
         $(document)
             .off("scroll.re621.zoom")
@@ -93,11 +95,12 @@ export class HoverZoom extends RE6Module {
             .off("mousemove.re621.zoom");
 
         $(window)
-            .off("blur.re621.zoom");
+            .off("blur.re621.zoom")
+            .off("contextmenu.re621.zoom");
 
         $("#page")
-            .off("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail")
-            .off("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail");
+            .off("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap subitem[data-id] img")
+            .off("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap subitem[data-id] img");
 
         if (zoomMode == ImageZoomMode.Disabled) return;
 
@@ -175,10 +178,22 @@ export class HoverZoom extends RE6Module {
             .on("keyup.re621.zoom", (event) => {
                 if (!this.shiftPressed || (event.originalEvent as KeyboardEvent).key !== "Shift") return;
                 this.shiftPressed = false;
+                if (!stickyShift) resetOnUnshift();
             });
         $(window).on("blur.re621.zoom", () => {
             this.shiftPressed = false;
+            if (!stickyShift) resetOnUnshift();
         });
+        $(window).on("contextmenu.re621.zoom", () => {
+            this.shiftPressed = false;
+            if (!stickyShift) resetOnUnshift();
+        })
+
+        function resetOnUnshift(): void {
+            if (!HoverZoom.curPost) return;
+            HoverZoom.trigger("zoom.stop", { post: HoverZoom.curPost.id, pageX: null, pageY: null });
+            HoverZoom.curPost = null;
+        }
     }
 
     /** Initialize the event listeners for the hover zoom functionality */
@@ -188,7 +203,8 @@ export class HoverZoom extends RE6Module {
 
         const viewport = $(window);
         HoverZoom.on("zoom.start", (event, data) => {
-            if (HoverZoom.paused || (this.fetchSettings("mode") == ImageZoomMode.OnShift && !this.shiftPressed))
+            const mode = this.fetchSettings("mode");
+            if (HoverZoom.paused || (mode == ImageZoomMode.OnShift && !this.shiftPressed))
                 return;
 
             const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}], subitem[data-id=${data.post}]`).first();
@@ -255,6 +271,7 @@ export class HoverZoom extends RE6Module {
             }
 
             // Write the image data into the info block
+            this.$zoomInfo.html("");
             if (post.img.width && post.img.height)
                 $("<span>") // dimensions and filesize
                     .text(`${post.img.width} x ${post.img.height}` + (post.file.size > 0 ? `, ${Util.Size.format(post.file.size)}` : ""))

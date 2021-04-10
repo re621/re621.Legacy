@@ -609,7 +609,7 @@ export class SettingsController extends RE6Module {
                 ]),
 
                 // Infinite Scroll
-                Form.accordionTab({ name: "infscroll", label: "Scrolling and Zoom", columns: 3, width: 3 }, [
+                Form.accordionTab({ name: "infscroll", label: "Infinite Scroll", columns: 3, width: 3 }, [
 
                     Form.header("Infinite Scroll", 3),
 
@@ -665,7 +665,11 @@ export class SettingsController extends RE6Module {
                             if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                         }
                     ),
-                    Form.hr(3),
+
+                ]),
+
+                // Hover Zoom
+                Form.accordionTab({ name: "hoverzoom", label: "Hover Zoom", columns: 3, width: 3 }, [
 
 
                     Form.header("Hover Zoom", 3),
@@ -738,6 +742,19 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await hoverZoom.pushSettings("skipBlacklisted", data);
+                        }
+                    ),
+                    Form.spacer(3, true),
+
+                    Form.checkbox(
+                        {
+                            value: hoverZoom.fetchSettings("stickyShift"),
+                            label: "<b>Sticky Shift</b><br />In \"Holding Shift\" mode, zoom will not clear until the mouse leaves the thumbnail",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await hoverZoom.pushSettings("stickyShift", data);
+                            if (hoverZoom.isInitialized()) hoverZoom.reloadEventListeners();
                         }
                     ),
                     Form.spacer(3, true),

@@ -26,6 +26,7 @@ export class Post implements PostData {
     public comments: number;                // total number of comments
     public rating: PostRating;              // rating in the one-letter lowercase format (s, q, e)
     public uploader: number;                // uploader ID
+    public uploaderName: string;            // name of the uploader; probably not available
     public approver: number;                // approver ID, or -1 if there isn't one
     public page: string;                    // search page. can either be numeric, or in a- / b- format
 
@@ -362,6 +363,7 @@ export interface PostData {
     comments: number;
     rating: PostRating;
     uploader: number;
+    uploaderName: string;
     approver: number;
 
     page: string;
@@ -457,6 +459,7 @@ export namespace PostData {
             comments: data.comment_count,
             rating: PostRating.fromValue(data.rating),
             uploader: data.uploader_id,
+            uploaderName: data["uploader_name"] || "",
             approver: data.approver_id ? data.approver_id : -1,
 
             page: page,
@@ -547,6 +550,7 @@ export namespace PostData {
             meta: getTags("meta"),
             species: getTags("species"),
         };
+        data["uploader_name"] = $article.attr("data-uploader");
 
         // Sources formatting is incorrect
         // All sources are dumped into the first element, separated by newlines
@@ -668,6 +672,7 @@ export namespace PostData {
             comments: -1,
             rating: PostRating.fromValue($article.attr("data-rating")),
             uploader: parseInt($article.attr("data-uploader-id")) || 0,
+            uploaderName: $article.attr("data-uploader") || "Unknown",
             approver: approver,
 
             page: "-1",

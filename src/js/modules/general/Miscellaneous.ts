@@ -125,16 +125,21 @@ export class Miscellaneous extends RE6Module {
                 // This should trim tags that might not be appropriate in the new version
                 // Image ratio tags should also be here... but there are just too many of them
                 const tags = post.tags.all;
-                for (const trimmedTag of ["better_version_at_source", "thumbnail", "low_res", "hi_res", "absurd_res", "superabsurd_res"])
+                for (const trimmedTag of ["better_version_at_source", "thumbnail", "low_res", "hi_res", "absurd_res", "superabsurd_res", "invalid_tag"])
                     tags.delete(trimmedTag);
                 const attributes = [];
 
                 if (post.sources.length > 0) attributes.push("sources=" + uriEncodeArray(post.sources));
-                if (post.description.length > 0) attributes.push("description=" + encodeURIComponent(post.description));
 
                 attributes.push("tags=" + encodeURIComponent(Array.from(tags).join(" ")));
                 attributes.push("simple-form=true");
                 attributes.push("rating=" + post.rating);
+
+                if (post.description.length > 0) {
+                    if ((post.description.length + attributes.join("&").length) > 8000)
+                        attributes.push("description=" + encodeURIComponent("Copy Description Manually"));
+                    else attributes.push("description=" + encodeURIComponent(post.description));
+                }
 
                 $("<a>")
                     .attr("href", "/uploads/new?" + attributes.join("&"))
