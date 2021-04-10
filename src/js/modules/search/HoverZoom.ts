@@ -255,6 +255,7 @@ export class HoverZoom extends RE6Module {
             }
 
             // Write the image data into the info block
+            this.$zoomInfo.html("");
             if (post.img.width && post.img.height)
                 $("<span>") // dimensions and filesize
                     .text(`${post.img.width} x ${post.img.height}` + (post.file.size > 0 ? `, ${Util.Size.format(post.file.size)}` : ""))
