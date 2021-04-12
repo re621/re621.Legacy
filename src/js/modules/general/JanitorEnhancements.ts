@@ -13,11 +13,13 @@ export class JanitorEnhancements extends RE6Module {
         "Colored base",
         "",
         "Does not meet minimum quality standards (Artistic)",
+        "Does not meet minimum quality standards (Resolution)",
         "Does not meet minimum quality standards (Bad digitization of traditional media)",
         "Broken/corrupted file",
         "JPG resaved as PNG",
         "",
         "Paysite/commercial content",
+        "Takedown #",
         "Conditional DNP: Only the artist is allowed to post",
         "The artist of this post is on the [[avoid_posting|avoid posting list]]",
     ];
