@@ -7,7 +7,6 @@ export class JanitorEnhancements extends RE6Module {
     private deletionReasons = [
         "Inferior version of post #%PARENT_ID%",
         "Inferior version/duplicate of post #%PARENT_ID%",
-        "Irrelevant to site",
         "Previously deleted (post #%PARENT_ID%)",
         "Excessive same base image set",
         "Colored base",
@@ -17,6 +16,9 @@ export class JanitorEnhancements extends RE6Module {
         "Does not meet minimum quality standards (Bad digitization of traditional media)",
         "Broken/corrupted file",
         "JPG resaved as PNG",
+        "",
+        "Irrelevant to site",
+        "Irrelevant to site (Human only)",
         "",
         "Paysite/commercial content",
         "Takedown #",
