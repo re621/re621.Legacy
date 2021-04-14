@@ -212,18 +212,28 @@ export class BetterSearch extends RE6Module {
                 const searchStatsCount = $("<span>")
                     .attr({
                         "id": "search-stats-count",
-                        "title": "Approximate number of posts found",
                     })
                     .on("re621:update", () => {
                         const results = (this.lastPage - 1) * User.postsPerPage + this.pageResultCount;
                         const queryPageNum = parseInt(this.queryPage);
-                        if (!queryPageNum) searchStatsCount.html("");
-                        else searchStatsCount.html((
-                            this.lastPage == queryPageNum
-                                ? results
-                                : "~" + Util.formatK(results))
-                            + " Posts"
-                        );
+                        searchStatsCount.attr("title", "");
+                        if (!queryPageNum) {
+                            // TODO Account for this by counting visible posts
+                            searchStatsCount.html("");
+                        } else {
+                            searchStatsCount.html((
+                                this.lastPage == queryPageNum
+                                    ? results
+                                    : "~" + Util.formatK(results))
+                                + " Posts"
+                            );
+
+                            searchStatsCount.attr({
+                                "title": (this.lastPage == queryPageNum)
+                                    ? `${results} active posts found`
+                                    : `Between ${results - User.postsPerPage} and ${results} posts were found.\nGo to the last page of the search to get the exact amount.`,
+                            })
+                        }
                     })
                     .appendTo(stats);
                 searchStatsCount.trigger("re621:update");
