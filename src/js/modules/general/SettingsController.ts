@@ -1362,7 +1362,20 @@ export class SettingsController extends RE6Module {
                             ),
                             Form.text(`This feature requires access to various domains not explicitly whitelisted by the script.<br />You will be prompted to approve a cross-origin request when that happens.`, 3),
                             Form.spacer(3),
-                        ]),
+                        ]
+                    ),
+
+                    Form.checkbox(
+                        {
+                            value: uploadUtilities.fetchSettings("stopLeaveWarning"),
+                            label: `<b>Suppress Exit Message</b><br />Removes the confirmation message when leaving the upload page`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await uploadUtilities.pushSettings("stopLeaveWarning", data);
+                        }
+                    ),
+                    Form.spacer(3),
 
                 ]),
 

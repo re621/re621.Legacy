@@ -19,8 +19,10 @@ export class UploadUtilities extends RE6Module {
 
             checkDuplicates: true,      // run uploads through e621's version of IQDB
             addSourceLinks: true,       // improve source links fields somewhat
-            cleanSourceLinks: true,    // convert linkst to https and remove the www
+            cleanSourceLinks: true,     // convert linkst to https and remove the www
             loadImageData: false,       // load image headers to get extra data
+
+            stopLeaveWarning: false,    // removes the beforeunload warning
         };
     }
 
@@ -47,6 +49,11 @@ export class UploadUtilities extends RE6Module {
 
         // Add a class to the "Submit" button
         $("button:contains('Upload')").addClass("submit-upload");
+
+        // Remove the warning before leaving the page
+        if (this.fetchSettings("stopLeaveWarning")) {
+            XM.Window.onbeforeunload = null;
+        }
     }
 
     /**
