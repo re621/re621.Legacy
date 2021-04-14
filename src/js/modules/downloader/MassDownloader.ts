@@ -101,7 +101,7 @@ export class MassDownloader extends RE6Module {
             .appendTo(this.section)
             .on("click", (event) => {
                 event.preventDefault();
-                Post.find("all").each((post) => {
+                Post.find("visible").each((post) => {
                     post.$ref
                         .addClass("download-item")
                         .attr("data-state", "ready");
