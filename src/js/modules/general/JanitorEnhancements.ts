@@ -91,7 +91,7 @@ export class JanitorEnhancements extends RE6Module {
         const post = Post.getViewingPost();
         // console.log(post.tags.artist, post.uploaderName.toLowerCase());
         if (post.tags.artist.has(post.uploaderName.toLowerCase()))
-            $(`<span class="post-uploader-artist">(artist)</span>`).appendTo("li:contains('Uploader')");
+            $(`<span class="post-uploader-artist">(artist)</span>`).appendTo("#post-information li:contains('Uploader')");
     }
 
 }
