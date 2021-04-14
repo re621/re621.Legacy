@@ -13,6 +13,7 @@ export class JanitorEnhancements extends RE6Module {
         "",
         "Does not meet minimum quality standards (Artistic)",
         "Does not meet minimum quality standards (Resolution)",
+        "Does not meet minimum quality standards (Compression)",
         "Does not meet minimum quality standards (Bad digitization of traditional media)",
         "Broken/corrupted file",
         "JPG resaved as PNG",
