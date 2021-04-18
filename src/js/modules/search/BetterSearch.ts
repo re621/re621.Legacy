@@ -6,7 +6,7 @@ import { Blacklist } from "../../components/data/Blacklist";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
-import { Post } from "../../components/post/Post";
+import { Post, PostData } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Debug } from "../../components/utility/Debug";
@@ -385,6 +385,10 @@ export class BetterSearch extends RE6Module {
                         <option value="q">Questionable</option>
                         <option value="e">Explicit</option>
                     </select>` +
+                `   <select name="quick-edit-mode" id="re621_qedit_mode">
+                        <option value="overview">Full Tags</option>
+                        <option value="changes">Changes</option>
+                    </select>` +
                 `   <div class="quick-tags-info">` +
                 `       <span id="re621-qedit-dimensions"></span>` +
                 `       <span id="re621-qedit-flags" class="display-none-important"></span>` +
@@ -417,7 +421,40 @@ export class BetterSearch extends RE6Module {
             "reason": $("#re621_qedit_reason"),
             "parent": $("#re621_qedit_parent"),
             "rating": $("#re621_qedit_rating"),
+
+            mode: $("#re621_qedit_mode"),
         });
+
+        this.$quickEdit.data("mode")
+            .on("change", () => {
+                const switcher = this.$quickEdit.data("mode"),
+                    mode = switcher.val(),
+                    post: PostData = this.$quickEdit.data("wfpost");
+
+                if (!post) return;
+
+                Util.LS.setItem("re621.BetterSearch.QuickEditMode", mode);
+
+                console.log("switching mode", mode);
+
+                this.$quickEdit.data("tags")
+                    .attr({
+                        "placeholder": mode == "overview" ? "" : "Tags listed here will be added to the post.\nPreface a tag with a minus (-) to remove it instead.",
+                        "mode": mode,
+                    })
+                    .val(() => {
+                        switch (mode) {
+                            case "changes":
+                                return "";
+                            case "overview":
+                            default:
+                                return post.tagString + " ";
+                        }
+                    });
+            })
+            .val(Util.LS.getItem("re621.BetterSearch.QuickEditMode") || "overview")
+            .trigger("change");
+
         this.$quickEdit.find("input[name=cancel]").on("click", () => {
             this.$quickEdit.hide("fast");
         });
@@ -665,7 +702,8 @@ export class BetterSearch extends RE6Module {
                     else $quickEdit.css("top", "");
 
                     $quickEdit.show("fast");
-                    $quickEdit.attr("postid", post.id)
+                    $quickEdit.attr("postid", post.id);
+                    $quickEdit.data("wfpost", post);
 
                     const ratio = Util.formatRatio(post.img.width, post.img.height);
                     $quickEdit.data("info").html(`${post.img.width} x ${post.img.height} (${ratio[0]}:${ratio[1]}), ${Util.Size.format(post.file.size)}`);
