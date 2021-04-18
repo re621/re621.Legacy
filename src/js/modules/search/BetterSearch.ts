@@ -405,8 +405,33 @@ export class BetterSearch extends RE6Module {
                 `</div>` +
                 ``
             )
+            .on("re621:redraw", () => {
+                const post: PostData = this.$quickEdit.data("wfpost");
+                if (!post) return;
+
+                const ratio = Util.formatRatio(post.img.width, post.img.height);
+                this.$quickEdit.data("info").html(`${post.img.width} x ${post.img.height} (${ratio[0]}:${ratio[1]}), ${Util.Size.format(post.file.size)}`);
+                this.$quickEdit.data("flags")
+                    .toggleClass("display-none-important", post.flags.size == 0)
+                    .html(post.flags.size > 0 ? [...post.flags].join(", ") : "");
+                this.$quickEdit.data("history").attr("href", `https://e621.net/post_versions?search[post_id]=${post.id}`);
+
+                this.$quickEdit.data("thumb")
+                    .data("wfpost", post)
+                    .attr({ "data-id": post.id, });
+                this.$quickEdit.data("image").attr("src", post.file.sample);
+
+                if (this.$quickEdit.data("mode").val() == "overview")
+                    this.$quickEdit.data("tags").val(post.tagString + " ").trigger("re621:input").focus();
+                else this.$quickEdit.data("tags").val("");
+
+                this.$quickEdit.data("reason").val("");
+                this.$quickEdit.data("parent").val(post.rel.parent);
+                this.$quickEdit.data("rating").val(post.rating);
+            })
             .appendTo(this.$wrapper)
             .hide();
+
         this.$quickEdit.data({
             "token": $("#re621_qedit_token"),
 
@@ -430,18 +455,12 @@ export class BetterSearch extends RE6Module {
                 const switcher = this.$quickEdit.data("mode"),
                     mode = switcher.val(),
                     post: PostData = this.$quickEdit.data("wfpost");
-
                 if (!post) return;
 
                 Util.LS.setItem("re621.BetterSearch.QuickEditMode", mode);
 
-                console.log("switching mode", mode);
-
                 this.$quickEdit.data("tags")
-                    .attr({
-                        "placeholder": mode == "overview" ? "" : "Tags listed here will be added to the post.\nPreface a tag with a minus (-) to remove it instead.",
-                        "mode": mode,
-                    })
+                    .attr({ "placeholder": mode == "overview" ? "" : "Tags listed here will be added to the post.\nPreface a tag with a minus (-) to remove it instead.", })
                     .val(() => {
                         switch (mode) {
                             case "changes":
@@ -702,25 +721,11 @@ export class BetterSearch extends RE6Module {
                     else $quickEdit.css("top", "");
 
                     $quickEdit.show("fast");
+
                     $quickEdit.attr("postid", post.id);
                     $quickEdit.data("wfpost", post);
 
-                    const ratio = Util.formatRatio(post.img.width, post.img.height);
-                    $quickEdit.data("info").html(`${post.img.width} x ${post.img.height} (${ratio[0]}:${ratio[1]}), ${Util.Size.format(post.file.size)}`);
-                    $quickEdit.data("flags")
-                        .toggleClass("display-none-important", post.flags.size == 0)
-                        .html(post.flags.size > 0 ? [...post.flags].join(", ") : "");
-                    $quickEdit.data("history").attr("href", `https://e621.net/post_versions?search[post_id]=${post.id}`);
-
-                    $quickEdit.data("thumb")
-                        .data("wfpost", post)
-                        .attr({ "data-id": post.id, });
-                    $quickEdit.data("image").attr("src", post.file.sample);
-
-                    $quickEdit.data("tags").val(post.tagString + " ").trigger("re621:input").focus();
-                    $quickEdit.data("reason").val("");
-                    $quickEdit.data("parent").val(post.rel.parent);
-                    $quickEdit.data("rating").val(post.rating);
+                    $quickEdit.trigger("re621:redraw");
                     break;
                 }
                 default: {
