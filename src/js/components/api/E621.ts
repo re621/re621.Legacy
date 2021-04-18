@@ -134,6 +134,15 @@ class APIEndpoint {
         );
     }
 
+    public async patch(data?: APIQuery, delay?: number): Promise<any> {
+        return this.queue.createRequest(this.getParsedPath(), {}, "PATCH", this.formatParam(data), this.name, this.node, delay).then(
+            (data) => {
+                return Promise.resolve(data);
+            },
+            (error) => { return Promise.reject(error); }
+        );
+    }
+
     /** Returns the endpoint path, accounting for the possible parameter */
     private getParsedPath(): string {
         if (this.param) {
@@ -284,7 +293,7 @@ export class E621 {
      * @param data Data to POST
      * @param delay How quickly the next request can be sent, in ms
      */
-    public async createRequest(path: string, query: FormattedAPIQuery, method: "GET" | "POST" | "PUT" | "DELETE", requestBody: FormattedAPIQuery, endpoint: string, node: string, delay: number): Promise<any> {
+    public async createRequest(path: string, query: FormattedAPIQuery, method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE", requestBody: FormattedAPIQuery, endpoint: string, node: string, delay: number): Promise<any> {
         if (delay === undefined) delay = E621.requestRateLimit;
         else if (delay < 500) delay = 500;
 
@@ -296,7 +305,7 @@ export class E621 {
                 "X-User-Agent": window["re621"]["useragent"],
             },
             method: method,
-            mode: "cors"
+            mode: "cors",
         };
 
         if (method !== "GET") {
