@@ -138,7 +138,7 @@ export class HoverZoom extends RE6Module {
 
                 window.clearTimeout(timer);
                 timer = window.setTimeout(() => {
-                    HoverZoom.trigger("zoom.start", { post: $ref.data("id"), pageX: event.pageX, pageY: event.pageY });
+                    HoverZoom.trigger("zoom.start", { post: HoverZoom.curPost.id, pageX: event.pageX, pageY: event.pageY });
                 }, zoomDelay);
             })
             .on("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap subitem[data-id] img", (event) => {
