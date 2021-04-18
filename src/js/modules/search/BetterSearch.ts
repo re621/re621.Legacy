@@ -374,9 +374,6 @@ export class BetterSearch extends RE6Module {
             .addClass("simple_form")
             .html(
                 `<input type="hidden" name="_method" value="put">` +
-                `<div class="quick-tags-container">` +
-                `   <textarea name="post[tag_string]" id="re621_qedit_tags" data-autocomplete="tag-edit" class="ui-autocomplete-input" autocomplete="off"></textarea>` +
-                `</div>` +
                 `<div class="quick-tags-toolbar">` +
                 `   <input type="submit" name="submit" value="Submit">` +
                 `   <input type="button" name="cancel" value="Cancel">` +
@@ -387,12 +384,16 @@ export class BetterSearch extends RE6Module {
                         <option value="q">Questionable</option>
                         <option value="e">Explicit</option>
                     </select>` +
-                `<div class="quick-tags-info">` +
-                `   <span id="re621-qedit-dimensions"></span>` +
-                `   <span id="re621-qedit-flags" class="display-none-important"></span>` +
-                `   <a id="re621-qedit-history" href="404">history</a>` +
+                `   <div class="quick-tags-info">` +
+                `       <span id="re621-qedit-dimensions"></span>` +
+                `       <span id="re621-qedit-flags" class="display-none-important"></span>` +
+                `       <a id="re621-qedit-history" href="post_versions">history</a>` +
+                `   </div>` +
                 `</div>` +
-                `</div>`
+                `<div class="quick-tags-container">` +
+                `   <textarea name="post[tag_string]" id="re621_qedit_tags" data-autocomplete="tag-edit" class="ui-autocomplete-input" autocomplete="off"></textarea>` +
+                `</div>` +
+                ``
             )
             .appendTo(this.$wrapper)
             .hide();

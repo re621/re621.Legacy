@@ -702,7 +702,7 @@ section#content > form#re621-quick-tags {
     box-sizing: border-box;
     top: 0;
     width: 100%;
-    padding: 0.5rem 0.25rem;
+    padding: 0.375rem 0.25rem 0.25rem;
     margin-bottom: 1.25rem;
     z-index: 100;
     position: relative;
@@ -718,7 +718,7 @@ section#content > form#re621-quick-tags {
         display: grid;
         grid-template-columns: 5rem 5rem auto 5rem 7rem;
         grid-column-gap: 0.5rem;
-        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
     }
 
     div.quick-tags-info {
