@@ -736,6 +736,9 @@ section#content > form#re621-quick-tags {
         }
     }
 }
+section#content[hide-smart-alias-output=true] > form#re621-quick-tags smart-alias {
+    display: none;
+}
 
 body[data-sticky-editbox=true] section#content > form#re621-quick-tags {
     position: sticky;

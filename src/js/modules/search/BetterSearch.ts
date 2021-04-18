@@ -75,6 +75,7 @@ export class BetterSearch extends RE6Module {
             hidePageBreaks: true,                           // Show a visual separator between different pages
 
             highlightVisited: true,                         // Adds a colored border to visited posts
+            hideSmartAliasOutput: false,                    // Run SmartAlias, but don't show its output, in the quick edit mode
         };
     }
 
@@ -481,6 +482,7 @@ export class BetterSearch extends RE6Module {
 
             "hidePageBreaks",
             "highlightVisited",
+            "hideSmartAliasOutput",
         ]);
 
         // Scaling Settings
@@ -501,6 +503,10 @@ export class BetterSearch extends RE6Module {
         // Add border to visited pages
         if (conf.highlightVisited) this.$content.attr("highlight-visited", "true");
         else this.$content.removeAttr("highlight-visited");
+
+        // Hide the SmartAlias output in the quick edit form
+        if (conf.hideSmartAliasOutput) $("section#content").attr("hide-smart-alias-output", "true");
+        else $("section#content").removeAttr("hide-smart-alias-output");
     }
 
     /** Restarts various event listeners used by the module */

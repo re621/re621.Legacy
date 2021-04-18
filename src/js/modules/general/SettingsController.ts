@@ -1269,7 +1269,8 @@ export class SettingsController extends RE6Module {
         const smartAlias = ModuleController.get(SmartAlias),
             uploadUtilities = ModuleController.get(UploadUtilities),
             tagSuggester = ModuleController.get(TagSuggester),
-            customFlagger = ModuleController.get(CustomFlagger);
+            customFlagger = ModuleController.get(CustomFlagger),
+            betterSearch = ModuleController.get(BetterSearch);
 
         const aliasContainer = $("<textarea>")
             .attr("id", "alias-list-container")
@@ -1573,6 +1574,19 @@ export class SettingsController extends RE6Module {
                         async (data) => {
                             await smartAlias.pushSettings("quickTagsForm", data);
                             await smartAlias.reload();
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("hideSmartAliasOutput"),
+                            label: `<b>Hide Quick Tags Output</b><br />Run the SmartAlias in the quick tags form, but don't display the tag anaysis`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("hideSmartAliasOutput", data);
+                            betterSearch.updateContentHeader();
                         }
                     ),
                     Form.spacer(3),
