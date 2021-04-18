@@ -422,8 +422,13 @@ export class BetterSearch extends RE6Module {
                 this.$quickEdit.data("image").attr("src", post.file.sample);
 
                 if (this.$quickEdit.data("mode").val() == "overview")
-                    this.$quickEdit.data("tags").val(post.tagString + " ").trigger("re621:input").focus();
-                else this.$quickEdit.data("tags").val("");
+                    this.$quickEdit.data("tags")
+                        .attr("placeholder", "")
+                        .val(post.tagString + " ");
+                else this.$quickEdit.data("tags")
+                    .val("")
+                    .attr({ "placeholder": "Tags listed here will be added to the post.\nPreface a tag with a minus (-) to remove it instead.", });
+                this.$quickEdit.data("tags").trigger("re621:input").focus();
 
                 this.$quickEdit.data("reason").val("");
                 this.$quickEdit.data("parent").val(post.rel.parent);
@@ -482,15 +487,28 @@ export class BetterSearch extends RE6Module {
         this.$quickEdit.on("submit", (event) => {
             event.preventDefault();
             const postID = parseInt(this.$quickEdit.attr("postid"));
+            const post: PostData = this.$quickEdit.data("wfpost");
 
-            E621.Post.id(postID).put({
-                post: {
-                    "tag_string": this.$quickEdit.data("tags").val() + "",
-                    "edit_reason": this.$quickEdit.data("reason").val() + "",
-                    "parent_id": this.$quickEdit.data("parent").val() + "",
-                    "rating": PostRating.fromValue(this.$quickEdit.data("rating").val() + ""),
-                }
-            }).then(
+            const formData = {
+                "edit_reason": this.$quickEdit.data("reason").val() + "",
+                "parent_id": this.$quickEdit.data("parent").val() + "",
+                "rating": PostRating.fromValue(this.$quickEdit.data("rating").val() + ""),
+            };
+
+            switch (this.$quickEdit.data("mode").val()) {
+                case "changes":
+                    formData["tag_string_diff"] = this.$quickEdit.data("tags").val() + "";
+                    break;
+                case "overview":
+                    formData["tag_string"] = this.$quickEdit.data("tags").val() + "";
+                    formData["old_tag_string"] = post.tagString;
+                    break;
+                default:
+                    Danbooru.error(`An error occurred while updating a post`);
+                    return;
+            }
+
+            E621.Post.id(postID).patch({ post: formData, }).then(
                 (response) => {
                     Debug.log(response);
 
