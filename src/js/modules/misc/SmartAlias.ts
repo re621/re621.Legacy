@@ -393,10 +393,10 @@ export class SmartAlias extends RE6Module {
                 const lastTag = (this.fetchSettings("replaceLastTag") || currentValue.endsWith(" ") || !$textarea.is(":focus"))
                     ? null
                     : Util.getTags($textarea).pop();
-                console.log("[" + lastTag + "]", this.fetchSettings("replaceLastTag"), $textarea.is(":focus"));
+                // console.log("[" + lastTag + "]", this.fetchSettings("replaceLastTag"), $textarea.is(":focus"));
                 for (const [antecedent, consequent] of Object.entries(SmartAlias.tagAliases)) {
                     if (antecedent == lastTag) continue;
-                    console.log("replacing [" + antecedent + "] with [" + consequent + "]", antecedent == lastTag);
+                    // console.log("replacing [" + antecedent + "] with [" + consequent + "]", antecedent == lastTag);
                     currentValue = currentValue.replace(
                         this.getTagRegex(antecedent),
                         "$1" + consequent + "$3"
