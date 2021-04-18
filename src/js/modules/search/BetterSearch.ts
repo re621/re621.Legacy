@@ -428,7 +428,9 @@ export class BetterSearch extends RE6Module {
                 else this.$quickEdit.data("tags")
                     .val("")
                     .attr({ "placeholder": "Tags listed here will be added to the post.\nPreface a tag with a minus (-) to remove it instead.", });
-                this.$quickEdit.data("tags").trigger("re621:input").focus();
+                this.$quickEdit.data("tags")
+                    .trigger("re621:input")
+                    .focus();
 
                 this.$quickEdit.data("reason").val("");
                 this.$quickEdit.data("parent").val(post.rel.parent);
@@ -474,7 +476,8 @@ export class BetterSearch extends RE6Module {
                             default:
                                 return post.tagString + " ";
                         }
-                    });
+                    })
+                    .trigger("re621:input");
             })
             .val(Util.LS.getItem("re621.BetterSearch.QuickEditMode") || "overview")
             .trigger("change");

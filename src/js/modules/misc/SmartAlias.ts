@@ -197,7 +197,7 @@ export class SmartAlias extends RE6Module {
 
             // Update the tag counter
             let updateTimeout: number;
-            $textarea.on("input", () => {
+            $textarea.on("input re621:input", () => {
                 if (updateTimeout) return;
                 updateTimeout = window.setTimeout(() => { updateTimeout = 0; }, 500);
                 $counter.html(SmartAlias.getInputTags($textarea).length + "");
