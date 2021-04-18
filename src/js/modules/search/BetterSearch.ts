@@ -392,7 +392,12 @@ export class BetterSearch extends RE6Module {
                 `   </div>` +
                 `</div>` +
                 `<div class="quick-tags-container">` +
-                `   <textarea name="post[tag_string]" id="re621_qedit_tags" data-autocomplete="tag-edit" class="ui-autocomplete-input" autocomplete="off"></textarea>` +
+                `   <div class="post-thumbnail" id="quick-tags-thumbnail">` +
+                `       <img id="quick-tags-image" src="" />` +
+                `   </div>` +
+                `   <div>` +
+                `       <textarea name="post[tag_string]" id="re621_qedit_tags" data-autocomplete="tag-edit" class="ui-autocomplete-input" autocomplete="off"></textarea>` +
+                `   </div>` +
                 `</div>` +
                 ``
             )
@@ -404,6 +409,9 @@ export class BetterSearch extends RE6Module {
             "info": $("#re621-qedit-dimensions"),
             "flags": $("#re621-qedit-flags"),
             "history": $("#re621-qedit-history"),
+
+            thumb: $("#quick-tags-thumbnail"),
+            image: $("#quick-tags-image"),
 
             "tags": $("#re621_qedit_tags"),
             "reason": $("#re621_qedit_reason"),
@@ -665,6 +673,11 @@ export class BetterSearch extends RE6Module {
                         .toggleClass("display-none-important", post.flags.size == 0)
                         .html(post.flags.size > 0 ? [...post.flags].join(", ") : "");
                     $quickEdit.data("history").attr("href", `https://e621.net/post_versions?search[post_id]=${post.id}`);
+
+                    $quickEdit.data("thumb")
+                        .data("wfpost", post)
+                        .attr({ "data-id": post.id, });
+                    $quickEdit.data("image").attr("src", post.file.sample);
 
                     $quickEdit.data("tags").val(post.tagString + " ").trigger("re621:input").focus();
                     $quickEdit.data("reason").val("");
