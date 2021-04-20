@@ -7,8 +7,8 @@ tag-suggester {
     margin: 0.25rem 0;
     overflow: hidden;
 
-    font-family: monospace;
-    font-size: 1.05rem;
+    font-family: "Consolas", monospace, monospace;
+    font-size: 1em;
 
     border: 1px solid #666;
     border-radius: 0.25rem;
@@ -21,7 +21,7 @@ tag-suggester {
 
     tag-entry {
         position: relative;
-        padding: 0.075rem 0 0.075rem 1.35rem;
+        padding: 0.075rem 0 0.075rem 0.35rem;
 
         & > a:first-child {
             margin-right: 0.5rem;
