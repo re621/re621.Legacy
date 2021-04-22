@@ -257,7 +257,7 @@ export class Post implements PostData {
      * Returns all Post elements of the specified type
      * @param type Type to look for
      */
-    public static find(type: "rendered" | "blacklisted" | "hovering" | "existant" | "all" | number): PostSet {
+    public static find(type: "rendered" | "blacklisted" | "hovering" | "visible" | "existant" | "all" | number): PostSet {
         const result = new PostSet();
 
         // Return posts up to specified ID
@@ -276,6 +276,11 @@ export class Post implements PostData {
             case "blacklisted":
             case "rendered": {
                 for (const elem of $(`post[${type}=true]`).get())
+                    result.push(Post.get($(elem)));
+                break;
+            }
+            case "visible": {
+                for (const elem of $(`post:not([blacklisted=true])`).get())
                     result.push(Post.get($(elem)));
                 break;
             }

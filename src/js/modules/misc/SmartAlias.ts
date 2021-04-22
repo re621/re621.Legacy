@@ -197,10 +197,10 @@ export class SmartAlias extends RE6Module {
 
             // Update the tag counter
             let updateTimeout: number;
-            $textarea.on("input", () => {
+            $textarea.on("input re621:input", () => {
                 if (updateTimeout) return;
                 updateTimeout = window.setTimeout(() => { updateTimeout = 0; }, 500);
-                $counter.html(SmartAlias.getInputTags($textarea).length + "");
+                $counter.html(SmartAlias.countTagInput($textarea) + "");
             });
         }
     }
@@ -217,15 +217,26 @@ export class SmartAlias extends RE6Module {
     }
 
     /**
-     * Parses the textarea input specified in the parameter and returns an array of tags
-     * @param input Textarea to parse, or a space-separated sting of tags
+     * Parses the string input specified in the parameter and returns an array of tags
+     * @param input Space-separated sting of tags
      */
-    private static getInputTags(input: string): string[];
-    private static getInputTags(input: JQuery<HTMLElement>): string[];
-    private static getInputTags(input: string | JQuery<HTMLElement>): string[] {
-        return (typeof input === "string" ? input : SmartAlias.getInputString(input))
-            .split(" ")
-            .filter((el) => { return el != null && el != ""; });
+    private static parseTagString(input: string): ParsedTag[] {
+        const result = [];
+        for (const tag of input.split(/ |\n|\r/).filter(el => el != null && el != ""))
+            result.push(ParsedTag.fromString(tag));
+        return result;
+    }
+
+    /**
+     * Parses the textarea input specified in the parameter and returns an array of tags
+     * @param input Textarea to parse
+     */
+    private static parseTagInput(input: JQuery<HTMLElement>): ParsedTag[] {
+        return this.parseTagString(SmartAlias.getInputString(input));
+    }
+
+    private static countTagInput(input: JQuery<HTMLElement>): number {
+        return SmartAlias.getInputString(input).split(/ |\n|\r/).length;
     }
 
     private manageAutoLoad($textarea: JQuery<HTMLElement>, $container: JQuery<HTMLElement>): void {
@@ -254,7 +265,7 @@ export class SmartAlias extends RE6Module {
             })
             .on("blur.smartalias.spacefix", () => {
                 $textarea.val((index, value) => {
-                    return value.endsWith(" ") ? value : (value + " ");
+                    return (value.endsWith(" ") || value.length == 0) ? value : (value + " ");
                 })
             });
 
@@ -304,7 +315,7 @@ export class SmartAlias extends RE6Module {
 
         // Get the tags from the textarea
         const inputString = SmartAlias.getInputString($textarea);
-        let tags = SmartAlias.getInputTags(inputString);
+        let tags: ParsedTag[] = SmartAlias.parseTagString(inputString);
 
         // Skip the rest if the textarea is empty
         if (tags.length == 0) {
@@ -326,21 +337,21 @@ export class SmartAlias extends RE6Module {
 
         if (SmartAlias.aliasCache.length > 0) {
             $textarea.val((index, text) => {
-                return this.replaceInputAliases(text);;
+                return this.replaceInputAliases(text);
             });
 
             // Regenerate the tags to account for replacements
             triggerUpdateEvent($textarea);
-            tags = SmartAlias.getInputTags($textarea);
+            tags = SmartAlias.parseTagInput($textarea);
         }
 
 
         // Step 2
         // Create a list of tags that need to be looked up in the API
         const lookup: Set<string> = new Set();
-        for (const tagName of tags) {
-            if (typeof SmartAlias.tagData[tagName] == "undefined")
-                lookup.add(tagName);
+        for (const tagData of tags) {
+            if (typeof SmartAlias.tagData[tagData.name] == "undefined")
+                lookup.add(tagData.name);
         }
 
         // Redraw the container to indicate loading
@@ -393,10 +404,10 @@ export class SmartAlias extends RE6Module {
                 const lastTag = (this.fetchSettings("replaceLastTag") || currentValue.endsWith(" ") || !$textarea.is(":focus"))
                     ? null
                     : Util.getTags($textarea).pop();
-                console.log("[" + lastTag + "]", this.fetchSettings("replaceLastTag"), $textarea.is(":focus"));
+                // console.log("[" + lastTag + "]", this.fetchSettings("replaceLastTag"), $textarea.is(":focus"));
                 for (const [antecedent, consequent] of Object.entries(SmartAlias.tagAliases)) {
                     if (antecedent == lastTag) continue;
-                    console.log("replacing [" + antecedent + "] with [" + consequent + "]", antecedent == lastTag);
+                    // console.log("replacing [" + antecedent + "] with [" + consequent + "]", antecedent == lastTag);
                     currentValue = currentValue.replace(
                         this.getTagRegex(antecedent),
                         "$1" + consequent + "$3"
@@ -408,7 +419,7 @@ export class SmartAlias extends RE6Module {
 
             // Regenerate the tags to account for replacements
             triggerUpdateEvent($textarea);
-            tags = SmartAlias.getInputTags($textarea);
+            tags = SmartAlias.parseTagInput($textarea);
         }
 
 
@@ -519,7 +530,7 @@ export class SmartAlias extends RE6Module {
          * @param tags Tags to display
          * @param loading Tags to mark as loading
          */
-        function redrawContainerContents($container: JQuery<HTMLElement>, tags: string[], minPostsWarning: number, asciiWarning: boolean, tagOrder: TagOrder, loading = new Set<string>()): void {
+        function redrawContainerContents($container: JQuery<HTMLElement>, tags: ParsedTag[], minPostsWarning: number, asciiWarning: boolean, tagOrder: TagOrder, loading = new Set<string>()): void {
             $container
                 .html("")
                 .toggleClass("grouped", tagOrder == TagOrder.Grouped);
@@ -528,14 +539,19 @@ export class SmartAlias extends RE6Module {
 
             // console.log(SmartAlias.tagData);
 
-            for (let tagName of tags) {
+            // Index of tag names, for quicker duplicated checking
+            const tagNames = [];
+            for (const tagData of tags)
+                tagNames.push(tagData.name);
 
-                let displayName = tagName;  // text to be displayed in the link
-                if (SmartAlias.tagAliases[tagName] != undefined)
-                    tagName = SmartAlias.tagAliases[tagName];
+            for (const tagData of tags) {
 
-                const data = SmartAlias.tagData[tagName];
-                const isLoading = loading.has(tagName);
+                let displayName = tagData.name;  // text to be displayed in the link
+                if (SmartAlias.tagAliases[tagData.name] != undefined)
+                    tagData.name = SmartAlias.tagAliases[tagData.name];
+
+                const data = SmartAlias.tagData[tagData.name];
+                const isLoading = loading.has(tagData.name);
 
                 // console.log("drawing " + tagName, data);
 
@@ -556,7 +572,7 @@ export class SmartAlias extends RE6Module {
                     symbol = "error";
                     color = "error";
                     text = "avoid posting";
-                } else if (Util.getArrayIndexes(tags, tagName).length > 1) {
+                } else if (Util.getArrayIndexes(tagNames, tagData.name).length > 1) {
                     symbol = "info";
                     color = "info";
                     text = "duplicate";
@@ -564,7 +580,7 @@ export class SmartAlias extends RE6Module {
                     symbol = "error";
                     color = "error";
                     text = "invalid";
-                } else if (data.ambiguous || tagName.endsWith("_(disambiguation)")) {
+                } else if (data.ambiguous || tagData.name.endsWith("_(disambiguation)")) {
                     symbol = "info";
                     color = "warning";
                     text = "ambiguous";
@@ -590,13 +606,13 @@ export class SmartAlias extends RE6Module {
                 $("<smart-tag>")
                     .addClass(isLoading ? "" : "category-" + data.category)
                     .attr({
-                        "name": tagName,
+                        "name": tagData.name,
                         "symbol": symbol,
                         "color": color,
                         "title": title,
                     })
                     .html(
-                        `<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tagName)}" target="_blank" rel="noopener noreferrer" tabindex="-1">${displayName}</a> ${text}`
+                        `<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tagData.name)}" target="_blank" rel="noopener noreferrer" tabindex="-1">${displayName}</a> ${text}`
                         + (
                             (asciiWarning && data && data.errors.length > 0 && !data.dnp)
                                 ? ` <span class="fas fa-exclamation-triangle tag-warning" title="${data.errors.join("\n")}"></span>`
@@ -685,7 +701,7 @@ export class SmartAlias extends RE6Module {
             input[i] = input[i]
                 .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
                 .replace(/\*/g, "(\\S*)");
-        return new RegExp("(^|\n| )(" + input.join("|") + ")( |\n|$)", "gi");
+        return new RegExp("((?:^|\n| )-?(?:(?:artist|character):)?)(" + input.join("|") + ")( |\n|$)", "gi");
     }
 
     /**
@@ -797,4 +813,40 @@ namespace TagOrder {
         return TagOrder.Default;
     }
 
+}
+
+type ParsedTag = {
+    name: string;
+    negated: boolean;
+    prefix: string;
+}
+
+namespace ParsedTag {
+    export function fromString(rawTag: string): ParsedTag {
+        const result: ParsedTag = {
+            name: null,
+            negated: false,
+            prefix: null,
+        }
+        if (rawTag.startsWith("-")) {
+            result.negated = true;
+            rawTag = rawTag.substr(1);
+        }
+
+        const match = rawTag.match(/(artist|character):/)
+        if (match) {
+            result.prefix = match[1];
+            rawTag = rawTag.substr(match[0].length);
+        }
+
+        result.name = rawTag;
+
+        return result;
+    }
+
+    export function toString(tag: ParsedTag, skipNegation = false): string {
+        return ((tag.negated && !skipNegation) ? "-" : "")
+            + (tag.prefix ? (tag.prefix + ":") : "")
+            + tag.name;
+    }
 }

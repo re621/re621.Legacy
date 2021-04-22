@@ -17,8 +17,10 @@ smart-alias {
     margin: 0.25rem 0;
     overflow: hidden;
 
-    font-family: monospace;
-    font-size: 1.05rem;
+    // This is deliberate
+    // Resets the font size to page default
+    font-family: "Consolas", monospace, monospace;
+    font-size: 1em;
 
     border: 1px solid #666;
     border-radius: 0.25rem;
@@ -133,4 +135,11 @@ button.smart-alias-validate {
 // Bigger Quick-Tags Textarea
 textarea#post_tag_string {
     min-height: 6rem;
+}
+
+// Fixed font in the tag textareas
+div#c-uploads div#a-new textarea.tag-textarea,
+form.simple_form div.input textarea.tag-textarea {
+    font-family: "Consolas", monospace, monospace;
+    font-size: 1em;
 }

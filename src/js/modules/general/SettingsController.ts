@@ -1269,7 +1269,8 @@ export class SettingsController extends RE6Module {
         const smartAlias = ModuleController.get(SmartAlias),
             uploadUtilities = ModuleController.get(UploadUtilities),
             tagSuggester = ModuleController.get(TagSuggester),
-            customFlagger = ModuleController.get(CustomFlagger);
+            customFlagger = ModuleController.get(CustomFlagger),
+            betterSearch = ModuleController.get(BetterSearch);
 
         const aliasContainer = $("<textarea>")
             .attr("id", "alias-list-container")
@@ -1362,7 +1363,20 @@ export class SettingsController extends RE6Module {
                             ),
                             Form.text(`This feature requires access to various domains not explicitly whitelisted by the script.<br />You will be prompted to approve a cross-origin request when that happens.`, 3),
                             Form.spacer(3),
-                        ]),
+                        ]
+                    ),
+
+                    Form.checkbox(
+                        {
+                            value: uploadUtilities.fetchSettings("stopLeaveWarning"),
+                            label: `<b>Suppress Exit Message</b><br />Removes the confirmation message when leaving the upload page`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await uploadUtilities.pushSettings("stopLeaveWarning", data);
+                        }
+                    ),
+                    Form.spacer(3),
 
                 ]),
 
@@ -1560,6 +1574,19 @@ export class SettingsController extends RE6Module {
                         async (data) => {
                             await smartAlias.pushSettings("quickTagsForm", data);
                             await smartAlias.reload();
+                        }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("hideSmartAliasOutput"),
+                            label: `<b>Hide Quick Tags Output</b><br />Run the SmartAlias in the quick tags form, but don't display the tag anaysis`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("hideSmartAliasOutput", data);
+                            betterSearch.updateContentHeader();
                         }
                     ),
                     Form.spacer(3),

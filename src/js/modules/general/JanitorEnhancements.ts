@@ -7,17 +7,22 @@ export class JanitorEnhancements extends RE6Module {
     private deletionReasons = [
         "Inferior version of post #%PARENT_ID%",
         "Inferior version/duplicate of post #%PARENT_ID%",
-        "Irrelevant to site",
         "Previously deleted (post #%PARENT_ID%)",
         "Excessive same base image set",
         "Colored base",
         "",
         "Does not meet minimum quality standards (Artistic)",
+        "Does not meet minimum quality standards (Resolution)",
+        "Does not meet minimum quality standards (Compression)",
         "Does not meet minimum quality standards (Bad digitization of traditional media)",
         "Broken/corrupted file",
         "JPG resaved as PNG",
         "",
+        "Irrelevant to site",
+        "Irrelevant to site (Human only)",
+        "",
         "Paysite/commercial content",
+        "Takedown #",
         "Conditional DNP: Only the artist is allowed to post",
         "The artist of this post is on the [[avoid_posting|avoid posting list]]",
     ];
@@ -86,7 +91,7 @@ export class JanitorEnhancements extends RE6Module {
         const post = Post.getViewingPost();
         // console.log(post.tags.artist, post.uploaderName.toLowerCase());
         if (post.tags.artist.has(post.uploaderName.toLowerCase()))
-            $(`<span class="post-uploader-artist">(artist)</span>`).appendTo("li:contains('Uploader')");
+            $(`<span class="post-uploader-artist">(artist)</span>`).appendTo("#post-information li:contains('Uploader')");
     }
 
 }

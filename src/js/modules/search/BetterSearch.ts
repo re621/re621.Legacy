@@ -6,7 +6,7 @@ import { Blacklist } from "../../components/data/Blacklist";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
-import { Post } from "../../components/post/Post";
+import { Post, PostData } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Debug } from "../../components/utility/Debug";
@@ -75,6 +75,7 @@ export class BetterSearch extends RE6Module {
             hidePageBreaks: true,                           // Show a visual separator between different pages
 
             highlightVisited: true,                         // Adds a colored border to visited posts
+            hideSmartAliasOutput: false,                    // Run SmartAlias, but don't show its output, in the quick edit mode
         };
     }
 
@@ -212,18 +213,28 @@ export class BetterSearch extends RE6Module {
                 const searchStatsCount = $("<span>")
                     .attr({
                         "id": "search-stats-count",
-                        "title": "Approximate number of posts found",
                     })
                     .on("re621:update", () => {
                         const results = (this.lastPage - 1) * User.postsPerPage + this.pageResultCount;
                         const queryPageNum = parseInt(this.queryPage);
-                        if (!queryPageNum) searchStatsCount.html("");
-                        else searchStatsCount.html((
-                            this.lastPage == queryPageNum
-                                ? results
-                                : "~" + Util.formatK(results))
-                            + " Posts"
-                        );
+                        searchStatsCount.attr("title", "");
+                        if (!queryPageNum) {
+                            // TODO Account for this by counting visible posts
+                            searchStatsCount.html("");
+                        } else {
+                            searchStatsCount.html((
+                                this.lastPage == queryPageNum
+                                    ? results
+                                    : "~" + Util.formatK(results))
+                                + " Posts"
+                            );
+
+                            searchStatsCount.attr({
+                                "title": (this.lastPage == queryPageNum)
+                                    ? `${results} active posts found`
+                                    : `Between ${results - User.postsPerPage} and ${results} posts were found.\nGo to the last page of the search to get the exact amount.`,
+                            })
+                        }
                     })
                     .appendTo(stats);
                 searchStatsCount.trigger("re621:update");
@@ -364,9 +375,6 @@ export class BetterSearch extends RE6Module {
             .addClass("simple_form")
             .html(
                 `<input type="hidden" name="_method" value="put">` +
-                `<div class="quick-tags-container">` +
-                `   <textarea name="post[tag_string]" id="re621_qedit_tags" data-autocomplete="tag-edit" class="ui-autocomplete-input" autocomplete="off"></textarea>` +
-                `</div>` +
                 `<div class="quick-tags-toolbar">` +
                 `   <input type="submit" name="submit" value="Submit">` +
                 `   <input type="button" name="cancel" value="Cancel">` +
@@ -377,15 +385,60 @@ export class BetterSearch extends RE6Module {
                         <option value="q">Questionable</option>
                         <option value="e">Explicit</option>
                     </select>` +
-                `<div class="quick-tags-info">` +
-                `   <span id="re621-qedit-dimensions"></span>` +
-                `   <span id="re621-qedit-flags" class="display-none-important"></span>` +
-                `   <a id="re621-qedit-history" href="404">history</a>` +
+                `   <select name="quick-edit-mode" id="re621_qedit_mode">
+                        <option value="overview">Full Tags</option>
+                        <option value="changes">Changes</option>
+                    </select>` +
+                `   <div class="quick-tags-info">` +
+                `       <span id="re621-qedit-dimensions"></span>` +
+                `       <span id="re621-qedit-flags" class="display-none-important"></span>` +
+                `       <a id="re621-qedit-history" href="post_versions">history</a>` +
+                `   </div>` +
                 `</div>` +
-                `</div>`
+                `<div class="quick-tags-container">` +
+                `   <div class="post-thumbnail" id="quick-tags-thumbnail">` +
+                `       <img id="quick-tags-image" src="" />` +
+                `   </div>` +
+                `   <div>` +
+                `       <textarea name="post[tag_string]" id="re621_qedit_tags" data-autocomplete="tag-edit" class="ui-autocomplete-input" autocomplete="off"></textarea>` +
+                `   </div>` +
+                `</div>` +
+                ``
             )
+            .on("re621:redraw", () => {
+                const post: PostData = this.$quickEdit.data("wfpost");
+                if (!post) return;
+
+                const ratio = Util.formatRatio(post.img.width, post.img.height);
+                this.$quickEdit.data("info").html(`${post.img.width} x ${post.img.height} (${ratio[0]}:${ratio[1]}), ${Util.Size.format(post.file.size)}`);
+                this.$quickEdit.data("flags")
+                    .toggleClass("display-none-important", post.flags.size == 0)
+                    .html(post.flags.size > 0 ? [...post.flags].join(", ") : "");
+                this.$quickEdit.data("history").attr("href", `https://e621.net/post_versions?search[post_id]=${post.id}`);
+
+                this.$quickEdit.data("thumb")
+                    .data("wfpost", post)
+                    .attr({ "data-id": post.id, });
+                this.$quickEdit.data("image").attr("src", post.file.sample);
+
+                if (this.$quickEdit.data("mode").val() == "overview")
+                    this.$quickEdit.data("tags")
+                        .attr("placeholder", "")
+                        .val(post.tagString + " ");
+                else this.$quickEdit.data("tags")
+                    .val("")
+                    .attr({ "placeholder": "Tags listed here will be added to the post.\nPreface a tag with a minus (-) to remove it instead.", });
+                this.$quickEdit.data("tags")
+                    .trigger("re621:input")
+                    .focus();
+
+                this.$quickEdit.data("reason").val("");
+                this.$quickEdit.data("parent").val(post.rel.parent);
+                this.$quickEdit.data("rating").val(post.rating);
+            })
             .appendTo(this.$wrapper)
             .hide();
+
         this.$quickEdit.data({
             "token": $("#re621_qedit_token"),
 
@@ -393,11 +446,42 @@ export class BetterSearch extends RE6Module {
             "flags": $("#re621-qedit-flags"),
             "history": $("#re621-qedit-history"),
 
+            thumb: $("#quick-tags-thumbnail"),
+            image: $("#quick-tags-image"),
+
             "tags": $("#re621_qedit_tags"),
             "reason": $("#re621_qedit_reason"),
             "parent": $("#re621_qedit_parent"),
             "rating": $("#re621_qedit_rating"),
+
+            mode: $("#re621_qedit_mode"),
         });
+
+        this.$quickEdit.data("mode")
+            .on("change", () => {
+                const switcher = this.$quickEdit.data("mode"),
+                    mode = switcher.val(),
+                    post: PostData = this.$quickEdit.data("wfpost");
+                if (!post) return;
+
+                Util.LS.setItem("re621.BetterSearch.QuickEditMode", mode);
+
+                this.$quickEdit.data("tags")
+                    .attr({ "placeholder": mode == "overview" ? "" : "Tags listed here will be added to the post.\nPreface a tag with a minus (-) to remove it instead.", })
+                    .val(() => {
+                        switch (mode) {
+                            case "changes":
+                                return "";
+                            case "overview":
+                            default:
+                                return post.tagString + " ";
+                        }
+                    })
+                    .trigger("re621:input");
+            })
+            .val(Util.LS.getItem("re621.BetterSearch.QuickEditMode") || "overview")
+            .trigger("change");
+
         this.$quickEdit.find("input[name=cancel]").on("click", () => {
             this.$quickEdit.hide("fast");
         });
@@ -406,15 +490,28 @@ export class BetterSearch extends RE6Module {
         this.$quickEdit.on("submit", (event) => {
             event.preventDefault();
             const postID = parseInt(this.$quickEdit.attr("postid"));
+            const post: PostData = this.$quickEdit.data("wfpost");
 
-            E621.Post.id(postID).put({
-                post: {
-                    "tag_string": this.$quickEdit.data("tags").val() + "",
-                    "edit_reason": this.$quickEdit.data("reason").val() + "",
-                    "parent_id": this.$quickEdit.data("parent").val() + "",
-                    "rating": PostRating.fromValue(this.$quickEdit.data("rating").val() + ""),
-                }
-            }).then(
+            const formData = {
+                "edit_reason": this.$quickEdit.data("reason").val() + "",
+                "parent_id": this.$quickEdit.data("parent").val() + "",
+                "rating": PostRating.fromValue(this.$quickEdit.data("rating").val() + ""),
+            };
+
+            switch (this.$quickEdit.data("mode").val()) {
+                case "changes":
+                    formData["tag_string_diff"] = this.$quickEdit.data("tags").val() + "";
+                    break;
+                case "overview":
+                    formData["tag_string"] = this.$quickEdit.data("tags").val() + "";
+                    formData["old_tag_string"] = post.tagString;
+                    break;
+                default:
+                    Danbooru.error(`An error occurred while updating a post`);
+                    return;
+            }
+
+            E621.Post.id(postID).patch({ post: formData, }).then(
                 (response) => {
                     Debug.log(response);
 
@@ -470,6 +567,7 @@ export class BetterSearch extends RE6Module {
 
             "hidePageBreaks",
             "highlightVisited",
+            "hideSmartAliasOutput",
         ]);
 
         // Scaling Settings
@@ -490,6 +588,10 @@ export class BetterSearch extends RE6Module {
         // Add border to visited pages
         if (conf.highlightVisited) this.$content.attr("highlight-visited", "true");
         else this.$content.removeAttr("highlight-visited");
+
+        // Hide the SmartAlias output in the quick edit form
+        if (conf.hideSmartAliasOutput) $("section#content").attr("hide-smart-alias-output", "true");
+        else $("section#content").removeAttr("hide-smart-alias-output");
     }
 
     /** Restarts various event listeners used by the module */
@@ -640,19 +742,11 @@ export class BetterSearch extends RE6Module {
                     else $quickEdit.css("top", "");
 
                     $quickEdit.show("fast");
-                    $quickEdit.attr("postid", post.id)
 
-                    const ratio = Util.formatRatio(post.img.width, post.img.height);
-                    $quickEdit.data("info").html(`${post.img.width} x ${post.img.height} (${ratio[0]}:${ratio[1]}), ${Util.Size.format(post.file.size)}`);
-                    $quickEdit.data("flags")
-                        .toggleClass("display-none-important", post.flags.size == 0)
-                        .html(post.flags.size > 0 ? [...post.flags].join(", ") : "");
-                    $quickEdit.data("history").attr("href", `https://e621.net/post_versions?search[post_id]=${post.id}`);
+                    $quickEdit.attr("postid", post.id);
+                    $quickEdit.data("wfpost", post);
 
-                    $quickEdit.data("tags").val(post.tagString + " ").trigger("re621:input").focus();
-                    $quickEdit.data("reason").val("");
-                    $quickEdit.data("parent").val(post.rel.parent);
-                    $quickEdit.data("rating").val(post.rating);
+                    $quickEdit.trigger("re621:redraw");
                     break;
                 }
                 default: {
