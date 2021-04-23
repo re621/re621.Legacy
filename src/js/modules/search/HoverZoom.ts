@@ -208,6 +208,12 @@ export class HoverZoom extends RE6Module {
                 return;
 
             const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}], subitem[data-id=${data.post}]`).first();
+
+            // Prevents the HZ from triggering multiple times
+            // Still no idea why it even does that
+            if ($ref.attr("hz-display")) return;
+            $ref.attr("hz-display", "true");
+
             let post: PostData;
             if ($ref.is("post")) post = Post.get($ref);
             else {
@@ -321,6 +327,8 @@ export class HoverZoom extends RE6Module {
             HoverZoom.off("mousemove.tracking");
 
             const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}]`).first();
+
+            $ref.removeAttr("hz-display");
 
             const $img = $ref.find("img").first();
             if ($ref.data("stored-title")) $img.attr("title", $ref.data("stored-title"));
