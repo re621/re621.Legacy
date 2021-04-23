@@ -17,6 +17,10 @@ export class PostParts {
 
     private static renderedGIFs: PostSet = new PostSet();
 
+    public static cleanup(post: Post): void {
+        this.renderedGIFs.delete(post);
+    }
+
     public static renderImage(post: Post, conf: any): JQuery<HTMLElement> {
 
         const query = Page.getQueryParameter("tags")

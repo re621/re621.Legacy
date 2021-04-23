@@ -133,6 +133,9 @@ export class Post implements PostData {
             "buttonsVote", "buttonsFav",                        // renderButtons
         ]);
 
+        // Clean up older events and data
+        PostParts.cleanup(this);
+
         // Reset the article state
         this.$ref
             .attr({
@@ -162,6 +165,9 @@ export class Post implements PostData {
 
     /** Resets the previously rendered post element back to placeholder state */
     public reset(): Post {
+
+        // Clean up attached events and data
+        PostParts.cleanup(this);
 
         // Remove structure
         this.$ref

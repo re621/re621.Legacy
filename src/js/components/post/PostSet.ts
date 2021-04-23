@@ -62,6 +62,17 @@ export class PostSet {
             case PostSortType.IDAsc:
                 return new PostSet([...this.posts.sort((a, b) => a.id - b.id)]);
         }
+        return this;
+    }
+
+    public delete(needle: Post): PostSet {
+        const result = [];
+        for (const post of this.posts) {
+            if (post.id == needle.id) continue;
+            result.push(post);
+        }
+        this.posts = result;
+        return this;
     }
 
 }
