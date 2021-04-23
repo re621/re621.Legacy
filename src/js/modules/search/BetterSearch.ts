@@ -429,6 +429,7 @@ export class BetterSearch extends RE6Module {
                     .val("")
                     .attr({ "placeholder": "Tags listed here will be added to the post.\nPreface a tag with a minus (-) to remove it instead.", });
                 this.$quickEdit.data("tags")
+                    .data("originalTags", post.tags.all)
                     .trigger("re621:input")
                     .focus();
 

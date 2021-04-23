@@ -313,6 +313,13 @@ export class SmartAlias extends RE6Module {
             });
         }
 
+        // Pass on the original tags, if necessary
+        const originalTags = $textarea.data("originalTags");
+        if (originalTags) {
+            $container.attr("has-original", "true");
+            $container.data("originalTags", originalTags);
+        } else $container.removeAttr("has-original");
+
         // Get the tags from the textarea
         const inputString = SmartAlias.getInputString($textarea);
         let tags: ParsedTag[] = SmartAlias.parseTagString(inputString);
@@ -536,6 +543,10 @@ export class SmartAlias extends RE6Module {
                 .html("")
                 .toggleClass("grouped", tagOrder == TagOrder.Grouped);
 
+            const originalTags: Set<string> = $container.data("originalTags")
+                ? $container.data("originalTags")
+                : new Set();
+
             if (tagOrder !== TagOrder.Default) tags = tags.sort();
 
             // console.log(SmartAlias.tagData);
@@ -622,16 +633,22 @@ export class SmartAlias extends RE6Module {
                 // Insert zero-width spaces for better line-breaking
                 displayName = displayName.replace(/_/g, "_&#8203;");
 
+                let action = "default";
+                if (originalTags.has(tagData.name) && tagData.negated) action = "removed";
+                if (!originalTags.has(tagData.name) && !tagData.negated) action = "added";
+
                 $("<smart-tag>")
                     .addClass(isLoading ? "" : "category-" + data.category)
                     .attr({
                         "name": tagData.name,
                         "symbol": symbol,
                         "color": color,
-                        "title": title,
+                        // "title": title,
+                        "action": action == "default" ? undefined : action,
                     })
                     .html(
-                        `<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tagData.name)}" target="_blank" rel="noopener noreferrer" tabindex="-1">${displayName}</a> ${text}`
+                        `<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tagData.name)}" target="_blank" rel="noopener noreferrer" tabindex="-1">${displayName}</a>
+                        <span title="${title}">${text}</span>`
                         + (
                             (asciiWarning && data && data.errors.length > 0 && !data.dnp)
                                 ? ` <span class="fas fa-exclamation-triangle tag-warning" title="${data.errors.join("\n")}"></span>`
