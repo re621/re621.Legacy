@@ -348,8 +348,9 @@ export class SmartAlias extends RE6Module {
 
         // Step 2
         // Create a list of tags that need to be looked up in the API
+        // Ignore tags considered malformed from the very start
         const lookup: Set<string> = new Set();
-        for (const tagData of tags) {
+        for (const tagData of tags.filter(tag => !tag.malformed)) {
             if (typeof SmartAlias.tagData[tagData.name] == "undefined")
                 lookup.add(tagData.name);
         }
@@ -550,7 +551,19 @@ export class SmartAlias extends RE6Module {
                 if (SmartAlias.tagAliases[tagData.name] != undefined)
                     tagData.name = SmartAlias.tagAliases[tagData.name];
 
-                const data = SmartAlias.tagData[tagData.name];
+                const data = tagData.malformed
+                    ? {
+                        count: 0,
+                        category: TagCategory.Invalid,
+
+                        invalid: true,
+                        ambiguous: false,
+                        dnp: false,
+                        errors: [],
+
+                        cached: false,
+                    }
+                    : SmartAlias.tagData[tagData.name];
                 const isLoading = loading.has(tagData.name);
 
                 // console.log("drawing " + tagName, data);
@@ -568,6 +581,12 @@ export class SmartAlias extends RE6Module {
                     symbol = "loading";
                     color = "success";
                     text = "";
+                } else if (tagData.malformed) {
+                    symbol = "error";
+                    color = "error";
+                    text = "invalid";
+                    tagData.name = (tagData.negated ? "-" : "") + (tagData.prefix ? (tagData.prefix + ":") : "") + tagData.name;
+                    displayName = tagData.name;
                 } else if (data.dnp) {
                     symbol = "error";
                     color = "error";
@@ -819,6 +838,7 @@ type ParsedTag = {
     name: string;
     negated: boolean;
     prefix: string;
+    malformed?: boolean;
 }
 
 namespace ParsedTag {
@@ -828,6 +848,7 @@ namespace ParsedTag {
             negated: false,
             prefix: null,
         }
+
         if (rawTag.startsWith("-")) {
             result.negated = true;
             rawTag = rawTag.substr(1);
@@ -840,6 +861,9 @@ namespace ParsedTag {
         }
 
         result.name = rawTag;
+
+        if (result.name.length == 0)
+            result.malformed = true;
 
         return result;
     }
