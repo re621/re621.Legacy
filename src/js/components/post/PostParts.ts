@@ -178,6 +178,16 @@ export class PostParts {
                             post.$ref.removeAttr("loading");
                             $image.off("mouseenter.re621.upscale")
                                 .off("mouseleave.re621.upscale");
+
+                            // Limit the number of actively playing GIFs for performance reasons
+                            if (post.file.ext !== "gif") return;
+                            if (typeof conf.maxPlayingGIFs !== "number" || conf.maxPlayingGIFs == -1) return;
+                            PostParts.renderedGIFs.push(post);
+                            if (PostParts.renderedGIFs.size() > conf.maxPlayingGIFs) {
+                                const trimmed = PostParts.renderedGIFs.shift();
+                                trimmed.loaded = LoadedFileType.PREVIEW;
+                                trimmed.render();
+                            }
                         });
                 }, 200);
             });
