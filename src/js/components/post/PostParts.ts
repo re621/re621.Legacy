@@ -152,6 +152,7 @@ export class PostParts {
                             PostParts.renderedGIFs.push(post);
                             if (PostParts.renderedGIFs.size() > conf.maxPlayingGIFs) {
                                 const trimmed = PostParts.renderedGIFs.shift();
+                                if (trimmed.id == post.id) return;
                                 trimmed.loaded = LoadedFileType.PREVIEW;
                                 trimmed.render();
                             }
@@ -189,6 +190,7 @@ export class PostParts {
                             PostParts.renderedGIFs.push(post);
                             if (PostParts.renderedGIFs.size() > conf.maxPlayingGIFs) {
                                 const trimmed = PostParts.renderedGIFs.shift();
+                                if (trimmed.id == post.id) return;
                                 trimmed.loaded = LoadedFileType.PREVIEW;
                                 trimmed.render();
                             }
