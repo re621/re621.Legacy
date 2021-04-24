@@ -313,6 +313,13 @@ export class SmartAlias extends RE6Module {
             });
         }
 
+        // Pass on the original tags, if necessary
+        const originalTags = $textarea.data("originalTags");
+        if (originalTags) {
+            $container.attr("has-original", "true");
+            $container.data("originalTags", originalTags);
+        } else $container.removeAttr("has-original");
+
         // Get the tags from the textarea
         const inputString = SmartAlias.getInputString($textarea);
         let tags: ParsedTag[] = SmartAlias.parseTagString(inputString);
@@ -348,8 +355,9 @@ export class SmartAlias extends RE6Module {
 
         // Step 2
         // Create a list of tags that need to be looked up in the API
+        // Ignore tags considered malformed from the very start
         const lookup: Set<string> = new Set();
-        for (const tagData of tags) {
+        for (const tagData of tags.filter(tag => !tag.malformed)) {
             if (typeof SmartAlias.tagData[tagData.name] == "undefined")
                 lookup.add(tagData.name);
         }
@@ -535,6 +543,10 @@ export class SmartAlias extends RE6Module {
                 .html("")
                 .toggleClass("grouped", tagOrder == TagOrder.Grouped);
 
+            const originalTags: Set<string> = $container.data("originalTags")
+                ? $container.data("originalTags")
+                : new Set();
+
             if (tagOrder !== TagOrder.Default) tags = tags.sort();
 
             // console.log(SmartAlias.tagData);
@@ -550,7 +562,19 @@ export class SmartAlias extends RE6Module {
                 if (SmartAlias.tagAliases[tagData.name] != undefined)
                     tagData.name = SmartAlias.tagAliases[tagData.name];
 
-                const data = SmartAlias.tagData[tagData.name];
+                const data = tagData.malformed
+                    ? {
+                        count: 0,
+                        category: TagCategory.Invalid,
+
+                        invalid: true,
+                        ambiguous: false,
+                        dnp: false,
+                        errors: [],
+
+                        cached: false,
+                    }
+                    : SmartAlias.tagData[tagData.name];
                 const isLoading = loading.has(tagData.name);
 
                 // console.log("drawing " + tagName, data);
@@ -568,6 +592,12 @@ export class SmartAlias extends RE6Module {
                     symbol = "loading";
                     color = "success";
                     text = "";
+                } else if (tagData.malformed) {
+                    symbol = "error";
+                    color = "error";
+                    text = "invalid";
+                    tagData.name = (tagData.negated ? "-" : "") + (tagData.prefix ? (tagData.prefix + ":") : "") + tagData.name;
+                    displayName = tagData.name;
                 } else if (data.dnp) {
                     symbol = "error";
                     color = "error";
@@ -603,16 +633,22 @@ export class SmartAlias extends RE6Module {
                 // Insert zero-width spaces for better line-breaking
                 displayName = displayName.replace(/_/g, "_&#8203;");
 
+                let action = "default";
+                if (originalTags.has(tagData.name) && tagData.negated) action = "removed";
+                if (!originalTags.has(tagData.name) && !tagData.negated) action = "added";
+
                 $("<smart-tag>")
                     .addClass(isLoading ? "" : "category-" + data.category)
                     .attr({
                         "name": tagData.name,
                         "symbol": symbol,
                         "color": color,
-                        "title": title,
+                        // "title": title,
+                        "action": action == "default" ? undefined : action,
                     })
                     .html(
-                        `<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tagData.name)}" target="_blank" rel="noopener noreferrer" tabindex="-1">${displayName}</a> ${text}`
+                        `<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tagData.name)}" target="_blank" rel="noopener noreferrer" tabindex="-1">${displayName}</a>
+                        <span title="${title}">${text}</span>`
                         + (
                             (asciiWarning && data && data.errors.length > 0 && !data.dnp)
                                 ? ` <span class="fas fa-exclamation-triangle tag-warning" title="${data.errors.join("\n")}"></span>`
@@ -701,7 +737,7 @@ export class SmartAlias extends RE6Module {
             input[i] = input[i]
                 .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
                 .replace(/\*/g, "(\\S*)");
-        return new RegExp("((?:^|\n| )-?(?:(?:artist|character):)?)(" + input.join("|") + ")( |\n|$)", "gi");
+        return new RegExp("((?:^|\n| )-?(?:(?:artist|character|copyright|species):)?)(" + input.join("|") + ")( |\n|$)", "gi");
     }
 
     /**
@@ -819,6 +855,7 @@ type ParsedTag = {
     name: string;
     negated: boolean;
     prefix: string;
+    malformed?: boolean;
 }
 
 namespace ParsedTag {
@@ -828,18 +865,22 @@ namespace ParsedTag {
             negated: false,
             prefix: null,
         }
+
         if (rawTag.startsWith("-")) {
             result.negated = true;
             rawTag = rawTag.substr(1);
         }
 
-        const match = rawTag.match(/(artist|character):/)
+        const match = rawTag.match(/(artist|character|copyright|species):/)
         if (match) {
             result.prefix = match[1];
             rawTag = rawTag.substr(match[0].length);
         }
 
         result.name = rawTag;
+
+        if (result.name.length == 0)
+            result.malformed = true;
 
         return result;
     }

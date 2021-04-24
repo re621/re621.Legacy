@@ -17,6 +17,10 @@ export class PostParts {
 
     private static renderedGIFs: PostSet = new PostSet();
 
+    public static cleanup(post: Post): void {
+        this.renderedGIFs.delete(post);
+    }
+
     public static renderImage(post: Post, conf: any): JQuery<HTMLElement> {
 
         const query = Page.getQueryParameter("tags")
@@ -148,6 +152,7 @@ export class PostParts {
                             PostParts.renderedGIFs.push(post);
                             if (PostParts.renderedGIFs.size() > conf.maxPlayingGIFs) {
                                 const trimmed = PostParts.renderedGIFs.shift();
+                                if (trimmed.id == post.id) return;
                                 trimmed.loaded = LoadedFileType.PREVIEW;
                                 trimmed.render();
                             }
@@ -178,6 +183,17 @@ export class PostParts {
                             post.$ref.removeAttr("loading");
                             $image.off("mouseenter.re621.upscale")
                                 .off("mouseleave.re621.upscale");
+
+                            // Limit the number of actively playing GIFs for performance reasons
+                            if (post.file.ext !== "gif") return;
+                            if (typeof conf.maxPlayingGIFs !== "number" || conf.maxPlayingGIFs == -1) return;
+                            PostParts.renderedGIFs.push(post);
+                            if (PostParts.renderedGIFs.size() > conf.maxPlayingGIFs) {
+                                const trimmed = PostParts.renderedGIFs.shift();
+                                if (trimmed.id == post.id) return;
+                                trimmed.loaded = LoadedFileType.PREVIEW;
+                                trimmed.render();
+                            }
                         });
                 }, 200);
             });

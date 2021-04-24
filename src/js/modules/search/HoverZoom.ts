@@ -208,6 +208,7 @@ export class HoverZoom extends RE6Module {
                 return;
 
             const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}], subitem[data-id=${data.post}]`).first();
+
             let post: PostData;
             if ($ref.is("post")) post = Post.get($ref);
             else {

@@ -89,6 +89,15 @@ smart-alias {
     }
 }
 
+smart-alias[has-original=true] smart-tag {
+    &[symbol=success][action=added]::before {
+        color: #81ec81;
+    }
+    &[symbol=success][action=removed]::before {
+        color: #ff8585;
+    }
+}
+
 // Limit the height for the editing mode
 #c-posts #a-index smart-alias,
 #c-favorites #a-index smart-alias,
