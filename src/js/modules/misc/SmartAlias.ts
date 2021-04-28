@@ -371,7 +371,7 @@ export class SmartAlias extends RE6Module {
         const invalidTags: Set<string> = new Set(),
             ambiguousTags: Set<string> = new Set();
         for (const batch of Util.chunkArray([...lookup].filter((value) => SmartAlias.tagAliases[value] == undefined), 40)) {
-            for (const result of await E621.TagAliases.get<APITagAlias>({ "search[antecedent_name]": batch, limit: 1000 }, 500)) {
+            for (const result of await E621.TagAliases.get<APITagAlias>({ "search[antecedent_name]": batch, limit: 320 }, 500)) {
 
                 // Don't apply pending or inactive aliases
                 if (result.status !== "active") continue;
