@@ -1,13 +1,15 @@
+import { PostFlag } from "../../components/api/responses/APIPost";
 import { ModuleController } from "../../components/ModuleController";
 import { PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Debug } from "../../components/utility/Debug";
 import { BetterSearch } from "./BetterSearch";
 import { CustomFlagger } from "./CustomFlagger";
 
 export class ThumbnailTweaks extends RE6Module {
 
     public constructor() {
-        super();
+        super([], true);
     }
 
     protected getDefaultSettings(): Settings {
@@ -20,9 +22,12 @@ export class ThumbnailTweaks extends RE6Module {
         super.create();
 
         const conf = ModuleController.get(BetterSearch).fetchSettings(["ribbonsRel", "ribbonsFlag"]);
+        let count = 0;
         for (const element of $(".post-preview").get()) {
             ThumbnailTweaks.modify($(element), conf.ribbonsRel, conf.ribbonsFlag);
+            count++;
         }
+        Debug.log(`ThumbnailTweaks: ${count} elements`);
     }
 
     private static modify($article: JQuery<HTMLElement>, ribbonsRel: boolean, ribbonsFlag: boolean): void {
@@ -51,11 +56,11 @@ export class ThumbnailTweaks extends RE6Module {
                 .appendTo($ribbons);
             const relRibbonText = [];
 
-            if ($article.attr("data-has-children") == "true") {
+            if (post.has.children) {
                 relRibbon.addClass("has-children");
                 relRibbonText.push("Child posts");
             }
-            if ($article.attr("data-parent-id") !== undefined) {
+            if (post.has.parent) {
                 relRibbon.addClass("has-parent");
                 relRibbonText.push("Parent posts");
             }
@@ -66,7 +71,6 @@ export class ThumbnailTweaks extends RE6Module {
 
         // Flag Ribbons
         if (ribbonsFlag) {
-            const flags = new Set(($article.attr("data-flags") || "").split(" "));
 
             const flagRibbon = $("<ribbon>")
                 .addClass("right")
@@ -74,11 +78,11 @@ export class ThumbnailTweaks extends RE6Module {
                 .appendTo($ribbons);
             const flagRibbonText = [];
 
-            if (flags.has("flagged")) {
+            if (post.flags.has(PostFlag.Flagged)) {
                 flagRibbon.addClass("is-flagged");
                 flagRibbonText.push("Flagged");
             }
-            if (flags.has("pending")) {
+            if (post.flags.has(PostFlag.Pending)) {
                 flagRibbon.addClass("is-pending");
                 flagRibbonText.push("Pending");
             }

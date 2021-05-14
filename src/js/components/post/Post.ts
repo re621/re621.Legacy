@@ -729,8 +729,8 @@ export namespace PostData {
 
             has: {
                 file: $article.attr("data-file-url") !== undefined,
-                children: $article.attr("data-has-active-children") == "true",
-                parent: $article.attr("data-parent-id") !== undefined,
+                children: $article.hasClass("post-status-has-children") || $article.attr("data-has-active-children") == "true",
+                parent: $article.hasClass("post-status-has-parent") || $article.attr("data-parent-id") !== undefined,
                 sample: urls["original"] !== urls["sample"],
             },
 
