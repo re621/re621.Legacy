@@ -345,12 +345,16 @@ export class MassDownloader extends RE6Module {
     public static createFilenameBase(template: string, post: PostData): string {
         return template
             .replace(/%postid%/g, post.id + "")
-            .replace(/%artist%/g, [...post.tags.artist].join("-"))
-            .replace(/%copyright%/g, [...post.tags.copyright].join("-"))
-            .replace(/%character%/g, [...post.tags.character].join("-"))
-            .replace(/%species%/g, [...post.tags.species].join("-"))
-            .replace(/%meta%/g, [...post.tags.meta].join("-"))
+            .replace(/%artist%/g, tagSetToString(post.tags.artist))
+            .replace(/%copyright%/g, tagSetToString(post.tags.copyright))
+            .replace(/%character%/g, tagSetToString(post.tags.character))
+            .replace(/%species%/g, tagSetToString(post.tags.species))
+            .replace(/%meta%/g, tagSetToString(post.tags.meta))
             .replace(/%md5%/g, post.file.md5);
+
+        function tagSetToString(tags: Set<string>): string {
+            return [...tags].join("-").replace(/\||\*|\/|\\|:|"/, "_");
+        }
     }
 
 }

@@ -153,7 +153,21 @@ body {
         section#downloader-box,
         section#fav-downloader-box { position: sticky; }
     }
+
+    div#page {
+        &.mode-edit div#re621-search.re621-search-sticky { background-color: #828028; }
+        &.mode-add-fav div#re621-search.re621-search-sticky { background-color: #104e17; }
+        &.mode-remove-fav div#re621-search.re621-search-sticky { background-color: #07240b; }
+        &.mode-vote-up div#re621-search.re621-search-sticky { background-color: #288233; }
+        &.mode-vote-down div#re621-search.re621-search-sticky { background-color: #822828; }
+        &.mode-tag-script div#re621-search.re621-search-sticky { background-color: #4f114f; }
+        &.mode-lock-rating div#re621-search.re621-search-sticky { background-color: #aa3; }
+        &.mode-lock-note div#re621-search.re621-search-sticky { background-color: #3aa; }
+        &.mode-approve div#re621-search.re621-search-sticky { background-color: #48c; }
+        &.mode-delete div#re621-search.re621-search-sticky { background-color: #4e1010; }
+    }
 }
+
 div#page aside#sidebar {
 
     section {

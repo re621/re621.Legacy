@@ -112,15 +112,18 @@ export class DownloadQueue {
                 item = this.queue.pop();
 
                 item.listeners.onStart(item.file, thread, index);
-                await this.zip.file(
-                    item.file.name,
-                    await this.getDataBlob(item, thread),
-                    {
-                        binary: true,
-                        date: item.file.date,
-                        comment: item.file.tags,
-                    }
-                );
+                try {
+                    const dataBlob = await this.getDataBlob(item, thread);
+                    await this.zip.file(
+                        item.file.name,
+                        dataBlob,
+                        {
+                            binary: true,
+                            date: item.file.date,
+                            comment: item.file.tags,
+                        }
+                    );
+                } catch (e) { console.log(e); }
                 item.listeners.onFinish(item.file, thread, index);
             }
 
