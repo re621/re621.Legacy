@@ -332,12 +332,26 @@ export class PoolDownloader extends RE6Module {
     private createFilename(post: PostData, downloadSamples = false): string {
         return MassDownloader.createFilenameBase(this.fetchSettings<string>("template"), post)
             .replace(/%pool%/g, this.poolName)
-            .replace(/%index%/g, "" + (this.poolFiles.indexOf(post.id) + 1))
+            .replace(/%index%/g, this.padIndex(this.poolFiles.indexOf(post.id) + 1, this.poolFiles.length.toString().length))
             .slice(0, 128)
             .replace(/-{2,}/g, "-")
             .replace(/-*$/g, "")
             + "."
             + ((downloadSamples && post.has.sample) ? "jpg" : post.file.ext);
+    }
+
+    /**
+     * Pads the index to make the files sort better
+     * @param index The index to be padded
+     * @param length The padding amount, the amount of digits in pool length. Defaults to 2
+     */
+    private padIndex(index: number, length = 2): string {
+        let str = index.toString();
+        while (str.length < length) {
+            str = "0" + str;
+        }
+
+        return str;
     }
 
     /**
