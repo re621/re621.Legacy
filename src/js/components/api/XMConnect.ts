@@ -211,13 +211,23 @@ export class XMConnect {
     public static browserDownload(url: string, name?: string, saveAs?: boolean): void;
     public static browserDownload(defaults: GMDownloadDetails): void;
     public static browserDownload(a: any, b?: string, c?: boolean): void {
-        if (typeof a === "string") a = { url: a, name: b, saveAs: c };
 
-        if (Debug.getState("vivaldi")) {
-            XM.Connect.download(a);
-            return;
+        // Fallback to avoid a crash in Vivaldi
+        if (Debug.getState("vivaldi")) XM.Connect.download(a, b);
+
+        const downloadDetails: GMDownloadDetails = typeof a === "string"
+            ? { url: a, name: b, saveAs: c }
+            : a;
+
+        // Workaround to SWF files not being whitelisted by default in Tampermonkey
+        downloadDetails.onerror = (event): void => {
+            if (event.error == "not_whitelisted")
+                XM.Connect.download(a, b);
+            else if (a.onerror) a.onerror(event);
+            else throw "Error: unable to download file" + (event.error ? (` [${event.error}]`) : "");
         }
 
+        // All script managers should have a GM_download function, but the extension won't 
         if (typeof GM_download === "function") GM_download(a);
         else XM.Chrome.download(a, b, c);
     }
@@ -373,6 +383,11 @@ export interface GMxmlHttpRequestResponse extends GMxmlHttpRequestEvent {
     responseText: string;
 }
 
+export interface GMxmlHttpRequestError extends GMxmlHttpRequestEvent {
+    /** Error message sometimes returned by Tampermonkey */
+    error: string;
+}
+
 export interface GMDownloadDetails {
     /** **url** - the URL from where the data should be downloaded (required) */
     url: string;
@@ -387,7 +402,7 @@ export interface GMDownloadDetails {
     saveAs?: boolean;
 
     /** **onerror** callback to be executed if this download ended up with an error */
-    onerror?(event: GMxmlHttpRequestEvent): void;
+    onerror?(event: GMxmlHttpRequestError): void;
 
     /** **onprogress** callback to be executed if this download made some progress */
     onprogress?(event: GMxmlHttpRequestProgressEvent): void;
