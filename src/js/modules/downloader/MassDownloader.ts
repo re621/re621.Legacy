@@ -353,7 +353,7 @@ export class MassDownloader extends RE6Module {
             .replace(/%md5%/g, post.file.md5);
 
         function tagSetToString(tags: Set<string>): string {
-            return [...tags].join("-").replace(/\||\*|\/|\\|:|"/, "_");
+            return [...tags].join("-").replace(/\||\*|\/|\\|:|"/g, "_");
         }
     }
 
