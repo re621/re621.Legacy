@@ -68,7 +68,7 @@ export class JanitorEnhancements extends RE6Module {
         for (const reason of this.deletionReasons) {
             if (reason == "") $("<br />").appendTo(suggestionsWrapper);
             else $("<a>")
-                .html(reason.replace(/%PARENT_ID%/g, parentID))
+                .text(reason.replace(/%PARENT_ID%/g, parentID))
                 .appendTo(suggestionsWrapper)
                 .on("click", (event) => {
                     event.preventDefault();
