@@ -8,6 +8,7 @@ import { Debug } from "../utility/Debug";
 import { Util } from "../utility/Util";
 import { PostParts } from "./PostParts";
 import { PostSet } from "./PostSet";
+import { PostViewer } from "../../modules/post/PostViewer";
 
 export class Post implements PostData {
 
@@ -132,6 +133,9 @@ export class Post implements PostData {
             "ribbonsFlag", "ribbonsRel",                        // renderRibbons
             "buttonsVote", "buttonsFav",                        // renderButtons
         ]);
+
+        // Get upvoteOnFavorite setting from PostViewer
+        conf.upvoteOnFavorite = ModuleController.get(PostViewer).fetchSettings("upvoteOnFavorite");
 
         // Clean up older events and data
         PostParts.cleanup(this);
