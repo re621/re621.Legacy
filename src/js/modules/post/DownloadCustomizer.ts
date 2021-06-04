@@ -133,7 +133,7 @@ export class DownloadCustomizer extends RE6Module {
             + "." + (ext ? ext : post.file.ext);
 
         function tagSetToString(tags: Set<string>): string {
-            return [...tags].join("-").replace(/\||\*|\/|\\|:|"/, "_");
+            return [...tags].join("-").replace(/\||\*|\/|\\|:|"/g, "_");
         }
     }
 
