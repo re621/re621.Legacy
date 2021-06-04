@@ -360,7 +360,7 @@ export class PostParts {
                         if (conf.upvoteOnFavorite) {
                             PostActions.vote(post.id, 1, true).then(
                                 (response) => {
-                                    post.$ref.attr("vote", response.action);
+                                    post.$ref.attr("vote", 1);
         
                                     post.score = {
                                         up: response.up || 0,
