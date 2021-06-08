@@ -242,7 +242,6 @@ export const TagSuggestionsList: SuggestionSet = {
     "athletic_herm": { has: [/^athletic_/, "herm"] },
     "athletic_maleherm": { has: [/^athletic_/, "maleherm"] },
 
-
     // Situation
     "rear_view": { has: "looking_back" },
     "solo_focus": { has: [/^faceless_/, /^(duo|group)$/] },
@@ -274,7 +273,6 @@ export const TagSuggestionsList: SuggestionSet = {
 
     // Penis Parts
     "foreskin": { has: "humanoid_penis" },
-    // "frenulum": { has: "penis" },
     "glans": { has: "humanoid_penis" },
     "knot": { has: "canine_penis" },
 
