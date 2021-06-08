@@ -272,9 +272,6 @@ export const TagSuggestionsList: SuggestionSet = {
     "vaginal_masturbation": { has: ["pussy", "masturbation"] },
     "speech_bubble|thought_bubble": { has: "dialogue", },
 
-    // General Private Parts
-    "urethra": { has: /(penis|pussy|cloaca)/ },
-
     // Penis Parts
     "foreskin": { has: "humanoid_penis" },
     // "frenulum": { has: "penis" },
