@@ -61,9 +61,10 @@ export class Miscellaneous extends RE6Module {
     public create(): void {
         super.create();
 
-        // Enhanced quoting button
+        // Enhanced quoting button and copy ID button
         if (Page.matches([PageDefinition.post, PageDefinition.forum])) {
             this.handleQuoteButton();
+            this.handleIDButton();
         }
 
         // Sticky elements
@@ -260,6 +261,39 @@ export class Miscellaneous extends RE6Module {
                 event.preventDefault();
                 const $parent = $(event.target).parents("article.comment");
                 this.quote($parent, "comment", $parent.data("comment-id"), $("#comment_body_for_"), $("a.expand-comment-response"));
+            });
+        }
+    }
+
+    /**
+     * Generates the "Copy ID" button on comments and forum posts 
+     */
+    private handleIDButton(): void {
+        if (Page.matches(PageDefinition.forum)) {
+            $(".content-menu > menu").each(function (index, element) {
+                const $copyElement = $("<a>")
+                    .addClass("re621-forum-post-copy-id")
+                    .html("Copy ID");
+                $(element).append($copyElement.wrap("<li>"));
+            });
+
+            $(".re621-forum-post-copy-id").on('click', (event) => {
+                event.preventDefault();
+                const $post = $(event.target).parents("article.forum-post");
+                XM.Util.setClipboard($post.data("forum-post-id"));
+            });
+        } else if (Page.matches(PageDefinition.post)) {
+            $(".content-menu > menu").each(function (index, element) {
+                const $copyElement = $("<a>")
+                    .addClass("re621-comment-copy-id")
+                    .html("Copy ID");
+                $(element).append($copyElement.wrap("<li>"));
+            });
+
+            $(".re621-comment-copy-id").on('click', (event) => {
+                event.preventDefault();
+                const $comment = $(event.target).parents("article.comment");
+                XM.Util.setClipboard($comment.data("comment-id"));
             });
         }
     }
