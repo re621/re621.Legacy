@@ -270,11 +270,13 @@ export class Miscellaneous extends RE6Module {
      */
     private handleIDButton(): void {
         if (Page.matches(PageDefinition.forum)) {
-            $(".content-menu > menu").each(function (index, element) {
+            // Using li:last to put the button before the vote menu
+            $(".content-menu > menu > li:last").each(function (index, element) {
                 const $copyElement = $("<a>")
                     .addClass("re621-forum-post-copy-id")
                     .html("Copy ID");
-                $(element).append($copyElement.wrap("<li>"));
+                $(element).after($copyElement);
+                $($copyElement).wrap("<li>");
             });
 
             $(".re621-forum-post-copy-id").on('click', (event) => {
@@ -287,7 +289,8 @@ export class Miscellaneous extends RE6Module {
                 const $copyElement = $("<a>")
                     .addClass("re621-comment-copy-id")
                     .html("Copy ID");
-                $(element).append($copyElement.wrap("<li>"));
+                $(element).append($copyElement);
+                $($copyElement).wrap("<li>");
             });
 
             $(".re621-comment-copy-id").on('click', (event) => {
