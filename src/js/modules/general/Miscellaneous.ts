@@ -270,8 +270,8 @@ export class Miscellaneous extends RE6Module {
      */
     private handleIDButton(): void {
         if (Page.matches(PageDefinition.forum)) {
-            // Using li:last to put the button before the vote menu
-            $(".content-menu > menu > li:last").each(function (index, element) {
+            // Using li:last-of-type to put the button before the vote menu
+            $(".content-menu > menu > li:last-of-type").each(function (index, element) {
                 const $copyElement = $("<a>")
                     .addClass("re621-forum-post-copy-id")
                     .html("Copy ID");
