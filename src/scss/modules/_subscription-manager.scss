@@ -73,7 +73,7 @@ tabbed.config-tabs {
     div.ui-tabs-panel {
         margin-left: 0.5rem;
         grid-column: 2;
-        width: 37rem;
+        width: var(--window-width, 45vw);
     }
 
     // More compact "Manual Update" / "Clear Cache" buttons
@@ -81,6 +81,15 @@ tabbed.config-tabs {
         grid-template-columns: 1fr 1fr;
         form-input { grid-column: span 1; }
     }
+}
+
+div#modal-container div.re621-ui-dialog div.ui-dialog-content.subscription-wrapper {
+    overflow-x: auto !important;
+}
+
+#subscriptions-controls {
+    justify-content: center;
+    overflow: hidden;
 }
 
 
@@ -225,7 +234,7 @@ sb-enwrap[content=Comments] {
 // Generic subscription update entry
 sb-ctwrap {
     display: block;
-    width: 37rem; // based on the tag updates grid
+    width: var(--window-width, 45vw); // based on the tag updates grid
 
     &[state=done] sb-status { display: none !important; }
     &:not([state=done]) sb-canvas { display: none !important; }
@@ -272,19 +281,20 @@ sb-ctwrap {
 // TagTracker style overrides
 sb-ctwrap[content=Tags] sb-canvas {
 
-    $sub-row: 7rem;
+    $sub-row: var(--thumb-width, 8.5vw);
     $sub-rowgap: 0.5rem;
-    $sub-col: 7rem;
+    $sub-col: var(--thumb-width, 8.5vw);
     $sub-colgap: 0.5rem;
     
     $sub-colcount: 5;
 
     display: grid;
-    width: ($sub-col * $sub-colcount) + ($sub-colgap * ($sub-colcount - 1));
+    width: var(--window-width, 45vw);
 
     grid-template-columns: repeat($sub-colcount, $sub-col);
     grid-column-gap: $sub-colgap;
     grid-row-gap: $sub-rowgap;
+    justify-content: space-between;
 
     subitem {
         display: block;

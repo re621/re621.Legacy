@@ -55,7 +55,7 @@ export class Post implements PostData {
     public description: string;
 
     public file: {
-        ext: string;                        // file extension
+        ext: FileExtension;                 // file extension
         md5: string;
         original: string;                   // full-resolution image. `null` if the post is deleted
         sample: string;                     // sampled (~850px) image. for WEBM, same as original. for SWF, null or undefined
@@ -407,7 +407,7 @@ export interface PostData {
     description: string;
 
     file: {
-        ext: string;
+        ext: FileExtension;
         md5: string;
         original: string;
         sample: string;
@@ -503,7 +503,7 @@ export namespace PostData {
             description: data.description,
 
             file: {
-                ext: data.file.ext,
+                ext: FileExtension.fromString(data.file.ext),
                 md5: data.file.md5,
                 original: data.file.url,
                 sample: data.sample.has ? data.sample.url : data.file.url,
@@ -629,7 +629,7 @@ export namespace PostData {
             height = parseInt($article.attr("data-height"));
 
         // MD5 and File URLs
-        const extension = $article.attr("data-file-ext");
+        const extension: FileExtension = FileExtension.fromString($article.attr("data-file-ext"));
         let urls = {};
         let md5: string;
         if ($article.hasClass("post-preview")) {
@@ -776,4 +776,26 @@ export enum LoadedFileType {
     PREVIEW = "preview",
     SAMPLE = "sample",
     ORIGINAL = "original",
+}
+
+export enum FileExtension {
+    JPG = "jpg",
+    PNG = "png",
+    GIF = "gif",
+    SWF = "swf",
+    WEBM = "webm",
+}
+
+export namespace FileExtension {
+    export function fromString(input: string): FileExtension {
+        switch (input) {
+            case "jpeg":
+            case "jpg": return FileExtension.JPG;
+            case "png": return FileExtension.PNG;
+            case "gif": return FileExtension.GIF;
+            case "swf": return FileExtension.SWF;
+            case "webm": return FileExtension.WEBM;
+        }
+        return null;
+    }
 }

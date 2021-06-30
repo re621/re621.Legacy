@@ -19,6 +19,8 @@ export class SubscriptionManager extends RE6Module {
     private static windowOpen = false;      // Whether or not the notifications window is open
     private static activeTab: string;       // ID of the tracker tab that is open
 
+    private tabbed: JQuery<HTMLElement>;    // Tabs of the notifications window, used to pass settings to CSS
+
     public constructor() {
         super();
         this.registerHotkeys(
@@ -34,6 +36,9 @@ export class SubscriptionManager extends RE6Module {
 
             skipPreflightChecks: false,     // suppresses the network status check before the update
             loadLargeThumbs: false,         // replaces the preview-sized thumbnails with (animated) sample sized ones
+
+            windowWidth: "35",              // width of the notifications window, in VW
+            thumbWidth: "6.5",              // width of the thumbnails, in VW
 
             hotkeyOpenNotifications: "",    // hotkey that opens the notifications window
         }
@@ -79,7 +84,7 @@ export class SubscriptionManager extends RE6Module {
         }
 
         // Establish the settings window contents
-        const content = new Tabbed({
+        this.tabbed = new Tabbed({
             name: "notifications-tabs",
             class: "config-tabs",
             content: [
@@ -90,6 +95,7 @@ export class SubscriptionManager extends RE6Module {
                 }
             ]
         }).render();
+        this.rebuildTabbedSettings();
 
         let windowAlreadyOpened = false;
         const tabbedObserver = new IntersectionObserver((entries) => {
@@ -98,13 +104,13 @@ export class SubscriptionManager extends RE6Module {
             if (!windowAlreadyOpened) windowAlreadyOpened = true;
             // console.log("notifications", SubscriptionManager.windowOpen, SubscriptionManager.activeTab);
         });
-        tabbedObserver.observe(content[0]);
+        tabbedObserver.observe(this.tabbed[0]);
 
-        content.on("tabsactivate", () => {
+        this.tabbed.on("tabsactivate", () => {
             // console.log("tabs", trackerIDs[content.tabs("option", "active")]);
-            SubscriptionManager.activeTab = trackerIDs[content.tabs("option", "active")];
+            SubscriptionManager.activeTab = trackerIDs[this.tabbed.tabs("option", "active")];
         });
-        SubscriptionManager.activeTab = trackerIDs[content.tabs("option", "active")];
+        SubscriptionManager.activeTab = trackerIDs[this.tabbed.tabs("option", "active")];
 
         // Update the notifications button when updates occur
         SubscriptionManager.on("notification", () => {
@@ -119,7 +125,7 @@ export class SubscriptionManager extends RE6Module {
 
                 if (!windowAlreadyOpened && updates > 0) {
                     windowAlreadyOpened = true;
-                    content.tabs("option", "active", index);
+                    this.tabbed.tabs("option", "active", index);
                     // console.log("tab opening", index);
                 }
 
@@ -139,7 +145,7 @@ export class SubscriptionManager extends RE6Module {
             escapable: false,
             fixed: true,
             reserveHeight: true,
-            content: content,
+            content: this.tabbed,
             position: { my: "right", at: "right" },
         });
         modal.getElement().addClass("subscription-wrapper");
@@ -213,11 +219,47 @@ export class SubscriptionManager extends RE6Module {
             Form.text(`Cache Age: Updates older than this are removed automatically`, 2, "subscription-tutorial"),
             Form.hr(2),
 
+            Form.subheader(
+                "Notifications Window Width",
+                "Percent of browser width",
+                1
+            ),
+            Form.input(
+                {
+                    value: this.fetchSettings("windowWidth"),
+                    width: 1,
+                    pattern: "^[3-9][0-9](\\.\\d{1,2})?$",
+                },
+                async (data, input) => {
+                    if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                    await this.pushSettings("windowWidth", data);
+                    this.rebuildTabbedSettings();
+                }
+            ),
+
+            Form.subheader(
+                "Thumbnail Dimensions",
+                "Percent of browser width",
+                1
+            ),
+            Form.input(
+                {
+                    value: this.fetchSettings("thumbWidth"),
+                    width: 1,
+                    pattern: "^[1-9][0-9]?(\\.\\d{1,2})?$",
+                },
+                async (data, input) => {
+                    if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                    await this.pushSettings("thumbWidth", data);
+                    this.rebuildTabbedSettings();
+                }
+            ),
+
             Form.checkbox(
                 {
                     value: this.fetchSettings("skipPreflightChecks"),
                     label: "<b>Skip Preflight Checks</b><br />Disables the extra network checks before updating the subscriptions",
-                    width: 3,
+                    width: 2,
                 },
                 async (data) => {
                     await this.pushSettings("skipPreflightChecks", data);
@@ -229,7 +271,7 @@ export class SubscriptionManager extends RE6Module {
                 {
                     value: this.fetchSettings("loadLargeThumbs"),
                     label: "<b>Load Large Thumbnails</b><br />Use the larger animation-enabled thumbnails instead of the default ones",
-                    width: 3,
+                    width: 2,
                 },
                 async (data) => {
                     await this.pushSettings("loadLargeThumbs", data);
@@ -455,6 +497,15 @@ export class SubscriptionManager extends RE6Module {
                 ]),
             ]);
         }
+    }
+
+    /** Fills in the CSS variables for the window width */
+    private rebuildTabbedSettings(): void {
+        const conf = this.fetchSettings(["windowWidth", "thumbWidth"]);
+        this.tabbed.removeAttr("style").css({
+            "--window-width": conf.windowWidth + "vw",
+            "--thumb-width": conf.thumbWidth + "vw",
+        });
     }
 
     /**

@@ -3,6 +3,7 @@ import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
 import { AvoidPosting } from "../../components/cache/AvoidPosting";
 import { TagCache } from "../../components/cache/TagCache";
+import { TagSuggestionsList, TagSuggestionsTools } from "../../components/cache/TagSuggestions";
 import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -1280,6 +1281,10 @@ export class SettingsController extends RE6Module {
             .attr("id", "flag-defs-container");
         const flagDefs = customFlagger.fetchSettings("flags");
 
+        const tagContainer = $("<textarea>")
+            .attr("id", "tag-suggestions-container")
+            .val(tagSuggester.fetchSettings<string>("data"));
+
         flagDefs.forEach((flag) => {
             makeFlagDefInput(flag).appendTo(flagDefsContainer);
         });
@@ -1687,8 +1692,42 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.div({ value: `<span id="defs-confirm"></span>` }),
                     Form.div({
-                        value: `<div class="float-right">[ <a href="${window["re621"]["links"]["repository"]}/wiki/SmartAlias">syntax help</a> ]</div>`
+                        value: `<div class="float-right">[ <a href="${window["re621"]["links"]["repository"]}/wiki/SmartAlias" target="_blank">syntax help</a> ]</div>`
                     })
+                ]),
+
+                // Tag Suggestions
+                Form.accordionTab({ name: "tagsuggdef", label: "Tag Suggestions", columns: 3, width: 3 }, [
+                    Form.div({ value: tagContainer, width: 3 }),
+
+                    Form.button(
+                        { value: "Save" },
+                        async () => {
+                            const confirmBox = $("div#tagsugg-confirm").html("Saving . . .");
+                            await tagSuggester.pushSettings("data", $("#tag-suggestions-container").val().toString().trim());
+                            tagSuggester.reloadSuggestions();
+                            confirmBox.html("Suggestions Saved");
+                            window.setTimeout(() => { confirmBox.html(""); }, 1000);
+                        }
+                    ),
+                    Form.div({
+                        value: `<div class="text-center">[ <a href="${window["re621"]["links"]["repository"]}/wiki/TagSuggester" target="_blank">syntax help</a> ]</div>`
+                    }),
+                    Form.button(
+                        { value: "Reset to default" },
+                        async () => {
+                            const value = JSON.stringify(TagSuggestionsList, TagSuggestionsTools.replacer, " ");
+                            $("#tag-suggestions-container").val(value);
+                            const confirmBox = $("div#tagsugg-confirm").html("Saving . . .");
+                            await tagSuggester.pushSettings("data", value);
+                            tagSuggester.reloadSuggestions();
+                            confirmBox.html("Suggestions Reset");
+                            window.setTimeout(() => { confirmBox.html(""); }, 1000);
+                        }
+                    ),
+
+                    Form.spacer(1),
+                    Form.div({ value: `<div class="text-center" id="tagsugg-confirm"></div>` }),
                 ]),
 
             ]),

@@ -1,11 +1,14 @@
-import { TagSuggestion, TagSuggestionsList } from "../../components/cache/TagSuggestions";
+import { SuggestionSet, TagSuggestion, TagSuggestionsList, TagSuggestionsTools } from "../../components/cache/TagSuggestions";
 import { PageDefinition } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { ErrorHandler } from "../../components/utility/ErrorHandler";
 import { Util } from "../../components/utility/Util";
 
 export class TagSuggester extends RE6Module {
 
     private container: JQuery<HTMLElement>;
+
+    private tagSuggestionsData: SuggestionSet;
 
     // Element selectors that TagSuggester should track
     private static inputSelectors = new Set([
@@ -38,11 +41,15 @@ export class TagSuggester extends RE6Module {
     public getDefaultSettings(): Settings {
         return {
             enabled: true,
+            data: JSON.stringify(TagSuggestionsList, TagSuggestionsTools.replacer, " "),
         }
     }
 
     public create(): void {
         super.create();
+
+        // Recreate the suggestions list from storage
+        this.reloadSuggestions();
 
         // Mark up the toggle buttons (if there are any)
         for (const element of $("button.toggle-button").get()) {
@@ -129,6 +136,15 @@ export class TagSuggester extends RE6Module {
         })
     }
 
+    /** Attempt to recreate the suggestions list from saved data */
+    public reloadSuggestions(): void {
+        try { this.tagSuggestionsData = JSON.parse(this.fetchSettings("data"), TagSuggestionsTools.reviver); }
+        catch (error) {
+            ErrorHandler.error("TagSuggester", "Failed to parse the tag suggestions file");
+            this.tagSuggestionsData = {};
+        }
+    }
+
     private update(): void {
         const tagOutput = this.tagOutput;
         const container = this.container
@@ -176,7 +192,7 @@ export class TagSuggester extends RE6Module {
         }
 
         // Derived from the added tags
-        for (const [key, matches] of Object.entries(TagSuggestionsList)) {
+        for (const [key, matches] of Object.entries(this.tagSuggestionsData)) {
             const keyset = key.split("|");
             if (tagAlreadyPresent(tags, Object.keys(suggestions), keyset)) continue;
             if (tagsMatchRegex(matches, tags)) {
