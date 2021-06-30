@@ -11,7 +11,7 @@ export class EditTracker extends RE6Module {
     public create(): void {
 
         if ($("#post_tag_string").is(":visible")) this.listen();
-        else $("body").one("click.re621", "#post-edit-link", () => { this.listen(); });
+        else {$("body").one("click.re621", "#post-edit-link, #side-edit-link", () => { this.listen(); });}
     }
 
     private async listen(): Promise<void> {

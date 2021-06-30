@@ -1,7 +1,8 @@
 /* Smart Alias Styles */
 
 // Settings Interface
-textarea#alias-list-container {
+textarea#alias-list-container,
+textarea#tag-suggestions-container {
     min-height: 40vh;
     font-family: monospace;
     font-size: 1.2em;

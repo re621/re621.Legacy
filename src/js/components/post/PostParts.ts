@@ -8,7 +8,7 @@ import { Page } from "../data/Page";
 import { User } from "../data/User";
 import { Debug } from "../utility/Debug";
 import { Util } from "../utility/Util";
-import { LoadedFileType, Post, PostData } from "./Post";
+import { FileExtension, LoadedFileType, Post, PostData } from "./Post";
 import { PostActions } from "./PostActions";
 import { PostSet } from "./PostSet";
 
@@ -122,14 +122,41 @@ export class PostParts {
                 post.loaded = LoadedFileType.ORIGINAL;
             });
 
-        // Load appropriate image
+        // Fallbacks for deleted and flash files
         if (post.flags.has(PostFlag.Deleted) && !User.isApprover) {
             post.img.ratio = 1;
             post.loaded = LoadedFileType.ORIGINAL;
-        } else if (post.file.ext === "swf") {
+            return $image;
+        } else if (post.file.ext === FileExtension.SWF) {
             post.img.ratio = 1;
             post.loaded = LoadedFileType.ORIGINAL;
-        } else if (post.file.ext === "gif" && conf.imageLoadMethod == ImageLoadMethod.Always && !conf.autoPlayGIFs) { // account for other load methods
+            return $image;
+        }
+
+        // Load the appropriate file
+        const loadedFileType = determineFileType(post.loaded, conf.imageLoadMethod, post.file.ext, conf.autoPlayGIFs);
+        $image.attr("src", loadedFileType == LoadedFileType.SAMPLE ? post.file.sample : post.file.preview);
+        post.loaded = loadedFileType;
+
+        function determineFileType(loadedFileType: LoadedFileType, imageLoadMethod: ImageLoadMethod, extension: FileExtension, autoPlayGIFs: boolean): LoadedFileType {
+            // If the autoPlayGIFs is enabled, the GIFs must be loaded at original quality
+            if (extension == FileExtension.GIF) return autoPlayGIFs ? LoadedFileType.SAMPLE : LoadedFileType.PREVIEW;
+
+            // If the image has not been previously loaded, determine appropriate size depending on the preferred load method
+            if (!loadedFileType) return imageLoadMethod == ImageLoadMethod.Always ? LoadedFileType.SAMPLE : LoadedFileType.PREVIEW;
+
+            // Override the previously loaded size if necessary
+            switch (imageLoadMethod) {
+                case ImageLoadMethod.Always: return LoadedFileType.SAMPLE;
+                case ImageLoadMethod.Disabled: return LoadedFileType.PREVIEW;
+            }
+
+            // Fall back to the previously loaded size
+            return loadedFileType;
+        }
+
+        // Handle the GIF dynamic loading
+        if (post.file.ext === "gif" && !conf.autoPlayGIFs) {
 
             if (post.loaded == LoadedFileType.SAMPLE) $image.attr("src", post.file.sample);
             else {
@@ -140,8 +167,6 @@ export class PostParts {
                 $image.on("mouseenter.re621.upscale", () => {
                     timer = window.setTimeout(() => {
                         post.$ref.attr("loading", "true");
-                        post.loaded = LoadedFileType.SAMPLE;
-                        // ($image[0] as HTMLImageElement).src = post.file.sample;
                         $image.attr("src", post.file.sample).on("load", () => {
                             post.$ref.removeAttr("loading");
                             $image.off("mouseenter.re621.upscale")
@@ -157,17 +182,15 @@ export class PostParts {
                                 trimmed.render();
                             }
                         });
+                        post.loaded = LoadedFileType.SAMPLE;
                     }, 200);
                 });
                 $image.on("mouseleave.re621.upscale", () => {
                     window.clearTimeout(timer);
                 });
             }
-        } else {
-            const size = getRequiredImageSize(post.loaded, conf.imageLoadMethod);
-            if (size == LoadedFileType.SAMPLE) $image.attr("src", post.file.sample);
-            else $image.attr("src", post.file.preview);
-            post.loaded = size;
+
+            return $image;
         }
 
         // Load sample-sized image on hover
@@ -176,25 +199,13 @@ export class PostParts {
             $image.on("mouseenter.re621.upscale", () => {
                 timer = window.setTimeout(() => {
                     post.$ref.attr("loading", "true");
-                    post.loaded = LoadedFileType.SAMPLE;
-
                     $image.attr("src", post.file.sample)
                         .one("load", () => {
                             post.$ref.removeAttr("loading");
                             $image.off("mouseenter.re621.upscale")
                                 .off("mouseleave.re621.upscale");
-
-                            // Limit the number of actively playing GIFs for performance reasons
-                            if (post.file.ext !== "gif") return;
-                            if (typeof conf.maxPlayingGIFs !== "number" || conf.maxPlayingGIFs == -1) return;
-                            PostParts.renderedGIFs.push(post);
-                            if (PostParts.renderedGIFs.size() > conf.maxPlayingGIFs) {
-                                const trimmed = PostParts.renderedGIFs.shift();
-                                if (trimmed.id == post.id) return;
-                                trimmed.loaded = LoadedFileType.PREVIEW;
-                                trimmed.render();
-                            }
                         });
+                    post.loaded = LoadedFileType.SAMPLE;
                 }, 200);
             });
             $image.on("mouseleave.re621.upscale", () => {
@@ -203,15 +214,6 @@ export class PostParts {
         }
 
         return $image;
-
-
-        /** Determines the size of the image to load */
-        function getRequiredImageSize(cur: LoadedFileType, req: ImageLoadMethod): LoadedFileType {
-            if (!cur) return req == ImageLoadMethod.Always ? LoadedFileType.SAMPLE : LoadedFileType.PREVIEW;
-            if (req == ImageLoadMethod.Always) return LoadedFileType.SAMPLE;
-            else if (req == ImageLoadMethod.Disabled) return LoadedFileType.PREVIEW;
-            return cur;
-        }
     }
 
     public static renderRibbons(post: Post, conf: any): JQuery<HTMLElement> {
