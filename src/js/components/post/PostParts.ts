@@ -358,6 +358,21 @@ export class PostParts {
                         post.is_favorited = true;
                         post.$ref.attr("fav", "true");
                         $btn.addClass("score-favorite");
+                        // Upvote post if updateOnFavorites setting is on
+                        if (conf.upvoteOnFavorite) {
+                            PostActions.vote(post.id, 1, true).then(
+                                (response) => {
+                                    post.$ref.attr("vote", 1);
+        
+                                    post.score = {
+                                        up: response.up || 0,
+                                        down: response.down || 0,
+                                        total: response.score || 0,
+                                    };
+                                    post.$ref.trigger("re621:update");
+                                }
+                            );
+                        }
                     }
 
                     favBlock = false;
