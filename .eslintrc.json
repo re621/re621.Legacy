@@ -38,7 +38,7 @@
         },
         {
             "files": [
-                "build/*.js",
+                "build/**/*.js",
                 "bin/*.js"
             ],
             "rules": {
