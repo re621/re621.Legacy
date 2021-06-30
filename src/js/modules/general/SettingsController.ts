@@ -1703,10 +1703,10 @@ export class SettingsController extends RE6Module {
                     Form.button(
                         { value: "Save" },
                         async () => {
-                            const confirmBox = $("span#tagsugg-confirm").html("Saving . . .");
+                            const confirmBox = $("div#tagsugg-confirm").html("Saving . . .");
                             await tagSuggester.pushSettings("data", $("#tag-suggestions-container").val().toString().trim());
                             tagSuggester.reloadSuggestions();
-                            confirmBox.html("Settings Saved");
+                            confirmBox.html("Suggestions Saved");
                             window.setTimeout(() => { confirmBox.html(""); }, 1000);
                         }
                     ),
@@ -1718,10 +1718,10 @@ export class SettingsController extends RE6Module {
                         async () => {
                             const value = JSON.stringify(TagSuggestionsList, TagSuggestionsTools.replacer, " ");
                             $("#tag-suggestions-container").val(value);
-                            const confirmBox = $("span#tagsugg-confirm").html("Saving . . .");
+                            const confirmBox = $("div#tagsugg-confirm").html("Saving . . .");
                             await tagSuggester.pushSettings("data", value);
                             tagSuggester.reloadSuggestions();
-                            confirmBox.html("Settings Saved");
+                            confirmBox.html("Suggestions Reset");
                             window.setTimeout(() => { confirmBox.html(""); }, 1000);
                         }
                     ),
