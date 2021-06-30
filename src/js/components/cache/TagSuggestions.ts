@@ -278,7 +278,7 @@ export const TagSuggestionsList: SuggestionSet = {
 
 }
 
-type SuggestionSet = {
+export type SuggestionSet = {
     [tag: string]: TagSuggestion;
 };
 
@@ -289,3 +289,22 @@ export type TagSuggestion = {
 }
 
 type SuggestionParam = RegExp | string | (RegExp | string)[];
+
+export class TagSuggestionsTools {
+
+    /** Converts regular expressions to a prefixed string */
+    public static replacer(key: string, value: any): string {
+        return (value instanceof RegExp)
+            ? ("REGEXP:" + value.toString())
+            : value;
+    }
+
+    /** Restores regular expressions from prefixed strings */
+    public static reviver(key: string, value: string): any {
+        if (value.toString().includes("REGEXP:")) {
+            const parts = value.split("REGEXP:")[1].match(/\/(.*)\/(.*)?/);
+            return new RegExp(parts[1], parts[2] || "");
+        } else return value;
+    }
+
+}
