@@ -15,7 +15,7 @@ export class UtilNetwork {
         return new Promise((resolve) => {
             XM.Connect.xmlHttpRequest({
                 method: "HEAD",
-                url: "https://e621.net/",
+                url: window.location.host == "e621.net" ? "https://e621.net/" : "https://e926.net/",
                 onerror: () => { resolve(false); },
                 onload: () => { resolve(true); },
             });
