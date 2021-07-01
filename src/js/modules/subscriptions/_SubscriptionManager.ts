@@ -38,7 +38,8 @@ export class SubscriptionManager extends RE6Module {
             loadLargeThumbs: false,         // replaces the preview-sized thumbnails with (animated) sample sized ones
 
             windowWidth: "37",              // width of the notifications window, in REM
-            thumbWidth: "8.75",              // width of the thumbnails, in REM
+            thumbWidth: "8.75",             // HEIGHT of the thumbnails, in REM. misleading name, due to backwards compatibility
+            thumbCols: "4",                 // number of thumbnail columns
 
             hotkeyOpenNotifications: "",    // hotkey that opens the notifications window
         }
@@ -221,14 +222,14 @@ export class SubscriptionManager extends RE6Module {
 
             Form.subheader(
                 "Notifications Window Width",
-                "",
+                "At least 37, no more than 99",
                 1
             ),
             Form.input(
                 {
                     value: this.fetchSettings("windowWidth"),
                     width: 1,
-                    pattern: "^[3-9][0-9](\\.\\d{1,2})?$",
+                    pattern: "^(3[7-9]|[4-9][0-9])(\\.\\d{1,2})?$",
                 },
                 async (data, input) => {
                     if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
@@ -238,8 +239,26 @@ export class SubscriptionManager extends RE6Module {
             ),
 
             Form.subheader(
-                "Thumbnail Dimensions",
-                "",
+                "Thumbnail Columns",
+                "Number of columns in the grid",
+                1
+            ),
+            Form.input(
+                {
+                    value: this.fetchSettings("thumbCols"),
+                    width: 1,
+                    pattern: "^[1-9]$",
+                },
+                async (data, input) => {
+                    if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
+                    await this.pushSettings("thumbCols", data);
+                    this.rebuildTabbedSettings();
+                }
+            ),
+
+            Form.subheader(
+                "Thumbnail Height",
+                "Vertical dimension of the thumbnails",
                 1
             ),
             Form.input(
@@ -503,10 +522,11 @@ export class SubscriptionManager extends RE6Module {
 
     /** Fills in the CSS variables for the window width */
     private rebuildTabbedSettings(): void {
-        const conf = this.fetchSettings(["windowWidth", "thumbWidth"]);
+        const conf = this.fetchSettings(["windowWidth", "thumbWidth", "thumbCols"]);
         this.tabbed.removeAttr("style").css({
             "--window-width": conf.windowWidth + "rem",
             "--thumb-width": conf.thumbWidth + "rem",
+            "--thumb-cols": conf.thumbCols,
         });
     }
 
