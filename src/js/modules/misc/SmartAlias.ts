@@ -547,7 +547,8 @@ export class SmartAlias extends RE6Module {
                 ? $container.data("originalTags")
                 : new Set();
 
-            if (tagOrder !== TagOrder.Default) tags = tags.sort();
+            if (tagOrder !== TagOrder.Default)
+                tags = tags.sort((a, b) => a.name.localeCompare(b.name));
 
             // console.log(SmartAlias.tagData);
 
