@@ -37,8 +37,8 @@ export class SubscriptionManager extends RE6Module {
             skipPreflightChecks: false,     // suppresses the network status check before the update
             loadLargeThumbs: false,         // replaces the preview-sized thumbnails with (animated) sample sized ones
 
-            windowWidth: "35",              // width of the notifications window, in VW
-            thumbWidth: "6.5",              // width of the thumbnails, in VW
+            windowWidth: "37",              // width of the notifications window, in REM
+            thumbWidth: "8.75",              // width of the thumbnails, in REM
 
             hotkeyOpenNotifications: "",    // hotkey that opens the notifications window
         }
@@ -221,7 +221,7 @@ export class SubscriptionManager extends RE6Module {
 
             Form.subheader(
                 "Notifications Window Width",
-                "Percent of browser width",
+                "",
                 1
             ),
             Form.input(
@@ -239,7 +239,7 @@ export class SubscriptionManager extends RE6Module {
 
             Form.subheader(
                 "Thumbnail Dimensions",
-                "Percent of browser width",
+                "",
                 1
             ),
             Form.input(
@@ -277,6 +277,8 @@ export class SubscriptionManager extends RE6Module {
                     await this.pushSettings("loadLargeThumbs", data);
                 }
             ),
+            Form.spacer(2, true),
+
         ]);
 
         function makeSubscriptionSection(instance: SubscriptionTracker): FormElement {
@@ -503,8 +505,8 @@ export class SubscriptionManager extends RE6Module {
     private rebuildTabbedSettings(): void {
         const conf = this.fetchSettings(["windowWidth", "thumbWidth"]);
         this.tabbed.removeAttr("style").css({
-            "--window-width": conf.windowWidth + "vw",
-            "--thumb-width": conf.thumbWidth + "vw",
+            "--window-width": conf.windowWidth + "rem",
+            "--thumb-width": conf.thumbWidth + "rem",
         });
     }
 
