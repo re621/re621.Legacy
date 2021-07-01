@@ -246,7 +246,7 @@ sb-ctwrap {
 
         subdivider {
             display: flex;
-            grid-column: span 5;
+            grid-column: 1 / -1;
             align-items: center;
             text-align: center;
             order: 10;
