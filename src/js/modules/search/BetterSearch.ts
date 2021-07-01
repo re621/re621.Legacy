@@ -76,6 +76,8 @@ export class BetterSearch extends RE6Module {
 
             highlightVisited: true,                         // Adds a colored border to visited posts
             hideSmartAliasOutput: false,                    // Run SmartAlias, but don't show its output, in the quick edit mode
+
+            hideInfoBar: false,                             // Remove the post info (votes, favorites, etc) from view
         };
     }
 
@@ -569,6 +571,8 @@ export class BetterSearch extends RE6Module {
             "hidePageBreaks",
             "highlightVisited",
             "hideSmartAliasOutput",
+
+            "hideInfoBar",
         ]);
 
         // Scaling Settings
@@ -593,6 +597,10 @@ export class BetterSearch extends RE6Module {
         // Hide the SmartAlias output in the quick edit form
         if (conf.hideSmartAliasOutput) $("section#content").attr("hide-smart-alias-output", "true");
         else $("section#content").removeAttr("hide-smart-alias-output");
+
+        // Hide the post info bar
+        if (conf.hideInfoBar) this.$content.attr("hide-info-bar", "true");
+        else this.$content.removeAttr("hide-info-bar");
     }
 
     /** Restarts various event listeners used by the module */

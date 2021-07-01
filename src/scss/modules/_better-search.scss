@@ -359,6 +359,14 @@ search-content[highlight-visited=true] > post[rendered=false] {
     border-bottom: 1.125rem solid #ffffff25;
 }
 
+/* Hiding the info bar */
+search-content[hide-info-bar] > post {
+    post-info { display: none; }
+    &[rendered=false] { border-bottom: 0; }
+    a img { border-radius: 6px; }
+}
+
+
 /* Thumbnail Resizing */
 search-content > post img {
     object-fit: cover;
