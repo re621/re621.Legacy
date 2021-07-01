@@ -39,7 +39,10 @@ export class SubscriptionList {
         // unless the data actually changes. So, an extraneous element is added
         // to the list every time subscriptions are saved, and get removed here
         const data: string[] = await XM.Storage.getValue(this.storageTag, []);
-        data.pop();
+        const extracted = data.pop();
+        // Push that bad boy back in, in case someone fucked with the settings
+        // and removed the key. This will prevent them from losing data.
+        if (extracted && !extracted.startsWith("re621:")) data.push(extracted);
 
         this.subscriptions = new Set(data);
         this.extra = JSON.parse(Util.LS.getItem(this.extraTag) || "{}");
@@ -65,6 +68,14 @@ export class SubscriptionList {
      */
     public get(): Set<string> {
         return this.subscriptions;
+    }
+
+    /**
+     * Returns the settings tag used for subscription storage
+     * @returns Storage tag, as string
+     */
+    public getStorageTag(): string {
+        return this.storageTag;
     }
 
     /** Returns the number of subscribed items */

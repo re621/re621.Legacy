@@ -7,3 +7,13 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* Moves the report button to the far right, to avoid accidental clicks */
+#subnav-reportcommend {
+    float: right;
+}
+
+/* Override to make the fit-height mode more reasonable */
+#image.fit-window-vertical {
+    max-height: calc(100vh - 5rem);
+}

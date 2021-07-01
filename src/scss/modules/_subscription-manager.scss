@@ -246,7 +246,7 @@ sb-ctwrap {
 
         subdivider {
             display: flex;
-            grid-column: span 5;
+            grid-column: 1 / -1;
             align-items: center;
             text-align: center;
             order: 10;
@@ -289,7 +289,7 @@ sb-ctwrap[content=Tags] sb-canvas {
     display: grid;
     width: var(--window-width, 37rem);
 
-    grid-template-columns: repeat(auto-fill, $sub-col);
+    grid-template-columns: repeat(var(--thumb-cols, 4), 1fr);
     grid-column-gap: $sub-colgap;
     grid-row-gap: $sub-rowgap;
     justify-content: space-between;

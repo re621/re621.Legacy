@@ -453,7 +453,7 @@ export class SettingsController extends RE6Module {
                                 value: betterSearch.fetchSettings("imageRatio"),
                                 title: "Number between 0.1 and 1.9",
                                 required: true,
-                                pattern: "^([01]\\.[1-9]|1\\.0)$",
+                                pattern: "^1|([01]\\.[1-9]|1\\.0)$",
                                 wrapper: betterSearch.fetchSettings("imageRatioChange") ? undefined : "input-disabled",
                                 disabled: !betterSearch.fetchSettings("imageRatioChange"),
                             },
@@ -602,6 +602,19 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await betterSearch.pushSettings("highlightVisited", data);
+                            if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
+                        }
+                    ),
+                    Form.spacer(3, true),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("hideInfoBar"),
+                            label: "<b>Hide Post Info</b><br />Disables the voting, favorites, and rating display under the post",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("hideInfoBar", data);
                             if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                         }
                     ),
@@ -2261,6 +2274,12 @@ export class SettingsController extends RE6Module {
             const promises: Promise<any>[] = [];
             ModuleController.getAll().forEach((module) => {
                 promises.push(module.getSavedSettings());
+            });
+            SubscriptionManager.getAllTrackers().forEach((tracker) => {
+                promises.push(new Promise((resolve) => {
+                    console.log(tracker.exportSubscriptionsList());
+                    resolve(tracker.exportSubscriptionsList());
+                }));
             });
 
             Promise.all(promises).then((response) => {
