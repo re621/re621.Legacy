@@ -160,9 +160,15 @@ export class TagTracker extends SubscriptionTracker {
                     .one("load", () => {
                         // This is a workaround to avoid empty thumbnails
                         // The preview gets loaded first, then a sample replaces it if necessary
-                        if (this.loadLargeThumbs) image.attr("src", getSampleLink(imageData[0], imageData[1] == "true", imageData[2]));
+                        if (this.loadLargeThumbs && !image.attr("error"))
+                            image
+                                .attr("src", getSampleLink(imageData[0], imageData[1] == "true", imageData[2]))
+                                .one("error", () => {
+                                    image.attr("src", "https://e621.net/images/deleted-preview.png");
+                                });
                     })
                     .one("error", () => {
+                        image.attr("error", "true");
                         image.attr("src", "https://e621.net/images/deleted-preview.png");
                     });
 
