@@ -12,3 +12,8 @@
 #subnav-reportcommend {
     float: right;
 }
+
+/* Override to make the fit-height mode more reasonable */
+#image.fit-window-vertical {
+    max-height: calc(100vh - 5rem);
+}
