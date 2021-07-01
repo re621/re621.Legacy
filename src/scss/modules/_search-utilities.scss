@@ -1,10 +1,11 @@
 /** Collapsable Sidebar **/
 a#sidebar-collapse {
-    position: absolute;
-    top: 0;
-    left: 0.5rem;
+    position: relative;
     z-index: 10;
     font-family: monospace;
+    grid-column: 1 / -1;
+    width: 1rem;
+    line-height: 0;
 
     &:after { content: "<<"; }
 }
