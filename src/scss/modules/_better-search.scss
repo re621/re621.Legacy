@@ -364,7 +364,7 @@ search-content > post img {
     object-fit: cover;
     min-width: var(--img-fit, 100%);
     height: calc(var(--img-width, 150px) * var(--img-ratio, 1));
-    min-height: calc(var(--img-width, 150px) * 0.25);
+    min-height: 2rem;
     max-height: var(--img-maxheight, 50vh);
 }
 
