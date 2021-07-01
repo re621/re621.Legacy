@@ -2262,6 +2262,12 @@ export class SettingsController extends RE6Module {
             ModuleController.getAll().forEach((module) => {
                 promises.push(module.getSavedSettings());
             });
+            SubscriptionManager.getAllTrackers().forEach((tracker) => {
+                promises.push(new Promise((resolve) => {
+                    console.log(tracker.exportSubscriptionsList());
+                    resolve(tracker.exportSubscriptionsList());
+                }));
+            });
 
             Promise.all(promises).then((response) => {
                 Debug.log(response);

@@ -170,6 +170,13 @@ export class SubscriptionTracker extends RE6Module {
         }
     }
 
+    public exportSubscriptionsList(): { name: string; data: any } {
+        return {
+            name: this.slist.getStorageTag(),
+            data: Array.from(this.slist.get()),
+        };
+    }
+
     /** Returns the unique identifier for this tracker */
     public getTrackerID(): string { return this.trackerID; }
 

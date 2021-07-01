@@ -70,6 +70,14 @@ export class SubscriptionList {
         return this.subscriptions;
     }
 
+    /**
+     * Returns the settings tag used for subscription storage
+     * @returns Storage tag, as string
+     */
+    public getStorageTag(): string {
+        return this.storageTag;
+    }
+
     /** Returns the number of subscribed items */
     public count(): number {
         return this.subscriptions.size;

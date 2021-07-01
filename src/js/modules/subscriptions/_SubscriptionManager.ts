@@ -194,6 +194,11 @@ export class SubscriptionManager extends RE6Module {
         return Promise.resolve(this.trackers.length);
     }
 
+    /** Returns a complete list of all active trackers */
+    public static getAllTrackers(): SubscriptionTracker[] {
+        return this.trackers;
+    }
+
     /**
      * Generates a settings page for the subscriptions trackers
      * @returns Settings form
