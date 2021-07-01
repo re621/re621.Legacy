@@ -453,7 +453,7 @@ export class SettingsController extends RE6Module {
                                 value: betterSearch.fetchSettings("imageRatio"),
                                 title: "Number between 0.1 and 1.9",
                                 required: true,
-                                pattern: "^([01]\\.[1-9]|1\\.0)$",
+                                pattern: "^1|([01]\\.[1-9]|1\\.0)$",
                                 wrapper: betterSearch.fetchSettings("imageRatioChange") ? undefined : "input-disabled",
                                 disabled: !betterSearch.fetchSettings("imageRatioChange"),
                             },
