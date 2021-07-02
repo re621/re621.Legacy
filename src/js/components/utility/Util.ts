@@ -231,6 +231,7 @@ export class Util {
     public static versionCompare(v1: string, v2: string, options?: { lexicographical?: boolean; zeroExtend?: boolean }): number {
         const lexicographical = options && options.lexicographical,
             zeroExtend = options && options.zeroExtend;
+        if (typeof v1 !== "string" || typeof v2 !== "string") return NaN;
         let v1parts: string[] | number[] = v1.split('.'),
             v2parts: string[] | number[] = v2.split('.');
 

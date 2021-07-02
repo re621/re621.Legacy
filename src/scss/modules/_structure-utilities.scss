@@ -89,7 +89,7 @@ header#top {
 body[data-sticky-header=true] {
     header#top {
         position: sticky;
-        z-index: 9000;
+        z-index: 400;
         top: -1px;
     }
 
