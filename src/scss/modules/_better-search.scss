@@ -360,10 +360,17 @@ search-content[highlight-visited=true] > post[rendered=false] {
 }
 
 /* Hiding the info bar */
-search-content[hide-info-bar] > post {
+search-content[hide-info-bar=true] > post {
     post-info { display: none; }
     &[rendered=false] { border-bottom: 0; }
     a img { border-radius: 6px; }
+    post-voting {
+        bottom: 0;
+        button.fav { border-bottom-left-radius: 0.25rem; }
+    }
+}
+search-content[highlight-visited=true][hide-info-bar=true] > post > a {
+    border-radius: 0.75rem;
 }
 
 
