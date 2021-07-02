@@ -353,10 +353,10 @@ search-content > post[deleted=true] > a:after { content: "DELETED" }
 
 
 /* Visited Highlights */
-search-content[highlight-visited=true] > post > a { border-bottom: 0.125rem solid #444; }
+search-content[highlight-visited=true] > post > a { border-bottom: 0.05rem solid #444; }
 search-content[highlight-visited=true] > post > a:visited { border-bottom-color: #d2a109; }
 search-content[highlight-visited=true] > post[rendered=false] {
-    border-bottom: 1.125rem solid #ffffff25;
+    border-bottom: 1.05rem solid #ffffff25;
 }
 
 /* Hiding the info bar */
