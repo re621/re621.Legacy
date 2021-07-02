@@ -44,6 +44,8 @@ export class VersionChecker {
             try {
                 const latestRelease = await VersionChecker.getGithubData("latest");
 
+                if (!latestRelease || !latestRelease.name) throw "Malformed GitHub response";
+
                 VersionChecker.latestBuild = latestRelease.name;
                 VersionChecker.cachedBuild = VersionChecker.scriptBuild;
 
@@ -60,7 +62,7 @@ export class VersionChecker {
                 VersionChecker.lastUpdated = Util.Time.now();
                 VersionChecker.changesText = "Unable to fetch changelog";
 
-                ErrorHandler.error("VersionChecker", "Failed to fetch update data from GitHub.");
+                ErrorHandler.error("VersionChecker", "Failed to fetch update data from GitHub.\n" + error);
             }
         }
 
