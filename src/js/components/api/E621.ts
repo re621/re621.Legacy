@@ -160,7 +160,7 @@ class APIEndpoint {
      * @param noEncode If true, the values are not URI encoded
      */
     private formatParam(input: APIQuery, noEncode = false): FormattedAPIQuery {
-        Debug.log("input", input);
+        // Debug.log("input", input);
         if (input === undefined || input === null) return {};
 
         const response: FormattedAPIQuery = {};
@@ -184,7 +184,7 @@ class APIEndpoint {
             }
         }
 
-        Debug.log("output", response);
+        // Debug.log("output", response);
         return response;
 
         /** Prevent double-encoding the values */
