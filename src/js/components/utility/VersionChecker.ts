@@ -1,6 +1,7 @@
 import { XM } from "../api/XM";
 import { GMxmlHttpRequestResponse } from "../api/XMConnect";
 import { Debug } from "./Debug";
+import { ErrorHandler } from "./ErrorHandler";
 import { Util } from "./Util";
 
 export class VersionChecker {
@@ -40,20 +41,32 @@ export class VersionChecker {
             VersionChecker.wasUpdated = false;
             VersionChecker.hasUpdate = false;
         } else if (VersionChecker.wasUpdated || VersionChecker.lastUpdated + Util.Time.HOUR < Util.Time.now()) {
-            const latestRelease = await VersionChecker.getGithubData("latest");
+            try {
+                const latestRelease = await VersionChecker.getGithubData("latest");
 
-            VersionChecker.latestBuild = latestRelease.name;
-            VersionChecker.cachedBuild = VersionChecker.scriptBuild;
+                VersionChecker.latestBuild = latestRelease.name;
+                VersionChecker.cachedBuild = VersionChecker.scriptBuild;
 
-            VersionChecker.hasUpdate = Util.versionCompare(VersionChecker.scriptBuild, VersionChecker.latestBuild) < 0;
+                VersionChecker.hasUpdate = Util.versionCompare(VersionChecker.scriptBuild, VersionChecker.latestBuild) < 0;
 
-            VersionChecker.lastUpdated = Util.Time.now();
-            VersionChecker.changesText = latestRelease.body;
+                VersionChecker.lastUpdated = Util.Time.now();
+                VersionChecker.changesText = latestRelease.body;
+            } catch (error) {
+                VersionChecker.latestBuild = "0.0.1";
+                VersionChecker.cachedBuild = VersionChecker.scriptBuild;
+
+                VersionChecker.hasUpdate = false;
+
+                VersionChecker.lastUpdated = Util.Time.now();
+                VersionChecker.changesText = "Unable to fetch changelog";
+
+                ErrorHandler.error("VersionChecker", "Failed to fetch update data from GitHub.");
+            }
         }
 
         VersionChecker.changesHTML = Util.quickParseMarkdown(VersionChecker.changesText);
 
-        Debug.log("VersionChecker", {
+        Debug.table({
             scriptBuild: VersionChecker.scriptBuild,
             latestBuild: VersionChecker.latestBuild,
             cachedBuild: VersionChecker.cachedBuild,
@@ -62,8 +75,6 @@ export class VersionChecker {
             hasUpdate: VersionChecker.hasUpdate,
 
             lastUpdated: VersionChecker.lastUpdated,
-            changesText: VersionChecker.changesText,
-            changesHTML: VersionChecker.changesHTML,
         });
 
         await XM.Storage.setValue("re621.VersionChecker", {
