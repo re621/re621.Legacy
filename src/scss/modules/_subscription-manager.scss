@@ -271,9 +271,15 @@ sb-ctwrap {
 
     sb-status { // Notifications status log
         display: block;
-        padding: 6rem;
         font-family: monospace;
         font-size: 1.25rem;
+        width: min-content;
+        margin: 6rem auto;
+        & > div {
+            white-space: nowrap;
+            line-height: 1.5rem;
+            padding-bottom: 0.125rem;
+        }
     }
 }
 
