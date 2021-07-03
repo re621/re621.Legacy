@@ -17,6 +17,8 @@ export class TagTracker extends SubscriptionTracker {
     // Needs to be overridden due to lower lookup batch sizes
     protected batchSize = 40;
 
+    protected quickSubEnabled = true;
+
     protected buttonSelect = {
         minor: {
             regex: [PageDefinition.search, PageDefinition.post],
