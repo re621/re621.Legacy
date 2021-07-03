@@ -263,9 +263,30 @@ sb-ctwrap {
             &::before { margin-right: 1rem; }
             &::after { margin-left: 1rem; }
         }
+
+        subnotif {
+            grid-column: 1/-1;
+            justify-self: center;
+            padding: 20% 2rem 25%;
+            color: #666666;
+            font-family: "Calibri";
+            font-size: 1.25rem;
+            width: 21rem;
+            background: #33333340;
+            box-shadow: 1px 1px 5rem #33333340;
+            border-radius: 0 0 10rem 10rem;
+
+            div {
+                font-size: 150%;
+                padding-bottom: 1rem;
+                text-align: center;
+                color: #999999;
+            }
+        }
     }
 
-    &[added="0"] sb-canvas subdivider {
+    &[added="0"] sb-canvas subdivider,
+    &:not([posts="0"]) sb-canvas subnotif {
         display: none;
     }
 

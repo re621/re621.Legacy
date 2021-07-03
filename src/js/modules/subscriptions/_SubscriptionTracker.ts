@@ -456,6 +456,8 @@ export class SubscriptionTracker extends RE6Module {
 
         this.execPreDraw();
         this.canvas.append(this.drawNewUpdatesDivider());
+        this.canvas.append(this.drawNoNotificationsMessage());
+
         this.cache.forEach((data, timestamp) => {
             const entry = this.drawUpdateEntry(data, timestamp, (timestamp, result) => {
                 this.cache.deleteItem(timestamp);
@@ -509,6 +511,14 @@ export class SubscriptionTracker extends RE6Module {
      */
     protected drawNewUpdatesDivider(): JQuery<HTMLElement> {
         return $("<subdivider>Older Updates</subdivider>");
+    }
+
+    /**
+     * Returns a message that appears if the notifications field is blank
+     * @returns JQuery DOM object
+     */
+    protected drawNoNotificationsMessage(): JQuery<HTMLElement> {
+        return $(`<subnotif><div>No notifications yet!</div>Once one of your subscriptions receives updates, they will appear here.</subnotif>`)
     }
 
     /** Clears the status screen of all entries */
