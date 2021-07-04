@@ -408,6 +408,7 @@ export class UploadUtilities extends RE6Module {
 
     }
 
+    /** Add a preview image to the parent ID field */
     private handleParentIDPreview(): void {
         const input = $(`input[placeholder="Ex. 12345"]`);
         if (input.length == 0) return;
