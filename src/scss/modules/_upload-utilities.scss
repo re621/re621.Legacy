@@ -100,3 +100,15 @@ button.submit-upload {
     padding: 0.75rem 1rem;
     font-weight: bold;
 }
+
+a#upload-parent-preview {
+    display: block;
+    margin: 0.5rem 0;
+    width: min-content;
+    
+    img {
+        object-fit: cover;
+        width: 8rem;
+        height: 8rem;
+    }
+}
