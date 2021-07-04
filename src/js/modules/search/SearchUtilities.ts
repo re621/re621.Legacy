@@ -130,7 +130,7 @@ export class SearchUtilities extends RE6Module {
         this.initQuickBlacklist(this.fetchSettings("quickBlacklist"));
 
         // Handle sidebar collapse
-        if (Page.matches(PageDefinition.search))
+        if (Page.matches([PageDefinition.search, PageDefinition.favorites]))
             this.handleSidebarCollapse();
     }
 
