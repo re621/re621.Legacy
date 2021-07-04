@@ -353,17 +353,24 @@ search-content > post[deleted=true] > a:after { content: "DELETED" }
 
 
 /* Visited Highlights */
-search-content[highlight-visited=true] > post > a { border-bottom: 0.125rem solid #444; }
+search-content[highlight-visited=true] > post > a { border-bottom: 0.05rem solid #444; }
 search-content[highlight-visited=true] > post > a:visited { border-bottom-color: #d2a109; }
 search-content[highlight-visited=true] > post[rendered=false] {
-    border-bottom: 1.125rem solid #ffffff25;
+    border-bottom: 1.05rem solid #ffffff25;
 }
 
 /* Hiding the info bar */
-search-content[hide-info-bar] > post {
+search-content[hide-info-bar=true] > post {
     post-info { display: none; }
     &[rendered=false] { border-bottom: 0; }
     a img { border-radius: 6px; }
+    post-voting {
+        bottom: 0;
+        button.fav { border-bottom-left-radius: 0.25rem; }
+    }
+}
+search-content[highlight-visited=true][hide-info-bar=true] > post > a {
+    border-radius: 0.75rem;
 }
 
 

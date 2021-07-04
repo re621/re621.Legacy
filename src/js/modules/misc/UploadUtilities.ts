@@ -1,7 +1,9 @@
 import { E621 } from "../../components/api/E621";
 import { APIIQDBResponse } from "../../components/api/responses/APIIQDBResponse";
+import { APIPost, PostFlag } from "../../components/api/responses/APIPost";
 import { XM } from "../../components/api/XM";
 import { PageDefinition } from "../../components/data/Page";
+import { PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 import { TagSuggester } from "./TagSuggester";
@@ -54,6 +56,9 @@ export class UploadUtilities extends RE6Module {
         if (this.fetchSettings("stopLeaveWarning")) {
             XM.Window.onbeforeunload = null;
         }
+
+        // Add a preview image to the parent ID input
+        this.handleParentIDPreview();
     }
 
     /**
@@ -401,6 +406,53 @@ export class UploadUtilities extends RE6Module {
             ].filter(n => n).join("&emsp;"));
         }
 
+    }
+
+    /** Add a preview image to the parent ID field */
+    private handleParentIDPreview(): void {
+        const input = $(`input[placeholder="Ex. 12345"]`);
+        if (input.length == 0) return;
+
+        const preview = $("<a>")
+            .attr({
+                target: "_blank",
+                rel: "noopener noreferrer",
+                id: "upload-parent-preview",
+            })
+            .addClass("display-none-important")
+            .insertAfter(input);
+
+        const image = $("<img>")
+            .attr({
+                src: "/images/deleted-preview.png"
+            })
+            .appendTo(preview);
+
+        let timer: number;
+        input.on("input", () => {
+            if (timer) window.clearTimeout(timer);
+            timer = window.setTimeout(async () => {
+                const search = parseInt(input.val() + "");
+                if (!search) {
+                    preview.addClass("display-none-important");
+                    return;
+                }
+
+                const lookup = await E621.Posts.first<APIPost>({ tags: "id:" + search }, 500);
+                console.log(lookup);
+                if (!lookup) {
+                    preview.addClass("display-none-important");
+                    return;
+                }
+
+                const post = PostData.fromAPI(lookup);
+                preview
+                    .attr("href", "/posts/" + post.id)
+                    .removeClass("display-none-important");
+                image.attr("src", post.flags.has(PostFlag.Deleted) ? "/images/deleted-preview.png" : post.file.preview);
+
+            }, 500);
+        })
     }
 
 }

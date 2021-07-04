@@ -14,6 +14,8 @@ export class SubscriptionTracker extends RE6Module {
 
     protected batchSize = 100;              // maximum number of subscribed entries per API request
 
+    protected quickSubEnabled = false;      // Enables quick-subscribing from the info page
+
     protected buttonSelect: {               // defines which elements should receive
         minor?: SubscribeButtonSelector;    // subscription buttons, and on what pages
         major?: SubscribeButtonSelector;
@@ -456,6 +458,8 @@ export class SubscriptionTracker extends RE6Module {
 
         this.execPreDraw();
         this.canvas.append(this.drawNewUpdatesDivider());
+        this.canvas.append(this.drawNoNotificationsMessage());
+
         this.cache.forEach((data, timestamp) => {
             const entry = this.drawUpdateEntry(data, timestamp, (timestamp, result) => {
                 this.cache.deleteItem(timestamp);
@@ -511,6 +515,14 @@ export class SubscriptionTracker extends RE6Module {
         return $("<subdivider>Older Updates</subdivider>");
     }
 
+    /**
+     * Returns a message that appears if the notifications field is blank
+     * @returns JQuery DOM object
+     */
+    protected drawNoNotificationsMessage(): JQuery<HTMLElement> {
+        return $(`<subnotif><div>No notifications yet!</div>Once one of your subscriptions receives updates, they will appear here.</subnotif>`)
+    }
+
     /** Clears the status screen of all entries */
     protected clearStatus(): void {
         this.status.html("");
@@ -529,6 +541,9 @@ export class SubscriptionTracker extends RE6Module {
     public getSubscriptionList(): JQuery<HTMLElement> {
         if (this.sblist !== undefined) return this.sblist;
 
+        let quickAddCont: JQuery<HTMLElement>,
+            quickAddLink: JQuery<HTMLElement>;
+
         const sbcont = $("<sb-encont>");
         const search = $("<input>")
             .addClass("sb-enfind")
@@ -541,11 +556,22 @@ export class SubscriptionTracker extends RE6Module {
                     this.sblist.find("sb-enitem").each((index, el) => {
                         $(el).removeClass("display-none");
                     });
+                    if (this.quickSubEnabled) quickAddCont.addClass("display-none");
                 } else {
                     this.sblist.find("sb-enitem").each((index, el) => {
                         $(el).addClass("display-none");
                     });
                     this.sblist.find(`sb-enitem[content*="${value}"]`).removeClass("display-none");
+
+                    if (this.quickSubEnabled) {
+                        quickAddLink
+                            .text(`Subscribe to ${value}`)
+                            .attr({
+                                tag: value,
+                                href: `/wiki_pages/show_or_new?title=${value}`,
+                            });
+                        quickAddCont.removeClass("display-none");
+                    }
                 }
             });
 
@@ -555,6 +581,7 @@ export class SubscriptionTracker extends RE6Module {
             .append(sbcont)
             .on("re621:update", () => {
                 sbcont.html("");
+
                 let list = [];
                 for (const name of this.slist.get())
                     list.push(this.formatSubscriptionListEntry(name, (this.slist.getExtraData(name) || {}), (name: string) => {
@@ -564,6 +591,25 @@ export class SubscriptionTracker extends RE6Module {
                 list = list.sort((a, b) => {
                     return $(a).attr("sort").localeCompare($(b).attr("sort"));
                 });
+
+                quickAddCont = $("<sb-enitem>")
+                    .addClass("sb-quicksub display-none")
+                    .appendTo(this.sblist);
+                quickAddLink = $("<a>")
+                    .on("click", (event) => {
+                        event.preventDefault();
+                        const value = quickAddLink.attr("tag");
+                        if (!value) return;
+
+                        this.slist.subscribe(value);
+
+                        search.val("");
+                        quickAddCont.addClass("display-none");
+
+                        this.sblist.trigger("re621:update");
+                    })
+                    .appendTo(quickAddCont);
+
                 sbcont.append(list);
             });
 
