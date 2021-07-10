@@ -91,12 +91,8 @@ smart-alias {
 }
 
 smart-alias[has-original=true] smart-tag {
-    &[symbol=success][action=added]::before {
-        color: #81ec81;
-    }
-    &[symbol=success][action=removed]::before {
-        color: #ff8585;
-    }
+    &[action=added]::before { color: #81ec81; }
+    &[action=removed]::before { color: #ff8585; }
 }
 
 // Limit the height for the editing mode
