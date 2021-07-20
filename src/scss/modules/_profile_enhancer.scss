@@ -1,5 +1,5 @@
 /** Fixes to the vanilla profile structure */
-div#c-users div#a-show {
+div#c-users[enhancements=true] div#a-show {
 
     .bottom-section {
         display: block;
