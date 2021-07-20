@@ -23,6 +23,8 @@ export class Miscellaneous extends RE6Module {
             { keys: "hotkeyToggleBlacklist", fnct: this.toggleBlacklist },
             { keys: "hotkeySubmit", fnct: this.handleSubmitForm, element: "body", selector: "textarea, input" },
             { keys: "hotkeyRandomSetPost", fnct: this.randomSetPost },
+            { keys: "hotkeyScrollUp", fnct: this.scrollUp },
+            { keys: "hotkeyScrollDown", fnct: this.scrollDown },
         );
     }
 
@@ -40,6 +42,9 @@ export class Miscellaneous extends RE6Module {
             hotkeySubmit: "alt+return",
 
             hotkeyRandomSetPost: "",
+
+            hotkeyScrollUp: "",
+            hotkeyScrollDown: "",
 
             stickySearchbox: true,      // `div#re621-search`
             stickyHeader: false,        // `header#top`
@@ -427,6 +432,14 @@ export class Miscellaneous extends RE6Module {
             const $el = $(el);
             $el.text($el.parent("td.ticket-subject").attr("title"));
         }
+    }
+
+    private scrollUp(): void {
+        $('html, body').animate({ scrollTop: `-=${$(window).height() * 0.15}px` }, 300);
+    }
+
+    private scrollDown(): void {
+        $('html, body').animate({ scrollTop: `+=${$(window).height() * 0.15}px` }, 300);
     }
 
 }
