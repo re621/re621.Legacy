@@ -79,6 +79,8 @@ export class UploadUtilities extends RE6Module {
             .find("div.col2").first()
             .attr("id", "file-container");
 
+        console.log("container", fileContainer);
+
         const dupesContainer = $("<div>")
             .attr("id", "dupes-container")
             .appendTo(fileContainer);
@@ -89,8 +91,15 @@ export class UploadUtilities extends RE6Module {
             .appendTo("div.upload_preview_container");
 
         let working = false;
-        $(fileContainer).on("input paste", "input", (event) => {
+        $(fileContainer).on("input paste", "input", async (event) => {
             if (working) return;
+
+            // This is a dumb solution, but here we are.
+            // The issue is with the paste event - it fires BEFORE ther
+            // input value gets updated. This means that the function will
+            // process the previously held input value, which may be empty
+            // or incorrect. Delaying it by a quarter of a second fixes it
+            await Util.sleep(250);
 
             const $input = $(event.target),
                 value = $input.val() + "";
