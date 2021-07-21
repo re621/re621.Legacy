@@ -593,8 +593,12 @@ class FormattingHelper {
         const replacedTags = [];
 
         if (lookup !== null) {
-            lookup.forEach(function (element) {
+            // Has to be reversed first, in order to present prompts
+            // in the correct order. This way, the LAST prompt is
+            // layered at the bottom, and FIRST is at the very top.
+            lookup.reverse().forEach((element) => {
                 const title = element.replace(/(%$)|(^%prompt[:]?)/g, "");
+                console.log("running", title);
                 replacedTags.push(element);
                 promises.push(new Prompt(title).getPromise());
             });
