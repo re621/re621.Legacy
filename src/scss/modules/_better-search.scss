@@ -283,7 +283,6 @@ search-content > post {
         }
 
         span.post-info-favorites {
-            color: #c3a816;
             &::before { content: unicode("f004");  }                // heart
         }
 
@@ -373,6 +372,10 @@ search-content[highlight-visited=true][hide-info-bar=true] > post > a {
     border-radius: 0.75rem;
 }
 
+/* Coloring the favorites counter */
+search-content[color-fav-count=true] > post > post-info {
+    span.post-info-favorites { color: #c3a816; }
+}
 
 /* Thumbnail Resizing */
 search-content > post img {

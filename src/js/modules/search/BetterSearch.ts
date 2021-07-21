@@ -78,6 +78,7 @@ export class BetterSearch extends RE6Module {
             hideSmartAliasOutput: false,                    // Run SmartAlias, but don't show its output, in the quick edit mode
 
             hideInfoBar: false,                             // Remove the post info (votes, favorites, etc) from view
+            colorFavCount: true,                            // The Favorites counter on the thumbnail will be colored yellow
         };
     }
 
@@ -572,7 +573,7 @@ export class BetterSearch extends RE6Module {
             "highlightVisited",
             "hideSmartAliasOutput",
 
-            "hideInfoBar",
+            "hideInfoBar", "colorFavCount",
         ]);
 
         // Scaling Settings
@@ -601,6 +602,10 @@ export class BetterSearch extends RE6Module {
         // Hide the post info bar
         if (conf.hideInfoBar) this.$content.attr("hide-info-bar", "true");
         else this.$content.removeAttr("hide-info-bar");
+
+        // Hide the post info bar
+        if (conf.colorFavCount) this.$content.attr("color-fav-count", "true");
+        else this.$content.removeAttr("color-fav-count");
     }
 
     /** Restarts various event listeners used by the module */

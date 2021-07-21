@@ -620,6 +620,19 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3, true),
 
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("colorFavCount"),
+                            label: "<b>Colored Favorites Counter</b><br />Changes the color of the favorites counter to yellow",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("colorFavCount", data);
+                            if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
+                        }
+                    ),
+                    Form.spacer(3, true),
+
                 ]),
 
                 // Infinite Scroll
