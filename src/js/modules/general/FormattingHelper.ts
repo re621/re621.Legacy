@@ -236,7 +236,7 @@ class FormattingHelper {
             [
                 Form.input({ name: "name", label: "Name", width: 2 }),
                 Form.icon({ name: "icon", label: "Icon", width: 2 }, iconDefinitions),
-                Form.input({ name: "text", label: "Content", width: 2 }),
+                Form.textarea({ name: "text", label: "Content", width: 2 }),
 
                 Form.button(
                     { name: "delete", value: "Delete" },
@@ -351,7 +351,7 @@ class FormattingHelper {
             [
                 Form.input({ name: "name", label: "Name", width: 2 }),
                 Form.icon({ name: "icon", label: "Icon", width: 2 }, iconDefinitions),
-                Form.input({ name: "text", label: "Content", width: 2 }),
+                Form.textarea({ name: "text", label: "Content", width: 2 }),
 
                 Form.spacer(),
                 Form.button({ name: "submit", value: "Create", type: "submit" }),
@@ -363,6 +363,7 @@ class FormattingHelper {
                 Form.copy({ label: "Prompt", value: "%prompt%", width: 2 }),
             ],
             (values) => {
+                console.log(values);
                 const buttonData = this.createButton({
                     name: values["name"],
                     icon: values["icon"],
@@ -452,9 +453,9 @@ class FormattingHelper {
         function fetchData(element: HTMLElement): ButtonDefinition {
             const $button = $(element);
             return {
-                name: $button.attr("data-name"),
-                icon: $button.attr("data-icon"),
-                text: $button.attr("data-text"),
+                name: $button.data("name").toString(),
+                icon: $button.data("icon").toString(),
+                text: $button.data("text").toString(),
             };
         }
     }

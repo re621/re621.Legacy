@@ -334,6 +334,70 @@ export class Form implements PreparedStructure {
     }
 
     /**
+     * Creates an input FormElement based on the provided parameters  
+     * @param options Element configuration
+     * @param changed Input change callback
+     */
+    public static textarea(options?: InputElementOptions, changed?: InputChangeEvent): FormElement {
+        if (!options.name) options.name = Util.ID.make();
+
+        let $label: JQuery<HTMLElement>;
+        if (options.label)
+            $label = FormUtils.makeLabel(options.name, options.label);
+
+        const $element = FormUtils
+            .makeInputWrapper(options.label, options.wrapper, options.width);
+
+        const $input = $("<textarea>")
+            .attr({
+                "type": "text",
+                "id": options.name,
+                "name": options.name,
+            })
+            .addClass("bg-section color-text")
+            .prop("disabled", options.disabled == true)
+            .appendTo($element);
+
+        if (options.value !== undefined && options.value !== null) {
+            switch (typeof options.value) {
+                case "function": {
+                    options.value($input);
+                    break;
+                }
+                case "object": {
+                    $input.val(options.value.text());
+                    break;
+                }
+                case "boolean":
+                    options.value = options.value + "";
+                default: {
+                    $input
+                        .val(options.value)
+                        .attr("defval", options.value);
+                }
+            }
+        }
+
+        if (options.title) $input.attr("title", options.title);
+
+        if (options.pattern) $input.attr("pattern", options.pattern);
+        if (options.required) $input.attr("required", '');
+
+        if (changed !== undefined) {
+            let timer: number;
+            $input.on("input", () => {
+                if (timer) clearTimeout(timer);
+                timer = window.setTimeout(
+                    () => { changed($input.val().toString(), $input); },
+                    Form.inputTimeout
+                );
+            });
+        }
+
+        return new FormElement($element, $input, $label);
+    }
+
+    /**
      * Creates a copy input FormElement based on the provided parameters  
      * @param options Element configuration
      */
