@@ -251,7 +251,7 @@ class FormattingHelper {
 
                 Form.div({ value: "Available variables:", width: 2 }),
                 Form.copy({ label: "Selection", value: "%selection%", width: 2 }),
-                Form.copy({ label: "Prompt", value: "%prompt%", width: 2 }),
+                Form.copy({ label: "Prompt", value: "%prompt:Input Name%", width: 2 }),
             ],
             async (values) => {
                 this.updateButton(
@@ -360,7 +360,7 @@ class FormattingHelper {
 
                 Form.div({ value: "Available variables:", width: 2 }),
                 Form.copy({ label: "Selection", value: "%selection%", width: 2 }),
-                Form.copy({ label: "Prompt", value: "%prompt%", width: 2 }),
+                Form.copy({ label: "Prompt", value: "%prompt:Input Name%", width: 2 }),
             ],
             (values) => {
                 console.log(values);
