@@ -121,7 +121,7 @@ export class UploadUtilities extends RE6Module {
             working = true;
             dupesContainer.html(`<span class="fullspan">Checking for duplicates . . .</span>`);;
 
-            E621.IQDBQueries.get<APIIQDBResponse>({ "url": value }).then(
+            E621.IQDBQueries.get<APIIQDBResponse>({ "url": encodeURI(value) }).then(
                 (response) => {
                     // console.log(response);
                     dupesContainer.html("");
