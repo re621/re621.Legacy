@@ -50,26 +50,31 @@ export class CustomFlagger extends RE6Module {
                 .prependTo(flagContainer);
     }
 
-    private static get(): Map<string, FilterPair> {
-        if (CustomFlagger.filters == undefined) {
-            CustomFlagger.filters = new Map();
-            for (const flag of ModuleController.fetchSettings<FlagDefinition[]>(CustomFlagger, "flags")) {
-                if (CustomFlagger.filters.get(flag.tags)) continue;
-
-                // Backwards compatibility
-                if (flag.show == undefined) flag.show = true;
-
-                CustomFlagger.filters.set(
-                    flag.tags,
-                    {
-                        data: flag,
-                        filter: new PostFilter(flag.tags, true),
-                        show: flag.show,
-                    }
-                );
-            }
-        }
+    public static get(): Map<string, FilterPair> {
+        if (CustomFlagger.filters == undefined)
+            CustomFlagger.regenerateFlagDefinitions();
         return CustomFlagger.filters;
+    }
+
+    public static regenerateFlagDefinitions(): void {
+        CustomFlagger.filters = new Map();
+        console.log("regenerating", CustomFlagger.filters);
+        for (const flag of ModuleController.fetchSettings<FlagDefinition[]>(CustomFlagger, "flags")) {
+            if (CustomFlagger.filters.get(flag.tags)) continue;
+
+            // Backwards compatibility
+            if (flag.show == undefined) flag.show = true;
+
+            CustomFlagger.filters.set(
+                flag.tags,
+                {
+                    data: flag,
+                    filter: new PostFilter(flag.tags, true),
+                    show: flag.show,
+                }
+            );
+        }
+        console.log("finished", CustomFlagger.filters);
     }
 
     /**

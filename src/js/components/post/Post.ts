@@ -1,3 +1,4 @@
+import { PostViewer } from "../../modules/post/PostViewer";
 import { BetterSearch } from "../../modules/search/BetterSearch";
 import { CustomFlagger } from "../../modules/search/CustomFlagger";
 import { APIPost, PostFlag, PostRating } from "../api/responses/APIPost";
@@ -8,7 +9,6 @@ import { Debug } from "../utility/Debug";
 import { Util } from "../utility/Util";
 import { PostParts } from "./PostParts";
 import { PostSet } from "./PostSet";
-import { PostViewer } from "../../modules/post/PostViewer";
 
 export class Post implements PostData {
 

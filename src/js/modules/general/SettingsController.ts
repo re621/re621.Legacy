@@ -6,6 +6,7 @@ import { TagCache } from "../../components/cache/TagCache";
 import { TagSuggestionsList, TagSuggestionsTools } from "../../components/cache/TagSuggestions";
 import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
+import { Post } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
@@ -1469,6 +1470,11 @@ export class SettingsController extends RE6Module {
 
                             await customFlagger.pushSettings("flags", defData);
                             confirmBox.html("Settings Saved");
+                            CustomFlagger.regenerateFlagDefinitions();
+                            console.log("reloading rendered posts");
+                            Post.find("all").each((post) => CustomFlagger.addPost(post));
+                            console.log(CustomFlagger.get());
+                            betterSearch.reloadRenderedPosts();
                             window.setTimeout(() => { confirmBox.html(""); }, 1000);
                         }
                     ),
