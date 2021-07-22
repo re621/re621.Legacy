@@ -106,12 +106,24 @@ export class KeybindManager {
 
             // Establish the listener structure
             if (!this.listeners.has(key)) {
+                let keydown = false;
+
                 this.listeners.set(key, (event: Event) => {
                     if (KeybindManager.listening) return;
                     const listenerExecutor = this.executors.get(key);
                     Debug.log(`[${key}]: triggered ${Object.entries(listenerExecutor).length} executors`);
                     for (const [bindMeta, keyObj] of Object.entries(listenerExecutor)) {
+
+                        // If the keybind is outright disable, skip
                         if (!keyObj.enabled) continue;
+
+                        // This is a dumb solution, but it'll work for the time being
+                        // The issue is that any keybind can be made holdable by binding it
+                        // to a the same key as an already holdable key. This may allow
+                        // people to spam certain actions.
+                        if (keyObj.holdable) keydown = false;
+
+                        // Execute the keybind function
                         keyObj.fnct(event, bindMeta);
                     }
                 });
@@ -119,14 +131,24 @@ export class KeybindManager {
                 // Create the listener itself
                 const $element: any = element ? $(element) : $(document);
                 if (!selector) selector = null;
-                let keydown = false;
 
+                let cooldown = null;
                 $element.on("keydown.re621.hotkey-" + key, selector, key, (event: Event) => {
                     if (keydown) return;
+                    if (cooldown) return;
+
                     keydown = true;
                     if (!KeybindManager.enabled || KeybindManager.listening) return false;
                     Debug.log(`[${key}]: caught`);
                     this.listeners.get(key)(event);
+
+                    // Slightly throttles the keystroke input speed
+                    // Should only be an issue with holdable keybinds
+                    clearTimeout(cooldown);
+                    cooldown = setTimeout(() => {
+                        clearTimeout(cooldown);
+                        cooldown = null;
+                    }, 50);
                 });
 
                 $element.on("keyup.re621.hotkey-" + key, selector, key, () => {
@@ -153,6 +175,8 @@ export interface Keybind {
 
     element?: string;           // Element to which the listener gets bound. Defaults to `document`
     selector?: string;          // Selector within the element for deferred listeners. Defaults to `null`
+
+    holdable?: boolean;         // if true, allows the response function to keep running as long as the key is pressed
 }
 
 type ListenerFunction = (event: Event) => void;

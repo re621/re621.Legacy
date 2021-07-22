@@ -23,8 +23,8 @@ export class Miscellaneous extends RE6Module {
             { keys: "hotkeyToggleBlacklist", fnct: this.toggleBlacklist },
             { keys: "hotkeySubmit", fnct: this.handleSubmitForm, element: "body", selector: "textarea, input" },
             { keys: "hotkeyRandomSetPost", fnct: this.randomSetPost },
-            { keys: "hotkeyScrollUp", fnct: this.scrollUp },
-            { keys: "hotkeyScrollDown", fnct: this.scrollDown },
+            { keys: "hotkeyScrollUp", fnct: this.scrollUp, holdable: true },
+            { keys: "hotkeyScrollDown", fnct: this.scrollDown, holdable: true },
         );
     }
 
@@ -435,11 +435,11 @@ export class Miscellaneous extends RE6Module {
     }
 
     private scrollUp(): void {
-        $('html, body').animate({ scrollTop: `-=${$(window).height() * 0.15}px` }, 300);
+        window.scrollBy(0, $(window).height() * -0.15);
     }
 
     private scrollDown(): void {
-        $('html, body').animate({ scrollTop: `+=${$(window).height() * 0.15}px` }, 300);
+        window.scrollBy(0, $(window).height() * 0.15);
     }
 
 }

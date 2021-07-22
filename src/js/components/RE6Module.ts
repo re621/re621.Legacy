@@ -297,6 +297,7 @@ export class RE6Module {
                 enabled: enabled && (!keybind.page || Page.matches(keybind.page)),
                 element: keybind.element,
                 selector: keybind.selector,
+                holdable: keybind.holdable,
             })
 
             keyMeta.push(meta);
@@ -368,7 +369,8 @@ interface KeybindDefinition {
     element?: string;           // Element to which the listener gets bound. Defaults to `document`
     selector?: string;          // Selector within the element for deferred listeners. Defaults to `null`
     page?: RegExp | RegExp[];   // Pages on which the shortcuts must work. Leave blank for all.
-    ignoreShift?: boolean;       // If true, the hotkey will work regardless if it's accompanied by a shift
+    ignoreShift?: boolean;      // If true, the hotkey will work regardless if it's accompanied by a shift
+    holdable?: boolean;         // If true, the function will run repeatedly as long as the key is held
 }
 
 export type Settings = {
