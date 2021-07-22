@@ -58,7 +58,6 @@ export class CustomFlagger extends RE6Module {
 
     public static regenerateFlagDefinitions(): void {
         CustomFlagger.filters = new Map();
-        console.log("regenerating", CustomFlagger.filters);
         for (const flag of ModuleController.fetchSettings<FlagDefinition[]>(CustomFlagger, "flags")) {
             if (CustomFlagger.filters.get(flag.tags)) continue;
 
@@ -74,7 +73,6 @@ export class CustomFlagger extends RE6Module {
                 }
             );
         }
-        console.log("finished", CustomFlagger.filters);
     }
 
     /**
