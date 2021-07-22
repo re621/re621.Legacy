@@ -50,6 +50,7 @@ export class Post implements PostData {
         meta: Set<string>;
         lore: Set<string>;
     };
+    tagCategoriesKnown: boolean;            // false if the data is scraped from the page, and is thus missing tag category data
 
     public sources: string[];
     public description: string;
@@ -402,6 +403,7 @@ export interface PostData {
         meta: Set<string>;
         lore: Set<string>;
     };
+    tagCategoriesKnown: boolean;
 
     sources: string[];
     description: string;
@@ -498,6 +500,7 @@ export namespace PostData {
                 meta: new Set(data.tags.meta),
                 lore: new Set(data.tags.lore),
             },
+            tagCategoriesKnown: true,
 
             sources: data.sources,
             description: data.description,
@@ -711,6 +714,7 @@ export namespace PostData {
                 meta: new Set<string>(),
                 lore: new Set<string>(),
             },
+            tagCategoriesKnown: false,
 
             sources: [],
             description: "",

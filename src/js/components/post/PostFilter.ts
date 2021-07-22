@@ -147,25 +147,25 @@ export class PostFilter {
                     result = PostFilterUtils.compareNumbers(post.tags.all.size, value, filter.comparison)
                     break;
                 case FilterType.GenTags:
-                    result = PostFilterUtils.compareNumbers(post.tags.general.size, value, filter.comparison)
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.general.size, value, filter.comparison)
                     break;
                 case FilterType.ArtTags:
-                    result = PostFilterUtils.compareNumbers(post.tags.artist.size, value, filter.comparison)
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.artist.size, value, filter.comparison)
                     break;
                 case FilterType.CharTags:
-                    result = PostFilterUtils.compareNumbers(post.tags.character.size, value, filter.comparison)
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.character.size, value, filter.comparison)
                     break;
                 case FilterType.CopyTags:
-                    result = PostFilterUtils.compareNumbers(post.tags.copyright.size, value, filter.comparison)
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.copyright.size, value, filter.comparison)
                     break;
                 case FilterType.SpecTags:
-                    result = PostFilterUtils.compareNumbers(post.tags.species.size, value, filter.comparison)
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.species.size, value, filter.comparison)
                     break;
                 case FilterType.InvTags:
-                    result = PostFilterUtils.compareNumbers(post.tags.invalid.size, value, filter.comparison)
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.invalid.size, value, filter.comparison)
                     break;
                 case FilterType.MetaTags:
-                    result = PostFilterUtils.compareNumbers(post.tags.meta.size, value, filter.comparison)
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.meta.size, value, filter.comparison)
                     break;
                 default:
                     result = false;
