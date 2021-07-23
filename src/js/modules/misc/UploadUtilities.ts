@@ -93,17 +93,16 @@ export class UploadUtilities extends RE6Module {
             .html("")
             .appendTo("div.upload_preview_container");
 
-        let working = false;
+        let timer: number = null;
         $(fileContainer).on("input paste", "input", async (event) => {
-            if (working) return;
+            clearTimeout(timer);
+            timer = setTimeout(() => handleInput(event), 500);
+        });
 
-            // This is a dumb solution, but here we are.
-            // The issue is with the paste event - it fires BEFORE ther
-            // input value gets updated. This means that the function will
-            // process the previously held input value, which may be empty
-            // or incorrect. Delaying it by a quarter of a second fixes it
-            await Util.sleep(250);
+        fileContainer.find("input[type=text").trigger("input");
 
+        /** Handles the image URL input changes */
+        function handleInput(event: JQuery.TriggeredEvent): void {
             const $input = $(event.target),
                 value = $input.val() + "";
 
@@ -115,13 +114,13 @@ export class UploadUtilities extends RE6Module {
             }
 
             // Input is not a URL
-            if (!/^https?:\/\//.test(value)) {
+            try { new URL(value); }
+            catch {
                 dupesContainer.html(`<span class="fullspan">Unable to parse image path. <a href="/iqdb_queries" target="_blank" rel="noopener noreferrer">Check manually</a>?</span>`);
                 risContainer.html("");
                 return;
             }
 
-            working = true;
             dupesContainer.html(`<span class="fullspan">Checking for duplicates . . .</span>`);;
 
             E621.IQDBQueries.get<APIIQDBResponse>({ "url": encodeURI(value) }).then(
@@ -131,10 +130,8 @@ export class UploadUtilities extends RE6Module {
 
                     // Sometimes, an empty response is just an empty array
                     // More often than not, it's an array with one malformed object
-                    if (response.length == 0 || (response[0] !== undefined && response[0].post_id == undefined)) {
-                        working = false;
+                    if (response.length == 0 || (response[0] !== undefined && response[0].post_id == undefined))
                         return;
-                    }
 
                     $("<h3>")
                         .html(`<a href="/iqdb_queries?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">Duplicates Found:</a> ${response.length}`)
@@ -142,8 +139,6 @@ export class UploadUtilities extends RE6Module {
 
                     for (const entry of response)
                         makePostThumbnail(entry).appendTo(dupesContainer);
-
-                    working = false;
                 },
                 (error) => {
                     console.log(error);
@@ -163,7 +158,6 @@ export class UploadUtilities extends RE6Module {
                             event.preventDefault();
                             $(fileContainer).find("input").trigger("input");
                         });
-                    working = false;
                 }
             );
 
@@ -174,9 +168,7 @@ export class UploadUtilities extends RE6Module {
                 <a href="https://derpibooru.org/search/reverse?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">Derpibooru</a>
                 <a href="https://kheina.com/?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">Kheina</a>
             `);
-        });
-
-        fileContainer.find("input[type=text").trigger("input");
+        }
 
         /**
          * Makes a simplistic thumbnail to display in the duplicates section
