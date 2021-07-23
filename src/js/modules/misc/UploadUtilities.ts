@@ -79,8 +79,6 @@ export class UploadUtilities extends RE6Module {
             .find("div.col2").first()
             .attr("id", "file-container");
 
-        console.log("container", fileContainer);
-
         const dupesContainer = $("<div>")
             .attr("id", "dupes-container")
             .appendTo(fileContainer);
