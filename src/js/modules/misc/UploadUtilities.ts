@@ -23,6 +23,7 @@ export class UploadUtilities extends RE6Module {
             addSourceLinks: true,       // improve source links fields somewhat
             cleanSourceLinks: true,     // convert linkst to https and remove the www
             loadImageData: false,       // load image headers to get extra data
+            fixPixivPreviews: false,    // load pixiv previews manually
 
             stopLeaveWarning: false,    // removes the beforeunload warning
         };
@@ -59,6 +60,10 @@ export class UploadUtilities extends RE6Module {
 
         // Add a preview image to the parent ID input
         this.handleParentIDPreview();
+
+        // Make sure the pixiv previews load in properly
+        if (this.fetchSettings("fixPixivPreviews"))
+            this.handlePixivPreviews();
     }
 
     /**
@@ -290,7 +295,14 @@ export class UploadUtilities extends RE6Module {
     /** Load image file size and type */
     private handleImageData(): void {
 
-        const output = $("#preview-sidebar div.upload_preview_dims").first();
+        const output = $("#preview-sidebar div.upload_preview_dims").first()
+            .on("re621:update", () => {
+                output.html([
+                    output.attr("data-width") == "-1" ? "0×0" : `${output.attr("data-width")}×${output.attr("data-height")}`,
+                    output.attr("data-type") !== "UNK" ? `${output.attr("data-type").toUpperCase()}` : undefined,
+                    output.attr("data-size") !== "-1" ? `${Util.Size.format(output.attr("data-size"))}` : undefined
+                ].filter(n => n).join("&emsp;"));
+            });
         const image = $("#preview-sidebar img.upload_preview_img").first();
 
         // WEBM files send two error messages
@@ -335,7 +347,7 @@ export class UploadUtilities extends RE6Module {
                 });
 
                 prevRequest = "";
-                refreshFileData();
+                output.trigger("re621:update");
                 TagSuggester.trigger("update");
 
             } else if (urlInput.length > 0) {                           // Remote file URL
@@ -351,7 +363,7 @@ export class UploadUtilities extends RE6Module {
                     });
 
                     prevRequest = "";
-                    refreshFileData();
+                    output.trigger("re621:update");
                     TagSuggester.trigger("update");
                     return;
                 }
@@ -360,15 +372,19 @@ export class UploadUtilities extends RE6Module {
                 console.log("attempting", prevRequest == curRequest);
                 if (curRequest == prevRequest) {
                     output.attr(prevData);
-                    refreshFileData();
+                    output.trigger("re621:update");
                     TagSuggester.trigger("update");
                     return;
                 }
                 prevRequest = curRequest;
 
+                const requestURL = urlInput.val() + "";
                 XM.Connect.xmlHttpRequest({
-                    url: urlInput.val() + "",
+                    url: requestURL,
                     method: "HEAD",
+                    headers: {
+                        referer: requestURL.includes("i.pximg.net") ? "https://www.pixiv.net/" : window.location.href,
+                    },
                     onload: (event) => {
 
                         const headerStrings = event.responseHeaders.split(/\r?\n/);
@@ -395,7 +411,7 @@ export class UploadUtilities extends RE6Module {
                             "data-file": false,
                         }
 
-                        refreshFileData();
+                        output.trigger("re621:update");
                         TagSuggester.trigger("update");
                     }
                 });
@@ -404,14 +420,6 @@ export class UploadUtilities extends RE6Module {
         });
 
         image.trigger("load.resix");
-
-        function refreshFileData(): void {
-            output.html([
-                output.attr("data-width") == "-1" ? "0×0" : `${output.attr("data-width")}×${output.attr("data-height")}`,
-                output.attr("data-type") !== "UNK" ? `${output.attr("data-type").toUpperCase()}` : undefined,
-                output.attr("data-size") !== "-1" ? `${Util.Size.format(output.attr("data-size"))}` : undefined
-            ].filter(n => n).join("&emsp;"));
-        }
 
     }
 
@@ -460,6 +468,69 @@ export class UploadUtilities extends RE6Module {
 
             }, 500);
         })
+    }
+
+    /** Fixes an issue with Pixiv previews not loading properly */
+    private handlePixivPreviews(): void {
+        const fileContainer = UploadUtilities.findSection("post_file", "section-file")
+            .find("div.col2").first()
+            .attr("id", "file-container");
+
+        const output = $("#preview-sidebar div.upload_preview_dims").first();
+        const image = $("#preview-sidebar img.upload_preview_img").first();
+
+        let timer: number = null;
+        $(fileContainer).on("input paste", "input", async (event) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => processInput(event), 200);
+        });
+
+        // Process the input URL
+        // Should only be executed once the user pastes/stops typing
+        function processInput(event: JQuery.TriggeredEvent): void {
+
+            // Get input value
+            const $input = $(event.target),
+                value = $input.val() + "";
+
+            // Only applies to pixiv files
+            if (!value.includes("i.pximg.net")) return;
+
+            // Test for valid URL
+            try { new URL(value); }
+            catch { return; }
+
+            image.attr("src", Util.DOM.getLoadingImage());
+
+            // Fetch the image directly
+            XM.Connect.xmlHttpRequest({
+                url: value,
+                method: "GET",
+                responseType: "blob",
+                headers: {
+                    referer: "https://www.pixiv.net/",
+                },
+                onload: (event) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(event.response);
+                    reader.onloadend = (): void => {
+                        const base64data = reader.result;
+                        image
+                            .attr("src", base64data + "")
+                            .one("load", () => {
+                                const width = image.prop("naturalWidth"),
+                                    height = image.prop("naturalHeight");
+                                output
+                                    .attr("data-width", width)
+                                    .attr("data-height", height)
+                                    .trigger("re621:update");
+                            });
+                    }
+
+                    TagSuggester.trigger("update");
+                }
+            });
+        }
     }
 
 }

@@ -1387,12 +1387,27 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3),
 
+                    Form.checkbox(
+                        {
+                            value: uploadUtilities.fetchSettings("stopLeaveWarning"),
+                            label: `<b>Suppress Exit Message</b><br />Removes the confirmation message when leaving the upload page`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await uploadUtilities.pushSettings("stopLeaveWarning", data);
+                        }
+                    ),
+                    Form.spacer(3),
+
                     Form.section(
                         {
                             width: 3,
                             wrapper: window["re621"].privacy ? "display-none" : undefined,
                         },
                         [
+                            Form.text(`The following features require access to various domains not explicitly whitelisted by the script.<br />You will be prompted to approve a cross-origin request when that happens.`, 3),
+                            Form.spacer(3),
+
                             Form.checkbox(
                                 {
                                     value: uploadUtilities.fetchSettings("loadImageData"),
@@ -1406,22 +1421,24 @@ export class SettingsController extends RE6Module {
                             Form.text(
                                 `<div class="text-center text-bold">Requires a page reload</div>`
                             ),
-                            Form.text(`This feature requires access to various domains not explicitly whitelisted by the script.<br />You will be prompted to approve a cross-origin request when that happens.`, 3),
+                            Form.spacer(3),
+
+                            Form.checkbox(
+                                {
+                                    value: uploadUtilities.fetchSettings("fixPixivPreviews"),
+                                    label: `<b>Fix Broken Pixiv Previews</b><br />Hacky workaround – might not work reliably.`,
+                                    width: 2,
+                                },
+                                async (data) => {
+                                    await uploadUtilities.pushSettings("fixPixivPreviews", data);
+                                }
+                            ),
+                            Form.text(
+                                `<div class="text-center text-bold">Requires a page reload</div>`
+                            ),
                             Form.spacer(3),
                         ]
                     ),
-
-                    Form.checkbox(
-                        {
-                            value: uploadUtilities.fetchSettings("stopLeaveWarning"),
-                            label: `<b>Suppress Exit Message</b><br />Removes the confirmation message when leaving the upload page`,
-                            width: 3,
-                        },
-                        async (data) => {
-                            await uploadUtilities.pushSettings("stopLeaveWarning", data);
-                        }
-                    ),
-                    Form.spacer(3),
 
                 ]),
 
