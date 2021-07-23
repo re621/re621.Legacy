@@ -444,7 +444,7 @@ export class UploadUtilities extends RE6Module {
             .appendTo(preview);
 
         let timer: number;
-        input.on("input", () => {
+        input.on("input paste", () => {
             if (timer) window.clearTimeout(timer);
             timer = window.setTimeout(async () => {
                 const search = parseInt(input.val() + "");
