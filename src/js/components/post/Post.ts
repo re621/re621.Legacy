@@ -470,7 +470,7 @@ export namespace PostData {
                 down: data.score.down,
                 total: data.score.total
             },
-            user_score: undefined,
+            user_score: data["user_score"],
             favorites: data.fav_count,
             is_favorited: data.is_favorited == true,
             comments: data.comment_count,
@@ -586,6 +586,14 @@ export namespace PostData {
             "height": -1,
             "url": `https://static1.e621.net/data/preview/${md52}/${md52}/${md5}.jpg`
         };
+
+        // Fetch the user's current vote
+        const positiveVote = $("a.post-vote-up-link span").first(),
+            negativeVote = $("a.post-vote-down-link span").first();
+
+        data["user_score"] = positiveVote.hasClass("score-positive")
+            ? 1
+            : (negativeVote.hasClass("score-negative") ? -1 : 0);
 
         return PostData.fromAPI(data);
 
