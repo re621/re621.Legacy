@@ -119,6 +119,12 @@ Danbooru.Utility.disableShortcuts(true);
 // Create the basic DOM structure
 CleanSlate.createDOM().then(async () => {
 
+    // Abort loading the script
+    // This is a workaround for the fact that the title page
+    // is missing the blacklist data, causing issues with
+    // subscriptions
+    if (Page.matches(PageDefinition.title)) return;
+
     // Disable existing keyboard shortcuts, again.
     // Workaround made specificially for one user who presses 
     // the Edit hotkey immediately after the post page loads.
