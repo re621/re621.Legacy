@@ -2,7 +2,6 @@ import { BlacklistEnhancer } from "../../modules/search/BlacklistEnhancer";
 import { ModuleController } from "../ModuleController";
 import { Post, PostData } from "../post/Post";
 import { FilterOptions, PostFilter } from "../post/PostFilter";
-import { ErrorHandler } from "../utility/ErrorHandler";
 import { Util } from "../utility/Util";
 import { User } from "./User";
 
@@ -13,11 +12,14 @@ export class Blacklist {
     private blacklist = new Map<string, PostFilter>();
 
     private constructor() {
-        const filters = $("head meta[name=blacklisted-tags]").attr("content");
-        const blacklistEnabled = Util.LS.getItem("dab") !== "1";
+        const blacklistMeta = $("head meta[name=blacklisted-tags]");
+        if (!blacklistMeta.length) {
+            console.warn("Warning: The blacklist failed to load. This may be caused by the blacklist being empty, or by an internal error.");
+            return;
+        }
 
-        try { console.log("Constructing Blacklist", filters.length); }
-        catch (e) { ErrorHandler.error("Blacklist", "Failed to import the blacklist"); }
+        const filters = blacklistMeta.attr("content");
+        const blacklistEnabled = Util.LS.getItem("dab") !== "1";
 
         const enhancer = ModuleController.get(BlacklistEnhancer)
         const options = enhancer.fetchSettings(["favorites", "uploads", "whitelist"]) as FilterOptions;
