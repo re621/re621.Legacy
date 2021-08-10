@@ -264,7 +264,10 @@ export class SubscriptionTracker extends RE6Module {
     /** Generated and return a styled sub / unsub button */
     protected createSubscribeMinorButton(id: string, subscribe: SubscribeFunction, unsubscribe: SubscribeFunction): JQuery<HTMLElement> {
         const result = $("<a>")
-            .attr("name", id)
+            .attr({
+                "name": id,
+                "title": "Subscribe to this tag",
+            })
             .addClass("subscribe-button-minor")
             .on("click", (event) => {
                 event.preventDefault();
