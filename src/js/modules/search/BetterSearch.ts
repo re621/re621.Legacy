@@ -213,30 +213,37 @@ export class BetterSearch extends RE6Module {
                 .appendTo(this.$content);
 
             if (Util.Math.isNumeric(this.queryPage)) {
+                const postsPerPage = this.queryLimit ? this.queryLimit : User.postsPerPage;
                 const searchStatsCount = $("<span>")
                     .attr({
                         "id": "search-stats-count",
                     })
                     .on("re621:update", () => {
-                        const results = (this.lastPage - 1) * User.postsPerPage + this.pageResultCount;
+                        const results = (this.lastPage - 1) * postsPerPage + this.pageResultCount;
                         const queryPageNum = parseInt(this.queryPage);
+                        const isLastPage = this.lastPage == queryPageNum;
+
                         searchStatsCount.attr("title", "");
                         if (!queryPageNum) {
                             // TODO Account for this by counting visible posts
                             searchStatsCount.html("");
                         } else {
-                            searchStatsCount.html((
-                                this.lastPage == queryPageNum
-                                    ? results
-                                    : "~" + Util.formatK(results))
-                                + " Posts"
-                            );
 
-                            searchStatsCount.attr({
-                                "title": (this.lastPage == queryPageNum)
-                                    ? `${results} active posts found`
-                                    : `Between ${results - User.postsPerPage} and ${results} posts were found.\nGo to the last page of the search to get the exact amount.`,
-                            })
+                            if (this.lastPage == 750)
+                                searchStatsCount
+                                    .text(">" + results + " Posts")
+                                    .attr("title", `Over ${results} posts found`);
+                            else if (isLastPage)
+                                searchStatsCount
+                                    .text(results + " Posts")
+                                    .attr("title", `${results} posts found`);
+                            else
+                                searchStatsCount
+                                    .text("~" + Util.formatK(results) + " Posts")
+                                    .attr(
+                                        "title",
+                                        `Between ${results - postsPerPage} and ${results} posts were found.\nGo to the last page of the search to get the exact number.`
+                                    );
                         }
                     })
                     .appendTo(stats);
