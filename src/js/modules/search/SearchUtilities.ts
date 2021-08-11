@@ -94,7 +94,15 @@ export class SearchUtilities extends RE6Module {
 
         SearchUtilities.randomPostURL = "/posts/random" + (queryEncoded.length ? ("?tags=" + queryEncoded.join("+")) : "");
         if (Page.matches(PageDefinition.post)) {
+            const qParam = Page.getQueryParameter("q");
+            console.log(qParam);
             Page.removeQueryParameter(["q", "tags"]);
+
+            if (qParam)
+                for (const link of $("#has-children-relationship-preview article a, #has-parent-relationship-preview article a").get())
+                    $(link).on("click", () => {
+                        Page.setQueryParameter("q", qParam);
+                    });
         }
 
         // Replaces the tag count estimate with the real number
