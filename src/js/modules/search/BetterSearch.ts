@@ -232,7 +232,7 @@ export class BetterSearch extends RE6Module {
                             if (this.lastPage == 750)
                                 searchStatsCount
                                     .text(">" + results + " Posts")
-                                    .attr("title", `Over ${results} posts found`);
+                                    .attr("title", `Over ${Util.formatK(results)} posts found`);
                             else if (isLastPage)
                                 searchStatsCount
                                     .text(results + " Posts")
