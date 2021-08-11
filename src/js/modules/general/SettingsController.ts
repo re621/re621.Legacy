@@ -857,6 +857,18 @@ export class SettingsController extends RE6Module {
                         }
                     ),
                     Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle"),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: searchUtilities.fetchSettings("trimQueryParameters"),
+                            label: "<b>Trim Query Parameter</b><br />Remove the \"?q=\" from the URL on the post page",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await searchUtilities.pushSettings("trimQueryParameters", data);
+                        }
+                    ),
                     Form.hr(3),
 
                     // ------------------------------------------ //

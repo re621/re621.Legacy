@@ -51,6 +51,7 @@ export class SearchUtilities extends RE6Module {
             persistentTags: "",
 
             quickBlacklist: true,
+            trimQueryParameters: true,
 
             hotkeyFocusSearch: "q",
             hotkeyRandomPost: "r",
@@ -93,7 +94,7 @@ export class SearchUtilities extends RE6Module {
         for (const part of queryParams) queryEncoded.push(encodeURIComponent(part));
 
         SearchUtilities.randomPostURL = "/posts/random" + (queryEncoded.length ? ("?tags=" + queryEncoded.join("+")) : "");
-        if (Page.matches(PageDefinition.post)) {
+        if (Page.matches(PageDefinition.post) && this.fetchSettings("trimQueryParameters")) {
             const qParam = Page.getQueryParameter("q");
             console.log(qParam);
             Page.removeQueryParameter(["q", "tags"]);
