@@ -2,6 +2,7 @@ import { Danbooru } from "../../components/api/Danbooru";
 import { Blacklist } from "../../components/data/Blacklist";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Util } from "../../components/utility/Util";
 
 export class SearchUtilities extends RE6Module {
 
@@ -141,6 +142,10 @@ export class SearchUtilities extends RE6Module {
         // Handle sidebar collapse
         if (Page.matches([PageDefinition.search, PageDefinition.favorites]))
             this.handleSidebarCollapse();
+
+        // Handle the sidebar collapse on the post page
+        if (Page.matches([PageDefinition.post]))
+            this.handleSidebarCollapsePost();
     }
 
     /**
@@ -262,6 +267,29 @@ export class SearchUtilities extends RE6Module {
                 sidebar.toggleClass("collapsed");
                 button.toggleClass("collapsed");
             });
+    }
+
+    /** Handle sidebar expansion and collapse */
+    private handleSidebarCollapsePost(): void {
+        let collapsed = Util.LS.getItem("re621.sidebar") == "true";
+
+        const sidebar = $("#sidebar");
+        const button = $("<a>")
+            .attr({ "id": "sidebar-collapse" })
+            .insertBefore(sidebar)
+            .on("click", () => {
+                sidebar.toggleClass("collapsed");
+                button.toggleClass("collapsed");
+
+                collapsed = !collapsed;
+                if(collapsed) Util.LS.setItem("re621.sidebar", "true");
+                else Util.LS.removeItem("re621.sidebar");
+            });
+
+        if (collapsed) {
+            sidebar.toggleClass("collapsed");
+            button.toggleClass("collapsed");
+        }
     }
 
 }
