@@ -65,25 +65,25 @@
     "homepage": "https://e621.net/forum_topics/25872",
     "github": "https://github.com/bitWolfy/re621",
     "dependencies": {
-        "jquery": "^3.5.1",
+        "jquery": "^3.6.0",
         "jquery-ui": "^1.12.1"
     },
     "devDependencies": {
-        "@actions/core": "^1.2.6",
-        "@types/jquery": "^3.5.3",
-        "@types/jqueryui": "^1.12.13",
-        "@typescript-eslint/eslint-plugin": "^4.5.0",
-        "@typescript-eslint/parser": "^4.5.0",
-        "archiver": "^5.0.2",
-        "autoprefixer": "^10.0.1",
+        "@actions/core": "^1.5.0",
+        "@types/jquery": "^3.5.6",
+        "@types/jqueryui": "^1.12.16",
+        "@typescript-eslint/eslint-plugin": "^4.29.3",
+        "@typescript-eslint/parser": "^4.29.3",
+        "archiver": "^5.3.0",
+        "autoprefixer": "^10.3.3",
         "browserify": "^17.0.0",
         "crx": "^5.0.1",
-        "eslint": "^7.11.0",
+        "eslint": "^7.32.0",
         "npm-run-all": "^4.1.5",
-        "postcss": "^8.2.10",
-        "postcss-cli": "^8.1.0",
-        "sass": "^1.27.0",
-        "terser": "^5.3.7",
-        "typescript": "^4.0.3"
+        "postcss": "^8.3.6",
+        "postcss-cli": "^8.3.1",
+        "sass": "^1.38.1",
+        "terser": "^5.7.2",
+        "typescript": "^4.4.2"
     }
 }
