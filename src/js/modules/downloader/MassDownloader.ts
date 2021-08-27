@@ -47,6 +47,7 @@ export class MassDownloader extends RE6Module {
         return {
             enabled: true,
             template: "%artist%/%postid%-%copyright%-%character%-%species%",
+            archive: "download-%timestamp%",
             autoDownloadArchive: true,
         };
     }
@@ -297,7 +298,10 @@ export class MassDownloader extends RE6Module {
         this.downloadIndex++;
 
         if (zipData) {
-            const filename = `e621-${this.fileTimestamp}-${this.downloadIndex}.zip`;
+            let filename = this.fetchSettings("archive")
+                .replace("%timestamp%", this.fileTimestamp);
+            filename += this.downloadOverSize ? "-part" + this.downloadIndex + ".zip" : ".zip";
+
             const $downloadLink = $("<a>")
                 .attr({
                     "href": URL.createObjectURL(zipData),

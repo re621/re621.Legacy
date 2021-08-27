@@ -49,6 +49,7 @@ export class FavDownloader extends RE6Module {
         return {
             enabled: true,
             template: "%artist%/%postid%-%copyright%-%character%-%species%",
+            archive: "%userid%-favorites-%timestamp%",
             autoDownloadArchive: true,
         };
     }
@@ -235,7 +236,9 @@ export class FavDownloader extends RE6Module {
             else { this.infoFile.html(""); }
         });
 
-        let filename = this.userID + "-fav-" + this.fileTimestamp;
+        let filename = this.fetchSettings("archive")
+            .replace("%userid%", this.userID)
+            .replace("%timestamp%", this.fileTimestamp);
         filename += this.downloadOverSize ? "-part" + this.downloadIndex + ".zip" : ".zip";
 
         this.infoText

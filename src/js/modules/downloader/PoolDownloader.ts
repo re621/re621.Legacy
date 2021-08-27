@@ -57,6 +57,7 @@ export class PoolDownloader extends RE6Module {
         return {
             enabled: true,
             template: "%pool%/%index%-%postid%-%artist%-%copyright%-%character%-%species%",
+            archive: "%poolname%-%timestamp%",
             autoDownloadArchive: true,
         };
     }
@@ -280,7 +281,9 @@ export class PoolDownloader extends RE6Module {
             // Clear the queue instance
             delete this.downloadQueue;
 
-            let filename = this.createPoolFilename(poolName) + "-" + this.fileTimestamp;
+            let filename = this.fetchSettings("archive")
+                .replace("%poolname%", this.createPoolFilename(poolName))
+                .replace("%timestamp%", this.fileTimestamp);
             filename += this.downloadOverSize ? "-part" + this.downloadIndex + ".zip" : ".zip";
 
             this.infoText
