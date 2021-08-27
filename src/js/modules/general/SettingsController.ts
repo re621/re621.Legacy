@@ -1240,7 +1240,7 @@ export class SettingsController extends RE6Module {
 
                 // Mass Downloader
                 Form.accordionTab({ name: "mass", label: "Mass Downloader", subheader: "Download files from the search page", columns: 3, width: 3 }, [
-                    Form.text("<b>Archive name</b>"),
+                    Form.text("<b>File name</b>"),
                     Form.input(
                         { value: massDownloader.fetchSettings("template"), width: 2 },
                         async (data) => { await massDownloader.pushSettings("template", data); }
@@ -1264,7 +1264,7 @@ export class SettingsController extends RE6Module {
 
                 // Fav Downloader
                 Form.accordionTab({ name: "fav", label: "Favorites Downloader", subheader: "Download all favorites at once", columns: 3, width: 3 }, [
-                    Form.text("<b>Archive name</b>"),
+                    Form.text("<b>File name</b>"),
                     Form.input(
                         { value: favDownloader.fetchSettings("template"), width: 2 },
                         async (data) => { await favDownloader.pushSettings("template", data); }
@@ -1288,7 +1288,7 @@ export class SettingsController extends RE6Module {
 
                 // Pool Downloader
                 Form.accordionTab({ name: "pool", label: "Pool Downloader", subheader: "Download image pools or sets", columns: 3, width: 3 }, [
-                    Form.text("<b>Archive name</b>"),
+                    Form.text("<b>File name</b>"),
                     Form.input(
                         { value: poolDownloader.fetchSettings("template"), width: 2 },
                         async (data) => { await poolDownloader.pushSettings("template", data); }
