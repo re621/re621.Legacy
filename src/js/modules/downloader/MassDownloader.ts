@@ -352,9 +352,8 @@ export class MassDownloader extends RE6Module {
 
         // Don't include non-artist tags in the file name
         const trimmedArtists = post.tags.artist;
-        trimmedArtists.delete("conditional_dnp");
-        trimmedArtists.delete("avoid_posting");
-        trimmedArtists.delete("sound_warning");
+        for (const tag of ["conditional_dnp", "avoid_posting", "sound_warning", "epilepsy_warning"])
+            trimmedArtists.delete(tag);
 
         return template
             .replace(/%postid%/g, post.id + "")
