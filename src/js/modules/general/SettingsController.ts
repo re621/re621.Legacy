@@ -610,12 +610,12 @@ export class SettingsController extends RE6Module {
 
                     Form.checkbox(
                         {
-                            value: betterSearch.fetchSettings("hideInfoBar"),
-                            label: "<b>Hide Post Info</b><br />Disables the voting, favorites, and rating display under the post",
+                            value: !betterSearch.fetchSettings("hideInfoBar"), // Inverted for the sake of consistency
+                            label: "<b>Show Post Info</b><br />Shows the score, favorites, and rating display under the post",
                             width: 3,
                         },
                         async (data) => {
-                            await betterSearch.pushSettings("hideInfoBar", data);
+                            await betterSearch.pushSettings("hideInfoBar", !data);
                             if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                         }
                     ),
