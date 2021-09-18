@@ -25,8 +25,15 @@ export class Blacklist {
         const options = enhancer.fetchSettings(["favorites", "uploads", "whitelist"]) as FilterOptions;
 
         if (filters !== undefined) {
-            for (const filter of JSON.parse(filters))
+            for (const filter of JSON.parse(filters)) {
+
+                // Skip empty or broken values
+                const text = filter ? filter.trim() : "";
+                if (!text) continue;
+
+                // Create a blacklist filter
                 this.createFilter(filter, blacklistEnabled, options);
+            }
         }
     }
 
@@ -122,6 +129,11 @@ export class Blacklist {
      * @param enabled Whether or not the filter should be enabled after creation
      */
     private createFilter(filter: string, enabled = true, options?: FilterOptions): void {
+
+        // Ensure that the filter is not blank
+        if (!filter) return;
+
+        // If the filter does not exit yet, create it
         let postFilter = this.blacklist.get(filter);
         if (postFilter === undefined) {
             postFilter = new PostFilter(filter, enabled, options);

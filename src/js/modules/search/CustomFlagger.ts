@@ -64,6 +64,10 @@ export class CustomFlagger extends RE6Module {
             // Backwards compatibility
             if (flag.show == undefined) flag.show = true;
 
+            // Skip empty flags
+            const tags = flag.tags ? flag.tags.trim() : "";
+            if (tags == "") continue;
+
             CustomFlagger.filters.set(
                 flag.tags,
                 {

@@ -98,9 +98,16 @@ export class InstantFilters extends RE6Module {
     }
 
     public applyFilter(): void {
-        const filterText = Util.getTagString(this.$searchbox);
+
+        // Ensure that the filter text exists, and is not blank
+        let filterText = Util.getTagString(this.$searchbox);
+        filterText = filterText ? filterText.trim() : "";
+
+        // Regenerate the custom PostFilter
         if (filterText.length == 0) InstantFilters.filter = undefined;
         else InstantFilters.filter = new PostFilter(filterText);
+
+        // Refresh the posts
         $("post").trigger("re621:insearch");
     }
 }
