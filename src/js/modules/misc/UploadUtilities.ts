@@ -371,11 +371,34 @@ export class UploadUtilities extends RE6Module {
                 prevRequest = curRequest;
 
                 const requestURL = urlInput.val() + "";
+
+                // Validate the request URL
+                let requestURLValidated: URL = null;
+                try {
+                    requestURLValidated = new URL(requestURL);
+                    if (!requestURLValidated) requestURLValidated = null;
+                } catch (e) { requestURLValidated = null; }
+
+                if (!requestURLValidated) {
+                    output.attr({
+                        "data-size": -1,
+                        "data-type": "UNK",
+                        "data-year": -1,
+                        "data-file": false,
+                    });
+
+                    prevRequest = "";
+                    output.trigger("re621:update");
+                    TagSuggester.trigger("update");
+                    return;
+                }
+
+                // Send a HEAD request to fetch basic image data
                 XM.Connect.xmlHttpRequest({
                     url: requestURL,
                     method: "HEAD",
                     headers: {
-                        referer: requestURL.includes("i.pximg.net") ? "https://www.pixiv.net/" : window.location.href,
+                        referer: requestURLValidated.hostname = - "i.pximg.net" ? "https://www.pixiv.net/" : window.location.href,
                     },
                     onload: (event) => {
 
@@ -485,18 +508,20 @@ export class UploadUtilities extends RE6Module {
             const $input = $(event.target),
                 value = $input.val() + "";
 
-            // Only applies to pixiv files
-            if (!value.includes("i.pximg.net")) return;
+            // Validate the URL and ensure it originated from pixiv
+            let imageURL: URL;
+            try {
+                imageURL = new URL(value);
+                if (imageURL.hostname !== "i.pximg.net") return;
+            } catch (e) { return; }
+            if (!imageURL) return;
 
-            // Test for valid URL
-            try { new URL(value); }
-            catch { return; }
-
+            // Start the loading process
             image.attr("src", Util.DOM.getLoadingImage());
 
             // Fetch the image directly
             XM.Connect.xmlHttpRequest({
-                url: value,
+                url: "https://" + imageURL.hostname + "/" + imageURL.pathname,
                 method: "GET",
                 responseType: "blob",
                 headers: {
