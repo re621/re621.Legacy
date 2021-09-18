@@ -21,6 +21,8 @@ export class BetterSearch extends RE6Module {
 
     private static paused = false;              // If true, stops several actions that may interfere with other modules
 
+    public static originalTags: string;
+
     private $wrapper: JQuery<HTMLElement>;      // Wrapper object containing the loading and content sections
     private $content: JQuery<HTMLElement>;      // Section containing post thumbnails
     private $quickEdit: JQuery<HTMLElement>;    // Quick tags form
@@ -97,6 +99,9 @@ export class BetterSearch extends RE6Module {
         this.queryPage = Page.getQueryParameter("page") || "1";
         this.queryTags = (Page.getQueryParameter("tags") || "").split(" ").filter(el => el != "");
         this.queryLimit = parseInt(Page.getQueryParameter("limit")) || undefined;
+
+        BetterSearch.originalTags = $("#tags").val() + "";
+        console.log("original tags", BetterSearch.originalTags);
 
         // Queue up the first API call
         // This can be done early, to prevent waiting for `create()`

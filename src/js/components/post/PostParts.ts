@@ -4,7 +4,7 @@ import { Danbooru } from "../api/Danbooru";
 import { PostFlag } from "../api/responses/APIPost";
 import { XM } from "../api/XM";
 import { Blacklist } from "../data/Blacklist";
-import { Page } from "../data/Page";
+import { Page, PageDefinition } from "../data/Page";
 import { User } from "../data/User";
 import { Debug } from "../utility/Debug";
 import { Util } from "../utility/Util";
@@ -23,7 +23,9 @@ export class PostParts {
 
     public static renderImage(post: Post, conf: any): JQuery<HTMLElement> {
 
-        const query = Page.getQueryParameter("tags")
+        let query = "";
+        if (Page.matches(PageDefinition.search)) query = Page.getQueryParameter("tags");
+        else if (Page.matches(PageDefinition.favorites)) query = BetterSearch.originalTags;
 
         // Basic structure
         const $link = $("<a>")
@@ -363,7 +365,7 @@ export class PostParts {
                             PostActions.vote(post.id, 1, true).then(
                                 (response) => {
                                     post.$ref.attr("vote", 1);
-        
+
                                     post.score = {
                                         up: response.up || 0,
                                         down: response.down || 0,
