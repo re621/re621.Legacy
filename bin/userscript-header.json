@@ -48,5 +48,5 @@
         "static1.e621.net",
         "*"
     ],
-    "run-at": "document-start"
+    "run-at": "document-body"
 }
