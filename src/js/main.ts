@@ -30,7 +30,6 @@ import { ProfileEnhancer } from "./modules/misc/ProfileEnhancer";
 import { ScriptAssistant } from "./modules/misc/ScriptAssistant";
 import { SmartAlias } from "./modules/misc/SmartAlias";
 import { TagSuggester } from "./modules/misc/TagSuggester";
-import { TitleFixer } from "./modules/misc/TitleFixer";
 import { UploadUtilities } from "./modules/misc/UploadUtilities";
 import { WikiEnhancer } from "./modules/misc/WikiEnhancer";
 import { DownloadCustomizer } from "./modules/post/DownloadCustomizer";
@@ -76,7 +75,6 @@ const loadOrder = [
     PostSuggester,
     SearchUtilities,
     ProfileEnhancer,
-    TitleFixer,
     Miscellaneous,
 
     SmartAlias,
