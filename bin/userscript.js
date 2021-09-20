@@ -8,8 +8,7 @@ const headerData = JSON.parse(fs.readFileSync("./bin/userscript-header.json")),
 
 // Prepare the directory
 if (mode !== "injector") {
-    if (fs.existsSync("./build/userscript"))
-        fs.rmdirSync("./build/userscript", { recursive: true });
+    fs.rmSync("./build/userscript", { recursive: true, force: true });
     fs.mkdirSync("./build/userscript");
 }
 
