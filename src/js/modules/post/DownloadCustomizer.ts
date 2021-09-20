@@ -26,7 +26,7 @@ export class DownloadCustomizer extends RE6Module {
     protected getDefaultSettings(): Settings {
         return {
             enabled: true,
-            template: "%postid%-%artist%-%copyright%-%character%",
+            template: "%postid%-%artist%-%copyright%-%character%-%species%",
             confirmDownload: false,
             downloadSamples: false,
             hotkeyDownload: "",
