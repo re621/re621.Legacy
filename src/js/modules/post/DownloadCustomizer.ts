@@ -4,6 +4,7 @@ import { ModuleController } from "../../components/ModuleController";
 import { Post, PostData } from "../../components/post/Post";
 import { PostParts } from "../../components/post/PostParts";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { MassDownloader } from "../downloader/MassDownloader";
 
 /**
  * Renames the files to a user-readable scheme for download
@@ -119,22 +120,14 @@ export class DownloadCustomizer extends RE6Module {
      */
     public static getFileName(post: PostData, template?: string, ext?: string): string {
         if (!template) template = ModuleController.fetchSettings<string>(DownloadCustomizer, "template");
-        return template
-            .replace(/%postid%/g, post.id + "")
-            .replace(/%artist%/g, tagSetToString(post.tags.real_artist))
-            .replace(/%copyright%/g, tagSetToString(post.tags.copyright))
-            .replace(/%species%/g, tagSetToString(post.tags.species))
-            .replace(/%character%/g, tagSetToString(post.tags.character))
-            .replace(/%meta%/g, tagSetToString(post.tags.meta))
-            .replace(/%md5%/g, post.file.md5)
+
+        // No, I don't know why some modules use this method instead of going straight to MassDownloader
+
+        return MassDownloader.createFilenameBase(template, post)
             .slice(0, 128)
             .replace(/-{2,}/g, "-")
             .replace(/-*$/g, "")
             + "." + (ext ? ext : post.file.ext);
-
-        function tagSetToString(tags: Set<string>): string {
-            return [...tags].join("-").replace(/\||\*|\/|\\|:|"/g, "_");
-        }
     }
 
 }
