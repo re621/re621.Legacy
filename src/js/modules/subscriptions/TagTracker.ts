@@ -3,11 +3,14 @@ import { APIPost, PostFlag } from "../../components/api/responses/APIPost";
 import { XM } from "../../components/api/XM";
 import { Blacklist } from "../../components/data/Blacklist";
 import { PageDefinition } from "../../components/data/Page";
+import { ModuleController } from "../../components/ModuleController";
 import { PostData } from "../../components/post/Post";
+import { PostActions } from "../../components/post/PostActions";
 import { PostParts } from "../../components/post/PostParts";
 import { Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
 import { WikiEnhancer } from "../misc/WikiEnhancer";
+import { BetterSearch, ImageClickAction } from "../search/BetterSearch";
 import { UpdateContent, UpdateData } from "./_SubscriptionCache";
 import { SubscriptionManager } from "./_SubscriptionManager";
 import { SubscriptionTracker } from "./_SubscriptionTracker";
@@ -150,7 +153,39 @@ export class TagTracker extends SubscriptionTracker {
                     .appendTo(result);
 
                 PostParts.bootstrapDoubleClick(link, () => {
-                    XM.Util.openInTab(window.location.origin + link.attr("href"), false);
+
+                    switch (ModuleController.fetchSettings(BetterSearch, "clickAction")) {
+                        case ImageClickAction.NewTab: {
+                            XM.Util.openInTab(window.location.origin + link.attr("href"), false);
+                            break;
+                        }
+                        case ImageClickAction.CopyID: {
+                            XM.Util.setClipboard(data.uid + "", "text");
+                            Danbooru.notice(`Copied post ID to clipboard: <a href="/posts/${data.uid}" target="_blank" rel="noopener noreferrer">#${data.uid}</a>`);
+                            break;
+                        }
+                        case ImageClickAction.Blacklist: {
+                            Blacklist.toggleBlacklistTag("id:" + data.uid);
+                            break;
+                        }
+                        case ImageClickAction.AddToSet: {
+                            const lastSet = parseInt(window.localStorage.getItem("set"));
+                            if (!lastSet) Danbooru.error(`Error: no set selected`);
+                            else PostActions.addSet(lastSet, data.uid);
+                            break;
+                        }
+                        case ImageClickAction.ToggleSet: {
+                            const lastSet = parseInt(window.localStorage.getItem("set"));
+                            if (!lastSet) Danbooru.error(`Error: no set selected`);
+                            else PostActions.toggleSet(lastSet, data.uid);
+                            break;
+                        }
+                        default: {
+                            link.off("click.re621.dbl-extra");
+                            link[0].click();
+                        }
+                    }
+
                 });
 
                 const image = $("<img>")
