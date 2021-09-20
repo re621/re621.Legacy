@@ -362,6 +362,7 @@ export class MassDownloader extends RE6Module {
             .replace(/%character%/g, tagSetToString(post.tags.character))
             .replace(/%species%/g, tagSetToString(post.tags.species))
             .replace(/%meta%/g, tagSetToString(post.tags.meta))
+            .replace(/%tags%/g, tagSetToString(post.tags.general))
             .replace(/%md5%/g, post.file.md5);
 
         function tagSetToString(tags: Set<string>): string {

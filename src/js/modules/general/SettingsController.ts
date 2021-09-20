@@ -1208,6 +1208,7 @@ export class SettingsController extends RE6Module {
                     Form.copy({ value: "%character%", label: "Characters" }),
                     Form.copy({ value: "%species%", label: "Species" }),
                     Form.copy({ value: "%meta%", label: "Meta" }),
+                    Form.copy({ value: "%tags%", label: "General" }),
                     Form.copy({ value: "%md5%", label: "MD5" }),
                 ]),
                 Form.spacer(3),
