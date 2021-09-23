@@ -304,11 +304,19 @@ export class Miscellaneous extends RE6Module {
             });
         } else if (Page.matches(PageDefinition.post)) {
             $(".content-menu > menu").each(function (index, element) {
+                const $element = $(element);
+
+                $("<li>")
+                    .text("|")
+                    .appendTo($element);
+
                 const $copyElement = $("<a>")
                     .addClass("re621-comment-copy-id")
-                    .html("Copy ID");
-                $(element).append($copyElement);
-                $($copyElement).wrap("<li>");
+                    .text("Copy ID");
+
+                $("<li>")
+                    .appendTo($element)
+                    .append($copyElement);
             });
 
             $(".re621-comment-copy-id").on('click', (event) => {
@@ -316,6 +324,11 @@ export class Miscellaneous extends RE6Module {
                 const $comment = $(event.target).parents("article.comment");
                 XM.Util.setClipboard($comment.data("comment-id"));
             });
+
+            $(".show-all-comments-for-post-link").on("click", async () => {
+                await Util.sleep(500);
+                this.handleIDButton();
+            })
         }
     }
 
