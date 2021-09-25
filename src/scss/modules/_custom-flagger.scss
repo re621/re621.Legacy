@@ -85,7 +85,7 @@ post-flags {
             border-bottom: 0.5rem solid var(--flag-color, #666666);
         }
 
-        &:hover {
+        &:hover, &.expanded {
             max-width: 100%;
         }
     }

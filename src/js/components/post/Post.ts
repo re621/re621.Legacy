@@ -133,6 +133,7 @@ export class Post implements PostData {
             "autoPlayGIFs", "maxPlayingGIFs",
             "ribbonsFlag", "ribbonsRel",                        // renderRibbons
             "buttonsVote", "buttonsFav",                        // renderButtons
+            "customFlagsExpanded",
         ]);
 
         // Get upvoteOnFavorite setting from PostViewer
@@ -156,7 +157,7 @@ export class Post implements PostData {
             .append(PostParts.renderImage(this, conf))       // Image
             .append(PostParts.renderRibbons(this, conf))     // Ribbons
             .append(PostParts.renderButtons(this, conf))     // Voting Buttons
-            .append(PostParts.renderFlags(this))             // Custom Flags
+            .append(PostParts.renderFlags(this, conf))             // Custom Flags
             .append(PostParts.renderInfo(this))              // Post info
 
         if (!conf.imageRatioChange) this.$ref.css("--img-ratio", this.img.ratio);

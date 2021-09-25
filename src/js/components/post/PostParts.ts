@@ -385,13 +385,14 @@ export class PostParts {
         return $voteBox;
     }
 
-    public static renderFlags(post: Post): JQuery<HTMLElement> {
+    public static renderFlags(post: Post, conf: any): JQuery<HTMLElement> {
 
         const $flagBox = $("<post-flags>");
 
         for (const flag of CustomFlagger.getFlags(post)) {
             $("<span>")
                 .addClass("custom-flag-thumb")
+                .toggleClass("expanded", conf.customFlagsExpanded)
                 .css("--flag-color", flag.color)
                 .attr("title", flag.tags)
                 .html(flag.name)

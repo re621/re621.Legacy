@@ -81,6 +81,7 @@ export class BetterSearch extends RE6Module {
 
             hideInfoBar: false,                             // Remove the post info (votes, favorites, etc) from view
             colorFavCount: true,                            // The Favorites counter on the thumbnail will be colored yellow
+            customFlagsExpanded: false,                     // Show custom flags at full width by default, not just on hover
         };
     }
 

@@ -1539,6 +1539,20 @@ export class SettingsController extends RE6Module {
                         Flag names must be unique. Duplicate tag strings are allowed, but their corresponding flag may not display.`,
                         width: 3
                     }),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: betterSearch.fetchSettings("customFlagsExpanded"),
+                            label: `<b>Always Show Flags</b><br />Custom flags will always be shown in full, not expanded on hover`,
+                            width: 3,
+                        },
+                        async (data) => {
+                            await betterSearch.pushSettings("customFlagsExpanded", data);
+                            if (betterSearch.isInitialized()) betterSearch.reloadRenderedPosts();
+                        }
+                    ),
+                    Form.spacer(3),
                 ]),
 
                 // Validator Configuration
