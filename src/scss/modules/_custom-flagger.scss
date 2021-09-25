@@ -90,3 +90,8 @@ post-flags {
         }
     }
 }
+
+/** Fixes the padding on non-<post> elements **/
+article post-flags {
+    bottom: 0;
+}
