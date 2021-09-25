@@ -596,29 +596,22 @@ export class BetterSearch extends RE6Module {
         else this.$content.css("--img-fit", Util.Math.clamp(conf.imageMinWidth, 10, 100) + "%");
         if (conf.compactMode) this.$content.css("--img-maxheight", (conf.imageSizeChange ? conf.imageWidth : 150) + "px");
 
-        // Alternative ribbons
-        if (conf.ribbonsAlt) this.$content.attr("ribbons-alt", "true");
-        else this.$content.removeAttr("ribbons-alt");
-
-        // InfScroll separators
-        if (conf.hidePageBreaks) this.$content.attr("hide-page-breaks", "true");
-        else this.$content.removeAttr("hide-page-breaks");
-
-        // Add border to visited pages
-        if (conf.highlightVisited) this.$content.attr("highlight-visited", "true");
-        else this.$content.removeAttr("highlight-visited");
-
         // Hide the SmartAlias output in the quick edit form
         if (conf.hideSmartAliasOutput) $("section#content").attr("hide-smart-alias-output", "true");
         else $("section#content").removeAttr("hide-smart-alias-output");
 
-        // Hide the post info bar
-        if (conf.hideInfoBar) this.$content.attr("hide-info-bar", "true");
-        else this.$content.removeAttr("hide-info-bar");
+        const searchContent = this.$content;
 
-        // Hide the post info bar
-        if (conf.colorFavCount) this.$content.attr("color-fav-count", "true");
-        else this.$content.removeAttr("color-fav-count");
+        setContentParameter(conf.ribbonsAlt, "ribbons-alt");                // Alternative ribbons
+        setContentParameter(conf.hidePageBreaks, "hide-page-breaks");       // InfScroll separators
+        setContentParameter(conf.highlightVisited, "highlight-visited");    // Add border to visited pages
+        setContentParameter(conf.hideInfoBar, "hide-info-bar");             // Hide the post info bar
+        setContentParameter(conf.colorFavCount, "color-fav-count");         // Change the color of the favorites counter
+
+        function setContentParameter(param: boolean, value: string): void {
+            if (param) searchContent.attr(value, "true");
+            else searchContent.removeAttr(value);
+        }
     }
 
     /** Restarts various event listeners used by the module */
