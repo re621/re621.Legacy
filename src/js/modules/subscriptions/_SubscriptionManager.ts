@@ -1,9 +1,11 @@
 import { XM } from "../../components/api/XM";
+import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed, TabContent } from "../../components/structure/Tabbed";
 import { Util } from "../../components/utility/Util";
+import { TagTracker } from "./TagTracker";
 import { SubscriptionTracker } from "./_SubscriptionTracker";
 
 
@@ -206,6 +208,9 @@ export class SubscriptionManager extends RE6Module {
     private createSettingsPage(): Form {
         const subSections: FormElement[] = [],
             trackerConfig: FormElement[] = [];
+
+        const tagTracker = ModuleController.get(TagTracker);
+
         for (const subscription of SubscriptionManager.trackers) {
             subSections.push(makeSubscriptionSection(subscription));
             trackerConfig.push(makeTrackerConfig(subscription));
@@ -301,6 +306,19 @@ export class SubscriptionManager extends RE6Module {
                     await this.pushSettings("loadLargeThumbs", data);
                 }
             ),
+            Form.spacer(2, true),
+
+            Form.checkbox(
+                {
+                    value: tagTracker.fetchSettings("hideMinorButton"),
+                    label: "<b>Hide Quick Subscribe Buttons</b><br />Don't show <3 buttons in the sidebar",
+                    width: 1,
+                },
+                async (data) => {
+                    await tagTracker.pushSettings("hideMinorButton", data);
+                }
+            ),
+            Form.requiresReload(),
             Form.spacer(2, true),
 
         ]);

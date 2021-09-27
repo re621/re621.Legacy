@@ -166,6 +166,8 @@ export class SubscriptionTracker extends RE6Module {
             cacheMaxAge: 0,                 // cache entries older than this get trimmed
             cacheSize: 50,                  // how many subscription updates are kept
 
+            hideMinorButton: false,         // override the minor sub button display
+
             // Utility values
             lastUpdate: 0,                  // last time an update has been completed
             lastAttempt: 0,                 // last time an update was attempted. 0 if not applicable.
@@ -208,7 +210,7 @@ export class SubscriptionTracker extends RE6Module {
     /** Append sub / unsub buttons to pages */
     public appendSubscribeButton(): void {
 
-        if (this.buttonSelect.minor && Page.matches(this.buttonSelect.minor.regex)) {
+        if (this.buttonSelect.minor && Page.matches(this.buttonSelect.minor.regex) && !this.fetchSettings("hideMinorButton")) {
             for (const el of $(this.buttonSelect.minor.selector).get()) {
                 const $el = $(el);
                 const button = this.createSubscribeMinorButton(
