@@ -34,7 +34,8 @@
         {
             "matches": [
                 "https://e621.net/*",
-                "https://e926.net/*"
+                "https://e926.net/*",
+                "http://e621.local/*"
             ],
             "css": [],
             "js": [],
