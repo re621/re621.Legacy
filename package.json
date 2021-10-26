@@ -66,7 +66,7 @@
     "github": "https://github.com/bitWolfy/re621",
     "dependencies": {
         "jquery": "^3.6.0",
-        "jquery-ui": "^1.12.1"
+        "jquery-ui": "^1.13.0"
     },
     "devDependencies": {
         "@actions/core": "^1.5.0",
