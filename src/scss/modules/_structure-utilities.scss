@@ -346,11 +346,6 @@ div.blacklist-character-counter-box {
     pointer-events: none;
 }
 
-/* Fix the issue with poorly colored upload form switches */
-div#c-uploads div#a-new .toggle-button.active {
-    background-color: #e8c446 !important;
-}
-
 /* Tweak the set cover page */
 div#page div#c-sets div#a-show span.set-viewposts {
     display: block;
