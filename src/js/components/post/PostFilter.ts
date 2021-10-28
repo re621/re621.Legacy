@@ -10,7 +10,7 @@ export class PostFilter {
 
     private entries: Filter[];          // individual filters
     private enabled: boolean;           // if false, the filters are ignored
-    private matchIDs: Set<number>;       // post IDs matched by the filter
+    private matchIDs: Set<number>;      // post IDs matched by the filter
     private optionals: number;          // number of optional filters
 
     constructor(input: string, enabled = true, options?: FilterOptions) {
@@ -179,7 +179,8 @@ export class PostFilter {
         }
 
         // The post must match all normal filters, and at least one optional one
-        result = result && (this.optionals == 0 || optionalHits > 0);
+        if(this.optionals > 0)
+            result = ((this.entries.length - this.optionals > 0) || result) && optionalHits > 0;
 
         if (result === true) this.matchIDs.add(post.id);
         else if (result === false && shouldDecrement) this.matchIDs.delete(post.id);
