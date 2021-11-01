@@ -178,6 +178,12 @@ export class BlacklistEnhancer extends RE6Module {
 
     /** Reloads the "Enable / Disable All" toggle */
     public static updateToggleSwitch(): void {
+        // This fixes a really dumb bug.
+        // If there are no blacklisted posts on the page, the blacklist would just... turn back on.
+        // Not the ideal solution, but that will have to wait until the blacklist rework.
+        if(BlacklistEnhancer.$wrapper.attr("count") == "0" && BlacklistEnhancer.$wrapper.attr("discount") == "0")
+            return;
+        
         if (BlacklistEnhancer.$content.find("filter[enabled=false]").length > 0) {
             BlacklistEnhancer.$toggle
                 .html("Enable All Filters")
