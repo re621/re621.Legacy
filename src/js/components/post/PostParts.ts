@@ -220,52 +220,63 @@ export class PostParts {
 
     public static renderRibbons(post: Post, conf: any): JQuery<HTMLElement> {
 
-        const $ribbons = $("<img-ribbons>")
+        const $ribbons = $("<img-ribbons>");
 
-        // Relationship Ribbons
-        if (conf.ribbonsRel) {
-            const relRibbon = $("<ribbon>")
-                .addClass("left")
-                .html(`<span></span>`)
-                .appendTo($ribbons);
-            const relRibbonText = [];
-
-            if (post.has.children) {
-                relRibbon.addClass("has-children");
-                relRibbonText.push("Child posts");
-            }
-            if (post.has.parent) {
-                relRibbon.addClass("has-parent");
-                relRibbonText.push("Parent posts");
-            }
-
-            if (relRibbonText.length > 0) relRibbon.attr("title", relRibbonText.join("\n"));
-            else relRibbon.remove();
-        }
-
-        // Flag Ribbons
-        if (conf.ribbonsFlag) {
-            const flagRibbon = $("<ribbon>")
-                .addClass("right")
-                .html(`<span></span>`)
-                .appendTo($ribbons);
-            const flagRibbonText = [];
-
-            if (post.flags.has(PostFlag.Flagged)) {
-                flagRibbon.addClass("is-flagged");
-                flagRibbonText.push("Flagged");
-            }
-            if (post.flags.has(PostFlag.Pending)) {
-                flagRibbon.addClass("is-pending");
-                flagRibbonText.push("Pending");
-            }
-
-            if (flagRibbonText.length > 0) flagRibbon.attr("title", flagRibbonText.join("\n"));
-            else flagRibbon.remove();
-        }
-
-        if ($ribbons.children().length == 0) return undefined;
+        generateRibbons(post, $ribbons, conf);
+        post.$ref.on("re621:sync.ribbons", () => {
+            generateRibbons(post, $ribbons, conf);
+        });
+        
         return $ribbons;
+        
+        function generateRibbons(post: Post, container: JQuery<HTMLElement>, conf: any): void {
+            container.html("");
+        
+            // Relationship Ribbons
+            if (conf.ribbonsRel) {
+                const relRibbon = $("<ribbon>")
+                    .addClass("left")
+                    .html(`<span></span>`)
+                    .appendTo(container);
+                const relRibbonText = [];
+        
+                if (post.has.children) {
+                    relRibbon.addClass("has-children");
+                    relRibbonText.push("Child posts");
+                }
+                if (post.has.parent) {
+                    relRibbon.addClass("has-parent");
+                    relRibbonText.push("Parent posts");
+                }
+        
+                if (relRibbonText.length > 0) relRibbon.attr("title", relRibbonText.join("\n"));
+                else relRibbon.remove();
+            }
+        
+            // Flag Ribbons
+            if (conf.ribbonsFlag) {
+                const flagRibbon = $("<ribbon>")
+                    .addClass("right")
+                    .html(`<span></span>`)
+                    .appendTo(container);
+                const flagRibbonText = [];
+        
+                if (post.flags.has(PostFlag.Flagged)) {
+                    flagRibbon.addClass("is-flagged");
+                    flagRibbonText.push("Flagged");
+                }
+                if (post.flags.has(PostFlag.Pending)) {
+                    flagRibbon.addClass("is-pending");
+                    flagRibbonText.push("Pending");
+                }
+        
+                if (flagRibbonText.length > 0) flagRibbon.attr("title", flagRibbonText.join("\n"));
+                else flagRibbon.remove();
+            }
+            
+            if ($ribbons.children().length == 0) container.css("display", "none");
+            else container.css("display", "");
+        }
     }
 
     public static renderButtons(post: Post, conf: any): JQuery<HTMLElement> {

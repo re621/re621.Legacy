@@ -1,6 +1,6 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { E621 } from "../../components/api/E621";
-import { APIPost, PostRating } from "../../components/api/responses/APIPost";
+import { APIPost, PostFlag, PostRating } from "../../components/api/responses/APIPost";
 import { XM } from "../../components/api/XM";
 import { Blacklist } from "../../components/data/Blacklist";
 import { Page, PageDefinition } from "../../components/data/Page";
@@ -645,7 +645,9 @@ export class BetterSearch extends RE6Module {
                 case "lock-note":
                 case "delete":
                 case "undelete":
-                case "approve":
+                case "approve": {
+                    post.flags.delete(PostFlag.Pending);
+                }
                 case "remove-parent":
                 case "tag-script":
 
@@ -674,6 +676,7 @@ export class BetterSearch extends RE6Module {
                                 $tempArticle.remove();
                             }, 500);
                         })[0].click();
+                    post.$ref.trigger("re621:sync");
                     break;
                 }
                 case "open": {

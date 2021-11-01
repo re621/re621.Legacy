@@ -186,7 +186,9 @@ export class Post implements PostData {
             .children().remove();
 
         // Unbind events
-        this.$ref.off("re621:update");
+        this.$ref
+            .off("re621:update")
+            .off("re621:sync");
 
         return this;
     }
