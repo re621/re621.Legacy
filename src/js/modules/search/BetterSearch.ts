@@ -664,6 +664,7 @@ export class BetterSearch extends RE6Module {
                             "id": "post_" + post.id,
                             "data-id": post.id,
                             "data-tags": post.tagString,
+                            "data-flags": Array.from(post.flags).join(" "),
                         })
                         .appendTo("body");
                     $("<a>").appendTo($tempArticle)
