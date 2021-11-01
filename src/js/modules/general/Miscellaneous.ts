@@ -5,6 +5,7 @@ import { XM } from "../../components/api/XM";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { Post } from "../../components/post/Post";
+import { PostActions } from "../../components/post/PostActions";
 import { PostParts } from "../../components/post/PostParts";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Util } from "../../components/utility/Util";
@@ -188,6 +189,11 @@ export class Miscellaneous extends RE6Module {
             href: "/dmails",
             title: "DMail",
         });
+        
+        // Add a "remove from set" button
+        if(Page.matches(PageDefinition.post)) {
+            this.addRemoveFromSetButton();
+        }
 
         function uriEncodeArray(array: string[], delimiter = ","): string {
             const result = [];
@@ -453,6 +459,25 @@ export class Miscellaneous extends RE6Module {
 
     private scrollDown(): void {
         window.scrollBy(0, $(window).height() * 0.15);
+    }
+    
+    private addRemoveFromSetButton(): void {
+        const post = Post.getViewingPost();
+        for(const link of $("div.set-nav span.set-name a").get()) {
+            const $link = $(link),
+                id = parseInt($link.attr("href").replace("/post_sets/", ""));
+            
+            if(!id) continue;
+            
+            $("<a>")
+                .addClass("remove-from-set-button")
+                .html(`<i class="fas fa-times"></i>`)
+                .insertAfter($link)
+                .on("click", (event) => {
+                    event.preventDefault();
+                    PostActions.removeSet(id, post.id);
+                });
+        }
     }
 
 }
