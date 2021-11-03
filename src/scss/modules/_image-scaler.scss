@@ -21,9 +21,6 @@ section#image-container {
     }
 
     img#image {
-        height: unset;
-        width: unset;
-
         &.re621-fit-horizontal {
             max-width: 100%;
         }

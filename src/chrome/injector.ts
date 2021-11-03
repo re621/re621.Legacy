@@ -35,6 +35,7 @@ const fnDanbooru = {
         "resize_cycle_mode": (): void => { Danbooru.Post.resize_cycle_mode(); },
         "resize_to": (size: string): void => { Danbooru.Post.resize_to(size); },
         "resize_to_internal": (size: string): void => { Danbooru.Post.resize_to_internal(size); },
+        "resize_notes": (): void => { Danbooru.Post.resize_notes(); },
     },
     "PostModeMenu": {
         "change": (): void => { Danbooru.PostModeMenu.change(); },

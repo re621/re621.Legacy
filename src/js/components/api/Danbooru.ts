@@ -93,6 +93,10 @@ export class Danbooru {
             if (Danbooru.hasModules()) Danbooru.getModules()["Post"].resize_to_internal(size);
             else XM.Chrome.execInjectorRequest("Danbooru", "Post", "resize_to_internal", [size]);
         },
+        resize_notes(): void {
+            if (Danbooru.hasModules()) Danbooru.getModules()["Post"].resize_notes();
+            else XM.Chrome.execInjectorRequest("Danbooru", "Post", "resize_notes");
+        }
     };
 
     public static PostModeMenu = {
