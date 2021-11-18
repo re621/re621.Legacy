@@ -42,6 +42,8 @@ export class PostViewer extends RE6Module {
             { keys: "hotkeyAddSetCustom1", fnct: () => { this.addSetCustom("hotkeyAddSetCustom1_data"); }, page: reqPage },
             { keys: "hotkeyAddSetCustom2", fnct: () => { this.addSetCustom("hotkeyAddSetCustom2_data"); }, page: reqPage },
             { keys: "hotkeyAddSetCustom3", fnct: () => { this.addSetCustom("hotkeyAddSetCustom3_data"); }, page: reqPage },
+            { keys: "hotkeyAddSetCustom4", fnct: () => { this.addSetCustom("hotkeyAddSetCustom4_data"); }, page: reqPage },
+            { keys: "hotkeyAddSetCustom5", fnct: () => { this.addSetCustom("hotkeyAddSetCustom5_data"); }, page: reqPage },
 
             { keys: "hotkeyOpenHistory", fnct: this.openImageHistory, },
             { keys: "hotkeyOpenArtist", fnct: this.openArtist, page: reqPage },
@@ -85,6 +87,10 @@ export class PostViewer extends RE6Module {
             hotkeyAddSetCustom2_data: "0",
             hotkeyAddSetCustom3: "",
             hotkeyAddSetCustom3_data: "0",
+            hotkeyAddSetCustom4: "",
+            hotkeyAddSetCustom4_data: "0",
+            hotkeyAddSetCustom5: "",
+            hotkeyAddSetCustom5_data: "0",
 
             hotkeyOpenHistory: "",      // Opens the post history for the current image
             hotkeyOpenArtist: "",       // Opens the search page for the post's artist

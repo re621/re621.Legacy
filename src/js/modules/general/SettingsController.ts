@@ -2007,6 +2007,8 @@ export class SettingsController extends RE6Module {
             ...createCustomInputs(postViewer, "Add to Set", "Set ID", "hotkeyAddSetCustom1", "\\d+"),
             ...createCustomInputs(postViewer, "Add to Set", "Set ID", "hotkeyAddSetCustom2", "\\d+"),
             ...createCustomInputs(postViewer, "Add to Set", "Set ID", "hotkeyAddSetCustom3", "\\d+"),
+            ...createCustomInputs(postViewer, "Add to Set", "Set ID", "hotkeyAddSetCustom4", "\\d+"),
+            ...createCustomInputs(postViewer, "Add to Set", "Set ID", "hotkeyAddSetCustom5", "\\d+"),
             Form.hr(3),
 
             // Actions
