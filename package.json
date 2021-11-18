@@ -69,21 +69,21 @@
         "jquery-ui": "^1.13.0"
     },
     "devDependencies": {
-        "@actions/core": "^1.5.0",
-        "@types/jquery": "^3.5.6",
+        "@actions/core": "^1.6.0",
+        "@types/jquery": "^3.5.8",
         "@types/jqueryui": "^1.12.16",
-        "@typescript-eslint/eslint-plugin": "^4.29.3",
-        "@typescript-eslint/parser": "^4.29.3",
+        "@typescript-eslint/eslint-plugin": "^5.4.0",
+        "@typescript-eslint/parser": "^5.4.0",
         "archiver": "^5.3.0",
-        "autoprefixer": "^10.3.3",
+        "autoprefixer": "^10.4.0",
         "browserify": "^17.0.0",
         "crx": "^5.0.1",
-        "eslint": "^7.32.0",
+        "eslint": "^8.2.0",
         "npm-run-all": "^4.1.5",
-        "postcss": "^8.3.6",
-        "postcss-cli": "^8.3.1",
-        "sass": "^1.38.1",
-        "terser": "^5.7.2",
-        "typescript": "^4.4.2"
+        "postcss": "^8.3.11",
+        "postcss-cli": "^9.0.2",
+        "sass": "^1.43.4",
+        "terser": "^5.10.0",
+        "typescript": "^4.5.2"
     }
 }
