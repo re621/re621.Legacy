@@ -101,6 +101,9 @@ export class FormattingManager extends RE6Module {
     public create(): void {
         super.create();
 
+        // Disable the module for the time being, to avoid compatibility issues
+        return;
+
         /** Wrap the post description textareas in FormattingHelper compatible tags */
         if (Page.matches(PageDefinition.upload) || Page.matches(PageDefinition.post)) {
             const $textarea = $("#post_description");
