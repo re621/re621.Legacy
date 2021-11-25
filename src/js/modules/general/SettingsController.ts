@@ -2141,7 +2141,7 @@ export class SettingsController extends RE6Module {
 
             ...createInput("InstantFilters", "Instant Filters", "Quickly add filters to your current search."),
 
-            ...createInput("FormattingManager", "Formatting Helper", "Fully customizable toolbar for easy DText formatting."),
+            ...createInput("FormattingExtender", "Formatting Helper", "Fully customizable toolbar for easy DText formatting."),
 
             ...createInput("SmartAlias", "Smart Alias", "A more intelligent way to quickly fill out post tags."),
         ]);

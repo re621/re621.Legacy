@@ -48,6 +48,21 @@ export class Danbooru {
         },
     }
 
+    public static DText = {
+        get buttons(): DTextButton[] {
+            if (Danbooru.hasModules()) return Danbooru.getModules()["DText"].buttons;
+            else XM.Chrome.execInjectorRequest("Danbooru", "DText", "getButtons");
+        },
+        set buttons(values: DTextButton[]) {
+            if (Danbooru.hasModules()) Danbooru.getModules()["DText"].buttons = values;
+            else XM.Chrome.execInjectorRequest("Danbooru", "DText", "setButtons", [values]);
+        },
+        override_formatting(fn: (content: string, input: JQuery<HTMLInputElement>) => void): void {
+            if (Danbooru.hasModules()) Danbooru.getModules()["DText"].process_formatting = fn;
+            else XM.Chrome.execInjectorRequest("Danbooru", "DText", "overrideFormatting", [fn]);
+        },
+    };
+
     public static Post = {
         vote(post_id: number, scoreDifference: number, preventUnvote?: boolean): void {
             if (Danbooru.hasModules()) Danbooru.getModules()["Post"].vote(post_id, scoreDifference, preventUnvote);
@@ -181,4 +196,10 @@ export class Danbooru {
             Danbooru.getModules()["error"](input);
         else XM.Chrome.execInjectorRequest("Danbooru", "Notice", "error", [input]);
     }
+}
+
+export type DTextButton = {
+    icon: string;
+    title: string;
+    content: string;
 }

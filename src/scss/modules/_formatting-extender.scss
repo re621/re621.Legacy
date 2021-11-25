@@ -1,0 +1,84 @@
+div.dtext-formatter[data-drawer] {
+    grid-template-columns: min-content auto min-content;
+    
+    // Drawer open button
+    .dtext-formatter-customizer{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        a {
+            box-sizing: border-box;
+            padding: 0.5rem 0.625rem;
+            border-radius: 6px 6px 0 0;
+            margin-right: 0.25rem;
+            cursor: pointer;
+            
+            @include fontawesome;
+            @include nonselectable;
+            
+            &:hover { background: #ffffff15; }
+        }
+    }
+    
+    // Highlighting draggable buttons
+    .dtext-formatter-buttons a {
+        border: 1px solid transparent;
+    }
+    
+    .dtext-formatter-drawer {
+        display: flex;
+        flex-flow: wrap;
+        align-content: flex-start;
+        justify-content: center;
+        width: 10vw;
+        padding: 0.25rem;
+    
+        a {
+            display: inline-block;
+            box-sizing: border-box;
+            padding: 0.5rem 0.625rem;
+            border-radius: 6px;
+            margin: 0.25rem;
+            cursor: pointer;
+            
+            @include fontawesome;
+            @include nonselectable;
+            
+            &:hover { background: #ffffff15; }
+        }
+        span {
+            margin: 0.25rem;
+        }
+    }
+    
+    .dtext-formatter-buttons,
+    .dtext-formatter-drawer {
+        overflow: unset;    // Dragging buttons causes them to disappear otherwise
+        
+        &.ui-sortable-placeholder {
+            display: inline-block;
+            height: 1px;
+        }
+    }
+    
+    // Drawer toggling styles
+    &:not([data-drawer="true"]) {
+        .dtext-formatter-input,
+        .dtext-formatter-preview {
+            grid-area: 2 / 1 / 2 / 4;
+        }
+        .dtext-formatter-drawer { display: none; }
+    }
+    
+    &[data-drawer="true"] {
+        .dtext-formatter-drawer,
+        .dtext-formatter-buttons {
+            a, span {
+                border: 1px dashed #eee;
+                cursor: grab;
+            }
+            span { margin-right: 0.25rem; }
+        }
+    }
+}

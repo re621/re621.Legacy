@@ -19,7 +19,7 @@ import { MassDownloader } from "./modules/downloader/MassDownloader";
 import { PoolDownloader } from "./modules/downloader/PoolDownloader";
 import { CommentBlacklist } from "./modules/general/CommentBlacklist";
 import { CompatibilityPatcher } from "./modules/general/CompatibilityPatcher";
-import { FormattingManager } from "./modules/general/FormattingHelper";
+import { FormattingExtender } from "./modules/general/FormattingExtender";
 import { HeaderCustomizer } from "./modules/general/HeaderCustomizer";
 import { JanitorEnhancements } from "./modules/general/JanitorEnhancements";
 import { Miscellaneous } from "./modules/general/Miscellaneous";
@@ -54,7 +54,7 @@ import { SubscriptionManager } from "./modules/subscriptions/_SubscriptionManage
 
 
 const loadOrder = [
-    FormattingManager,
+    FormattingExtender,
     HeaderCustomizer,
     ThemeCustomizer,
 

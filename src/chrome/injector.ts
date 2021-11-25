@@ -23,6 +23,13 @@ const fnDanbooru = {
             Danbooru.Blacklist.initialize_all = (): void => { return; };
         },
     },
+    "DText": {
+        "getButtons": (): any => { return Danbooru.DText.buttons; },
+        "setButtons": (values): void => { Danbooru.DText.buttons = values; },
+        "overrideFormatting": (fn: (content: string, input: JQuery<HTMLInputElement>) => void): void => {
+            Danbooru.Blacklist.process_formatting = fn;
+        },
+    },
     "Post": {
         "vote": (postid, scoreDifference, preventUnvote): void => { Danbooru.Post.vote(postid, scoreDifference, preventUnvote); },
         "initialize_all": (): void => { Danbooru.Post.initialize_all(); },
