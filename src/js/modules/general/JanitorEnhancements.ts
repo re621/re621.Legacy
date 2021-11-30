@@ -1,11 +1,21 @@
 import { Page, PageDefinition } from "../../components/data/Page";
 import { Post } from "../../components/post/Post";
-import { RE6Module } from "../../components/RE6Module";
+import { RE6Module, Settings } from "../../components/RE6Module";
 
 export class JanitorEnhancements extends RE6Module {
 
     public constructor() {
         super([], true);
+        this.registerHotkeys(
+            { keys: "hotkeyApprovePost", fnct: this.approvePost },
+        );
+    }
+
+    public getDefaultSettings(): Settings {
+        return {
+            enabled: true,
+            hotkeyApprovePost: "",
+        }
     }
 
     public create(): void {
@@ -29,6 +39,11 @@ export class JanitorEnhancements extends RE6Module {
         // console.log(post.tags.artist, post.uploaderName.toLowerCase());
         if (post.tags.artist.has(post.uploaderName.toLowerCase()))
             $(`<span class="post-uploader-artist">(artist)</span>`).appendTo("#post-information li:contains('Uploader')");
+    }
+
+    private approvePost(): void {
+        if (!Page.matches(PageDefinition.post)) return;
+        $("a.approve-post-link").first()[0].click()
     }
 
 }

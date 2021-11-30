@@ -36,6 +36,7 @@ import { PoolTracker } from "../subscriptions/PoolTracker";
 import { SubscriptionManager } from "../subscriptions/_SubscriptionManager";
 import { CommentBlacklist } from "./CommentBlacklist";
 import { HeaderCustomizer } from "./HeaderCustomizer";
+import { JanitorEnhancements } from "./JanitorEnhancements";
 import { Miscellaneous } from "./Miscellaneous";
 
 /**
@@ -1903,7 +1904,8 @@ export class SettingsController extends RE6Module {
             subscriptionManager = ModuleController.get(SubscriptionManager),
             searchUtilities = ModuleController.get(SearchUtilities),
             downloadCustomizer = ModuleController.get(DownloadCustomizer),
-            hoverZoom = ModuleController.get(HoverZoom);
+            hoverZoom = ModuleController.get(HoverZoom),
+            janitorEnhancements = ModuleController.get(JanitorEnhancements);
 
         /** Creates and returns two keybind inputs and a label */
         function createInputs(module: RE6Module, label: string, settingsKey: string): FormElement[] {
@@ -2075,6 +2077,21 @@ export class SettingsController extends RE6Module {
                     ...createInputs(searchUtilities, "Script #8", "hotkeyScriptEight"),
                     ...createInputs(searchUtilities, "Script #9", "hotkeyScriptNine"),
                     ...createInputs(searchUtilities, "Script #0", "hotkeyScriptTen"),
+                    Form.hr(3),
+                ]
+            ),
+
+            // Janitor stuff
+            Form.section(
+                {
+                    columns: 3,
+                    width: 3,
+                    wrapper: undefined, // TODO Hide from non-staff
+                },
+                [
+                    Form.header("Extra", 3),
+
+                    ...createInputs(janitorEnhancements, "Approve post", "hotkeyApprovePost"),
                     Form.hr(3),
                 ]
             ),
