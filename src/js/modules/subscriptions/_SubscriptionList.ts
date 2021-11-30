@@ -38,10 +38,23 @@ export class SubscriptionList {
         // This is the dumbest thing ever, but the event listener won't trigger
         // unless the data actually changes. So, an extraneous element is added
         // to the list every time subscriptions are saved, and get removed here
-        const data: string[] = await XM.Storage.getValue(this.storageTag, []);
-        const extracted = data.pop();
+        let data: string[] = await XM.Storage.getValue(this.storageTag, []);
+
+        // Fix for the weird issue hanekiwi was having - TM returns an object
+        // instead of an array. Not 100% sure why, but this should fix it.
+        if (!Array.isArray(data)) {
+            XM.Storage.setValue(this.storageTag + ".backup", data);
+            console.error("An error occurred while de-serializing subscriptions. Data has been recovered, but old values are still available on " + this.storageTag + ".backup");
+
+            const recovery = Array.from(data);
+            if (recovery.length != 0) data = recovery as string[];
+            else if (data[0]) data = Object.values(data);
+            else data = [];
+        }
+
         // Push that bad boy back in, in case someone fucked with the settings
         // and removed the key. This will prevent them from losing data.
+        const extracted = data.pop();
         if (extracted && !extracted.startsWith("re621:")) data.push(extracted);
 
         this.subscriptions = new Set(data);
