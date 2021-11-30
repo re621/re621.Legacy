@@ -1,5 +1,7 @@
 import { Danbooru, DTextButton } from "../../components/api/Danbooru";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Form } from "../../components/structure/Form";
+import { Modal } from "../../components/structure/Modal";
 import { Prompt } from "../../components/structure/Prompt";
 import { Util } from "../../components/utility/Util";
 
@@ -100,7 +102,7 @@ export class FormattingExtender extends RE6Module {
         Danbooru.DText.override_formatting(this.processFormattingTag);
 
         for (const wrapper of $(".dtext-formatter").get())
-            this.extendFormatter($(wrapper));
+            new Formatter(this, $(wrapper));
         this.regenerateButtons();
     }
 
@@ -119,163 +121,16 @@ export class FormattingExtender extends RE6Module {
             element.dispatchEvent(e);
     }
 
-    private extendFormatter(wrapper: JQuery<HTMLElement>): void {
-        let id = wrapper.attr("id");
-        if (!id) {
-            id = "formatter-" + Util.ID.make();
-            wrapper.attr("id", id);
-        }
-
-        wrapper.attr("data-drawer", "false");
-        this.createButtonDrawer(wrapper);
-    }
-
-    /** Creates the button drawer structure */
-    private createButtonDrawer(wrapper: JQuery<HTMLElement>): void {
-        // - Drawer Header
-        const header = $("<div>")
-            .addClass("dtext-formatter-customizer color-text")
-            .appendTo(wrapper);
-
-        $("<a>")
-            .html("&#x" + "f0c9")
-            .appendTo(header)
-            .on("click", (event) => {
-                event.preventDefault();
-                console.log("toggling 1");
-                wrapper.trigger("re621:formatter.toggle");
-            });
-
-        // Set up the button drawer
-        const formatDrawer = $("<div>")
-            .addClass("dtext-formatter-drawer color-text")
-            .html("placeholder text")
-            .appendTo(wrapper);
-
-        wrapper.on("e621:reload", () => {
-            console.log("reloading");
-
-            // Reindex the active button toolbar
-            const settings = this.fetchSettings<ButtonDefinition[]>("buttonsActive"),
-                children = formatButtons.children().get();
-            console.log("found", children.length, "children");
-            for (let index = 0; index < settings.length; index++) {
-                $(children[index]).data("button", settings[index]);
-            }
-
-            // Redraw the inactive button drawer
-            formatDrawer.html("");
-            for (const button of this.fetchSettings<ButtonDefinition[]>("buttonInactive")) {
-                const icon = ButtonDefinition.getIcon(button.icon);
-                if (!icon) {
-                    $("<span>")
-                        .appendTo(formatDrawer)
-                        .data("button", button);
-                    continue;
-                }
-                $("<a>")
-                    .html("&#x" + icon)
-                    .attr({
-                        "title": button.name,
-                        "role": "button",
-                    })
-                    .data("button", button)
-                    .appendTo(formatDrawer);
-            }
-        });
-
-        // Establish Sorting
-        const formatButtons = wrapper.find("div.dtext-formatter-buttons").first();
-        formatButtons.sortable({
-            helper: "clone",
-            forceHelperSize: true,
-            cursor: "grabbing",
-            containment: wrapper,
-            connectWith: formatDrawer,
-
-            disabled: true,
-
-            update: () => {
-                this.saveButtons(formatButtons, formatDrawer);
-            },
-        });
-
-        formatDrawer.sortable({
-            helper: "clone",
-            forceHelperSize: true,
-            cursor: "grabbing",
-            containment: wrapper,
-            connectWith: formatButtons,
-
-            disabled: true,
-        });
-
-        // Create toggling events
-        wrapper.on("re621:formatter.disable", () => {
-            wrapper.attr("data-drawer", "false");
-
-            formatButtons.sortable("disable");
-            formatDrawer.sortable("disable");
-        });
-
-        wrapper.on("re621:formatter.toggle", () => {
-            const enable = wrapper.attr("data-drawer") == "false";
-            $(".dtext-formatter").trigger("re621:formatter.disable");
-
-            console.log("toggling", enable, wrapper.attr("data-drawer"));
-
-            if (enable) {
-                wrapper.attr("data-drawer", "true");
-
-                formatButtons.sortable("enable");
-                formatDrawer.sortable("enable");
-            }
-        });
-
-        // Prevent formatting button clicks when the drawer is open
-        wrapper.on("click", ".dtext-formatter-buttons a", (event) => {
-            console.log("click", wrapper.attr("data-drawer"));
-            if (wrapper.attr("data-drawer")) {
-                event.preventDefault();
-                return false;
-            }
-        })
-    }
-
-    private async saveButtons(buttons: JQuery<HTMLElement>, drawer: JQuery<HTMLElement>): Promise<void> {
-        const active = buttons.children().get(),
-            inactive = drawer.children().get();
-
-        const activeData: ButtonDefinition[] = [],
-            inactiveData: ButtonDefinition[] = [];
-
-        for (const button of active) {
-            const data = $(button).data("button");
-            if (!data) continue;
-            activeData.push(data);
-        }
-
-        for (const button of inactive) {
-            const data = $(button).data("button");
-            if (!data) continue;
-            inactiveData.push(data);
-        }
-
-        console.log(activeData, inactiveData);
-        await this.pushSettings({
-            "buttonsActive": activeData,
-            "buttonInactive": inactiveData,
-        });
-
-        this.regenerateButtons();
-    }
-
     /**
      * Adds the provided tag text to the textarea
      * @param content Tag text (i.e. "[b]%selection%[/b]")
      * @param input Textarea
      */
     private processFormattingTag(content: string, input: JQuery<HTMLInputElement>): void {
+
+        // Prevent formatting tag insertion when the drawer is open
+        if (input.attr("paused") == "true") return;
+
         const promises = [];
 
         const lookup = content.match(/%prompt[:]?[^%]*?(%|$)/g);
@@ -287,7 +142,6 @@ export class FormattingExtender extends RE6Module {
             // layered at the bottom, and FIRST is at the very top.
             lookup.reverse().forEach((element) => {
                 const title = element.replace(/(%$)|(^%prompt[:]?)/g, "");
-                console.log("running", title);
                 replacedTags.push(element);
                 promises.push(new Prompt(title).getPromise());
             });
@@ -329,6 +183,272 @@ export class FormattingExtender extends RE6Module {
     }
 }
 
+class Formatter {
+
+    private module: FormattingExtender;
+
+    private id: string;
+
+    private wrapper: JQuery<HTMLElement>;       // element that contains the formatter UI
+    private bdrawer: JQuery<HTMLElement>;       // button drawer with inactive buttons
+    private toolbar: JQuery<HTMLElement>;       // toolbar with active buttons
+
+    private editForm: Modal;
+
+    constructor(module: FormattingExtender, element: JQuery<HTMLElement>) {
+
+        this.module = module;
+        this.wrapper = element;
+
+        // Ensure that the wrapper has a unique ID
+        this.id = this.wrapper.attr("id");
+        if (!this.id) {
+            this.id = "formatter-" + Util.ID.make();
+            this.wrapper.attr("id", this.id);
+        }
+
+        // Set up the drawer state attribute
+        this.wrapper.attr("data-drawer", "false");
+
+        // Create the DOM structure
+        this.bootstrapEditForm();
+        this.extendButtonToolbar();
+        this.createButtonDrawer();
+
+        this.setupSorting();
+    }
+
+    private extendButtonToolbar(): void {
+        this.toolbar = this.wrapper.find("div.dtext-formatter-buttons").first();
+
+        this.wrapper.on("e621:reload", () => {
+
+            // Re-index the active button toolbar
+            const settings = this.module.fetchSettings<ButtonDefinition[]>("buttonsActive"),
+                children = this.toolbar.children().get();
+            for (let index = 0; index < settings.length; index++) {
+                const element = $(children[index]);
+                this.editForm.registerTrigger({ element: element });
+                element.data("button", settings[index]);
+            }
+        });
+    }
+
+    /** Creates the button drawer structure */
+    private createButtonDrawer(): void {
+        // - Drawer Header
+        const header = $("<div>")
+            .addClass("dtext-formatter-customizer color-text")
+            .appendTo(this.wrapper);
+
+        $("<a>")
+            .html("&#x" + "f0c9")
+            .appendTo(header)
+            .on("click", (event) => {
+                event.preventDefault();
+                this.wrapper.trigger("re621:formatter.toggle");
+            });
+
+        // Set up the button drawer;
+        this.bdrawer = $("<div>")
+            .addClass("dtext-formatter-drawer color-text")
+            .html("placeholder text")
+            .appendTo(this.wrapper);
+
+        // Bootstrap modals
+        this.bootstrapEditForm();
+
+        // Regenerate the structure on reload
+        this.wrapper.on("e621:reload", () => {
+
+            // Redraw the inactive button drawer
+            this.bdrawer.html("");
+            for (const button of this.module.fetchSettings<ButtonDefinition[]>("buttonInactive")) {
+                const icon = ButtonDefinition.getIcon(button.icon);
+                if (!icon) {
+                    $("<span>")
+                        .appendTo(this.bdrawer)
+                        .data("button", button);
+                    continue;
+                }
+                $("<a>")
+                    .html("&#x" + icon)
+                    .attr({
+                        "title": button.name,
+                        "role": "button",
+                    })
+                    .data("button", button)
+                    .appendTo(this.bdrawer);
+            }
+        });
+
+        // Create toggling events
+        const input = this.wrapper.find("textarea").first();
+
+        this.wrapper.on("re621:formatter.disable", () => {
+            this.wrapper.attr("data-drawer", "false");
+            input.attr("paused", "false");
+
+            this.bdrawer.sortable("disable");
+            this.toolbar.sortable("disable");
+
+            this.editForm.disable();
+        });
+
+        this.wrapper.on("re621:formatter.toggle", () => {
+            const enable = this.wrapper.attr("data-drawer") == "false";
+            $(".dtext-formatter").trigger("re621:formatter.disable");
+
+            if (enable) {
+                this.wrapper.attr("data-drawer", "true");
+                input.attr("paused", "true");
+
+                this.bdrawer.sortable("enable");
+                this.toolbar.sortable("enable");
+
+                this.editForm.enable();
+            }
+        });
+    }
+
+    private bootstrapEditForm(): any {
+
+        this.editForm = null;
+
+        // Create the Button Editing Modal
+        const $editButtonsForm = new Form(
+            { name: "dtext-edit-button-" + this.id, columns: 2, width: 2 },
+            [
+                Form.input({ name: "name", label: "Name", width: 2 }),
+                Form.icon({ name: "icon", label: "Icon", width: 2 }, iconDefinitions),
+                Form.textarea({ name: "text", label: "Content", width: 2 }),
+
+                Form.button(
+                    { name: "delete", value: "Delete" },
+                    async () => {
+                        this.deleteButton(this.editForm.getActiveTrigger());
+                        this.editForm.close();
+                    }
+                ),
+                Form.button({ name: "update", value: "Update", type: "submit" }),
+
+                Form.hr(2),
+
+                Form.div({ value: "Available variables:", width: 2 }),
+                Form.copy({ label: "Selection", value: "%selection%", width: 2 }),
+                Form.copy({ label: "Prompt", value: "%prompt:Input Name%", width: 2 }),
+            ],
+            async (values) => {
+                console.log("updating button", values);
+                this.updateButton(
+                    this.editForm.getActiveTrigger(),
+                    {
+                        name: values["name"],
+                        icon: values["icon"],
+                        text: values["text"],
+                    }
+                );
+                this.editForm.close();
+            });
+
+        this.editForm = new Modal({
+            title: "Edit Button",
+            content: Form.placeholder(),
+            structure: $editButtonsForm,
+            triggers: [],
+            triggerMulti: true,
+            fixed: true,
+            disabled: true,
+        });
+
+        this.editForm.getElement().on("dialogopen", () => {
+            const $button = this.editForm.getActiveTrigger(),
+                buttonData = $button.data("button") as ButtonDefinition;
+            const $updateTabInputs = $editButtonsForm.getInputList();
+
+            $updateTabInputs.get("name").val(buttonData.name);
+            $updateTabInputs.get("icon").val(buttonData.icon).trigger("re621:form:update");
+            $updateTabInputs.get("text").val(buttonData.text);
+        });
+    }
+
+    private setupSorting(): void {
+        this.toolbar.sortable({
+            helper: "clone",
+            forceHelperSize: true,
+            cursor: "grabbing",
+            containment: this.wrapper,
+            connectWith: this.bdrawer,
+
+            disabled: true,
+
+            update: () => {
+                this.saveButtons();
+            },
+        });
+
+        this.bdrawer.sortable({
+            helper: "clone",
+            forceHelperSize: true,
+            cursor: "grabbing",
+            containment: this.wrapper,
+            connectWith: this.toolbar,
+
+            disabled: true,
+        });
+    }
+
+    private async saveButtons(): Promise<void> {
+        const active = this.toolbar.children().get(),
+            inactive = this.bdrawer.children().get();
+
+        const activeData: ButtonDefinition[] = [],
+            inactiveData: ButtonDefinition[] = [];
+
+        for (const button of active) {
+            const data = $(button).data("button");
+            if (!data) continue;
+            activeData.push(data);
+        }
+
+        for (const button of inactive) {
+            const data = $(button).data("button");
+            if (!data) continue;
+            inactiveData.push(data);
+        }
+
+        console.log({
+            "buttonsActive": activeData,
+            "buttonInactive": inactiveData,
+        });
+
+        await this.module.pushSettings({
+            "buttonsActive": activeData,
+            "buttonInactive": inactiveData,
+        });
+
+        this.module.regenerateButtons();
+    }
+
+    private deleteButton($element: JQuery<HTMLElement>): void {
+        $element.remove();
+        this.saveButtons();
+    }
+
+    /**
+     * Update the specified button with the corresponding configuration
+     * @param $element element of the button to update
+     * @param config new configuration
+     */
+    private updateButton($element: JQuery<HTMLElement>, config: ButtonDefinition): void {
+        config = ButtonDefinition.validate(config);
+        $element.data("button", config);
+        console.log($element, config);
+        this.saveButtons();
+    }
+}
+
+
 type ButtonDefinition = {
     name: string;
     icon: string;
@@ -352,5 +472,13 @@ namespace ButtonDefinition {
      */
     export function getIcon(name: string): string {
         return iconDefinitions[name] || null;
+    }
+
+    export function validate(value: ButtonDefinition): ButtonDefinition {
+        if (value.name === undefined) value.name = "New Button";
+        if (value.icon === undefined) value.icon = "crow";
+        if (value.text === undefined) value.text = "";
+
+        return value;
     }
 }

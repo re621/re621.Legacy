@@ -682,7 +682,7 @@ export class Form implements PreparedStructure {
             $("<a>")
                 .attr("href", "#")
                 .attr("data-value", key)
-                .html(content[key])
+                .html(content[key] ? ("&#x" + content[key]) : "&nbsp;")
                 .appendTo($selectContainer);
         }
 
@@ -703,6 +703,7 @@ export class Form implements PreparedStructure {
         // When the field value is set externally, this event needs to be triggered on the text input field.
         // There is probably a better way to do this, but this should work for now.
         $input.on("re621:form:update", () => {
+            console.log("updating", $input.val());
             if ($input.val() == "") { $selectContainer.find("a").first().trigger("click"); }
             else { $selectContainer.find("a[data-value='" + $input.val() + "']").first().trigger("click"); }
         });
