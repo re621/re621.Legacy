@@ -194,6 +194,7 @@ class Formatter {
     private toolbar: JQuery<HTMLElement>;       // toolbar with active buttons
 
     private editForm: Modal;
+    private makeForm: Modal;
 
     constructor(module: FormattingExtender, element: JQuery<HTMLElement>) {
 
@@ -212,6 +213,8 @@ class Formatter {
 
         // Create the DOM structure
         this.bootstrapEditForm();
+        this.bootstrapCreateForm();
+
         this.extendButtonToolbar();
         this.createButtonDrawer();
 
@@ -243,11 +246,20 @@ class Formatter {
 
         $("<a>")
             .html("&#x" + "f0c9")
+            .addClass("dtext-formatter-opendrawer")
+            .attr({ "title": "Customize Buttons" })
             .appendTo(header)
             .on("click", (event) => {
                 event.preventDefault();
                 this.wrapper.trigger("re621:formatter.toggle");
             });
+
+        const addButton = $("<a>")
+            .html("&#x" + "f067")
+            .addClass("dtext-formatter-addbutton")
+            .attr({ "title": "Add Custom Button" })
+            .appendTo(header);
+        this.makeForm.registerTrigger({ element: addButton });
 
         // Set up the button drawer;
         this.bdrawer = $("<div>")
@@ -271,7 +283,7 @@ class Formatter {
                         .data("button", button);
                     continue;
                 }
-                $("<a>")
+                const element = $("<a>")
                     .html("&#x" + icon)
                     .attr({
                         "title": button.name,
@@ -279,6 +291,8 @@ class Formatter {
                     })
                     .data("button", button)
                     .appendTo(this.bdrawer);
+
+                this.editForm.registerTrigger({ element: element });
             }
         });
 
@@ -372,6 +386,47 @@ class Formatter {
         });
     }
 
+    private bootstrapCreateForm(): void {
+
+        // - New Button Process
+        const newFormatForm = new Form(
+            { name: "dtext-custom-button-" + this.id, columns: 2, width: 2 },
+            [
+                Form.input({ name: "name", label: "Name", width: 2 }),
+                Form.icon({ name: "icon", label: "Icon", width: 2 }, iconDefinitions),
+                Form.textarea({ name: "text", label: "Content", width: 2 }),
+
+                Form.spacer(),
+                Form.button({ name: "submit", value: "Create", type: "submit" }),
+
+                Form.hr(2),
+
+                Form.div({ value: "Available variables:", width: 2 }),
+                Form.copy({ label: "Selection", value: "%selection%", width: 2 }),
+                Form.copy({ label: "Prompt", value: "%prompt:Input Name%", width: 2 }),
+            ],
+            (values) => {
+                console.log(values);
+                this.createButton({
+                    name: values["name"],
+                    icon: values["icon"],
+                    text: values["text"],
+                });
+
+                newFormatForm.reset();
+                this.makeForm.close();
+            }
+        );
+
+        this.makeForm = new Modal({
+            title: "New Custom Button",
+            content: Form.placeholder(),
+            structure: newFormatForm,
+            triggers: [],
+            fixed: true,
+        });
+    }
+
     private setupSorting(): void {
         this.toolbar.sortable({
             helper: "clone",
@@ -427,6 +482,18 @@ class Formatter {
             "buttonInactive": inactiveData,
         });
 
+        this.module.regenerateButtons();
+    }
+
+    /**
+     * Creates a new element based on provided definition
+     * @param config Button definition
+     */
+    private async createButton(config: ButtonDefinition): Promise<void> {
+        config = ButtonDefinition.validate(config);
+        const inactiveButtons = this.module.fetchSettings<ButtonDefinition[]>("buttonInactive");
+        inactiveButtons.push(config);
+        await this.module.pushSettings("buttonInactive", inactiveButtons);
         this.module.regenerateButtons();
     }
 

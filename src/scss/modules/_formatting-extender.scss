@@ -6,6 +6,7 @@ div.dtext-formatter[data-drawer] {
         display: flex;
         align-items: center;
         justify-content: center;
+        padding-top: 0.5rem;
         
         a {
             box-sizing: border-box;
@@ -48,13 +49,13 @@ div.dtext-formatter[data-drawer] {
             &:hover { background: #ffffff15; }
         }
         span {
+            width: 1em;
             margin: 0.25rem;
         }
     }
     
     .dtext-formatter-buttons,
     .dtext-formatter-drawer {
-        overflow: unset;    // Dragging buttons causes them to disappear otherwise
         
         &.ui-sortable-placeholder {
             display: inline-block;
@@ -69,11 +70,15 @@ div.dtext-formatter[data-drawer] {
             grid-area: 2 / 1 / 2 / 4;
         }
         .dtext-formatter-drawer { display: none; }
+        a.dtext-formatter-addbutton { display: none; }
     }
     
     &[data-drawer="true"] {
         .dtext-formatter-drawer,
         .dtext-formatter-buttons {
+            // Dragging buttons causes them to disappear otherwise
+            overflow: auto;
+        
             a, span {
                 border: 1px dashed #eee;
                 cursor: grab;
