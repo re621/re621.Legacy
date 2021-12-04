@@ -3,6 +3,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Prompt } from "../../components/structure/Prompt";
+import { Debug } from "../../components/utility/Debug";
 import { Util } from "../../components/utility/Util";
 
 // Available icons for formatting buttons
@@ -226,13 +227,15 @@ class Formatter {
 
         this.wrapper.on("e621:reload", () => {
 
-            // Re-index the active button toolbar
-            const settings = this.module.fetchSettings<ButtonDefinition[]>("buttonsActive"),
+            const buttonList = this.module.fetchSettings<ButtonDefinition[]>("buttonsActive"),
                 children = this.toolbar.children().get();
-            for (let index = 0; index < settings.length; index++) {
+            Debug.log("Formatter:Toolbar", buttonList.length);
+
+            // Re-index the active button toolbar
+            for (let index = 0; index < buttonList.length; index++) {
                 const element = $(children[index]);
                 this.editForm.registerTrigger({ element: element });
-                element.data("button", settings[index]);
+                element.data("button", buttonList[index]);
             }
         });
     }
@@ -270,11 +273,13 @@ class Formatter {
         this.bootstrapEditForm();
 
         // Regenerate the structure on reload
-        this.wrapper.on("e621:reload", () => {
+        this.wrapper.on("e621:reload re621:reload", () => {
 
             // Redraw the inactive button drawer
             this.bdrawer.html("");
-            for (const button of this.module.fetchSettings<ButtonDefinition[]>("buttonInactive")) {
+            const buttonList = this.module.fetchSettings<ButtonDefinition[]>("buttonInactive");
+            Debug.log("Formatter:Drawer", buttonList.length);
+            for (const button of buttonList) {
                 const icon = ButtonDefinition.getIcon(button.icon);
                 if (!icon) {
                     $("<span>")
@@ -471,15 +476,17 @@ class Formatter {
             inactiveData.push(data);
         }
 
-        console.log({
+        Debug.log({
             "buttonsActive": activeData,
             "buttonInactive": inactiveData,
         });
 
-        await this.module.pushSettings({
-            "buttonsActive": activeData,
-            "buttonInactive": inactiveData,
-        });
+        // Prevent empty toolbar from being saved.
+        if (activeData.length > 0)
+            await this.module.pushSettings({
+                "buttonsActive": activeData,
+                "buttonInactive": inactiveData,
+            });
 
         this.module.regenerateButtons();
     }
