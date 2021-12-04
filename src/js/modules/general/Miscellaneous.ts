@@ -189,9 +189,9 @@ export class Miscellaneous extends RE6Module {
             href: "/dmails",
             title: "DMail",
         });
-        
+
         // Add a "remove from set" button
-        if(Page.matches(PageDefinition.post)) {
+        if (Page.matches(PageDefinition.post)) {
             this.addRemoveFromSetButton();
         }
 
@@ -460,15 +460,15 @@ export class Miscellaneous extends RE6Module {
     private scrollDown(): void {
         window.scrollBy(0, $(window).height() * 0.15);
     }
-    
+
     private addRemoveFromSetButton(): void {
         const post = Post.getViewingPost();
-        for(const link of $("div.set-nav span.set-name a").get()) {
+        for (const link of $("div.set-nav span.set-name a").get()) {
             const $link = $(link),
                 id = parseInt($link.attr("href").replace("/post_sets/", ""));
-            
-            if(!id) continue;
-            
+
+            if (!id) continue;
+
             $("<a>")
                 .addClass("remove-from-set-button")
                 .html(`<i class="fas fa-times"></i>`)
