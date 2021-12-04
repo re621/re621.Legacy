@@ -264,7 +264,6 @@ class Formatter {
         // Set up the button drawer;
         this.bdrawer = $("<div>")
             .addClass("dtext-formatter-drawer color-text")
-            .html("placeholder text")
             .appendTo(this.wrapper);
 
         // Bootstrap modals
