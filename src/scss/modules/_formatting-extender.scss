@@ -49,8 +49,10 @@ div.dtext-formatter[data-drawer] {
             &:hover { background: #ffffff15; }
         }
         span {
-            width: 1em;
+            width: 2.125em;
+            height: 2.125em;
             margin: 0.25rem;
+            border-radius: 6px;
         }
     }
     
