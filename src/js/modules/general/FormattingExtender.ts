@@ -57,6 +57,8 @@ const iconDefinitions = {
 
 export class FormattingExtender extends RE6Module {
 
+    private observer: IntersectionObserver;
+
     public constructor() {
         super([], true, false, [], "FormattingHelper");
     }
@@ -102,9 +104,22 @@ export class FormattingExtender extends RE6Module {
 
         Danbooru.DText.override_formatting(this.processFormattingTag);
 
+        this.observer = new IntersectionObserver((entries) => {
+            entries.forEach((value) => {
+                if (!value.isIntersecting) return;
+                const wrapper = $(value.target as HTMLElement);
+                this.observer.unobserve(value.target);
+                new Formatter(this, wrapper);
+                this.regenerateButtons();
+            })
+        }, {
+            root: null,
+            rootMargin: "100% 50% 100% 50%",
+            threshold: 0.5,
+        });
+
         for (const wrapper of $(".dtext-formatter").get())
-            new Formatter(this, $(wrapper));
-        this.regenerateButtons();
+            this.observer.observe(wrapper);
     }
 
     public regenerateButtons(): void {
