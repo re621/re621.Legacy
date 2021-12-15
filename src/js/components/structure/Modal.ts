@@ -27,7 +27,8 @@ export class Modal {
 
                 closeOnEscape: config.escapable,
                 draggable: config.draggable,
-                resizable: config.resizable,
+                resizable: false,
+                // resizable: config.resizable,
 
                 width: "auto",
                 minWidth: config.minWidth,
@@ -53,12 +54,14 @@ export class Modal {
             .addClass("re621-ui-dialog")
             .removeClass("ui-dialog ui-widget ui-widget-content")
             .toggleClass("modal-reserve-height", config.reserveHeight)
-            .draggable({
-                disabled: !config.draggable,
-                containment: "parent"
-            })
+            /*
             .resizable({
                 disabled: !config.resizable,
+                containment: "parent"
+            })
+            */
+            .draggable({
+                disabled: !config.draggable,
                 containment: "parent"
             });
 
@@ -92,7 +95,7 @@ export class Modal {
             );
 
             widget.draggable("option", "containment", "window");
-            widget.resizable("option", "containment", "window");
+            // widget.resizable("option", "containment", "window");
 
             let timer = 0,
                 left = widget.css("left"),
@@ -151,7 +154,7 @@ export class Modal {
 
         if (config.escapable === undefined) config.escapable = true;
         if (config.draggable === undefined) config.draggable = true;
-        if (config.resizable === undefined) config.resizable = false;
+        // if (config.resizable === undefined) config.resizable = false;
 
         if (config.minWidth === undefined) config.minWidth = 150;
         if (config.minHeight === undefined) config.minHeight = 150;
@@ -261,7 +264,7 @@ interface ModalConfig {
     /** If true, modal window is closed when the ESC key is pressed */
     escapable?: boolean;
     /** Users can resize the window at will. Glitchy. */
-    resizable?: boolean;
+    // resizable?: boolean;
     /** Users can drag the window around the screen. Glitchy when used with "fixed" option. */
     draggable?: boolean;
 
