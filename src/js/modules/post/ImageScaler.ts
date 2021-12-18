@@ -45,16 +45,12 @@ export class ImageScaler extends RE6Module {
     public create(): void {
         super.create();
 
-        const $image = $("#image"),
-            $container = $("#image-container"),
+        const $container = $("#image-container"),
             $selector = $("#image-resize-selector");
 
         const isInteractive = Post.getViewingPost().meta.interactive;
 
-        // Fix to a vanilla bug - blacklisted posts would not have the correct size selected
         const post = Post.getViewingPost();
-        if (post.file.ext !== "webm" && ($container.hasClass("blacklisted-active") || $container.hasClass("blacklisted-active-visible")))
-            $selector.val(User.defaultImageSize);
 
         // Set up dynamic scaling options
         const dynSizeMode = this.fetchSettings("dynSizeMode");
@@ -72,18 +68,23 @@ export class ImageScaler extends RE6Module {
         }
 
         // Handle clicking on the post
-        $image.on("click", async () => {
+        $container.on("click", async () => {
 
             // Workaround to un-blacklist images on mouse click
-            if ($container.hasClass("blacklisted-active-visible")) {
+            if ($container.hasClass("blacklisted")) {
                 if (!this.fetchSettings("clickShowFiltered")) return;
 
-                $container.addClass("blacklisted").removeClass("blacklisted-active-visible");
-                const size = ($selector.val() || "large") + "";
+                $container.removeClass("blacklisted");
+                const size = ($selector.val() + "") || "large";
                 Danbooru.Post.resize_to(size);
+                Danbooru.Post.resize_notes();
 
                 return;
             }
+            
+            // Does not work with those types of files anyways
+            if(post.file.ext == "webm" || post.file.ext == "swf")
+                return;
 
             // Disable this when notes are being edited
             if (!this.fetchSettings("clickScale")
