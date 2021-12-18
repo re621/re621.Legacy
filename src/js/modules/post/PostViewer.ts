@@ -1,4 +1,5 @@
 import { Danbooru } from "../../components/api/Danbooru";
+import { XM } from "../../components/api/XM";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { Post } from "../../components/post/Post";
@@ -112,6 +113,15 @@ export class PostViewer extends RE6Module {
 
         if (!Page.matches(PageDefinition.post)) return;
 
+        // For testing purposes
+        // ? Possibly add an option in settings to disable/enable this
+        // this.preload();
+        $("video#image").attr("preload", "auto");
+        $("video#image")
+            .on("canplaythrough", () => { 
+                console.log("canplaythrough")
+            });
+
         this.post = Post.getViewingPost()
 
         // Move the add to set / pool buttons
@@ -159,6 +169,20 @@ export class PostViewer extends RE6Module {
                     this.toggleNotes(false);
             });
 
+
+        // Create the "Preload" button
+        const $preloadContainer = $("<div>")
+            .attr("id", "image-preload")
+            .appendTo("#image-extra-controls");
+        
+        $("<a>")
+            .html("Preload")
+            .addClass("button btn-neutral")
+            .appendTo($preloadContainer)
+            .on("click", (event) => {
+                event.preventDefault();
+                this.preload();
+            });
 
         // Move child/parent indicator, leave others as is, like marked for deletion
         if (this.fetchSettings("moveChildThumbs"))
@@ -360,6 +384,57 @@ export class PostViewer extends RE6Module {
         await ModuleController.get(PostViewer).pushSettings("hideNotes", false);
 
         Danbooru.Note.TranslationMode.toggle();
+    }
+
+    /** Toggle the preload tag */
+    private preload(): void {
+        const $videoElement = $("video#image");
+
+        //$videoElement.attr("preload", "auto");
+        console.log("Sending request");
+        // TODO: This doesn't work cause of CSP :/
+        // But it works on Firefox!??!?
+
+        XM.Connect.xmlHttpRequest({
+            url: $videoElement.attr("src"),
+            method: "GET",
+            responseType: "blob",
+            onload: async (event) => {
+                console.log("Response received");
+                console.log(event.status);
+                if (event.status == 200) {
+                    console.log("Success");
+                    const base64 = await this.blobToBase64(event.response);
+                    console.log(base64)
+                    // This process is really intense (for big files) and lags the tab
+                    const objectURL = URL.createObjectURL(event.response);
+                    $videoElement.attr("src", objectURL);
+                    console.log(event.response);
+                    console.log(objectURL);
+                    setTimeout(() => URL.revokeObjectURL(objectURL), 1000);
+                }
+            },
+            onprogress: (event) => {
+                console.log("Progress");
+                if (event.lengthComputable) {
+                    const percentComplete = event.loaded / event.total;
+                    console.log(percentComplete * 100 + "%");
+                }
+            },
+            onerror: (event) => {
+                Danbooru.error("An error occurred while preloading the video");
+                console.log("Request failed");
+                console.log(event.status)
+            }
+        });
+    }
+
+    private blobToBase64(blob: Blob): Promise<string> {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = (): void => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+        });
     }
 
     /** Opens the dialog to add the post to the set */
