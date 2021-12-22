@@ -66,7 +66,7 @@ export class ForumTracker extends SubscriptionTracker {
             // If a thread is somehow empty, skip it
             // Not sure how this would happen, though
             const responseCount = thread.response_count;
-            if (responseCount == 0) return;
+            if (responseCount == 0) continue;
 
             const threadExtra = this.slist.getExtraData(thread.id + "") || {};
             threadExtra.name = thread.title;
