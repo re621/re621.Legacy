@@ -14,7 +14,7 @@ export class ProfileEnhancer extends RE6Module {
 
         const commentsLine = $("th:contains('Comments')");
         if (commentsLine.length > 0)
-            commentsLine.next().append(` (<a href="/comments?group_by=comment&search[body_matches]=${username}&search[results]=exact">Mentions</a>)`)
+            commentsLine.next().append(` (<a href="/comments?group_by=comment&search[body_matches]=${username}">Mentions</a>)`)
 
         const forumLine = $("th:contains('Forum Posts')");
         if (forumLine.length > 0)
