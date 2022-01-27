@@ -8,7 +8,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 export class WikiEnhancer extends RE6Module {
 
     public constructor() {
-        super([PageDefinition.wiki, PageDefinition.wikiNA, PageDefinition.artist]);
+        super([PageDefinition.wiki, PageDefinition.wikiNA, PageDefinition.artist], true);
     }
 
     protected getDefaultSettings(): Settings {
@@ -18,15 +18,15 @@ export class WikiEnhancer extends RE6Module {
     public create(): void {
         super.create();
         const $title = Page.matches(PageDefinition.artist)
-            ? $("#a-show h1").first()
-            : $("#wiki-page-title");
+            ? $("#a-show h1 a:first")
+            : $("#wiki-page-title a:first");
         const tagName = WikiEnhancer.sanitizeWikiTagName($title.text());
 
         $("<button>")
             .attr("id", "wiki-page-copy-tag")
             .addClass("button btn-neutral border-highlight border-left")
             .html(`<i class="far fa-copy"></i>`)
-            .appendTo($title)
+            .insertAfter($title)
             .on("click", () => {
                 XM.Util.setClipboard(tagName);
             });
@@ -41,7 +41,6 @@ export class WikiEnhancer extends RE6Module {
     public static sanitizeWikiTagName(raw: string): string {
         return raw.trim()
             .replace(/^.+: /g, "")
-            .replace("\n\n          (locked)", "")
             .replace(/ /g, "_");
     }
 }
