@@ -71,8 +71,10 @@ export class Miscellaneous extends RE6Module {
 
         // Enhanced quoting button and copy ID button
         if (Page.matches([PageDefinition.post, PageDefinition.forum])) {
-            this.handleQuoteButton();
-            this.handleIDButton();
+            $(() => {
+                this.handleQuoteButton();
+                this.handleIDButton();
+            });
         }
 
         // Sticky elements
