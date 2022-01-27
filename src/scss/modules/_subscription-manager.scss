@@ -122,6 +122,8 @@ a.subscribe-button-major {
     color: #fff;
     float: right;
     box-shadow: 0px 0px 1px 0px black;
+    
+    @include nonselectable;
 
     &:hover {
         background: #004b00;

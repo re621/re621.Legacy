@@ -18,7 +18,10 @@ section#image-extra-controls {
     & > div {
         margin: 0.25rem 0.5rem 0.25rem 0;
         &:last-child { margin-right: 0; }
-        & > a { outline: 0; }
+        & > a, & > button, & > select {
+            outline: 0;
+            @include nonselectable;
+        }
     }
 
     div.image-vote-buttons > a > span {
