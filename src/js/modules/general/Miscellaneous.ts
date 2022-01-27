@@ -206,7 +206,7 @@ export class Miscellaneous extends RE6Module {
     public resetContentHeaders(): void {
         const config = this.fetchSettings(["profileEnhancements"]);
 
-        if (Page.matches(PageDefinition.profile) && config.profileEnhancements) $("#c-users").attr("enhancements", "true");
+        if (Page.matches(PageDefinition.profile) && config.profileEnhancements) $("#page").attr("enhancements", "true");
         else $("#c-users").removeAttr("enhancements");
     }
 
