@@ -143,8 +143,8 @@ export class PoolDownloader extends RE6Module {
         let source: Promise<APIPostGroup[]>;
         let poolName = "UnknownPostGroup";
 
-        if (Page.matches(PageDefinition.pool)) source = E621.Pools.get<APIPool>({ "search[id]": Page.getPageID() });
-        else source = E621.Sets.get<APIPool>({ "search[id]": Page.getPageID() });
+        if (Page.matches(PageDefinition.pool)) source = E621.Pool.id(Page.getPageID()).get<APIPool>();
+        else source = E621.Set.id(Page.getPageID()).get<APIPool>();
 
         source.then((poolData) => {
             if (poolData.length < 1) { return Promise.reject("Pool not found"); };
