@@ -1,5 +1,5 @@
 import { Page, PageDefinition } from "../../components/data/Page";
-import { Post } from "../../components/post/Post";
+import { Post, PostData } from "../../components/post/Post";
 import { RE6Module, Settings } from "../../components/RE6Module";
 
 export class JanitorEnhancements extends RE6Module {
@@ -25,6 +25,10 @@ export class JanitorEnhancements extends RE6Module {
             this.decorateArtistName();
         }
 
+        if (Page.matches(PageDefinition.postConfirmDelete)) {
+            this.enhanceDeletionpage();
+        }
+
     }
 
     private cleanupRecords(): void {
@@ -44,6 +48,33 @@ export class JanitorEnhancements extends RE6Module {
     private approvePost(): void {
         if (!Page.matches(PageDefinition.post)) return;
         $("a.approve-post-link").first()[0].click()
+    }
+
+    private enhanceDeletionpage(): void {
+        const postElements = $("#c-confirm-delete article");
+        if (postElements.length != 2) return;
+
+        const deleted = PostData.fromThumbnail(postElements.first()),
+            inheritor = PostData.fromThumbnail(postElements.last());
+
+        const portedTags = new Set(Array.from(deleted.tags.all).filter(item => !inheritor.tags.all.has(item)));
+
+        const container = $("<div>")
+            .addClass("deletion-diff")
+            .css("display", "none")
+            .appendTo(".post_delete_options .input");
+        if (portedTags.size == 0)
+            $("<span><i>none</i></span>").appendTo(container);
+        else
+            for (const tag of portedTags)
+                $("<span>").html(`<a href="/show_or_new?title=${tag}">${tag}</a> `).appendTo(container);
+
+        const toggle = $("#copy_tags");
+        if (toggle.is(":checked")) container.css("display", "");
+        toggle.on("click", () => {
+            if (toggle.is(":checked")) container.css("display", "");
+            else container.css("display", "none");
+        });
     }
 
 }
