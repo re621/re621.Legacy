@@ -95,7 +95,7 @@ export class Miscellaneous extends RE6Module {
         this.handleAvatarClick(this.fetchSettings("avatarClick"));
 
         // How to comment guide
-        this.handleCommentRules(this.fetchSettings("disableCommentRules"));
+        $(() => { this.handleCommentRules(this.fetchSettings("disableCommentRules")); });
 
         // Fix the forum title
         if (this.fetchSettings("fixForumTitle") && Page.matches(PageDefinition.forum)) {
