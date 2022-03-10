@@ -192,7 +192,7 @@ export class Blacklist {
         return Promise.resolve();
 
         function getTagLink(tagName: string): string {
-            if (tagName.startsWith("id:")) return `<a href="/posts/${tagName.substr(3)}" target="_blank" rel="noopener noreferrer">${tagName}</a>`;
+            if (tagName.startsWith("id:")) return `<a href="/posts/${tagName.substring(3)}" target="_blank" rel="noopener noreferrer">${tagName}</a>`;
             return `<a href="/wiki_pages/show_or_new?title=${tagName}">${tagName}</a>`;
         }
     }

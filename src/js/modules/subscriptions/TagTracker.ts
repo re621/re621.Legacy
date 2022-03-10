@@ -226,14 +226,14 @@ export class TagTracker extends SubscriptionTracker {
 
         function getPreviewLink(md5: string): string {
             if (!md5) return "https://e621.net/images/deleted-preview.png";
-            return `https://static1.e621.net/data/preview/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`;;
+            return `https://static1.e621.net/data/preview/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`;;
         }
 
         function getSampleLink(md5: string, hasSample: boolean, ext = "jpg"): string {
             if (!md5) return "https://e621.net/images/deleted-preview.png";
             return hasSample
-                ? `https://static1.e621.net/data/sample/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`
-                : `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${ext}`;
+                ? `https://static1.e621.net/data/sample/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`
+                : `https://static1.e621.net/data/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.${ext}`;
         }
     }
 

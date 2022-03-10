@@ -583,7 +583,7 @@ export namespace PostData {
 
         // Restore the preview image. Not used anywhere, but avoids an error.
         const md5 = data["file"]["md5"],
-            md52 = md5.substr(0, 2);
+            md52 = md5.substring(0, 2);
         data["preview"] = {
             "width": -1,
             "height": -1,
@@ -649,7 +649,7 @@ export namespace PostData {
         if ($article.hasClass("post-preview")) {
             if ($article.attr("data-md5")) md5 = $article.attr("data-md5");
             else if ($article.attr("data-file-url"))
-                md5 = $article.attr("data-file-url").substr(36, 32);
+                md5 = $article.attr("data-file-url").substring(36, 68);
 
             urls = {
                 preview: $article.attr("data-preview-file-url") || null,
@@ -659,7 +659,7 @@ export namespace PostData {
         } else {
             if ($article.attr("data-md5")) md5 = $article.attr("data-md5");
             else if ($article.attr("data-preview-url"))
-                md5 = $article.attr("data-preview-url").substr(44, 32);
+                md5 = $article.attr("data-preview-url").substring(44, 72);
 
             if (md5 == undefined) urls = {
                 preview: `/images/deleted-preview.png`,
@@ -670,13 +670,13 @@ export namespace PostData {
                 urls = {
                     preview: $article.attr("data-preview-url")
                         ? $article.attr("data-preview-url")
-                        : `https://static1.e621.net/data/preview/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`,
+                        : `https://static1.e621.net/data/preview/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`,
                     sample: $article.attr("data-large-file-url")    // This is horrifying.
                         ? $article.attr("data-large-file-url")      // I am truly sorry...
                         : ((width < 850 || height < 850 || extension == "gif")
-                            ? `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${extension}`
-                            : `https://static1.e621.net/data/sample/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`),
-                    original: `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${extension}`,
+                            ? `https://static1.e621.net/data/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.${extension}`
+                            : `https://static1.e621.net/data/sample/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`),
+                    original: `https://static1.e621.net/data/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.${extension}`,
                 };
             }
         }

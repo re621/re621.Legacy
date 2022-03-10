@@ -869,13 +869,13 @@ namespace ParsedTag {
 
         if (rawTag.startsWith("-")) {
             result.negated = true;
-            rawTag = rawTag.substr(1);
+            rawTag = rawTag.substring(1);
         }
 
         const match = rawTag.match(/(artist|character|copyright|species):/)
         if (match) {
             result.prefix = match[1];
-            rawTag = rawTag.substr(match[0].length);
+            rawTag = rawTag.substring(match[0].length);
         }
 
         result.name = rawTag;

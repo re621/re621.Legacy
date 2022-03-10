@@ -49,7 +49,7 @@ export class CommentBlacklist extends RE6Module {
             // Negative filter handling
             // If even one is found, just abort the whole thing. Otherwise, skip
             if (filter.startsWith("-")) {
-                if (comment.includes(filter.substr(1))) return false;
+                if (comment.includes(filter.substring(1))) return false;
                 else matches++;
             } else if (comment.includes(filter)) matches++;
         }
