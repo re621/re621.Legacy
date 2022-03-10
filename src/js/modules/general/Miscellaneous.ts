@@ -307,8 +307,9 @@ export class Miscellaneous extends RE6Module {
 
             $(".re621-forum-post-copy-id").on('click', (event) => {
                 event.preventDefault();
-                const $post = $(event.target).parents("article.forum-post");
-                XM.Util.setClipboard($post.data("forum-post-id"));
+                const id = $(event.target).parents("article.forum-post").data("forum-post-id");
+                XM.Util.setClipboard(id);
+                Danbooru.notice(`Copied forum post ID to clipboard: ${id}`);
             });
         } else if (Page.matches(PageDefinition.post)) {
             $(".content-menu > menu").each(function (index, element) {
@@ -329,8 +330,9 @@ export class Miscellaneous extends RE6Module {
 
             $(".re621-comment-copy-id").on('click', (event) => {
                 event.preventDefault();
-                const $comment = $(event.target).parents("article.comment");
-                XM.Util.setClipboard($comment.data("comment-id"));
+                const id = $(event.target).parents("article.comment").data("comment-id");
+                XM.Util.setClipboard(id);
+                Danbooru.notice(`Copied comment ID to clipboard: ${id}`);
             });
 
             $(".show-all-comments-for-post-link").on("click", async () => {
