@@ -48,8 +48,7 @@ export class UtilEvents {
      * @param label Data attribute to set on the element
      */
     public static triggerVueEvent(element: JQuery<HTMLElement>, name: string, label?: string): void {
-        const e = document.createEvent('HTMLEvents');
-        e.initEvent(name, true, true);
+        const e = new Event(name, { "bubbles": true, "cancelable": true });
         if (label) element.data(label, "true");
         element[0].dispatchEvent(e);
     }

@@ -131,8 +131,7 @@ export class FormattingExtender extends RE6Module {
     }
 
     public reloadButtonToolbar(): void {
-        const e = document.createEvent('HTMLEvents');
-        e.initEvent("e621:reload", true, true);
+        const e = new Event("e621:reload", { "bubbles": true, "cancelable": true });
         for (const element of $(".dtext-formatter").get())
             element.dispatchEvent(e);
     }
