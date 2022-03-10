@@ -119,6 +119,10 @@ export class PoolTracker extends SubscriptionTracker {
             }
             if (!poolExtra.last) poolExtra.last = pool.post_ids.slice(-1)[0];
 
+            // If no lastSeen value is set for pool, set it to the second to last post in the pool
+            // This doesn't account for if more than 1 post gets added to the pool before the first lastSeen value is set
+            if (!poolExtra.lastSeen) poolExtra.lastSeen = pool.post_ids.slice(-2)[0];
+
             if ((pool.post_ids.length - 1) > pool.post_ids.indexOf(poolExtra.last)) {
                 result[new Date(pool.updated_at).getTime()] = {
                     uid: pool.id,
@@ -126,6 +130,12 @@ export class PoolTracker extends SubscriptionTracker {
                     ext: encodeURIComponent(pool.name.replace(/_/g, " ")) + "|" + pool.post_count,
                     new: true,
                 }
+
+                // Handle cases where lastSeen post is removed from pool
+                // This could be handled better if you saved pool post IDs for comparison
+                if (pool.post_ids.indexOf(poolExtra.lastSeen) == -1) poolExtra.lastSeen = pool.post_ids.slice(-1)[0];
+
+                poolExtra.numBehind = (pool.post_ids.length - 1) - pool.post_ids.indexOf(poolExtra.lastSeen);
                 poolExtra.last = pool.post_ids.slice(-1)[0];
             }
 
@@ -202,11 +212,23 @@ export class PoolTracker extends SubscriptionTracker {
 
                 $("<a>")
                     .html(decodeURIComponent(poolData[0]))
-                    .attr({ "href": extraData.last ? `/posts/${extraData.last}?pool_id=${data.uid}` : `/pools/${data.uid}`, })
+                    .attr({ "href": getLastSeenHref() })
+                    .on("click", () => {
+                        // Update the last seen post to the newest post in pool
+                        extraData.lastSeen = extraData.last;
+                        extraData.numBehind = 0;
+                        this.slist.addExtraData(data.uid + "", extraData);
+                        this.slist.pushSubscriptions();
+                    })
                     .appendTo(mainSection);
 
                 $("<div>")
-                    .html("Updated " + Util.Time.ago(timestamp))
+                    .html(extraData.numBehind > 0
+                        ? extraData.numBehind === 1
+                            ? `Updated ${Util.Time.ago(timestamp)} (${extraData.numBehind} post behind)`
+                            : `Updated ${Util.Time.ago(timestamp)} (${extraData.numBehind} posts behind)`
+                        : `Updated ${Util.Time.ago(timestamp)}`
+                    )
                     .appendTo(mainSection);
 
                 $("<a>")
@@ -230,6 +252,14 @@ export class PoolTracker extends SubscriptionTracker {
             });
 
         return result;
+
+        function getLastSeenHref(): string {
+            if (extraData.lastSeen) return `/posts/${extraData.lastSeen}?pool_id=${data.uid}`;
+            // This is only needed for the edge case where the pool is still in the notifications list,
+            // but hasn't been updated/clicked since this feature was added
+            if (extraData.last) return `/posts/${extraData.last}?pool_id=${data.uid}`;
+            return `/pools/${data.uid}`;
+        }
 
         function getPreviewLink(md5: string): string {
             if (!md5) return "https://e621.net/images/deleted-preview.png";
