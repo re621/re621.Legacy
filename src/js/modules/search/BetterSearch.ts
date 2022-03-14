@@ -245,7 +245,7 @@ export class BetterSearch extends RE6Module {
                                     .attr("title", `${results} posts found`);
                             else
                                 searchStatsCount
-                                    .text("~" + Util.formatK(results) + " Posts")
+                                    .text("~" + Util.formatK(results - math.ceil(postsPerPage * 0.5)) + " Posts")
                                     .attr(
                                         "title",
                                         `Between ${results - postsPerPage} and ${results} posts were found.\nGo to the last page of the search to get the exact number.`
