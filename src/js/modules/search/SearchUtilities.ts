@@ -97,7 +97,7 @@ export class SearchUtilities extends RE6Module {
         SearchUtilities.randomPostURL = "/posts/random" + (queryEncoded.length ? ("?tags=" + queryEncoded.join("+")) : "");
         if (Page.matches(PageDefinition.post) && this.fetchSettings("trimQueryParameters")) {
             const qParam = Page.getQueryParameter("q");
-            console.log(qParam);
+            // console.log(qParam);
             Page.removeQueryParameter(["q", "tags"]);
 
             if (qParam)
@@ -282,7 +282,7 @@ export class SearchUtilities extends RE6Module {
                 button.toggleClass("collapsed");
 
                 collapsed = !collapsed;
-                if(collapsed) Util.LS.setItem("re621.sidebar", "true");
+                if (collapsed) Util.LS.setItem("re621.sidebar", "true");
                 else Util.LS.removeItem("re621.sidebar");
             });
 

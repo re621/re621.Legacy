@@ -54,7 +54,7 @@ export class CleanSlate {
         actions.push({
             selector: "#page",
             action: () => { $("<div>").attr("id", "modal-container").prependTo("div#page"); },
-        })
+        });
 
         // Create the header
         actions.push({
@@ -82,7 +82,7 @@ export class CleanSlate {
 
                 $menuContainer.addClass("grid");
             },
-        })
+        });
 
         // Clear the existing thumbnails
         if (Page.matches([PageDefinition.search, PageDefinition.favorites]) && Util.LS.getItem("re621.bs.enabled") === "true") {
@@ -96,7 +96,7 @@ export class CleanSlate {
 
                     $("#content").html("");
                 },
-            })
+            });
         }
 
         if (Page.matches(PageDefinition.post)) {
@@ -106,7 +106,7 @@ export class CleanSlate {
                     if ($("#image-container").attr("data-file-ext") === "swf")
                         KeybindManager.block();
                 }
-            })
+            });
         }
 
         return this.elementsReady(actions);
