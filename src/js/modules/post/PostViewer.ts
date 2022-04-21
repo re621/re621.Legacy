@@ -52,6 +52,13 @@ export class PostViewer extends RE6Module {
             { keys: "hotkeyToggleRel", fnct: this.toggleRelSection, page: reqPage },
             { keys: "hotkeyOpenIQDB", fnct: this.openIQDB },
             { keys: "hotkeyOpenAPI", fnct: this.openAPI, },
+
+            { keys: "hotkeyOpenSauceNAO", fnct: this.openSauceNAO },
+            { keys: "hotkeyOpenKheina", fnct: this.openKheina },
+            { keys: "hotkeyOpenGoogle", fnct: this.openGoogle },
+            { keys: "hotkeyOpenYandex", fnct: this.openYandex },
+            { keys: "hotkeyOpenDerpibooru", fnct: this.openDerpibooru },
+            { keys: "hotkeyOpenInkbunny", fnct: this.openInkbunny },
         );
     }
 
@@ -99,6 +106,13 @@ export class PostViewer extends RE6Module {
             hotkeyToggleRel: "",        // Toggles the relationship section
             hotkeyOpenIQDB: "",         // Searches for similar posts
             hotkeyOpenAPI: "",          // Shows raw post data
+
+            hotkeyOpenSauceNAO: "",     // Open SauceNAO search
+            hotkeyOpenKheina: "",     // Open SauceNAO search
+            hotkeyOpenGoogle: "",     // Open SauceNAO search
+            hotkeyOpenYandex: "",     // Open SauceNAO search
+            hotkeyOpenDerpibooru: "",     // Open SauceNAO search
+            hotkeyOpenInkbunny: "",     // Open SauceNAO search
 
             upvoteOnFavorite: true,     // add an upvote when adding the post to favorites
             hideNotes: false,           // should the notes be hidden by default
@@ -230,7 +244,7 @@ export class PostViewer extends RE6Module {
                 ["https://yandex.ru/images/search?url=" + this.getSourceLink(RISSizeLimit.Yandex, useSample), "Yandex"],
                 null,
                 ["https://derpibooru.org/search/reverse?url=" + this.getSourceLink(RISSizeLimit.Derpibooru, useSample), "Derpibooru"],
-                ["https://inkbunny.net/search_process.php?text=" + this.post.file.md5 + "&md5=yes", "Inkbunny (MD5)"],
+                ["https://inkbunny.net/search_process.php?text=" + this.post.file.md5 + "&md5=yes", "Inkbunny"],
             ];
             $("#post-related-images ul").html(() => {
                 const htmlContent = [];
@@ -238,7 +252,7 @@ export class PostViewer extends RE6Module {
                     htmlContent.push(
                         link == null
                             ? `<li class="list-break"></li>`
-                            : `<li><a href="${link[0]}" ${link[2] ? "" : `target="_blank" rel="noopener noreferrer"`}>${link[1]}</a></li>`);
+                            : `<li><a href="${link[0]}" ${link[2] ? "" : `target="_blank" rel="noopener noreferrer"`} lookup="${link[1]}">${link[1]}</a></li>`);
                 return htmlContent.join("\n");
             });
         }
@@ -463,6 +477,20 @@ export class PostViewer extends RE6Module {
             location.href = "/iqdb_queries?post_id=" + Page.getQueryParameter("search[post_id]");
         }
     }
+
+    private static openSourceLookup(source: "SauceNAO" | "Kheina" | "Google" | "Yandex" | "Derpibooru" | "Inkbunny"): void {
+        if (!Page.matches(PageDefinition.post)) return;
+        const link = $(`a[lookup="${source}"]`).first();
+        if (!link.length) return;
+        link[0].click();
+    }
+
+    private openSauceNAO(): void { PostViewer.openSourceLookup("SauceNAO"); }
+    private openKheina(): void { PostViewer.openSourceLookup("Kheina"); }
+    private openGoogle(): void { PostViewer.openSourceLookup("Google"); }
+    private openYandex(): void { PostViewer.openSourceLookup("Yandex"); }
+    private openDerpibooru(): void { PostViewer.openSourceLookup("Derpibooru"); }
+    private openInkbunny(): void { PostViewer.openSourceLookup("Inkbunny"); }
 
     /** Opens the raw API data for the current post */
     private openAPI(): void { location.href = location.origin + location.pathname + ".json" + location.search; }

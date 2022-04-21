@@ -2032,6 +2032,13 @@ export class SettingsController extends RE6Module {
                     ...createInputs(postViewer, "Toggle Child Posts", "hotkeyToggleRel"),
                     ...createInputs(postViewer, "Open IQDB", "hotkeyOpenIQDB"),
                     ...createInputs(postViewer, "Open API Page", "hotkeyOpenAPI"),
+                    Form.spacer(3),
+                    ...createInputs(postViewer, "Search SauceNAO", "hotkeyOpenSauceNAO"),
+                    ...createInputs(postViewer, "Search Kheina", "hotkeyOpenKheina"),
+                    ...createInputs(postViewer, "Search Google Search", "hotkeyOpenGoogle"),
+                    ...createInputs(postViewer, "Search Yandex Search", "hotkeyOpenYandex"),
+                    ...createInputs(postViewer, "Search Derpibooru", "hotkeyOpenDerpibooru"),
+                    ...createInputs(postViewer, "Search Inkbunny", "hotkeyOpenInkbunny"),
                     Form.hr(3),
                 ]
             ),
