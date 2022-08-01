@@ -382,12 +382,20 @@ export class SettingsController extends RE6Module {
                             async (data) => {
                                 await betterSearch.pushSettings("imageSizeChange", data);
                                 if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
-
                                 $("#conf-general-collapse-thumb-scaling-thumbsize-desc").toggleClass("input-disabled", !data);
                                 $("#conf-general-collapse-thumb-scaling-thumbsize")
                                     .prop("disabled", !data)
                                     .parent()
                                     .toggleClass("input-disabled", !data);
+
+                                $("#conf-general-collapse-thumb-scaling-thumbnailResizeButtons")
+                                    .prop("disabled", !data)
+
+                                $("label[for='conf-general-collapse-thumb-scaling-thumbnailResizeButtons']")
+                                    .parent()
+                                    .toggleClass("input-disabled", !data);
+
+                                if (betterSearch.fetchSettings("thumbnailResizeButtons")) BetterSearch.toggleResizeButtons(data)
                             }
                         ),
                         Form.spacer(3, true),
@@ -500,6 +508,20 @@ export class SettingsController extends RE6Module {
                             async (data, input) => {
                                 if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
                                 await betterSearch.pushSettings("imageMinWidth", parseInt(data));
+                                if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
+                            }
+                        ),
+                        Form.spacer(3, true),
+
+                        Form.checkbox(
+                            {
+                                name: "thumbnailResizeButtons",
+                                value: betterSearch.fetchSettings("thumbnailResizeButtons"),
+                                label: '<b>Thumbnail Rescaling Buttons</b><br />Resize the images using the - and + buttons in the top right',
+                                width: 3,
+                            },
+                            async (data) => {
+                                await betterSearch.pushSettings("thumbnailResizeButtons", data);
                                 if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
                             }
                         ),

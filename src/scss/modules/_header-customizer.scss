@@ -65,4 +65,21 @@ header#top nav#nav {
     menu.main.custom:not([data-editing=true]) li[data-right=true] {
         float: right;
     }
+
+    menu:last-child li.float-right {
+        #subnav-button-increase {
+            padding-right: 0.24rem;
+        }
+
+        .resize-disabled {
+            pointer-events: none;
+            cursor: default;
+
+            i {
+                color: #666666;
+            }
+        }
+
+        &[hide-resize-buttons=true] { display: none; }
+    }
 }
