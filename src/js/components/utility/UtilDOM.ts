@@ -5,8 +5,9 @@ export class UtilDOM {
     /**
      * Adds a button to the top-right of the navbar
      * @param config Button configuration
+     * @param target Target element
      */
-    public static addSettingsButton(config: SettingsButton): JQuery<HTMLElement> {
+    public static addSettingsButton(config: SettingsButton, target = "menu.extra"): JQuery<HTMLElement> {
         if (config.name === undefined) config.name = "T";
         if (config.href === undefined) config.href = "";
         if (config.title === undefined) config.title = "";
@@ -16,7 +17,7 @@ export class UtilDOM {
 
         if (config.attr === undefined) config.attr = {};
 
-        const $tab = $(`<li>`).appendTo("menu.extra");
+        const $tab = $(`<li>`).appendTo(target);
         const $link = $("<a>")
             .html(config.name)
             .attr({
