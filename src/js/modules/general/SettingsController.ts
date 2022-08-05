@@ -519,6 +519,7 @@ export class SettingsController extends RE6Module {
                                 value: betterSearch.fetchSettings("thumbnailResizeButtons"),
                                 label: '<b>Thumbnail Rescaling Buttons</b><br />Resize the images using the - and + buttons in the top right',
                                 width: 3,
+                                disabled: !betterSearch.fetchSettings("imageSizeChange"),
                             },
                             async (data) => {
                                 await betterSearch.pushSettings("thumbnailResizeButtons", data);
