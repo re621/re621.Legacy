@@ -109,3 +109,6 @@ bin/extension-key.pem
 
 # TamperDAV server
 dav/
+
+# Jetbrains IDE
+.idea

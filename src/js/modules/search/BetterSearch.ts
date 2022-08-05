@@ -82,6 +82,8 @@ export class BetterSearch extends RE6Module {
             hideInfoBar: false,                             // Remove the post info (votes, favorites, etc) from view
             colorFavCount: true,                            // The Favorites counter on the thumbnail will be colored yellow
             customFlagsExpanded: false,                     // Show custom flags at full width by default, not just on hover
+
+            thumbnailResizeButtons: true,                   // Resize the images using the - and + buttons in the top right
         };
     }
 
@@ -349,6 +351,10 @@ export class BetterSearch extends RE6Module {
             this.updatePostCount();
             BetterSearch.trigger("ready");
         });
+
+        BetterSearch.createResizeButtons();
+        if (!this.fetchSettings("thumbnailResizeButtons") || !this.fetchSettings("imageSizeChange"))
+            BetterSearch.toggleResizeButtons(false)
     }
 
     /** If true, InfiniteScroll and HoverZoom are both paused */
@@ -587,6 +593,7 @@ export class BetterSearch extends RE6Module {
             "hideSmartAliasOutput",
 
             "hideInfoBar", "colorFavCount",
+            "thumbnailResizeButtons",
         ]);
 
         // Scaling Settings
@@ -612,6 +619,8 @@ export class BetterSearch extends RE6Module {
             if (param) searchContent.attr(value, "true");
             else searchContent.removeAttr(value);
         }
+
+        BetterSearch.toggleResizeButtons(conf.thumbnailResizeButtons);
     }
 
     /** Restarts various event listeners used by the module */
@@ -1067,6 +1076,61 @@ export class BetterSearch extends RE6Module {
         }
     }
 
+    private static createResizeButtons(): void {
+
+        const betterSearch = ModuleController.get(BetterSearch)
+
+        Util.DOM.addSettingsButton({
+            id: "subnav-button-increase",
+            name: `<i class="fas fa-plus"></i>`,
+            title: "Increase Image Size",
+            tabClass: "float-right",
+            onClick: async () => {
+                const cur = await betterSearch.fetchSettings("imageWidth")
+                await betterSearch.pushSettings("imageWidth", Math.min(450, cur + 100))
+                await disableResizeButton()
+                if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
+            },
+        }, "nav#nav menu:last-child")
+
+        Util.DOM.addSettingsButton({
+            id: "subnav-button-decrease",
+            name: `<i class="fas fa-minus"></i>`,
+            title: "Decrease Image Size",
+            tabClass: "float-right",
+            onClick: async () => {
+                const cur = await betterSearch.fetchSettings("imageWidth")
+                await betterSearch.pushSettings("imageWidth", Math.max(150, cur - 100))
+                await disableResizeButton()
+                if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
+            },
+        }, "nav#nav menu:last-child")
+
+        async function disableResizeButton(): Promise<void> {
+            const cur = await betterSearch.fetchSettings("imageWidth")
+            if (cur <= 150) {
+                $("#subnav-button-decrease").addClass("resize-disabled")
+            } else {
+                $("#subnav-button-decrease").removeClass("resize-disabled")
+            }
+
+            if (cur >= 450) {
+                $("#subnav-button-increase").addClass("resize-disabled")
+            } else {
+                $("#subnav-button-increase").removeClass("resize-disabled")
+            }
+        }
+
+        disableResizeButton()
+    }
+
+    public static toggleResizeButtons(buttonsEnabled: boolean): void {
+        if (buttonsEnabled) {
+            $("menu:last-child li.float-right").attr("hide-resize-buttons", "false")
+        } else {
+            $("menu:last-child li.float-right").attr("hide-resize-buttons", "true")
+        }
+    }
 }
 
 export enum ImageLoadMethod {

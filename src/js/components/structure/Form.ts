@@ -777,7 +777,8 @@ export class Form implements PreparedStructure {
 
         const $element = FormUtils
             .makeInputWrapper(undefined, options.wrapper, options.width)
-            .addClass("checkbox-switch");
+            .addClass("checkbox-switch")
+            .toggleClass("input-disabled", options.disabled == true);
 
         const $input = $("<input>")
             .attr({
