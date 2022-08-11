@@ -272,7 +272,7 @@ export class Miscellaneous extends RE6Module {
             $(".re621-forum-post-reply").on('click', (event) => {
                 event.preventDefault();
                 const $parent = $(event.target).parents("article.forum-post");
-                this.quote($parent, "forum", $parent.data("forum-post-id"), $("#topic-response #forum_post_body"), $("a#new-response-link"));
+                this.quote($parent, "forum", $parent.data("forum-post-id"), $("#forum_post_body_for_"), $("a#new-response-link"));
             });
         } else if (Page.matches(PageDefinition.post)) {
             $(".comment-reply-link").each(function (index, element) {
@@ -286,7 +286,7 @@ export class Miscellaneous extends RE6Module {
             $(".re621-comment-reply").on('click', (event) => {
                 event.preventDefault();
                 const $parent = $(event.target).parents("article.comment");
-                this.quote($parent, "comment", $parent.data("comment-id"), $("div.new-comment #comment_body"), $("a.expand-comment-response"));
+                this.quote($parent, "comment", $parent.data("comment-id"), $("#comment_body_for_"), $("a.expand-comment-response"));
             });
         }
     }
