@@ -351,18 +351,14 @@ export class Miscellaneous extends RE6Module {
         } else {
             strippedBody = `[quote]"` + $parent.data('creator') + `":/user/show/` + $parent.data('creator-id') + ` said:\n` + selection + `\n[/quote]`;
         }
-        console.log(strippedBody);
 
         if (($textarea.val() + "").length > 0) { strippedBody = "\n\n" + strippedBody; }
 
         $responseButton[0].click();
-        console.log($textarea);
         $textarea.scrollTop($textarea[0].scrollHeight);
 
-        console.log("before", $textarea.val());
         const newVal = $textarea.val() + strippedBody + "\n\n";
         $textarea.trigger("focus").val("").val(newVal);
-        console.log("after", $textarea.val());
     }
 
     /**
