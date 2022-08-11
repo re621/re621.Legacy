@@ -272,7 +272,7 @@ export class Miscellaneous extends RE6Module {
             $(".re621-forum-post-reply").on('click', (event) => {
                 event.preventDefault();
                 const $parent = $(event.target).parents("article.forum-post");
-                this.quote($parent, "forum", $parent.data("forum-post-id"), $("#forum_post_body"), $("a#new-response-link"));
+                this.quote($parent, "forum", $parent.data("forum-post-id"), $("#topic-response #forum_post_body"), $("a#new-response-link"));
             });
         } else if (Page.matches(PageDefinition.post)) {
             $(".comment-reply-link").each(function (index, element) {
@@ -286,7 +286,7 @@ export class Miscellaneous extends RE6Module {
             $(".re621-comment-reply").on('click', (event) => {
                 event.preventDefault();
                 const $parent = $(event.target).parents("article.comment");
-                this.quote($parent, "comment", $parent.data("comment-id"), $("#comment_body_for_"), $("a.expand-comment-response"));
+                this.quote($parent, "comment", $parent.data("comment-id"), $("div.new-comment #comment_body"), $("a.expand-comment-response"));
             });
         }
     }
@@ -351,14 +351,18 @@ export class Miscellaneous extends RE6Module {
         } else {
             strippedBody = `[quote]"` + $parent.data('creator') + `":/user/show/` + $parent.data('creator-id') + ` said:\n` + selection + `\n[/quote]`;
         }
+        console.log(strippedBody);
 
         if (($textarea.val() + "").length > 0) { strippedBody = "\n\n" + strippedBody; }
 
         $responseButton[0].click();
+        console.log($textarea);
         $textarea.scrollTop($textarea[0].scrollHeight);
 
-        const newVal = $textarea.val() + strippedBody;
+        console.log("before", $textarea.val());
+        const newVal = $textarea.val() + strippedBody + "\n\n";
         $textarea.trigger("focus").val("").val(newVal);
+        console.log("after", $textarea.val());
     }
 
     /**
