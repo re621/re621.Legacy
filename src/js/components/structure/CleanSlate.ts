@@ -43,6 +43,7 @@ export class CleanSlate {
             selector: "body",
             action: () => {
                 $("body").attr({
+                    "re621": true,
                     "data-th-main": window.localStorage.getItem("theme"),
                     "data-th-extra": window.localStorage.getItem("theme-extra"),
                     "data-th-nav": window.localStorage.getItem("theme-nav"),
