@@ -5,31 +5,30 @@
     "version": "%VERSION%",
     "description": "%DESCRIPTION%",
     "author": "%AUTHOR%",
-
     "icons": {},
     "icons-lib": [
         {
             "size": "32",
-            "url": "https://cdn.jsdelivr.net/gh/bitwolfy/re621@master/assets/icon32.png",
+            "url": "https://cdn.jsdelivr.net/gh/re621/re621.Legacy@master/assets/icon32.png",
             "path": "./build/cache/icon32.png"
         },
         {
             "size": "64",
-            "url": "https://cdn.jsdelivr.net/gh/bitwolfy/re621@master/assets/icon64.png",
+            "url": "https://cdn.jsdelivr.net/gh/re621/re621.Legacy@master/assets/icon64.png",
             "path": "./build/cache/icon64.png"
         },
         {
             "size": "129",
-            "url": "https://cdn.jsdelivr.net/gh/bitwolfy/re621@master/assets/icon128.png",
+            "url": "https://cdn.jsdelivr.net/gh/re621/re621.Legacy@master/assets/icon128.png",
             "path": "./build/cache/icon128.png"
         }
     ],
-
     "background": {
-        "scripts": ["background.js"],
+        "scripts": [
+            "background.js"
+        ],
         "persistent": false
     },
-
     "content_scripts": [
         {
             "matches": [
@@ -59,7 +58,6 @@
             ]
         }
     ],
-
     "permissions": [
         "storage",
         "tabs",
@@ -67,11 +65,9 @@
         "https://api.github.com/*",
         "https://static1.e621.net/*"
     ],
-
     "resources": {
         "re621_css": "style.min.css"
     },
-
     "web_accessible_resources": [
         "style.min.css",
         "injector.js"

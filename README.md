@@ -10,7 +10,7 @@ It consists of several different modules that enhance the entire site, top to bo
 
 The project is delivered via a userscript. This means that you need a script manager, such as [Tampermonkey](https://www.tampermonkey.net/).
 
-With a script manager installed, click on [this link](https://github.com/bitWolfy/re621/releases/latest/download/script.user.js) and follow the instructions on the new page.
+With a script manager installed, click on [this link](https://github.com/re621/re621.Legacy/releases/latest/download/script.user.js) and follow the instructions on the new page.
 
 ## Features
 
@@ -19,7 +19,7 @@ For a complete feature overview visit the projects website, found under [re621.b
 ## Contributing
 
 Contributions are always welcome.  
-For bug reports, suggestions, and feature requests, head on over to the [issue tracker](https://github.com/bitWolfy/re621/issues).
+For bug reports, suggestions, and feature requests, head on over to the [issue tracker](https://github.com/re621/re621.Legacy/issues).
 
 ## Building the Script
 

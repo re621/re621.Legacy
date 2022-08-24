@@ -28,22 +28,18 @@
         "GM.deleteValue",
         "GM.openInTab",
         "GM.setClipboard",
-
         "GM.getResourceUrl",
         "GM_getResourceURL",
         "GM_getResourceText",
         "GM.xmlHttpRequest",
         "GM_xmlhttpRequest",
-
         "GM_download",
-
         "GM_addValueChangeListener",
         "GM_removeValueChangeListener",
-
         "unsafeWindow"
     ],
-    "icon": "https://cdn.jsdelivr.net/gh/bitwolfy/re621@master/assets/icon64.png",
-    "icon64": "https://cdn.jsdelivr.net/gh/bitwolfy/re621@master/assets/icon64.png",
+    "icon": "https://cdn.jsdelivr.net/gh/re621/re621.Legacy@master/assets/icon64.png",
+    "icon64": "https://cdn.jsdelivr.net/gh/re621/re621.Legacy@master/assets/icon64.png",
     "connect": [
         "api.github.com",
         "static1.e621.net",
