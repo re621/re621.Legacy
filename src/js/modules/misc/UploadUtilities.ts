@@ -398,7 +398,7 @@ export class UploadUtilities extends RE6Module {
                     url: requestURL,
                     method: "HEAD",
                     headers: {
-                        referer: requestURLValidated.hostname = - "i.pximg.net" ? "https://www.pixiv.net/" : window.location.href,
+                        referer: requestURLValidated.hostname == "i.pximg.net" ? "https://www.pixiv.net/" : window.location.href,
                     },
                     onload: (event) => {
 
