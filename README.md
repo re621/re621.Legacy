@@ -1,16 +1,32 @@
-RE:621
-================
+<div>
+  <h1>RE621</h1>
+  <div>
+    <a href="https://github.com/re621/re621/releases">
+      <img src="https://img.shields.io/github/v/release/re621/re621.Legacy?label=version&style=flat-square" alt="Releases">
+    </a>
+    <a href="https://github.com/re621/re621/issues">
+      <img src="https://img.shields.io/github/issues/re621/re621.Legacy?&style=flat-square" alt="Issues">
+    </a>
+    <a href="https://github.com/re621/re621/pulls">
+      <img src="https://img.shields.io/github/issues-pr/re621/re621.Legacy?style=flat-square" alt="Pull Requests">
+    </a>
+    <a href="https://github.com/re621/re621/releases/latest/download/script.user.js">
+      <img src="https://img.shields.io/github/downloads/re621/re621.Legacy/total?style=flat-square" alt="Download">
+    </a>
+  </div>
+</div>
 
-## e621, Reimagined
-
-RE621 is a comprehensive project created to improve the basic user experience while browsing e621.net.
+RE621 is a comprehensive project created to improve the basic user experience while browsing e621.net.  
 It consists of several different modules that enhance the entire site, top to bottom - literally.
 
 ## Installation
 
-The project is delivered via a userscript. This means that you need a script manager, such as [Tampermonkey](https://www.tampermonkey.net/).
+The project is delivered via a userscript. This means that you need a script manager, such as [Tampermonkey](https://tampermonkey.net/).  
+With a script manager installed, click on the following link and follow the instructions on the new page.
 
-With a script manager installed, click on [this link](https://github.com/re621/re621.Legacy/releases/latest/download/script.user.js) and follow the instructions on the new page.
+<a href="https://github.com/re621/re621.Legacy/releases/latest/download/script.user.js">
+  <img src="https://img.shields.io/github/v/release/re621/re621.Legacy?label=Install&style=for-the-badge">
+</a>
 
 ## Features
 
