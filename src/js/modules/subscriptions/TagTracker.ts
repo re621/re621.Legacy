@@ -257,7 +257,7 @@ export class TagTracker extends SubscriptionTracker {
             });
 
         $("<a>")
-            .html(formattedID)
+            .html(id)
             .attr({ "href": "/wiki_pages/show_or_new?title=" + id })
             .appendTo(result);
 
