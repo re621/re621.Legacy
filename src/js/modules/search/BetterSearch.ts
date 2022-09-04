@@ -1087,7 +1087,7 @@ export class BetterSearch extends RE6Module {
             tabClass: "float-right",
             onClick: async () => {
                 const cur = await betterSearch.fetchSettings("imageWidth")
-                await betterSearch.pushSettings("imageWidth", Math.min(450, cur + 100))
+                await betterSearch.pushSettings("imageWidth", Math.min($("#content").innerWidth(), cur + 100))
                 await disableResizeButton()
                 if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
             },
@@ -1114,7 +1114,7 @@ export class BetterSearch extends RE6Module {
                 $("#subnav-button-decrease").removeClass("resize-disabled")
             }
 
-            if (cur >= 450) {
+            if (cur >= $("#content").innerWidth()) {
                 $("#subnav-button-increase").addClass("resize-disabled")
             } else {
                 $("#subnav-button-increase").removeClass("resize-disabled")
