@@ -67,10 +67,14 @@ smart-alias {
             color: #d8c;
         }
 
-        & > span.tag-warning {
-            color: orange;
-            cursor: help;
-            font-size: 70%;
+        & > span {
+            margin-left: 0.5em;
+
+            &.tag-warning {
+                color: orange;
+                cursor: help;
+                font-size: 70%;
+            }
         }
 
     }

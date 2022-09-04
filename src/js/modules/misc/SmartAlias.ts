@@ -632,13 +632,13 @@ export class SmartAlias extends RE6Module {
                 }
 
                 // Insert zero-width spaces for better line-breaking
-                displayName = displayName.replace(/_/g, "_&#8203;");
+                displayName = displayName.replace(/_/g, "_\u200B");
 
                 let action = "default";
                 if (originalTags.has(tagData.name) && tagData.negated) action = "removed";
                 if (!originalTags.has(tagData.name) && !tagData.negated) action = "added";
 
-                $("<smart-tag>")
+                const $element = $("<smart-tag>")
                     .addClass(isLoading ? "" : "category-" + data.category)
                     .attr({
                         "name": tagData.name,
@@ -647,16 +647,25 @@ export class SmartAlias extends RE6Module {
                         // "title": title,
                         "action": action == "default" ? undefined : action,
                     })
-                    .html(
-                        `<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tagData.name)}" target="_blank" rel="noopener noreferrer" tabindex="-1">${displayName}</a>
-                        <span title="${title}">${text}</span>`
-                        + (
-                            (asciiWarning && data && data.errors.length > 0 && !data.dnp)
-                                ? ` <span class="fas fa-exclamation-triangle tag-warning" title="${data.errors.join("\n")}"></span>`
-                                : ``
-                        )
-                    )
                     .appendTo($container);
+                $("<a>")
+                    .attr({
+                        href: "/wiki_pages/show_or_new?title=" + encodeURIComponent(tagData.name),
+                        target: "_blank",
+                        rel: "noopener noreferrer",
+                        tabindex: -1,
+                    })
+                    .text(displayName)
+                    .appendTo($element);
+                $(" <span>")
+                    .attr("title", title)
+                    .text(text)
+                    .appendTo($element)
+                if (asciiWarning && data && data.errors.length > 0 && !data.dnp)
+                    $("<span>")
+                        .addClass("fas fa-exclamation-triangle tag-warning")
+                        .attr("title", data.errors.join("\n"))
+                        .appendTo($element);
             }
         }
 
