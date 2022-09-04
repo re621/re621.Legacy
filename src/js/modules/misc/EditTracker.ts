@@ -11,7 +11,7 @@ export class EditTracker extends RE6Module {
     public create(): void {
 
         if ($("#post_tag_string").is(":visible")) this.listen();
-        else {$("body").one("click.re621", "#post-edit-link, #side-edit-link", () => { this.listen(); });}
+        else { $("body").one("click.re621", "#post-edit-link, #side-edit-link", () => { this.listen(); }); }
     }
 
     private async listen(): Promise<void> {
@@ -29,10 +29,10 @@ export class EditTracker extends RE6Module {
             const output = [];
             // Added tags (in changed, but not in original)
             for (const tag of changed.filter(el => !original.includes(el)))
-                output.push(`<ins>+<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tag)}" target="_blank" rel="noopener noreferrer">${tag}</a></ins>`);
+                output.push(`<ins>+<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tag)}" target="_blank" rel="noopener noreferrer">${escapeHTML(tag)}</a></ins>`);
             // Removed tags (in original, but not in changed)
             for (const tag of original.filter(el => !changed.includes(el)))
-                output.push(`<del>-<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tag)}" target="_blank" rel="noopener noreferrer">${tag}</a></del>`);
+                output.push(`<del>-<a href="/wiki_pages/show_or_new?title=${encodeURIComponent(tag)}" target="_blank" rel="noopener noreferrer">${escapeHTML(tag)}</a></del>`);
 
             if (output.length == 0) {
                 changes.html("");
@@ -41,6 +41,10 @@ export class EditTracker extends RE6Module {
 
             changes.html(`<label>Tag Changes</label>\n` + output.join(" "));
         });
+
+        function escapeHTML(input: string): string {
+            return $("<span>").text(input).html();
+        }
     }
 
 }
