@@ -8,6 +8,8 @@ export class JanitorEnhancements extends RE6Module {
         super([], true);
         this.registerHotkeys(
             { keys: "hotkeyApprovePost", fnct: this.approvePost },
+            { keys: "hotkeyApprovePostPrev", fnct: this.approvePostPrev },
+            { keys: "hotkeyApprovePostNext", fnct: this.approvePostNext },
         );
     }
 
@@ -15,6 +17,8 @@ export class JanitorEnhancements extends RE6Module {
         return {
             enabled: true,
             hotkeyApprovePost: "",
+            hotkeyApprovePostPrev: "",
+            hotkeyApprovePostNext: "",
         }
     }
 
@@ -47,7 +51,17 @@ export class JanitorEnhancements extends RE6Module {
 
     private approvePost(): void {
         if (!Page.matches(PageDefinition.post)) return;
-        $("a.approve-post-link").first()[0].click()
+        $("a#approve-post").first()[0].click()
+    }
+
+    private approvePostPrev(): void {
+        if (!Page.matches(PageDefinition.post)) return;
+        $("a#approve-post-prev").first()[0].click()
+    }
+
+    private approvePostNext(): void {
+        if (!Page.matches(PageDefinition.post)) return;
+        $("a#approve-post-next").first()[0].click()
     }
 
     private enhanceDeletionpage(): void {

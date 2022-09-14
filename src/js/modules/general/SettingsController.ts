@@ -2122,6 +2122,8 @@ export class SettingsController extends RE6Module {
                     Form.header("Extra", 3),
 
                     ...createInputs(janitorEnhancements, "Approve post", "hotkeyApprovePost"),
+                    ...createInputs(janitorEnhancements, "Approve + Prev", "hotkeyApprovePostPrev"),
+                    ...createInputs(janitorEnhancements, "Approve + Next", "hotkeyApprovePostNext"),
                     Form.hr(3),
                 ]
             ),
