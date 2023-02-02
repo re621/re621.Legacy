@@ -40,8 +40,12 @@
     font-variant: normal;
     text-rendering: auto;
     line-height: 1;
-    font-family: "Font Awesome 5 Free";
     font-weight: 900;
+    @include FontAwesomeFamily;
+}
+
+@mixin FontAwesomeFamily() {
+    font-family: "Font Awesome 6 Free";
 }
 
 @mixin nonselectable {

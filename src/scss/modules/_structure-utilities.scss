@@ -392,7 +392,7 @@ body[data-hide-blacklist=true] section#blacklist-box {
 
     &::after {
         content: unicode('f110');
-        font-family: "Font Awesome 5 Free";
+        @include FontAwesomeFamily;
         font-weight: 900;
         font-size: 0.75em;
         line-height: 0.75em;

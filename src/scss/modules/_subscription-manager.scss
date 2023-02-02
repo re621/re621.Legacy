@@ -43,7 +43,7 @@ tabbed.config-tabs {
 
                 &:not([updates="0"])::after {
                     content: unicode("f111");
-                    font-family: "Font Awesome 5 Free";
+                    @include FontAwesomeFamily;
                     font-weight: 900;
                     font-size: 0.5em;
                     color: red;
@@ -55,7 +55,7 @@ tabbed.config-tabs {
 
                 &[loading=true]::after {
                     content: unicode("f110");
-                    font-family: "Font Awesome 5 Free";
+                    @include FontAwesomeFamily;
                     font-weight: 900;
                     font-size: 0.5em;
                     color: inherit;
@@ -98,7 +98,7 @@ a.subscribe-button-minor {
 
     &::after {
         content: unicode("f004");
-        font-family: "Font Awesome 5 Free";
+        @include FontAwesomeFamily;
         font-weight: 500;
     }
 

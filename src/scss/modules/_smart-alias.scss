@@ -41,7 +41,7 @@ smart-alias {
             display: block;
             line-height: 1;
 
-            font-family: "Font Awesome 5 Free";
+            @include FontAwesomeFamily;
             font-weight: 400;
             font-size: 0.7rem;
             color: white;

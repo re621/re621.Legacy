@@ -59,7 +59,7 @@ section#image-extra-controls {
 
             &:before {
                 content: "\f1ce";
-                font-family: "Font Awesome 5 Free";
+                @include FontAwesomeFamily;
                 font-weight: 900;
                 animation: fa-spin 2s infinite linear;
                 color: #aaa;

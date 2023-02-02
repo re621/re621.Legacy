@@ -231,7 +231,7 @@ search-content > post {
 
         &::before {
             content: unicode("f1ce");
-            font-family: "Font Awesome 5 Free";
+            @include FontAwesomeFamily;
             font-weight: 900;
             width: 2rem;
             height: 2rem;
@@ -447,8 +447,8 @@ search-content > post[sound=true] {
         &[warning=true] { color: goldenrod; }
 
         &::before {
-            content: unicode("f027");    
-            font-family: "Font Awesome 5 Free";
+            content: unicode("f027");
+            @include FontAwesomeFamily;
             font-weight: 900;
         }
     }
@@ -573,7 +573,7 @@ search-content  {
             padding: 0.125rem 1rem;
 
             &::before {
-                font-family: "Font Awesome 5 Free";
+                @include FontAwesomeFamily;
                 font-weight: 500;
                 position: relative;
             }
@@ -608,7 +608,7 @@ search-content  {
 
             &::before {
                 content: unicode("f005");
-                font-family: "Font Awesome 5 Free";
+                @include FontAwesomeFamily;
                 font-weight: 500;
                 position: relative;
                 top: 1px;
@@ -694,7 +694,7 @@ zoom-container {
     &[status=loading] {
         &::after {
             content: unicode("f1ce");
-            font-family: "Font Awesome 5 Free";
+            @include FontAwesomeFamily;
             font-weight: 900;
             font-size: 3rem;
             line-height: 3rem;

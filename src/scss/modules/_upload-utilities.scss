@@ -35,7 +35,7 @@ div#c-uploads div#a-new div.the_secret_switch {
     &::before {
         content: unicode("f011"); // fa-check-circle
 
-        font-family: "Font Awesome 5 Free";
+        @include FontAwesomeFamily;
         font-weight: 700;
 
         font-size: 1.2rem;
