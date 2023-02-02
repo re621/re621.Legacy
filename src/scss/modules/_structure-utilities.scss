@@ -370,7 +370,7 @@ body[data-hide-blacklist=true] section#blacklist-box {
 .update-notification:not([data-updates="0"]) {
     &::after {
         content: unicode('f111');
-        font-family: 'Font Awesome 5 Free';
+        @include FontAwesomeFamily;
         font-weight: 900;
         font-size: 0.5em;
         color: red;

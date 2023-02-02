@@ -41,7 +41,7 @@ header#top nav#nav {
 
             li > a.tab-has-updates::after {
                 content: unicode('f111');
-                font-family: 'Font Awesome 5 Free';
+                @include FontAwesomeFamily;
                 font-weight: 900;
                 font-size: 0.5em;
                 color: red;

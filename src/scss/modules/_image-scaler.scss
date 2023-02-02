@@ -8,7 +8,7 @@ section#image-container {
 
         &::after {
             content: unicode("f1ce");
-            font-family: 'Font Awesome 5 Free';
+            @include FontAwesomeFamily;
             font-weight: 900;
             font-size: 3rem;
 

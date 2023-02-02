@@ -272,7 +272,7 @@ search-content > post {
 
         span::before {
             content: " ";
-            font-family: 'Font Awesome 5 Free';
+            @include FontAwesomeFamily;
             font-weight: 900;
         }
 
