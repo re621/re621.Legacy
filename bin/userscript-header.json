@@ -11,7 +11,7 @@
     "match": [
         "https://e621.net/*",
         "https://e926.net/*",
-        "http://e621.local/*"
+        "http://localhost:3000/*"
     ],
     "updateURL": "%GITHUB%/releases/latest/download/script.meta.js",
     "downloadURL": "%GITHUB%/releases/latest/download/script.user.js",
