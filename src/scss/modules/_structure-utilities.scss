@@ -41,20 +41,11 @@ header#top {
         display: none !important;
     }
 
-    nav#nav.grid {
-        display: grid !important;
-        grid-template-columns: auto 1fr auto;
-
-        menu.logo:not(.main) {
-            background: unset;
-            margin: 0 0 0 0.5rem;
-            padding: 0.25rem 0;
-            font-weight: 700;
-        }
-
-        menu.logo a {
-            padding: 6px 10px;
-        }
+    nav#nav.re621-nav {
+        grid-template-columns: 3.75em 1fr auto;
+        grid-template-areas:
+            "logo main extra"
+            "logo secondary secondary";
 
         menu.main {
             overflow: hidden;
@@ -63,7 +54,8 @@ header#top {
             padding-right: 0;
         }
 
-        menu.extra:not(.main) {
+        menu.extra {
+            grid-area: extra;
             background: unset;
             margin: 0 0.5rem 0 0;
             padding: 0.25rem 0;
@@ -72,15 +64,6 @@ header#top {
 
         menu.extra a {
             padding: 6px 10px;
-        }
-
-        // Technically, this would be menu.submenu
-        // But sometimes, that class gets added to the wrong element
-        menu:last-child {
-            grid-row: 2;
-            grid-column: 1;
-            grid-area: 2 / 1 / 2 / 4;
-            height: 1.125rem;
         }
     }
 }
