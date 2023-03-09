@@ -61,27 +61,18 @@ export class CleanSlate {
         actions.push({
             selector: "#nav",
             action: () => {
-                const $menuContainer = $("nav#nav");
-                const $menuMain = $("menu.main");
-
-                if ($("#nav").find("menu").length < 2) {
-                    $menuContainer.append(`<menu>`);
-                }
-
-                // Replace the logo in menu.main with a separate element
-                const titlePageRouting = Util.LS.getItem("re621.mainpage") || "default";
-                $("<menu>")
-                    .addClass("logo desktop-only")
-                    .html(`<a href="${titlePageRouting == "default" ? "/" : "/" + titlePageRouting}">` + Page.getSiteName() + `</a>`)
-                    .prependTo($menuContainer);
-                $menuMain.find("a[href='/']").remove();
 
                 // Add a section for re621 settings buttons
+                $("#nav").addClass("re621-nav")
                 $("<menu>")
                     .addClass("extra")
-                    .insertAfter($menuMain);
+                    .insertAfter("#nav menu.main");
 
-                $menuContainer.addClass("grid");
+                // Replace the logo's URL if necessary
+                // I don't remember why it's stored in LS
+                const titlePageRouting = Util.LS.getItem("re621.mainpage") || "default";
+                if(titlePageRouting !== "default")
+                    $("#nav a.logo").attr("href", titlePageRouting);
             },
         });
 
