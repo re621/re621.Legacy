@@ -35,6 +35,7 @@ switch (mode) {
             .replace(/\/\/ @downloadURL.*\n/, "")
             .replace(/(\/\/ @resource[ ]+re621_css )(.+)/, browser == "chrome" ? "$1file://" + __dirname + "\\..\\build\\userscript\\style.min.css" : "$1http://localhost:7000/style.min.css");
         header += formateHeaderLine("require", browser == "chrome" ? "file://" + __dirname + "\\..\\build\\userscript\\script.user.js" : "http://localhost:7000/script.user.js");
+        header += formateHeaderLine("match", "http://localhost:3000/*");
         fs.writeFileSync("./build/userscript/injector.user.js", util.parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n", package));
         break;
     }

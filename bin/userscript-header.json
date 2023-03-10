@@ -10,8 +10,7 @@
     "contributionURL": "https://ko-fi.com/bitwolfy",
     "match": [
         "https://e621.net/*",
-        "https://e926.net/*",
-        "http://localhost:3000/*"
+        "https://e926.net/*"
     ],
     "updateURL": "%GITHUB%/releases/latest/download/script.meta.js",
     "downloadURL": "%GITHUB%/releases/latest/download/script.user.js",

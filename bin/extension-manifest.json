@@ -33,8 +33,7 @@
         {
             "matches": [
                 "https://e621.net/*",
-                "https://e926.net/*",
-                "http://localhost:3000/*"
+                "https://e926.net/*"
             ],
             "css": [],
             "js": [],
