@@ -1607,6 +1607,16 @@ export class SettingsController extends RE6Module {
 
                     Form.checkbox(
                         {
+                            value: smartAlias.fetchSettings("resolveImplications"),
+                            label: `<b>Resolve Implications</b><br />Automatically add implied tags to the tag input`,
+                            width: 3,
+                        },
+                        (data) => { smartAlias.pushSettings("resolveImplications", data); }
+                    ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
                             value: !smartAlias.fetchSettings("replaceLastTag"),
                             label: `<b>Ignore Last Tag</b><br />Don't replace the last tag with its alias, in case you are still thinking about it`,
                             width: 3,

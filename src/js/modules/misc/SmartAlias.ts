@@ -2,6 +2,7 @@ import { E621 } from "../../components/api/E621";
 import { APITag, TagCategory } from "../../components/api/responses/APITag";
 import { APITagAlias } from "../../components/api/responses/APITagAlias";
 import { AvoidPosting } from "../../components/cache/AvoidPosting";
+import RelationsCache from "../../components/cache/RelationsCache";
 import { TagCache } from "../../components/cache/TagCache";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -58,6 +59,8 @@ export class SmartAlias extends RE6Module {
             uploadTagsForm: true,
 
             replaceAliasedTags: true,
+            resolveImplications: false,
+
             replaceLastTag: false,
             fixCommonTypos: false,
             asciiWarning: true,
@@ -428,6 +431,53 @@ export class SmartAlias extends RE6Module {
             // Regenerate the tags to account for replacements
             triggerUpdateEvent($textarea);
             tags = SmartAlias.parseTagInput($textarea);
+        }
+
+        // Step 4.1
+        // Resolve Implications
+        if (this.fetchSettings("resolveImplications")) {
+            console.log("resolving implications");
+
+            // RECURSE ALL THINGS
+            let added = [];
+            do {
+                const implLookup = RelationsCache.intersect(tags);
+                added = [];
+
+                for (const batch of Util.chunkArray(implLookup.lacks, 100)) {
+                    for (const result of await E621.TagImplications.get<APITagAlias>({
+                        search: {
+                            antecedent_name: batch.join(","),
+                        },
+                        limit: 100,
+                    }, 500)) {
+                        console.log(result);
+    
+                        const tagData = implLookup.has[result.antecedent_name] || { adds: [] };
+                        tagData.adds.push(result.consequent_name);
+                        implLookup.has[result.antecedent_name] = tagData;
+    
+                        RelationsCache.add(result.antecedent_name, tagData);
+                    }
+                }
+    
+                let textboxValue = $textarea.val() + "";
+    
+                for(const tagData of Object.values(implLookup.has)) {
+                    for(const implication of tagData.adds) {
+                        if(textboxValue.includes(implication) || added.includes(implication)) continue;
+                        added.push(implication);
+                    }
+                }
+    
+                if(added.length > 0)
+                    textboxValue = textboxValue + (textboxValue.endsWith(" ") ? "" : " ") + added.join(" ") + " ";
+    
+                $textarea.val(textboxValue);
+                triggerUpdateEvent($textarea);
+                tags = SmartAlias.parseTagInput($textarea);
+
+            } while(added.length > 0);
         }
 
 
@@ -861,7 +911,7 @@ namespace TagOrder {
 
 }
 
-type ParsedTag = {
+export type ParsedTag = {
     name: string;
     negated: boolean;
     prefix: string;
