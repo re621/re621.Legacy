@@ -34,6 +34,7 @@ smart-alias {
         &[color=error]      { color: lightcoral; }
         &[color=info]       { color: aqua; }
         &[color=warning]    { color: gold; }
+        &[color=implied]    { color: lightgreen; }
         &[color=success]    { color: inherit; }
 
         &::before {

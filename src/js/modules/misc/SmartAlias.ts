@@ -327,6 +327,7 @@ export class SmartAlias extends RE6Module {
         // Get the tags from the textarea
         const inputString = SmartAlias.getInputString($textarea);
         let tags: ParsedTag[] = SmartAlias.parseTagString(inputString);
+        const impliedTags = [];
 
         // Skip the rest if the textarea is empty
         if (tags.length == 0) {
@@ -463,22 +464,19 @@ export class SmartAlias extends RE6Module {
                 }
             }
 
-            let textboxValue = $textarea.val() + "";
-            const added = [];
+            const textboxValue = $textarea.val() + "";
     
             for(const tagData of Object.values(implLookup.has)) {
                 for(const implication of tagData.adds) {
-                    if(textboxValue.includes(implication) || added.includes(implication)) continue;
-                    added.push(implication);
+                    if(textboxValue.includes(implication) || impliedTags.includes(implication)) continue;
+                    impliedTags.push(implication);
+                    tags.push({
+                        name: implication,
+                        negated: false,
+                        prefix: null,
+                    });
                 }
             }
-
-            if(added.length > 0)
-                textboxValue = textboxValue + (textboxValue.endsWith(" ") ? "" : " ") + added.join(" ") + " ";
-
-            $textarea.val(textboxValue);
-            triggerUpdateEvent($textarea);
-            tags = SmartAlias.parseTagInput($textarea);
 
             // Add implied tags to the lookup list, since they are probably missing from it?
             for (const tagData of tags.filter(tag => !tag.malformed)) {
@@ -675,6 +673,10 @@ export class SmartAlias extends RE6Module {
                     color = "warning";
                     text = "ambiguous";
                     displayName = displayName.replace("_(disambiguation)", "");
+                } else if (impliedTags.includes(tagData.name)) {
+                    symbol = "info";
+                    color = "implied";
+                    text = "implied";
                 } else if (data.count == 0) {
                     symbol = "error";
                     color = "error";
