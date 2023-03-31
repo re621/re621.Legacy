@@ -327,7 +327,7 @@ export class SmartAlias extends RE6Module {
         // Get the tags from the textarea
         const inputString = SmartAlias.getInputString($textarea);
         let tags: ParsedTag[] = SmartAlias.parseTagString(inputString);
-        const impliedTags = [];
+        const impliedTags: Set<string> = new Set();
 
         // Skip the rest if the textarea is empty
         if (tags.length == 0) {
@@ -464,12 +464,13 @@ export class SmartAlias extends RE6Module {
                 }
             }
 
-            const textboxValue = $textarea.val() + "";
+            const tagIndex = new Set();
+            for(const tagData of tags) tagIndex.add(tagData.name);
     
             for(const tagData of Object.values(implLookup.has)) {
                 for(const implication of tagData.adds) {
-                    if(textboxValue.includes(implication) || impliedTags.includes(implication)) continue;
-                    impliedTags.push(implication);
+                    if(tagIndex.has(implication) || impliedTags.has(implication)) continue;
+                    impliedTags.add(implication);
                     tags.push({
                         name: implication,
                         negated: false,
@@ -673,7 +674,7 @@ export class SmartAlias extends RE6Module {
                     color = "warning";
                     text = "ambiguous";
                     displayName = displayName.replace("_(disambiguation)", "");
-                } else if (impliedTags.includes(tagData.name)) {
+                } else if (impliedTags.has(tagData.name)) {
                     symbol = "info";
                     color = "implied";
                     text = "implied";
