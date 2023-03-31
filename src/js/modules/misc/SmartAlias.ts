@@ -1,7 +1,9 @@
 import { E621 } from "../../components/api/E621";
 import { APITag, TagCategory } from "../../components/api/responses/APITag";
 import { APITagAlias } from "../../components/api/responses/APITagAlias";
+import { APITagPreview } from "../../components/api/responses/APITagPreview";
 import { AvoidPosting } from "../../components/cache/AvoidPosting";
+import RelationsCache from "../../components/cache/RelationsCache";
 import { TagCache } from "../../components/cache/TagCache";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -58,6 +60,8 @@ export class SmartAlias extends RE6Module {
             uploadTagsForm: true,
 
             replaceAliasedTags: true,
+            resolveImplications: true,
+
             replaceLastTag: false,
             fixCommonTypos: false,
             asciiWarning: true,
@@ -323,6 +327,7 @@ export class SmartAlias extends RE6Module {
         // Get the tags from the textarea
         const inputString = SmartAlias.getInputString($textarea);
         let tags: ParsedTag[] = SmartAlias.parseTagString(inputString);
+        const impliedTags = [];
 
         // Skip the rest if the textarea is empty
         if (tags.length == 0) {
@@ -428,6 +433,58 @@ export class SmartAlias extends RE6Module {
             // Regenerate the tags to account for replacements
             triggerUpdateEvent($textarea);
             tags = SmartAlias.parseTagInput($textarea);
+        }
+
+        // Step 4.1
+        // Resolve Implications
+        if (this.fetchSettings("resolveImplications")) {
+
+            const implLookup = RelationsCache.intersect(tags);
+            // console.log("looking up implications for " + implLookup.lacks.length + " tags");
+
+            if(implLookup.lacks.length) {
+
+                const response: APITagPreview[] = await E621.TagPreview.post({
+                    tags: implLookup.lacks.join(" "),
+                }, 500).then((result) => {
+                    if(result[1] !== 200) return [];
+                    return result[0];
+                });
+    
+                // console.log("response", response);
+    
+                for(const tagPreview of response) {
+                    if(tagPreview.type !== "implication") continue;
+                        
+                    const tagData = implLookup.has[tagPreview.a] || { adds: [] };
+                    tagData.adds.push(tagPreview.b);
+                    implLookup.has[tagPreview.a] = tagData;
+    
+                    RelationsCache.add(tagPreview.a, tagData);
+                }
+            }
+
+            const textboxValue = $textarea.val() + "";
+    
+            for(const tagData of Object.values(implLookup.has)) {
+                for(const implication of tagData.adds) {
+                    if(textboxValue.includes(implication) || impliedTags.includes(implication)) continue;
+                    impliedTags.push(implication);
+                    tags.push({
+                        name: implication,
+                        negated: false,
+                        prefix: null,
+                    });
+                }
+            }
+
+            // Add implied tags to the lookup list, since they are probably missing from it?
+            for (const tagData of tags.filter(tag => !tag.malformed)) {
+                if (typeof SmartAlias.tagData[tagData.name] == "undefined")
+                    lookup.add(tagData.name);
+            }
+
+            redrawContainerContents($container, tags, minPostsWarning, asciiWarning, tagOrder);
         }
 
 
@@ -616,6 +673,10 @@ export class SmartAlias extends RE6Module {
                     color = "warning";
                     text = "ambiguous";
                     displayName = displayName.replace("_(disambiguation)", "");
+                } else if (impliedTags.includes(tagData.name)) {
+                    symbol = "info";
+                    color = "implied";
+                    text = "implied";
                 } else if (data.count == 0) {
                     symbol = "error";
                     color = "error";
@@ -861,7 +922,7 @@ namespace TagOrder {
 
 }
 
-type ParsedTag = {
+export type ParsedTag = {
     name: string;
     negated: boolean;
     prefix: string;
