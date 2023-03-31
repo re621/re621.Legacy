@@ -1,6 +1,7 @@
 import { E621 } from "../../components/api/E621";
 import { APITag, TagCategory } from "../../components/api/responses/APITag";
 import { APITagAlias } from "../../components/api/responses/APITagAlias";
+import { APITagPreview } from "../../components/api/responses/APITagPreview";
 import { AvoidPosting } from "../../components/cache/AvoidPosting";
 import RelationsCache from "../../components/cache/RelationsCache";
 import { TagCache } from "../../components/cache/TagCache";
@@ -436,48 +437,56 @@ export class SmartAlias extends RE6Module {
         // Step 4.1
         // Resolve Implications
         if (this.fetchSettings("resolveImplications")) {
-            console.log("resolving implications");
 
-            // RECURSE ALL THINGS
-            let added = [];
-            do {
-                const implLookup = RelationsCache.intersect(tags);
-                added = [];
+            const implLookup = RelationsCache.intersect(tags);
+            // console.log("looking up implications for " + implLookup.lacks.length + " tags");
 
-                for (const batch of Util.chunkArray(implLookup.lacks, 100)) {
-                    for (const result of await E621.TagImplications.get<APITagAlias>({
-                        search: {
-                            antecedent_name: batch.join(","),
-                        },
-                        limit: 100,
-                    }, 500)) {
-                        console.log(result);
+            if(implLookup.lacks.length) {
+
+                const response: APITagPreview[] = await E621.TagPreview.post({
+                    tags: implLookup.lacks.join(" "),
+                }, 500).then((result) => {
+                    if(result[1] !== 200) return [];
+                    return result[0];
+                });
     
-                        const tagData = implLookup.has[result.antecedent_name] || { adds: [] };
-                        tagData.adds.push(result.consequent_name);
-                        implLookup.has[result.antecedent_name] = tagData;
+                // console.log("response", response);
     
-                        RelationsCache.add(result.antecedent_name, tagData);
-                    }
+                for(const tagPreview of response) {
+                    if(tagPreview.type !== "implication") continue;
+                        
+                    const tagData = implLookup.has[tagPreview.a] || { adds: [] };
+                    tagData.adds.push(tagPreview.b);
+                    implLookup.has[tagPreview.a] = tagData;
+    
+                    RelationsCache.add(tagPreview.a, tagData);
                 }
-    
-                let textboxValue = $textarea.val() + "";
-    
-                for(const tagData of Object.values(implLookup.has)) {
-                    for(const implication of tagData.adds) {
-                        if(textboxValue.includes(implication) || added.includes(implication)) continue;
-                        added.push(implication);
-                    }
-                }
-    
-                if(added.length > 0)
-                    textboxValue = textboxValue + (textboxValue.endsWith(" ") ? "" : " ") + added.join(" ") + " ";
-    
-                $textarea.val(textboxValue);
-                triggerUpdateEvent($textarea);
-                tags = SmartAlias.parseTagInput($textarea);
+            }
 
-            } while(added.length > 0);
+            let textboxValue = $textarea.val() + "";
+            const added = [];
+    
+            for(const tagData of Object.values(implLookup.has)) {
+                for(const implication of tagData.adds) {
+                    if(textboxValue.includes(implication) || added.includes(implication)) continue;
+                    added.push(implication);
+                }
+            }
+
+            if(added.length > 0)
+                textboxValue = textboxValue + (textboxValue.endsWith(" ") ? "" : " ") + added.join(" ") + " ";
+
+            $textarea.val(textboxValue);
+            triggerUpdateEvent($textarea);
+            tags = SmartAlias.parseTagInput($textarea);
+
+            // Add implied tags to the lookup list, since they are probably missing from it?
+            for (const tagData of tags.filter(tag => !tag.malformed)) {
+                if (typeof SmartAlias.tagData[tagData.name] == "undefined")
+                    lookup.add(tagData.name);
+            }
+
+            redrawContainerContents($container, tags, minPostsWarning, asciiWarning, tagOrder);
         }
 
 

@@ -17,6 +17,7 @@ const ENDPOINT_DEFS: EndpointDefinition[] = [
     { name: "tag", path: "tags/%ID%.json" },
     { name: "tag_aliases", path: "tag_aliases.json" },
     { name: "tag_implications", path: "tag_implications.json" },
+    { name: "tag_preview", path: "tags/preview.json" },
 
     { name: "notes", path: "notes.json" },
     { name: "favorites", path: "favorites.json", node: "posts" },
@@ -238,6 +239,7 @@ export class E621 {
     public static Tag = E621.getEndpoint("tag");
     public static TagAliases = E621.getEndpoint("tag_aliases");
     public static TagImplications = E621.getEndpoint("tag_implications");
+    public static TagPreview = E621.getEndpoint("tag_preview");
 
     public static Notes = E621.getEndpoint("notes");
     public static Favorites = E621.getEndpoint("favorites");
