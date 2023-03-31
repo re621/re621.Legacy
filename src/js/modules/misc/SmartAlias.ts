@@ -60,7 +60,7 @@ export class SmartAlias extends RE6Module {
             uploadTagsForm: true,
 
             replaceAliasedTags: true,
-            resolveImplications: false,
+            resolveImplications: true,
 
             replaceLastTag: false,
             fixCommonTypos: false,
