@@ -492,6 +492,7 @@ export class SmartAlias extends RE6Module {
                     lookup.add(tagData.name);
             }
 
+            $textarea.data("implications", Array.from(impliedTags))
             redrawContainerContents($container, tags, minPostsWarning, asciiWarning, tagOrder);
         }
 

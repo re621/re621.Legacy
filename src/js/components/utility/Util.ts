@@ -178,10 +178,12 @@ export class Util {
      * @param input Textarea to parse
      */
     public static getTagString(input: JQuery<HTMLElement>): string {
+        const implications = [input.data("implications")] || [];
         return input.val().toString().trim()
             .toLowerCase()
             .replace(/\r?\n|\r/g, " ")      // strip newlines
-            .replace(/(?:\s){2,}/g, " ");   // strip multiple spaces
+            .replace(/(?:\s){2,}/g, " ")    // strip multiple spaces
+            + (implications.length > 0 ? (" " + implications.join(" ")) : "");
     }
 
     public static getTags(input: string): string[];
