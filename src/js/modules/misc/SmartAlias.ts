@@ -452,15 +452,22 @@ export class SmartAlias extends RE6Module {
                 });
     
                 // console.log("response", response);
+                const lackingTags = new Set(implLookup.lacks);
     
                 for(const tagPreview of response) {
                     if(tagPreview.type !== "implication") continue;
-                        
+                    
                     const tagData = implLookup.has[tagPreview.a] || { adds: [] };
                     tagData.adds.push(tagPreview.b);
                     implLookup.has[tagPreview.a] = tagData;
+                    lackingTags.delete(tagPreview.a);
     
                     RelationsCache.add(tagPreview.a, tagData);
+                }
+
+                for(const tag of lackingTags) {
+                    const tagData = implLookup.has[tag] || { adds: [] };
+                    RelationsCache.add(tag, tagData);
                 }
             }
 
