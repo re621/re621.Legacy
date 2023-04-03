@@ -178,7 +178,7 @@ export class Util {
      * @param input Textarea to parse
      */
     public static getTagString(input: JQuery<HTMLElement>): string {
-        const implications = [input.data("implications")] || [];
+        const implications = input.data("implications") || [];
         return input.val().toString().trim()
             .toLowerCase()
             .replace(/\r?\n|\r/g, " ")      // strip newlines
