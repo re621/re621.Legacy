@@ -125,7 +125,7 @@ export class PostParts {
             });
 
         // Fallbacks for deleted and flash files
-        if (post.flags.has(PostFlag.Deleted) && !User.isApprover) {
+        if (post.flags.has(PostFlag.Deleted) && !User.canSeeDeletedPosts) {
             post.img.ratio = 1;
             post.loaded = LoadedFileType.ORIGINAL;
             return $image;

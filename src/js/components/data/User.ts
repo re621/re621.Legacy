@@ -28,6 +28,7 @@ export class User {
     public static isBlocked: boolean;
     public static isBanned: boolean;
 
+    public static canSeeDeletedPosts: boolean;
     public static canApprovePosts: boolean;
     public static canUploadFree: boolean;
 
@@ -66,6 +67,7 @@ export class User {
         User.isBlocked = data.userIsBlocked == true;
         User.isBanned = data.userIsBanned == true;
 
+        User.canSeeDeletedPosts = User.isApprover || User.isJanitor || User.isModerator || User.isAdmin;
         User.canApprovePosts = data.userCanApprovePosts == true;
         User.canUploadFree = data.userCanUploadFree == true;
 
