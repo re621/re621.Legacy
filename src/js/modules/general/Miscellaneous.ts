@@ -343,9 +343,9 @@ export class Miscellaneous extends RE6Module {
         if (selection === "") {
             const jsonData: APIForumPost = endpoint === "forum" ? await E621.ForumPost.id(id).first() : await E621.Comment.id(id).first();
             strippedBody = jsonData.body.replace(/\[quote\](?:.|\n|\r)+?\[\/quote\][\n\r]*/gm, "");
-            strippedBody = `[quote]"` + $parent.data('creator') + `":/user/show/` + $parent.data('creator-id') + ` said:\n` + strippedBody + `\n[/quote]`;
+            strippedBody = `[quote]"` + $parent.data('creator') + `":/users/` + $parent.data('creator-id') + ` said:\n` + strippedBody + `\n[/quote]`;
         } else {
-            strippedBody = `[quote]"` + $parent.data('creator') + `":/user/show/` + $parent.data('creator-id') + ` said:\n` + selection + `\n[/quote]`;
+            strippedBody = `[quote]"` + $parent.data('creator') + `":/users/` + $parent.data('creator-id') + ` said:\n` + selection + `\n[/quote]`;
         }
 
         if (($textarea.val() + "").length > 0) { strippedBody = "\n\n" + strippedBody; }
