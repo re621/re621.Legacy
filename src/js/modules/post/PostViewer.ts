@@ -240,7 +240,7 @@ export class PostViewer extends RE6Module {
                 null,
                 ["https://saucenao.com/search.php?url=" + this.getSourceLink(RISSizeLimit.SauceNAO, useSample), "SauceNAO"],
                 ["https://kheina.com/?url=" + this.getSourceLink(RISSizeLimit.Kheina, useSample), "Kheina"],
-                ["https://www.google.com/searchbyimage?image_url=" + this.getSourceLink(RISSizeLimit.Google, useSample), "Google"],
+                ["https://www.google.com/searchbyimage?image_url=" + this.getSourceLink(RISSizeLimit.Google, useSample)+"&client=e621", "Google"],
                 ["https://yandex.ru/images/search?url=" + this.getSourceLink(RISSizeLimit.Yandex, useSample) + "&rpt=imageview", "Yandex"],
                 null,
                 ["https://derpibooru.org/search/reverse?url=" + this.getSourceLink(RISSizeLimit.Derpibooru, useSample), "Derpibooru"],
