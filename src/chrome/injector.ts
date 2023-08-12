@@ -24,8 +24,7 @@ const fnDanbooru = {
         },
     },
     "DText": {
-        "getButtons": (): any => { return Danbooru.DText.buttons; },
-        "setButtons": (values): void => { Danbooru.DText.buttons = values; },
+        "initializeFormattingButtons": (element: JQuery<HTMLElement>): void => { Danbooru.DText.initialize_formatting_buttons(element); },
         "overrideFormatting": (fn: (content: string, input: JQuery<HTMLInputElement>) => void): void => {
             Danbooru.Blacklist.process_formatting = fn;
         },
