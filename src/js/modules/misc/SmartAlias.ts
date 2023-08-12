@@ -157,9 +157,6 @@ export class SmartAlias extends RE6Module {
             SmartAlias.aliasCacheLength = cacheData.length;
         }
 
-        // Fix the secret switch breaking the module
-        $(".the_secret_switch").one("click", () => { this.reload(); });
-
         // Detect enabled inputs
         const inputs = new Set(Array.from(SmartAlias.inputSelector));
         const enabledInputs = this.fetchSettings(["uploadCharactersForm", "uploadSexesForm", "uploadBodyTypesForm", "uploadThemesForm", "uploadTagsForm"]);

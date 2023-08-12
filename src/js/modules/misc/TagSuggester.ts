@@ -67,9 +67,6 @@ export class TagSuggester extends RE6Module {
             .on("recount", () => { this.container.attr("count", this.container.children().length); })
             .appendTo(this.tagOutput.parent());
 
-        // Fix the secret switch breaking the module
-        $(".the_secret_switch").one("click", () => { this.reload(); });
-
         // Initialize the listeners
         this.tagInput = [];
         for (const selector of TagSuggester.inputSelectors) {
