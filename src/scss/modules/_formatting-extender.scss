@@ -1,3 +1,7 @@
+.dtext-formatter-buttons a {
+    @include fontawesome;
+}
+
 div.dtext-formatter[data-drawer] {
     grid-template-columns: min-content auto min-content;
     
