@@ -49,13 +49,9 @@ export class Danbooru {
     }
 
     public static DText = {
-        get buttons(): DTextButton[] {
-            if (Danbooru.hasModules()) return Danbooru.getModules()["DText"].buttons;
-            else XM.Chrome.execInjectorRequest("Danbooru", "DText", "getButtons");
-        },
-        set buttons(values: DTextButton[]) {
-            if (Danbooru.hasModules()) Danbooru.getModules()["DText"].buttons = values;
-            else XM.Chrome.execInjectorRequest("Danbooru", "DText", "setButtons", [values]);
+        initialize_formatting_buttons(element: HTMLElement): void {
+            if (Danbooru.hasModules()) Danbooru.getModules()["DText"].initialize_formatting_buttons(element);
+            else XM.Chrome.execInjectorRequest("Danbooru", "DText", "initializeFormattingButtons", [element]);
         },
         override_formatting(fn: (content: string, input: JQuery<HTMLInputElement>) => void): void {
             if (Danbooru.hasModules()) Danbooru.getModules()["DText"].process_formatting = fn;
@@ -200,10 +196,4 @@ export class Danbooru {
             Danbooru.getModules()["error"](input);
         else XM.Chrome.execInjectorRequest("Danbooru", "Notice", "error", [input]);
     }
-}
-
-export type DTextButton = {
-    icon: string;
-    title: string;
-    content: string;
 }

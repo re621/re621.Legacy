@@ -1,4 +1,4 @@
-import { Danbooru, DTextButton } from "../../components/api/Danbooru";
+import { Danbooru } from "../../components/api/Danbooru";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
@@ -123,18 +123,24 @@ export class FormattingExtender extends RE6Module {
     }
 
     public regenerateButtons(): void {
-        const dtextButtons: DTextButton[] = [];
+        const dtextButtons: HTMLElement[] = [];
         for (const button of this.fetchSettings<ButtonDefinition[]>("buttonsActive"))
             dtextButtons.push(ButtonDefinition.toEsixButton(button));
-        Danbooru.DText.buttons = dtextButtons;
-        this.reloadButtonToolbar();
+        this.reloadButtonToolbar($(dtextButtons));
     }
 
-    public reloadButtonToolbar(): void {
+    public reloadButtonToolbar(buttons: JQuery<HTMLElement>): void {
         const e = document.createEvent('HTMLEvents');
-        e.initEvent("e621:reload", true, true);
-        for (const element of $(".dtext-formatter").get())
+        e.initEvent("re621:reload", true, true);
+
+        $(".dtext-formatter").each((index, element) => {
+            const wrapper = $(".dtext-formatter-buttons", element);
+            wrapper.empty();
+            wrapper.append(buttons.clone());
+
+            Danbooru.DText.initialize_formatting_buttons(element);
             element.dispatchEvent(e);
+        });
     }
 
     /**
@@ -240,7 +246,7 @@ class Formatter {
     private extendButtonToolbar(): void {
         this.toolbar = this.wrapper.find("div.dtext-formatter-buttons").first();
 
-        this.wrapper.on("e621:reload", () => {
+        this.wrapper.on("re621:reload", () => {
 
             const buttonList = this.module.fetchSettings<ButtonDefinition[]>("buttonsActive"),
                 children = this.toolbar.children().get();
@@ -288,7 +294,7 @@ class Formatter {
         this.bootstrapEditForm();
 
         // Regenerate the structure on reload
-        this.wrapper.on("e621:reload re621:reload", () => {
+        this.wrapper.on("re621:reload", () => {
 
             // Redraw the inactive button drawer
             this.bdrawer.html("");
@@ -544,14 +550,16 @@ type ButtonDefinition = {
 }
 
 namespace ButtonDefinition {
-    export function toEsixButton(value: ButtonDefinition): DTextButton {
-        const icon = ButtonDefinition.getIcon(value.icon);
-        if (!icon) return null;
-        return {
-            icon: icon,
-            title: value.name,
-            content: value.text,
-        }
+    export function toEsixButton(value: ButtonDefinition): HTMLElement {
+        const iconUnicode = ButtonDefinition.getIcon(value.icon);
+        if (!iconUnicode) return $("<span>").addClass("spacer")[0];
+        return $("<a>")
+            .html("&#x" + iconUnicode)
+            .attr({
+                "title": value.name,
+                "role": "button",
+                "data-content": value.text,
+            })[0];
     }
 
     /**

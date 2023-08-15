@@ -53,6 +53,10 @@
                 [
                     "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js",
                     "./build/cache/jszip.min.js"
+                ],
+                [
+                    "https://kit.fontawesome.com/994103cb75.js",
+                    "./build/cache/994103cb75.js"
                 ]
             ]
         }
