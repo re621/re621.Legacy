@@ -24,8 +24,8 @@
         "template": "node ./bin/common.js",
         "compile-sass:prod": "npm-run-all sass:prod autoprefixer",
         "compile-sass:dev": "npm-run-all sass:dev autoprefixer",
-        "sass:prod": "sass ./src/scss/style.scss ./build/style.css --no-source-map --style expanded --load-path=node_modules",
-        "sass:dev": "sass ./src/scss/style.scss ./build/style.css --no-source-map --style expanded --load-path=node_modules",
+        "sass:prod": "sass ./src/scss/style.scss ./build/style.css --no-source-map --style expanded",
+        "sass:dev": "sass ./src/scss/style.scss ./build/style.css --no-source-map --style expanded",
         "autoprefixer": "postcss ./build/style.css --no-map --use autoprefixer -r",
         "compose:prod": "npm-run-all --parallel compose-userscript:prod compose-extension:prod",
         "compose:dev": "npm-run-all --parallel compose-userscript:dev compose-extension:dev",
@@ -55,7 +55,6 @@
     "homepage": "https://e621.net/forum_topics/25872",
     "github": "https://github.com/re621/re621.Legacy",
     "dependencies": {
-        "@fortawesome/fontawesome-free": "^6.4.2",
         "jquery": "^3.6.0",
         "jquery-ui": "^1.13.2"
     },
