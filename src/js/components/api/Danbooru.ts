@@ -163,16 +163,14 @@ export class Danbooru {
 
     }
 
-    public static Utility = {
+    public static Shortcuts = {
 
-        disableShortcuts(state?: boolean): Promise<boolean> {
-            if (Danbooru.hasModules()) {
-                if (state !== undefined) Danbooru.getModules()["Utility"].disableShortcuts = state;
-                return Promise.resolve(Danbooru.getModules()["Utility"].disableShortcuts);
-            } else return XM.Chrome.execInjectorRequest("Danbooru", "Utility", "disableShortcuts", [state]);
-        },
+        set disabled(value: boolean) {
+            if (Danbooru.hasModules()) Danbooru.getModules()["Shortcuts"].disabled = (value == true);
+            else XM.Chrome.execInjectorRequest("Danbooru", "Shortcuts", "setDisabled", [(value == true)]);
+        }
 
-    };
+    }
 
     public static E621 = {
 

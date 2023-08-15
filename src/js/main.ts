@@ -110,7 +110,7 @@ if (Page.matches(PageDefinition.title)) {
 }
 
 // Disable existing keyboard shortcuts
-Danbooru.Utility.disableShortcuts(true);
+Danbooru.Shortcuts.disabled = true;
 
 // Create the basic DOM structure
 CleanSlate.createDOM().then(async () => {
@@ -125,7 +125,7 @@ CleanSlate.createDOM().then(async () => {
     // Workaround made specificially for one user who presses 
     // the Edit hotkey immediately after the post page loads.
     // You know who you are.
-    Danbooru.Utility.disableShortcuts(true);
+    Danbooru.Shortcuts.disabled = true;
 
     StartupTasks.createSearchbox();
     StartupTasks.createTagList();

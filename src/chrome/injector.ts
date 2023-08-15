@@ -71,6 +71,11 @@ const fnDanbooru = {
             return Danbooru.Utility.disableShortcuts;
         },
     },
+    "Shortcuts": {
+        "setDisabled": (state: boolean): void => {
+            Danbooru.Shortcuts.disabled = state;
+        }
+    },
     "E621": {
         "addDeferredPosts": (posts): void => {
             window["___deferred_posts"] = window["___deferred_posts"] || {}
