@@ -18,8 +18,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/jquery.hotkeys/0.2.0/jquery.hotkeys.min.js",
-        "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js",
-        "https://kit.fontawesome.com/994103cb75.js"
+        "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"
     ],
     "grant": [
         "GM.info",
