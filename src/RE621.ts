@@ -1,53 +1,53 @@
-import { ModuleController } from "./js/components/ModuleController";
-import { Danbooru } from "./js/components/api/Danbooru";
-import AvoidPosting from "./js/components/cache/AvoidPosting";
-import css from "./scss/style.module.scss";
+import css from "./css/style.module.scss";
+import AvoidPosting from "./js/cache/AvoidPosting";
+import { ModuleController } from "./js/models.old/ModuleController";
+import Danbooru from "./js/models/api/Danbooru";
 
-import { IgnoredPages, Page, PageDefinition } from "./js/components/data/Page";
-import { User } from "./js/components/data/User";
-import { Debug } from "./js/components/utility/Debug";
-import { ErrorHandler } from "./js/components/utility/ErrorHandler";
-import { Patcher } from "./js/components/utility/Patcher";
-import { Util } from "./js/components/utility/Util";
+import { FavDownloader } from "./js/components/downloader/FavDownloader";
+import { MassDownloader } from "./js/components/downloader/MassDownloader";
+import { PoolDownloader } from "./js/components/downloader/PoolDownloader";
+import { CommentBlacklist } from "./js/components/general/CommentBlacklist";
+import { CompatibilityPatcher } from "./js/components/general/CompatibilityPatcher";
+import { FormattingExtender } from "./js/components/general/FormattingExtender";
+import { HeaderCustomizer } from "./js/components/general/HeaderCustomizer";
+import { JanitorEnhancements } from "./js/components/general/JanitorEnhancements";
+import { Miscellaneous } from "./js/components/general/Miscellaneous";
+import { SettingsController } from "./js/components/general/SettingsController";
+import { ThemeCustomizer } from "./js/components/general/ThemeCustomizer";
+import { EditTracker } from "./js/components/misc/EditTracker";
+import { ScriptAssistant } from "./js/components/misc/ScriptAssistant";
+import { SmartAlias } from "./js/components/misc/SmartAlias";
+import { TagSuggester } from "./js/components/misc/TagSuggester";
+import { UploadUtilities } from "./js/components/misc/UploadUtilities";
+import { WikiEnhancer } from "./js/components/misc/WikiEnhancer";
+import { DownloadCustomizer } from "./js/components/post/DownloadCustomizer";
+import { ImageScaler } from "./js/components/post/ImageScaler";
+import { PoolNavigator } from "./js/components/post/PoolNavigator";
+import { PostViewer } from "./js/components/post/PostViewer";
+import { TitleCustomizer } from "./js/components/post/TitleCustomizer";
+import { BetterSearch } from "./js/components/search/BetterSearch";
+import { BlacklistEnhancer } from "./js/components/search/BlacklistEnhancer";
+import { CustomFlagger } from "./js/components/search/CustomFlagger";
+import { HoverZoom } from "./js/components/search/HoverZoom";
+import { InstantFilters } from "./js/components/search/InstantFilters";
+import { PostSuggester } from "./js/components/search/PostSuggester";
+import { ProgressTracker } from "./js/components/search/ProgressTracker";
+import { SearchUtilities } from "./js/components/search/SearchUtilities";
+import { ThumbnailTweaks } from "./js/components/search/ThumbnailTweaks";
+import { CommentTracker } from "./js/components/subscriptions/CommentTracker";
+import { ForumTracker } from "./js/components/subscriptions/ForumTracker";
+import { PoolTracker } from "./js/components/subscriptions/PoolTracker";
+import { TagTracker } from "./js/components/subscriptions/TagTracker";
+import { SubscriptionManager } from "./js/components/subscriptions/_SubscriptionManager";
+import { IgnoredPages, Page, PageDefinition } from "./js/models/data/Page";
 import Script from "./js/models/data/Script";
+import User from "./js/models/data/User";
 import Version from "./js/models/data/Version";
 import PageObserver from "./js/models/structure/PageObserver";
-import { FavDownloader } from "./js/modules/downloader/FavDownloader";
-import { MassDownloader } from "./js/modules/downloader/MassDownloader";
-import { PoolDownloader } from "./js/modules/downloader/PoolDownloader";
-import { CommentBlacklist } from "./js/modules/general/CommentBlacklist";
-import { CompatibilityPatcher } from "./js/modules/general/CompatibilityPatcher";
-import { FormattingExtender } from "./js/modules/general/FormattingExtender";
-import { HeaderCustomizer } from "./js/modules/general/HeaderCustomizer";
-import { JanitorEnhancements } from "./js/modules/general/JanitorEnhancements";
-import { Miscellaneous } from "./js/modules/general/Miscellaneous";
-import { SettingsController } from "./js/modules/general/SettingsController";
-import { ThemeCustomizer } from "./js/modules/general/ThemeCustomizer";
-import { EditTracker } from "./js/modules/misc/EditTracker";
-import { ScriptAssistant } from "./js/modules/misc/ScriptAssistant";
-import { SmartAlias } from "./js/modules/misc/SmartAlias";
-import { TagSuggester } from "./js/modules/misc/TagSuggester";
-import { UploadUtilities } from "./js/modules/misc/UploadUtilities";
-import { WikiEnhancer } from "./js/modules/misc/WikiEnhancer";
-import { DownloadCustomizer } from "./js/modules/post/DownloadCustomizer";
-import { ImageScaler } from "./js/modules/post/ImageScaler";
-import { PoolNavigator } from "./js/modules/post/PoolNavigator";
-import { PostViewer } from "./js/modules/post/PostViewer";
-import { TitleCustomizer } from "./js/modules/post/TitleCustomizer";
-import { BetterSearch } from "./js/modules/search/BetterSearch";
-import { BlacklistEnhancer } from "./js/modules/search/BlacklistEnhancer";
-import { CustomFlagger } from "./js/modules/search/CustomFlagger";
-import { HoverZoom } from "./js/modules/search/HoverZoom";
-import { InstantFilters } from "./js/modules/search/InstantFilters";
-import { PostSuggester } from "./js/modules/search/PostSuggester";
-import { ProgressTracker } from "./js/modules/search/ProgressTracker";
-import { SearchUtilities } from "./js/modules/search/SearchUtilities";
-import { ThumbnailTweaks } from "./js/modules/search/ThumbnailTweaks";
-import { CommentTracker } from "./js/modules/subscriptions/CommentTracker";
-import { ForumTracker } from "./js/modules/subscriptions/ForumTracker";
-import { PoolTracker } from "./js/modules/subscriptions/PoolTracker";
-import { TagTracker } from "./js/modules/subscriptions/TagTracker";
-import { SubscriptionManager } from "./js/modules/subscriptions/_SubscriptionManager";
+import { Debug } from "./js/utility/Debug";
+import { ErrorHandler } from "./js/utility/ErrorHandler";
+import { Patcher } from "./js/utility/Patcher";
+import { Util } from "./js/utility/Util";
 
 export default class RE621 {
 
@@ -187,8 +187,6 @@ export default class RE621 {
             console.log("%c[RE621]%c loaded", "color: maroon", "color: unset");
         });
         */
-       
-        User.init();
 
         await pageLoaded;
 

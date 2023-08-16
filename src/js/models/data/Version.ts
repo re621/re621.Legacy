@@ -1,7 +1,7 @@
-import { XM } from "../../components/api/XM";
-import { ErrorHandler } from "../../components/utility/ErrorHandler";
-import { Util } from "../../components/utility/Util";
+import { ErrorHandler } from "../../utility/ErrorHandler";
+import { Util } from "../../utility/Util";
 import LocalStorage from "../api/LocalStorage";
+import { XM } from "../api/XM";
 
 
 export default class Version {

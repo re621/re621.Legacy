@@ -1,4 +1,4 @@
-import { XM } from "../../components/api/XM";
+import { XM } from "./XM";
 
 export default class LocalStorage {
 

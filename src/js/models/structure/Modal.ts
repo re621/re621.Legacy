@@ -1,4 +1,4 @@
-import { Util } from "../../components/utility/Util";
+import { Util } from "../../utility/Util";
 import PreparedStructure from "./PreparedStructure";
 
 export default class Modal {
@@ -47,6 +47,8 @@ export default class Modal {
                 maxWidth: config.maxWidth,
                 maxHeight: config.maxHeight,
 
+                closeOnEscape: config.escapable,
+
                 position: {
                     my: config.position.my,
                     at: config.position.at,
@@ -63,7 +65,11 @@ export default class Modal {
             });
 
         const ui = this.$modal.closest('.ui-dialog');
-        ui.draggable('option', 'containment', '#modal-container');
+        ui
+            .addClass("re621-ui-dialog")
+            .removeClass("ui-dialog ui-widget ui-widget-content")
+            .toggleClass("modal-reserve-height", config.reserveHeight)
+            .draggable('option', 'containment', '#modal-container');
 
         // Replace the modal structure on window open, if necessary
         if (config.structure)
@@ -71,6 +77,68 @@ export default class Modal {
                 this.$modal.html("");
                 this.$modal.append(config.structure.render());
             });
+
+        // Fix resizing and dragging issue with the "position: fixed"
+        // This code is terrible, and should be fixed by a braver soul than I
+        if (config.fixed) {
+            const widget = this.$modal.dialog("widget");
+            widget.addClass("modal-fixed");
+
+            this.$modal.dialog(
+                "option",
+                "position",
+                {
+                    my: config.position.my,
+                    at: config.position.at,
+                    of: window,
+                    within: "div#modal-container",
+                    collision: "none",
+                }
+            );
+
+            widget.draggable("option", "containment", "window");
+            // widget.resizable("option", "containment", "window");
+
+            let timer = 0,
+                left = widget.css("left"),
+                top = widget.css("top");
+
+            const style = $("<style>")
+                .attr({
+                    "id": "style-" + this.id,
+                    "type": "text/css"
+                })
+                .html(`
+                    .modal-fixed-${this.id} {
+                        left: ${left} !important;
+                        top: ${top} !important;
+                    }
+                `)
+                .appendTo("head");
+
+            // This effectively clamps down the modal position while scrolling
+            // Without this, the modal gets run off the screen for some reason
+            $(window).on("scroll", () => {
+                if (timer) clearTimeout(timer);
+                else {
+                    left = widget.css("left");
+                    top = widget.css("top");
+                    style.html(`
+                        .modal-fixed-${this.id} {
+                            left: ${left} !important;
+                            top: ${top} !important;
+                        }
+                    `);
+                    widget.addClass("modal-fixed-" + this.id);
+                }
+                timer = window.setTimeout(() => {
+                    timer = 0;
+                    widget.removeClass("modal-fixed-" + this.id);
+                    widget.css("left", left);
+                    widget.css("top", top);
+                }, 500);
+            });
+        }
 
         this.registerTrigger(config.triggers);
     }
@@ -96,6 +164,10 @@ export default class Modal {
         result.minHeight = typeof config.minHeight === "undefined" ? 150 : config.minHeight;
         result.maxWidth = typeof config.maxWidth === "undefined" ? undefined : config.maxWidth;
         result.maxHeight = typeof config.minHeight === "undefined" ? undefined : config.maxHeight;
+
+        result.fixed = config.fixed === true;
+        result.reserveHeight = config.reserveHeight === true;
+        result.escapable = config.escapable !== false;
 
         result.disabled = typeof config.disabled === "undefined" ? false : config.disabled;
         if (typeof config.position === "undefined") result.position = { my: "center", at: "center" };
@@ -208,6 +280,13 @@ interface ModalConfig {
     minHeight?: number;
     maxWidth?: number;
     maxHeight?: number;
+    
+    /** If true, the modal window has "position: fixed" style set. */
+    fixed?: boolean;
+    /** Sets the modal window to 80vh. Special case for the Settings modal */
+    reserveHeight?: boolean; // TODO This really shouldn't be a thing
+    /** If true, modal window is closed when the ESC key is pressed */
+    escapable?: boolean;
 
     /** If true, triggers are disabled */
     disabled?: boolean;
