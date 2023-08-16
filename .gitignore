@@ -112,3 +112,6 @@ dav/
 
 # Jetbrains IDE
 .idea
+
+# Other
+.gitconfig
