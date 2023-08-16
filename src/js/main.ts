@@ -50,6 +50,7 @@ import { ForumTracker } from "./modules/subscriptions/ForumTracker";
 import { PoolTracker } from "./modules/subscriptions/PoolTracker";
 import { TagTracker } from "./modules/subscriptions/TagTracker";
 import { SubscriptionManager } from "./modules/subscriptions/_SubscriptionManager";
+import AvoidPosting from "./components/cache/AvoidPosting";
 
 
 const loadOrder = [
@@ -133,6 +134,7 @@ CleanSlate.createDOM().then(async () => {
     await Debug.init();
     await Patcher.patchConfig();
     await VersionChecker.init();
+    await AvoidPosting.init();
 
     User.init();
 

@@ -2,7 +2,7 @@ import { E621 } from "../../components/api/E621";
 import { APITag, TagCategory } from "../../components/api/responses/APITag";
 import { APITagAlias } from "../../components/api/responses/APITagAlias";
 import { APITagPreview } from "../../components/api/responses/APITagPreview";
-import { AvoidPosting } from "../../components/cache/AvoidPosting";
+import AvoidPosting from "../../components/cache/AvoidPosting";
 import RelationsCache from "../../components/cache/RelationsCache";
 import { TagCache } from "../../components/cache/TagCache";
 import { Page, PageDefinition } from "../../components/data/Page";
@@ -302,9 +302,6 @@ export class SmartAlias extends RE6Module {
     private async handleTagInput($textarea: JQuery<HTMLElement>, $container: JQuery<HTMLElement>, scrollToBottom = true): Promise<void> {
         if ($container.attr("ready") !== "true") return;
         $container.attr("ready", "false");
-
-        // Prepare the necessary tools
-        if (AvoidPosting.isUpdateRequired()) await AvoidPosting.update();
 
         // Fix typos
         // TODO Replace this with better error handling

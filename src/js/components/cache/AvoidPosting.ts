@@ -1,81 +1,67 @@
-import { E621 } from "../api/E621";
-import { APITagImplication } from "../api/responses/APITagImplication";
+import LocalStorage from "../api/LocalStorage";
+import { XM } from "../api/XM";
+import { ErrorHandler } from "../utility/ErrorHandler";
 import { Util } from "../utility/Util";
 
-export class AvoidPosting {
+export default class AvoidPosting {
 
-    private static cache: Set<string>;
+    private static baseURL = "https://re621.bitwolfy.com/cache/dnp/";
+    public static get Version(): number { return LocalStorage.DNP.Version; }
+    public static get CreatedAt(): number { return LocalStorage.DNP.CreatedAt; }
 
-    /**
-     * Returns the set containing cached items.  
-     * Loads the data from local storage if necessary.
-     */
-    private static getCache(): Set<string> {
-        if (typeof AvoidPosting.cache === "undefined")
-            AvoidPosting.cache = new Set<string>(JSON.parse(window.localStorage.getItem("re621.dnpcache.data") || "[]"))
-        return AvoidPosting.cache;
+    private static CachedList: Set<string>;
+    public static get Cache(): Set<string> {
+        if (!this.CachedList) this.CachedList = LocalStorage.DNP.Cache;
+        return new Set(this.CachedList);
+    }
+    public static get size(): number {
+        return this.Cache.size;
+    }
+    public static has(value: string): boolean {
+        return this.Cache.has(value);
     }
 
-    /** Saves the cached items to local storage */
-    private static save(): void {
-        window.localStorage.setItem("re621.dnpcache.data", JSON.stringify(Array.from(AvoidPosting.getCache())));
-    }
+    public static async init(): Promise<void> {
 
-    /** Permanently removes all data from cache */
-    private static clear(): void {
-        AvoidPosting.cache = new Set();
-        AvoidPosting.save();
-    }
+        if (LocalStorage.DNP.Expires > Util.Time.now()) return;
+        try {
+            // Version data
+            const versionData = await XM.Connect.xmlHttpPromise({
+                url: this.baseURL + "version/",
+                method: "GET",
+            });
 
-    /** Returns the number of items in the cache */
-    public static size(): number {
-        return AvoidPosting.getCache().size;
-    }
+            let json: any;
+            try { json = JSON.parse(versionData.responseText); }
+            catch (error) { return passTime(); }
 
-    /** Returns true if the parameter is present in cache */
-    public static has(tag: string): boolean {
-        return AvoidPosting.getCache().has(tag);
-    }
+            if (!json.version || json.version < this.Version)
+                return passTime();
 
-    /** Adds the provided item to cache */
-    private static add(tag: string): void {
-        AvoidPosting.getCache().add(tag);
-        AvoidPosting.save();
-    }
+            // DNP data
+            const dnpData = await XM.Connect.xmlHttpPromise({
+                url: this.baseURL,
+                method: "GET",
+            });
 
-    /**
-     * Fetches the tags aliased to `avoid_posting` from the API and adds them to cache
-     * @param status DOM element for the status messages
-     */
-    public static async update(status?: JQuery<HTMLElement>): Promise<number> {
-        if (!status) status = $("<span>");
+            try { json = JSON.parse(dnpData.responseText); }
+            catch (error) { return passTime(); }
 
-        AvoidPosting.clear();
-        let result: APITagImplication[] = [],
-            page = 0;
+            if (!json.data || !Array.isArray) return passTime();
 
-        do {
-            page++;
-            status.html(`<i class="fas fa-circle-notch fa-spin"></i> Processing tags: batch ${page} / ?`)
-            result = await E621.TagImplications.get<APITagImplication>({ search: { consequent_name: ["avoid_posting", "conditional_dnp"], status: "approved" }, page: page, limit: 320 }, 500);
-            for (const entry of result) AvoidPosting.add(entry["antecedent_name"]);
-        } while (result.length == 320);
+            LocalStorage.DNP.Version = json.version || 0;
+            LocalStorage.DNP.CreatedAt = json.from || 0;
+            LocalStorage.DNP.Cache = new Set(json.data);
+            passTime();
 
-        status.html(`<i class="far fa-check-circle"></i> Cache reloaded: ${AvoidPosting.size()} entries`);
+        } catch (error) {
+            ErrorHandler.log("[AvoidPosting] Failed to load assets", error);
+            LocalStorage.DNP.Expires = Util.Time.now() + (5 * Util.Time.MINUTE);
+        }
 
-        window.localStorage.setItem("re621.dnpcache.update", Util.Time.now() + "")
-
-        return Promise.resolve(AvoidPosting.size());
-    }
-
-    /** Returns the timestamp for the last time cache was updated */
-    public static getUpdateTime(): number {
-        return parseInt(window.localStorage.getItem("re621.dnpcache.update")) || 0;
-    }
-
-    /** Returns true if the cache needs to be reloaded */
-    public static isUpdateRequired(): boolean {
-        return (AvoidPosting.getUpdateTime() + Util.Time.DAY < Util.Time.now()) || AvoidPosting.size() == 0;
+        function passTime(): void {
+            LocalStorage.DNP.Expires = Util.Time.now() + Util.Time.DAY;
+        }
     }
 
 }

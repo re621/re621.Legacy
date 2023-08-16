@@ -1,7 +1,6 @@
 import { E621 } from "../../components/api/E621";
 import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
-import { AvoidPosting } from "../../components/cache/AvoidPosting";
 import { TagCache } from "../../components/cache/TagCache";
 import { TagSuggestionsList, TagSuggestionsTools } from "../../components/cache/TagSuggestions";
 import { User } from "../../components/data/User";
@@ -38,6 +37,7 @@ import { CommentBlacklist } from "./CommentBlacklist";
 import { HeaderCustomizer } from "./HeaderCustomizer";
 import { JanitorEnhancements } from "./JanitorEnhancements";
 import { Miscellaneous } from "./Miscellaneous";
+import AvoidPosting from "../../components/cache/AvoidPosting";
 
 /**
  * SettingsController  
@@ -2217,8 +2217,6 @@ export class SettingsController extends RE6Module {
         });
         let selectedModule = "none";
 
-        let dnpcacheUpdated = true;
-
         // Create the settings form
         return new Form({ name: "conf-misc", columns: 3, width: 3 }, [
             Form.header("Miscellaneous", 3),
@@ -2248,45 +2246,22 @@ export class SettingsController extends RE6Module {
                             value: `<b>Avoid Posting Cache</b><br />Used to validate the artist tags against the DNP list`,
                             width: 2,
                         }),
-                        Form.button({ name: "reset", value: "Reset", }, async (data, input) => {
-                            input.prop("disabled", "true");
-                            await AvoidPosting.update($("#dnpcache-status"));
-                            input.prop("disabled", "false");
-
-                            if (dnpcacheUpdated) return;
-                            dnpcacheUpdated = false;
-                            this.pushNotificationsCount("util", -1);
-                        }),
                         Form.div({
                             value: async (element) => {
-                                const $status = $("<div>")
+                                $("<div>")
                                     .attr("id", "dnpcache-status")
-                                    .html(`<i class="fas fa-circle-notch fa-spin"></i> Initializing . . .`)
+                                    .html(`${AvoidPosting.size} tags cached`)
                                     .appendTo(element);
 
-                                if (AvoidPosting.getUpdateTime() == 0)
-                                    await AvoidPosting.update();
-
-                                if (AvoidPosting.size() == 0) {
-                                    $status.html(`
-                                        <i class="far fa-times-circle"></i> 
-                                        <span style="color:gold">Reset required</span>: Cache integrity failure
-                                    `);
-
-                                    this.pushNotificationsCount("util", 1);
-                                    dnpcacheUpdated = true;
-                                } else $status.html(`<i class="far fa-check-circle"></i> Cache integrity verified`)
+                                const lastUpdate = AvoidPosting.CreatedAt;
+                                $("<div>")
+                                    .css("color", "#666666")
+                                    .html(lastUpdate ? Util.Time.format(lastUpdate) : "")
+                                    .appendTo(element);
                             },
-                            width: 2,
+                            width: 1,
+                            wrapper: "text-center",
                         }),
-                        Form.div({
-                            value: (element) => {
-                                const lastUpdate = AvoidPosting.getUpdateTime();
-                                if (lastUpdate) element.html(Util.Time.format(lastUpdate));
-                                else element.html("");
-                            },
-                            wrapper: "text-center input-disabled",
-                        })
 
                     ]),
 
