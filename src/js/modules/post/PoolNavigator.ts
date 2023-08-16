@@ -9,7 +9,7 @@ export class PoolNavigator extends RE6Module {
     private navbars: PostNav[] = [];
 
     public constructor() {
-        super(PageDefinition.post);
+        super(PageDefinition.posts.view);
         this.registerHotkeys(
             { keys: "hotkeyCycle", fnct: this.cycleNavbars },
             { keys: "hotkeyNext", fnct: this.triggerNextPost },

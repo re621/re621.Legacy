@@ -10,7 +10,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 export class ImageScaler extends RE6Module {
 
     public constructor() {
-        super(PageDefinition.post, true);
+        super(PageDefinition.posts.view, true);
         this.registerHotkeys(
             { keys: "hotkeyScale", fnct: this.cycleScaling },
             { keys: "hotkeyFullscreen", fnct: this.openFullscreen },

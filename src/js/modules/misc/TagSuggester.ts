@@ -137,7 +137,7 @@ export class TagSuggester extends RE6Module {
     public reloadSuggestions(): void {
         try { this.tagSuggestionsData = JSON.parse(this.fetchSettings("data"), TagSuggestionsTools.reviver); }
         catch (error) {
-            ErrorHandler.error("TagSuggester", "Failed to parse the tag suggestions file");
+            ErrorHandler.log("TagSuggester", "Failed to parse the tag suggestions file");
             this.tagSuggestionsData = {};
         }
     }

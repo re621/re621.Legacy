@@ -9,7 +9,7 @@ export class CustomFlagger extends RE6Module {
     private static filters: Map<string, FilterPair>;
 
     public constructor() {
-        super(PageDefinition.post, true);
+        super(PageDefinition.posts.view, true);
     }
 
     protected getDefaultSettings(): Settings {

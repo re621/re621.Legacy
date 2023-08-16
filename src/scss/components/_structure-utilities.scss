@@ -98,28 +98,8 @@ body[data-sticky-editbox=true] {
 }
 
 
-/* Gridify the sidebar */
-div#c-posts div#a-index,
-div#c-posts div#a-show,
-div#c-favorites div#a-index {
-    display: grid;
-    grid-template-columns: min-content auto;
-    grid-column-gap: 1rem;
-
-    aside#sidebar {
-        width: 13rem;
-        float: unset;
-    }
-
-    section#content {
-        margin-left: unset;
-        padding-left: unset;
-        position: relative;
-    }
-}
-
-
 /* Fix Sidebar Sections */
+/*
 body {
     aside#sidebar div#re621-search {
         position: relative;
@@ -150,6 +130,7 @@ body {
         &.mode-delete div#re621-search.re621-search-sticky { background-color: #4e1010; }
     }
 }
+*/
 
 div#page aside#sidebar {
 

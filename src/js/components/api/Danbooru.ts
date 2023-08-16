@@ -4,151 +4,171 @@ import { XM } from "./XM";
 
 export class Danbooru {
 
-    private static getModules(): any { return XM.Window["Danbooru"]; }
-    private static hasModules(): boolean { return XM.Window["Danbooru"] !== undefined; }
+    private static _cachedModules: any;
+    private static get Modules(): any {
+        if (!this._cachedModules) {
+            this._cachedModules = XM.Window["Danbooru"];
+            if (!this._cachedModules) this._cachedModules = {};
+        }
+        return this._cachedModules;
+    }
+
+    private static _cachedModuleCount: number;
+    private static get hasModules(): boolean {
+        if (typeof this._cachedModuleCount == "undefined")
+            this._cachedModuleCount = Object.keys(this.Modules).length;
+        return this._cachedModuleCount > 0;
+    }
 
     public static Autocomplete = {
         initialize_all(): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Autocomplete"].initialize_all();
-            else XM.Chrome.execInjectorRequest("Danbooru", "Autocomplete", "initialize_all");
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Autocomplete.initialize_all();
         }
     }
 
     public static Blacklist = {
         apply(): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Blacklist"].apply();
-            else XM.Chrome.execInjectorRequest("Danbooru", "Blacklist", "apply");
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Blacklist.apply();
 
         },
 
         initialize_anonymous_blacklist(): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Blacklist"].initialize_anonymous_blacklist();
-            else XM.Chrome.execInjectorRequest("Danbooru", "Blacklist", "initialize_anonymous_blacklist");
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Blacklist.initialize_anonymous_blacklist();
 
         },
 
         initialize_all(): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Blacklist"].initialize_all();
-            else XM.Chrome.execInjectorRequest("Danbooru", "Blacklist", "initialize_all");
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Blacklist.initialize_all();
 
         },
 
         initialize_disable_all_blacklists(): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Blacklist"].initialize_disable_all_blacklists();
-            else XM.Chrome.execInjectorRequest("Danbooru", "Blacklist", "initialize_disable_all_blacklists");
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Blacklist.initialize_disable_all_blacklists();
 
         },
 
         stub_vanilla_functions(): void {
-            if (Danbooru.hasModules()) {
-                Danbooru.getModules()["Blacklist"].apply = (): void => { return; };
-                Danbooru.getModules()["Blacklist"].initialize_disable_all_blacklists = (): void => { return; };
-                Danbooru.getModules()["Blacklist"].initialize_all = (): void => { return; };
-            } else XM.Chrome.execInjectorRequest("Danbooru", "Blacklist", "stub_vanilla_functions");
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Blacklist.apply = (): void => { return; };
+            Danbooru.Modules.Blacklist.initialize_disable_all_blacklists = (): void => { return; };
+            Danbooru.Modules.Blacklist.initialize_all = (): void => { return; };
+        },
+
+        postShow(post: JQuery<HTMLElement>) {
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Blacklist.postShow(post);
+        },
+
+        postHide(post: JQuery<HTMLElement>) {
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Blacklist.postHide(post);
         },
     }
 
     public static DText = {
         initialize_formatting_buttons(element: HTMLElement): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["DText"].initialize_formatting_buttons(element);
-            else XM.Chrome.execInjectorRequest("Danbooru", "DText", "initializeFormattingButtons", [element]);
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.DText.initialize_formatting_buttons(element);
         },
         override_formatting(fn: (content: string, input: JQuery<HTMLInputElement>) => void): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["DText"].process_formatting = fn;
-            else XM.Chrome.execInjectorRequest("Danbooru", "DText", "overrideFormatting", [fn]);
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.DText.process_formatting = fn;
         },
     };
 
     public static Post = {
         vote(post_id: number, scoreDifference: number, preventUnvote?: boolean): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Post"].vote(post_id, scoreDifference, preventUnvote);
-            else XM.Chrome.execInjectorRequest("Danbooru", "Post", "vote", [post_id, scoreDifference, preventUnvote]);
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Post.vote(post_id, scoreDifference, preventUnvote);
         },
         initialize_all(): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Post"].initialize_all();
-            else XM.Chrome.execInjectorRequest("Danbooru", "Post", "update");
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Post.initialize_all();
         },
         update(post_id: number, params: any): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Post"].update(post_id, params);
-            else XM.Chrome.execInjectorRequest("Danbooru", "Post", "update", [post_id, params]);
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Post.update(post_id, params);
         },
         delete_with_reason(post_id: number, reason: string, reload_after_delete: boolean): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Post"].delete_with_reason(post_id, reason, reload_after_delete);
-            else XM.Chrome.execInjectorRequest("Danbooru", "Post", "delete_with_reason", [post_id, reason, reload_after_delete]);
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Post.delete_with_reason(post_id, reason, reload_after_delete);
         },
         undelete(post_id: number): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Post"].undelete(post_id);
-            else XM.Chrome.execInjectorRequest("Danbooru", "Post", "undelete", [post_id]);
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Post.undelete(post_id);
         },
         approve(post_id: number, should_reload = false): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Post"].approve(post_id, should_reload);
-            else XM.Chrome.execInjectorRequest("Danbooru", "Post", "approve", [post_id, should_reload]);
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Post.approve(post_id, should_reload);
         },
         disapprove(post_id: number, reason: string, should_reload = false): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Post"].disapprove(post_id, reason, should_reload);
-            else XM.Chrome.execInjectorRequest("Danbooru", "Post", "disapprove", [post_id, reason, should_reload]);
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Post.disapprove(post_id, reason, should_reload);
         },
         unapprove(post_id: number): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Post"].unapprove(post_id);
-            else XM.Chrome.execInjectorRequest("Danbooru", "Post", "unapprove", [post_id]);
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Post.unapprove(post_id);
         },
         resize_cycle_mode(): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Post"].resize_cycle_mode();
-            else XM.Chrome.execInjectorRequest("Danbooru", "Post", "resize_cycle_mode");
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Post.resize_cycle_mode();
         },
         resize_to(size: string): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Post"].resize_to(size);
-            else XM.Chrome.execInjectorRequest("Danbooru", "Post", "resize_to", [size]);
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Post.resize_to(size);
         },
         resize_to_internal(size: string): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Post"].resize_to_internal(size);
-            else XM.Chrome.execInjectorRequest("Danbooru", "Post", "resize_to_internal", [size]);
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Post.resize_to_internal(size);
         },
         resize_notes(): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Post"].resize_notes();
-            else XM.Chrome.execInjectorRequest("Danbooru", "Post", "resize_notes");
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Post.resize_notes();
         }
     };
 
     public static PostModeMenu = {
         change(): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["PostModeMenu"].change();
-            else XM.Chrome.execInjectorRequest("Danbooru", "PostModeMenu", "change");
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.PostModeMenu.change();
         },
         click(e: Event | any): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["PostModeMenu"].click(e);
-            else XM.Chrome.execInjectorRequest("Danbooru", "PostModeMenu", "click", [e]);
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.PostModeMenu.click(e);
         },
         change_tag_script(script: number): void {
-            if (Danbooru.hasModules()) {
-                const event = new CustomEvent("re621.dummy-event");
-                event["key"] = script;
-                Danbooru.getModules()["PostModeMenu"].change_tag_script(event);
-            } else XM.Chrome.execInjectorRequest("Danbooru", "PostModeMenu", "click", [script]);
+            if (!Danbooru.hasModules) return;
+            const event = new CustomEvent("re621.dummy-event");
+            event["key"] = script;
+            Danbooru.Modules.PostModeMenu.change_tag_script(event);
         },
     };
 
     public static Note = {
         Box: {
             scale_all(): void {
-                if (Danbooru.hasModules()) Danbooru.getModules()["Note"]["Box"].scale_all();
-                else XM.Chrome.execInjectorRequest("Danbooru", "Note.Box", "scale_all");
+                if (!Danbooru.hasModules) return;
+                Danbooru.Modules.Note.Box.scale_all();
 
             }
         },
 
         TranslationMode: {
             active(state?: boolean): Promise<boolean> {
-                if (Danbooru.hasModules()) {
-                    if (state !== undefined) Danbooru.getModules()["Note"]["TranslationMode"].active = state;
-                    return Promise.resolve(Danbooru.getModules()["Note"]["TranslationMode"].active);
-                } else return XM.Chrome.execInjectorRequest("Danbooru", "Note.TranslationMode", "active", [state]);
+                if (!Danbooru.hasModules) return;
+                if (state !== undefined) Danbooru.Modules.Note.TranslationMode.active = state;
+                return Promise.resolve(Danbooru.Modules.Note.TranslationMode.active);
 
             },
 
             toggle(): void {
-                if (Danbooru.hasModules()) Danbooru.getModules()["Note"]["TranslationMode"].toggle(new CustomEvent("re621.dummy-event"));
-                else XM.Chrome.execInjectorRequest("Danbooru", "Note.TranslationMode", "toggle");
+                if (!Danbooru.hasModules) return;
+                Danbooru.Modules.Note.TranslationMode.toggle(new CustomEvent("re621.dummy-event"));
 
             },
         }
@@ -157,8 +177,8 @@ export class Danbooru {
     public static Thumbnails = {
 
         initialize(): void {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Thumbnails"].initialize();
-            else XM.Chrome.execInjectorRequest("Danbooru", "Thumbnails", "initialize");
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Thumbnails.initialize();
         }
 
     }
@@ -166,8 +186,8 @@ export class Danbooru {
     public static Shortcuts = {
 
         set disabled(value: boolean) {
-            if (Danbooru.hasModules()) Danbooru.getModules()["Shortcuts"].disabled = (value == true);
-            else XM.Chrome.execInjectorRequest("Danbooru", "Shortcuts", "setDisabled", [(value == true)]);
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Shortcuts.disabled = value;
         }
 
     }
@@ -175,23 +195,23 @@ export class Danbooru {
     public static E621 = {
 
         addDeferredPosts(posts: []): void {
-            if (Danbooru.hasModules()) {
-                XM.Window["___deferred_posts"] = XM.Window["___deferred_posts"] || {}
-                XM.Window["___deferred_posts"] = $.extend(XM.Window["___deferred_posts"], posts);
-            } else XM.Chrome.execInjectorRequest("Danbooru", "E621", "addDeferredPosts", [posts]);
+            XM.Window["___deferred_posts"] = XM.Window["___deferred_posts"] || {}
+            XM.Window["___deferred_posts"] = $.extend(XM.Window["___deferred_posts"], posts);
         }
 
     }
 
     public static notice(input: string, permanent?: boolean): void {
-        if (Danbooru.hasModules())
-            Danbooru.getModules()["notice"](input, permanent);
-        else XM.Chrome.execInjectorRequest("Danbooru", "Notice", "notice", [input, permanent]);
+        Danbooru.Modules.notice(input, permanent);
     }
 
     public static error(input: string): void {
-        if (Danbooru.hasModules())
-            Danbooru.getModules()["error"](input);
-        else XM.Chrome.execInjectorRequest("Danbooru", "Notice", "error", [input]);
+        Danbooru.Modules.error(input);
     }
+}
+
+export type DTextButton = {
+    icon: string;
+    title: string;
+    content: string;
 }

@@ -32,7 +32,7 @@ export class Patcher {
                 case 9: counter += await this.patch10();
                 case 10: counter += await this.patch11();
             }
-        } catch (error) { ErrorHandler.error("Patcher", error.stack, "patch " + Patcher.version); }
+        } catch (error) { ErrorHandler.log("Patcher", "patch " + Patcher.version, error.stack); }
 
         Debug.log(`Patcher: ${counter} records changed`)
         await XM.Storage.setValue("re621.patchVersion", Patcher.version);

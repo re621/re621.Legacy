@@ -1,3 +1,4 @@
+import Script from "../../models/data/Script";
 import { Debug } from "../utility/Debug";
 import { XM } from "./XM";
 
@@ -75,8 +76,8 @@ export class XMConnect {
     private static validateXHRDetails(details: XMConnectRequest): XMConnectRequest {
         if (details.headers === undefined) details.headers = {};
         if (details.headers["User-Agent"] === undefined) {
-            details.headers["User-Agent"] = window["re621"]["useragent"];
-            details.headers["X-User-Agent"] = window["re621"]["useragent"];
+            details.headers["User-Agent"] = Script.userAgent;
+            details.headers["X-User-Agent"] = Script.userAgent;
         }
 
         if (details.onabort === undefined) details.onabort = (): void => { return; };
@@ -129,8 +130,8 @@ export class XMConnect {
                     credentials: "include",
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded",
-                        "User-Agent": window["re621"]["useragent"],
-                        "X-User-Agent": window["re621"]["useragent"],
+                        "User-Agent": Script.userAgent,
+                        "X-User-Agent": Script.userAgent,
                     },
                     method: "GET",
                     mode: "cors"
@@ -169,8 +170,8 @@ export class XMConnect {
         }
 
         if (a.headers === undefined) a.headers = {
-            "User-Agent": window["re621"]["useragent"],
-            "X-User-Agent": window["re621"]["useragent"],
+            "User-Agent": Script.userAgent,
+            "X-User-Agent": Script.userAgent,
         };
 
         if (a.onerror === undefined) a.onerror = (): void => { return; }

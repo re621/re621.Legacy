@@ -15,7 +15,7 @@ export class PoolTracker extends SubscriptionTracker {
 
     protected buttonSelect = {
         major: {
-            regex: [PageDefinition.pool],
+            regex: [PageDefinition.pools.view],
             selector: "#c-pools > #a-show > h2:first",
             method: "before",
         }

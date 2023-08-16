@@ -1,3 +1,4 @@
+import Script from "../../models/data/Script";
 import { XM } from "../api/XM";
 import { GMxmlHttpRequestResponse } from "../api/XMConnect";
 import { Debug } from "./Debug";
@@ -22,7 +23,7 @@ export class VersionChecker {
         // Load the hard-coded script version
         // For debugging purposes it can be emulated via a localStorage value
         const emVersion = Util.LS.getItem("re621.version");
-        VersionChecker.scriptBuild = emVersion ? emVersion : window["re621"]["version"];
+        VersionChecker.scriptBuild = emVersion ? emVersion : Script.userAgent;
 
         // Load settings
         const settings: VersionSettings = await XM.Storage.getValue("re621.VersionChecker", {});
@@ -62,7 +63,7 @@ export class VersionChecker {
                 VersionChecker.lastUpdated = Util.Time.now();
                 VersionChecker.changesText = "Unable to fetch changelog";
 
-                ErrorHandler.error("VersionChecker", "Failed to fetch update data from GitHub.\n" + error);
+                ErrorHandler.log("VersionChecker", "Failed to fetch update data from GitHub.\n", error);
             }
         }
 

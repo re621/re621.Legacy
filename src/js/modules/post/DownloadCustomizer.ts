@@ -14,7 +14,7 @@ export class DownloadCustomizer extends RE6Module {
     private post: Post;
 
     public constructor() {
-        super(PageDefinition.post, true);
+        super(PageDefinition.posts.view, true);
         this.registerHotkeys(
             { keys: "hotkeyDownload", fnct: this.hotkeyDownload },
         );

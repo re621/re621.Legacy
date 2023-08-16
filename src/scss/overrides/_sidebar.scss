@@ -1,0 +1,58 @@
+/* Sidebar Grid */
+div#c-posts div#a-index,
+div#c-posts div#a-show,
+div#c-favorites div#a-index {
+    display: grid;
+    grid-template-columns: min-content auto;
+    grid-column-gap: 1rem;
+
+    aside#sidebar {
+        width: 13rem;
+        float: unset;
+
+        div#re621-search {
+            position: relative;
+            margin: -0.5rem -0.5rem 0;
+            padding: 0.5rem 0.5rem;
+            border-radius: 6px 6px 0 0;
+            top: -1px;
+            z-index: 1;
+
+            #mode-box {
+                margin-top: 0.5rem;
+            }
+            #blacklist-box,
+            blacklist-ui {
+                margin-top: 0.75rem;
+            }
+        }
+    }
+
+    section#content {
+        margin-left: unset;
+        padding-left: unset;
+        position: relative;
+    }
+}
+
+$modes-list: (
+    edit: #828028,
+    add-fav: #104e17,
+    remove-fav: #07240b,
+    vote-up: #288233,
+    vote-down: #822828,
+    tag-script: #4f114f,
+    lock-rating: #aa3,
+    lock-note: #3aa,
+    approve: #48c,
+    delete: #4e1010,
+);
+
+div#page {
+    @each $mode,
+    $color in $modes-list {
+        &.mode-#{$mode} #re621-search.re621-search-sticky {
+            background-color: $color;
+        }
+    }
+}

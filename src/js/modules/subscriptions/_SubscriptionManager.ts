@@ -1,9 +1,9 @@
-import { XM } from "../../components/api/XM";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { XM } from "../../components/api/XM";
 import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
-import { Tabbed, TabContent } from "../../components/structure/Tabbed";
+import { TabContent, Tabbed } from "../../components/structure/Tabbed";
 import { Util } from "../../components/utility/Util";
 import { TagTracker } from "./TagTracker";
 import { SubscriptionTracker } from "./_SubscriptionTracker";
@@ -476,7 +476,7 @@ export class SubscriptionManager extends RE6Module {
                             }
 
                             let tick = true;
-                            timer = setInterval(() => {
+                            timer = window.setInterval(() => {
                                 const now = Util.Time.now();
                                 const distance = date - now;
 

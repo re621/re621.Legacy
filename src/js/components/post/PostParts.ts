@@ -24,7 +24,7 @@ export class PostParts {
     public static renderImage(post: Post, conf: any): JQuery<HTMLElement> {
 
         let query = "";
-        if (Page.matches(PageDefinition.search)) query = Page.getQueryParameter("tags");
+        if (Page.matches(PageDefinition.posts.list)) query = Page.getQueryParameter("tags");
         else if (Page.matches(PageDefinition.favorites)) query = BetterSearch.originalTags;
 
         // Basic structure

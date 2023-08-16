@@ -1,6 +1,60 @@
+import { Page, PageDefinition } from "../data/Page";
+import { Debug } from "./Debug";
 import { Util } from "./Util";
 
 export class UtilDOM {
+
+    /**
+     * Adds the given style to the document and returns the injected style element
+     * @param css string CSS styles
+     */
+    public static addStyle(css: string): JQuery<HTMLElement> {
+        const id = Util.ID.make();
+        Debug.log("adding style " + id);
+        return $("<style>")
+            .attr({
+                "id": id,
+                "type": "text/css"
+            })
+            .html(css)
+            .appendTo("head");
+    }
+
+    /**
+     * Alters the page header to allow components to attach to it
+     */
+    public static patchHeader(): void {
+
+        // Add a section for re621 settings buttons
+        $("#nav").addClass("re621-nav")
+        $("<menu>")
+            .addClass("extra")
+            .insertAfter("#nav menu.main");
+    }
+
+    /** Sets up a container to load modals into */
+    public static setupDialogContainer(): void {
+        $("<div>")
+            .attr("id", "modal-container")
+            .prependTo("body");
+    }
+
+    /** Tweaks the search form to work with new functionality */
+    public static setupSearchBox() {
+        if (Page.matches([PageDefinition.posts.list, PageDefinition.posts.view, PageDefinition.favorites]) && $("aside#sidebar").length > 0) {
+            const $searchContainer = $("<div>").attr("id", "re621-search").prependTo("aside#sidebar");
+            $("#search-box").appendTo($searchContainer);
+            $("#mode-box").appendTo($searchContainer);
+            $("#blacklist-box").appendTo($searchContainer);
+
+            const observer = new IntersectionObserver(
+                ([event]) => { $(event.target).toggleClass("re621-search-sticky bg-foreground", event.intersectionRatio < 1) },
+                { threshold: [1] }
+            );
+
+            observer.observe($searchContainer[0]);
+        }
+    }
 
     /**
      * Adds a button to the top-right of the navbar
@@ -36,20 +90,6 @@ export class UtilDOM {
 
         return $link;
     }
-
-    /**
-     * Adds the given style to the document and returns the injected style element
-     * @param css string CSS styles
-     */
-    public static addStyle(css: string): JQuery<HTMLElement> {
-        return $("<style>")
-            .attr({
-                "id": Util.ID.make(),
-                "type": "text/css"
-            })
-            .html(css)
-            .appendTo("head");
-    };
 
     /**
      * Returns a base-64 encoded image used for placeholder during lazy loading

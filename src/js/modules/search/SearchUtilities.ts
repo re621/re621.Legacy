@@ -9,7 +9,7 @@ export class SearchUtilities extends RE6Module {
     private static randomPostURL = "";
 
     public constructor() {
-        super([PageDefinition.search, PageDefinition.post, PageDefinition.favorites]);
+        super([PageDefinition.posts.list, PageDefinition.posts.view, PageDefinition.favorites]);
         this.registerHotkeys(
             { keys: "hotkeyFocusSearch", fnct: this.focusSearchbar },
             { keys: "hotkeyRandomPost", fnct: this.randomPost },
@@ -84,7 +84,7 @@ export class SearchUtilities extends RE6Module {
         super.create();
 
         // Auto-focus on the searchbar
-        if (Page.matches(PageDefinition.search) && this.fetchSettings<boolean>("autoFocusSearch")) {
+        if (Page.matches(PageDefinition.posts.list) && this.fetchSettings<boolean>("autoFocusSearch")) {
             const searchbox = $("section#search-box input");
             if (searchbox.val() == "") searchbox.trigger("focus");
         }
@@ -95,7 +95,7 @@ export class SearchUtilities extends RE6Module {
         for (const part of queryParams) queryEncoded.push(encodeURIComponent(part));
 
         SearchUtilities.randomPostURL = "/posts/random" + (queryEncoded.length ? ("?tags=" + queryEncoded.join("+")) : "");
-        if (Page.matches(PageDefinition.post) && this.fetchSettings("trimQueryParameters")) {
+        if (Page.matches(PageDefinition.posts.view) && this.fetchSettings("trimQueryParameters")) {
             const qParam = Page.getQueryParameter("q");
             // console.log(qParam);
             Page.removeQueryParameter(["q", "tags"]);
@@ -108,20 +108,20 @@ export class SearchUtilities extends RE6Module {
         }
 
         // Replaces the tag count estimate with the real number
-        if (Page.matches([PageDefinition.search, PageDefinition.post])) {
+        if (Page.matches([PageDefinition.posts.list, PageDefinition.posts.view])) {
             this.improveTagCount(this.fetchSettings("improveTagCount"));
             this.shortenTagNames(this.fetchSettings("shortenTagNames"));
             this.hidePlusMinusIcons(this.fetchSettings("hidePlusMinusIcons"));
         }
 
         // Restore the collapsed categories
-        if (this.fetchSettings("collapseCategories") === true && Page.matches(PageDefinition.post)) {
+        if (this.fetchSettings("collapseCategories") === true && Page.matches(PageDefinition.posts.view)) {
             this.collapseTagCategories();
         }
 
         // Append custom string to searches
         const persistentTags = this.fetchSettings<string>("persistentTags").trim().toLowerCase();
-        if (persistentTags !== "" && Page.matches([PageDefinition.search, PageDefinition.post, PageDefinition.favorites])) {
+        if (persistentTags !== "" && Page.matches([PageDefinition.posts.list, PageDefinition.posts.view, PageDefinition.favorites])) {
             const $tagInput = $("input#tags");
             $tagInput.val(($tagInput.val() + "").replace(persistentTags, ""));
 
@@ -140,11 +140,11 @@ export class SearchUtilities extends RE6Module {
         this.initQuickBlacklist(this.fetchSettings("quickBlacklist"));
 
         // Handle sidebar collapse
-        if (Page.matches([PageDefinition.search, PageDefinition.favorites]))
+        if (Page.matches([PageDefinition.posts.list, PageDefinition.favorites]))
             this.handleSidebarCollapse();
 
         // Handle the sidebar collapse on the post page
-        if (Page.matches([PageDefinition.post]))
+        if (Page.matches([PageDefinition.posts.view]))
             this.handleSidebarCollapsePost();
     }
 

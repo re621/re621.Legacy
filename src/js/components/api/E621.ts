@@ -1,6 +1,7 @@
 // E621 API Endpoint Wrapper
 // Version 2.1
 
+import Script from "../../models/data/Script";
 import { Debug } from "../utility/Debug";
 import { Util } from "../utility/Util";
 import { APIResponse } from "./responses/APIResponse";
@@ -303,8 +304,8 @@ export class E621 {
             credentials: "include",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
-                "User-Agent": window["re621"]["useragent"],
-                "X-User-Agent": window["re621"]["useragent"],
+                "User-Agent": Script.userAgent,
+                "X-User-Agent": Script.userAgent,
             },
             method: method,
             mode: "cors",
@@ -317,7 +318,7 @@ export class E621 {
         }
 
         // Append query parameters to the URL
-        query["_client"] = window["re621"]["useragent"];
+        query["_client"] = Script.userAgent;
 
         const entry = new Request(location.origin + "/" + path + "?" + FormattedAPIQuery.stringify(query), requestInfo);
         // console.log(path, requestInfo);

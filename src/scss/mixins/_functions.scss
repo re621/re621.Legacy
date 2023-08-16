@@ -1,8 +1,12 @@
 // Utility functions
 
-//UTF-8 fuckery: https://github.com/sass/sass/issues/1395
+// This was a fix to a unicode character problem in the older version of the script.
+// However, the webpack does not seem to experience the same issue. Somehow.
+// Moreover, keeping the function as-is broke the rest of the stylesheet. Somehow.
+// For posterity: https://github.com/sass/sass/issues/1395
 @function unicode($str) {
-    @return unquote("\"")+unquote(str-insert($str, "\\", 1))+unquote("\"");
+    @return "\\"+$str;
+    // @return unquote("\"")+unquote(str-insert($str, "\\", 1))+unquote("\"");
 }
 
 @function placeholderBG($color) {

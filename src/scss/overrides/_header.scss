@@ -1,0 +1,49 @@
+// Restyled header, scalable and with extra button space
+
+// TODO Fix this properly
+@include desktop() {
+    header#top {
+        #nav.re621-nav {
+            grid-template-columns: 3.75em 1fr auto;
+            grid-template-areas:
+                "logo main extra"
+                "logo secondary secondary";
+
+            menu.main {
+                padding: 6px 0;
+            }
+
+            menu.extra {
+                grid-area: extra;
+                background: none;
+                margin-top: 0;
+                padding: 6px 0 6px 0.5rem;
+
+                li a {
+                    cursor: pointer;
+                    padding: 6px;
+                }
+            }
+
+            menu.secondary {
+                grid-column: span 3;
+                height: 2rem;
+                box-sizing: border-box;
+            }
+
+            @include desktop() {
+
+                menu.main,
+                menu.secondary {
+                    overflow: hidden;
+                    white-space: nowrap;
+                }
+            }
+        }
+    }
+
+    // Fix fot he notifications being layered under the sticky header
+    div#notice {
+        z-index: 500;
+    }
+}

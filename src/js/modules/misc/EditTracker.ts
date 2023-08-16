@@ -5,7 +5,7 @@ import { Util } from "../../components/utility/Util";
 export class EditTracker extends RE6Module {
 
     public constructor() {
-        super(PageDefinition.post);
+        super(PageDefinition.posts.view);
     }
 
     public create(): void {

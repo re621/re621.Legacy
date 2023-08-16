@@ -1,12 +1,13 @@
+import { ModuleController } from "../../components/ModuleController";
+import { RE6Module, Settings } from "../../components/RE6Module";
 import { E621 } from "../../components/api/E621";
-import { APIForumPost } from "../../components/api/responses/APIForumPost";
 import { XM } from "../../components/api/XM";
+import { APIForumPost } from "../../components/api/responses/APIForumPost";
+import AvoidPosting from "../../components/cache/AvoidPosting";
 import { TagCache } from "../../components/cache/TagCache";
 import { TagSuggestionsList, TagSuggestionsTools } from "../../components/cache/TagSuggestions";
 import { User } from "../../components/data/User";
-import { ModuleController } from "../../components/ModuleController";
 import { Post } from "../../components/post/Post";
-import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
@@ -14,6 +15,8 @@ import { Debug } from "../../components/utility/Debug";
 import { Patcher } from "../../components/utility/Patcher";
 import { Util } from "../../components/utility/Util";
 import { VersionChecker } from "../../components/utility/VersionChecker";
+import Script from "../../models/data/Script";
+import Version from "../../models/data/Version";
 import { FavDownloader } from "../downloader/FavDownloader";
 import { MassDownloader } from "../downloader/MassDownloader";
 import { PoolDownloader } from "../downloader/PoolDownloader";
@@ -37,7 +40,6 @@ import { CommentBlacklist } from "./CommentBlacklist";
 import { HeaderCustomizer } from "./HeaderCustomizer";
 import { JanitorEnhancements } from "./JanitorEnhancements";
 import { Miscellaneous } from "./Miscellaneous";
-import AvoidPosting from "../../components/cache/AvoidPosting";
 
 /**
  * SettingsController  
@@ -1460,7 +1462,8 @@ export class SettingsController extends RE6Module {
                     Form.section(
                         {
                             width: 3,
-                            wrapper: window["re621"].privacy ? "display-none" : undefined,
+                            wrapper: "display-none",
+                            // wrapper: window["re621"].privacy ? "display-none" : undefined, // TODO Fix this
                         },
                         [
                             Form.text(`The following features require access to various domains not explicitly whitelisted by the script.<br />You will be prompted to approve a cross-origin request when that happens.`, 3),
@@ -1836,7 +1839,7 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.div({ value: `<span id="defs-confirm"></span>` }),
                     Form.div({
-                        value: `<div class="float-right">[ <a href="${window["re621"]["links"]["repository"]}/wiki/SmartAlias" target="_blank">syntax help</a> ]</div>`
+                        value: `<div class="float-right">[ <a href="${Script.url.repo}/wiki/SmartAlias" target="_blank">syntax help</a> ]</div>`
                     })
                 ]),
 
@@ -1855,7 +1858,7 @@ export class SettingsController extends RE6Module {
                         }
                     ),
                     Form.div({
-                        value: `<div class="text-center">[ <a href="${window["re621"]["links"]["repository"]}/wiki/TagSuggester" target="_blank">syntax help</a> ]</div>`
+                        value: `<div class="text-center">[ <a href="${Script.url.repo}/wiki/TagSuggester" target="_blank">syntax help</a> ]</div>`
                     }),
                     Form.button(
                         { value: "Reset to default" },
@@ -2541,27 +2544,27 @@ export class SettingsController extends RE6Module {
             // About
             Form.div({
                 value:
-                    `<h3 class="display-inline"><a href="${window["re621"]["links"]["website"]}" target="_blank" rel="noopener noreferrer">${window["re621"]["name"]} v.${VersionChecker.scriptBuild}</a></h3>` +
-                    ` <span class="display-inline">build ${window["re621"]["build"]}:${Patcher.version}</span>`,
+                    `<h3 class="display-inline"><a href="${Script.url.website}" target="_blank" rel="noopener noreferrer">RE621 v.${Version.Local}</a></h3>` +
+                    ` <span class="display-inline">build ${Script.version}:${Patcher.version}</span>`, // TODO This should be the build number
                 width: 2
             }),
             Form.div({
                 value:
                     `<span class="float-right" id="project-update-button" data-available="${VersionChecker.hasUpdate}">
-                    <a href="${window["re621"]["links"]["releases"]}" target="_blank" rel="noopener noreferrer">Update Available</a>
+                    <a href="${Script.url.latest}" target="_blank" rel="noopener noreferrer">Update Available</a>
                     </span>`
             }),
             Form.div({
                 value:
-                    `<b>${window["re621"]["name"]}</b> is a comprehensive set of tools designed to enhance the website for both casual and power users. ` +
+                    `<b>RE621</b> is a comprehensive set of tools designed to enhance the website for both casual and power users. ` +
                     `It is created and maintained by unpaid volunteers, with the hope that it will be useful for the community.`,
                 width: 3
             }),
             Form.div({
                 value:
                     `Keeping the script - and the website - fully functional is our highest priority. ` +
-                    `If you are experiencing bugs or issues, do not hesitate to create a new ticket on <a href="${window["re621"]["links"]["issues"]}" target="_blank" rel="noopener noreferrer">github</a>, ` +
-                    `or leave us a message in the <a href="${window["re621"]["links"]["forum"]}" target="_blank" rel="noopener noreferrer">forum thread</a>. ` +
+                    `If you are experiencing bugs or issues, do not hesitate to create a new ticket on <a href="${Script.url.issues}" target="_blank" rel="noopener noreferrer">github</a>, ` +
+                    `or leave us a message in the <a href="${Script.url.thread}" target="_blank" rel="noopener noreferrer">forum thread</a>. ` +
                     `Feature requests, comments, and overall feedback are also appreciated.`,
                 width: 3
             }),
@@ -2588,7 +2591,7 @@ export class SettingsController extends RE6Module {
             Form.spacer(3),
 
             // Changelog
-            Form.header(`<a href="${window["re621"]["links"]["releases"]}" target="_blank" rel="noopener noreferrer" class="unmargin">What's new?</a>`, 3),
+            Form.header(`<a href="${Script.url.latest}" target="_blank" rel="noopener noreferrer" class="unmargin">What's new?</a>`, 3),
             Form.div({ value: `<div id="changelog-list"><h5>Version ${VersionChecker.latestBuild}</h5>${VersionChecker.changesHTML}</div>`, width: 3 })
         ]);
     }

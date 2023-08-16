@@ -59,7 +59,7 @@ export class FavDownloader extends RE6Module {
         super.create();
 
         this.userID = parseInt(Page.getQueryParameter("user_id") || $("meta[name=current-user-id]").attr("content"));
-        if (this.userID == NaN) return;
+        if (Number.isNaN(this.userID)) return;
 
         this.section = $("<section>")
             .attr({

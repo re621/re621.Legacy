@@ -15,7 +15,7 @@ export class CommentTracker extends SubscriptionTracker {
 
     protected buttonSelect = {
         major: {
-            regex: [PageDefinition.post],
+            regex: [PageDefinition.posts.view],
             selector: "menu#post-sections",
         }
     };

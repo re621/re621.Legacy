@@ -24,11 +24,11 @@ export class TagTracker extends SubscriptionTracker {
 
     protected buttonSelect = {
         minor: {
-            regex: [PageDefinition.search, PageDefinition.post],
+            regex: [PageDefinition.posts.list, PageDefinition.posts.view],
             selector: "#tag-box li span.tag-action-subscribe, #tag-list li span.tag-action-subscribe",
         },
         major: {
-            regex: [PageDefinition.wiki, PageDefinition.wikiNA, PageDefinition.artist],
+            regex: [PageDefinition.wiki.view, PageDefinition.artists.view],
             selector: "#c-wiki-pages > #a-show > #content > h1:first, #c-artists > #a-show > h1:first",
         }
     };

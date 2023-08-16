@@ -1,4 +1,4 @@
-import LocalStorage from "../api/LocalStorage";
+import LocalStorage from "../../models/api/LocalStorage";
 import { XM } from "../api/XM";
 import { ErrorHandler } from "../utility/ErrorHandler";
 import { Util } from "../utility/Util";

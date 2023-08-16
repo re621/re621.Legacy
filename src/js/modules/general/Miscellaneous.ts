@@ -70,7 +70,7 @@ export class Miscellaneous extends RE6Module {
         super.create();
 
         // Enhanced quoting button and copy ID button
-        if (Page.matches([PageDefinition.post, PageDefinition.forum])) {
+        if (Page.matches([PageDefinition.posts.view, PageDefinition.forums.view, PageDefinition.forums.post])) {
             $(() => {
                 this.handleQuoteButton();
                 this.handleIDButton();
@@ -78,13 +78,13 @@ export class Miscellaneous extends RE6Module {
         }
 
         // Sticky elements
-        if (Page.matches([PageDefinition.search, PageDefinition.post, PageDefinition.favorites])) {
+        if (Page.matches([PageDefinition.posts.list, PageDefinition.posts.view, PageDefinition.favorites])) {
             this.createStickySearchbox(this.fetchSettings("stickySearchbox"));
         }
 
         this.createStickyHeader(this.fetchSettings("stickyHeader"));
 
-        if (Page.matches([PageDefinition.search, PageDefinition.favorites])) {
+        if (Page.matches([PageDefinition.posts.list, PageDefinition.favorites])) {
             this.createStickyEditBox(this.fetchSettings("stickyEditBox"));
         }
 
@@ -98,18 +98,18 @@ export class Miscellaneous extends RE6Module {
         $(() => { this.handleCommentRules(this.fetchSettings("disableCommentRules")); });
 
         // Fix the forum title
-        if (this.fetchSettings("fixForumTitle") && Page.matches(PageDefinition.forum)) {
+        if (this.fetchSettings("fixForumTitle") && Page.matches(PageDefinition.forums.view)) {
             const title = /^(?:Forum - )(.+)(?: - (e621|e926))$/g.exec(document.title);
             if (title) document.title = `${title[1]} - Forum - ${title[2]}`;
         }
 
         // Add a character counter to the blacklist input in the settings
-        if (Page.matches(PageDefinition.settings)) {
+        if (Page.matches(PageDefinition.users.settings)) {
             this.modifyBlacklistForm();
         }
 
         // Minor changes to the set cover page
-        if (Page.matches(PageDefinition.set)) {
+        if (Page.matches(PageDefinition.sets.view)) {
             this.tweakSetPage();
         }
 
@@ -125,12 +125,12 @@ export class Miscellaneous extends RE6Module {
         }
 
         // Fix typos on the ticket page
-        if (Page.matches(PageDefinition.tickets))
-            this.fixTicketTypos();
+        if (Page.matches(PageDefinition.tickets.list))
+            this.fixTicketTypos(); // TODO This is no longer needed
 
         // Add "Upload Superior" button
         $(async () => {
-            if (Page.matches(PageDefinition.post)) {
+            if (Page.matches(PageDefinition.posts.view)) {
                 const post = Post.getViewingPost();
 
                 // This should trim tags that might not be appropriate in the new version
@@ -189,7 +189,7 @@ export class Miscellaneous extends RE6Module {
         });
 
         // Add a "remove from set" button
-        if (Page.matches(PageDefinition.post)) {
+        if (Page.matches(PageDefinition.posts.view)) {
             this.addRemoveFromSetButton();
         }
 
@@ -204,21 +204,21 @@ export class Miscellaneous extends RE6Module {
     public resetContentHeaders(): void {
         const config = this.fetchSettings(["profileEnhancements"]);
 
-        if (Page.matches(PageDefinition.profile) && config.profileEnhancements) $("#page").attr("enhancements", "true");
+        if (Page.matches(PageDefinition.users.view) && config.profileEnhancements) $("#page").attr("enhancements", "true");
         else $("#c-users").removeAttr("enhancements");
     }
 
     /** Emulates the clicking on "New Comment" link */
     private openNewComment(): void {
-        if (Page.matches(PageDefinition.post)) {
+        if (Page.matches(PageDefinition.posts.view)) {
             $("menu#post-sections > li > a[href$=comments]")[0].click();
             $("a.expand-comment-response")[0].click();
-        } else if (Page.matches(PageDefinition.forum)) { $("a#new-response-link")[0].click(); }
+        } else if (Page.matches(PageDefinition.forums.view)) { $("a#new-response-link")[0].click(); }
     }
 
     /** Emulated clicking on "Edit" tab */
     private openEditTab(): void {
-        if (Page.matches(PageDefinition.post)) {
+        if (Page.matches(PageDefinition.posts.view)) {
             window.setTimeout(() => { $("#post-edit-link")[0].click(); }, 100);
         }
     }
@@ -256,7 +256,7 @@ export class Miscellaneous extends RE6Module {
      * Handles the "Reply" button functionality
      */
     private handleQuoteButton(): void {
-        if (Page.matches(PageDefinition.forum)) {
+        if (Page.matches([PageDefinition.forums.view, PageDefinition.forums.post])) {
             $(".forum-post-reply-link").each(function (index, element) {
                 const $newLink = $("<a>")
                     .attr("href", "#")
@@ -270,7 +270,7 @@ export class Miscellaneous extends RE6Module {
                 const $parent = $(event.target).parents("article.forum-post");
                 this.quote($parent, "forum", $parent.data("forum-post-id"), $("#forum_post_body_for_"), $("a#new-response-link"));
             });
-        } else if (Page.matches(PageDefinition.post)) {
+        } else if (Page.matches(PageDefinition.posts.view)) {
             $(".comment-reply-link").each(function (index, element) {
                 const $newLink = $("<a>")
                     .attr("href", "#")
@@ -291,7 +291,7 @@ export class Miscellaneous extends RE6Module {
      * Generates the "Copy ID" button on comments and forum posts 
      */
     private handleIDButton(): void {
-        if (Page.matches(PageDefinition.forum)) {
+        if (Page.matches([PageDefinition.forums.view, PageDefinition.forums.post])) {
             // Using li:last-of-type to put the button before the vote menu
             $(".content-menu > menu > li:last-of-type").each(function (index, element) {
                 const $copyElement = $("<a>")
@@ -306,7 +306,7 @@ export class Miscellaneous extends RE6Module {
                 const $post = $(event.target).parents("article.forum-post");
                 XM.Util.setClipboard($post.data("forum-post-id"));
             });
-        } else if (Page.matches(PageDefinition.post)) {
+        } else if (Page.matches(PageDefinition.posts.view)) {
             $(".content-menu > menu").each(function (index, element) {
                 const $element = $(element);
 
@@ -427,7 +427,7 @@ export class Miscellaneous extends RE6Module {
     }
 
     private randomSetPost(): void {
-        if (!Page.matches(PageDefinition.set)) return;
+        if (!Page.matches(PageDefinition.sets.view)) return;
         $("#set-random-post")[0].click();
     }
 

@@ -1,4 +1,4 @@
-import { XM } from "./XM";
+import { XM } from "../../components/api/XM";
 
 export default class LocalStorage {
 
@@ -9,13 +9,16 @@ export default class LocalStorage {
         d1: "r6.dnp.version",
         d2: "r6.dnp.created",
         d3: "r6.dnp.cache",
+
+        v0: "r6.ver.expires",
+        v1: "r6.ver.remote",
     }
 
     private static get = (name: string): string => this.LS.getItem(name);
     private static set = (name: string, value: string): void => this.LS.setItem(name, value);
     private static remove = (name: string): void => this.LS.removeItem(name);
 
-    // DNP cache
+    // DNP Cache
     public static DNP = {
         get Expires(): number {
             return parseInt(LocalStorage.get(LocalStorage.Index.d0)) || 0;
@@ -66,6 +69,29 @@ export default class LocalStorage {
             LocalStorage.remove(LocalStorage.Index.d1);
             LocalStorage.remove(LocalStorage.Index.d2);
             LocalStorage.remove(LocalStorage.Index.d3);
+        },
+    }
+
+    // Version Tracking
+    public static Version = {
+        get Expires(): number {
+            return parseInt(LocalStorage.get(LocalStorage.Index.v0)) || 0;
+        },
+        set Expires(value: number) {
+            if (value == 0) LocalStorage.remove(LocalStorage.Index.v0);
+            else LocalStorage.set(LocalStorage.Index.v0, value + "");
+        },
+        get Remote(): string {
+            return LocalStorage.get(LocalStorage.Index.v1) || "0.0.0";
+        },
+        set Remote(value: string) {
+            if (value == "0.0.0") LocalStorage.remove(LocalStorage.Index.v1);
+            else LocalStorage.set(LocalStorage.Index.v1, value);
+        },
+
+        clear() {
+            LocalStorage.remove(LocalStorage.Index.v0);
+            LocalStorage.remove(LocalStorage.Index.v1);
         },
     }
 

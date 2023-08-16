@@ -1,3 +1,4 @@
+import Script from "../../models/data/Script";
 import { Util } from "../utility/Util";
 import { XM } from "./XM";
 import { GMxmlHttpRequestEvent, GMxmlHttpRequestProgressEvent, GMxmlHttpRequestResponse } from "./XMConnect";
@@ -145,8 +146,8 @@ export class DownloadQueue {
                 method: "GET",
                 url: item.file.path,
                 headers: {
-                    "User-Agent": window["re621"]["useragent"],
-                    "X-User-Agent": window["re621"]["useragent"],
+                    "User-Agent": Script.userAgent,
+                    "X-User-Agent": Script.userAgent,
                 },
                 responseType: "arraybuffer",
                 onloadstart: (event) => {

@@ -27,7 +27,7 @@ export class ModuleController {
                 const instance = moduleClass.getInstance();
                 this.modules.set(moduleClass.prototype.constructor.name, instance);
                 await instance.prepare();
-            } catch (error) { ErrorHandler.error(moduleClass.prototype.constructor.name, error.stack, "prepare"); }
+            } catch (error) { ErrorHandler.log(moduleClass.prototype.constructor.name, "prepare", error.stack); }
         }
 
         for (const instance of this.modules.values()) {
@@ -51,7 +51,7 @@ export class ModuleController {
                 }
 
                 activeModules++;
-            } catch (error) { ErrorHandler.error(instance, error.stack, "init"); }
+            } catch (error) { ErrorHandler.log(instance.getSettingsTag(), "init", error.stack); }
             Debug.perfEnd(instance.constructor.name);
         }
 

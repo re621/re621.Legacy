@@ -23,15 +23,18 @@ export class XM {
             return {
                 script: null,
                 scriptMetaStr: null,
-                scriptHandler: window["re621"].type,
+                scriptHandler: "unknown",
                 version: "1.0",
             }
         } else return GM.info;
     }
 
-    /** Returns true if the current script instance is a userscript, false for extension */
+    /**
+     * Returns true if the current script instance is a userscript, false for extension
+     * @deprecated
+     */
     public static isUserscript(): boolean {
-        return window["re621"].type == "script";
+        return true;
     }
 
 }

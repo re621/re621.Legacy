@@ -46,7 +46,7 @@ export class PoolDownloader extends RE6Module {
     private infoFile: JQuery<HTMLElement>;
 
     public constructor() {
-        super([PageDefinition.pool, PageDefinition.set]);
+        super([PageDefinition.pools.view, PageDefinition.sets.view]);
     }
 
     /**
@@ -66,7 +66,7 @@ export class PoolDownloader extends RE6Module {
     public create(): void {
         super.create();
 
-        const base = Page.matches(PageDefinition.pool) ? "div#c-pools" : "div#c-sets";
+        const base = Page.matches(PageDefinition.pools.view) ? "div#c-pools" : "div#c-sets";
 
         const container = $(base)
             .addClass("pool-container");
@@ -143,7 +143,7 @@ export class PoolDownloader extends RE6Module {
         let source: Promise<APIPostGroup[]>;
         let poolName = "UnknownPostGroup";
 
-        if (Page.matches(PageDefinition.pool)) source = E621.Pool.id(Page.getPageID()).get<APIPool>();
+        if (Page.matches(PageDefinition.pools.view)) source = E621.Pool.id(Page.getPageID()).get<APIPool>();
         else source = E621.Set.id(Page.getPageID()).get<APIPool>();
 
         source.then((poolData) => {
@@ -174,7 +174,7 @@ export class PoolDownloader extends RE6Module {
 
             for (let i = 1; i <= resultPages; i++) {
                 dataQueue.push(new Promise(async (resolve) => {
-                    const result = await E621.Posts.get<APIPost>({ tags: (Page.matches(PageDefinition.pool) ? "pool:" : "set:") + pool.id, page: i, limit: 320 }, 500);
+                    const result = await E621.Posts.get<APIPost>({ tags: (Page.matches(PageDefinition.pools.view) ? "pool:" : "set:") + pool.id, page: i, limit: 320 }, 500);
                     this.infoFile.html(" &nbsp; &nbsp;request " + (i + 1) + " / " + resultPages);
                     resolve(result);
                 }));

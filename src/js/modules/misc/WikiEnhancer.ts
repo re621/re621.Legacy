@@ -8,7 +8,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 export class WikiEnhancer extends RE6Module {
 
     public constructor() {
-        super([PageDefinition.wiki, PageDefinition.wikiNA, PageDefinition.artist], true);
+        super([PageDefinition.wiki.view, PageDefinition.artists.view], true);
     }
 
     protected getDefaultSettings(): Settings {
@@ -17,7 +17,7 @@ export class WikiEnhancer extends RE6Module {
 
     public create(): void {
         super.create();
-        const $title = Page.matches(PageDefinition.artist)
+        const $title = Page.matches(PageDefinition.artists.view)
             ? $("#a-show h1 a:first")
             : $("#wiki-page-title a:first");
         const tagName = WikiEnhancer.sanitizeWikiTagName($title.text());

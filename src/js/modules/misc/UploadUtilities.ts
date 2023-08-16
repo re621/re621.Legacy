@@ -96,7 +96,7 @@ export class UploadUtilities extends RE6Module {
         let timer: number = null;
         $(fileContainer).on("input paste", "input", async (event) => {
             clearTimeout(timer);
-            timer = setTimeout(() => handleInput(event), 500);
+            timer = window.setTimeout(() => handleInput(event), 500);
         });
 
         fileContainer.find("input[type=text").trigger("input");
@@ -497,7 +497,7 @@ export class UploadUtilities extends RE6Module {
         let timer: number = null;
         $(fileContainer).on("input paste", "input", async (event) => {
             clearTimeout(timer);
-            timer = setTimeout(() => processInput(event), 200);
+            timer = window.setTimeout(() => processInput(event), 200);
         });
 
         // Process the input URL

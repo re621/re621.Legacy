@@ -2,10 +2,28 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "push",
+            "type": "npm",
+            "script": "push",
+            "group": {
+                "kind": "none",
+                "isDefault": true
+            },
+            "presentation": {
+                "clear": true,
+                "reveal": "silent",
+                "panel": "shared"
+            },
+            "options": {
+                "statusbar": {
+                    "hide": false
+                }
+            }
+        },
+        {
             "label": "build",
             "type": "npm",
-            "script": "build:dev",
-            "problemMatcher": ["$eslint-stylish"],
+            "script": "build",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -16,15 +34,19 @@
                 "panel": "shared"
             },
             "options": {
-                "statusbar": { "hide": false }
+                "statusbar": {
+                    "hide": false
+                }
             }
         },
         {
-            "label": "injector:chrome",
+            "label": "eslint",
             "type": "npm",
-            "script": "injector:chrome",
-            "problemMatcher": ["$eslint-stylish"],
-            "group": "none",
+            "script": "eslint",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
             "presentation": {
                 "clear": true,
                 "reveal": "silent",
@@ -32,28 +54,9 @@
             },
             "options": {
                 "statusbar": {
-                    "hide": false,
-                    "label": "inj:chrome"
+                    "hide": false
                 }
             }
         },
-        {
-            "label": "injector:firefox",
-            "type": "npm",
-            "script": "injector:firefox",
-            "problemMatcher": ["$eslint-stylish"],
-            "group": "none",
-            "presentation": {
-                "clear": true,
-                "reveal": "silent",
-                "panel": "shared"
-            },
-            "options": {
-                "statusbar": {
-                    "hide": false,
-                    "label": "inj:firefox"
-                }
-            }
-        }
     ]
 }

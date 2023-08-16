@@ -17,7 +17,7 @@ export class Page {
      */
     public static matches(filter: RegExp | RegExp[]): boolean {
         if (filter instanceof RegExp) filter = [filter];
-        const pathname = this.getInstance().url.pathname.replace(/[\/?]$/g, "");
+        const pathname = this.getInstance().url.pathname.replace(/[/?]$/g, "");
         let result = false;
         filter.forEach(function (constraint) {
             result = result || constraint.test(pathname);
@@ -81,7 +81,7 @@ export class Page {
      * @returns e621 or e926
      */
     public static getSiteName(): string {
-        return this.getInstance().url.hostname.replace(/\.net/g, "");;
+        return this.getInstance().url.hostname.replace(/\.net/g, "");
     }
 
     /**
@@ -104,36 +104,94 @@ export class Page {
      * Returns the type of the page, according to the definitions below
      * @returns Page type, as a string
      */
-    public static getPageType(): string {
-        for (const [name, regex] of Object.entries(PageDefinition))
-            if (Page.matches(regex)) return name;
+    public static getPageName(): string {
+        for (const [name, value] of Object.entries(PageDefinition as RegExpList)) {
+            if (typeof value.test == "function")
+                if (Page.matches(value as RegExp)) return name;
+                else continue;
+
+            for (const [sub, regex] of Object.entries(value))
+                if (Page.matches(regex)) return name + "." + sub;
+        }
         return null;
     }
 }
 
+// 1: Pages that allow alphanumeric params
 export const PageDefinition = {
-    title: /^(\/)?$/,
-    search: /^\/posts\/?$/,
-    post: /^\/posts\/\d+\/?(show_seq)?$/,
-    upload: /\/uploads\/new\/?/,
-    forum: /^\/forum_topics\/?.*/,
-    forumPost: /^\/forum_topics\/\d+.*/,
-    pool: /^\/pools\/.+/,
-    set: /^\/post_sets\/.+/,
-    popular: /^\/explore\/posts\/popular.?/,
-    favorites: /^\/favorites\/?.*/,
-    wiki: /^\/wiki_pages\/[0-9]+/,
-    wikiNA: /^\/wiki_pages\/show_or_new.*/,
-    artist: /^\/artists\/[0-9]+/,
-    comments: /^\/comments\??.*/,
-    settings: /^\/users\/\.+\/edit$/,
-    changes: /^\/post_versions.*/,
-    tickets: /^\/tickets.*/,
-    profile: /^\/users\/.+$/,
-    iqdb: /^\/iqdb_queries.*/,
-    deleted_posts: /^\/deleted_posts.*/,
-    blips: /^\/blips.*/,
-    help: /^\/help.*/,
+    root: /^\/?$/,
 
+    // Posts
+    posts: {
+        list: /^\/posts\/?$/,
+        view: /^\/posts\/\d+\/?(show_seq)?$/
+    },
+    popular: /^\/popular\/?$/,
+    favorites: /^\/favorites\/?$/,
+    upload: /\/uploads\/new\/?/,
+    changes: /^\/post_versions\/?$/,
+    iqdb: /^\/iqdb_queries\/?$/,
+    deleted_posts: /^\/deleted_posts\/?$/,
     postConfirmDelete: /^\/moderator\/post\/posts\/.+\/confirm_delete.*/,
+
+    // Interactions
+    users: {
+        list: /^\/users\/?$/,
+        view: /^\/users\/.+/,           // 1
+        settings: /^\/users\/\.+\/edit\/?$/,
+    },
+    forums: {
+        any: /^\/forum_topics.*$/,
+        list: /^\/forum_topics\/?$/,
+        view: /^\/forum_topics\/\d+\/?$/,
+        post: /^\/posts\/\d+\/?$/,
+    },
+    comments: {
+        list: /^\/comments\/?$/,
+        view: /^\/comments\/\d+\/?$/,
+    },
+    tickets: {
+        list: /^\/tickets\/?$/,
+        view: /^\/tickets\/\d+\/?$/,
+    },
+    blips: {
+        list: /^\/blips\/?/,
+        view: /^\/blips\/\d+\/?$/,
+    },
+
+    // Post groups
+    pools: {
+        list: /^\/pools\/?$/,
+        view: /^\/pools\/\d+\/?$/,
+    },
+    sets: {
+        list: /^\/post_sets\/?$/,
+        view: /^\/post_sets\/\d+\/?$/,
+    },
+
+    // Wikis
+    wiki: {
+        list: /^\/wiki_pages\/?$/,
+        view: /^\/wiki_pages\/.+/,      // 1
+    },
+    artists: {
+        list: /^\/artists\/?$/,
+        view: /^\/artists\/.+/,         // 1
+    },
+    help: {
+        list: /^\/help\/?4/,
+        view: /^\/help\/.*/,            // 1
+    },
+
+    // Custom
+    pluginSettings: /^\/plugins\/re621.*/,
 };
+type RegExpList = {
+    [name: string]: RegExp | RegExpList;
+}
+
+export const IgnoredPages = [
+    PageDefinition.root,
+    /\.json/,
+    /sidekiq/,
+];

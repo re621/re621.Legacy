@@ -10,7 +10,7 @@ export class TitleCustomizer extends RE6Module {
     private post: Post;
 
     public constructor() {
-        super(PageDefinition.post, true);
+        super(PageDefinition.posts.view, true);
     }
 
     /**

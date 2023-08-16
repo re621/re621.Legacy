@@ -16,9 +16,9 @@ export class PostViewer extends RE6Module {
     private post: Post;
 
     public constructor() {
-        super([PageDefinition.post, PageDefinition.changes, PageDefinition.iqdb], true);
+        super([PageDefinition.posts.view, PageDefinition.changes, PageDefinition.iqdb], true);
 
-        const reqPage = PageDefinition.post;
+        const reqPage = PageDefinition.posts.view;
         this.registerHotkeys(
             { keys: "hotkeyUpvote", fnct: this.triggerUpvote, page: reqPage },
             { keys: "hotkeyUpvoteNU", fnct: this.triggerUpvoteNU, page: reqPage },
@@ -130,7 +130,7 @@ export class PostViewer extends RE6Module {
     public create(): void {
         super.create();
 
-        if (!Page.matches(PageDefinition.post)) return;
+        if (!Page.matches(PageDefinition.posts.view)) return;
 
         this.post = Post.getViewingPost()
 
@@ -187,7 +187,7 @@ export class PostViewer extends RE6Module {
                 .insertAfter($("#search-box"));
 
         // Add a "left" option for navbars
-        if (Page.matches(PageDefinition.post)) {
+        if (Page.matches(PageDefinition.posts.view)) {
 
             const navbarContainer = $("#nav-links-top");
             if (navbarContainer.length > 0) {
@@ -436,7 +436,7 @@ export class PostViewer extends RE6Module {
 
     /** Redirects the page to the post history */
     private openImageHistory(): void {
-        if (Page.matches(PageDefinition.post)) {
+        if (Page.matches(PageDefinition.posts.view)) {
             location.href = "/post_versions?search[post_id]=" + Page.getPageID();
         } else if (Page.matches(PageDefinition.iqdb)) {
             if (!Page.hasQueryParameter("post_id")) return;
@@ -467,7 +467,7 @@ export class PostViewer extends RE6Module {
 
     /** Opens IQDB page for the current page */
     private openIQDB(): void {
-        if (Page.matches(PageDefinition.post)) {
+        if (Page.matches(PageDefinition.posts.view)) {
             location.href = "/iqdb_queries?post_id=" + Page.getPageID();
         } else if (Page.matches(PageDefinition.iqdb)) {
             if (!Page.hasQueryParameter("post_id")) return;
@@ -479,7 +479,7 @@ export class PostViewer extends RE6Module {
     }
 
     private static openSourceLookup(source: "SauceNAO" | "Kheina" | "Google" | "Yandex" | "Derpibooru" | "Inkbunny"): void {
-        if (!Page.matches(PageDefinition.post)) return;
+        if (!Page.matches(PageDefinition.posts.view)) return;
         const link = $(`a[lookup="${source}"]`).first();
         if (!link.length) return;
         link[0].click();

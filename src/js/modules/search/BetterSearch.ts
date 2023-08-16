@@ -43,7 +43,7 @@ export class BetterSearch extends RE6Module {
     private loadingPosts: boolean;              // True value indicates that infinite scroll is loading posts
 
     public constructor() {
-        super([PageDefinition.search, PageDefinition.favorites], true, true, [BlacklistEnhancer]);
+        super([PageDefinition.posts.list, PageDefinition.favorites], true, true, [BlacklistEnhancer]);
     }
 
     protected getDefaultSettings(): Settings {
@@ -259,7 +259,7 @@ export class BetterSearch extends RE6Module {
             }
 
             const order = this.queryTags.find(el => el.includes("order:"));
-            if (Page.matches(PageDefinition.search) && pageResult.length > 1 && (!order || order == "order:id_desc")) {
+            if (Page.matches(PageDefinition.posts.list) && pageResult.length > 1 && (!order || order == "order:id_desc")) {
                 const diffData = BetterSearch.getPostDiffs(pageResult);
                 // console.log(diffData);
 
@@ -336,7 +336,7 @@ export class BetterSearch extends RE6Module {
                 .attr("infscroll", "ready");
 
             resolve(pagesLoaded);
-        }).then((pagesLoaded) => {
+        }).then((pagesLoaded: number) => {
 
             this.reloadPaginator();
             this.reloadEventListeners();
