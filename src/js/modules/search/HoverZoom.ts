@@ -45,6 +45,8 @@ export class HoverZoom extends RE6Module {
             zoomDelay: 0,                               // Delay until the zoom is triggered, in milliseconds
             stickyShift: false,                         // In onShift mode, zoom won't clear until mouse leaves the post
 
+            audio: false,
+
             hotkeyDownload: "",                         // downloads the currently hovered over post
             hotkeyFullscreen: "",                       // opens the currently hovered over post in new tab
         };
@@ -69,12 +71,12 @@ export class HoverZoom extends RE6Module {
             .attr("src", Util.DOM.getPlaceholderImage())
             .addClass("display-none")
             .appendTo(this.$zoomBlock);
-        this.$zoomVideo = $("<video controls autoplay loop muted></video>")
+        this.$zoomVideo = $("<video controls autoplay loop></video>")
             .attr({
                 poster: "",
                 src: "",
-                muted: "muted",
             })
+            .prop("muted", this.fetchSettings<boolean>("audio") == false)
             .addClass("display-none")
             .appendTo(this.$zoomBlock);
         this.$zoomTags = $("<div>")
@@ -257,7 +259,10 @@ export class HoverZoom extends RE6Module {
                     });
 
                 // Chrome blocks the video autoplay unless it's muted
-                videoTimeout = window.setTimeout(() => { this.$zoomVideo.attr("muted", "false"); }, 500);
+                // No, I don't remember why it's on a timeout
+                videoTimeout = window.setTimeout(() => {
+                    this.$zoomVideo.prop("muted", this.fetchSettings<boolean>("audio") == false);
+                }, 100);
 
                 this.$zoomBlock.attr("status", "ready");
             } else {
@@ -340,7 +345,7 @@ export class HoverZoom extends RE6Module {
                 .attr("src", Util.DOM.getPlaceholderImage());
             this.$zoomVideo
                 .addClass("display-none")
-                .attr({ "muted": "", });
+                .prop("muted", this.fetchSettings<boolean>("audio") == false);
             if (this.$zoomVideo.attr("src") !== "")
                 this.$zoomVideo.attr({
                     "poster": "",

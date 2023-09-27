@@ -811,6 +811,19 @@ export class SettingsController extends RE6Module {
                     ),
                     Form.spacer(3, true),
 
+                    Form.checkbox(
+                        {
+                            value: hoverZoom.fetchSettings("audio"),
+                            label: "<b>Play Audio</b><br />WEBMs with audio will not be muted",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await hoverZoom.pushSettings("audio", data);
+                            if (hoverZoom.isInitialized()) hoverZoom.reloadEventListeners();
+                        }
+                    ),
+                    Form.spacer(3, true),
+
                 ]),
 
                 // Post Page
