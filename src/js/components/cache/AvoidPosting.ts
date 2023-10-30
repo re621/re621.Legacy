@@ -5,7 +5,7 @@ import { Util } from "../utility/Util";
 
 export default class AvoidPosting {
 
-    private static baseURL = "https://re621.bitwolfy.com/cache/dnp/";
+    private static baseURL = "https://re621.app/cache/dnp/";
     public static get Version(): number { return LocalStorage.DNP.Version; }
     public static get CreatedAt(): number { return LocalStorage.DNP.CreatedAt; }
 

@@ -63,7 +63,7 @@
         "downloads",
         "https://api.github.com/*",
         "https://static1.e621.net/*",
-        "https://re621.bitwolfy.com/*"
+        "https://re621.app/*"
     ],
     "resources": {
         "re621_css": "style.min.css"

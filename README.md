@@ -30,7 +30,7 @@ With a script manager installed, click on the following link and follow the inst
 
 ## Features
 
-For a complete feature overview visit the projects website, found under [re621.bitwolfy.com](https://re621.bitwolfy.com/)
+For a complete feature overview visit the projects website, found under [re621.app](https://re621.app/)
 
 ## Contributing
 

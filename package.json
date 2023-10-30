@@ -1,7 +1,7 @@
 {
     "name": "re621-legacy",
     "displayName": "re621 - e621 Reimagined",
-    "namespace": "re621.bitwolfy.com",
+    "namespace": "re621.app",
     "version": "1.5.0",
     "description": "Subscription manager, mass downloader, thumbnail enhancer, and more for e621",
     "author": "bitWolfy",
