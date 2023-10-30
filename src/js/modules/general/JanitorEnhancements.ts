@@ -81,7 +81,7 @@ export class JanitorEnhancements extends RE6Module {
             $("<span><i>none</i></span>").appendTo(container);
         else
             for (const tag of portedTags)
-                $("<span>").html(`<a href="/show_or_new?title=${tag}">${tag}</a> `).appendTo(container);
+                $("<span>").html(`<a href="/wiki_pages/show_or_new?title=${tag}">${tag}</a> `).appendTo(container);
 
         const toggle = $("#copy_tags");
         if (toggle.is(":checked")) container.css("display", "");
