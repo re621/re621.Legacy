@@ -11,7 +11,7 @@ window.re621 = new function() {
         releases: "%GITHUB%/releases",
         forum: "https://e621.net/forum_topics/25872",
     };
-    this.useragent = "%NAME%:%BUILDTYPE%/%VERSHORT%";
+    this.useragent = "%NAME%/%VERSION%";
     this.privacy = "%PRIVACY%";
     this.debug = true;
 };
