@@ -2,6 +2,7 @@ import { XM } from "../../components/api/XM";
 import { Page } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { ErrorHandler } from "../../components/utility/ErrorHandler";
 import { Util } from "../../components/utility/Util";
 import { SubscriptionCache, UpdateContent, UpdateData } from "./_SubscriptionCache";
 import { SubscriptionList } from "./_SubscriptionList";
@@ -397,14 +398,15 @@ export class SubscriptionTracker extends RE6Module {
         this.updateInProgress = true;
         SubscriptionManager.trigger("inprogress." + this.trackerID, 0);
 
-        if (ModuleController.fetchSettings(SubscriptionManager, "skipPreflightChecks") || await Util.Network.isOnline()) {
+        try {
             this.execPreUpdate();
             await this.cache.fetch();
             this.execPostUpdate();
             this.networkOffline = false;
             this.updateInProgress = false;
             SubscriptionManager.trigger("inprogress." + this.trackerID, 2);
-        } else {
+        } catch(error) {
+            ErrorHandler.error(this, JSON.stringify(error), "update");
             this.networkOffline = true;
             this.updateInProgress = false;
             SubscriptionManager.trigger("inprogress." + this.trackerID, 3);

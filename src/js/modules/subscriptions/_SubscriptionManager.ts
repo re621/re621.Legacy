@@ -36,7 +36,6 @@ export class SubscriptionManager extends RE6Module {
 
             cacheVersion: 0,                // utility variable, cache is cleared if it does not match the hardcoded one
 
-            skipPreflightChecks: false,     // suppresses the network status check before the update
             loadLargeThumbs: false,         // replaces the preview-sized thumbnails with (animated) sample sized ones
 
             windowWidth: "37",              // width of the notifications window, in REM
@@ -286,18 +285,6 @@ export class SubscriptionManager extends RE6Module {
 
             Form.checkbox(
                 {
-                    value: this.fetchSettings("skipPreflightChecks"),
-                    label: "<b>Skip Preflight Checks</b><br />Disables the extra network checks before updating the subscriptions",
-                    width: 2,
-                },
-                async (data) => {
-                    await this.pushSettings("skipPreflightChecks", data);
-                }
-            ),
-            Form.spacer(2, true),
-
-            Form.checkbox(
-                {
                     value: this.fetchSettings("loadLargeThumbs"),
                     label: "<b>Load Large Thumbnails</b><br />Use the larger animation-enabled thumbnails instead of the default ones",
                     width: 2,
@@ -437,8 +424,8 @@ export class SubscriptionManager extends RE6Module {
                             }
 
                             if (instance.isNetworkOffline()) {
-                                $el.val("Network Offline")
-                                    .attr("title", "Unable to reach e621 servers.\nPlease, check your Internet connection.")
+                                $el.val("Error")
+                                    .attr("title", "At least one update request failed to complete.")
                                     .addClass("failed-attempt");
                                 eventLock = false;
                                 return;
