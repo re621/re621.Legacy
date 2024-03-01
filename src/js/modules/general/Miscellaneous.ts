@@ -117,8 +117,7 @@ export class Miscellaneous extends RE6Module {
             $(() => {
                 for (const link of $(".diff-list a").get()) {
                     const $link = $(link);
-                    let text = $link.text();
-                    if (text.startsWith("-")) text = text.substring(1);
+                    const text = $link.text().replace(/^[+-]/, "");
                     $link.attr("href", "/wiki_pages/show_or_new?title=" + encodeURIComponent(text));
                 }
             });
