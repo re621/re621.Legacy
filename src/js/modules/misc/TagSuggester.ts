@@ -62,10 +62,12 @@ export class TagSuggester extends RE6Module {
 
         // Create the element structure
         this.tagOutput = $("#post_tags");
+        const parentContainer = this.tagOutput.parent()
+            .addClass("tag-suggester-container");
         this.container = $("<tag-suggester>")
             .attr("ready", "true")
             .on("recount", () => { this.container.attr("count", this.container.children().length); })
-            .appendTo(this.tagOutput.parent());
+            .appendTo(parentContainer);
 
         // Initialize the listeners
         this.tagInput = [];

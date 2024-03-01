@@ -29,3 +29,12 @@ tag-suggester {
     }
 
 }
+
+.tag-suggester-container {
+    display: flex;
+    flex-flow: column;
+    
+    smart-alias {
+        order: 10;
+    }
+}
