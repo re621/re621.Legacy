@@ -137,6 +137,23 @@ export const TagSuggestionsList: SuggestionSet = {
     "elderly_herm": { has: [/^elderly_/, "herm"] },
     "elderly_maleherm": { has: [/^elderly_/, "maleherm"] },
 
+    // Young
+    "young_anthro": { has: [/^young_/, "anthro"] },
+    "young_human": { has: [/^young_/, "human"] },
+    "young_humanoid": { has: [/^young_/, "humanoid"] },
+    "young_feral": { has: [/^young_/, "feral"] },
+    "young_taur": { has: [/^young_/, "taur"] },
+
+    "young_male": { has: [/^young_/, "male"] },
+    "young_female": { has: [/^young_/, "female"] },
+    "young_ambiguous": { has: [/^young_/, "ambiguous_gender"] },
+    "young_gynomorph": { has: [/^young_/, "gynomorph"] },
+    "young_andromorph": { has: [/^young_/, "andromorph"] },
+    "young_herm": { has: [/^young_/, "herm"] },
+    "young_maleherm": { has: [/^young_/, "maleherm"] },
+
+    "baby|toddler|child|adolescent": { has: /young/, not: ["baby", "toddler", "child", "adolescent"] },
+
     // Older
     "older_anthro": { has: [/^older_/, "anthro"] },
     "older_human": { has: [/^older_/, "human"] },
