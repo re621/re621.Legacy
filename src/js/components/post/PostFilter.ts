@@ -56,6 +56,15 @@ export class PostFilter {
                 case FilterType.Size:
                     filter = Util.Size.unformat(filter) + "";
                     break;
+                case FilterType.IsParent:
+                case FilterType.IsChild:
+                    if(!["true", "false", "yes", "no"].includes(filter))
+                        continue;
+
+                    if(filter == "yes") filter = "true";
+                    else if(filter == "no") filter = "false";
+
+                    break;
             }
             filter = filter.toLowerCase();
 
@@ -167,6 +176,20 @@ export class PostFilter {
                 case FilterType.MetaTags:
                     result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.meta.size, value, filter.comparison)
                     break;
+                case FilterType.LoreTags:
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.lore.size, value, filter.comparison)
+                    break;
+
+                case FilterType.IsParent:
+                    result = post.has.children;
+                    if(value == "false") result = !result;
+                    break;
+                case FilterType.IsChild:
+                    result = post.has.parent;
+                    if(value == "false") result = !result;
+                    break;
+
+                
                 default:
                     result = false;
             }
@@ -303,6 +326,10 @@ enum FilterType {
     SpecTags = "spectags",
     InvTags = "invtags",
     MetaTags = "metatags",
+    LoreTags = "lortags",
+
+    IsParent = "isparent",
+    IsChild = "ischild",
 }
 
 namespace FilterType {
