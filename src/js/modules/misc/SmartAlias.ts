@@ -20,12 +20,13 @@ export class SmartAlias extends RE6Module {
         "#post_tag_string",     // editing form tags
         "#re621_qedit_tags",    // re621's version
 
-        // Yes, this is correct
-        "#post_characters",     // artist
-        "#post_sexes",          // characters
-        "#post_bodyTypes",      // body types
-        "#post_themes",         // themes
-        "#post_tags",           // other tags
+        // Upload page inputs
+        "#post_artist", 
+        "#post_character",
+        "#post_species",
+        "#post_themes", 
+        "#post_content",
+        "#post_tags",
     ]);
 
     private inputElements: JQuery<HTMLElement>[] = [];
