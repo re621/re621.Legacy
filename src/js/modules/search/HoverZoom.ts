@@ -24,6 +24,7 @@ export class HoverZoom extends RE6Module {
     private pageY = 0;
 
     private static curPost: PostData = null;    // Post over which the user currently hovers, or null if there isn't one
+    private static curRef: JQuery<HTMLElement> = null;
 
     public constructor() {
         super([], true);
@@ -137,6 +138,7 @@ export class HoverZoom extends RE6Module {
                 HoverZoom.curPost = $ref.is("post")
                     ? Post.get($ref)
                     : PostData.fromThumbnail($ref);
+                HoverZoom.curRef = $ref;
 
                 window.clearTimeout(timer);
                 timer = window.setTimeout(() => {
@@ -150,6 +152,7 @@ export class HoverZoom extends RE6Module {
                 $ref.removeAttr("hovering");
 
                 HoverZoom.curPost = null;
+                HoverZoom.curRef = null;
 
                 window.clearTimeout(timer);
                 HoverZoom.trigger("zoom.stop", { post: $ref.data("id"), pageX: event.pageX, pageY: event.pageY });
@@ -195,6 +198,7 @@ export class HoverZoom extends RE6Module {
             if (!HoverZoom.curPost) return;
             HoverZoom.trigger("zoom.stop", { post: HoverZoom.curPost.id, pageX: null, pageY: null });
             HoverZoom.curPost = null;
+            HoverZoom.curRef = null;
         }
     }
 
@@ -209,14 +213,8 @@ export class HoverZoom extends RE6Module {
             if (HoverZoom.paused || (mode == ImageZoomMode.OnShift && !this.shiftPressed))
                 return;
 
-            const $ref = $(`#entry_${data.post}, #post_${data.post}, div.post-thumbnail[data-id=${data.post}], subitem[data-id=${data.post}]`).first();
-
-            let post: PostData;
-            if ($ref.is("post")) post = Post.get($ref);
-            else {
-                post = PostData.fromThumbnail($ref);
-                Blacklist.addPost(post);
-            }
+            const $ref = HoverZoom.curRef,
+                post = HoverZoom.curPost;
 
             // Skip blacklisted posts, if necessary
             if (this.fetchSettings("skipBlacklisted")

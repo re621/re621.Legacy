@@ -622,87 +622,43 @@ export namespace PostData {
         if (cached && $article.data("wfpost"))
             return $article.data("wfpost");
 
+        const data = $article[0].dataset; // Faster than $element.data()
+
         const id = parseInt($article.attr("data-id")) || 0;
 
-        // Children
-        const children: Set<number> = new Set();
-
-        // Tags
-        const tagString = $article.attr("data-tags") || "",
+        // For some reason, this takes 10x as long on the first post.
+        // But it's still only ~1ms (rather than 0.1ms), so it's fine
+        const tagString = data.tags || "",
             tagSet = new Set(tagString.split(" "));
 
-        // Uploader
-        // This is slightly nuts
-        const approverLink = $("#post-information li a.user-post-approver");
-        const approver = approverLink.length > 0
-            ? (parseInt(approverLink.attr("href").replace("/users/", "")) || -1)
-            : -1;
+        const score = parseInt(data.score) || 0;
+        const rawDate = data.created_at || "0";
+        const width = parseInt(data.width) || 0;
+        const height = parseInt(data.height) || 0;
 
-        // Dimensions
-        const width = parseInt($article.attr("data-width")),
-            height = parseInt($article.attr("data-height"));
-
-        // MD5 and File URLs
-        const extension: FileExtension = FileExtension.fromString($article.attr("data-file-ext"));
-        let urls = {};
-        let md5: string;
-        if ($article.hasClass("post-preview")) {
-            if ($article.attr("data-md5")) md5 = $article.attr("data-md5");
-            else if ($article.attr("data-file-url"))
-                md5 = $article.attr("data-file-url").substr(36, 32);
-
-            urls = {
-                preview: $article.attr("data-preview-file-url") || null,
-                sample: $article.attr("data-large-file-url") || null,
-                original: $article.attr("data-file-url") || null,
-            };
-        } else {
-            if ($article.attr("data-md5")) md5 = $article.attr("data-md5");
-            else if ($article.attr("data-preview-url"))
-                md5 = $article.attr("data-preview-url").substr(44, 32);
-
-            if (md5 == undefined) urls = {
-                preview: `/images/deleted-preview.png`,
-                sample: `/images/deleted-preview.png`,
-                original: `/images/deleted-preview.png`,
-            };
-            else {
-                urls = {
-                    preview: $article.attr("data-preview-url")
-                        ? $article.attr("data-preview-url")
-                        : `https://static1.e621.net/data/preview/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`,
-                    sample: $article.attr("data-large-file-url")    // This is horrifying.
-                        ? $article.attr("data-large-file-url")      // I am truly sorry...
-                        : ((width < 850 || height < 850 || extension == "gif")
-                            ? `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${extension}`
-                            : `https://static1.e621.net/data/sample/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`),
-                    original: `https://static1.e621.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${extension}`,
-                };
-            }
-        }
-
-        // Date
-        const rawDate = $article.attr("data-created-at") || "0";
-
-        // Score
-        const score = parseInt($article.attr("data-score") || "0");
+        const urls = {
+            original: data.fileUrl || "/images/deleted-preview.png",
+            sample: data.largeUrl || "/images/deleted-preview.png",
+            preview: data.previewUrl || "/images/deleted-preview.png",
+        };
+        const extension = FileExtension.fromString(data.fileExt);
 
         const result = {
             id: id,
-            flags: PostFlag.fromString($article.attr("data-flags") || ""),
+            flags: PostFlag.fromString(data.flags || ""),
             score: {
                 up: score > 0 ? score : 0,
                 down: score < 0 ? score : 0,
                 total: score,
             },
             user_score: 0,
-            favorites: parseInt($article.attr("data-fav-count")) || 0,
-            is_favorited: $article.attr("data-is-favorited") == "true",
+            favorites: parseInt(data.favCount) || 0,
+            is_favorited: !!data.isFavorited,
             comments: -1,
-            rating: PostRating.fromValue($article.attr("data-rating")),
-            uploader: parseInt($article.attr("data-uploader-id")) || 0,
-            uploaderName: $article.attr("data-uploader") || "Unknown",
-            approver: approver,
+            rating: PostRating.fromValue(data.rating || ""),
+            uploader: parseInt(data.uploaderId) || -1,
+            uploaderName: (data.uploader || "Unknown").toLowerCase(),
+            approver: 0,
 
             page: "-1",
 
@@ -732,11 +688,11 @@ export namespace PostData {
 
             file: {
                 ext: extension,
-                md5: md5,
-                original: urls["original"],
-                sample: urls["sample"],
-                preview: urls["preview"],
-                size: parseInt($article.attr("data-filesize") || "0"),
+                md5: data.md5 || "",
+                original: urls.original,
+                sample: urls.sample,
+                preview: urls.preview,
+                size: parseInt(data.size) || 0,
             },
             loaded: undefined,
 
@@ -747,15 +703,15 @@ export namespace PostData {
             },
 
             has: {
-                file: $article.attr("data-file-url") !== undefined,
-                children: $article.hasClass("post-status-has-children") || $article.attr("data-has-active-children") == "true",
-                parent: $article.hasClass("post-status-has-parent") || $article.attr("data-parent-id") !== undefined,
+                file: data.fileURL !== undefined,
+                children: $article.hasClass("post-status-has-children"),
+                parent: $article.hasClass("post-status-has-parent"),
                 sample: urls["original"] !== urls["sample"],
             },
 
             rel: {
-                children: children,
-                parent: parseInt($article.attr("data-parent-id")) || null,
+                children: new Set<number>(),
+                parent: null,
             },
 
             meta: {
