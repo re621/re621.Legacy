@@ -69,6 +69,51 @@ export default class LocalStorage {
         },
     }
 
+    public static Blacklist = {
+        get Collapsed(): boolean {
+            return LocalStorage.get("e6.blk.collapsed") !== "false";
+        },
+        set Collapsed(value: boolean) {
+            if (value) LocalStorage.remove("e6.blk.collapsed");
+            else LocalStorage.set("e6.blk.collapsed", "false");
+        },
+
+        /**
+         * List of disabled blacklist filters
+         * @returns {Set<string>}
+         */
+        get FilterState(): Set<string> {
+            if (!LocalStorage.Blacklist._filterCache) {
+                try {
+                    LocalStorage.Blacklist._filterCache = new Set(
+                        JSON.parse(localStorage.getItem("e6.blk.filters") || "[]"),
+                    );
+                } catch (e) {
+                    console.error(e);
+                    localStorage.removeItem("e6.blk.filters");
+                    LocalStorage.Blacklist._filterCache = new Set();
+                }
+
+                patchBlacklistFunctions();
+            }
+            return LocalStorage.Blacklist._filterCache;
+        },
+
+        set FilterState(value: Set<string>) {
+            if (!value.size) {
+                localStorage.removeItem("e6.blk.filters");
+                LocalStorage.Blacklist._filterCache = new Set();
+                return;
+            }
+
+            LocalStorage.Blacklist._filterCache = value;
+            patchBlacklistFunctions();
+            localStorage.setItem("e6.blk.filters", JSON.stringify([...value]));
+        },
+
+        _filterCache: undefined,
+    }
+
     /**
      * Determines the current size of data in LocalStorage.  
      * @see https://stackoverflow.com/a/15720835/
@@ -83,4 +128,28 @@ export default class LocalStorage {
         return _lsTotal;
     }
 
+}
+
+function patchBlacklistFunctions(): void {
+    LocalStorage.Blacklist._filterCache.add = function (...args: any[]): void {
+        Set.prototype.add.apply(this, args);
+        localStorage.setItem(
+            "e6.blk.filters",
+            JSON.stringify([...LocalStorage.Blacklist._filterCache]),
+        );
+    };
+    LocalStorage.Blacklist._filterCache.delete = function (...args: any[]): void {
+        Set.prototype.delete.apply(this, args);
+        if (LocalStorage.Blacklist._filterCache.size == 0)
+            localStorage.removeItem("e6.blk.filters");
+        else
+            localStorage.setItem(
+                "e6.blk.filters",
+                JSON.stringify([...LocalStorage.Blacklist._filterCache]),
+            );
+    };
+    LocalStorage.Blacklist._filterCache.clear = function (...args: any[]): void {
+        Set.prototype.clear.apply(this, args);
+        localStorage.removeItem("e6.blk.filters");
+    };
 }

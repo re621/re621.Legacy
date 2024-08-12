@@ -1,8 +1,8 @@
 import { BlacklistEnhancer } from "../../modules/search/BlacklistEnhancer";
+import LocalStorage from "../api/LocalStorage";
 import { ModuleController } from "../ModuleController";
 import { Post, PostData } from "../post/Post";
 import { FilterOptions, PostFilter } from "../post/PostFilter";
-import { Util } from "../utility/Util";
 import { User } from "./User";
 
 export class Blacklist {
@@ -19,7 +19,7 @@ export class Blacklist {
         }
 
         const filters = blacklistMeta.attr("content");
-        const blacklistEnabled = Util.LS.getItem("dab") !== "1";
+        const disabledFilters = LocalStorage.Blacklist.FilterState;
 
         const enhancer = ModuleController.get(BlacklistEnhancer)
         const options = enhancer.fetchSettings(["favorites", "uploads", "whitelist"]) as FilterOptions;
@@ -32,7 +32,7 @@ export class Blacklist {
                 if (!text) continue;
 
                 // Create a blacklist filter
-                this.createFilter(filter, blacklistEnabled, options);
+                this.createFilter(filter, !disabledFilters.has(text), options);
             }
         }
     }
@@ -115,12 +115,17 @@ export class Blacklist {
     public static enableAll(): void {
         for (const filter of Blacklist.get().values())
             filter.setEnabled(true);
+        LocalStorage.Blacklist.FilterState.clear();
     }
 
     /** Disables all blacklist filters */
     public static disableAll(): void {
-        for (const filter of Blacklist.get().values())
+        const filters = new Set<string>();
+        for (const filter of Blacklist.get().values()) {
             filter.setEnabled(false);
+            filters.add(filter.getName());
+        }
+        LocalStorage.Blacklist.FilterState = filters;
     }
 
     /**

@@ -1,10 +1,10 @@
 import { Danbooru } from "../../components/api/Danbooru";
+import LocalStorage from "../../components/api/LocalStorage";
 import { Blacklist } from "../../components/data/Blacklist";
 import { PageDefinition } from "../../components/data/Page";
 import { Post } from "../../components/post/Post";
 import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { Util } from "../../components/utility/Util";
 import { BetterSearch } from "./BetterSearch";
 
 /**
@@ -41,12 +41,13 @@ export class BlacklistEnhancer extends RE6Module {
 
         // Content wrapper
         // Clean up the vanilla attributes and styles, or things will go poorly
-        BlacklistEnhancer.$wrapper = $("#blacklist-box")
+        BlacklistEnhancer.$wrapper = $(".blacklist-ui")
             .attr({
                 "open": false,
                 "count": 0,
                 "discount": 0,
-                "collapsed": Util.LS.getItem("bc") == "1",
+                "collapsed": LocalStorage.Blacklist.Collapsed,
+                "id": "blacklist-box",
             })
             .removeAttr("style")
             .removeAttr("class")
@@ -61,7 +62,7 @@ export class BlacklistEnhancer extends RE6Module {
             .on("click.re621", () => {
                 const collapsed = !(BlacklistEnhancer.$wrapper.attr("collapsed") == "true");
                 BlacklistEnhancer.$wrapper.attr("collapsed", collapsed + "");
-                Util.LS.setItem("bc", collapsed ? "1" : "0");
+                LocalStorage.Blacklist.Collapsed = collapsed;
                 $("#sidebar").trigger("re621:reflow");
             });
 
@@ -78,6 +79,9 @@ export class BlacklistEnhancer extends RE6Module {
             const filter: PostFilter = $target.data("filter");
             filter.setEnabled(enabled);
             $target.attr("enabled", enabled + "");
+
+            if(enabled) LocalStorage.Blacklist.FilterState.delete(filter.getName());
+            else LocalStorage.Blacklist.FilterState.add(filter.getName());
 
             BlacklistEnhancer.updateHeader();
             BlacklistEnhancer.updateToggleSwitch();
@@ -109,7 +113,7 @@ export class BlacklistEnhancer extends RE6Module {
                     BlacklistEnhancer.$toggle.attr("id", "re-enable-all-blacklists");
 
                     BlacklistEnhancer.$wrapper.attr("collapsed", "false");
-                    Util.LS.setItem("bc", "0");
+                    LocalStorage.Blacklist.Collapsed = false;
                     $("#sidebar").trigger("re621:reflow");
                 }
 
@@ -188,12 +192,10 @@ export class BlacklistEnhancer extends RE6Module {
             BlacklistEnhancer.$toggle
                 .html("Enable All Filters")
                 .attr("id", "re-enable-all-blacklists");
-            Util.LS.setItem("dab", "1");
         } else {
             BlacklistEnhancer.$toggle
                 .html("Disable All Filters")
                 .attr("id", "disable-all-blacklists");
-            Util.LS.setItem("dab", "0");
         }
     }
 
