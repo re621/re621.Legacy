@@ -336,7 +336,7 @@ export class BetterSearch extends RE6Module {
                 .attr("infscroll", "ready");
 
             resolve(pagesLoaded);
-        }).then((pagesLoaded) => {
+        }).then((pagesLoaded: number) => {
 
             this.reloadPaginator();
             this.reloadEventListeners();
@@ -677,14 +677,14 @@ export class BetterSearch extends RE6Module {
                             "data-tags": post.tagString,
                             "data-flags": Array.from(post.flags).join(" "),
                         })
-                        .appendTo("body");
-                    $("<a>").appendTo($tempArticle)
-                        .one("click", (event) => {
+                        .appendTo("body")
+                        .on("click", (event) => {
                             Danbooru.PostModeMenu.click(event);
                             window.setTimeout(() => {
                                 $tempArticle.remove();
                             }, 500);
-                        })[0].click();
+                        });
+                    $tempArticle[0].click();
                     post.$ref.trigger("re621:sync");
                     break;
                 }
