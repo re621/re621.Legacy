@@ -198,11 +198,11 @@ export class SearchUtilities extends RE6Module {
     /** Sets the focus on the search bar */
     private focusSearchbar(event: Event): void {
         event.preventDefault();
-        let searchbar = $("section#search-box input");
+        const searchbar = $("section#search-box input");
         searchbar.trigger("focus");
         if(this.fetchSettings("switchCursorFocus")){
             searchbar.each(function () {
-                let textbox = <HTMLInputElement>this;
+                const textbox = this as HTMLInputElement;
                 textbox.setSelectionRange(textbox.value.length, textbox.value.length);
             });
         };
