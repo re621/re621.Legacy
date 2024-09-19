@@ -45,6 +45,7 @@ export class SearchUtilities extends RE6Module {
             shortenTagNames: true,
             hidePlusMinusIcons: false,
             autoFocusSearch: false,
+            switchCursorFocus: true,
 
             collapseCategories: true,
             categoryData: [],
@@ -199,13 +200,19 @@ export class SearchUtilities extends RE6Module {
     private focusSearchbar(event: Event): void {
         event.preventDefault();
         const searchbar = $("section#search-box input");
-        if(this.fetchSettings("switchCursorFocus")){
-            searchbar.each(function () {
-                const textbox = this as HTMLInputElement;
-                textbox.focus();
-                textbox.setSelectionRange(textbox.value.length, textbox.value.length);
-            });
-        } else searchbar.trigger("focus");
+        searchbar.trigger("focus");
+
+        /*This method doesn't work at the moment, trying to figure out how to work with it.*/
+        // if(this.fetchSettings<boolean>("switchCursorFocus")){
+        //     searchbar.each(function () {
+        //         const textbox = this as HTMLInputElement;
+        //         textbox.focus();
+        //         textbox.setSelectionRange(textbox.value.length, textbox.value.length);
+        //     });
+        // } else {
+        //     event.preventDefault();
+        //     searchbar.trigger("focus");
+        // }
     }
 
     /** Switches the location over to a random post */
