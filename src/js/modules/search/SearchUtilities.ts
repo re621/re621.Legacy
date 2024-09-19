@@ -205,7 +205,7 @@ export class SearchUtilities extends RE6Module {
                 textbox.focus();
                 textbox.setSelectionRange(textbox.value.length, textbox.value.length);
             });
-        } else searchbar.trigger("focus");;
+        } else searchbar.trigger("focus");
     }
 
     /** Switches the location over to a random post */
