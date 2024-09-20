@@ -239,6 +239,7 @@ export class SettingsController extends RE6Module {
                         },
                         async (data) => {
                             await searchUtilities.pushSettings("switchCursorFocus", data);
+                            if (searchUtilities.isInitialized()) searchUtilities.switchCursorFocus(data);
                         }
                     ),
                     Form.hr(3),

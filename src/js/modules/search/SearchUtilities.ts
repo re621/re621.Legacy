@@ -110,6 +110,7 @@ export class SearchUtilities extends RE6Module {
 
         // Replaces the tag count estimate with the real number
         if (Page.matches([PageDefinition.search, PageDefinition.post])) {
+            this.switchCursorFocus(this.fetchSettings("switchCursorFocus"));
             this.improveTagCount(this.fetchSettings("improveTagCount"));
             this.shortenTagNames(this.fetchSettings("shortenTagNames"));
             this.hidePlusMinusIcons(this.fetchSettings("hidePlusMinusIcons"));
@@ -147,6 +148,16 @@ export class SearchUtilities extends RE6Module {
         // Handle the sidebar collapse on the post page
         if (Page.matches([PageDefinition.post]))
             this.handleSidebarCollapsePost();
+    }
+
+    /**
+     * Makes the cursor move to the end of the searchbar query instead of the beginning
+     * @param state True to modify, false to restore
+     */
+    public switchCursorFocus(state = true): void {
+        //TODO: implement way to switch between the two event handlers
+        //Option 1: just re-register the whole hotkey set every time the setting is changed
+        //Option 2: find a way to have the same function in the hotkey definition point to different handlers
     }
 
     /**
@@ -199,20 +210,17 @@ export class SearchUtilities extends RE6Module {
     /** Sets the focus on the search bar */
     private focusSearchbar(event: Event): void {
         event.preventDefault();
-        const searchbar = $("section#search-box input");
-        searchbar.trigger("focus");
+        $("section#search-box input").trigger("focus");
+    }
 
-        /*This method doesn't work at the moment, trying to figure out how to work with it.*/
-        // if(this.fetchSettings<boolean>("switchCursorFocus")){
-        //     searchbar.each(function () {
-        //         const textbox = this as HTMLInputElement;
-        //         textbox.focus();
-        //         textbox.setSelectionRange(textbox.value.length, textbox.value.length);
-        //     });
-        // } else {
-        //     event.preventDefault();
-        //     searchbar.trigger("focus");
-        // }
+    /** Sets the focus on the search bar with the cursor at the end of the query */
+    private focusSearchbarCursor(event: Event): void {
+        event.preventDefault();
+        $("section#search-box input").each(function () {
+            const textbox = this as HTMLInputElement;
+            textbox.focus();
+            textbox.setSelectionRange(textbox.value.length, textbox.value.length);
+        });
     }
 
     /** Switches the location over to a random post */
