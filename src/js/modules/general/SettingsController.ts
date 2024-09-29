@@ -229,6 +229,19 @@ export class SettingsController extends RE6Module {
                             await searchUtilities.pushSettings("autoFocusSearch", data);
                         }
                     ),
+                    Form.spacer(3),
+
+                    Form.checkbox(
+                        {
+                            value: searchUtilities.fetchSettings("switchCursorFocus"),
+                            label: "<b>Switch Cursor Focus</b><br />Automatically set the cursor in the search bar to the end of the query insead of the beginning",
+                            width: 3,
+                        },
+                        async (data) => {
+                            await searchUtilities.pushSettings("switchCursorFocus", data);
+                            if (searchUtilities.isInitialized()) searchUtilities.switchCursorFocus(data);
+                        }
+                    ),
                     Form.hr(3),
 
                     Form.checkbox(
