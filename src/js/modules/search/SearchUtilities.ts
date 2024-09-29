@@ -7,6 +7,7 @@ import { Util } from "../../components/utility/Util";
 export class SearchUtilities extends RE6Module {
 
     private static randomPostURL = "";
+    private static cursorFocusState: boolean;
 
     public constructor() {
         super([PageDefinition.search, PageDefinition.post, PageDefinition.favorites]);
@@ -155,9 +156,7 @@ export class SearchUtilities extends RE6Module {
      * @param state True to modify, false to restore
      */
     public switchCursorFocus(state = true): void {
-        //TODO: implement way to switch between the two event handlers
-        //Option 1: just re-register the whole hotkey set every time the setting is changed
-        //Option 2: find a way to have the same function in the hotkey definition point to different handlers
+        SearchUtilities.cursorFocusState = state;
     }
 
     /**
@@ -210,16 +209,11 @@ export class SearchUtilities extends RE6Module {
     /** Sets the focus on the search bar */
     private focusSearchbar(event: Event): void {
         event.preventDefault();
-        $("section#search-box input").trigger("focus");
-    }
-
-    /** Sets the focus on the search bar with the cursor at the end of the query */
-    private focusSearchbarCursor(event: Event): void {
-        event.preventDefault();
         $("section#search-box input").each(function () {
-            const textbox = this as HTMLInputElement;
-            textbox.focus();
-            textbox.setSelectionRange(textbox.value.length, textbox.value.length);
+            const searchbar = this as HTMLInputElement;
+            const cursorPosition = SearchUtilities.cursorFocusState ? searchbar.value.length : 0;
+            searchbar.focus();
+            searchbar.setSelectionRange(cursorPosition, cursorPosition);
         });
     }
 
