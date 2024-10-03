@@ -94,17 +94,17 @@ export class UploadUtilities extends RE6Module {
             .appendTo("div.upload_preview_container");
 
         let timer: number = null;
-        $(fileContainer).on("input paste", "input", async (event) => {
+        $(fileContainer).on("input paste drop", "input", async (event) => {
             clearTimeout(timer);
             timer = setTimeout(() => handleInput(event), 500);
         });
 
-        fileContainer.find("input[type=text").trigger("input");
+        fileContainer.find("input[type='text']").trigger("focus");
 
         /** Handles the image URL input changes */
         function handleInput(event: JQuery.TriggeredEvent): void {
             const $input = $(event.target),
-                value = $input.val() + "";
+                value = $input.val() + ""; //this works for URLs in a text field, not for file inputs which use the "files" attribute; value gives the fake local path that causes the 403
 
             // Input is empty
             if (value == "") {
