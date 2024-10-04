@@ -112,10 +112,6 @@ export class UploadUtilities extends RE6Module {
                 isFile = $input.attr("type") === "file",
                 value = isFile ? $input.prop("files")[0] : $input.val() + "";
 
-            console.log($input);
-            console.log(isFile);
-            console.log(value);
-
             // Input is empty
             if (value == "") {
                 dupesContainer.html("");
@@ -125,8 +121,16 @@ export class UploadUtilities extends RE6Module {
 
             dupesContainer.html(`<span class="fullspan">Checking for duplicates . . .</span>`);
 
-            if(isFile){
-
+            if(isFile){ //Event fired by file input for local files or drag/drop
+                //This is ugly, but the APIQuery interface doesn't allow for anything except strings.
+                const data = new FormData();
+                data.append("file", value);
+                fetch("/iqdb_queries.json", { body: data, method: "POST"}).then(
+                    (r: Response) => {
+                        console.log(r.json());
+                    }
+                );
+                
             } else { //Event fired by text input for URL uploading
                 // Input is not a URL
                 try { new URL(value); }
