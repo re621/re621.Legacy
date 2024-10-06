@@ -129,6 +129,12 @@ export class UploadUtilities extends RE6Module {
                 .then((r: Response) => r.json())
                 .then((data) => handleResponse(request, data, true))
                 .catch((error) => handleError(error));
+                const request = new FormData();
+                request.append("file", value);
+                fetch("/iqdb_queries.json", { body: request, method: "POST"})
+                .then((r: Response) => r.json())
+                .then((data) => handleResponse(request, data, true))
+                .catch((error) => handleError(error));
                 
             } else { //Event fired by text input for URL uploading
                 // Input is not a URL
