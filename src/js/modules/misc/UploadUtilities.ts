@@ -123,13 +123,12 @@ export class UploadUtilities extends RE6Module {
 
             if(isFile){ //Event fired by file input for local files or drag/drop
                 //This is ugly, but the APIQuery interface doesn't allow for anything except strings.
-                const data = new FormData();
-                data.append("file", value);
-                fetch("/iqdb_queries.json", { body: data, method: "POST"}).then(
-                    (r: Response) => {
-                        console.log(r.json());
-                    }
-                );
+                const request = new FormData();
+                request.append("file", value);
+                fetch("/iqdb_queries.json", { body: request, method: "POST"})
+                .then((r: Response) => r.json())
+                .then((data) => handleResponse(request, data, true))
+                .catch((error) => handleError(error));
                 
             } else { //Event fired by text input for URL uploading
                 // Input is not a URL
@@ -141,41 +140,8 @@ export class UploadUtilities extends RE6Module {
                 }
 
                 E621.IQDBQueries.get<APIIQDBResponse>({ "url": encodeURI(value) }).then(
-                    (response) => {
-                        // console.log(response);
-                        dupesContainer.html("");
-
-                        // Sometimes, an empty response is just an empty array
-                        // More often than not, it's an array with one malformed object
-                        if (response.length == 0 || (response[0] !== undefined && response[0].post_id == undefined))
-                            return;
-
-                        $("<h3>")
-                            .html(`<a href="/iqdb_queries?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">Duplicates Found:</a> ${response.length}`)
-                            .appendTo(dupesContainer);
-
-                        for (const entry of response)
-                            makePostThumbnail(entry).appendTo(dupesContainer);
-                    },
-                    (error) => {
-                        console.log(error);
-                        dupesContainer.html("");
-                        const errorMessage = $("<span>")
-                            .addClass("fullspan error")
-                            .html(
-                                (error.error && error.error == 429)
-                                    ? "IQDB: Too Many Requests. "
-                                    : `IQDB: Internal Error ${error.error ? error.error : 400} `
-                            )
-                            .appendTo(dupesContainer);
-                        $("<a>")
-                            .html("Retry?")
-                            .appendTo(errorMessage)
-                            .on("click", (event) => {
-                                event.preventDefault();
-                                $(fileContainer).find("input").trigger("input");
-                            });
-                    }
+                    (response) => handleResponse(value, response, false),
+                    (error) => handleError(error)
                 );
 
                 risContainer.html(`
@@ -188,6 +154,46 @@ export class UploadUtilities extends RE6Module {
             }
             
             
+        }
+
+        function handleResponse(request, response, isFile: boolean){
+            // console.log(response);
+            dupesContainer.html("");
+
+            // Sometimes, an empty response is just an empty array
+            // More often than not, it's an array with one malformed object
+            if (response.length == 0 || (response[0] !== undefined && response[0].post_id == undefined))
+                return;
+
+            if(isFile){
+                //Add duplicate counter/linker that can handle POST request
+            } else {
+                $("<h3>")
+                    .html(`<a href="/iqdb_queries?url=${encodeURI(request)}" target="_blank" rel="noopener noreferrer">Duplicates Found:</a> ${response.length}`)
+                    .appendTo(dupesContainer);
+            }
+            for (const entry of response)
+                makePostThumbnail(entry).appendTo(dupesContainer);
+        }
+
+        function handleError(error){
+            console.log(error);
+            dupesContainer.html("");
+            const errorMessage = $("<span>")
+                .addClass("fullspan error")
+                .html(
+                    (error.error && error.error == 429)
+                        ? "IQDB: Too Many Requests. "
+                        : `IQDB: Internal Error ${error.error ? error.error : 400} `
+                )
+                .appendTo(dupesContainer);
+            $("<a>")
+                .html("Retry?")
+                .appendTo(errorMessage)
+                .on("click", (event) => {
+                    event.preventDefault();
+                    $(fileContainer).find("input").trigger("input");
+                });
         }
 
         /**
