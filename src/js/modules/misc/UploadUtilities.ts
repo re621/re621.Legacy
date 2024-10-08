@@ -100,8 +100,11 @@ export class UploadUtilities extends RE6Module {
         });
 
         $(fileContainer).on("click", "button", async () => {
-            dupesContainer.html("");
-            risContainer.html("");
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                dupesContainer.html("");
+                risContainer.html("");
+            }, 500);
         });
 
         fileContainer.find("input[type='text']").trigger("focus");
@@ -113,7 +116,7 @@ export class UploadUtilities extends RE6Module {
                 value = isFile ? $input.prop("files")[0] : $input.val() + "";
 
             // Input is empty
-            if (value == "") {
+            if (value == "" || value == null) {
                 dupesContainer.html("");
                 risContainer.html("");
                 return;
@@ -127,7 +130,7 @@ export class UploadUtilities extends RE6Module {
                 request.append("file", value);
                 fetch("/iqdb_queries.json", { body: request, method: "POST"})
                 .then((r: Response) => r.json())
-                .then((data) => handleResponse(request, data, true))
+                .then((data) => handleResponse(value, data, isFile))
                 .catch((error) => handleError(error));
                 
             } else { //Event fired by text input for URL uploading
@@ -140,7 +143,7 @@ export class UploadUtilities extends RE6Module {
                 }
 
                 E621.IQDBQueries.get<APIIQDBResponse>({ "url": encodeURI(value) }).then(
-                    (response) => handleResponse(value, response, false),
+                    (response) => handleResponse(value, response, isFile),
                     (error) => handleError(error)
                 );
 
@@ -157,7 +160,7 @@ export class UploadUtilities extends RE6Module {
         }
 
         /** Handles valid responses from IQDB endpoint*/
-        function handleResponse(request, response, isFile: boolean){
+        function handleResponse(request, response, isFile: boolean): void{
             // console.log(response);
             dupesContainer.html("");
 
@@ -166,19 +169,16 @@ export class UploadUtilities extends RE6Module {
             if (response.length == 0 || (response[0] !== undefined && response[0].post_id == undefined))
                 return;
 
-            if(isFile){
-                //Add duplicate counter/linker that can handle POST request
-            } else {
-                $("<h3>")
-                    .html(`<a href="/iqdb_queries?url=${encodeURI(request)}" target="_blank" rel="noopener noreferrer">Duplicates Found:</a> ${response.length}`)
-                    .appendTo(dupesContainer);
-            }
+            $("<h3>")
+                .html(isFile ? `Duplicates Found: ${response.length}` :`<a href="/iqdb_queries?url=${encodeURI(request)}" target="_blank" rel="noopener noreferrer">Duplicates Found:</a> ${response.length}`)
+                .appendTo(dupesContainer);
+            
             for (const entry of response)
                 makePostThumbnail(entry).appendTo(dupesContainer);
         }
 
         /** Handles errors from IQDB endpoint */
-        function handleError(error){
+        function handleError(error): void{
             console.log(error);
             dupesContainer.html("");
             const errorMessage = $("<span>")
