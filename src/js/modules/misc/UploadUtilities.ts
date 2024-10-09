@@ -94,17 +94,14 @@ export class UploadUtilities extends RE6Module {
             .appendTo("div.upload_preview_container");
 
         let timer: number = null;
-        $(fileContainer).on("input paste drop", "input", async (event) => {
+        $(fileContainer).on("input paste", "input", async (event) => {
             clearTimeout(timer);
             timer = setTimeout(() => handleInput(event), 500);
         });
 
         $(fileContainer).on("click", "button", async () => {
-            clearTimeout(timer);
-            timer = setTimeout(() => {
-                dupesContainer.html("");
-                risContainer.html("");
-            }, 500);
+            dupesContainer.html("");
+            risContainer.html("");
         });
 
         fileContainer.find("input[type='text']").trigger("focus");
@@ -116,7 +113,7 @@ export class UploadUtilities extends RE6Module {
                 value = isFile ? $input.prop("files")[0] : $input.val() + "";
 
             // Input is empty
-            if (value == "" || value == null) {
+            if (value == "") {
                 dupesContainer.html("");
                 risContainer.html("");
                 return;
@@ -170,7 +167,7 @@ export class UploadUtilities extends RE6Module {
                 return;
 
             $("<h3>")
-                .html(isFile ? `Duplicates Found: ${response.length}` :`<a href="/iqdb_queries?url=${encodeURI(request)}" target="_blank" rel="noopener noreferrer">Duplicates Found:</a> ${response.length}`)
+                .html(isFile ? `Duplicates Found: ${response.length}` : `<a href="/iqdb_queries?url=${encodeURI(request)}" target="_blank" rel="noopener noreferrer">Duplicates Found:</a> ${response.length}`)
                 .appendTo(dupesContainer);
             
             for (const entry of response)
