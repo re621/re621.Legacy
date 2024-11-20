@@ -191,7 +191,7 @@ export class SmartAlias extends RE6Module {
             // On search pages, in the editing mode, reload container when the user clicks on a thumbnail
             // Otherwise, the old tags get left behind. Thanks to tag data caching, this should be pretty quick
             if (Page.matches([PageDefinition.search, PageDefinition.favorites])) {
-                $("article.post-preview").on("click.danbooru", () => {
+                $("article.thumbnail").on("click.danbooru", () => {
                     if (mode) this.handleTagInput($textarea, $container, false);
                     else $container.html("");
                 });

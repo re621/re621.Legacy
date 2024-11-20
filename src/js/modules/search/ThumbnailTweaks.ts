@@ -23,7 +23,7 @@ export class ThumbnailTweaks extends RE6Module {
 
         const conf = ModuleController.get(BetterSearch).fetchSettings(["ribbonsRel", "ribbonsFlag"]);
         let count = 0;
-        for (const element of $(".post-preview").get()) {
+        for (const element of $(".thumbnail").get()) {
             ThumbnailTweaks.modify($(element), conf.ribbonsRel, conf.ribbonsFlag);
             count++;
         }
