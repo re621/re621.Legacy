@@ -704,8 +704,8 @@ export namespace PostData {
 
             has: {
                 file: data.fileURL !== undefined,
-                children: $article.hasClass("post-status-has-children"),
-                parent: $article.hasClass("post-status-has-parent"),
+                children: $article.hasClass("has-children"),
+                parent: $article.hasClass("has-parent"),
                 sample: urls["original"] !== urls["sample"],
             },
 
