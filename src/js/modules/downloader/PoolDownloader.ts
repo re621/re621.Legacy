@@ -225,7 +225,7 @@ export class PoolDownloader extends RE6Module {
                         return;
                     }
 
-                    $("article.post-preview#post_" + post.id).attr("data-state", "preparing");
+                    $("article.thumbnail#post_" + post.id).attr("data-state", "preparing");
                     this.downloadQueue.add(
                         {
                             name: this.createFilename(post, downloadSamples),
@@ -243,13 +243,13 @@ export class PoolDownloader extends RE6Module {
                                 threadInfo[thread]
                                     .html(item.file)
                                     .css("--progress", "0%");
-                                $("article.post-preview#post_" + post.id).attr("data-state", "loading");
+                                $("article.thumbnail#post_" + post.id).attr("data-state", "loading");
                             },
                             onFinish: () => {
-                                $("article.post-preview#post_" + post.id).attr("data-state", "done");
+                                $("article.thumbnail#post_" + post.id).attr("data-state", "done");
                             },
                             onError: () => {
-                                $("article.post-preview#post_" + post.id).attr("data-state", "error");
+                                $("article.thumbnail#post_" + post.id).attr("data-state", "error");
                             },
                             onLoadProgress: (item, thread, event) => {
                                 if (event.lengthComputable) {
