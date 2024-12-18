@@ -16,6 +16,7 @@ export enum TagCategory {
     Unknown = -1,
     General = 0,
     Artist = 1,
+    Contributor = 2,
     Copyright = 3,
     Character = 4,
     Species = 5,

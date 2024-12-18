@@ -47,6 +47,7 @@ interface Tags {
     character: string[];
     copyright: string[];
     artist: string[];
+    contributor: string[];
     invalid: string[];
     lore: string[];
     meta: string[];
@@ -173,6 +174,7 @@ export namespace APIPost {
     export function getTags(post: APIPost): string[] {
         return [
             ...post.tags.artist,
+            ...post.tags.contributor,
             ...post.tags.character,
             ...post.tags.copyright,
             ...post.tags.general,

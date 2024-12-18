@@ -51,6 +51,7 @@ export interface APIIQDBResponse extends APIResponse {
 
             tag_count: number;
             tag_count_artist: number;
+            tag_count_contributor: number;
             tag_count_copyright: number;
             tag_count_character: number;
             tag_count_species: number;
@@ -61,6 +62,7 @@ export interface APIIQDBResponse extends APIResponse {
 
             tag_string: string;
             tag_string_artist: string;
+            tag_string_contributor: string;
             tag_string_copyright: string;
             tag_string_character: string;
             tag_string_species: string;

@@ -4,7 +4,7 @@ export class TagValidator {
     private static metatags = ["user", "approver", "commenter", "comm", "noter", "noteupdater", "artcomm?", "pool", "ordpool", "fav", "favoritedby", "md5", "rating", "note", "locked", "width", "height", "mpixels", "ratio", "score", "favcount", "filesize", "source", "id", "date", "age", "order", "limit", "status", "tagcount", "parent", "child", "pixiv_id", "pixiv", "search", "upvote", "downvote", "voted", "filetype", "flagger", "type", "appealer", "disapproval", "set", "randseed", "description", "change", "user_id", "delreason", "deletedby", "votedup", "voteddown", "duration"];
     private static metatagsRegex = new RegExp(`^(${TagValidator.metatags.join("|")}):(.+)$`, "i");
 
-    private static categories = ["general", "species", "character", "copyright", "artist", "invalid", "lore", "meta"];
+    private static categories = ["general", "species", "character", "copyright", "artist", "contributor", "invalid", "lore", "meta"];
     private static categoriesRegex = new RegExp(`^(${TagValidator.categories.join("|")}):(.+)$`, "i");
 
     private static validation = [

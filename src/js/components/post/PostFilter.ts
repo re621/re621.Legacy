@@ -161,6 +161,9 @@ export class PostFilter {
                 case FilterType.ArtTags:
                     result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.artist.size, value, filter.comparison)
                     break;
+                case FilterType.ContTags:
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.contributor.size, value, filter.comparison)
+                    break;
                 case FilterType.CharTags:
                     result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.character.size, value, filter.comparison)
                     break;
@@ -321,6 +324,7 @@ enum FilterType {
     TagCount = "tagcount",
     GenTags = "gentags",
     ArtTags = "arttags",
+    ContTags = "conttags",
     CharTags = "chartags",
     CopyTags = "copytags",
     SpecTags = "spectags",

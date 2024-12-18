@@ -42,6 +42,7 @@ export class Post implements PostData {
         all: Set<string>;
         artist: Set<string>;
         real_artist: Set<string>;           // same as artist, minus tags like `conditional_dnp` or `sound_warning`. See `Tag.isArtist()` for more info.
+        contributor: Set<string>;
         copyright: Set<string>;
         species: Set<string>;
         character: Set<string>;
@@ -398,6 +399,7 @@ export interface PostData {
         all: Set<string>;
         artist: Set<string>;
         real_artist: Set<string>;
+        contributor: Set<string>;
         copyright: Set<string>;
         species: Set<string>;
         character: Set<string>;
@@ -495,6 +497,7 @@ export namespace PostData {
                 all: tags,
                 artist: new Set(data.tags.artist),
                 real_artist: new Set(data.tags.artist.filter(tag => Tag.isArtist(tag))),
+                contributor: new Set(data.tags.contributor),
                 copyright: new Set(data.tags.copyright),
                 species: new Set(data.tags.species),
                 character: new Set(data.tags.character),
@@ -563,6 +566,7 @@ export namespace PostData {
         // Fetch tags - the existant ones are insufficient
         data["tags"] = {
             artist: getTags("artist"),
+            contributor: getTags("contributor"),
             character: getTags("character"),
             copyright: getTags("copyright"),
             general: getTags("general"),
@@ -672,6 +676,7 @@ export namespace PostData {
             tags: {
                 all: tagSet,
                 artist: new Set<string>(),
+                contributor: new Set<string>(),
                 real_artist: new Set<string>(),
                 copyright: new Set<string>(),
                 species: new Set<string>(),

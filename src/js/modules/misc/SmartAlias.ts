@@ -812,7 +812,7 @@ export class SmartAlias extends RE6Module {
             input[i] = input[i]
                 .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
                 .replace(/\*/g, "(\\S*)");
-        return new RegExp("((?:^|\n| )-?(?:(?:artist|character|copyright|species):)?)(" + input.join("|") + ")( |\n|$)", "gi");
+        return new RegExp("((?:^|\n| )-?(?:(?:artist|contributor|character|copyright|species):)?)(" + input.join("|") + ")( |\n|$)", "gi");
     }
 
     /**
@@ -946,7 +946,7 @@ namespace ParsedTag {
             rawTag = rawTag.substr(1);
         }
 
-        const match = rawTag.match(/(artist|character|copyright|species):/)
+        const match = rawTag.match(/(artist|contributor|character|copyright|species):/)
         if (match) {
             result.prefix = match[1];
             rawTag = rawTag.substr(match[0].length);
