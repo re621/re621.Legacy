@@ -102,8 +102,8 @@ export class HoverZoom extends RE6Module {
             .off("contextmenu.re621.zoom");
 
         $("#page")
-            .off("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap subitem[data-id] img")
-            .off("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap subitem[data-id] img");
+            .off("mouseenter.re621.zoom", "post, .post-preview, .thumbnail, div.post-thumbnail, sb-ctwrap subitem[data-id] img")
+            .off("mouseleave.re621.zoom", "post, .post-preview, .thumbnail, div.post-thumbnail, sb-ctwrap subitem[data-id] img");
 
         if (zoomMode == ImageZoomMode.Disabled) return;
 
@@ -127,7 +127,7 @@ export class HoverZoom extends RE6Module {
         let scrolling = false;
         const zoomDelay = this.fetchSettings("zoomDelay");
         $("#page")
-            .on("mouseenter.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap subitem[data-id] img", (event) => {
+            .on("mouseenter.re621.zoom", "post, .post-preview, .thumbnail, div.post-thumbnail, sb-ctwrap subitem[data-id] img", (event) => {
                 if (scrolling) return;
 
                 let $ref = $(event.currentTarget);
@@ -145,7 +145,7 @@ export class HoverZoom extends RE6Module {
                     HoverZoom.trigger("zoom.start", { post: HoverZoom.curPost.id, pageX: event.pageX, pageY: event.pageY });
                 }, zoomDelay);
             })
-            .on("mouseleave.re621.zoom", "post, .post-preview, div.post-thumbnail, sb-ctwrap subitem[data-id] img", (event) => {
+            .on("mouseleave.re621.zoom", "post, .post-preview, .thumbnail, div.post-thumbnail, sb-ctwrap subitem[data-id] img", (event) => {
                 let $ref = $(event.currentTarget);
                 if ($ref.attr("hztarget"))
                     $ref = $ref.parents($ref.attr("hztarget"));
