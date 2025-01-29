@@ -67,18 +67,15 @@ nav.navigation {
         float: right;
     }
 
-    menu.nav-secondary li.float-right {
-        #subnav-button-increase {
-            padding-right: 0.24rem;
-        }
+    menu.nav-secondary li.re6-bs-pmbutton {
 
-        .resize-disabled {
+        &.push-right { margin-left: auto; }
+
+        a.resize-disabled {
             pointer-events: none;
             cursor: default;
 
-            i {
-                color: #666666;
-            }
+            i { color: #666666; }
         }
 
         &[hide-resize-buttons=true] { display: none; }

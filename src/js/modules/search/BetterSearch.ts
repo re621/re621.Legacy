@@ -1084,27 +1084,27 @@ export class BetterSearch extends RE6Module {
             id: "subnav-button-increase",
             name: `<i class="fas fa-plus"></i>`,
             title: "Increase Image Size",
-            tabClass: "float-right",
+            tabClass: "re6-bs-pmbutton push-right",
             onClick: async () => {
                 const cur = await betterSearch.fetchSettings("imageWidth")
                 await betterSearch.pushSettings("imageWidth", Math.min($("#content").innerWidth(), cur + 100))
                 await disableResizeButton()
                 if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
             },
-        }, "nav#nav menu:last-child")
+        }, ".nav-secondary")
 
         Util.DOM.addSettingsButton({
             id: "subnav-button-decrease",
             name: `<i class="fas fa-minus"></i>`,
             title: "Decrease Image Size",
-            tabClass: "float-right",
+            tabClass: "re6-bs-pmbutton",
             onClick: async () => {
                 const cur = await betterSearch.fetchSettings("imageWidth")
                 await betterSearch.pushSettings("imageWidth", Math.max(150, cur - 100))
                 await disableResizeButton()
                 if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
             },
-        }, "nav#nav menu:last-child")
+        }, ".nav-secondary")
 
         async function disableResizeButton(): Promise<void> {
             const cur = await betterSearch.fetchSettings("imageWidth")
@@ -1125,11 +1125,8 @@ export class BetterSearch extends RE6Module {
     }
 
     public static toggleResizeButtons(buttonsEnabled: boolean): void {
-        if (buttonsEnabled) {
-            $("menu:last-child li.float-right").attr("hide-resize-buttons", "false")
-        } else {
-            $("menu:last-child li.float-right").attr("hide-resize-buttons", "true")
-        }
+        $("menu.nav-secondary li.re6-bs-pmbutton")
+            .attr("hide-resize-buttons", !buttonsEnabled + "");
     }
 }
 
