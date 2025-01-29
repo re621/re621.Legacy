@@ -7,7 +7,7 @@ export class UtilDOM {
      * @param config Button configuration
      * @param target Target element
      */
-    public static addSettingsButton(config: SettingsButton, target = "menu.extra"): JQuery<HTMLElement> {
+    public static addSettingsButton(config: SettingsButton, target = ".nav-tools"): JQuery<HTMLElement> {
         if (config.name === undefined) config.name = "T";
         if (config.href === undefined) config.href = "";
         if (config.title === undefined) config.title = "";

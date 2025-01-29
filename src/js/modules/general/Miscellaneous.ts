@@ -178,9 +178,10 @@ export class Miscellaneous extends RE6Module {
         // Add a mail button
         Util.DOM.addSettingsButton({
             id: "header-button-dmail",
-            name: `<i class="fas fa-envelope"></i>`,
+            name: `<i class="fas fa-envelope"></i> <span>DMail</span>`,
             href: "/dmails",
             title: "DMail",
+            tabClass: "nav-re6-dmail",
         });
 
         // Add a "remove from set" button

@@ -144,9 +144,9 @@ export class HeaderCustomizer extends RE6Module {
         // === Tab Configuration Interface
         this.addTabButton = Util.DOM.addSettingsButton({
             id: "header-button-customizer",
-            name: `<i class="fas fa-tasks"></i>`,
+            name: `<i class="fas fa-tasks"></i> <span>Customize</span>`,
             title: "Edit Header Tabs",
-            tabClass: "float-left",
+            tabClass: "nav-re6-headercus",
         });
 
         const newTabForm = new Form(

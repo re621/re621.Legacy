@@ -52,13 +52,14 @@ export class SubscriptionManager extends RE6Module {
         // Create a notifications button
         const openSubscriptionsButton = Util.DOM.addSettingsButton({
             id: "header-button-notifications",
-            name: `<i class="fas fa-bell"></i>`,
+            name: `<i class="fas fa-bell"></i> <span>Updates</span>`,
             title: "Notifications",
             attr: {
                 "data-loading": "false",
                 "data-updates": "0",
             },
             linkClass: "update-notification",
+            tabClass: "nav-re6-notifications",
             onClick: () => { SubscriptionManager.trigger("windowOpen"); },
         });
 

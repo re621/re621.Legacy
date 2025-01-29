@@ -32,8 +32,9 @@ export class ThemeCustomizer extends RE6Module {
         // === Create a button in the header
         const openCustomizerButton = Util.DOM.addSettingsButton({
             id: "header-button-theme",
-            name: `<i class="fas fa-paint-brush"></i>`,
+            name: `<i class="fas fa-paint-brush"></i> <span>Themes</span>`,
             title: "Change Theme",
+            tabClass: "nav-re6-themecus",
         });
 
         // === Establish the settings window contents
@@ -91,6 +92,7 @@ export class ThemeCustomizer extends RE6Module {
                     ThemeCustomizer.trigger("switch.navbar", data);
                 }
             ),
+            Form.div({ value: "<center><a href='/static/themes'>More theme options</a></center>", width: 1 }),
         ]);
 
         // === Create the modal

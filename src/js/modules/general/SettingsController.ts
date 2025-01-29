@@ -69,9 +69,9 @@ export class SettingsController extends RE6Module {
         // Create a button in the header
         this.openSettingsButton = Util.DOM.addSettingsButton({
             id: "header-button-settings",
-            name: `<i class="fas fa-wrench"></i>`,
-            title: "Settings",
-            tabClass: "float-right",
+            name: `<i class="fas fa-wrench"></i> <span>RE621</span>`,
+            title: "RE621 Settings",
+            tabClass: "nav-re6-settings",
             attr: {
                 "data-loading": "false",
                 "data-updates": "0",

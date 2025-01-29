@@ -42,3 +42,23 @@
         }
     }
 }
+
+/* Reorder the menu tools */
+.nav-re6-headercus { order: 1; }
+.nav-re6-themecus { order: 2; }
+.nav-re6-dmail { order: 3; }
+.nav-re6-notifications { order: 4; }
+.nav-re6-settings { order: 5; }
+#nav-themes { display: none; }
+#nav-settings { order: 7; }
+#nav-account { order: 8; }
+
+.nav-re6-headercus,
+.nav-re6-themecus,
+.nav-re6-dmail,
+.nav-re6-notifications,
+.nav-re6-settings {
+    @media (min-width: 800px) {
+        span { display: none; }
+    }
+}

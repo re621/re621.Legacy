@@ -61,18 +61,11 @@ export class CleanSlate {
         actions.push({
             selector: "#nav",
             action: () => {
-
-                // Add a section for re621 settings buttons
-                $("#nav").addClass("re621-nav")
-                $("<menu>")
-                    .addClass("extra")
-                    .insertAfter("#nav menu.main");
-
                 // Replace the logo's URL if necessary
                 // I don't remember why it's stored in LS
                 const titlePageRouting = Util.LS.getItem("re621.mainpage") || "default";
                 if(titlePageRouting !== "default")
-                    $("#nav a.logo").attr("href", titlePageRouting);
+                    $("a.nav-logo-link").attr("href", titlePageRouting);
             },
         });
 
