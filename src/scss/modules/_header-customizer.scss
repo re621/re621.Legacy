@@ -1,7 +1,7 @@
 /* Header Customizer Styles */
-header#top nav#nav {
+nav.navigation {
 
-    menu.main.custom {
+    menu.nav-primary.custom {
         padding: 0;
         align-self: center;
         display: inline-flex;
@@ -16,6 +16,7 @@ header#top nav#nav {
             &>a {
                 padding: 0 0.5rem;
                 outline: 0;
+                white-space: nowrap;
             }
         }
 
@@ -58,15 +59,15 @@ header#top nav#nav {
         }
     }
 
-    menu.main.custom[data-editing=true] li {
+    menu.nav-primary.custom[data-editing=true] li {
         background-color: #ffffff40;
     }
 
-    menu.main.custom:not([data-editing=true]) li[data-right=true] {
+    menu.nav-primary.custom:not([data-editing=true]) li[data-right=true] {
         float: right;
     }
 
-    menu:last-child li.float-right {
+    menu.nav-secondary li.float-right {
         #subnav-button-increase {
             padding-right: 0.24rem;
         }
@@ -81,5 +82,9 @@ header#top nav#nav {
         }
 
         &[hide-resize-buttons=true] { display: none; }
+    }
+
+    menu.nav-help {
+        display: none;
     }
 }

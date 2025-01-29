@@ -35,39 +35,6 @@ div#c-users div#a-edit .active {
     width: 80%;
 }
 
-// Gridify the header
-header#top {
-    h1 {
-        display: none !important;
-    }
-
-    nav#nav.re621-nav {
-        grid-template-columns: 3.75em 1fr auto;
-        grid-template-areas:
-            "logo main extra"
-            "logo secondary secondary";
-
-        menu.main {
-            overflow: hidden;
-            white-space: nowrap;
-            padding-left: 0;
-            padding-right: 0;
-        }
-
-        menu.extra {
-            grid-area: extra;
-            background: unset;
-            margin: 0 0.5rem 0 0;
-            padding: 0.25rem 0;
-            font-weight: 700;
-        }
-
-        menu.extra a {
-            padding: 6px 10px;
-        }
-    }
-}
-
 // Stickify the header
 body[data-sticky-header=true] {
     header#top {
