@@ -92,7 +92,7 @@ export class ThemeCustomizer extends RE6Module {
                     ThemeCustomizer.trigger("switch.navbar", data);
                 }
             ),
-            Form.div({ value: "<center><a href='/static/themes'>More theme options</a></center>", width: 1 }),
+            Form.div({ value: "<center><a href='/static/theme'>More theme options</a></center>", width: 1 }),
         ]);
 
         // === Create the modal
