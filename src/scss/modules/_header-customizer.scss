@@ -2,9 +2,6 @@
 nav.navigation {
 
     menu.nav-primary.custom {
-        padding: 0;
-        align-self: center;
-        display: inline-flex;
 
         li {
             position: relative;
@@ -80,8 +77,8 @@ nav.navigation {
 
         &[hide-resize-buttons=true] { display: none; }
     }
+}
 
-    menu.nav-help {
-        display: none;
-    }
+nav.navigation menu.nav-help, html.nav-toggled nav.navigation menu.nav-help {
+    display: none;
 }
