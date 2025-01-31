@@ -287,7 +287,7 @@ export class HeaderCustomizer extends RE6Module {
         if (config.title !== "") $link.attr("title", this.processTabVariables(config.title));
         if (config.href !== "") $link.attr("href", this.processTabVariables(config.href));
 
-        if (config.href === "/forum_topics" && this.hasForumUpdates)
+        if (config.href.startsWith("/forum_topics") && this.hasForumUpdates)
             $link.addClass("tab-has-updates");
         else if ((config.href == "/users/%userid%" || config.href == "/users/home") && !User.loggedIn) {
             $link
