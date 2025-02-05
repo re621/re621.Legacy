@@ -51,7 +51,7 @@ export class BlacklistEnhancer extends RE6Module {
             })
             .removeAttr("style")
             .removeAttr("class")
-            .appendTo("#re621-search")
+            .insertAfter("#mode-box")
             .html("");
 
         // Clickable header

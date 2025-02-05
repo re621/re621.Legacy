@@ -128,7 +128,7 @@ CleanSlate.createDOM().then(async () => {
     // You know who you are.
     Danbooru.Shortcuts.disabled = true;
 
-    StartupTasks.createSearchbox();
+    // StartupTasks.createSearchbox();
     StartupTasks.createTagList();
 
     await Debug.init();
