@@ -104,7 +104,7 @@ export class BetterSearch extends RE6Module {
         this.queryLimit = parseInt(Page.getQueryParameter("limit")) || undefined;
 
         BetterSearch.originalTags = $("#tags").val() + "";
-        console.log("original tags", BetterSearch.originalTags);
+        // console.log("original tags", BetterSearch.originalTags);
 
         // Queue up the first API call
         // This can be done early, to prevent waiting for `create()`
@@ -118,9 +118,9 @@ export class BetterSearch extends RE6Module {
 
         // Scrape the old paginator for data
         // If the API ever starts returning the total number of results, this can be removed
-        const paginator = $("#paginator-old, div.paginator menu").first();
-        const curPage = parseInt(paginator.find(".current-page").text()) || -1,
-            lastPage = parseInt(paginator.find(".numbered-page").last().text()) || -1;
+        const paginator = $("#paginator-old, div.paginator").first();
+        const curPage = parseInt(paginator.attr("data-current")) || -1,
+            lastPage = parseInt(paginator.attr("data-total")) || -1;
         paginator.remove();
         this.lastPage = Math.max(curPage, lastPage);
 
@@ -604,8 +604,8 @@ export class BetterSearch extends RE6Module {
         if (conf.compactMode) this.$content.css("--img-maxheight", (conf.imageSizeChange ? conf.imageWidth : 150) + "px");
 
         // Hide the SmartAlias output in the quick edit form
-        if (conf.hideSmartAliasOutput) $("section#content").attr("hide-smart-alias-output", "true");
-        else $("section#content").removeAttr("hide-smart-alias-output");
+        if (conf.hideSmartAliasOutput) $("#content").attr("hide-smart-alias-output", "true");
+        else $("#content").removeAttr("hide-smart-alias-output");
 
         const searchContent = this.$content;
 

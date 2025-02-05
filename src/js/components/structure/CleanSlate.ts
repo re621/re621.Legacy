@@ -72,14 +72,14 @@ export class CleanSlate {
         // Clear the existing thumbnails
         if (Page.matches([PageDefinition.search, PageDefinition.favorites]) && Util.LS.getItem("re621.bs.enabled") === "true") {
             actions.push({
-                selector: "div.paginator menu",
+                selector: "div.paginator",
                 action: () => {
-                    $("div.paginator menu")
+                    $("div.paginator")
                         .css("display", "none")
                         .attr("id", "paginator-old")
                         .appendTo("body");
 
-                    $("#content").html("");
+                    $(".content").attr("id", "content").html("");
                 },
             });
         }

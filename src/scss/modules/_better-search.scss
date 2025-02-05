@@ -1,6 +1,6 @@
 /* Styles for the revamped search page */
 
-section#content {
+#content {
 
     search-loading {
         display: flex;
@@ -717,7 +717,7 @@ zoom-container {
 
 
 /* Quick Tags Form */
-section#content > form#re621-quick-tags {
+#content > form#re621-quick-tags {
     display: none;
     box-sizing: border-box;
     top: 0;
@@ -768,15 +768,15 @@ section#content > form#re621-quick-tags {
         }
     }
 }
-section#content[hide-smart-alias-output=true] > form#re621-quick-tags smart-alias {
+#content[hide-smart-alias-output=true] > form#re621-quick-tags smart-alias {
     display: none;
 }
 
-body[data-sticky-editbox=true] section#content > form#re621-quick-tags {
+body[data-sticky-editbox=true] #content > form#re621-quick-tags {
     position: sticky;
 }
 
-div#page.mode-edit section#content > form#re621-quick-tags {
+div#page.mode-edit #content > form#re621-quick-tags {
     display: block;
 }
 
