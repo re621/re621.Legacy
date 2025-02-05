@@ -66,8 +66,8 @@ export class FavDownloader extends RE6Module {
                 "id": "fav-downloader-box",
                 "data-fixed": this.fetchSettings("fixedSection") + "",
             })
-            .html(`<h1>Download</h1>`)
-            .appendTo("aside#sidebar");
+            .html(`<h3>Download</h3>`)
+            .appendTo(".sidebar");
 
         $("#sidebar").on("re621:reflow", () => {
             this.section.css("top", $("#re621-search").outerHeight() + "px");
