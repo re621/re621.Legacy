@@ -297,6 +297,7 @@ body[data-hide-blacklist=true] section#blacklist-box {
 // This was copied from the old subscriptions manager
 // It needs to be streamlined for its actual purpose
 .update-notification:not([data-updates="0"]) {
+    position: relative;
     &::after {
         content: unicode('f111');
         @include FontAwesomeFamily;
@@ -305,7 +306,8 @@ body[data-hide-blacklist=true] section#blacklist-box {
         color: red;
 
         position: absolute;
-        top: 0;
+        top: -3px;
+        right: 0;
     }
 }
 
