@@ -118,7 +118,7 @@ export class BetterSearch extends RE6Module {
 
         // Scrape the old paginator for data
         // If the API ever starts returning the total number of results, this can be removed
-        const paginator = $("#paginator-old, div.paginator").first();
+        const paginator = $("nav .pagination.numbered").first();
         const curPage = parseInt(paginator.attr("data-current")) || -1,
             lastPage = parseInt(paginator.attr("data-total")) || -1;
         paginator.remove();
