@@ -7,6 +7,7 @@ import { Util } from "../../components/utility/Util";
 export class SearchUtilities extends RE6Module {
 
     private static randomPostURL = "";
+    private static cursorFocusState: boolean;
 
     public constructor() {
         super([PageDefinition.search, PageDefinition.post, PageDefinition.favorites]);
@@ -45,6 +46,7 @@ export class SearchUtilities extends RE6Module {
             shortenTagNames: true,
             hidePlusMinusIcons: false,
             autoFocusSearch: false,
+            switchCursorFocus: true,
 
             collapseCategories: true,
             categoryData: [],
@@ -109,6 +111,7 @@ export class SearchUtilities extends RE6Module {
 
         // Replaces the tag count estimate with the real number
         if (Page.matches([PageDefinition.search, PageDefinition.post])) {
+            this.switchCursorFocus(this.fetchSettings("switchCursorFocus"));
             this.improveTagCount(this.fetchSettings("improveTagCount"));
             this.shortenTagNames(this.fetchSettings("shortenTagNames"));
             this.hidePlusMinusIcons(this.fetchSettings("hidePlusMinusIcons"));
@@ -146,6 +149,14 @@ export class SearchUtilities extends RE6Module {
         // Handle the sidebar collapse on the post page
         if (Page.matches([PageDefinition.post]))
             this.handleSidebarCollapsePost();
+    }
+
+    /**
+     * Makes the cursor move to the end of the searchbar query instead of the beginning
+     * @param state True to modify, false to restore
+     */
+    public switchCursorFocus(state = true): void {
+        SearchUtilities.cursorFocusState = state;
     }
 
     /**
@@ -198,7 +209,12 @@ export class SearchUtilities extends RE6Module {
     /** Sets the focus on the search bar */
     private focusSearchbar(event: Event): void {
         event.preventDefault();
-        $("section#search-box input").trigger("focus");
+        $("section#search-box input").each(function () {
+            const searchbar = this as HTMLInputElement;
+            const cursorPosition = SearchUtilities.cursorFocusState ? searchbar.value.length : 0;
+            searchbar.focus();
+            searchbar.setSelectionRange(cursorPosition, cursorPosition);
+        });
     }
 
     /** Switches the location over to a random post */
