@@ -1,5 +1,6 @@
 import { Danbooru } from "../../components/api/Danbooru";
 import { Page, PageDefinition } from "../../components/data/Page";
+import { Blacklist } from "../../components/data/Blacklist";
 import { ModuleController } from "../../components/ModuleController";
 import { Post } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
@@ -133,6 +134,11 @@ export class PostViewer extends RE6Module {
         if (!Page.matches(PageDefinition.post)) return;
 
         this.post = Post.getViewingPost()
+        
+        if (Blacklist.addPost(this.post) == 0) { //no filters match, allows for BlacklistEnhancer exceptions
+            $("#image-container").removeClass("blacklisted");
+        }
+
 
         // Move the add to set / pool buttons
         const $addToContainer = $("<div>").attr("id", "image-add-links").insertAfter("div#image-download-link");
