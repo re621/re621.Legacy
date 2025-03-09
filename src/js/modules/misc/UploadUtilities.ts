@@ -99,12 +99,18 @@ export class UploadUtilities extends RE6Module {
             timer = setTimeout(() => handleInput(event), 500);
         });
 
-        fileContainer.find("input[type=text").trigger("input");
+        $(fileContainer).on("click", "button", async () => {
+            dupesContainer.html("");
+            risContainer.html("");
+        });
+
+        fileContainer.find("input[type='text']").trigger("focus");
 
         /** Handles the image URL input changes */
         function handleInput(event: JQuery.TriggeredEvent): void {
             const $input = $(event.target),
-                value = $input.val() + "";
+                isFile = $input.attr("type") === "file",
+                value = isFile ? $input.prop("files")[0] : $input.val() + "";
 
             // Input is empty
             if (value == "") {
@@ -113,61 +119,80 @@ export class UploadUtilities extends RE6Module {
                 return;
             }
 
-            // Input is not a URL
-            try { new URL(value); }
-            catch {
-                dupesContainer.html(`<span class="fullspan">Unable to parse image path. <a href="/iqdb_queries" target="_blank" rel="noopener noreferrer">Check manually</a>?</span>`);
-                risContainer.html("");
-                return;
-            }
+            dupesContainer.html(`<span class="fullspan">Checking for duplicates . . .</span>`);
 
-            dupesContainer.html(`<span class="fullspan">Checking for duplicates . . .</span>`);;
-
-            E621.IQDBQueries.get<APIIQDBResponse>({ "url": encodeURI(value) }).then(
-                (response) => {
-                    // console.log(response);
-                    dupesContainer.html("");
-
-                    // Sometimes, an empty response is just an empty array
-                    // More often than not, it's an array with one malformed object
-                    if (response.length == 0 || (response[0] !== undefined && response[0].post_id == undefined))
-                        return;
-
-                    $("<h3>")
-                        .html(`<a href="/iqdb_queries?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">Duplicates Found:</a> ${response.length}`)
-                        .appendTo(dupesContainer);
-
-                    for (const entry of response)
-                        makePostThumbnail(entry).appendTo(dupesContainer);
-                },
-                (error) => {
-                    console.log(error);
-                    dupesContainer.html("");
-                    const errorMessage = $("<span>")
-                        .addClass("fullspan error")
-                        .html(
-                            (error.error && error.error == 429)
-                                ? "IQDB: Too Many Requests. "
-                                : `IQDB: Internal Error ${error.error ? error.error : 400} `
-                        )
-                        .appendTo(dupesContainer);
-                    $("<a>")
-                        .html("Retry?")
-                        .appendTo(errorMessage)
-                        .on("click", (event) => {
-                            event.preventDefault();
-                            $(fileContainer).find("input").trigger("input");
-                        });
+            if(isFile){ //Event fired by file input for local files or drag/drop
+                //This is ugly, but the APIQuery interface doesn't allow for anything except strings.
+                const request = new FormData();
+                request.append("file", value);
+                fetch("/iqdb_queries.json", { body: request, method: "POST"})
+                .then((r: Response) => r.json())
+                .then((data) => handleResponse(value, data, isFile))
+                .catch((error) => handleError(error));
+                
+            } else { //Event fired by text input for URL uploading
+                // Input is not a URL
+                try { new URL(value); }
+                catch {
+                    dupesContainer.html(`<span class="fullspan">Unable to parse image path. <a href="/iqdb_queries" target="_blank" rel="noopener noreferrer">Check manually</a>?</span>`);
+                    risContainer.html("");
+                    return;
                 }
-            );
 
-            risContainer.html(`
-                <a href="/iqdb_queries?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">e621</a>
-                <a href="https://www.google.com/searchbyimage?image_url=${encodeURI(value)}&client=e621" target="_blank" rel="noopener noreferrer">Google</a>
-                <a href="https://saucenao.com/search.php?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">SauceNAO</a>
-                <a href="https://derpibooru.org/search/reverse?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">Derpibooru</a>
-                <a href="https://kheina.com/?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">Kheina</a>
-            `);
+                E621.IQDBQueries.get<APIIQDBResponse>({ "url": encodeURI(value) }).then(
+                    (response) => handleResponse(value, response, isFile),
+                    (error) => handleError(error)
+                );
+
+                risContainer.html(`
+                    <a href="/iqdb_queries?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">e621</a>
+                    <a href="https://www.google.com/searchbyimage?image_url=${encodeURI(value)}&client=e621" target="_blank" rel="noopener noreferrer">Google</a>
+                    <a href="https://saucenao.com/search.php?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">SauceNAO</a>
+                    <a href="https://derpibooru.org/search/reverse?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">Derpibooru</a>
+                    <a href="https://kheina.com/?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">Kheina</a>
+                `);
+            }
+            
+            
+        }
+
+        /** Handles valid responses from IQDB endpoint*/
+        function handleResponse(request, response, isFile: boolean): void{
+            // console.log(response);
+            dupesContainer.html("");
+
+            // Sometimes, an empty response is just an empty array
+            // More often than not, it's an array with one malformed object
+            if (response.length == 0 || (response[0] !== undefined && response[0].post_id == undefined))
+                return;
+
+            $("<h3>")
+                .html(isFile ? `Duplicates Found: ${response.length}` : `<a href="/iqdb_queries?url=${encodeURI(request)}" target="_blank" rel="noopener noreferrer">Duplicates Found:</a> ${response.length}`)
+                .appendTo(dupesContainer);
+            
+            for (const entry of response)
+                makePostThumbnail(entry).appendTo(dupesContainer);
+        }
+
+        /** Handles errors from IQDB endpoint */
+        function handleError(error): void{
+            console.log(error);
+            dupesContainer.html("");
+            const errorMessage = $("<span>")
+                .addClass("fullspan error")
+                .html(
+                    (error.error && error.error == 429)
+                        ? "IQDB: Too Many Requests. "
+                        : `IQDB: Internal Error ${error.error ? error.error : 400} `
+                )
+                .appendTo(dupesContainer);
+            $("<a>")
+                .html("Retry?")
+                .appendTo(errorMessage)
+                .on("click", (event) => {
+                    event.preventDefault();
+                    $(fileContainer).find("input").trigger("input");
+                });
         }
 
         /**
