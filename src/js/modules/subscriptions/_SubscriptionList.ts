@@ -140,4 +140,6 @@ type ExtraData = {
     name?: string;
     data?: string;
     last?: number;
+    lastSeen?: number;
+    numBehind?: number;
 }
