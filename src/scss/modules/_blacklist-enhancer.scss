@@ -1,5 +1,6 @@
 @use "../utilities/fontawesome";
 @use "../utilities/mixins";
+@use "../utilities/functions";
 
 /** Replacement Blacklist Filtering Styles */
 section#blacklist-box {
@@ -21,7 +22,7 @@ blacklist-header {
 }
 
 section#blacklist-box > blacklist-header::before {
-    content: unicode("f0d7");
+    content: functions.unicode("f0d7");
     display: inline-block;
     margin-right: 0.5rem;
     @include fontawesome.family;
@@ -47,7 +48,7 @@ blacklist-content {
         color: #bbb;
 
         &::before {
-            content: unicode("f14a");
+            content: functions.unicode("f14a");
             display: inline-block;
             margin-right: 0.435rem;
             margin-left: -1rem;
@@ -66,7 +67,7 @@ blacklist-content {
         }
 
         &[enabled=false] {
-            &::before { content: unicode("f0c8"); }
+            &::before { content: functions.unicode("f0c8"); }
             & > a { color: #ccc !important; }
         }
     }

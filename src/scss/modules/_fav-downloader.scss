@@ -1,4 +1,5 @@
 @use "../utilities/fontawesome";
+@use "../utilities/functions";
 
 /* Mass Downloader Styles */
 
@@ -38,15 +39,15 @@ section#fav-downloader-box {
             }
 
             &[data-state=done]::before {
-                content: unicode("f058"); // fa-check-circle
+                content: functions.unicode("f058"); // fa-check-circle
             }
 
             &[data-state=error]::before {
-                content: unicode("f057"); // fa-times-circle
+                content: functions.unicode("f057"); // fa-times-circle
             }
 
             &[data-state=loading]::before {
-                content: unicode("f1ce"); // fa-circle-notch
+                content: functions.unicode("f1ce"); // fa-circle-notch
                 font-weight: 700;
                 animation: fa-spin 2s infinite linear;
             }

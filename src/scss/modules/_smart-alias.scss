@@ -1,5 +1,6 @@
 @use "../utilities/fontawesome";
 @use "../utilities/mixins";
+@use "../utilities/functions";
 
 /* Smart Alias Styles */
 
@@ -56,14 +57,14 @@ smart-alias {
         }
 
         &[symbol=loading]::before {
-            content: unicode("f1ce"); // fa-circle-notch
+            content: functions.unicode("f1ce"); // fa-circle-notch
             font-weight: 700;
             animation: fa-spin 2s infinite linear;
         }
-        &[symbol=error]::before     { content: unicode("f057"); }   // fa-times-circle
-        &[symbol=info]::before      { content: unicode("f059"); }   // fa-question-circle
-        &[symbol=warning]::before   { content: unicode("f192"); }   // fa-dot-circle
-        &[symbol=success]::before   { content: unicode("f058"); }   // fa-check-circle
+        &[symbol=error]::before     { content: functions.unicode("f057"); }   // fa-times-circle
+        &[symbol=info]::before      { content: functions.unicode("f059"); }   // fa-question-circle
+        &[symbol=warning]::before   { content: functions.unicode("f192"); }   // fa-dot-circle
+        &[symbol=success]::before   { content: functions.unicode("f058"); }   // fa-check-circle
 
 
         // Stupid hack, but here we go
