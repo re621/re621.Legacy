@@ -15,7 +15,7 @@ export class PostViewer extends RE6Module {
 
     private post: Post;
 
-    public constructor() {
+    public constructor () {
         super([PageDefinition.post, PageDefinition.changes, PageDefinition.iqdb], true);
 
         const reqPage = PageDefinition.post;
@@ -45,13 +45,13 @@ export class PostViewer extends RE6Module {
             { keys: "hotkeyAddSetCustom4", fnct: () => { this.addSetCustom("hotkeyAddSetCustom4_data"); }, page: reqPage },
             { keys: "hotkeyAddSetCustom5", fnct: () => { this.addSetCustom("hotkeyAddSetCustom5_data"); }, page: reqPage },
 
-            { keys: "hotkeyOpenHistory", fnct: this.openImageHistory, },
+            { keys: "hotkeyOpenHistory", fnct: this.openImageHistory },
             { keys: "hotkeyOpenArtist", fnct: this.openArtist, page: reqPage },
             { keys: "hotkeyOpenSource", fnct: this.openSource, page: reqPage },
             { keys: "hotkeyOpenParent", fnct: this.openParent, page: reqPage },
             { keys: "hotkeyToggleRel", fnct: this.toggleRelSection, page: reqPage },
             { keys: "hotkeyOpenIQDB", fnct: this.openIQDB },
-            { keys: "hotkeyOpenAPI", fnct: this.openAPI, },
+            { keys: "hotkeyOpenAPI", fnct: this.openAPI },
 
             { keys: "hotkeyOpenSauceNAO", fnct: this.openSauceNAO },
             { keys: "hotkeyOpenKheina", fnct: this.openKheina },
@@ -66,7 +66,7 @@ export class PostViewer extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings(): Settings {
+    protected getDefaultSettings (): Settings {
         return {
             enabled: true,
             hotkeyUpvote: "w",          // vote up on the current post
@@ -124,15 +124,15 @@ export class PostViewer extends RE6Module {
     }
 
     /**
-     * Creates the module's structure.  
+     * Creates the module's structure.
      * Should be run immediately after the constructor finishes.
      */
-    public create(): void {
+    public create (): void {
         super.create();
 
         if (!Page.matches(PageDefinition.post)) return;
 
-        this.post = Post.getViewingPost()
+        this.post = Post.getViewingPost();
 
         // Move the add to set / pool buttons
         const $addToContainer = $("<div>").attr("id", "image-add-links").insertAfter("div#image-download-link");
@@ -231,7 +231,7 @@ export class PostViewer extends RE6Module {
                         <li><a href="/iqdb_queries?post_id=${this.post.id}">Visually similar on E6</a></li>
                     </ul>
                 `)
-                .insertAfter("#post-history")
+                .insertAfter("#post-history");
         } else {
             const useSample = !this.fetchSettings("betterImageSearch");
             const links = [
@@ -240,7 +240,7 @@ export class PostViewer extends RE6Module {
                 null,
                 ["https://saucenao.com/search.php?url=" + this.getSourceLink(RISSizeLimit.SauceNAO, useSample), "SauceNAO"],
                 ["https://kheina.com/?url=" + this.getSourceLink(RISSizeLimit.Kheina, useSample), "Kheina"],
-                ["https://www.google.com/searchbyimage?image_url=" + this.getSourceLink(RISSizeLimit.Google, useSample)+"&client=e621", "Google"],
+                ["https://www.google.com/searchbyimage?image_url=" + this.getSourceLink(RISSizeLimit.Google, useSample) + "&client=e621", "Google"],
                 ["https://yandex.ru/images/search?url=" + this.getSourceLink(RISSizeLimit.Yandex, useSample) + "&rpt=imageview", "Yandex"],
                 null,
                 ["https://derpibooru.org/search/reverse?url=" + this.getSourceLink(RISSizeLimit.Derpibooru, useSample), "Derpibooru"],
@@ -258,7 +258,7 @@ export class PostViewer extends RE6Module {
         }
     }
 
-    private getSourceLink(limit: RISSizeLimit, useSample: boolean): string {
+    private getSourceLink (limit: RISSizeLimit, useSample: boolean): string {
         // console.log(limit.toString());
         return (useSample || !limit.test(this.post))
             ? this.post.file.sample
@@ -266,17 +266,17 @@ export class PostViewer extends RE6Module {
     }
 
     /** Toggles the boldened look on sidebar tags */
-    public toggleBoldenedTags(state = true): void {
+    public toggleBoldenedTags (state = true): void {
         $("#tag-list").toggleClass("tags-boldened", state);
     }
 
     /** Emulates a click on the upvote button */
-    private triggerUpvote(): void {
+    private triggerUpvote (): void {
         Danbooru.Post.vote(Post.getViewingPost().id, 1);
     }
 
     /** Same as above, but does not unvote */
-    private triggerUpvoteNU(): void {
+    private triggerUpvoteNU (): void {
         const id = Post.getViewingPost().id;
         PostActions.vote(id, 1, true).then((response) => {
             if (!response.success) {
@@ -295,18 +295,18 @@ export class PostViewer extends RE6Module {
                 .removeClass("score-positive score-negative score-neutral")
                 .addClass(PostViewer.getScoreClass(response.score))
                 .attr("title", response.up + " up / " + response.down + " down")
-                .html(response.score + "")
+                .html(response.score + "");
             if (response.score > 0) Danbooru.notice("Post Score Updated");
         });
     }
 
     /** Emulates a click on the downvote button */
-    private triggerDownvote(): void {
+    private triggerDownvote (): void {
         Danbooru.Post.vote(Post.getViewingPost().id, -1);
     }
 
     /** Same as above, but does not unvote */
-    private triggerDownvoteNU(): void {
+    private triggerDownvoteNU (): void {
         const id = Post.getViewingPost().id;
         PostActions.vote(id, -1, true).then((response) => {
             if (!response.success) {
@@ -325,39 +325,40 @@ export class PostViewer extends RE6Module {
                 .removeClass("score-positive score-negative score-neutral")
                 .addClass(PostViewer.getScoreClass(response.score))
                 .attr("title", response.up + " up / " + response.down + " down")
-                .html(response.score + "")
+                .html(response.score + "");
             if (response.score < 0) Danbooru.notice("Post Score Updated");
         });
     }
 
-    private static getScoreClass(score: number): string {
+    private static getScoreClass (score: number): string {
         if (score > 0) return "score-positive";
         if (score < 0) return "score-negative";
         return "score-neutral";
     }
 
     /** Toggles the favorite state */
-    private toggleFavorite(): void {
-        if ($("div.fav-buttons").hasClass("fav-buttons-false")) { $("#add-fav-button")[0].click(); }
-        else { $("#remove-fav-button")[0].click(); }
+    private toggleFavorite (): void {
+        if ($("div.fav-buttons").hasClass("fav-buttons-false")) {
+            $("#add-fav-button")[0].click();
+        } else { $("#remove-fav-button")[0].click(); }
     }
 
     /** Adds the post to favorites, does not remove it */
-    private addFavorite(): void {
+    private addFavorite (): void {
         if ($("div.fav-buttons").hasClass("fav-buttons-false")) {
             $("#add-fav-button")[0].click();
         }
     }
 
     /** Removes the post from favorites, does not add it */
-    private removeFavorite(): void {
+    private removeFavorite (): void {
         if (!$("div.fav-buttons").hasClass("fav-buttons-false")) {
             $("#remove-fav-button")[0].click();
         }
     }
 
     /** Switches the notes container to its opposite state */
-    private async toggleNotes(updateSettings = true): Promise<void> {
+    private async toggleNotes (updateSettings = true): Promise<void> {
         const module = ModuleController.get(PostViewer),
             hideNotes = module.fetchSettings("hideNotes");
 
@@ -374,7 +375,7 @@ export class PostViewer extends RE6Module {
     }
 
     /** Toggles the note editing interface */
-    private async switchNewNote(): Promise<void> {
+    private async switchNewNote (): Promise<void> {
         $("#note-container").attr("data-hidden", "false");
         $("a#image-note-button").html("Notes: ON");
         await ModuleController.get(PostViewer).pushSettings("hideNotes", false);
@@ -383,12 +384,12 @@ export class PostViewer extends RE6Module {
     }
 
     /** Opens the dialog to add the post to the set */
-    private openSetDialogue(): void {
+    private openSetDialogue (): void {
         $("a#set")[0].click();
     }
 
     /** Adds or removes the current post from the latest used set */
-    private toggleSetLatest(): void {
+    private toggleSetLatest (): void {
         const lastSet = parseInt(window.localStorage.getItem("set"));
         if (!lastSet) {
             Danbooru.error(`Error: no set selected`);
@@ -399,7 +400,7 @@ export class PostViewer extends RE6Module {
     }
 
     /** Adds the current post to the latest used set */
-    private addSetLatest(): void {
+    private addSetLatest (): void {
         const lastSet = parseInt(window.localStorage.getItem("set"));
         if (!lastSet) {
             Danbooru.error(`Error: no set selected`);
@@ -410,7 +411,7 @@ export class PostViewer extends RE6Module {
     }
 
     /** Removes the current post frp, the latest used set */
-    private removeSetLatest(): void {
+    private removeSetLatest (): void {
         const lastSet = parseInt(window.localStorage.getItem("set"));
         if (!lastSet) {
             Danbooru.error(`Error: no set selected`);
@@ -421,21 +422,21 @@ export class PostViewer extends RE6Module {
     }
 
     /** Adds the current post to the set defined in the config */
-    private addSetCustom(dataKey: string): void {
+    private addSetCustom (dataKey: string): void {
         PostActions.addSet(
             this.fetchSettings<number>(dataKey),
-            Post.getViewingPost().id
+            Post.getViewingPost().id,
         );
     }
 
     /** Opens the dialog to add the post to the pool */
-    private async openPoolDialogue(): Promise<void> {
+    private async openPoolDialogue (): Promise<void> {
         await Util.sleep(50);
         $("a#pool")[0].click();
     }
 
     /** Redirects the page to the post history */
-    private openImageHistory(): void {
+    private openImageHistory (): void {
         if (Page.matches(PageDefinition.post)) {
             location.href = "/post_versions?search[post_id]=" + Page.getPageID();
         } else if (Page.matches(PageDefinition.iqdb)) {
@@ -447,26 +448,26 @@ export class PostViewer extends RE6Module {
         }
     }
 
-    private static lookupClick(query: string): void {
+    private static lookupClick (query: string): void {
         const lookup = $(query).first();
         if (lookup.length == 0) return;
         lookup[0].click();
     }
 
     /** Searches for other works by the artist, if there is one */
-    private openArtist(): void { PostViewer.lookupClick("li.category-1 a.search-tag"); }
+    private openArtist (): void { PostViewer.lookupClick("li.category-1 a.search-tag"); }
 
     /** Opens the first source link */
-    private openSource(): void { PostViewer.lookupClick("div.source-link a"); }
+    private openSource (): void { PostViewer.lookupClick("div.source-link a"); }
 
     /** Opens the first source link */
-    private openParent(): void { PostViewer.lookupClick("#has-parent-relationship-preview a, #has-children-relationship-preview a"); }
+    private openParent (): void { PostViewer.lookupClick("#has-parent-relationship-preview a, #has-children-relationship-preview a"); }
 
     /** Toggles the visibility of the parent/child thumbnails */
-    private toggleRelSection(): void { PostViewer.lookupClick("#has-children-relationship-preview-link, #has-parent-relationship-preview-link"); }
+    private toggleRelSection (): void { PostViewer.lookupClick("#has-children-relationship-preview-link, #has-parent-relationship-preview-link"); }
 
     /** Opens IQDB page for the current page */
-    private openIQDB(): void {
+    private openIQDB (): void {
         if (Page.matches(PageDefinition.post)) {
             location.href = "/iqdb_queries?post_id=" + Page.getPageID();
         } else if (Page.matches(PageDefinition.iqdb)) {
@@ -478,21 +479,26 @@ export class PostViewer extends RE6Module {
         }
     }
 
-    private static openSourceLookup(source: "SauceNAO" | "Kheina" | "Google" | "Yandex" | "Derpibooru" | "Inkbunny"): void {
+    private static openSourceLookup (source: "SauceNAO" | "Kheina" | "Google" | "Yandex" | "Derpibooru" | "Inkbunny"): void {
         if (!Page.matches(PageDefinition.post)) return;
         const link = $(`a[lookup="${source}"]`).first();
         if (!link.length) return;
         link[0].click();
     }
 
-    private openSauceNAO(): void { PostViewer.openSourceLookup("SauceNAO"); }
-    private openKheina(): void { PostViewer.openSourceLookup("Kheina"); }
-    private openGoogle(): void { PostViewer.openSourceLookup("Google"); }
-    private openYandex(): void { PostViewer.openSourceLookup("Yandex"); }
-    private openDerpibooru(): void { PostViewer.openSourceLookup("Derpibooru"); }
-    private openInkbunny(): void { PostViewer.openSourceLookup("Inkbunny"); }
+    private openSauceNAO (): void { PostViewer.openSourceLookup("SauceNAO"); }
+
+    private openKheina (): void { PostViewer.openSourceLookup("Kheina"); }
+
+    private openGoogle (): void { PostViewer.openSourceLookup("Google"); }
+
+    private openYandex (): void { PostViewer.openSourceLookup("Yandex"); }
+
+    private openDerpibooru (): void { PostViewer.openSourceLookup("Derpibooru"); }
+
+    private openInkbunny (): void { PostViewer.openSourceLookup("Inkbunny"); }
 
     /** Opens the raw API data for the current post */
-    private openAPI(): void { location.href = location.origin + location.pathname + ".json" + location.search; }
+    private openAPI (): void { location.href = location.origin + location.pathname + ".json" + location.search; }
 
 }

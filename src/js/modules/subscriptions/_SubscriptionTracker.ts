@@ -27,24 +27,30 @@ export class SubscriptionTracker extends RE6Module {
     private tabbtn: JQuery<HTMLElement>;    // tab button corresponding to this tracker
 
     private ctwrap: JQuery<HTMLElement>;    // container for the canvas and the status
+
     private canvas: JQuery<HTMLElement>;    // canvas onto which the updates are drawn
+
     private status: JQuery<HTMLElement>;    // used to display status updates
 
     private sblist: JQuery<HTMLElement>;    // displays a list of subscribed items
+
     private sbadge: JQuery<HTMLElement>;    // displays the total number of subscribed items
 
     protected cache: SubscriptionCache;     // object containing update data
+
     protected slist: SubscriptionList;      // object containing subscribed items
 
     private updateInProgress = false;       // tracker is currently fetching updates
+
     private isVisible = false;              // notifications tab is currently open
+
     private networkOffline = false;         // unable to connect to the internet
 
     protected loadLargeThumbs = false;      // thumbnail resolution - sample / preview
 
     private observer: IntersectionObserver; // renders the updates when they come into view
 
-    public constructor() {
+    public constructor () {
         super();
 
         this.cache = new SubscriptionCache(this);
@@ -54,7 +60,7 @@ export class SubscriptionTracker extends RE6Module {
     }
 
     /** Performs the initialization and setup of the tracker */
-    public async init(): Promise<void> {
+    public async init (): Promise<void> {
         await this.cache.init();
         await this.slist.fetchSubscriptions();
 
@@ -98,7 +104,7 @@ export class SubscriptionTracker extends RE6Module {
                 updates: this.canvas.find("subitem[new=true]").length,
             });
 
-            SubscriptionManager.trigger("notification")
+            SubscriptionManager.trigger("notification");
         });
 
         // Fires when the user sees the tracker's canvas
@@ -146,8 +152,8 @@ export class SubscriptionTracker extends RE6Module {
 
                 // This is here to synchronize the timer if an update happened in another tab
                 SubscriptionManager.trigger("timer." + this.trackerID);
-            }
-        )
+            },
+        );
 
         // Fires when the tracker settings update
         // Used to refresh the subscriptions list
@@ -158,7 +164,7 @@ export class SubscriptionTracker extends RE6Module {
         });
     }
 
-    public getDefaultSettings(): Settings {
+    public getDefaultSettings (): Settings {
         return {
             enabled: true,
 
@@ -172,10 +178,10 @@ export class SubscriptionTracker extends RE6Module {
             // Utility values
             lastUpdate: 0,                  // last time an update has been completed
             lastAttempt: 0,                 // last time an update was attempted. 0 if not applicable.
-        }
+        };
     }
 
-    public exportSubscriptionsList(): { name: string; data: any } {
+    public exportSubscriptionsList (): { name: string; data: any } {
         return {
             name: this.slist.getStorageTag(),
             data: Array.from(this.slist.get()),
@@ -183,16 +189,16 @@ export class SubscriptionTracker extends RE6Module {
     }
 
     /** Returns the unique identifier for this tracker */
-    public getTrackerID(): string { return this.trackerID; }
+    public getTrackerID (): string { return this.trackerID; }
 
     /** Returns the current network status */
-    public isNetworkOffline(): boolean { return this.networkOffline; }
+    public isNetworkOffline (): boolean { return this.networkOffline; }
 
     /** Returns true if the update is currently in progress */
-    public isUpdateInProgress(): boolean { return this.updateInProgress; }
+    public isUpdateInProgress (): boolean { return this.updateInProgress; }
 
     /** Determines whether subscription updates need to be fetched */
-    private async isUpdateRequired(): Promise<boolean> {
+    private async isUpdateRequired (): Promise<boolean> {
 
         // This is redundant, since `lastAttempt` should catch the same thing,
         // but this prevents fetching fresh settings and thus speeds up the process.
@@ -209,7 +215,7 @@ export class SubscriptionTracker extends RE6Module {
     }
 
     /** Append sub / unsub buttons to pages */
-    public appendSubscribeButton(): void {
+    public appendSubscribeButton (): void {
 
         if (this.buttonSelect.minor && Page.matches(this.buttonSelect.minor.regex) && !this.fetchSettings("hideMinorButton")) {
             for (const el of $(this.buttonSelect.minor.selector).get()) {
@@ -217,7 +223,7 @@ export class SubscriptionTracker extends RE6Module {
                 const button = this.createSubscribeMinorButton(
                     this.fetchMinorSubscriptionName($el),
                     (id) => { this.slist.subscribe(id); },
-                    (id) => { this.slist.unsubscribe(id); }
+                    (id) => { this.slist.unsubscribe(id); },
                 );
                 switch (this.buttonSelect.minor.method) {
                     case "before":
@@ -243,7 +249,7 @@ export class SubscriptionTracker extends RE6Module {
                 const button = this.createSubscribeMajorButton(
                     this.fetchMajorSubscriptionName($el),
                     (id) => { this.slist.subscribe(id); },
-                    (id) => { this.slist.unsubscribe(id); }
+                    (id) => { this.slist.unsubscribe(id); },
                 );
                 switch (this.buttonSelect.major.method) {
                     case "before":
@@ -265,7 +271,7 @@ export class SubscriptionTracker extends RE6Module {
     }
 
     /** Generated and return a styled sub / unsub button */
-    protected createSubscribeMinorButton(id: string, subscribe: SubscribeFunction, unsubscribe: SubscribeFunction): JQuery<HTMLElement> {
+    protected createSubscribeMinorButton (id: string, subscribe: SubscribeFunction, unsubscribe: SubscribeFunction): JQuery<HTMLElement> {
         const result = $("<a>")
             .attr({
                 "name": id,
@@ -287,18 +293,17 @@ export class SubscriptionTracker extends RE6Module {
     }
 
     /**
-     * Takes in the parent element defined in `buttonSelect` and returns the corresponding subscription ID.  
+     * Takes in the parent element defined in `buttonSelect` and returns the corresponding subscription ID.
      * Needless to say, this has to be overridden by the child class
      * @param parent Parent element
      * @returns Subscription name, as a string
      */
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    protected fetchMinorSubscriptionName(parent: JQuery<HTMLElement>): string {
+    protected fetchMinorSubscriptionName (parent: JQuery<HTMLElement>): string {
         return "unknown";
     }
 
     /** Generated and return a styled sub / unsub button */
-    protected createSubscribeMajorButton(id: string, subscribe: SubscribeFunction, unsubscribe: SubscribeFunction): JQuery<HTMLElement> {
+    protected createSubscribeMajorButton (id: string, subscribe: SubscribeFunction, unsubscribe: SubscribeFunction): JQuery<HTMLElement> {
         let eventLock = false;
         const result = $("<a>")
             .attr("name", id)
@@ -326,18 +331,17 @@ export class SubscriptionTracker extends RE6Module {
     }
 
     /**
-     * Takes in the parent element defined in `buttonSelect` and returns the corresponding subscription ID.  
+     * Takes in the parent element defined in `buttonSelect` and returns the corresponding subscription ID.
      * Needless to say, this has to be overridden by the child class
      * @param parent Parent element
      * @returns Subscription name, as a string
      */
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    protected fetchMajorSubscriptionName(parent: JQuery<HTMLElement>): string {
+    protected fetchMajorSubscriptionName (parent: JQuery<HTMLElement>): string {
         return "unknown";
     }
 
     /** Returns the tab button corresponding to this tracker */
-    public getOutputTab(): JQuery<HTMLElement> {
+    public getOutputTab (): JQuery<HTMLElement> {
         if (this.tabbtn !== undefined) return this.tabbtn;
 
         this.tabbtn = $("<a>")
@@ -352,7 +356,7 @@ export class SubscriptionTracker extends RE6Module {
     }
 
     /** Returns the wrapper containing the canvas and status output */
-    public getOutputContainer(): JQuery<HTMLElement> {
+    public getOutputContainer (): JQuery<HTMLElement> {
         if (this.ctwrap !== undefined) return this.ctwrap;
 
         this.ctwrap = $("<sb-ctwrap>")
@@ -372,27 +376,27 @@ export class SubscriptionTracker extends RE6Module {
     }
 
     /**
-     * Returns the actual canvas element corresponding to this tracker.  
+     * Returns the actual canvas element corresponding to this tracker.
      * Should not normally be used - this is only here for the benefit of
      * the IntersectionObserver, since viewing the wrapper can cause issues
      * @returns JQuery DOM object
      */
-    public getCanvasElement(): JQuery<HTMLElement> {
+    public getCanvasElement (): JQuery<HTMLElement> {
         if (this.canvas == undefined) this.getOutputContainer();
         return this.canvas;
     }
 
     /**
-     * Calls the API and fetches the updated entries for this tracker.  
-     * This method **must** be overridden by the child class.  
+     * Calls the API and fetches the updated entries for this tracker.
+     * This method **must** be overridden by the child class.
      * Only used within the cache's `fetch()` method.
      */
-    public async fetchUpdatedEntries(): Promise<UpdateData> {
+    public async fetchUpdatedEntries (): Promise<UpdateData> {
         return Promise.resolve({});
     }
 
     /** Sets up and executes a subscription update */
-    public async update(): Promise<void> {
+    public async update (): Promise<void> {
         this.ctwrap.attr("state", TrackerState.Load);
         SubscriptionManager.trigger("attributes." + this.trackerID);
         this.updateInProgress = true;
@@ -405,7 +409,7 @@ export class SubscriptionTracker extends RE6Module {
             this.networkOffline = false;
             this.updateInProgress = false;
             SubscriptionManager.trigger("inprogress." + this.trackerID, 2);
-        } catch(error) {
+        } catch (error) {
             ErrorHandler.error(this, JSON.stringify(error), "update");
             this.networkOffline = true;
             this.updateInProgress = false;
@@ -416,12 +420,13 @@ export class SubscriptionTracker extends RE6Module {
     }
 
     /** Executed just before the update runs */
-    protected execPreUpdate(): void { return; }
+    protected execPreUpdate (): void { return; }
+
     /** Executed just after the update runs */
-    protected execPostUpdate(): void { return; }
+    protected execPostUpdate (): void { return; }
 
     /** Outputs the items currently in cache onto the canvas */
-    public async draw(): Promise<void> {
+    public async draw (): Promise<void> {
 
         // console.log(`Sub${this.trackerID}: Drawing ${this.cache.count()}`);
 
@@ -485,12 +490,13 @@ export class SubscriptionTracker extends RE6Module {
     }
 
     /** Executed just before the update runs */
-    protected execPreDraw(): void { return; }
+    protected execPreDraw (): void { return; }
+
     /** Executed just after the update runs */
-    protected execPostDraw(): void { return; }
+    protected execPostDraw (): void { return; }
 
     /** Clears all update entries from cache */
-    public async clear(): Promise<void> {
+    public async clear (): Promise<void> {
         await this.cache.clear();
 
         this.slist.clearExtraData();
@@ -502,14 +508,13 @@ export class SubscriptionTracker extends RE6Module {
     }
 
     /**
-     * Takes in the update data, and returns an HTML object that will be drawn onto the canvas.  
-     * This method **must** be overridden by the child class.  
+     * Takes in the update data, and returns an HTML object that will be drawn onto the canvas.
+     * This method **must** be overridden by the child class.
      * @param data Subscription update data
      * @param timestamp Update timestamp
      * @returns JQuery DOM object based on provided data
      */
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    protected drawUpdateEntry(data: UpdateContent, timestamp: number, deleteFunction: DeleteEntryFunction): JQuery<HTMLElement> {
+    protected drawUpdateEntry (data: UpdateContent, timestamp: number, deleteFunction: DeleteEntryFunction): JQuery<HTMLElement> {
         const result = $(`<subitem uid="${data.uid}">post #${data.uid} (${timestamp})</subitem>`);
         return result;
     }
@@ -518,7 +523,7 @@ export class SubscriptionTracker extends RE6Module {
      * Returns a divider that splits older updates from ones just added
      * @returns JQuery DOM object
      */
-    protected drawNewUpdatesDivider(): JQuery<HTMLElement> {
+    protected drawNewUpdatesDivider (): JQuery<HTMLElement> {
         return $("<subdivider>Older Updates</subdivider>");
     }
 
@@ -526,26 +531,26 @@ export class SubscriptionTracker extends RE6Module {
      * Returns a message that appears if the notifications field is blank
      * @returns JQuery DOM object
      */
-    protected drawNoNotificationsMessage(): JQuery<HTMLElement> {
-        return $(`<subnotif><div>No notifications yet!</div>Once one of your subscriptions receives updates, they will appear here.</subnotif>`)
+    protected drawNoNotificationsMessage (): JQuery<HTMLElement> {
+        return $(`<subnotif><div>No notifications yet!</div>Once one of your subscriptions receives updates, they will appear here.</subnotif>`);
     }
 
     /** Clears the status screen of all entries */
-    protected clearStatus(): void {
+    protected clearStatus (): void {
         this.status.html("");
     }
 
     /** Adds a status message to the list */
-    protected writeStatus(text: string): JQuery<HTMLElement> {
+    protected writeStatus (text: string): JQuery<HTMLElement> {
         return $("<div>").html(text).appendTo(this.status);
     }
 
     /**
-     * Outputs a list of items to which the user is currently subscribed.  
+     * Outputs a list of items to which the user is currently subscribed.
      * Note that this reads the subscriptions currently loaded into memory,
      * not taking into account changes made in other tabs.
      */
-    public getSubscriptionList(): JQuery<HTMLElement> {
+    public getSubscriptionList (): JQuery<HTMLElement> {
         if (this.sblist !== undefined) return this.sblist;
 
         let quickAddCont: JQuery<HTMLElement>,
@@ -626,15 +631,15 @@ export class SubscriptionTracker extends RE6Module {
     }
 
     /** Creates and returns an entry for the subscription list */
-    protected formatSubscriptionListEntry(id: string, value: any, unsub: SubscribeFunction): JQuery<HTMLElement> {
+    protected formatSubscriptionListEntry (id: string, value: any, unsub: SubscribeFunction): JQuery<HTMLElement> {
         const result = $("<sb-enitem>")
-            .attr({ content: id + (value.text ? value.text : ""), })
+            .attr({ content: id + (value.text ? value.text : "") })
             .html(value.text ? value.text : id);
 
         $("<a>")
             .addClass("sb-unsub")
             .html(`<i class="fas fa-times"></i>`)
-            .attr({ "title": "Unsubscribe", })
+            .attr({ "title": "Unsubscribe" })
             .prependTo(result)
             .on("click", (event) => {
                 event.preventDefault();
@@ -645,9 +650,9 @@ export class SubscriptionTracker extends RE6Module {
     }
 
     /**
-     * REturns the 
+     * REturns the
      */
-    public getSubscriptionBadge(): JQuery<HTMLElement> {
+    public getSubscriptionBadge (): JQuery<HTMLElement> {
         if (this.sbadge !== undefined) return this.sbadge;
 
         this.sbadge = $("<sb-badge>").html("0").on("re621:update", () => {
@@ -675,4 +680,4 @@ type SubscribeButtonSelector = {
     regex: RegExp | RegExp[];
     selector: string;
     method?: string;
-}
+};

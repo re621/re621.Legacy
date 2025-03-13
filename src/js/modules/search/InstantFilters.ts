@@ -6,7 +6,7 @@ import { Util } from "../../components/utility/Util";
 import { BetterSearch } from "./BetterSearch";
 
 /**
- * Adds a extra search input below the current one where 
+ * Adds a extra search input below the current one where
  * you can filter posts instantaneously
  */
 export class InstantFilters extends RE6Module {
@@ -15,7 +15,7 @@ export class InstantFilters extends RE6Module {
 
     private $searchbox: JQuery<HTMLElement>;
 
-    public constructor() {
+    public constructor () {
         super([PageDefinition.search, PageDefinition.favorites], true, false, [BetterSearch]);
     }
 
@@ -23,15 +23,15 @@ export class InstantFilters extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings(): Settings {
+    protected getDefaultSettings (): Settings {
         return { enabled: false };
     }
 
     /**
-     * Creates the module's structure.  
+     * Creates the module's structure.
      * Should be run immediately after the constructor finishes.
      */
-    public create(): void {
+    public create (): void {
         super.create();
 
         $("search-content").on("re621:insearch", "post", (event) => {
@@ -76,7 +76,7 @@ export class InstantFilters extends RE6Module {
         $("#sidebar").trigger("re621:reflow");
     }
 
-    public destroy(): void {
+    public destroy (): void {
         super.destroy();
 
         this.$searchbox.val("");
@@ -87,17 +87,17 @@ export class InstantFilters extends RE6Module {
         $("#sidebar").trigger("re621:reflow");
     }
 
-    public static get(): PostFilter {
+    public static get (): PostFilter {
         return InstantFilters.filter;
     }
 
-    public static addPost(...posts: PostData[]): boolean {
+    public static addPost (...posts: PostData[]): boolean {
         const filter = InstantFilters.get();
         if (!filter) return false;
         return filter.update(posts);
     }
 
-    public applyFilter(): void {
+    public applyFilter (): void {
 
         // Ensure that the filter text exists, and is not blank
         let filterText = Util.getTagString(this.$searchbox);

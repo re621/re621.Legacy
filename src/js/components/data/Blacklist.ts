@@ -11,7 +11,7 @@ export class Blacklist {
 
     private blacklist = new Map<string, PostFilter>();
 
-    private constructor() {
+    private constructor () {
         const blacklistMeta = $("head meta[name=blacklisted-tags]");
         if (!blacklistMeta.length) {
             console.warn("Warning: The blacklist failed to load. This may be caused by the blacklist being empty, or by an internal error.");
@@ -21,7 +21,7 @@ export class Blacklist {
         const filters = blacklistMeta.attr("content");
         const disabledFilters = LocalStorage.Blacklist.FilterState;
 
-        const enhancer = ModuleController.get(BlacklistEnhancer)
+        const enhancer = ModuleController.get(BlacklistEnhancer);
         const options = enhancer.fetchSettings(["favorites", "uploads", "whitelist"]) as FilterOptions;
 
         if (filters !== undefined) {
@@ -38,7 +38,7 @@ export class Blacklist {
     }
 
     /** Returns a singleton instance of the class */
-    private static getInstance(): Blacklist {
+    private static getInstance (): Blacklist {
         if (this.instance == undefined) this.instance = new Blacklist();
         return this.instance;
     }
@@ -47,12 +47,12 @@ export class Blacklist {
      * Returns the parsed blacklist filters
      * @returns PostFilter[] A array of the users current filters
      */
-    private static get(): Map<string, PostFilter> {
+    private static get (): Map<string, PostFilter> {
         return this.getInstance().blacklist;
     }
 
     /** Returns the filters that currently have posts on record */
-    public static getActiveFilters(): Map<string, PostFilter> {
+    public static getActiveFilters (): Map<string, PostFilter> {
         const result: Map<string, PostFilter> = new Map();
         for (const [tags, filter] of this.getInstance().blacklist)
             if (filter.getMatchesCount() > 0) result.set(tags, filter);
@@ -64,7 +64,7 @@ export class Blacklist {
      * @param posts Post(s) to add to the cache
      * @returns Number of filters that match the post
      */
-    public static addPost(...posts: PostData[]): number {
+    public static addPost (...posts: PostData[]): number {
         let count = 0;
         for (const filter of Blacklist.get().values()) {
             if (filter.update(posts)) count++;
@@ -77,12 +77,12 @@ export class Blacklist {
      * @param posts Post(s) to update
      * @returns Number of filters that match the post
      */
-    public static updatePost(...posts: PostData[]): number {
+    public static updatePost (...posts: PostData[]): number {
         return Blacklist.addPost(...posts);
     }
 
     /** Returns true if the post is in the blacklist cache */
-    public static checkPost(post: PostData | number, ignoreDisabled = false): boolean {
+    public static checkPost (post: PostData | number, ignoreDisabled = false): boolean {
         if (typeof post !== "number") post = post.id;
         for (const filter of Blacklist.get().values()) {
             if (filter.matchesID(post, ignoreDisabled)) return true;
@@ -91,14 +91,14 @@ export class Blacklist {
     }
 
     /**
-     * Alternative approach to `checkPost` method.  
+     * Alternative approach to `checkPost` method.
      * Returns:
      * - 0 if no filters match the post
      * - 1 if at least one enabled filter matches
      * - 2 if any number of filters match, but are all disabled
      * @param post Post to test against the filter
      */
-    public static checkPostAlt(post: PostData | number): number {
+    public static checkPostAlt (post: PostData | number): number {
         if (typeof post !== "number") post = post.id;
         let resultType = 0;
         for (const filter of Blacklist.get().values()) {
@@ -112,14 +112,14 @@ export class Blacklist {
     }
 
     /** Enables all blacklist filters */
-    public static enableAll(): void {
+    public static enableAll (): void {
         for (const filter of Blacklist.get().values())
             filter.setEnabled(true);
         LocalStorage.Blacklist.FilterState.clear();
     }
 
     /** Disables all blacklist filters */
-    public static disableAll(): void {
+    public static disableAll (): void {
         const filters = new Set<string>();
         for (const filter of Blacklist.get().values()) {
             filter.setEnabled(false);
@@ -133,7 +133,7 @@ export class Blacklist {
      * @param filter String which should be turned into a PostFilter
      * @param enabled Whether or not the filter should be enabled after creation
      */
-    private createFilter(filter: string, enabled = true, options?: FilterOptions): void {
+    private createFilter (filter: string, enabled = true, options?: FilterOptions): void {
 
         // Ensure that the filter is not blank
         if (!filter) return;
@@ -151,7 +151,7 @@ export class Blacklist {
      * @param filter String which should be turned into a PostFilter
      * @param enabled Whether or not the filter should be enabled after creation
      */
-    public static createFilter(filter: string, enabled = true, options?: FilterOptions): void {
+    public static createFilter (filter: string, enabled = true, options?: FilterOptions): void {
         return this.getInstance().createFilter(filter, enabled, options);
     }
 
@@ -159,7 +159,7 @@ export class Blacklist {
      * Deletes the filter matching provided tag string
      * @param filter String which should match an existing PostFilter
      */
-    private deleteFilter(filter: string): void {
+    private deleteFilter (filter: string): void {
         this.blacklist.delete(filter);
     }
 
@@ -167,7 +167,7 @@ export class Blacklist {
      * Deletes the filter matching provided tag string
      * @param filter String which should match an existing PostFilter
      */
-    public static deleteFilter(filter: string): void {
+    public static deleteFilter (filter: string): void {
         return this.getInstance().deleteFilter(filter);
     }
 
@@ -175,7 +175,7 @@ export class Blacklist {
      * Adds or removes a tag from the user's blacklist
      * @param tagname Name of the tag to toggle
      */
-    public static async toggleBlacklistTag(tagName: string): Promise<void> {
+    public static async toggleBlacklistTag (tagName: string): Promise<void> {
 
         let currentBlacklist = (await User.getCurrentSettings()).blacklisted_tags.split("\n");
 
@@ -196,7 +196,7 @@ export class Blacklist {
 
         return Promise.resolve();
 
-        function getTagLink(tagName: string): string {
+        function getTagLink (tagName: string): string {
             if (tagName.startsWith("id:")) return `<a href="/posts/${tagName.substr(3)}" target="_blank" rel="noopener noreferrer">${tagName}</a>`;
             return `<a href="/wiki_pages/show_or_new?title=${tagName}">${tagName}</a>`;
         }

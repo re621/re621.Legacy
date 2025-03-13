@@ -2,16 +2,18 @@ import { Util } from "../utility/Util";
 import { PreparedStructure } from "./PreparedStructure";
 
 /**
- * Tabbed  
+ * Tabbed
  * Relatively easy tabbed content, powered by CSS
  */
 export class Tabbed implements PreparedStructure {
 
     private id: string;
+
     private config: TabbedConfig;
+
     private $container: JQuery<HTMLElement>;
 
-    constructor(config: TabbedConfig) {
+    constructor (config: TabbedConfig) {
         this.id = Util.ID.make();
         this.config = config;
     }
@@ -20,7 +22,7 @@ export class Tabbed implements PreparedStructure {
      * Creates a JQuery-UI tab element based on the provided configuration
      * @param clearCache If true, clears cache and re-creates the element from scratch
      */
-    public render(clearCache = false): JQuery<HTMLElement> {
+    public render (clearCache = false): JQuery<HTMLElement> {
         if (this.$container !== undefined && !clearCache)
             return this.$container;
 
@@ -34,7 +36,7 @@ export class Tabbed implements PreparedStructure {
             if (typeof entry.name === "string")
                 $tab = $("<a>").html(entry.name);
             else $tab = entry.name;
-            $tab.attr("href", "#" + this.id + "-fragment-" + index)
+            $tab.attr("href", "#" + this.id + "-fragment-" + index);
             $("<li>").appendTo($tabList).append($tab);
 
             const elem = $("<div>")
@@ -53,7 +55,7 @@ export class Tabbed implements PreparedStructure {
             },
         });
 
-        this.$container.tabs("widget").find('.ui-tabs-nav li').off('keydown');
+        this.$container.tabs("widget").find(".ui-tabs-nav li").off("keydown");
 
         return this.$container;
     }
@@ -63,7 +65,7 @@ export class Tabbed implements PreparedStructure {
      * @param index Tab index to replace the content from
      * @param $element Element which will replace the current content
      */
-    public replace(index: number, $element: JQuery<HTMLElement>): void {
+    public replace (index: number, $element: JQuery<HTMLElement>): void {
         this.$container.find("#" + this.id + "-fragment-" + index).children().replaceWith($element);
     }
 

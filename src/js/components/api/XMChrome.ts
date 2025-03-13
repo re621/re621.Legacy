@@ -14,14 +14,14 @@ export class XMChrome {
      * @param args Optional arguments to pass to the function
      * @returns Promise that is fulfilled when a response is received
      */
-    public static async execBackgroundRequest(component: string, module: string, method: string, args?: any[]): Promise<any> {
+    public static async execBackgroundRequest (component: string, module: string, method: string, args?: any[]): Promise<any> {
         return new Promise((resolve) => {
             chrome.runtime.sendMessage(
                 XMChrome.formatRequestData(component, module, method, args),
                 (response: MessageResponse) => {
                     XMChrome.requests = XMChrome.requests.filter(e => e !== response.eventID);
                     resolve(response.data);
-                }
+                },
             );
         });
     }
@@ -30,7 +30,7 @@ export class XMChrome {
      * Establishes a connection to the background script
      * @returns Promise containing the port object
      */
-    public static async execBackgroundConnection(component: string): Promise<ChromePort> {
+    public static async execBackgroundConnection (component: string): Promise<ChromePort> {
         return Promise.resolve(chrome.runtime.connect({ name: component }));
     }
 
@@ -42,7 +42,7 @@ export class XMChrome {
      * @param args Optional arguments to pass to the function
      * @returns Promise that is fulfilled when a response is received
      */
-    public static async execInjectorRequest(component: string, module: string, method: string, args?: any[]): Promise<any> {
+    public static async execInjectorRequest (component: string, module: string, method: string, args?: any[]): Promise<any> {
         return new Promise((resolve) => {
             const request = XMChrome.formatRequestData(component, module, method, args);
             const callback = function (event: any): void {
@@ -63,7 +63,7 @@ export class XMChrome {
      * @param method Function to execute, ex. apply
      * @param args Optional arguments to pass to the function
      */
-    private static formatRequestData(component: string, module: string, method: string, args?: any[]): MessageRequest {
+    private static formatRequestData (component: string, module: string, method: string, args?: any[]): MessageRequest {
         return {
             component: component,
             module: module,
@@ -72,7 +72,7 @@ export class XMChrome {
             args: (args === undefined) ? [] : args,
         };
 
-        function makeRequestID(): string {
+        function makeRequestID (): string {
             let id: string;
             do { id = Util.ID.make(8, false); }
             while (XMChrome.requests.includes(id));
@@ -82,15 +82,15 @@ export class XMChrome {
     }
 
     /**
-     * Returns the URL for the specified resource.  
+     * Returns the URL for the specified resource.
      * Note that the resource must be specified in the manifest.
      * @param name Resource name
      */
-    public static getResourceURL(name: string): string {
+    public static getResourceURL (name: string): string {
         return chrome.extension.getURL(name);
     }
 
-    public static download(url: string, name?: string, saveAs?: boolean): string {
+    public static download (url: string, name?: string, saveAs?: boolean): string {
         return chrome.downloads.download({
             url: url,
             filename: name,
@@ -118,20 +118,20 @@ interface ChromePort {
     name: string;
 
     /**
-     * Immediately disconnect the port. Calling disconnect() on an already-disconnected port has no effect.  
+     * Immediately disconnect the port. Calling disconnect() on an already-disconnected port has no effect.
      * When a port is disconnected, no new events will be dispatched to this port.
      */
     disconnect(): void;
 
     /**
-     * Fired when the port is disconnected from the other end(s).runtime.lastError may be set if the port was disconnected by an error.  
-     * If the port is closed via disconnect, then this event is only fired on the other end.  
+     * Fired when the port is disconnected from the other end(s).runtime.lastError may be set if the port was disconnected by an error.
+     * If the port is closed via disconnect, then this event is only fired on the other end.
      * This event is fired at most once(see also Port lifetime). The first and only parameter to the event handler is this disconnected port.
      */
     onDisconnect: any;
 
     /**
-     * This event is fired when postMessage is called by the other end of the port.  
+     * This event is fired when postMessage is called by the other end of the port.
      * The first parameter is the message, the second parameter is the port that received the message.
      */
     onMessage: any;

@@ -30,10 +30,10 @@ export class TagTracker extends SubscriptionTracker {
         major: {
             regex: [PageDefinition.wiki, PageDefinition.wikiNA, PageDefinition.artist],
             selector: "#c-wiki-pages > #a-show > #content > h1:first, #c-artists > #a-show > h1:first",
-        }
+        },
     };
 
-    public getDefaultSettings(): Settings {
+    public getDefaultSettings (): Settings {
         return {
             ...super.getDefaultSettings(),
 
@@ -41,15 +41,15 @@ export class TagTracker extends SubscriptionTracker {
         };
     }
 
-    protected fetchMinorSubscriptionName(element: JQuery<HTMLElement>): string {
+    protected fetchMinorSubscriptionName (element: JQuery<HTMLElement>): string {
         return element.parent().attr("data-tag");
     }
 
-    protected fetchMajorSubscriptionName(element: JQuery<HTMLElement>): string {
+    protected fetchMajorSubscriptionName (element: JQuery<HTMLElement>): string {
         return WikiEnhancer.sanitizeWikiTagName(element.find("a:first").text());
     }
 
-    public async fetchUpdatedEntries(): Promise<UpdateData> {
+    public async fetchUpdatedEntries (): Promise<UpdateData> {
 
         const result: UpdateData = {};
         this.clearStatus();
@@ -108,8 +108,7 @@ export class TagTracker extends SubscriptionTracker {
                     + "|" + post.rating         // rating       E | Q | S
                     + "|" + post.img.width      // width        int
                     + "|" + post.img.height     // height       int
-                    + "|" + post.file.size      // filesize     int
-                ,
+                    + "|" + post.file.size,      // filesize     int
                 new: true,
             };
         }
@@ -119,7 +118,7 @@ export class TagTracker extends SubscriptionTracker {
         return result;
     }
 
-    protected drawUpdateEntry(data: UpdateContent, timestamp: number, deleteFunction): JQuery<HTMLElement> {
+    protected drawUpdateEntry (data: UpdateContent, timestamp: number, deleteFunction): JQuery<HTMLElement> {
 
         if (!data.md5) {
             console.error("Error: Invalid data in cache");
@@ -149,7 +148,7 @@ export class TagTracker extends SubscriptionTracker {
             })
             .on("re621:render", () => {
                 const link = $("<a>")
-                    .attr({ href: "/posts/" + data.uid, })
+                    .attr({ href: "/posts/" + data.uid })
                     .appendTo(result);
 
                 PostParts.bootstrapDoubleClick(link, () => {
@@ -224,12 +223,12 @@ export class TagTracker extends SubscriptionTracker {
 
         return result;
 
-        function getPreviewLink(md5: string): string {
+        function getPreviewLink (md5: string): string {
             if (!md5) return "https://e621.net/images/deleted-preview.png";
-            return `https://static1.e621.net/data/preview/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`;;
+            return `https://static1.e621.net/data/preview/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`;
         }
 
-        function getSampleLink(md5: string, hasSample: boolean, ext = "jpg"): string {
+        function getSampleLink (md5: string, hasSample: boolean, ext = "jpg"): string {
             if (!md5) return "https://e621.net/images/deleted-preview.png";
             return hasSample
                 ? `https://static1.e621.net/data/sample/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`
@@ -237,7 +236,7 @@ export class TagTracker extends SubscriptionTracker {
         }
     }
 
-    protected formatSubscriptionListEntry(id: string, value: any, unsub: (name: string) => void): JQuery<HTMLElement> {
+    protected formatSubscriptionListEntry (id: string, value: any, unsub: (name: string) => void): JQuery<HTMLElement> {
 
         const formattedID = id.replace(/_/g, " ").toLowerCase();
         const result = $("<sb-enitem>")
@@ -249,7 +248,7 @@ export class TagTracker extends SubscriptionTracker {
         $("<a>")
             .addClass("sb-unsub")
             .html(`<i class="fas fa-times"></i>`)
-            .attr({ "title": "Unsubscribe", })
+            .attr({ "title": "Unsubscribe" })
             .appendTo(result)
             .on("click", (event) => {
                 event.preventDefault();

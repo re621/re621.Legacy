@@ -4,7 +4,7 @@ import { Modal } from "../../components/structure/Modal";
 import { Util } from "../../components/utility/Util";
 
 /**
- * ThemeCustomizer  
+ * ThemeCustomizer
  * Built upon e621 Redesign Fixes, this module adds the ability to change and adjust themes
  */
 export class ThemeCustomizer extends RE6Module {
@@ -13,17 +13,17 @@ export class ThemeCustomizer extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings(): Settings {
+    protected getDefaultSettings (): Settings {
         return {
             enabled: true,
         };
     }
 
     /**
-     * Creates the module's structure.  
+     * Creates the module's structure.
      * Should be run immediately after the constructor finishes.
      */
-    public create(): void {
+    public create (): void {
         super.create();
 
         // === Set the saved themes
@@ -40,7 +40,7 @@ export class ThemeCustomizer extends RE6Module {
         // === Establish the settings window contents
         const form = new Form({ name: "theme-customizer" }, [
             Form.select(
-                { label: "Theme", value: window.localStorage.getItem("theme") || "hexagon", },
+                { label: "Theme", value: window.localStorage.getItem("theme") || "hexagon" },
                 {
                     "hexagon": "Hexagon",
                     "pony": "Pony",
@@ -52,10 +52,10 @@ export class ThemeCustomizer extends RE6Module {
                     window.localStorage.setItem("theme", data);
                     $("body").attr("data-th-main", data);
                     ThemeCustomizer.trigger("switch.theme", data);
-                }
+                },
             ),
             Form.select(
-                { label: "Extras", value: window.localStorage.getItem("theme-extra") || "hexagons", },
+                { label: "Extras", value: window.localStorage.getItem("theme-extra") || "hexagons" },
                 {
                     "none": "None",
                     "autumn": "Autumn",
@@ -70,10 +70,10 @@ export class ThemeCustomizer extends RE6Module {
                     window.localStorage.setItem("theme-extra", data);
                     $("body").attr("data-th-extra", data);
                     ThemeCustomizer.trigger("switch.extras", data);
-                }
+                },
             ),
             Form.select(
-                { label: "Post Navbar", value: Util.LS.getItem("re621-theme-nav") || Util.LS.getItem("theme-nav") || "top", },
+                { label: "Post Navbar", value: Util.LS.getItem("re621-theme-nav") || Util.LS.getItem("theme-nav") || "top" },
                 {
                     "top": "Top",
                     "bottom": "Bottom",
@@ -90,7 +90,7 @@ export class ThemeCustomizer extends RE6Module {
                     $("body").attr("re621-data-th-nav", data == "left" ? "true" : "false");
 
                     ThemeCustomizer.trigger("switch.navbar", data);
-                }
+                },
             ),
             Form.div({ value: "<center><a href='/static/theme'>More theme options</a></center>", width: 1 }),
         ]);
@@ -101,7 +101,7 @@ export class ThemeCustomizer extends RE6Module {
             triggers: [{ element: openCustomizerButton }],
             content: Form.placeholder(),
             structure: form,
-            position: { my: "right top", at: "right top" }
+            position: { my: "right top", at: "right top" },
         });
     }
 }

@@ -8,7 +8,7 @@ export class SearchUtilities extends RE6Module {
 
     private static randomPostURL = "";
 
-    public constructor() {
+    public constructor () {
         super([PageDefinition.search, PageDefinition.post, PageDefinition.favorites]);
         this.registerHotkeys(
             { keys: "hotkeyFocusSearch", fnct: this.focusSearchbar },
@@ -37,7 +37,7 @@ export class SearchUtilities extends RE6Module {
         );
     }
 
-    public getDefaultSettings(): Settings {
+    public getDefaultSettings (): Settings {
         return {
             enabled: true,
 
@@ -77,10 +77,10 @@ export class SearchUtilities extends RE6Module {
             hotkeyScriptEight: "alt+8|",
             hotkeyScriptNine: "alt+9|",
             hotkeyScriptTen: "alt+0|",
-        }
+        };
     }
 
-    public create(): void {
+    public create (): void {
         super.create();
 
         // Auto-focus on the searchbar
@@ -152,7 +152,7 @@ export class SearchUtilities extends RE6Module {
      * Replaces the tag estimates with the real count
      * @param state True to replace, false to restore
      */
-    public async improveTagCount(state = true): Promise<void> {
+    public async improveTagCount (state = true): Promise<void> {
         const source = state ? "data-count" : "data-count-short";
         $("span.re621-post-count").each(function (index, element) {
             const tag = $(element);
@@ -164,7 +164,7 @@ export class SearchUtilities extends RE6Module {
      * Shortens the tag names to fit in one line
      * @param state True to shorten, false to restore
      */
-    public shortenTagNames(state = true): void {
+    public shortenTagNames (state = true): void {
         $("section#tag-box, section#tag-list").attr("data-shorten-tagnames", state + "");
     }
 
@@ -172,14 +172,14 @@ export class SearchUtilities extends RE6Module {
      * Removes the + and - icons next to the tags
      * @param state True to remove, false to restore
      */
-    public hidePlusMinusIcons(state = true): void {
+    public hidePlusMinusIcons (state = true): void {
         $("section#tag-box, section#tag-list").attr("data-hide-plusminus", state + "");
     }
 
     /**
      * Records which tag categories the user has collapsed.
      */
-    private async collapseTagCategories(): Promise<void> {
+    private async collapseTagCategories (): Promise<void> {
         let storedCats = new Set<string>(await this.fetchSettings<string[]>("categoryData", true));
         for (const element of $("section#tag-list .tag-list-header").get()) {
             const $header = $(element),
@@ -196,45 +196,53 @@ export class SearchUtilities extends RE6Module {
     }
 
     /** Sets the focus on the search bar */
-    private focusSearchbar(event: Event): void {
+    private focusSearchbar (event: Event): void {
         event.preventDefault();
         $("#tags").trigger("focus");
     }
 
     /** Switches the location over to a random post */
-    private randomPost(): void {
+    private randomPost (): void {
         location.href = SearchUtilities.randomPostURL;
     }
 
     // Search Modes
-    private switchModeView(): void { SearchUtilities.switchMode("view"); }
-    private switchModeEdit(): void { SearchUtilities.switchMode("edit"); }
-    private switchModeOpen(): void { SearchUtilities.switchMode("open"); }
-    private switchModeAddFav(): void { SearchUtilities.switchMode("add-fav"); }
-    private switchModeRemFav(): void { SearchUtilities.switchMode("remove-fav"); }
-    private switchModeBlacklist(): void { SearchUtilities.switchMode("blacklist"); }
-    private switchModeAddSet(): void {
+    private switchModeView (): void { SearchUtilities.switchMode("view"); }
+
+    private switchModeEdit (): void { SearchUtilities.switchMode("edit"); }
+
+    private switchModeOpen (): void { SearchUtilities.switchMode("open"); }
+
+    private switchModeAddFav (): void { SearchUtilities.switchMode("add-fav"); }
+
+    private switchModeRemFav (): void { SearchUtilities.switchMode("remove-fav"); }
+
+    private switchModeBlacklist (): void { SearchUtilities.switchMode("blacklist"); }
+
+    private switchModeAddSet (): void {
         SearchUtilities.switchMode("add-to-set");
         $("#set-id").trigger("focus");
     }
-    private switchModeRemSet(): void {
+
+    private switchModeRemSet (): void {
         SearchUtilities.switchMode("remove-from-set");
         $("#set-id").trigger("focus");
     }
-    private switchModeScript(): void { SearchUtilities.switchMode("tag-script"); }
 
-    private static switchMode(mode: string): void {
+    private switchModeScript (): void { SearchUtilities.switchMode("tag-script"); }
+
+    private static switchMode (mode: string): void {
         $("select#mode-box-mode").val(mode);
         Danbooru.PostModeMenu.change();
     }
 
     /** Switches the tag script to the specified one */
-    private static switchScript(script: number): void {
+    private static switchScript (script: number): void {
         Danbooru.PostModeMenu.change_tag_script(script);
     }
 
     /** Reset quick blacklist buttons */
-    public initQuickBlacklist(state = true): void {
+    public initQuickBlacklist (state = true): void {
 
         if (!state) $("div.tag-actions span.tag-action-blacklist").html("");
         else {
@@ -258,7 +266,7 @@ export class SearchUtilities extends RE6Module {
     }
 
     /** Handle sidebar expansion and collapse */
-    private handleSidebarCollapse(): void {
+    private handleSidebarCollapse (): void {
         const sidebar = $("#sidebar");
         const button = $("<a>")
             .attr({ "id": "sidebar-collapse" })
@@ -270,7 +278,7 @@ export class SearchUtilities extends RE6Module {
     }
 
     /** Handle sidebar expansion and collapse */
-    private handleSidebarCollapsePost(): void {
+    private handleSidebarCollapsePost (): void {
         let collapsed = Util.LS.getItem("re621.sidebar") == "true";
 
         const sidebar = $("#sidebar");

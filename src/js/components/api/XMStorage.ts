@@ -11,7 +11,7 @@ export class XMStorage {
      * @param name Name of the data entry
      * @param value Data value
      */
-    public static async setValue(name: string, value: any): Promise<boolean> {
+    public static async setValue (name: string, value: any): Promise<boolean> {
         return new Promise<boolean>(async (resolve) => {
             if (typeof GM === "undefined") {
                 await new Promise<void>((resolve) => {
@@ -20,15 +20,15 @@ export class XMStorage {
             } else await GM.setValue(name, value);
             resolve(true);
         });
-    };
+    }
 
     /**
-     * Returns the value with the specified name  
+     * Returns the value with the specified name
      * If no such entry exists, returns the default value
      * @param name Name of the data entry
      * @param defaultValue Default value
      */
-    public static async getValue(name: string, defaultValue: any): Promise<any> {
+    public static async getValue (name: string, defaultValue: any): Promise<any> {
         return new Promise(async (resolve) => {
             if (typeof GM === "undefined") {
                 chrome.storage.sync.get(name, (result: any) => {
@@ -37,13 +37,13 @@ export class XMStorage {
                 });
             } else resolve(GM.getValue(name, defaultValue));
         });
-    };
+    }
 
     /**
      * Deletes the entry with the specified name from storage
      * @param name Name of the data entry
      */
-    public static async deleteValue(name: string): Promise<void> {
+    public static async deleteValue (name: string): Promise<void> {
         return new Promise<void>(async (resolve) => {
             if (typeof GM === "undefined") {
                 await new Promise<void>((resolve) => {
@@ -59,13 +59,13 @@ export class XMStorage {
     /**
      * Adds a change listener to the storage and returns the listener ID.
      * @param name string The name of the observed variable
-     * @param callback function(name, oldValue, newValue, remote) {}  
-     *      **name**        _string_  The name of the observed variable  
-     *      **oldValue**    _any_     The old value of the variable (undefined if created)  
-     *      **newValue**    _any_     The new value of the variable (undefined if deleted)  
-     *      **remote**      _boolean_ true if modified in another tab or false for this script instance  
+     * @param callback function(name, oldValue, newValue, remote) {}
+     *      **name**        _string_  The name of the observed variable
+     *      **oldValue**    _any_     The old value of the variable (undefined if created)
+     *      **newValue**    _any_     The new value of the variable (undefined if deleted)
+     *      **remote**      _boolean_ true if modified in another tab or false for this script instance
      */
-    public static addListener(name: string, callback: (name: string, oldValue: any, newValue: any, remote: boolean) => void): string {
+    public static addListener (name: string, callback: (name: string, oldValue: any, newValue: any, remote: boolean) => void): string {
         if (typeof GM_addValueChangeListener === "undefined") {
             chrome.storage.onChanged.addListener(function (changes: ChromeStorageDataChange) {
                 for (const key in changes) {
@@ -80,7 +80,7 @@ export class XMStorage {
      * Removes a change listener by its ID.
      * @param listenerId string ID of the listener
      */
-    public static removeListener(listenerId: string): void {
+    public static removeListener (listenerId: string): void {
         if (typeof GM_removeValueChangeListener === "undefined") {
             return;
         } else GM_removeValueChangeListener(listenerId);
@@ -93,4 +93,4 @@ type ChromeStorageDataChange = {
         oldValue: any;
         newValue: any;
     };
-}
+};

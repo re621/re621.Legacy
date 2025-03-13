@@ -4,7 +4,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 
 export class JanitorEnhancements extends RE6Module {
 
-    public constructor() {
+    public constructor () {
         super([], true);
         this.registerHotkeys(
             { keys: "hotkeyApprovePost", fnct: this.approvePost },
@@ -13,16 +13,16 @@ export class JanitorEnhancements extends RE6Module {
         );
     }
 
-    public getDefaultSettings(): Settings {
+    public getDefaultSettings (): Settings {
         return {
             enabled: true,
             hotkeyApprovePost: "",
             hotkeyApprovePostPrev: "",
             hotkeyApprovePostNext: "",
-        }
+        };
     }
 
-    public create(): void {
+    public create (): void {
 
         if (Page.matches(PageDefinition.post)) {
             this.cleanupRecords();
@@ -35,36 +35,36 @@ export class JanitorEnhancements extends RE6Module {
 
     }
 
-    private cleanupRecords(): void {
+    private cleanupRecords (): void {
         for (const element of $("#post-information span.user-feedback-neutral, #post-information span.user-feedback-negative, #post-information span.user-feedback-positive").get()) {
             $(element).html((index, value) => value.replace(/ (Neutral|Neg|Pos)$/, ""));
         }
         $("#post-information a[href^='/user_feedbacks']").html((index, html) => html.replace(/^\( +/, "(").replace(/ +\)$/, ")"));
     }
 
-    private decorateArtistName(): void {
+    private decorateArtistName (): void {
         const post = Post.getViewingPost();
         // console.log(post.tags.artist, post.uploaderName.toLowerCase());
         if (post.tags.artist.has(post.uploaderName.toLowerCase()))
             $(`<span class="post-uploader-artist">(artist)</span>`).appendTo("#post-information li:contains('Uploader')");
     }
 
-    private approvePost(): void {
+    private approvePost (): void {
         if (!Page.matches(PageDefinition.post)) return;
-        $("a#approve-post").first()[0].click()
+        $("a#approve-post").first()[0].click();
     }
 
-    private approvePostPrev(): void {
+    private approvePostPrev (): void {
         if (!Page.matches(PageDefinition.post)) return;
-        $("a#approve-post-prev").first()[0].click()
+        $("a#approve-post-prev").first()[0].click();
     }
 
-    private approvePostNext(): void {
+    private approvePostNext (): void {
         if (!Page.matches(PageDefinition.post)) return;
-        $("a#approve-post-next").first()[0].click()
+        $("a#approve-post-next").first()[0].click();
     }
 
-    private enhanceDeletionpage(): void {
+    private enhanceDeletionpage (): void {
         const postElements = $("#c-confirm-delete article");
         if (postElements.length != 2) return;
 

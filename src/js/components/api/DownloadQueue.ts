@@ -6,7 +6,7 @@ declare const JSZip;
 
 export class DownloadQueue {
 
-    // Maximum concurrent HTTP connections, per domain. Most modern browsers have this limited to 6.  
+    // Maximum concurrent HTTP connections, per domain. Most modern browsers have this limited to 6.
     // If the limit is exceeded, the connections will stall, and the overall throughput will suffer.
     private maxThreads = 4;
 
@@ -14,9 +14,10 @@ export class DownloadQueue {
     private id: string;
 
     private queue: QueuedFile[];
+
     private zip: any;
 
-    public constructor(maxThreads = 4) {
+    public constructor (maxThreads = 4) {
         this.id = Util.ID.make();
         this.maxThreads = Util.Math.clamp(maxThreads, 1, 6);
 
@@ -25,12 +26,12 @@ export class DownloadQueue {
     }
 
     /** Returns the maximum concurrent connections count */
-    public getThreadCount(): number {
+    public getThreadCount (): number {
         return this.maxThreads;
     }
 
     /** Returns the number of items in the queue */
-    public getQueueLength(): number {
+    public getQueueLength (): number {
         return this.queue.length;
     }
 
@@ -39,7 +40,7 @@ export class DownloadQueue {
      * @param file FileData name and path are required
      * @param listeners Event listeners that fire during queue execution
      */
-    public add(file: FileData, listeners?: DownloadListeners): void {
+    public add (file: FileData, listeners?: DownloadListeners): void {
         file.unid = file.unid === undefined ? 0 : file.unid;
         file.date = file.date === undefined ? new Date() : new Date(file.date);
         file.tags = file.tags === undefined ? "" : file.tags;
@@ -58,13 +59,13 @@ export class DownloadQueue {
     }
 
     /**
-     * Begins queue execution, which fetches and compresses image data until empty.  
-     * Note that the queue is processed in reverse order, for the sake of performance.  
+     * Begins queue execution, which fetches and compresses image data until empty.
+     * Note that the queue is processed in reverse order, for the sake of performance.
      * After all images are downloaded, creates a ZIP archive with the data.
      * @param onArchiveProgress Callback function that fires every time progress is made on the compression.
      * @returns Promise with a ZIP archive as a blob
      */
-    public async run(onArchiveProgress?: (metadata: { percent: number; currentFile: string }) => void): Promise<Blob> {
+    public async run (onArchiveProgress?: (metadata: { percent: number; currentFile: string }) => void): Promise<Blob> {
 
         // Queue is processed in a reverse order via `.pop()`
         // If it is reversed here, the order becomes correct.
@@ -93,12 +94,12 @@ export class DownloadQueue {
     }
 
     /**
-     * Creates a new download process.  
-     * The process pops an item from the queue, downloads it, and adds to the archive.  
+     * Creates a new download process.
+     * The process pops an item from the queue, downloads it, and adds to the archive.
      * If no items remain in the queue, it quietly shuts down.
      * @param thread Thread number that this process belongs to
      */
-    private async createNewProcess(thread: number): Promise<any> {
+    private async createNewProcess (thread: number): Promise<any> {
         return new Promise<void>(async (resolve) => {
 
             Util.Events.one(`re621.dl-${this.id}.cancel`, () => {
@@ -121,7 +122,7 @@ export class DownloadQueue {
                             binary: true,
                             date: item.file.date,
                             comment: item.file.tags,
-                        }
+                        },
                     );
                 } catch (e) { console.log(e); }
                 item.listeners.onFinish(item.file, thread, index);
@@ -138,7 +139,7 @@ export class DownloadQueue {
      * @param item File descriptor
      * @param thread Process that requested the file
      */
-    private async getDataBlob(item: QueuedFile, thread: number): Promise<ArrayBuffer> {
+    private async getDataBlob (item: QueuedFile, thread: number): Promise<ArrayBuffer> {
         return new Promise((resolve, reject) => {
             let timer: number;
             XM.Connect.xmlHttpRequest({
@@ -162,12 +163,12 @@ export class DownloadQueue {
                 },
                 onprogress: (event) => {
                     if (timer) clearTimeout(timer);
-                    timer = window.setTimeout(() => { item.listeners.onLoadProgress(item.file, thread, event) }, 500);
+                    timer = window.setTimeout(() => { item.listeners.onLoadProgress(item.file, thread, event); }, 500);
                 },
                 onload: (event) => {
                     item.listeners.onLoadFinish(item.file, thread, event);
                     resolve(event.response as ArrayBuffer);
-                }
+                },
             });
         });
     }
@@ -176,7 +177,7 @@ export class DownloadQueue {
      * Preemptively aborts the download process
      * @param save True to save already downloaded files
      */
-    public abort(save = false): void {
+    public abort (save = false): void {
         Util.Events.trigger(`re621.dl-${this.id}.cancel`, save);
     }
 
@@ -189,38 +190,38 @@ interface QueuedFile {
 
 interface FileData {
     /**
-     * **name** New name for the file, with extension.  
+     * **name** New name for the file, with extension.
      * ex. 2200256-red-izak-arcturus-smonia.jpg
      */
     name: string;
 
     /**
-     * **path** Absolute path where the file can be found.  
-     * Note that the domain has to be listed in the @connect tag in the header.  
+     * **path** Absolute path where the file can be found.
+     * Note that the domain has to be listed in the @connect tag in the header.
      * ex. https://static1.e621.net/data/c5/23/c5237c0c40c22af4c4871c38954cc6ac.jpg
      */
     path: string;
 
     /**
-     * **file** Shortened file name, used in logs and human-readable output.  
+     * **file** Shortened file name, used in logs and human-readable output.
      * ex. c5237c0c40c22af4c4871c38954cc6ac.jpg
      */
     file?: string;
 
     /**
-     * **unid** Unique ID of the file. Used to set the styles of processed files in callbacks.  
+     * **unid** Unique ID of the file. Used to set the styles of processed files in callbacks.
      * ex. 2200256
      */
     unid?: number;
 
     /**
-     * **date** Date and time of the file's last modification. If absent, current time is used.  
+     * **date** Date and time of the file's last modification. If absent, current time is used.
      * ex. new Date("2020-04-02T10:28:23-0400")
      */
     date?: Date;
 
     /**
-     * **tags** List of tags, as well as other information, that is added to the file's notes.  
+     * **tags** List of tags, as well as other information, that is added to the file's notes.
      * ex. "2020 ambiguous_gender biped black_bars book boots bottomwear claws ..."
      */
     tags?: string;
@@ -228,14 +229,14 @@ interface FileData {
 
 interface DownloadListeners {
     /**
-     * Fires right before file processing begins.  
+     * Fires right before file processing begins.
      * Note that there is a slight delay before onLoadStart() fires.
      */
     onStart?(file: FileData, thread: number, index: number): void;
 
     /**
-     * Fires once all file processing finished.  
-     * Note that there is a significant delay after onLoadFinish() fires.  
+     * Fires once all file processing finished.
+     * Note that there is a significant delay after onLoadFinish() fires.
      */
     onFinish?(file: FileData, thread: number, index: number): void;
 

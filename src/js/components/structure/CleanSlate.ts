@@ -11,7 +11,7 @@ declare const attachedStylesheet: string;
 
 export class CleanSlate {
 
-    public static async createDOM(): Promise<boolean> {
+    public static async createDOM (): Promise<boolean> {
         const actions: ActionDefinition[] = [];
 
         // Append stylesheets, inject scripts
@@ -22,14 +22,13 @@ export class CleanSlate {
                     const stylesheet = Util.DOM.addStyle(
                         XM.isUserscript()
                             ? attachedStylesheet
-                            : await XM.Connect.getResourceText("re621_css")
+                            : await XM.Connect.getResourceText("re621_css"),
                     );
                     // Move the stylesheet to the bottom on load
                     // This prevents other styles from overriding it
                     $(() => { stylesheet.appendTo("head"); });
                     return Promise.resolve(stylesheet);
-                }
-                catch (error) { ErrorHandler.error("DOM", error.stack, "styles"); }
+                } catch (error) { ErrorHandler.error("DOM", error.stack, "styles"); }
 
                 if (typeof GM == "undefined") {
                     $("<script>").attr("src", XM.Chrome.getResourceURL("injector.js")).appendTo("head");
@@ -64,7 +63,7 @@ export class CleanSlate {
                 // Replace the logo's URL if necessary
                 // I don't remember why it's stored in LS
                 const titlePageRouting = Util.LS.getItem("re621.mainpage") || "default";
-                if(titlePageRouting !== "default")
+                if (titlePageRouting !== "default")
                     $("a.nav-logo-link").attr("href", titlePageRouting);
             },
         });
@@ -90,7 +89,7 @@ export class CleanSlate {
                 action: () => {
                     if ($("#image-container").attr("data-file-ext") === "swf")
                         KeybindManager.block();
-                }
+                },
             });
         }
 
@@ -101,7 +100,7 @@ export class CleanSlate {
      * Awaits until the specified elements exist in the DOM, then runs the appropriate functions
      * @param actions Actions to watch for
      */
-    private static async elementsReady(actions: ActionDefinition[]): Promise<boolean> {
+    private static async elementsReady (actions: ActionDefinition[]): Promise<boolean> {
 
         // console.log("awaiting " + actions.length + " items");
 
@@ -139,12 +138,12 @@ export class CleanSlate {
                 for (const action of processed.values())
                     action();
                 resolve(false);
-            })
+            });
         });
     }
 
     /** Returns a promise that gets resolved if and when the window is visible on the screen */
-    public static async awaitFocus(): Promise<boolean> {
+    public static async awaitFocus (): Promise<boolean> {
         return new Promise((resolve) => {
 
             // Document either has direct user focus, or is generally visible on the screen

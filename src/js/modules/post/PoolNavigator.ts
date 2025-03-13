@@ -6,9 +6,10 @@ import { ThemeCustomizer } from "../general/ThemeCustomizer";
 export class PoolNavigator extends RE6Module {
 
     private activeNav = 0;
+
     private navbars: PostNav[] = [];
 
-    public constructor() {
+    public constructor () {
         super(PageDefinition.post);
         this.registerHotkeys(
             { keys: "hotkeyCycle", fnct: this.cycleNavbars },
@@ -21,7 +22,7 @@ export class PoolNavigator extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings(): Settings {
+    protected getDefaultSettings (): Settings {
         return {
             enabled: true,
             hotkeyCycle: "x|.",
@@ -31,10 +32,10 @@ export class PoolNavigator extends RE6Module {
     }
 
     /**
-     * Creates the module's structure.  
+     * Creates the module's structure.
      * Should be run immediately after the constructor finishes.
      */
-    public create(): void {
+    public create (): void {
         super.create();
 
         this.createStructure();
@@ -50,19 +51,20 @@ export class PoolNavigator extends RE6Module {
     }
 
     /** Loops through available navbars */
-    private cycleNavbars(): void {
+    private cycleNavbars (): void {
         const poolNavigator = ModuleController.get(PoolNavigator);
         const navbars = poolNavigator.navbars,
             active = poolNavigator.activeNav;
 
         if (navbars.length == 0) return;
 
-        if ((active + 1) >= navbars.length) { navbars[0].checkbox.trigger("click"); }
-        else { navbars[active + 1].checkbox.trigger("click"); }
+        if ((active + 1) >= navbars.length) {
+            navbars[0].checkbox.trigger("click");
+        } else { navbars[active + 1].checkbox.trigger("click"); }
     }
 
     /** Emulates a click on the "next" button */
-    private triggerNextPost(): void {
+    private triggerNextPost (): void {
         const poolNavigator = ModuleController.get(PoolNavigator);
         const navbars = poolNavigator.navbars,
             active = poolNavigator.activeNav;
@@ -73,7 +75,7 @@ export class PoolNavigator extends RE6Module {
     }
 
     /** Emulates a click on the "prev" button */
-    private triggerPrevPost(): void {
+    private triggerPrevPost (): void {
         const poolNavigator = ModuleController.get(PoolNavigator);
         const navbars = poolNavigator.navbars,
             active = poolNavigator.activeNav;
@@ -84,21 +86,21 @@ export class PoolNavigator extends RE6Module {
     }
 
     /** Creates the module structure */
-    private createStructure(): void {
+    private createStructure (): void {
         // Search-nav
         if ($(".search-seq-nav:visible").length) {
-            this.navbars.push({ type: "search", element: $(".search-seq-nav:visible > ul > li").first(), checkbox: undefined, });
+            this.navbars.push({ type: "search", element: $(".search-seq-nav:visible > ul > li").first(), checkbox: undefined });
         }
 
         // Pool-navbars
         for (const element of $(".pool-nav:visible").first().find("ul > li").get()) {
-            this.navbars.push({ type: "pool", element: $(element), checkbox: undefined, });
+            this.navbars.push({ type: "pool", element: $(element), checkbox: undefined });
         }
 
         // Set-navbars
         for (const element of $(".set-nav:visible").first().find("ul > li").get()) {
-            this.navbars.push({ type: "set", element: $(element), checkbox: undefined, });
-        };
+            this.navbars.push({ type: "set", element: $(element), checkbox: undefined });
+        }
 
         // Create checkboxes
         this.navbars.forEach((nav, index) => {
@@ -134,7 +136,7 @@ export class PoolNavigator extends RE6Module {
         });
     }
 
-    public resetStructure(): void {
+    public resetStructure (): void {
         $("input[type='radio'].post-nav-switch").off("change");
         $(".post-nav-switch-box, .post-nav-spacer").remove();
         this.navbars = [];

@@ -9,7 +9,7 @@ export class TitleCustomizer extends RE6Module {
 
     private post: Post;
 
-    public constructor() {
+    public constructor () {
         super(PageDefinition.post, true);
     }
 
@@ -17,22 +17,22 @@ export class TitleCustomizer extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings(): Settings {
+    protected getDefaultSettings (): Settings {
         return {
             enabled: true,
             template: "#%postid% by %artist% (%copyright%) - %character%",
             symbolsEnabled: true,
-            symbolFav: "\u2665",      //heart symbol
-            symbolVoteUp: "\u2191",   //arrow up
-            symbolVoteDown: "\u2193",  //arrow down
+            symbolFav: "\u2665",      // heart symbol
+            symbolVoteUp: "\u2191",   // arrow up
+            symbolVoteDown: "\u2193",  // arrow down
         };
     }
 
     /**
-     * Creates the module's structure.  
+     * Creates the module's structure.
      * Should be run immediately after the constructor finishes.
      */
-    public create(): void {
+    public create (): void {
         super.create();
 
         this.post = Post.getViewingPost();
@@ -42,7 +42,7 @@ export class TitleCustomizer extends RE6Module {
     /**
      * Refreshes the page's title according to the template in the settings
      */
-    public refreshPageTitle(): void {
+    public refreshPageTitle (): void {
         document.title = this.parseTemplate();
     }
 
@@ -50,12 +50,13 @@ export class TitleCustomizer extends RE6Module {
      * Parses the page title template, replacing variables with their corresponding values
      * @returns string Page title
      */
-    private parseTemplate(): string {
+    private parseTemplate (): string {
         let prefix = "";
         if (this.fetchSettings("symbolsEnabled")) {
             if (this.post.is_favorited) { prefix += this.fetchSettings("symbolFav"); }
-            if (this.post.user_score > 0) { prefix += this.fetchSettings("symbolVoteUp"); }
-            else if (this.post.user_score < 0) { prefix += this.fetchSettings("symbolVoteDown"); }
+            if (this.post.user_score > 0) {
+                prefix += this.fetchSettings("symbolVoteUp");
+            } else if (this.post.user_score < 0) { prefix += this.fetchSettings("symbolVoteDown"); }
             if (prefix) prefix += " ";
         }
 
@@ -74,7 +75,7 @@ export class TitleCustomizer extends RE6Module {
             .replace(/^ | $/g, "")
             + " - " + Page.getSiteName();
 
-        function tagSetToString(tags: Set<string>): string {
+        function tagSetToString (tags: Set<string>): string {
             return [...tags].join(", ");
         }
     }

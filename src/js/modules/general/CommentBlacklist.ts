@@ -2,19 +2,19 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 
 export class CommentBlacklist extends RE6Module {
 
-    public constructor() {
+    public constructor () {
         super([], true);
     }
 
-    public getDefaultSettings(): Settings {
+    public getDefaultSettings (): Settings {
         return {
             enabled: true,
 
-            filters: []
-        }
+            filters: [],
+        };
     }
 
-    public create(): void {
+    public create (): void {
 
         const filters = this.fetchSettings("filters");
         for (const comment of $("article.comment").get()) {
@@ -35,7 +35,7 @@ export class CommentBlacklist extends RE6Module {
      * @param blacklistLine Single line from the blacklist
      * @returns true if the line matches, false otherwise
      */
-    private static filterMatches(comment: string, blacklistLine: string): boolean {
+    private static filterMatches (comment: string, blacklistLine: string): boolean {
         const filters = blacklistLine.split(" ");
         let matches = 0;
         for (const filter of filters) {

@@ -8,9 +8,10 @@ export class Prompt extends Modal {
     private promise: Promise<string | number | string[]>;
 
     private $form: JQuery<HTMLElement>;
+
     private $input: JQuery<HTMLElement>;
 
-    constructor(title = "Prompt") {
+    constructor (title = "Prompt") {
         super({
             title: title,
             fixed: true,
@@ -32,7 +33,7 @@ export class Prompt extends Modal {
         });
     }
 
-    private createForm(): void {
+    private createForm (): void {
         this.$form = $("<form>")
             .addClass("prompt-input");
 
@@ -46,7 +47,7 @@ export class Prompt extends Modal {
             .appendTo(this.$form);
     }
 
-    public getPromise(): Promise<string | number | string[]> {
+    public getPromise (): Promise<string | number | string[]> {
         return this.promise;
     }
 }

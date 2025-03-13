@@ -17,11 +17,11 @@ export class PostParts {
 
     private static renderedGIFs: PostSet = new PostSet();
 
-    public static cleanup(post: Post): void {
+    public static cleanup (post: Post): void {
         this.renderedGIFs.delete(post);
     }
 
-    public static renderImage(post: Post, conf: any): JQuery<HTMLElement> {
+    public static renderImage (post: Post, conf: any): JQuery<HTMLElement> {
 
         let query = "";
         if (Page.matches(PageDefinition.search)) query = Page.getQueryParameter("tags");
@@ -29,7 +29,7 @@ export class PostParts {
 
         // Basic structure
         const $link = $("<a>")
-            .attr({ "href": "/posts/" + post.id + (query !== null ? "?q=" + query : ""), })
+            .attr({ "href": "/posts/" + post.id + (query !== null ? "?q=" + query : "") })
             .append(PostParts.renderImageElement(post, conf))
             .append($("<post-loading>"));
 
@@ -54,7 +54,7 @@ export class PostParts {
 
     }
 
-    private static handleDoubleClick($link: JQuery<HTMLElement>, post: Post, conf: any): void {
+    private static handleDoubleClick ($link: JQuery<HTMLElement>, post: Post, conf: any): void {
 
         PostParts.bootstrapDoubleClick(
             $link,
@@ -96,11 +96,11 @@ export class PostParts {
                 }
 
             },
-            () => { return (BetterSearch.isPaused()) || $("#mode-box-mode").val() !== "view"; }
+            () => { return (BetterSearch.isPaused()) || $("#mode-box-mode").val() !== "view"; },
         );
     }
 
-    private static renderImageElement(post: Post, conf: any): JQuery<HTMLElement> {
+    private static renderImageElement (post: Post, conf: any): JQuery<HTMLElement> {
 
         post.$ref.attr("loading", "true");
 
@@ -140,7 +140,7 @@ export class PostParts {
         $image.attr("src", loadedFileType == LoadedFileType.SAMPLE ? post.file.sample : post.file.preview);
         post.loaded = loadedFileType;
 
-        function determineFileType(loadedFileType: LoadedFileType, imageLoadMethod: ImageLoadMethod, extension: FileExtension, autoPlayGIFs: boolean): LoadedFileType {
+        function determineFileType (loadedFileType: LoadedFileType, imageLoadMethod: ImageLoadMethod, extension: FileExtension, autoPlayGIFs: boolean): LoadedFileType {
             // If the autoPlayGIFs is enabled, the GIFs must be loaded at original quality
             if (extension == FileExtension.GIF) return autoPlayGIFs ? LoadedFileType.SAMPLE : LoadedFileType.PREVIEW;
 
@@ -218,7 +218,7 @@ export class PostParts {
         return $image;
     }
 
-    public static renderRibbons(post: Post, conf: any): JQuery<HTMLElement> {
+    public static renderRibbons (post: Post, conf: any): JQuery<HTMLElement> {
 
         const $ribbons = $("<img-ribbons>");
 
@@ -226,12 +226,12 @@ export class PostParts {
         post.$ref.on("re621:sync.ribbons", () => {
             generateRibbons(post, $ribbons, conf);
         });
-        
+
         return $ribbons;
-        
-        function generateRibbons(post: Post, container: JQuery<HTMLElement>, conf: any): void {
+
+        function generateRibbons (post: Post, container: JQuery<HTMLElement>, conf: any): void {
             container.html("");
-        
+
             // Relationship Ribbons
             if (conf.ribbonsRel) {
                 const relRibbon = $("<ribbon>")
@@ -239,7 +239,7 @@ export class PostParts {
                     .html(`<span></span>`)
                     .appendTo(container);
                 const relRibbonText = [];
-        
+
                 if (post.has.children) {
                     relRibbon.addClass("has-children");
                     relRibbonText.push("Child posts");
@@ -248,11 +248,11 @@ export class PostParts {
                     relRibbon.addClass("has-parent");
                     relRibbonText.push("Parent posts");
                 }
-        
+
                 if (relRibbonText.length > 0) relRibbon.attr("title", relRibbonText.join("\n"));
                 else relRibbon.remove();
             }
-        
+
             // Flag Ribbons
             if (conf.ribbonsFlag) {
                 const flagRibbon = $("<ribbon>")
@@ -260,7 +260,7 @@ export class PostParts {
                     .html(`<span></span>`)
                     .appendTo(container);
                 const flagRibbonText = [];
-        
+
                 if (post.flags.has(PostFlag.Flagged)) {
                     flagRibbon.addClass("is-flagged");
                     flagRibbonText.push("Flagged");
@@ -269,17 +269,17 @@ export class PostParts {
                     flagRibbon.addClass("is-pending");
                     flagRibbonText.push("Pending");
                 }
-        
+
                 if (flagRibbonText.length > 0) flagRibbon.attr("title", flagRibbonText.join("\n"));
                 else flagRibbon.remove();
             }
-            
+
             if ($ribbons.children().length == 0) container.css("display", "none");
             else container.css("display", "");
         }
     }
 
-    public static renderButtons(post: Post, conf: any): JQuery<HTMLElement> {
+    public static renderButtons (post: Post, conf: any): JQuery<HTMLElement> {
 
         const $voteBox = $("<post-voting>");
 
@@ -313,7 +313,7 @@ export class PostParts {
                         (error) => {
                             Danbooru.error("An error occurred while recording the vote");
                             console.log(error);
-                        }
+                        },
                     );
                 });
 
@@ -345,7 +345,7 @@ export class PostParts {
                         (error) => {
                             Danbooru.error("An error occurred while recording the vote");
                             console.log(error);
-                        }
+                        },
                     );
                 });
         }
@@ -383,7 +383,7 @@ export class PostParts {
                                         total: response.score || 0,
                                     };
                                     post.$ref.trigger("re621:update");
-                                }
+                                },
                             );
                         }
                     }
@@ -396,7 +396,7 @@ export class PostParts {
         return $voteBox;
     }
 
-    public static renderFlags(post: Post, conf: any): JQuery<HTMLElement> {
+    public static renderFlags (post: Post, conf: any): JQuery<HTMLElement> {
 
         const $flagBox = $("<post-flags>");
 
@@ -415,7 +415,7 @@ export class PostParts {
 
     }
 
-    public static renderInfo(post: Post): JQuery<HTMLElement> {
+    public static renderInfo (post: Post): JQuery<HTMLElement> {
 
         const $infoBlock = $("<post-info>");
         post.$ref.on("re621:update", () => {
@@ -425,7 +425,7 @@ export class PostParts {
 
         return $infoBlock;
 
-        function getPostInfo(post: Post): string {
+        function getPostInfo (post: Post): string {
             const scoreClass = post.score.total > 0 ? "positive" : (post.score.total < 0 ? "negative" : "neutral");
             return `
                 <span class="post-info-score score-${scoreClass}" title="${post.score.up} up / ${Math.abs(post.score.down)} down">${post.score.total}</span>
@@ -437,23 +437,23 @@ export class PostParts {
     }
 
     /** Returns a formatted tag string for the image's hover text */
-    public static formatHoverText(post: PostData, compact = false, html = false): string {
+    public static formatHoverText (post: PostData, compact = false, html = false): string {
         const br = html ? "<br>\n" : "\n";
         if (compact)
-            return `` +
-                `${[...post.tags.artist, ...post.tags.contributor, ...post.tags.copyright].join(" ")} ` +
-                `${[...post.tags.character, ...post.tags.species].join(" ")} ` +
-                `${[...post.tags.general, ...post.tags.invalid, ...post.tags.lore, ...post.tags.meta].join(" ")}` +
-                ``;
-        return `` +
-            `Post #${post.id}, uploaded on: ${Util.Time.format(post.date.iso)} (${post.date.ago})${br}` +
-            `${[...post.tags.artist, ...post.tags.contributor, ...post.tags.copyright].join(" ")}${br}` +
-            `${[...post.tags.character, ...post.tags.species].join(" ")}${br}` +
-            `${[...post.tags.general, ...post.tags.invalid, ...post.tags.lore, ...post.tags.meta].join(" ")}${br}` +
-            ``;
+            return ``
+                + `${[...post.tags.artist, ...post.tags.contributor, ...post.tags.copyright].join(" ")} `
+                + `${[...post.tags.character, ...post.tags.species].join(" ")} `
+                + `${[...post.tags.general, ...post.tags.invalid, ...post.tags.lore, ...post.tags.meta].join(" ")}`
+                + ``;
+        return ``
+            + `Post #${post.id}, uploaded on: ${Util.Time.format(post.date.iso)} (${post.date.ago})${br}`
+            + `${[...post.tags.artist, ...post.tags.contributor, ...post.tags.copyright].join(" ")}${br}`
+            + `${[...post.tags.character, ...post.tags.species].join(" ")}${br}`
+            + `${[...post.tags.general, ...post.tags.invalid, ...post.tags.lore, ...post.tags.meta].join(" ")}${br}`
+            + ``;
     }
 
-    public static bootstrapDoubleClick(target: JQuery<HTMLElement> | string, onDoubleClick: ($link: JQuery<HTMLElement>) => void, isPaused: () => boolean = (): boolean => false): void {
+    public static bootstrapDoubleClick (target: JQuery<HTMLElement> | string, onDoubleClick: ($link: JQuery<HTMLElement>) => void, isPaused: () => boolean = (): boolean => false): void {
 
         let attachment: JQuery<HTMLElement>, selector: string;
         if (typeof target == "string") {
@@ -477,11 +477,11 @@ export class PostParts {
         attachment.on("click.re621.dbl-extra", selector, (event) => {
             if (
                 // Ignore mouse clicks which are not left clicks
-                (event.button !== 0) ||
+                (event.button !== 0)
                 // Ignore meta-key presses
-                (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) ||
+                || (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)
                 // Stop tracking double clicks if the module is paused
-                isPaused()
+                || isPaused()
             ) return;
 
             event.preventDefault();
@@ -500,11 +500,11 @@ export class PostParts {
         attachment.on("dblclick.re621.dbl-extra", selector, (event) => {
             if (
                 // Ignore mouse clicks which are not left clicks
-                (event.button !== 0) ||
+                (event.button !== 0)
                 // Ignore meta-key presses
-                (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) ||
+                || (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)
                 // Stop tracking double clicks if the module is paused
-                isPaused()
+                || isPaused()
             ) { return; }
 
             event.preventDefault();
@@ -517,7 +517,7 @@ export class PostParts {
         });
     }
 
-    public static unstrapDoubleClick(target: JQuery<HTMLElement> | string): void {
+    public static unstrapDoubleClick (target: JQuery<HTMLElement> | string): void {
         if (typeof target == "string")
             $("body")
                 .off("click.re621.thumbnail", target)

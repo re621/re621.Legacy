@@ -8,30 +8,33 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 import { BetterSearch } from "./BetterSearch";
 
 /**
- * Blacklist Enhancer  
+ * Blacklist Enhancer
  * Replaces e6 blacklist functionality
  */
 export class BlacklistEnhancer extends RE6Module {
 
     private static $wrapper: JQuery<HTMLElement>;               // wrapper for the rest of the content
+
     private static $header: JQuery<HTMLElement>;                // interactive header for the blacklist
+
     private static $content: JQuery<HTMLElement>;               // list of applicable filters
+
     private static $toggle: JQuery<HTMLElement>;                // toggle switch for all blacklists
 
-    public constructor() {
+    public constructor () {
         super([PageDefinition.search, PageDefinition.favorites], true, false, [BetterSearch]);
     }
 
-    public getDefaultSettings(): Settings {
+    public getDefaultSettings (): Settings {
         return {
             enabled: true,
             favorites: false,
             uploads: false,
             whitelist: "",
-        }
+        };
     }
 
-    public create(): void {
+    public create (): void {
         super.create();
 
         // Override default blacklist function
@@ -80,7 +83,7 @@ export class BlacklistEnhancer extends RE6Module {
             filter.setEnabled(enabled);
             $target.attr("enabled", enabled + "");
 
-            if(enabled) LocalStorage.Blacklist.FilterState.delete(filter.getName());
+            if (enabled) LocalStorage.Blacklist.FilterState.delete(filter.getName());
             else LocalStorage.Blacklist.FilterState.add(filter.getName());
 
             BlacklistEnhancer.updateHeader();
@@ -123,7 +126,7 @@ export class BlacklistEnhancer extends RE6Module {
     }
 
     /** Reloads all sidebar DOM elements */
-    public static update(): void {
+    public static update (): void {
         BlacklistEnhancer.updateFilterList();
         BlacklistEnhancer.updateHeader();
         BlacklistEnhancer.updateToggleSwitch();
@@ -131,7 +134,7 @@ export class BlacklistEnhancer extends RE6Module {
     }
 
     /** Reloads the blacklist header */
-    public static updateHeader(): void {
+    public static updateHeader (): void {
 
         let filteredPosts = new Set<number>(),
             unfilteredPosts = new Set<number>();
@@ -150,7 +153,7 @@ export class BlacklistEnhancer extends RE6Module {
     }
 
     /** Reloads the blacklist filters */
-    public static updateFilterList(): void {
+    public static updateFilterList (): void {
 
         BlacklistEnhancer.$content.html("");
 
@@ -159,7 +162,7 @@ export class BlacklistEnhancer extends RE6Module {
             const entry = $("<filter>")
                 .attr({
                     "count": count,
-                    "enabled": filter.isEnabled()
+                    "enabled": filter.isEnabled(),
                 })
                 .data("filter", filter)
                 .appendTo(BlacklistEnhancer.$content)
@@ -181,13 +184,13 @@ export class BlacklistEnhancer extends RE6Module {
     }
 
     /** Reloads the "Enable / Disable All" toggle */
-    public static updateToggleSwitch(): void {
+    public static updateToggleSwitch (): void {
         // This fixes a really dumb bug.
         // If there are no blacklisted posts on the page, the blacklist would just... turn back on.
         // Not the ideal solution, but that will have to wait until the blacklist rework.
-        if(BlacklistEnhancer.$wrapper.attr("count") == "0" && BlacklistEnhancer.$wrapper.attr("discount") == "0")
+        if (BlacklistEnhancer.$wrapper.attr("count") == "0" && BlacklistEnhancer.$wrapper.attr("discount") == "0")
             return;
-        
+
         if (BlacklistEnhancer.$content.find("filter[enabled=false]").length > 0) {
             BlacklistEnhancer.$toggle
                 .html("Enable All Filters")

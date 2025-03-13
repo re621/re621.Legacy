@@ -2,7 +2,7 @@ const fs = require("fs"),
     util = require("./util");
 
 const headerData = JSON.parse(fs.readFileSync("./bin/userscript-header.json")),
-    package = JSON.parse(fs.readFileSync("./package.json")),
+packageJSON = JSON.parse(fs.readFileSync("./package.json")),
     mode = process.argv[2] ? process.argv[2] : "build",
     browser = process.argv[3] ? process.argv[3] : "chrome";
 
@@ -16,7 +16,7 @@ if (mode !== "injector") {
 let header = "";
 for (let [key, value] of Object.entries(headerData)) {
     if (Array.isArray(value)) {
-        value.forEach((subValue) => { header += formateHeaderLine(key, subValue);; });
+        value.forEach((subValue) => { header += formateHeaderLine(key, subValue); });
     } else if (typeof value === "object" && value !== null) {
         for (let [subKey, subValue] of Object.entries(value))
             header += formateHeaderLine(key, subKey, subValue);
@@ -36,11 +36,11 @@ switch (mode) {
             .replace(/(\/\/ @resource[ ]+re621_css )(.+)/, browser == "chrome" ? "$1file://" + __dirname + "\\..\\build\\userscript\\style.min.css" : "$1http://localhost:7000/style.min.css");
         header += formateHeaderLine("require", browser == "chrome" ? "file://" + __dirname + "\\..\\build\\userscript\\script.user.js" : "http://localhost:7000/script.user.js");
         header += formateHeaderLine("match", "http://localhost:3000/*");
-        fs.writeFileSync("./build/userscript/injector.user.js", util.parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n", package));
+        fs.writeFileSync("./build/userscript/injector.user.js", util.parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n", packageJSON));
         break;
     }
     case "prod": {
-        const metaBody = util.parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n", package);
+        const metaBody = util.parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n", packageJSON);
         // Metadata file
         fs.writeFileSync("./build/userscript/script.meta.js", metaBody);
         fs.writeFileSync(
@@ -53,7 +53,7 @@ switch (mode) {
     default: {
         // Normal mode
         const scriptBody =
-            util.parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n", package) + "\n\n" +
+            util.parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n", packageJSON) + "\n\n" +
             (fs.readFileSync("./build/script.js") + "")
             .replace(/%BUILDTYPE%/g, "script")
             .replace(/\/\/%STYLESHEET%/g, "const attachedStylesheet = `" + JSON.stringify(fs.readFileSync("./build/style.css").toString(), null, 2) + "`;");

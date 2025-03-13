@@ -7,15 +7,15 @@ import { RE6Module, Settings } from "../../components/RE6Module";
  */
 export class WikiEnhancer extends RE6Module {
 
-    public constructor() {
+    public constructor () {
         super([PageDefinition.wiki, PageDefinition.wikiNA, PageDefinition.artist], true);
     }
 
-    protected getDefaultSettings(): Settings {
+    protected getDefaultSettings (): Settings {
         return { enabled: true };
     }
 
-    public create(): void {
+    public create (): void {
         super.create();
         const $title = Page.matches(PageDefinition.artist)
             ? $("#a-show h1 a:first")
@@ -32,13 +32,13 @@ export class WikiEnhancer extends RE6Module {
             });
     }
 
-    public destroy(): void {
+    public destroy (): void {
         if (!this.isInitialized()) return;
         super.destroy();
         $("#wiki-page-copy-tag").remove();
     }
 
-    public static sanitizeWikiTagName(raw: string): string {
+    public static sanitizeWikiTagName (raw: string): string {
         return raw.trim()
             .replace(/^.+: /g, "")
             .replace(/ /g, "_");

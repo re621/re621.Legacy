@@ -14,10 +14,10 @@ export class ForumTracker extends SubscriptionTracker {
         major: {
             regex: [PageDefinition.forumPost],
             selector: "#c-forum-topics > #a-show > h1:first",
-        }
+        },
     };
 
-    public getDefaultSettings(): Settings {
+    public getDefaultSettings (): Settings {
         return {
             ...super.getDefaultSettings(),
 
@@ -25,11 +25,11 @@ export class ForumTracker extends SubscriptionTracker {
         };
     }
 
-    protected fetchMajorSubscriptionName(): string {
+    protected fetchMajorSubscriptionName (): string {
         return Page.getPageID();
     }
 
-    public async fetchUpdatedEntries(): Promise<UpdateData> {
+    public async fetchUpdatedEntries (): Promise<UpdateData> {
 
         const result: UpdateData = {};
         this.clearStatus();
@@ -88,7 +88,7 @@ export class ForumTracker extends SubscriptionTracker {
         return result;
     }
 
-    protected drawUpdateEntry(data: UpdateContent, timestamp: number, deleteFunction): JQuery<HTMLElement> {
+    protected drawUpdateEntry (data: UpdateContent, timestamp: number, deleteFunction): JQuery<HTMLElement> {
 
         const threadData = data.ext.split("|");
         const result = $("<subitem>")
@@ -104,7 +104,7 @@ export class ForumTracker extends SubscriptionTracker {
 
                 $("<a>")
                     .html(decodeURIComponent(threadData[0]))
-                    .attr({ "href": `/forum_topics/${data.uid}?page=${Math.ceil(parseInt(threadData[1] || "1") / 75)}`, })
+                    .attr({ "href": `/forum_topics/${data.uid}?page=${Math.ceil(parseInt(threadData[1] || "1") / 75)}` })
                     .appendTo(mainSection);
 
                 $("<div>")
@@ -129,7 +129,7 @@ export class ForumTracker extends SubscriptionTracker {
 
     }
 
-    protected formatSubscriptionListEntry(id: string, value: any, unsub: (name: string) => void): JQuery<HTMLElement> {
+    protected formatSubscriptionListEntry (id: string, value: any, unsub: (name: string) => void): JQuery<HTMLElement> {
 
         const threadData = this.slist.getExtraData(id) || {};
         const result = $("<sb-enitem>")
@@ -141,7 +141,7 @@ export class ForumTracker extends SubscriptionTracker {
         $("<a>")
             .addClass("sb-unsub")
             .html(`<i class="fas fa-times"></i>`)
-            .attr({ "title": "Unsubscribe", })
+            .attr({ "title": "Unsubscribe" })
             .appendTo(result)
             .on("click", (event) => {
                 event.preventDefault();

@@ -14,7 +14,7 @@ export class ModuleController {
      * @todo any parameter is not correct here but I couldn't figure the right types out
      *  { new(): RE6Module } works to access constructor name but not static methods
      */
-    public static async register(moduleList: any | any[]): Promise<number> {
+    public static async register (moduleList: any | any[]): Promise<number> {
         if (!Array.isArray(moduleList)) moduleList = [moduleList];
 
         Debug.perfStart("re621.total");
@@ -62,8 +62,8 @@ export class ModuleController {
     }
 
     /**
-     * Returns a module singleton instance corresponding to the specified name.  
-     * Module name may be either a string or a class name, but the latter is preferred.  
+     * Returns a module singleton instance corresponding to the specified name.
+     * Module name may be either a string or a class name, but the latter is preferred.
      * All modules must extend the RE6Module class, and need to be registered beforehand.
      * @param moduleClass Module name
      * @returns Module instance
@@ -79,7 +79,7 @@ export class ModuleController {
      * Returns a map of currently registered modules
      * @returns List of modules
      */
-    public static getAll(): Map<string, RE6Module> {
+    public static getAll (): Map<string, RE6Module> {
         return this.modules;
     }
 

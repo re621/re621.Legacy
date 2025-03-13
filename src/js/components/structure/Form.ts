@@ -4,7 +4,7 @@ import { Util } from "../utility/Util";
 import { PreparedStructure } from "./PreparedStructure";
 
 /**
- * Form Engine v.2.0  
+ * Form Engine v.2.0
  * Simplifies the process of creating complex, visually consistent forms.
  */
 export class Form implements PreparedStructure {
@@ -12,19 +12,21 @@ export class Form implements PreparedStructure {
     private static inputTimeout = 500;          // Typing timeout on text input fields
 
     private created: boolean;                   // Used for caching, true if get() has been called before
+
     private element: JQuery<HTMLElement>;       // DOM element for the form
+
     private content: FormElement[];            // Array of form elements
 
     private inputList: Map<string, JQuery<HTMLElement>>;
 
     /**
-     * Prepares the form structure and settings.  
+     * Prepares the form structure and settings.
      * Use `get()` to return an actual DOM element.
      * @param options Form options
      * @param content Form elements
      * @param onSubmit Form submission callback
      */
-    public constructor(options?: SectionOptions, content?: FormElement[], onSubmit?: FormSubmitEvent) {
+    public constructor (options?: SectionOptions, content?: FormElement[], onSubmit?: FormSubmitEvent) {
         if (!options.name) options.name = Util.ID.make();
         if (!options.columns) options.columns = 1;
         if (!options.width) options.width = options.columns;
@@ -54,7 +56,7 @@ export class Form implements PreparedStructure {
      * Builds and returns the form DOM element
      * @param force If true, ignores any cached data and rebuilds the structure from scratch
      */
-    public render(force = false): JQuery<HTMLElement> {
+    public render (force = false): JQuery<HTMLElement> {
         if (this.created && !force) { return this.element; }
 
         // Build form elements
@@ -81,10 +83,10 @@ export class Form implements PreparedStructure {
     }
 
     /**
-     * Resets the elements to their default values.  
+     * Resets the elements to their default values.
      * Does not include buttons and submit elements
      */
-    public reset(): void {
+    public reset (): void {
         this.inputList.forEach((input) => {
             const defval = input.attr("defval");
             if (defval !== undefined) {
@@ -95,11 +97,11 @@ export class Form implements PreparedStructure {
     }
 
     /**
-     * Returns a list of elements in the form.  
+     * Returns a list of elements in the form.
      * If no parameter is specified, returns all inputs
      * @param names Names of inputs to return
      */
-    public getInputList(...names: string[]): Map<string, JQuery<HTMLElement>> {
+    public getInputList (...names: string[]): Map<string, JQuery<HTMLElement>> {
         if (names.length == 0) { return this.inputList; }
         const results: Map<string, JQuery<HTMLElement>> = new Map();
 
@@ -114,19 +116,19 @@ export class Form implements PreparedStructure {
      * An empty, placeholder form. Used to properly space out and center modals
      * @param width Form width
      */
-    public static placeholder(width = 1): JQuery<HTMLElement> {
+    public static placeholder (width = 1): JQuery<HTMLElement> {
         return new Form(
             { columns: width, width: width },
-            [Form.spacer(width)]
+            [Form.spacer(width)],
         ).render();
     }
 
     /**
-     * Creates a form section FormElement based on the provided parameters  
+     * Creates a form section FormElement based on the provided parameters
      * @param options Section configuration
      * @param content Form elements
      */
-    public static section(options?: SectionOptions, content?: FormElement[]): FormElement {
+    public static section (options?: SectionOptions, content?: FormElement[]): FormElement {
         if (!options.name) options.name = Util.ID.make();
         if (!options.columns) options.columns = 1;
         if (!options.width) options.width = options.columns;
@@ -148,11 +150,11 @@ export class Form implements PreparedStructure {
     }
 
     /**
-     * Creates a collapsible section FormElement based on the provided parameters  
+     * Creates a collapsible section FormElement based on the provided parameters
      * @param options Section configuration
      * @param content Form elements
      */
-    public static accordion(options?: SectionOptions & { active?: boolean | number; collapsible?: boolean }, content?: FormAccordionElement[]): FormElement {
+    public static accordion (options?: SectionOptions & { active?: boolean | number; collapsible?: boolean }, content?: FormAccordionElement[]): FormElement {
         if (!options.name) options.name = Util.ID.make();
         if (!options.columns) options.columns = 1;
         if (!options.width) options.width = options.columns;
@@ -183,7 +185,7 @@ export class Form implements PreparedStructure {
         });
     }
 
-    public static accordionTab(options?: SectionOptions & { badge?: JQuery<HTMLElement>; subheader?: string }, content?: FormElement[]): FormElement {
+    public static accordionTab (options?: SectionOptions & { badge?: JQuery<HTMLElement>; subheader?: string }, content?: FormElement[]): FormElement {
         if (!options.name) options.name = Util.ID.make();
         if (!options.columns) options.columns = 1;
         if (!options.width) options.width = options.columns;
@@ -217,11 +219,11 @@ export class Form implements PreparedStructure {
     }
 
     /**
-     * Creates a collapsible section FormElement based on the provided parameters  
+     * Creates a collapsible section FormElement based on the provided parameters
      * @param options Section configuration
      * @param content Form elements
      */
-    public static collapse(options?: SectionOptions & { title?: string; badge?: JQuery<HTMLElement>; collapsed?: boolean }, content?: FormElement[], onActivate?: (id: string, state: boolean) => void): FormElement {
+    public static collapse (options?: SectionOptions & { title?: string; badge?: JQuery<HTMLElement>; collapsed?: boolean }, content?: FormElement[], onActivate?: (id: string, state: boolean) => void): FormElement {
         if (!options.name) options.name = Util.ID.make();
         if (!options.columns) options.columns = 1;
         if (!options.width) options.width = options.columns;
@@ -270,11 +272,11 @@ export class Form implements PreparedStructure {
     }
 
     /**
-     * Creates an input FormElement based on the provided parameters  
+     * Creates an input FormElement based on the provided parameters
      * @param options Element configuration
      * @param changed Input change callback
      */
-    public static input(options?: InputElementOptions, changed?: InputChangeEvent): FormElement {
+    public static input (options?: InputElementOptions, changed?: InputChangeEvent): FormElement {
         if (!options.name) options.name = Util.ID.make();
 
         let $label: JQuery<HTMLElement>;
@@ -317,7 +319,7 @@ export class Form implements PreparedStructure {
         if (options.title) $input.attr("title", options.title);
 
         if (options.pattern) $input.attr("pattern", options.pattern);
-        if (options.required) $input.attr("required", '');
+        if (options.required) $input.attr("required", "");
 
         if (changed !== undefined) {
             let timer: number;
@@ -325,7 +327,7 @@ export class Form implements PreparedStructure {
                 if (timer) clearTimeout(timer);
                 timer = window.setTimeout(
                     () => { changed($input.val().toString(), $input); },
-                    Form.inputTimeout
+                    Form.inputTimeout,
                 );
             });
         }
@@ -334,11 +336,11 @@ export class Form implements PreparedStructure {
     }
 
     /**
-     * Creates an input FormElement based on the provided parameters  
+     * Creates an input FormElement based on the provided parameters
      * @param options Element configuration
      * @param changed Input change callback
      */
-    public static textarea(options?: InputElementOptions, changed?: InputChangeEvent): FormElement {
+    public static textarea (options?: InputElementOptions, changed?: InputChangeEvent): FormElement {
         if (!options.name) options.name = Util.ID.make();
 
         let $label: JQuery<HTMLElement>;
@@ -381,7 +383,7 @@ export class Form implements PreparedStructure {
         if (options.title) $input.attr("title", options.title);
 
         if (options.pattern) $input.attr("pattern", options.pattern);
-        if (options.required) $input.attr("required", '');
+        if (options.required) $input.attr("required", "");
 
         if (changed !== undefined) {
             let timer: number;
@@ -389,7 +391,7 @@ export class Form implements PreparedStructure {
                 if (timer) clearTimeout(timer);
                 timer = window.setTimeout(
                     () => { changed($input.val().toString(), $input); },
-                    Form.inputTimeout
+                    Form.inputTimeout,
                 );
             });
         }
@@ -398,10 +400,10 @@ export class Form implements PreparedStructure {
     }
 
     /**
-     * Creates a copy input FormElement based on the provided parameters  
+     * Creates a copy input FormElement based on the provided parameters
      * @param options Element configuration
      */
-    public static copy(options?: ElementOptions): FormElement {
+    public static copy (options?: ElementOptions): FormElement {
         if (!options.name) options.name = Util.ID.make();
 
         let $label: JQuery<HTMLElement>;
@@ -468,10 +470,10 @@ export class Form implements PreparedStructure {
     }
 
     /**
-     * Creates a key input FormElement based on the provided parameters  
+     * Creates a key input FormElement based on the provided parameters
      * @param options Element configuration
      */
-    public static key(options?: ElementOptions, changed?: InputChangeEvent): FormElement {
+    public static key (options?: ElementOptions, changed?: InputChangeEvent): FormElement {
         if (!options.name) options.name = Util.ID.make();
 
         let $label: JQuery<HTMLElement>;
@@ -563,8 +565,7 @@ export class Form implements PreparedStructure {
 
                     if (changed !== undefined) changed("", $input);
                     occupied = false;
-                }
-                else {
+                } else {
                     const newVal = flattenSequence(sequence);
 
                     $input
@@ -593,18 +594,18 @@ export class Form implements PreparedStructure {
         // add it to every element of the sequence. Since we are
         // flattening the sequence anyways, it should be safe to
         // get rid of them altogether.
-        function flattenSequence(input: string[]): string {
+        function flattenSequence (input: string[]): string {
             input = input.join("+").split("+");
-            input = [... new Set(input)];
+            input = [...new Set(input)];
             return input.join("+");
         }
     }
 
     /**
-     * Creates a file input FormElement based on the provided parameters  
+     * Creates a file input FormElement based on the provided parameters
      * @param options Element configuration
      */
-    public static file(options?: ElementOptions & { accept: string }, changed?: InputChangeEvent): FormElement {
+    public static file (options?: ElementOptions & { accept: string }, changed?: InputChangeEvent): FormElement {
         if (!options.name) options.name = Util.ID.make();
 
         let $label: JQuery<HTMLElement>;
@@ -636,7 +637,7 @@ export class Form implements PreparedStructure {
         return new FormElement($element, $input, $label);
     }
 
-    public static icon(options?: ElementOptions, content?: { [name: string]: any }, changed?: InputChangeEvent): FormElement {
+    public static icon (options?: ElementOptions, content?: { [name: string]: any }, changed?: InputChangeEvent): FormElement {
         if (!options.name) options.name = Util.ID.make();
 
         let $label: JQuery<HTMLElement>;
@@ -697,26 +698,28 @@ export class Form implements PreparedStructure {
             if (changed) changed($input.val().toString(), $input);
         });
 
-        if (options.value) { $selectContainer.find("a[data-value='" + options.value + "']").first().trigger("click"); }
-        else { $selectContainer.find("a").first().trigger("click"); }
+        if (options.value) {
+            $selectContainer.find("a[data-value='" + options.value + "']").first().trigger("click");
+        } else { $selectContainer.find("a").first().trigger("click"); }
 
         // When the field value is set externally, this event needs to be triggered on the text input field.
         // There is probably a better way to do this, but this should work for now.
         $input.on("re621:form:update", () => {
             console.log("updating", $input.val());
-            if ($input.val() == "") { $selectContainer.find("a").first().trigger("click"); }
-            else { $selectContainer.find("a[data-value='" + $input.val() + "']").first().trigger("click"); }
+            if ($input.val() == "") {
+                $selectContainer.find("a").first().trigger("click");
+            } else { $selectContainer.find("a[data-value='" + $input.val() + "']").first().trigger("click"); }
         });
 
         return new FormElement($element, $input, $label);
     }
 
     /**
-     * Creates a button FormElement based on the provided parameters  
+     * Creates a button FormElement based on the provided parameters
      * @param options Element configuration
      * @param changed Input change callback
      */
-    public static button(options?: ElementOptions & { "type"?: "submit" | "button" }, changed?: InputChangeEvent): FormElement {
+    public static button (options?: ElementOptions & { "type"?: "submit" | "button" }, changed?: InputChangeEvent): FormElement {
         if (!options.name) options.name = Util.ID.make();
 
         let $label: JQuery<HTMLElement>;
@@ -768,11 +771,11 @@ export class Form implements PreparedStructure {
     }
 
     /**
-     * Creates a checkbox FormElement based on the provided parameters  
+     * Creates a checkbox FormElement based on the provided parameters
      * @param options Element configuration
      * @param changed Input change callback
      */
-    public static checkbox(options?: ElementOptions, changed?: InputChangeEvent): FormElement {
+    public static checkbox (options?: ElementOptions, changed?: InputChangeEvent): FormElement {
         if (!options.name) options.name = Util.ID.make();
 
         const $element = FormUtils
@@ -826,12 +829,12 @@ export class Form implements PreparedStructure {
     }
 
     /**
-     * Creates a select FormElement based on the provided parameters  
+     * Creates a select FormElement based on the provided parameters
      * @param options Element configuration
      * @param content Select options data
      * @param changed Input change callback
      */
-    public static select(options?: ElementOptions, content?: SelectOptionSet | SelectOptionFunction, changed?: InputChangeEvent): FormElement {
+    public static select (options?: ElementOptions, content?: SelectOptionSet | SelectOptionFunction, changed?: InputChangeEvent): FormElement {
         if (!options.name) options.name = Util.ID.make();
 
         let $label: JQuery<HTMLElement>;
@@ -888,7 +891,7 @@ export class Form implements PreparedStructure {
      * @param text Header text
      * @param width Element span
      */
-    public static header(text: string, width?: number): FormElement {
+    public static header (text: string, width?: number): FormElement {
         const $element = FormUtils.makeInputWrapper(undefined, undefined, width);
 
         $("<h3>")
@@ -901,10 +904,10 @@ export class Form implements PreparedStructure {
     }
 
     /**
-     * Creates a div FormElement based on the provided parameters  
+     * Creates a div FormElement based on the provided parameters
      * @param options Element configuration
      */
-    public static div(options?: ElementOptions): FormElement {
+    public static div (options?: ElementOptions): FormElement {
         if (!options.name) options.name = Util.ID.make();
 
         let $label: JQuery<HTMLElement>;
@@ -943,11 +946,11 @@ export class Form implements PreparedStructure {
      * @param text Div contents
      * @param width Wrapper width
      */
-    public static text(text: string, width = 1, wrapper?: string): FormElement {
+    public static text (text: string, width = 1, wrapper?: string): FormElement {
         return Form.div({ value: text, width: width, wrapper: wrapper });
     }
 
-    public static requiresReload(): FormElement {
+    public static requiresReload (): FormElement {
         return Form.text(`<div class="text-center text-bold">Requires a page reload</div>`, 1, "align-middle");
     }
 
@@ -957,15 +960,15 @@ export class Form implements PreparedStructure {
      * @param subheader Second line of the header
      * @param width Wrapper width
      */
-    public static subheader(header: string, subheader: string, width = 1, name?: string, wrapper?: string): FormElement {
+    public static subheader (header: string, subheader: string, width = 1, name?: string, wrapper?: string): FormElement {
         return Form.div({ value: `<b>${header}</b><br />${subheader}`, width: width, wrapper: "subheader" + (wrapper ? " " + wrapper : ""), name: name });
     }
 
     /**
-     * Creates an hr FormElement based on the provided parameters  
+     * Creates an hr FormElement based on the provided parameters
      * @param width Element width
      */
-    public static hr(width?: number): FormElement {
+    public static hr (width?: number): FormElement {
         const $element = FormUtils.makeInputWrapper(undefined, undefined, width);
 
         $("<hr>")
@@ -980,7 +983,7 @@ export class Form implements PreparedStructure {
      * Creates an empty spacer element
      * @param width Element width
      */
-    public static spacer(width?: number, unmargin = false): FormElement {
+    public static spacer (width?: number, unmargin = false): FormElement {
         const $element = FormUtils.makeInputWrapper(undefined, undefined, width);
 
         $("<spacer>")
@@ -995,13 +998,13 @@ export class Form implements PreparedStructure {
 
 class FormUtils {
 
-    public static makeLabel(name: string, text: string): JQuery<HTMLElement> {
+    public static makeLabel (name: string, text: string): JQuery<HTMLElement> {
         return $("<label>")
             .attr("for", name)
             .html(text);
     }
 
-    public static makeInputWrapper(label: string, wrapper: string, width = 1): JQuery<HTMLElement> {
+    public static makeInputWrapper (label: string, wrapper: string, width = 1): JQuery<HTMLElement> {
         return $("<form-input>")
             .addClass(wrapper ? " " + wrapper : "")
             .attr({
@@ -1017,14 +1020,19 @@ export class FormElement {
     private created: boolean;
 
     private wrapper: JQuery<HTMLElement>;
+
     private input: JQuery<HTMLElement>;
+
     private label: JQuery<HTMLElement>;
+
     private content: FormElement[];
+
     private container: JQuery<HTMLElement>;
+
     private postProcessing: (wrapper: JQuery<HTMLElement>) => void;
 
     /**
-     * Constructs a form element based on provided data.  
+     * Constructs a form element based on provided data.
      * Only the `wrapper` parameter is required, everything else is optional.
      * @param wrapper Element that wraps the rest of the inputs
      * @param input Input element, if there is one
@@ -1033,7 +1041,7 @@ export class FormElement {
      * @param container Container object for content. If omitted, defaults to wrapper
      * @param postProcessing Function to run after the object has been built. Takes the wrapper as a parameter.
      */
-    public constructor(
+    public constructor (
         wrapper: JQuery<HTMLElement>,
         input?: JQuery<HTMLElement>,
         label?: JQuery<HTMLElement>,
@@ -1050,11 +1058,11 @@ export class FormElement {
         this.postProcessing = postProcessing ? postProcessing : (): void => { return; };
     }
 
-    public getInput(): JQuery<HTMLElement> {
+    public getInput (): JQuery<HTMLElement> {
         return this.input;
     }
 
-    public getInputs(): JQuery<HTMLElement>[] {
+    public getInputs (): JQuery<HTMLElement>[] {
         const result: JQuery<HTMLElement>[] = [];
 
         if (this.input) result.push(this.input);
@@ -1064,7 +1072,7 @@ export class FormElement {
         return result;
     }
 
-    public build(parentID: string, force = false): JQuery<HTMLElement>[] {
+    public build (parentID: string, force = false): JQuery<HTMLElement>[] {
         if (force || !this.created) {
             for (const entry of this.content) {
                 for (const childElem of entry.build(parentID + "-" + this.wrapper.attr("id"), force))
@@ -1139,7 +1147,7 @@ interface InputElementOptions extends ElementOptions {
     pattern?: string;
 }
 
-type SelectOptionSet = { [name: string]: any }
+type SelectOptionSet = { [name: string]: any };
 type SelectOptionFunction = () => SelectOptionSet;
 
 type ElementInputValue = (element: JQuery<HTMLElement>) => void;

@@ -12,7 +12,7 @@
 // The tags can be listed as either strings or regular expressions.
 // * String tags are better for performance, but must be matched **exactly**.
 // * Regular expressions can be anything, but are slightly worse performance-wise
-// This happens because 
+// This happens because
 // Tag lists can be single value or arrays. Mixed arrays are permitted.
 export const TagSuggestionsList: SuggestionSet = {
 
@@ -31,7 +31,7 @@ export const TagSuggestionsList: SuggestionSet = {
     "canine_penis": { has: "knot" },
     "sheath": { has: "canine_penis" },
 
-    "equine_penis": { has: "medial_ring", },
+    "equine_penis": { has: "medial_ring" },
     "knotted_equine_penis": { has: ["medial_ring", "knot"] },
     "medial_ring": { has: "equine_penis" },
     "flared_penis": { has: "equine_penis" },
@@ -269,14 +269,14 @@ export const TagSuggestionsList: SuggestionSet = {
     "pregnant_sex": { has: ["pregnant", "sex"] },
     "penile_masturbation": { has: ["penis", "masturbation"] },
     "vaginal_masturbation": { has: ["pussy", "masturbation"] },
-    "speech_bubble|thought_bubble": { has: "dialogue", },
+    "speech_bubble|thought_bubble": { has: "dialogue" },
 
     // Penis Parts
     "foreskin": { has: "humanoid_penis" },
     "glans": { has: "humanoid_penis" },
     "knot": { has: "canine_penis" },
 
-}
+};
 
 export type SuggestionSet = {
     [tag: string]: TagSuggestion;
@@ -286,21 +286,21 @@ export type TagSuggestion = {
     has?: SuggestionParam;
     not?: SuggestionParam;
     matchCount?: number;
-}
+};
 
 type SuggestionParam = RegExp | string | (RegExp | string)[];
 
 export class TagSuggestionsTools {
 
     /** Converts regular expressions to a prefixed string */
-    public static replacer(key: string, value: any): string {
+    public static replacer (key: string, value: any): string {
         return (value instanceof RegExp)
             ? ("REGEXP:" + value.toString())
             : value;
     }
 
     /** Restores regular expressions from prefixed strings */
-    public static reviver(key: string, value: string): any {
+    public static reviver (key: string, value: string): any {
         if (value.toString().includes("REGEXP:")) {
             const parts = value.split("REGEXP:")[1].match(/\/(.*)\/(.*)?/);
             return new RegExp(parts[1], parts[2] || "");

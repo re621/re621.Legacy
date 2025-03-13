@@ -18,10 +18,10 @@ export class PoolTracker extends SubscriptionTracker {
             regex: [PageDefinition.pool],
             selector: "#c-pools > #a-show > h2:first",
             method: "before",
-        }
+        },
     };
 
-    public getDefaultSettings(): Settings {
+    public getDefaultSettings (): Settings {
         return {
             ...super.getDefaultSettings(),
 
@@ -29,11 +29,11 @@ export class PoolTracker extends SubscriptionTracker {
         };
     }
 
-    protected fetchMajorSubscriptionName(): string {
+    protected fetchMajorSubscriptionName (): string {
         return Page.getPageID();
     }
 
-    public async fetchUpdatedEntries(): Promise<UpdateData> {
+    public async fetchUpdatedEntries (): Promise<UpdateData> {
 
         const result: UpdateData = {};
         this.clearStatus();
@@ -113,8 +113,7 @@ export class PoolTracker extends SubscriptionTracker {
                         + "|" + post.rating         // rating       E | Q | S
                         + "|" + post.img.width      // width        int
                         + "|" + post.img.height     // height       int
-                        + "|" + post.file.size      // filesize     int
-                        ;
+                        + "|" + post.file.size;     // filesize     int
                 }
             }
             if (!poolExtra.last) poolExtra.last = pool.post_ids.slice(-1)[0];
@@ -125,7 +124,7 @@ export class PoolTracker extends SubscriptionTracker {
                     md5: poolExtra.data,
                     ext: encodeURIComponent(pool.name.replace(/_/g, " ")) + "|" + pool.post_count,
                     new: true,
-                }
+                };
                 poolExtra.last = pool.post_ids.slice(-1)[0];
             }
 
@@ -138,7 +137,7 @@ export class PoolTracker extends SubscriptionTracker {
         return result;
     }
 
-    protected drawUpdateEntry(data: UpdateContent, timestamp: number, deleteFunction): JQuery<HTMLElement> {
+    protected drawUpdateEntry (data: UpdateContent, timestamp: number, deleteFunction): JQuery<HTMLElement> {
 
         const poolData = data.ext.split("|");
         const imageData = data.md5.split("|");
@@ -170,7 +169,7 @@ export class PoolTracker extends SubscriptionTracker {
 
                 const link = $("<a>")
                     .addClass("img-link")
-                    .attr({ href: "/pools/" + data.uid, })
+                    .attr({ href: "/pools/" + data.uid })
                     .appendTo(result);
 
                 PostParts.bootstrapDoubleClick(link, () => {
@@ -202,7 +201,7 @@ export class PoolTracker extends SubscriptionTracker {
 
                 $("<a>")
                     .html(decodeURIComponent(poolData[0]))
-                    .attr({ "href": extraData.last ? `/posts/${extraData.last}?pool_id=${data.uid}` : `/pools/${data.uid}`, })
+                    .attr({ "href": extraData.last ? `/posts/${extraData.last}?pool_id=${data.uid}` : `/pools/${data.uid}` })
                     .appendTo(mainSection);
 
                 $("<div>")
@@ -231,12 +230,12 @@ export class PoolTracker extends SubscriptionTracker {
 
         return result;
 
-        function getPreviewLink(md5: string): string {
+        function getPreviewLink (md5: string): string {
             if (!md5) return "https://e621.net/images/deleted-preview.png";
-            return `https://static1.e621.net/data/preview/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`;;
+            return `https://static1.e621.net/data/preview/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`;
         }
 
-        function getSampleLink(md5: string, hasSample: boolean, ext = "jpg"): string {
+        function getSampleLink (md5: string, hasSample: boolean, ext = "jpg"): string {
             if (!md5) return "https://e621.net/images/deleted-preview.png";
             return hasSample
                 ? `https://static1.e621.net/data/sample/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`
@@ -244,7 +243,7 @@ export class PoolTracker extends SubscriptionTracker {
         }
     }
 
-    protected formatSubscriptionListEntry(id: string, value: any, unsub: (name: string) => void): JQuery<HTMLElement> {
+    protected formatSubscriptionListEntry (id: string, value: any, unsub: (name: string) => void): JQuery<HTMLElement> {
 
         const poolData = this.slist.getExtraData(id) || {};
         const result = $("<sb-enitem>")
@@ -256,7 +255,7 @@ export class PoolTracker extends SubscriptionTracker {
         $("<a>")
             .addClass("sb-unsub")
             .html(`<i class="fas fa-times"></i>`)
-            .attr({ "title": "Unsubscribe", })
+            .attr({ "title": "Unsubscribe" })
             .appendTo(result)
             .on("click", (event) => {
                 event.preventDefault();

@@ -8,17 +8,17 @@ import { CustomFlagger } from "./CustomFlagger";
 
 export class ThumbnailTweaks extends RE6Module {
 
-    public constructor() {
+    public constructor () {
         super([], true);
     }
 
-    protected getDefaultSettings(): Settings {
+    protected getDefaultSettings (): Settings {
         return {
             enabled: true,
         };
     }
 
-    public create(): void {
+    public create (): void {
         super.create();
 
         const conf = ModuleController.get(BetterSearch).fetchSettings(["ribbonsRel", "ribbonsFlag"]);
@@ -30,7 +30,7 @@ export class ThumbnailTweaks extends RE6Module {
         Debug.log(`ThumbnailTweaks: ${count} elements`);
     }
 
-    private static modify($article: JQuery<HTMLElement>, ribbonsRel: boolean, ribbonsFlag: boolean): void {
+    private static modify ($article: JQuery<HTMLElement>, ribbonsRel: boolean, ribbonsFlag: boolean): void {
 
         const post = PostData.fromThumbnail($article);
         CustomFlagger.addPost(post);

@@ -8,11 +8,11 @@ export class CustomFlagger extends RE6Module {
 
     private static filters: Map<string, FilterPair>;
 
-    public constructor() {
+    public constructor () {
         super(PageDefinition.post, true);
     }
 
-    protected getDefaultSettings(): Settings {
+    protected getDefaultSettings (): Settings {
         return {
             enabled: true,
             flags: [
@@ -24,7 +24,7 @@ export class CustomFlagger extends RE6Module {
         };
     }
 
-    public create(): void {
+    public create (): void {
         super.create();
 
         const post = Post.getViewingPost();
@@ -50,13 +50,13 @@ export class CustomFlagger extends RE6Module {
                 .prependTo(flagContainer);
     }
 
-    public static get(): Map<string, FilterPair> {
+    public static get (): Map<string, FilterPair> {
         if (CustomFlagger.filters == undefined)
             CustomFlagger.regenerateFlagDefinitions();
         return CustomFlagger.filters;
     }
 
-    public static regenerateFlagDefinitions(): void {
+    public static regenerateFlagDefinitions (): void {
         CustomFlagger.filters = new Map();
         for (const flag of ModuleController.fetchSettings<FlagDefinition[]>(CustomFlagger, "flags")) {
             if (CustomFlagger.filters.get(flag.tags)) continue;
@@ -74,7 +74,7 @@ export class CustomFlagger extends RE6Module {
                     data: flag,
                     filter: new PostFilter(flag.tags, true),
                     show: flag.show,
-                }
+                },
             );
         }
     }
@@ -84,7 +84,7 @@ export class CustomFlagger extends RE6Module {
      * @param posts Post(s) to add to the cache
      * @returns Number of filters that match the post
      */
-    public static addPost(...posts: PostData[]): number {
+    public static addPost (...posts: PostData[]): number {
         let count = 0;
         for (const filterPair of CustomFlagger.get().values()) {
             if (filterPair.filter.update(posts)) count++;
@@ -97,12 +97,12 @@ export class CustomFlagger extends RE6Module {
      * @param posts Post(s) to update
      * @returns Number of filters that match the post
      */
-    public static updatePost(...posts: PostData[]): number {
+    public static updatePost (...posts: PostData[]): number {
         return CustomFlagger.addPost(...posts);
     }
 
     /** Returns true if the post is in the blacklist cache */
-    public static getFlags(post: PostData | number): FlagDefinition[] {
+    public static getFlags (post: PostData | number): FlagDefinition[] {
         if (typeof post !== "number") post = post.id;
         const output: FlagDefinition[] = [];
         for (const filterPair of CustomFlagger.get().values()) {

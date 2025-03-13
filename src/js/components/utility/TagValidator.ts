@@ -2,9 +2,11 @@
 export class TagValidator {
 
     private static metatags = ["user", "approver", "commenter", "comm", "noter", "noteupdater", "artcomm?", "pool", "ordpool", "fav", "favoritedby", "md5", "rating", "note", "locked", "width", "height", "mpixels", "ratio", "score", "favcount", "filesize", "source", "id", "date", "age", "order", "limit", "status", "tagcount", "parent", "child", "pixiv_id", "pixiv", "search", "upvote", "downvote", "voted", "filetype", "flagger", "type", "appealer", "disapproval", "set", "randseed", "description", "change", "user_id", "delreason", "deletedby", "votedup", "voteddown", "duration"];
+
     private static metatagsRegex = new RegExp(`^(${TagValidator.metatags.join("|")}):(.+)$`, "i");
 
     private static categories = ["general", "species", "character", "copyright", "artist", "contributor", "invalid", "lore", "meta"];
+
     private static categoriesRegex = new RegExp(`^(${TagValidator.categories.join("|")}):(.+)$`, "i");
 
     private static validation = [
@@ -43,7 +45,7 @@ export class TagValidator {
      * Returns true if the tag is valid, false otherwise
      * @param tag Tag to validate
      */
-    public static run(tag: string): boolean {
+    public static run (tag: string): boolean {
         return TagValidator.runVerbose(tag).length == 0;
     }
 
@@ -51,7 +53,7 @@ export class TagValidator {
      * Checks the tags for validity, and returns a list of errors
      * @param tag Tag to validate
      */
-    public static runVerbose(tag: string): string[] {
+    public static runVerbose (tag: string): string[] {
 
         const errors = [];
 

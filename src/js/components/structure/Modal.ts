@@ -6,12 +6,14 @@ export class Modal {
     private id: string;
 
     private config: ModalConfig;
+
     private $modal: JQuery<HTMLElement>;
 
     private triggers: ModalTrigger[] = [];
+
     private $activeTrigger: JQuery<HTMLElement>;
 
-    public constructor(config: ModalConfig) {
+    public constructor (config: ModalConfig) {
         this.id = Util.ID.make();
         this.config = this.validateConfig(config);
 
@@ -46,7 +48,7 @@ export class Modal {
                     "ui-dialog": "bg-foreground border-section color-text",
                     "ui-dialog-titlebar": "color-text",
                     "ui-dialog-titlebar-close": "border-foreground",
-                }
+                },
             });
 
         // Initialize JQueryUI functionality
@@ -62,7 +64,7 @@ export class Modal {
             */
             .draggable({
                 disabled: !config.draggable,
-                containment: "parent"
+                containment: "parent",
             });
 
         // Replace the modal structure on window open, if necessary
@@ -91,7 +93,7 @@ export class Modal {
                     of: window,
                     within: "div#modal-container",
                     collision: "none",
-                }
+                },
             );
 
             widget.draggable("option", "containment", "window");
@@ -104,7 +106,7 @@ export class Modal {
             const style = $("<style>")
                 .attr({
                     "id": "style-" + this.id,
-                    "type": "text/css"
+                    "type": "text/css",
                 })
                 .html(`
                     .modal-fixed-${this.id} {
@@ -146,7 +148,7 @@ export class Modal {
      * Parses the configuration and sets the default values for missing entries
      * @param config Configuration to parse
      */
-    private validateConfig(config: ModalConfig): ModalConfig {
+    private validateConfig (config: ModalConfig): ModalConfig {
         if (config.title === undefined) config.title = "Dialog";
         if (config.content === undefined) config.content = $("");
         if (config.triggers === undefined) config.triggers = [];
@@ -173,7 +175,7 @@ export class Modal {
      * Appends more content to the modal
      * @param $content Content to add
      */
-    public addContent($content: JQuery<HTMLElement>): void {
+    public addContent ($content: JQuery<HTMLElement>): void {
         this.$modal.append($content);
     }
 
@@ -181,7 +183,7 @@ export class Modal {
      * Sets the modal content
      * @param $content Content to add
      */
-    public setContent($content: JQuery<HTMLElement>): void {
+    public setContent ($content: JQuery<HTMLElement>): void {
         this.$modal.html("");
         this.$modal.append($content);
     }
@@ -190,7 +192,7 @@ export class Modal {
      * Listens to the specified element in order to trigger the modal
      * @param trigger Element-event pair to listen to
      */
-    public registerTrigger(trigger: ModalTrigger): void {
+    public registerTrigger (trigger: ModalTrigger): void {
 
         if (trigger.event === undefined) trigger.event = "click";
         if (this.triggers.length == 0) this.$activeTrigger = trigger.element;
@@ -211,25 +213,30 @@ export class Modal {
         });
     }
 
-    public getElement(): JQuery<HTMLElement> { return this.$modal; }
+    public getElement (): JQuery<HTMLElement> { return this.$modal; }
 
     /** Toggle the modal visibility */
-    public toggle(): void {
+    public toggle (): void {
         if (this.isOpen()) this.close();
         else this.open();
     }
-    public isOpen(): boolean { return this.$modal.dialog("isOpen"); }
-    public open(): JQuery<HTMLElement> { return this.$modal.dialog("open"); }
-    public close(): JQuery<HTMLElement> { return this.$modal.dialog("close"); }
 
-    public isDisabled(): boolean { return this.config.disabled; }
-    public enable(): void { this.config.disabled = false; }
-    public disable(): void { this.config.disabled = true; }
+    public isOpen (): boolean { return this.$modal.dialog("isOpen"); }
+
+    public open (): JQuery<HTMLElement> { return this.$modal.dialog("open"); }
+
+    public close (): JQuery<HTMLElement> { return this.$modal.dialog("close"); }
+
+    public isDisabled (): boolean { return this.config.disabled; }
+
+    public enable (): void { this.config.disabled = false; }
+
+    public disable (): void { this.config.disabled = true; }
 
     /**
      * Completely and irreversibly destroys the modal window
      */
-    public destroy(): void {
+    public destroy (): void {
         this.$modal.dialog("destroy");
         this.$modal.remove();
     }
@@ -238,7 +245,7 @@ export class Modal {
      * Returns the element that triggered the modal
      * @returns JQuery<HTMLElement> trigger
      */
-    public getActiveTrigger(): JQuery<HTMLElement> {
+    public getActiveTrigger (): JQuery<HTMLElement> {
         return this.$activeTrigger;
     }
 
@@ -251,7 +258,7 @@ interface ModalConfig {
     /** Modal content, created on page load */
     content?: JQuery<HTMLElement>;
     /**
-     * Optional. The modal content is replaced with this generated structure when the window is open.  
+     * Optional. The modal content is replaced with this generated structure when the window is open.
      * If used, the content parameter is used as a placeholder to properly size and center the window.
      */
     structure?: PreparedStructure;

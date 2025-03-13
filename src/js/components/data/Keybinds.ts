@@ -2,11 +2,60 @@ import { Debug } from "../utility/Debug";
 import { Util } from "../utility/Util";
 
 const validKeys = [
-    "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
-    "-", "=", ".", ",", "/", ";", "'", "[", "]",
-    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
-    "escape", "ctrl", "alt", "shift", "return",
-    "up", "down", "left", "right",
+    "1",
+"2",
+"3",
+"4",
+"5",
+"6",
+"7",
+"8",
+"9",
+"0",
+    "-",
+"=",
+".",
+",",
+"/",
+";",
+"'",
+"[",
+"]",
+    "a",
+"b",
+"c",
+"d",
+"e",
+"f",
+"g",
+"h",
+"i",
+"j",
+"k",
+"l",
+"m",
+"n",
+"o",
+"p",
+"q",
+"r",
+"s",
+"t",
+"u",
+"v",
+"w",
+"x",
+"y",
+"z",
+    "escape",
+"ctrl",
+"alt",
+"shift",
+"return",
+    "up",
+"down",
+"left",
+"right",
 ];
 
 const replacedKeys = {
@@ -27,19 +76,24 @@ const replacedRegExp = Util.getKeyRegex(replacedKeys);
 export class KeybindManager {
 
     private static listeners: Map<string, ListenerFunction> = new Map();
+
     private static executors: Map<string, KeybindExecutor> = new Map();
 
     private static enabled = true;      // if false, stops executor functions from running
+
     private static blocked = false;     // if true, stops listener functions from being created
+
     private static listening = false;   // same as enabled, but for internal use only
 
-    public static enable(): void { KeybindManager.enabled = true; }
-    public static disable(): void { KeybindManager.enabled = false; }
-    public static block(): void { KeybindManager.blocked = true; }
+    public static enable (): void { KeybindManager.enabled = true; }
 
-    public static register(keybind: Keybind): void;
-    public static register(keybind: Keybind[]): void;
-    public static register(keybind: Keybind | Keybind[]): void {
+    public static disable (): void { KeybindManager.enabled = false; }
+
+    public static block (): void { KeybindManager.blocked = true; }
+
+    public static register (keybind: Keybind): void;
+    public static register (keybind: Keybind[]): void;
+    public static register (keybind: Keybind | Keybind[]): void {
 
         if (KeybindManager.blocked) return;
 
@@ -58,9 +112,9 @@ export class KeybindManager {
         }
     }
 
-    public static unregister(bindMeta: string): void;
-    public static unregister(bindMeta: string[]): void;
-    public static unregister(bindMeta: string | string[]): void {
+    public static unregister (bindMeta: string): void;
+    public static unregister (bindMeta: string[]): void;
+    public static unregister (bindMeta: string | string[]): void {
 
         if (!Array.isArray(bindMeta)) bindMeta = [bindMeta];
 
@@ -69,7 +123,7 @@ export class KeybindManager {
                 if (bindMeta.includes(key)) delete executor[key];
     }
 
-    public static record(callback: (sequence: string[]) => void): void {
+    public static record (callback: (sequence: string[]) => void): void {
         KeybindManager.listening = true;
         let keys = [];
 
@@ -94,12 +148,12 @@ export class KeybindManager {
         });
     }
 
-    public static count(sequence: string): number {
+    public static count (sequence: string): number {
         if (!this.executors.has(sequence)) return 0;
         return Object.keys(this.executors.get(sequence)).length;
     }
 
-    private static refreshListener(keys: string[], element?: string, selector?: string): void {
+    private static refreshListener (keys: string[], element?: string, selector?: string): void {
         for (const key of keys) {
 
             if (key.length == 0) continue;

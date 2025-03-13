@@ -20,23 +20,23 @@ module.exports = {
      * @param {*} input String to process
      * @param {*} package package.json
      */
-    parseTemplate(input, package) {
+    parseTemplate(input, packageJSON) {
         // const version = process.env.GIT_TAG_NAME === undefined ? package.version : process.env.GIT_TAG_NAME;
-        const version = process.env.GIT_TAG_NAME === undefined ? package.version.substring(0, package.version.lastIndexOf(".")) + ".dev0" : process.env.GIT_TAG_NAME;
+        const version = process.env.GIT_TAG_NAME === undefined ? packageJSON.version.substring(0, packageJSON.version.lastIndexOf(".")) + ".dev0" : process.env.GIT_TAG_NAME;
         return input
             .replace(/%NAME%/g, "re621")
-            .replace(/%DISPLAYNAME%/g, package.displayName)
-            .replace(/%NAMESPACE%/g, package.namespace)
-            .replace(/%DESCRIPTION%/g, package.description)
-            .replace(/%AUTHOR%/g, package.author)
+            .replace(/%DISPLAYNAME%/g, packageJSON.displayName)
+            .replace(/%NAMESPACE%/g, packageJSON.namespace)
+            .replace(/%DESCRIPTION%/g, packageJSON.description)
+            .replace(/%AUTHOR%/g, packageJSON.author)
             .replace(/%VERSION%/g, version.split("-")[0])
             .replace(/%VERSIONREPO%/, version)
-            .replace(/%VERSHORT%/g, package.version.replace(/\.\d+$/g, ""))
+            .replace(/%VERSHORT%/g, packageJSON.version.replace(/\.\d+$/g, ""))
             .replace(/%BUILD%/g, this.getBuildTime())
-            .replace(/%HOMEPAGE%/g, package.homepage)
-            .replace(/%GITHUB%/g, package.github)
-            .replace(/%SUPPORT%/g, package.bugs.url)
-            .replace(/%HOMEPAGE%/g, package.homepage);
+            .replace(/%HOMEPAGE%/g, packageJSON.homepage)
+            .replace(/%GITHUB%/g, packageJSON.github)
+            .replace(/%SUPPORT%/g, packageJSON.bugs.url)
+            .replace(/%HOMEPAGE%/g, packageJSON.homepage);
     },
 
 }

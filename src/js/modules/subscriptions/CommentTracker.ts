@@ -17,10 +17,10 @@ export class CommentTracker extends SubscriptionTracker {
         major: {
             regex: [PageDefinition.post],
             selector: "menu#post-sections",
-        }
+        },
     };
 
-    public getDefaultSettings(): Settings {
+    public getDefaultSettings (): Settings {
         return {
             ...super.getDefaultSettings(),
 
@@ -28,11 +28,11 @@ export class CommentTracker extends SubscriptionTracker {
         };
     }
 
-    protected fetchMajorSubscriptionName(): string {
+    protected fetchMajorSubscriptionName (): string {
         return Page.getPageID();
     }
 
-    public async fetchUpdatedEntries(): Promise<UpdateData> {
+    public async fetchUpdatedEntries (): Promise<UpdateData> {
 
         const result: UpdateData = {};
         this.clearStatus();
@@ -113,8 +113,7 @@ export class CommentTracker extends SubscriptionTracker {
                         + "|" + post.rating         // rating       E | Q | S
                         + "|" + post.img.width      // width        int
                         + "|" + post.img.height     // height       int
-                        + "|" + post.file.size      // filesize     int
-                        ;
+                        + "|" + post.file.size;     // filesize     int
                 }
             }
 
@@ -138,7 +137,7 @@ export class CommentTracker extends SubscriptionTracker {
         return result;
     }
 
-    protected drawUpdateEntry(data: UpdateContent, timestamp: number, deleteFunction): JQuery<HTMLElement> {
+    protected drawUpdateEntry (data: UpdateContent, timestamp: number, deleteFunction): JQuery<HTMLElement> {
 
         const commentData = data.ext.split("|");
         const imageData = data.md5.split("|");
@@ -167,7 +166,7 @@ export class CommentTracker extends SubscriptionTracker {
 
                 const link = $("<a>")
                     .addClass("img-link")
-                    .attr({ href: "/posts/" + commentData[1], })
+                    .attr({ href: "/posts/" + commentData[1] })
                     .appendTo(result);
 
                 PostParts.bootstrapDoubleClick(link, () => {
@@ -197,7 +196,7 @@ export class CommentTracker extends SubscriptionTracker {
 
                 $("<a>")
                     .html(commentData[2] + " said:")
-                    .attr({ "href": `/posts/${commentData[1]}#comment-${data.uid}`, })
+                    .attr({ "href": `/posts/${commentData[1]}#comment-${data.uid}` })
                     .appendTo(mainSection);
 
                 $("<div>")
@@ -225,12 +224,12 @@ export class CommentTracker extends SubscriptionTracker {
 
         return result;
 
-        function getPreviewLink(md5: string): string {
+        function getPreviewLink (md5: string): string {
             if (!md5) return "https://e621.net/images/deleted-preview.png";
-            return `https://static1.e621.net/data/preview/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`;;
+            return `https://static1.e621.net/data/preview/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`;
         }
 
-        function getSampleLink(md5: string, hasSample: boolean, ext = "jpg"): string {
+        function getSampleLink (md5: string, hasSample: boolean, ext = "jpg"): string {
             if (!md5) return "https://e621.net/images/deleted-preview.png";
             return hasSample
                 ? `https://static1.e621.net/data/sample/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`
@@ -238,7 +237,7 @@ export class CommentTracker extends SubscriptionTracker {
         }
     }
 
-    protected formatSubscriptionListEntry(id: string, value: any, unsub: (name: string) => void): JQuery<HTMLElement> {
+    protected formatSubscriptionListEntry (id: string, value: any, unsub: (name: string) => void): JQuery<HTMLElement> {
 
         const result = $("<sb-enitem>")
             .attr({
@@ -249,7 +248,7 @@ export class CommentTracker extends SubscriptionTracker {
         $("<a>")
             .addClass("sb-unsub")
             .html(`<i class="fas fa-times"></i>`)
-            .attr({ "title": "Unsubscribe", })
+            .attr({ "title": "Unsubscribe" })
             .appendTo(result)
             .on("click", (event) => {
                 event.preventDefault();

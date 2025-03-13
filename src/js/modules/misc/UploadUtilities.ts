@@ -11,11 +11,11 @@ import { TagSuggester } from "./TagSuggester";
 export class UploadUtilities extends RE6Module {
 
 
-    public constructor() {
+    public constructor () {
         super([PageDefinition.upload], true);
     }
 
-    protected getDefaultSettings(): Settings {
+    protected getDefaultSettings (): Settings {
         return {
             enabled: true,
 
@@ -29,7 +29,7 @@ export class UploadUtilities extends RE6Module {
         };
     }
 
-    public create(): void {
+    public create (): void {
         super.create();
 
         // This form's structure is the absolute worst
@@ -67,18 +67,18 @@ export class UploadUtilities extends RE6Module {
     }
 
     /**
-     * Finds and returns a form section with the specified label.  
+     * Finds and returns a form section with the specified label.
      * @param label Label to look for
      * @param id ID to add to the section
      */
-    private static findSection(label: string, id: string): JQuery<HTMLElement> {
+    private static findSection (label: string, id: string): JQuery<HTMLElement> {
         return $("label[for=" + label + "]")
             .parent().parent()
             .attr("id", id);
     }
 
     /** Handles checking for duplicates, and appends reverse image search links */
-    private handleDuplicateCheck(): void {
+    private handleDuplicateCheck (): void {
 
         const fileContainer = UploadUtilities.findSection("post_file", "section-file")
             .find("div.col2").first()
@@ -102,7 +102,7 @@ export class UploadUtilities extends RE6Module {
         fileContainer.find("input[type=text").trigger("input");
 
         /** Handles the image URL input changes */
-        function handleInput(event: JQuery.TriggeredEvent): void {
+        function handleInput (event: JQuery.TriggeredEvent): void {
             const $input = $(event.target),
                 value = $input.val() + "";
 
@@ -114,14 +114,15 @@ export class UploadUtilities extends RE6Module {
             }
 
             // Input is not a URL
-            try { new URL(value); }
-            catch {
+            try {
+                new URL(value);
+            } catch {
                 dupesContainer.html(`<span class="fullspan">Unable to parse image path. <a href="/iqdb_queries" target="_blank" rel="noopener noreferrer">Check manually</a>?</span>`);
                 risContainer.html("");
                 return;
             }
 
-            dupesContainer.html(`<span class="fullspan">Checking for duplicates . . .</span>`);;
+            dupesContainer.html(`<span class="fullspan">Checking for duplicates . . .</span>`);
 
             E621.IQDBQueries.get<APIIQDBResponse>({ "url": encodeURI(value) }).then(
                 (response) => {
@@ -148,7 +149,7 @@ export class UploadUtilities extends RE6Module {
                         .html(
                             (error.error && error.error == 429)
                                 ? "IQDB: Too Many Requests. "
-                                : `IQDB: Internal Error ${error.error ? error.error : 400} `
+                                : `IQDB: Internal Error ${error.error ? error.error : 400} `,
                         )
                         .appendTo(dupesContainer);
                     $("<a>")
@@ -158,7 +159,7 @@ export class UploadUtilities extends RE6Module {
                             event.preventDefault();
                             $(fileContainer).find("input").trigger("input");
                         });
-                }
+                },
             );
 
             risContainer.html(`
@@ -174,7 +175,7 @@ export class UploadUtilities extends RE6Module {
          * Makes a simplistic thumbnail to display in the duplicates section
          * @param entry Post data
          */
-        function makePostThumbnail(entry: APIIQDBResponse): JQuery<HTMLElement> {
+        function makePostThumbnail (entry: APIIQDBResponse): JQuery<HTMLElement> {
             const postData = entry.post.posts;
             const article = $("<div>");
 
@@ -190,9 +191,8 @@ export class UploadUtilities extends RE6Module {
                 .attr({
                     src: postData.is_deleted ? "/images/deleted-preview.png" : postData["preview_file_url"],
                     title:
-                        `${postData.image_width}x${postData.image_height} ${Util.Size.format(postData.file_size)} ${Math.round(entry.score)}% match\n` +
-                        `${postData.tag_string_artist}\n${postData.tag_string_copyright}\n${postData.tag_string_character}\n${postData.tag_string_species}`
-                    ,
+                        `${postData.image_width}x${postData.image_height} ${Util.Size.format(postData.file_size)} ${Math.round(entry.score)}% match\n`
+                        + `${postData.tag_string_artist}\n${postData.tag_string_copyright}\n${postData.tag_string_character}\n${postData.tag_string_species}`,
                 })
                 .appendTo(link);
 
@@ -209,14 +209,14 @@ export class UploadUtilities extends RE6Module {
     }
 
     /** Improves source field functionality */
-    private handleSourceEnhancements(): void {
+    private handleSourceEnhancements (): void {
 
         const sourceContainer = UploadUtilities.findSection("post_sources", "section-sources")
             .find("div.col2")
             .children("div").eq(1)
             .attr("id", "source-container");
 
-        const urlMatch = /(http(?:s)?\:\/\/)(www\.)?/;
+        const urlMatch = /(http(?:s)?:\/\/)(www\.)?/;
         const timers = {};
         $(sourceContainer).on("input re621:input", "input.upload-source-input", (event) => {
             const $input = $(event.currentTarget),
@@ -277,22 +277,22 @@ export class UploadUtilities extends RE6Module {
 
         $("input.upload-source-input").trigger("input");
 
-        function getLinkEval(link: string): string {
-            if (!/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/.test(link)) return "invalid";
+        function getLinkEval (link: string): string {
+            if (!/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(link)) return "invalid";
             if (!link.startsWith("https")) return "http";
             return "";
         }
     }
 
     /** Load image file size and type */
-    private handleImageData(): void {
+    private handleImageData (): void {
 
         const output = $("#preview-sidebar div.upload_preview_dims").first()
             .on("re621:update", () => {
                 output.html([
                     output.attr("data-width") == "-1" ? "0×0" : `${output.attr("data-width")}×${output.attr("data-height")}`,
                     output.attr("data-type") !== "UNK" ? `${output.attr("data-type").toUpperCase()}` : undefined,
-                    output.attr("data-size") !== "-1" ? `${Util.Size.format(output.attr("data-size"))}` : undefined
+                    output.attr("data-size") !== "-1" ? `${Util.Size.format(output.attr("data-size"))}` : undefined,
                 ].filter(n => n).join("&emsp;"));
             });
         const image = $("#preview-sidebar img.upload_preview_img").first();
@@ -377,7 +377,7 @@ export class UploadUtilities extends RE6Module {
                 try {
                     requestURLValidated = new URL(requestURL);
                     if (!requestURLValidated) requestURLValidated = null;
-                } catch (e) { requestURLValidated = null; }
+                } catch { requestURLValidated = null; }
 
                 if (!requestURLValidated) {
                     output.attr({
@@ -424,11 +424,11 @@ export class UploadUtilities extends RE6Module {
                             "data-type": output.attr("data-type"),
                             "data-year": output.attr("data-year"),
                             "data-file": false,
-                        }
+                        };
 
                         output.trigger("re621:update");
                         TagSuggester.trigger("update");
-                    }
+                    },
                 });
 
             }
@@ -439,7 +439,7 @@ export class UploadUtilities extends RE6Module {
     }
 
     /** Add a preview image to the parent ID field */
-    private handleParentIDPreview(): void {
+    private handleParentIDPreview (): void {
         const input = $(`input[placeholder="Ex. 12345"]`);
         if (input.length == 0) return;
 
@@ -454,7 +454,7 @@ export class UploadUtilities extends RE6Module {
 
         const image = $("<img>")
             .attr({
-                src: "/images/deleted-preview.png"
+                src: "/images/deleted-preview.png",
             })
             .appendTo(preview);
 
@@ -482,11 +482,11 @@ export class UploadUtilities extends RE6Module {
                 image.attr("src", post.flags.has(PostFlag.Deleted) ? "/images/deleted-preview.png" : post.file.preview);
 
             }, 500);
-        })
+        });
     }
 
     /** Fixes an issue with Pixiv previews not loading properly */
-    private handlePixivPreviews(): void {
+    private handlePixivPreviews (): void {
         const fileContainer = UploadUtilities.findSection("post_file", "section-file")
             .find("div.col2").first()
             .attr("id", "file-container");
@@ -502,7 +502,7 @@ export class UploadUtilities extends RE6Module {
 
         // Process the input URL
         // Should only be executed once the user pastes/stops typing
-        function processInput(event: JQuery.TriggeredEvent): void {
+        function processInput (event: JQuery.TriggeredEvent): void {
 
             // Get input value
             const $input = $(event.target),
@@ -513,7 +513,7 @@ export class UploadUtilities extends RE6Module {
             try {
                 imageURL = new URL(value);
                 if (imageURL.hostname !== "i.pximg.net") return;
-            } catch (e) { return; }
+            } catch { return; }
             if (!imageURL) return;
 
             // Start the loading process
@@ -542,10 +542,10 @@ export class UploadUtilities extends RE6Module {
                                     .attr("data-height", height)
                                     .trigger("re621:update");
                             });
-                    }
+                    };
 
                     TagSuggester.trigger("update");
-                }
+                },
             });
         }
     }

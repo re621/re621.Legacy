@@ -7,24 +7,27 @@ import { Modal } from "../../components/structure/Modal";
 import { Util } from "../../components/utility/Util";
 
 /**
- * HeaderCustomizer  
+ * HeaderCustomizer
  * Add, remove, and re-arrange the tabs in the customizable navbar
  */
 export class HeaderCustomizer extends RE6Module {
 
     private $oldMenu: JQuery<HTMLElement>;
+
     private $menu: JQuery<HTMLElement>;
 
     private updateTabModal: Modal;
+
     private updateTabForm: Form;
 
     private addTabButton: JQuery<HTMLElement>;
+
     private addTabModal: Modal;
 
     // Temporary workaround for forum updates notification
     private hasForumUpdates: boolean;
 
-    public constructor() {
+    public constructor () {
         super();
         this.registerHotkeys(
             { keys: "hotkeyTab1", fnct: () => { HeaderCustomizer.openTabNum(0); } },
@@ -43,7 +46,7 @@ export class HeaderCustomizer extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings(): Settings {
+    protected getDefaultSettings (): Settings {
         return {
             enabled: true,
 
@@ -78,10 +81,10 @@ export class HeaderCustomizer extends RE6Module {
     }
 
     /**
-     * Creates the module's structure.  
+     * Creates the module's structure.
      * Should be run immediately after the constructor finishes.
      */
-    public create(): void {
+    public create (): void {
         super.create();
 
         // Check for forum updates before the structure changes
@@ -124,7 +127,7 @@ export class HeaderCustomizer extends RE6Module {
         this.addTabModal.getElement().on("dialogclose", () => { this.disableEditingMode(); });
     }
 
-    public destroy(): void {
+    public destroy (): void {
         if (!this.isInitialized()) return;
         super.destroy();
         this.$menu.removeClass("custom").empty();
@@ -139,7 +142,7 @@ export class HeaderCustomizer extends RE6Module {
     }
 
     /** Creates the configuration forms and modals */
-    private createConfigInterface(): void {
+    private createConfigInterface (): void {
 
         // === Tab Configuration Interface
         this.addTabButton = Util.DOM.addSettingsButton({
@@ -173,7 +176,7 @@ export class HeaderCustomizer extends RE6Module {
                 });
                 form.reset();
                 this.reloadTabMargins();
-            }
+            },
         );
 
         this.addTabModal = new Modal({
@@ -181,7 +184,7 @@ export class HeaderCustomizer extends RE6Module {
             triggers: [{ element: this.addTabButton }],
             content: Form.placeholder(),
             structure: newTabForm,
-            position: { my: "right top", at: "right top" }
+            position: { my: "right top", at: "right top" },
         });
 
         // Tab Update Interface
@@ -197,7 +200,7 @@ export class HeaderCustomizer extends RE6Module {
                     () => {
                         this.deleteTab(this.updateTabModal.getActiveTrigger().parent());
                         this.updateTabModal.close();
-                    }
+                    },
                 ),
                 Form.button({ value: "Update", type: "submit" }),
             ],
@@ -209,12 +212,12 @@ export class HeaderCustomizer extends RE6Module {
                         title: values["title"],
                         href: values["href"],
                         right: values["right"],
-                    }
+                    },
                 );
                 this.updateTabModal.close();
                 form.reset();
                 this.reloadTabMargins();
-            }
+            },
         );
 
         this.updateTabModal = new Modal({
@@ -231,7 +234,7 @@ export class HeaderCustomizer extends RE6Module {
     /**
      * Turns on editing mode on the header
      */
-    private enableEditingMode(): void {
+    private enableEditingMode (): void {
         this.$menu.attr("data-editing", "true");
         this.$menu.sortable("enable");
         this.updateTabModal.enable();
@@ -251,7 +254,7 @@ export class HeaderCustomizer extends RE6Module {
     /**
      * Turns off the header editing mode
      */
-    private disableEditingMode(): void {
+    private disableEditingMode (): void {
         this.$menu.attr("data-editing", "false");
         this.$menu.sortable("disable");
 
@@ -260,7 +263,7 @@ export class HeaderCustomizer extends RE6Module {
     }
 
     /** Toggles the red dot next to the forum tab */
-    public toggleForumDot(state: boolean): void {
+    public toggleForumDot (state: boolean): void {
         this.$menu.attr("data-forumdot", "" + state);
     }
 
@@ -268,7 +271,7 @@ export class HeaderCustomizer extends RE6Module {
      * Creates a new styled tab
      * @param config Tab configuration
      */
-    private createTabElement(config: HeaderTab, triggerUpdate = false): HeaderTabElement {
+    private createTabElement (config: HeaderTab, triggerUpdate = false): HeaderTabElement {
         config = this.parseHeaderTabConfig(config);
 
         const $tab = $(`<li>`)
@@ -309,7 +312,7 @@ export class HeaderCustomizer extends RE6Module {
      * Parses the provided configuration file for missing values
      * @param config Configuration to process
      */
-    private parseHeaderTabConfig(config: HeaderTab): HeaderTab {
+    private parseHeaderTabConfig (config: HeaderTab): HeaderTab {
         if (config.name === undefined) config.name = "New Tab";
         if (config.href === undefined) config.href = "";
         if (config.title === undefined) config.title = "";
@@ -322,7 +325,7 @@ export class HeaderCustomizer extends RE6Module {
      * Creates a new tab based on specified configuration
      * @param config Configuration
      */
-    private addTab(config: HeaderTab): void {
+    private addTab (config: HeaderTab): void {
         config = this.parseHeaderTabConfig(config);
         const newTab = this.createTabElement(config, true);
         this.updateTabModal.registerTrigger({ element: newTab.link });
@@ -333,7 +336,7 @@ export class HeaderCustomizer extends RE6Module {
      * @param $element Tab to update
      * @param config New configuration
      */
-    private updateTab($element: JQuery<HTMLElement>, config: HeaderTab): void {
+    private updateTab ($element: JQuery<HTMLElement>, config: HeaderTab): void {
         config = this.parseHeaderTabConfig(config);
         $element
             .data({
@@ -355,7 +358,7 @@ export class HeaderCustomizer extends RE6Module {
      * Remove the specified tab
      * @param $element LI element of the tab
      */
-    private deleteTab($element: JQuery<HTMLElement>): void {
+    private deleteTab ($element: JQuery<HTMLElement>): void {
         $element.remove();
         this.saveNavbarSettings();
     }
@@ -364,7 +367,7 @@ export class HeaderCustomizer extends RE6Module {
      * Replaces the variables in the text with corresponding values
      * @param text Text to parse
      */
-    private processTabVariables(text: string): string {
+    private processTabVariables (text: string): string {
         return text
             .replace(/%userid%/g, User.userID + "")
             .replace(/%username%/g, User.username);
@@ -373,7 +376,7 @@ export class HeaderCustomizer extends RE6Module {
     /**
      * Iterates over the header menu and saves the data to cookies
      */
-    private async saveNavbarSettings(): Promise<void> {
+    private async saveNavbarSettings (): Promise<void> {
         const tabData = [];
         this.$menu.find("li").each(function (i, element) {
             const $tab = $(element);
@@ -386,21 +389,21 @@ export class HeaderCustomizer extends RE6Module {
         });
         await this.pushSettings("tabs", tabData);
 
-        function formatVal(value: string): string {
+        function formatVal (value: string): string {
             if (value) return value;
             return undefined;
         }
     }
 
     /** Emulates a click on the header tab with the specified index */
-    private static openTabNum(num: number): void {
+    private static openTabNum (num: number): void {
         const tabs = ModuleController.get(HeaderCustomizer).$menu.find<HTMLElement>("li > a");
         if (num > tabs.length) return;
         tabs[num].click();
     }
 
     /** Refreshes the right-aligned tabs to have proper margins */
-    private reloadTabMargins(): void {
+    private reloadTabMargins (): void {
         this.$menu.children("li").removeClass("margined");
         this.$menu.find("li[align=true]")
             .first()

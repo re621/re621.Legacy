@@ -34,18 +34,18 @@ export class TagSuggester extends RE6Module {
     // Element to which suggester pushes tags
     private tagOutput: JQuery<HTMLElement>;
 
-    public constructor() {
+    public constructor () {
         super([PageDefinition.upload], true);
     }
 
-    public getDefaultSettings(): Settings {
+    public getDefaultSettings (): Settings {
         return {
             enabled: true,
             data: JSON.stringify(TagSuggestionsList, TagSuggestionsTools.replacer, " "),
-        }
+        };
     }
 
-    public create(): void {
+    public create (): void {
         super.create();
 
         // Recreate the suggestions list from storage
@@ -106,11 +106,11 @@ export class TagSuggester extends RE6Module {
         });
 
         // Listen for updates from other modules
-        TagSuggester.on("update.main", () => { this.update(); })
+        TagSuggester.on("update.main", () => { this.update(); });
         this.update();
     }
 
-    public destroy(): void {
+    public destroy (): void {
         super.destroy();
 
         if (this.container) this.container.remove();
@@ -121,10 +121,10 @@ export class TagSuggester extends RE6Module {
     }
 
     /**
-     * Destroys and re-creates the entire module as a method of reloading it.  
+     * Destroys and re-creates the entire module as a method of reloading it.
      * It's stupid, but it's the easiest and hassle-free method of resetting some things.
      */
-    public async reload(): Promise<void> {
+    public async reload (): Promise<void> {
         this.destroy();
         if (!this.fetchSettings("enabled")) return;
         return new Promise((resolve) => {
@@ -132,19 +132,18 @@ export class TagSuggester extends RE6Module {
                 this.create();
                 resolve();
             }, 100);
-        })
+        });
     }
 
     /** Attempt to recreate the suggestions list from saved data */
-    public reloadSuggestions(): void {
-        try { this.tagSuggestionsData = JSON.parse(this.fetchSettings("data"), TagSuggestionsTools.reviver); }
-        catch (error) {
+    public reloadSuggestions (): void {
+        try { this.tagSuggestionsData = JSON.parse(this.fetchSettings("data"), TagSuggestionsTools.reviver); } catch (error) {
             ErrorHandler.error("TagSuggester", "Failed to parse the tag suggestions file");
             this.tagSuggestionsData = {};
         }
     }
 
-    private update(): void {
+    private update (): void {
         const tagOutput = this.tagOutput;
         const container = this.container
             .html("")
@@ -167,7 +166,7 @@ export class TagSuggester extends RE6Module {
                 "size": parseInt(output.attr("data-size")) || -1,
                 "type": output.attr("data-type") || "unk",
                 "file": output.attr("data-file") == "true",
-            }
+            };
 
             if (data.type !== "unk") tags.add("type:" + data.type);
 
@@ -208,7 +207,7 @@ export class TagSuggester extends RE6Module {
             .trigger("recount");
 
         /** Checks if the specieid key set is already present in the tags or in suggestions */
-        function tagAlreadyPresent(tags: Set<string>, suggestions: string[], keyset: string[]): boolean {
+        function tagAlreadyPresent (tags: Set<string>, suggestions: string[], keyset: string[]): boolean {
             for (const key of keyset)
                 if (tags.has(key) || suggestions.includes(key)) return true;
             return false;
@@ -218,7 +217,7 @@ export class TagSuggester extends RE6Module {
          * Adds a new suggestion to the list
          * @param tagName Name of the tag to suggest
          */
-        function addSuggestion(tagName: string, hover?: string): void {
+        function addSuggestion (tagName: string, hover?: string): void {
             if (tags.has(tagName + "")) return;
 
             const wrapper = $("<tag-entry>")
@@ -263,7 +262,7 @@ export class TagSuggester extends RE6Module {
          * @param matches Regular expressions to test against
          * @param tags Tags to check
          */
-        function tagsMatchRegex(suggestion: TagSuggestion, tags: Set<string>): boolean {
+        function tagsMatchRegex (suggestion: TagSuggestion, tags: Set<string>): boolean {
 
             let matchHas = true;
             if (suggestion.has) {
@@ -314,7 +313,7 @@ export class TagSuggester extends RE6Module {
          * Formats the regular expressions into human-readable format
          * @param matches Regular expressions to format
          */
-        function formatMatchRegex(suggestion: TagSuggestion): string {
+        function formatMatchRegex (suggestion: TagSuggestion): string {
 
             const resultsHas = [];
             if (suggestion.has) {
@@ -326,7 +325,7 @@ export class TagSuggester extends RE6Module {
                             .replace(/^\/|\/$/g, "")
                             .replace(/^\((.*)\)$/g, "$1")
                             .replace(/\.\+/g, "*")
-                            .replace(/\|/g, " / ")
+                            .replace(/\|/g, " / "),
                     );
             }
 
@@ -340,7 +339,7 @@ export class TagSuggester extends RE6Module {
                             .replace(/^\/|\/$/g, "")
                             .replace(/^\((.*)\)$/g, "$1")
                             .replace(/\.\+/g, "*")
-                            .replace(/\|/g, " / ")
+                            .replace(/\|/g, " / "),
                     );
             }
 
@@ -353,7 +352,7 @@ export class TagSuggester extends RE6Module {
             return "???";
         }
 
-        function matchDimensions(width: number, height: number, matches: [number, number][]): boolean {
+        function matchDimensions (width: number, height: number, matches: [number, number][]): boolean {
             for (const [matchWidth, matchHeight] of matches) {
                 if ((width == matchWidth && height == matchHeight) || (width == matchHeight && height == matchWidth))
                     return true;
@@ -369,7 +368,7 @@ export class TagSuggester extends RE6Module {
      * @param height Image height
      * @returns Image ratio if applicable, undefined if none applies, and null if an error occurs
      */
-    private static getImageRatio(width: number | string, height: number | string): string {
+    private static getImageRatio (width: number | string, height: number | string): string {
         if (typeof width == "string") width = parseInt(width);
         if (typeof height == "string") height = parseInt(height);
         if (!width || !height) return null;
@@ -380,28 +379,28 @@ export class TagSuggester extends RE6Module {
 
 const ImageRatios = {
     "1.000000": "1:1",          // Icons / Avatars
-    "0.250000": "1:4",          // 
-    "0.281250": "9:32",         // 
-    "0.500000": "1:2",          // 
-    "0.428571": "9:21",         // 
+    "0.250000": "1:4",          //
+    "0.281250": "9:32",         //
+    "0.500000": "1:2",          //
+    "0.428571": "9:21",         //
     "0.529412": "9:17",         // NOT META
-    "0.562500": "9:16",         // 
+    "0.562500": "9:16",         //
     "0.571429": "4:7",          // NOT META
-    "0.600000": "3:5",          // 
-    "0.625000": "10:16",        // 
-    "0.642857": "9:14",         // 
+    "0.600000": "3:5",          //
+    "0.625000": "10:16",        //
+    "0.642857": "9:14",         //
     "0.666667": "2:3",          // Common Phone Ratio
-    "0.750000": "3:4",          // 
-    "0.800000": "4:5",          // 
-    "0.833333": "5:6",          // 
+    "0.750000": "3:4",          //
+    "0.800000": "4:5",          //
+    "0.833333": "5:6",          //
     "1.200000": "6:5",          // NOT META
     "1.250000": "5:4",          // Common Desktop Ratio
     "1.333333": "4:3",          // Common Desktop Ratio
     "1.500000": "3:2",          // Common Desktop Ratio
     "1.555556": "14:9",         // 4:3 / 16:9 compromise
     "1.600000": "16:10",        // Common Desktop Ratio
-    "1.666667": "5:3",          // 
-    "1.750000": "7:4",          // 
+    "1.666667": "5:3",          //
+    "1.750000": "7:4",          //
     "1.777778": "16:9",         // Common Desktop Ratio
     "1.888889": "17:9",         // NOT META
     "1.896296": "256:135",      // Digital Cinema 4k
@@ -409,4 +408,4 @@ const ImageRatios = {
     "2.333333": "21:9",         // Ultrawide
     "3.555556": "32:9",         // Samsung Ultrawide
     "4.000000": "4:1",          // Twitter Header Image
-}
+};

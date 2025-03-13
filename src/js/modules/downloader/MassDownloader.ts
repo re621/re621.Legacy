@@ -16,6 +16,7 @@ export class MassDownloader extends RE6Module {
     private static maxBlobSize = 1024 * 1024 * 800;
 
     private showInterface = false;
+
     private processing = false;
 
     private downloadOverSize = false;
@@ -24,18 +25,23 @@ export class MassDownloader extends RE6Module {
 
     // Value used to make downloaded file names unique
     private fileTimestamp: string = Util.Time.getDatetimeShort();
+
     private downloadIndex = 0;
 
     // Interface elements
     private container: JQuery<HTMLElement>;
 
     private section: JQuery<HTMLElement>;
+
     private selectButton: JQuery<HTMLElement>;
+
     private actButton: JQuery<HTMLElement>;
+
     private infoText: JQuery<HTMLElement>;
+
     private infoFile: JQuery<HTMLElement>;
 
-    public constructor() {
+    public constructor () {
         super(PageDefinition.search, true, false, [BetterSearch]);
     }
 
@@ -43,7 +49,7 @@ export class MassDownloader extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    public getDefaultSettings(): Settings {
+    public getDefaultSettings (): Settings {
         return {
             enabled: true,
             template: "%artist%/%postid%-%copyright%-%character%-%species%",
@@ -53,13 +59,13 @@ export class MassDownloader extends RE6Module {
     }
 
     /** Creates the module's structure. */
-    public create(): void {
+    public create (): void {
         super.create();
 
         this.section = $("<section>")
             .attr({
                 "id": "downloader-box",
-                "data-fixed": this.fetchSettings("fixedSection") + ""
+                "data-fixed": this.fetchSettings("fixedSection") + "",
             })
             .html("<h3>Download</h3>")
             .appendTo(".sidebar");
@@ -123,17 +129,17 @@ export class MassDownloader extends RE6Module {
         this.container = $("search-content");
     }
 
-    public destroy(): void {
+    public destroy (): void {
         super.destroy();
         BetterSearch.off("pageload.MassDownloader");
     }
 
     /**
-     * Toggles the downloader interface.  
+     * Toggles the downloader interface.
      * Enabling the interface should also disable thumbnail enhancements,
      * as well as anything else that might interfere with the file selection.
      */
-    private toggleInterface(): void {
+    private toggleInterface (): void {
         this.showInterface = !this.showInterface;
         BetterSearch.setPaused(this.showInterface);
 
@@ -152,7 +158,7 @@ export class MassDownloader extends RE6Module {
                         $(ui.selected)
                             .toggleClass("download-item")
                             .attr("data-state", "ready");
-                    }
+                    },
                 });
 
             BetterSearch.on("pageload.MassDownloader", () => {
@@ -174,12 +180,12 @@ export class MassDownloader extends RE6Module {
     /**
      * Toggles the fixed state of the interface section
      */
-    public toggleFixedSection(): void {
+    public toggleFixedSection (): void {
         if (this.section.attr("data-fixed") === "true") this.section.attr("data-fixed", "false");
-        else this.section.attr("data-fixed", "true")
+        else this.section.attr("data-fixed", "true");
     }
 
-    private setProcessing(state: boolean): void {
+    private setProcessing (state: boolean): void {
         this.processing = state;
         BetterSearch.setPaused(state);
         if (state) this.actButton.attr("disabled", "disabled");
@@ -187,7 +193,7 @@ export class MassDownloader extends RE6Module {
     }
 
     /** Processes and downloads the selected files. */
-    private async processFiles(): Promise<void> {
+    private async processFiles (): Promise<void> {
         if (this.processing) return;
         this.setProcessing(true);
 
@@ -236,7 +242,7 @@ export class MassDownloader extends RE6Module {
 
             // Determine queue size
             totalFileSize += post.file.size;
-            Debug.log(`adding #${post.id} (${Util.Size.format(post.file.size)}) to the queue: ${Util.Size.format(totalFileSize)} total`)
+            Debug.log(`adding #${post.id} (${Util.Size.format(post.file.size)}) to the queue: ${Util.Size.format(totalFileSize)} total`);
             if (totalFileSize > MassDownloader.maxBlobSize) {
                 this.downloadOverSize = true;
                 Debug.log(`over filesize limit, aborting`);
@@ -274,7 +280,7 @@ export class MassDownloader extends RE6Module {
                     onWorkerFinish: (item, thread) => {
                         threadInfo[thread].remove();
                     },
-                }
+                },
             );
         }
 
@@ -285,8 +291,9 @@ export class MassDownloader extends RE6Module {
 
         const zipData = await this.downloadQueue.run((metadata) => {
             this.infoText.html(`Compressing . . . ${metadata.percent.toFixed(2)}%`);
-            if (metadata.currentFile) { this.infoFile.html(metadata.currentFile); }
-            else { this.infoFile.html(""); }
+            if (metadata.currentFile) {
+                this.infoFile.html(metadata.currentFile);
+            } else { this.infoFile.html(""); }
         });
 
         this.infoText
@@ -298,7 +305,7 @@ export class MassDownloader extends RE6Module {
         this.downloadIndex++;
 
         if (zipData) {
-            const tagString = ($("#tags").val() + "").replace(/([^a-z0-9 ]+)/gi, '').split(" ").join("_").slice(0, 32);
+            const tagString = ($("#tags").val() + "").replace(/([^a-z0-9 ]+)/gi, "").split(" ").join("_").slice(0, 32);
             let filename = this.fetchSettings("archive")
                 .replace("%tags%", tagString)
                 .replace("%timestamp%", this.fileTimestamp);
@@ -339,7 +346,7 @@ export class MassDownloader extends RE6Module {
      * Creates a filename from the post data based on the current template
      * @param data Post data
      */
-    private createFilename(post: Post, downloadSamples = false): string {
+    private createFilename (post: Post, downloadSamples = false): string {
         return MassDownloader.createFilenameBase(this.fetchSettings<string>("template"), post)
             .slice(0, 128)
             .replace(/-{2,}/g, "-")
@@ -348,7 +355,7 @@ export class MassDownloader extends RE6Module {
             + ((downloadSamples && post.has.sample) ? "jpg" : post.file.ext);
     }
 
-    public static createFilenameBase(template: string, post: PostData): string {
+    public static createFilenameBase (template: string, post: PostData): string {
 
         // Don't include non-artist tags in the file name
         const trimmedArtists = post.tags.artist;
@@ -365,7 +372,7 @@ export class MassDownloader extends RE6Module {
             .replace(/%tags%/g, tagSetToString(post.tags.general))
             .replace(/%md5%/g, post.file.md5);
 
-        function tagSetToString(tags: Set<string>): string {
+        function tagSetToString (tags: Set<string>): string {
             return [...tags].join("-").replace(/\||\*|\/|\\|:|"/g, "_");
         }
     }

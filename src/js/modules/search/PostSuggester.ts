@@ -15,38 +15,79 @@ export class PostSuggester extends RE6Module {
 
     /** These tags are not helpful, and are not displayed */
     private static removedTags = [
-        "hi_res", "absurd_res", "digital_media_(artwork)", // meta
-        "solo", "duo", "group", // composition
-        "simple_background", "detailed_background", // background
-        "text", "english_text", // misc
+        "hi_res",
+"absurd_res",
+"digital_media_(artwork)", // meta
+        "solo",
+"duo",
+"group", // composition
+        "simple_background",
+"detailed_background", // background
+        "text",
+"english_text", // misc
     ];
 
     /** These tags are displayed, by not selected */
     private static ignoredTags = [
-        "male", "female", "intersex", // genders
-        "mammal", "scalie", "biped", // species
-        "anthro", "feral", // species type
-        "genitals", "penis", "balls", "animal_genitalia", "humanoid_penis", "erection", "pussy", "butt", "anus", "breasts", "nipples", "non-mammal_breasts", // genitalia
-        "genital_fluids", "bodily_fluids", "cum", // fluids
-        "wings", "membrane_(anatomy)", "membranous_wings", "claws", "horn", "scales", "teeth", "smile", "tongue", "feathers", "toes", // body parts
-        "hair", "fur", "clothing", "clothed", "nude", // misc
-        "sex", "penetration", "male_penetrating", // actions
+        "male",
+"female",
+"intersex", // genders
+        "mammal",
+"scalie",
+"biped", // species
+        "anthro",
+"feral", // species type
+        "genitals",
+"penis",
+"balls",
+"animal_genitalia",
+"humanoid_penis",
+"erection",
+"pussy",
+"butt",
+"anus",
+"breasts",
+"nipples",
+"non-mammal_breasts", // genitalia
+        "genital_fluids",
+"bodily_fluids",
+"cum", // fluids
+        "wings",
+"membrane_(anatomy)",
+"membranous_wings",
+"claws",
+"horn",
+"scales",
+"teeth",
+"smile",
+"tongue",
+"feathers",
+"toes", // body parts
+        "hair",
+"fur",
+"clothing",
+"clothed",
+"nude", // misc
+        "sex",
+"penetration",
+"male_penetrating", // actions
     ];
 
     private status: JQuery<HTMLElement>;
+
     private content: JQuery<HTMLElement>;
 
-    public constructor() {
+    public constructor () {
         super(PageDefinition.search);
     }
 
-    protected getDefaultSettings(): Settings {
+    protected getDefaultSettings (): Settings {
         return {
             enabled: true,
         };
     }
 
-    public create(): void {
+    public create (): void {
         super.create();
 
         if (!User.loggedIn) return;
@@ -56,7 +97,7 @@ export class PostSuggester extends RE6Module {
         const button = $("<a>")
             .attr({
                 "id": "recommended-posts",
-                "title": "Show posts similar to your favorites"
+                "title": "Show posts similar to your favorites",
             })
             .html("Recommended")
             .appendTo(listItem);
@@ -78,7 +119,7 @@ export class PostSuggester extends RE6Module {
             triggers: [{ element: button }],
             fixed: true,
             content: modalContent,
-            position: { my: "center", at: "center" }
+            position: { my: "center", at: "center" },
         });
 
         let triggered = false;
@@ -91,14 +132,14 @@ export class PostSuggester extends RE6Module {
         });
     }
 
-    public async handleRecommendation(): Promise<boolean> {
+    public async handleRecommendation (): Promise<boolean> {
         this.status.html("Compiling favorites data");
         const data: TagCounter = {};
         let result: APIPost[];
         for (let i = 1; i <= PostSuggester.maxPages; i++) {
             // Fetching data from the API
             this.status.html(`Analyzing favorites [ page ${i} ]`);
-            result = await E621.Favorites.get<APIPost>({ "user_id": User.userID, page: i }, 500);
+            result = await E621.Favorites.get<APIPost>({ "user_id": User.userID, "page": i }, 500);
             result.forEach((post) => {
                 APIPost.getTags(post).forEach((tag) => {
                     if (data[tag]) data[tag] = data[tag] + 1;
@@ -122,8 +163,8 @@ export class PostSuggester extends RE6Module {
 
         // Filter
         processedData = processedData.filter((entry) => {
-            return !PostSuggester.removedTags.includes(entry[0]) &&
-                entry[1] > PostSuggester.minTagCount;
+            return !PostSuggester.removedTags.includes(entry[0])
+                && entry[1] > PostSuggester.minTagCount;
         });
         if (processedData.length > 100) processedData.length = 100;
 
@@ -174,7 +215,7 @@ export class PostSuggester extends RE6Module {
                 const checkedEls = $("input[name=post-suggester-selector]:checked").get();
                 const query = [];
                 for (const checkedEl of checkedEls)
-                    query.push("~" + encodeURIComponent($(checkedEl).attr("data-tag")))
+                    query.push("~" + encodeURIComponent($(checkedEl).attr("data-tag")));
                 query.length = Math.min(query.length, 37);
                 query.push(
                     encodeURIComponent("-fav:" + User.username),
@@ -192,4 +233,4 @@ export class PostSuggester extends RE6Module {
 
 type TagCounter = {
     [prop: string]: number;
-}
+};

@@ -5,14 +5,21 @@ export enum TagTypes {
     Species = "species",
     General = "general",
     Meta = "meta",
-    Lore = "lore"
+    Lore = "lore",
 }
 
 export class Tag {
 
-    private static nonArtistTags = ["unknown_artist", "unknown_artist_signature",
-        "unknown_colorist", "anonymous_artist", "avoid_posting",
-        "conditional_dnp", "sound_warning", "epilepsy_warning"];
+    private static nonArtistTags = [
+"unknown_artist",
+"unknown_artist_signature",
+        "unknown_colorist",
+"anonymous_artist",
+"avoid_posting",
+        "conditional_dnp",
+"sound_warning",
+"epilepsy_warning",
+];
 
     /**
      * This function just checks if the string is contained in nonArtistTags
@@ -20,7 +27,7 @@ export class Tag {
      * Does NOT take into consideration the tag type
      * In this functions eyes a general tag will also be an artist tag
      */
-    public static isArtist(tag: string): boolean {
+    public static isArtist (tag: string): boolean {
         return Tag.nonArtistTags.indexOf(tag) === -1;
     }
 
@@ -30,9 +37,9 @@ export class Tag {
      * '*' has a special meaning when searching and acts as a wildcard character
      * To put this into the regex it gets replaced with [\S]* which matches zero or more non-whitespace characters
      * This ways if you have a space separated string of tags this function will tell you wether or not the filter matches
-     * @param string 
+     * @param string
      */
-    public static escapeSearchToRegex(string: string): RegExp {
+    public static escapeSearchToRegex (string: string): RegExp {
         return new RegExp(string.replace(/[-\/\\^$+?.()|[\]{}]/g, "\\$&").replace(/\*/g, "[\\S]*?"));
     }
 }

@@ -10,12 +10,12 @@ declare const GM_download: any;
 export class XMConnect {
 
     /**
-     * Make a cross-domain xmlHttpRequest.  
-     * For userscripts, the domain name MUST be defined in @resource tag.  
+     * Make a cross-domain xmlHttpRequest.
+     * For userscripts, the domain name MUST be defined in @resource tag.
      * For extensions, the domain name MUST be listed in the permissions.
      * @param details Request details
      */
-    public static xmlHttpRequest(details: XMConnectRequest): void {
+    public static xmlHttpRequest (details: XMConnectRequest): void {
         Debug.connectLog(details.url);
         const validDetails = XMConnect.validateXHRDetails(details);
         if (typeof GM !== "undefined" && typeof GM.xmlHttpRequest === "function") GM.xmlHttpRequest(validDetails);
@@ -35,15 +35,15 @@ export class XMConnect {
                     details[response.event](response);
                 });
             });
-    };
+    }
 
     /**
-     * Cross-domain xmlHttpRequest, wrapped in a Promise.  
-     * For userscripts, the domain name MUST be defined in @resource tag.  
+     * Cross-domain xmlHttpRequest, wrapped in a Promise.
+     * For userscripts, the domain name MUST be defined in @resource tag.
      * For extensions, the domain name MUST be listed in the permissions.
      * @param details Request details
      */
-    public static xmlHttpPromise(details: XMConnectRequest): Promise<any> {
+    public static xmlHttpPromise (details: XMConnectRequest): Promise<any> {
         const validDetails = XMConnect.validateXHRDetails(details);
         return new Promise((resolve, reject) => {
             const callbacks = {
@@ -56,13 +56,31 @@ export class XMConnect {
                 ontimeout: validDetails.ontimeout,
             };
 
-            details.onabort = (event): void => { callbacks.onabort(event); reject(event); };
-            details.onerror = (event): void => { callbacks.onerror(event); reject(event); };
-            details.onload = (event): void => { callbacks.onload(event); resolve(event); };
-            details.onloadstart = (event): void => { callbacks.onloadstart(event); };
-            details.onprogress = (event): void => { callbacks.onprogress(event); };
-            details.onreadystatechange = (event): void => { callbacks.onreadystatechange(event); };
-            details.ontimeout = (event): void => { callbacks.ontimeout(event); reject(event); };
+            details.onabort = (event): void => {
+                callbacks.onabort(event);
+                reject(event);
+            };
+            details.onerror = (event): void => {
+                callbacks.onerror(event);
+                reject(event);
+            };
+            details.onload = (event): void => {
+                callbacks.onload(event);
+                resolve(event);
+            };
+            details.onloadstart = (event): void => {
+                callbacks.onloadstart(event);
+            };
+            details.onprogress = (event): void => {
+                callbacks.onprogress(event);
+            };
+            details.onreadystatechange = (event): void => {
+                callbacks.onreadystatechange(event);
+            };
+            details.ontimeout = (event): void => {
+                callbacks.ontimeout(event);
+                reject(event);
+            };
 
             XMConnect.xmlHttpRequest(validDetails);
         });
@@ -72,7 +90,7 @@ export class XMConnect {
      * Validates the xmlHttpRequest details, returning a valid set
      * @param details Request details
      */
-    private static validateXHRDetails(details: XMConnectRequest): XMConnectRequest {
+    private static validateXHRDetails (details: XMConnectRequest): XMConnectRequest {
         if (details.headers === undefined) details.headers = {};
         if (details.headers["User-Agent"] === undefined) {
             details.headers["User-Agent"] = window["re621"]["useragent"];
@@ -88,14 +106,14 @@ export class XMConnect {
         if (details.ontimeout === undefined) details.ontimeout = (): void => { return; };
 
         return details;
-    };
+    }
 
     /**
-     * Get contents of the resource as plain text.  
+     * Get contents of the resource as plain text.
      * Note that the name must be defined in a @resource tag in the script header.
      * @param name Resource name
      */
-    public static async getResourceText(name: string): Promise<string> {
+    public static async getResourceText (name: string): Promise<string> {
         // Tampermonkey
         if (typeof GM_getResourceText === "function") return Promise.resolve(GM_getResourceText(name));
 
@@ -108,17 +126,17 @@ export class XMConnect {
             method: "GET",
         }).then(
             (data: GMxmlHttpRequestResponse) => { return Promise.resolve(data.responseText); },
-            (error: GMxmlHttpRequestEvent) => { return Promise.reject(error.status + " " + error.statusText); }
+            (error: GMxmlHttpRequestEvent) => { return Promise.reject(error.status + " " + error.statusText); },
         );
     }
 
     /**
-     * Gets the contents of the resource as plain text.  
-     * This function presumes Greasemonkey is used.  
+     * Gets the contents of the resource as plain text.
+     * This function presumes Greasemonkey is used.
      * Note that the name must be defined in a @resource tag in the script header.
      * @param name Resource name
      */
-    private static async getResourceTextGM(name: string): Promise<string> {
+    private static async getResourceTextGM (name: string): Promise<string> {
         const resource = (typeof GM.getResourceUrl === "function") ? await GM.getResourceUrl(name) : GM_getResourceURL(name);
 
         if (resource.startsWith("data:")) {
@@ -133,11 +151,12 @@ export class XMConnect {
                         "X-User-Agent": window["re621"]["useragent"],
                     },
                     method: "GET",
-                    mode: "cors"
+                    mode: "cors",
                 });
 
-                if (request.ok) { resolve(await request.text()); }
-                else { reject(); }
+                if (request.ok) {
+                    resolve(await request.text());
+                } else { reject(); }
             });
         } else { return Promise.reject(); }
     }
@@ -150,17 +169,17 @@ export class XMConnect {
     public static async getResourceJSON<T>(name: string): Promise<T> {
         return XMConnect.getResourceText(name).then(
             (resolved) => { return Promise.resolve(JSON.parse(resolved) as T); },
-            (rejected) => { return Promise.reject(rejected); }
-        )
+            (rejected) => { return Promise.reject(rejected); },
+        );
     }
 
     /**
-     * Downloads a given URL to the local disk.  
+     * Downloads a given URL to the local disk.
      * @param details Download details
      */
-    public static download(url: string, name: string): void;
-    public static download(defaults: GMDownloadDetails): void;
-    public static download(a: any, b?: any): void {
+    public static download (url: string, name: string): void;
+    public static download (defaults: GMDownloadDetails): void;
+    public static download (a: any, b?: any): void {
         if (typeof a === "string") {
             a = {
                 url: a,
@@ -173,10 +192,10 @@ export class XMConnect {
             "X-User-Agent": window["re621"]["useragent"],
         };
 
-        if (a.onerror === undefined) a.onerror = (): void => { return; }
-        if (a.onload === undefined) a.onload = (): void => { return; }
-        if (a.onprogress === undefined) a.onprogress = (): void => { return; }
-        if (a.ontimeout === undefined) a.ontimeout = (): void => { return; }
+        if (a.onerror === undefined) a.onerror = (): void => { return; };
+        if (a.onload === undefined) a.onload = (): void => { return; };
+        if (a.onprogress === undefined) a.onprogress = (): void => { return; };
+        if (a.ontimeout === undefined) a.ontimeout = (): void => { return; };
 
         let timer: number;
         XMConnect.xmlHttpRequest({
@@ -188,7 +207,7 @@ export class XMConnect {
             ontimeout: (event) => { a.ontimeout(event); },
             onprogress: (event) => {
                 if (timer) clearTimeout(timer);
-                timer = window.setTimeout(() => { a.onprogress(event) }, 500);
+                timer = window.setTimeout(() => { a.onprogress(event); }, 500);
             },
             onload: (event) => {
                 a.onload(event);
@@ -200,17 +219,17 @@ export class XMConnect {
                     .html("download")
                     .on("click", () => { btn.remove(); });
                 btn[0].click();
-            }
+            },
         });
-    };
+    }
 
     /**
-     * Alternative to the normal download method above, using GM_download method.  
+     * Alternative to the normal download method above, using GM_download method.
      * @param details Download details
      */
-    public static browserDownload(url: string, name?: string, saveAs?: boolean): void;
-    public static browserDownload(defaults: GMDownloadDetails): void;
-    public static browserDownload(a: any, b?: string, c?: boolean): void {
+    public static browserDownload (url: string, name?: string, saveAs?: boolean): void;
+    public static browserDownload (defaults: GMDownloadDetails): void;
+    public static browserDownload (a: any, b?: string, c?: boolean): void {
 
         // Fallback to avoid a crash in Vivaldi
         if (Debug.getState("vivaldi")) XM.Connect.download(a, b);
@@ -225,9 +244,9 @@ export class XMConnect {
                 XM.Connect.download(a, b);
             else if (a.onerror) a.onerror(event);
             else throw "Error: unable to download file" + (event.error ? (` [${event.error}]`) : "");
-        }
+        };
 
-        // All script managers should have a GM_download function, but the extension won't 
+        // All script managers should have a GM_download function, but the extension won't
         if (typeof GM_download === "function") GM_download(a);
         else XM.Chrome.download(a, b, c);
     }
@@ -299,7 +318,7 @@ interface XMConnectRequestCallbacks {
     ontimeout?(event: GMxmlHttpRequestEvent): void;
 
     /**
-     * **onload** callback to be executed if the request was loaded.  
+     * **onload** callback to be executed if the request was loaded.
      *   It gets one argument with the following attributes:
      *   - **finalUrl** - the final URL after all redirects from where the data was loaded
      *   - **readyState** - the ready state
@@ -320,24 +339,24 @@ export interface GMxmlHttpRequestEvent {
     finalURL: string;
 
     /**
-     * **readyState** - returns the state an XMLHttpRequest client is in:  
-     * 0	UNSENT              client has been created, open() not called yet  
-     * 1	OPENED	            open() has been called  
-     * 2	HEADERS_RECEIVED	send() has been called, headers and status available  
-     * 3	LOADING             downloading; responseText holds partial data  
-     * 4	DONE	            the operation is complete  
+     * **readyState** - returns the state an XMLHttpRequest client is in:
+     * 0    UNSENT              client has been created, open() not called yet
+     * 1    OPENED              open() has been called
+     * 2    HEADERS_RECEIVED    send() has been called, headers and status available
+     * 3    LOADING             downloading; responseText holds partial data
+     * 4    DONE                the operation is complete
      */
     readyState: 0 | 1 | 2 | 3 | 4;
 
     /**
-     * **status** - returns the numerical HTTP status code of the response.  
-     * Before the request completes, the value of **status** is always 0.  
+     * **status** - returns the numerical HTTP status code of the response.
+     * Before the request completes, the value of **status** is always 0.
      * Browsers also report a status of 0 in case of XMLHttpRequest errors.
      */
     status: number;
 
     /**
-     * **statusText** - returns a DOMString containing the response's status message.  
+     * **statusText** - returns a DOMString containing the response's status message.
      * Unlike **status**, this property contains the _text_ of the response status, such as "OK" or "Not Found".
      */
     statusText: string;
@@ -371,7 +390,7 @@ export interface GMxmlHttpRequestResponse extends GMxmlHttpRequestEvent {
 
     /**
      * **responseXML** - returns a Document containing the HTML or XML retrieved by the request;
-     * or null if the request was unsuccessful, has not yet been sent, or if the data can't be parsed as XML or HTML.  
+     * or null if the request was unsuccessful, has not yet been sent, or if the data can't be parsed as XML or HTML.
      * **Note:** The name responseXML is an artifact of this property's history; it works for both HTML and XML.
      */
     responseXML: Document;

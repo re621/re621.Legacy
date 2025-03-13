@@ -2,7 +2,7 @@ const fs = require("fs");
 const ChromeExtension = require("crx");
 const util = require("./util");
 
-const package = JSON.parse(fs.readFileSync("./package.json"));
+const packageJSON = JSON.parse(fs.readFileSync("./package.json"));
 
 if (process.env.CRX_SECRET_KEY !== undefined) {
     fs.writeFileSync("./bin/extension-key.pem", process.env.CRX_SECRET_KEY);
@@ -19,7 +19,7 @@ crx.load("./build/extension/src")
     .then(crxBuffer => {
         //    const updateXML = crx.generateUpdateXML()
         //    fs.writeFile('../update.xml', updateXML);
-        fs.writeFileSync(util.parseTemplate("./build/extension/%NAME%.crx", package), crxBuffer);
+        fs.writeFileSync(util.parseTemplate("./build/extension/%NAME%.crx", packageJSON), crxBuffer);
     })
     .catch(err => {
         console.error(err);

@@ -84,7 +84,7 @@ interface File {
 export enum PostRating {
     Safe = "s",
     Questionable = "q",
-    Explicit = "e"
+    Explicit = "e",
 }
 
 enum PostRatingAliases {
@@ -112,7 +112,7 @@ export enum PostFlag {
 
 export namespace PostFlag {
 
-    export function get(post: APIPost): Set<PostFlag> {
+    export function get (post: APIPost): Set<PostFlag> {
         const flags: Set<PostFlag> = new Set();
         if (post.flags.deleted) flags.add(PostFlag.Deleted);
         if (post.flags.flagged) flags.add(PostFlag.Flagged);
@@ -120,11 +120,11 @@ export namespace PostFlag {
         return flags;
     }
 
-    export function getString(post: APIPost): string {
+    export function getString (post: APIPost): string {
         return [...PostFlag.get(post)].join(" ");
     }
 
-    export function fromSingle(input: string): PostFlag {
+    export function fromSingle (input: string): PostFlag {
         input = input.toLowerCase().trim();
         switch (input) {
             case "pending": return PostFlag.Pending;
@@ -134,7 +134,7 @@ export namespace PostFlag {
         return null;
     }
 
-    export function fromString(input: string): Set<PostFlag> {
+    export function fromString (input: string): Set<PostFlag> {
         const parts = new Set(input.split(" "));
         const flags: Set<PostFlag> = new Set();
         if (parts.has("deleted")) flags.add(PostFlag.Deleted);
@@ -146,11 +146,11 @@ export namespace PostFlag {
 }
 
 export namespace PostRating {
-    export function fromValue(value: string): PostRating {
+    export function fromValue (value: string): PostRating {
         return PostRatingAliases[value];
     }
 
-    export function toString(postRating: PostRating): string {
+    export function toString (postRating: PostRating): string {
         for (const key of Object.keys(PostRating)) {
             if (PostRating[key] === postRating) {
                 return key;
@@ -159,7 +159,7 @@ export namespace PostRating {
         return undefined;
     }
 
-    export function toFullString(postRating: PostRating): string {
+    export function toFullString (postRating: PostRating): string {
         switch (postRating.toLowerCase()) {
             case "s": return "safe";
             case "q": return "questionable";
@@ -171,7 +171,7 @@ export namespace PostRating {
 
 export namespace APIPost {
 
-    export function getTags(post: APIPost): string[] {
+    export function getTags (post: APIPost): string[] {
         return [
             ...post.tags.artist,
             ...post.tags.contributor,
@@ -181,15 +181,15 @@ export namespace APIPost {
             ...post.tags.invalid,
             ...post.tags.lore,
             ...post.tags.meta,
-            ...post.tags.species
+            ...post.tags.species,
         ];
     }
 
-    export function getTagString(post: APIPost): string {
+    export function getTagString (post: APIPost): string {
         return APIPost.getTags(post).join(" ");
     }
 
-    export function getTagSet(post: APIPost): Set<string> {
+    export function getTagSet (post: APIPost): Set<string> {
         return new Set(APIPost.getTags(post));
     }
 

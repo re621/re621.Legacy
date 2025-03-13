@@ -5,18 +5,18 @@ import { BetterSearch } from "./BetterSearch";
 
 export class ProgressTracker extends RE6Module {
 
-    public constructor() {
+    public constructor () {
         super(PageDefinition.search, true, true, [BetterSearch]);
     }
 
-    public getDefaultSettings(): Settings {
+    public getDefaultSettings (): Settings {
         return {
             enabled: true,
             data: {},
-        }
+        };
     }
 
-    public create(): void {
+    public create (): void {
         super.create();
 
         const data = this.fetchSettings<TrackedData>("data");
@@ -32,7 +32,7 @@ export class ProgressTracker extends RE6Module {
 
     }
 
-    private createDOM(data: TrackedData, tags: string): void {
+    private createDOM (data: TrackedData, tags: string): void {
 
         const lastPost = data[tags];
         const page = Page.getQueryParameter("page") || "1";
@@ -73,7 +73,7 @@ export class ProgressTracker extends RE6Module {
             post.$ref.attr("new", "true");
         });
 
-        function getNewPost(): number {
+        function getNewPost (): number {
             const post = Post.get("first");
             const page = Page.getQueryParameter("page") || "1";
             if (post == null) return -1;     // Must have some posts on the page

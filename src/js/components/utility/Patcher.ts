@@ -9,10 +9,10 @@ export class Patcher {
     public static version = 0;
 
     /**
-     * Runs patch-ups on the settings to preserve backwards compatibility.  
+     * Runs patch-ups on the settings to preserve backwards compatibility.
      * All patches MUST be documented and versioned.
      */
-    public static async patchConfig(): Promise<void> {
+    public static async patchConfig (): Promise<void> {
 
         let counter = 0;
 
@@ -34,14 +34,14 @@ export class Patcher {
             }
         } catch (error) { ErrorHandler.error("Patcher", error.stack, "patch " + Patcher.version); }
 
-        Debug.log(`Patcher: ${counter} records changed`)
+        Debug.log(`Patcher: ${counter} records changed`);
         await XM.Storage.setValue("re621.patchVersion", Patcher.version);
     }
 
     // Patch 1 - Version 1.3.5
     // The subscription modules were renamed to make the overall structure more clear.
     // Cache was removed from the module settings to prevent event listeners from being triggered needlessly.
-    private static async patch1(): Promise<number> {
+    private static async patch1 (): Promise<number> {
         let counter = 0;
 
         for (const type of ["Comment", "Forum", "Pool", "Tag"]) {
@@ -63,7 +63,7 @@ export class Patcher {
 
     // Patch 2 - Version 1.3.7
     // The "Miscellaneous" module was split apart into several more specialized modules
-    private static async patch2(): Promise<number> {
+    private static async patch2 (): Promise<number> {
         let counter = 0;
 
         const miscSettings = await XM.Storage.getValue("re621.Miscellaneous", {}),
@@ -94,7 +94,7 @@ export class Patcher {
 
     // Patch 3 - Version 1.3.12
     // Rework of existing sync code meant the removal of existing variables
-    private static async patch3(): Promise<number> {
+    private static async patch3 (): Promise<number> {
         let counter = 0;
 
         if (await XM.Storage.getValue("re621.report", undefined) !== undefined) {
@@ -109,7 +109,7 @@ export class Patcher {
 
     // Patch 4 - Version 1.3.15
     // Favorites and DNP cache local storage variable names were changed
-    private static async patch4(): Promise<number> {
+    private static async patch4 (): Promise<number> {
         let counter = 0;
 
         window.localStorage.removeItem("re621.favorites");
@@ -123,10 +123,10 @@ export class Patcher {
 
     // Patch 5 - Version 1.3.19
     // TinyAlias was replaced with SmartAlias, migrating the settings
-    private static async patch5(): Promise<number> {
+    private static async patch5 (): Promise<number> {
         let counter = 0;
 
-        const taConf = await XM.Storage.getValue("re621.TinyAlias", undefined)
+        const taConf = await XM.Storage.getValue("re621.TinyAlias", undefined);
         if (taConf !== undefined && taConf.data !== undefined) {
             // Convert the data into a newline-separated string
             let output = "";
@@ -137,10 +137,10 @@ export class Patcher {
 
             // Append the imported data to SmartAlias configuration
             const saConf = await XM.Storage.getValue("re621.SmartAlias", { data: "" });
-            saConf.data = saConf.data +
-                (saConf.data == "" ? "" : "\n\n") +
-                "# Imported from TinyAlias\n" +
-                output;
+            saConf.data = saConf.data
+                + (saConf.data == "" ? "" : "\n\n")
+                + "# Imported from TinyAlias\n"
+                + output;
             await XM.Storage.setValue("re621.SmartAlias", saConf);
 
             // Clean up the TinyAlias config
@@ -156,7 +156,7 @@ export class Patcher {
     // ThumbnailEnhancer and InfiniteScroll were merged together into BetterSearch
     // A lot of settings names were changed to less ambiguous ones
     // Favorites cache was retired and removed
-    private static async patch6(): Promise<number> {
+    private static async patch6 (): Promise<number> {
         let counter = 0;
 
         const thumbEnhancer = await XM.Storage.getValue("re621.ThumbnailEnhancer", undefined),
@@ -214,7 +214,7 @@ export class Patcher {
     // Patch 8: 1.4.5
     // Version checker has been rewritten, rendering old sync-based data void
     // Functionally identical to patch 7
-    private static async patch8(): Promise<number> {
+    private static async patch8 (): Promise<number> {
         let counter = 0;
 
         await XM.Storage.deleteValue("re621.sync");
@@ -226,7 +226,7 @@ export class Patcher {
 
     // Patch 9: 1.4.8
     // HoverZoom was moved into a separate module
-    private static async patch9(): Promise<number> {
+    private static async patch9 (): Promise<number> {
         let counter = 0;
 
         const betterSearch = await XM.Storage.getValue("re621.BetterSearch", {});
@@ -254,7 +254,7 @@ export class Patcher {
 
     // Patch 10: 1.4.44
     // Fixed and expanded the CustomFlagger
-    private static async patch10(): Promise<number> {
+    private static async patch10 (): Promise<number> {
         let counter = 0;
 
         const customFlagger = await XM.Storage.getValue("re621.CustomFlagger", {});
@@ -265,7 +265,7 @@ export class Patcher {
             counter++;
         }
 
-        // Fix the 
+        // Fix the
         if (customFlagger["flags"] !== undefined && Array.isArray(customFlagger["flags"])) {
             const result = [];
             for (const flag of customFlagger["flags"] as FlagDefinition[]) {
@@ -287,7 +287,7 @@ export class Patcher {
     // Patch 11: 1.5.0
     // Replaced the old SubscriptionManager with a more modular one
     // Old settings are to be converted to the new format, or removed
-    private static async patch11(): Promise<number> {
+    private static async patch11 (): Promise<number> {
         let counter = 0;
 
         for (const tracker of ["Tag", "Pool", "Forum", "Comment"]) {
@@ -305,7 +305,7 @@ export class Patcher {
             const list = new Set<string>([
                 ...newSettings,
                 ...subscriptions,
-            ].sort())
+            ].sort());
             if (extraID) list.add(extraID);
 
             await XM.Storage.setValue(`re621.${tracker}Tracker.list`, Array.from(list));

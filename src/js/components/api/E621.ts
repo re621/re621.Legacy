@@ -48,14 +48,16 @@ const ENDPOINT_DEFS: EndpointDefinition[] = [
 class APIEndpoint {
 
     private queue: E621;
+
     private path: string;
 
     private name: string;
+
     private node: string;
 
     private param: string;
 
-    public constructor(queue: E621, endpoint: EndpointDefinition) {
+    public constructor (queue: E621, endpoint: EndpointDefinition) {
         this.queue = queue;
         this.path = endpoint.path;
 
@@ -64,11 +66,11 @@ class APIEndpoint {
     }
 
     /**
-     * Set an endpoint parameter, if the current endpoint allows it.  
+     * Set an endpoint parameter, if the current endpoint allows it.
      * For example, to GET /users/12345.json, use E621.User.spec("12345").get(...);
-     * @param param 
+     * @param param
      */
-    public id(param: string | number): APIEndpoint {
+    public id (param: string | number): APIEndpoint {
         this.param = param + "";
         return this;
     }
@@ -86,12 +88,12 @@ class APIEndpoint {
             },
             (response) => {
                 return Promise.reject(response[0]);
-            }
+            },
         );
     }
 
     /**
-     * Sends a GET request to the endpoint, and returns the first result found.  
+     * Sends a GET request to the endpoint, and returns the first result found.
      * If no results are found, returns null.
      * @param query Request query, either as a raw string or an APIQuery
      * @param delay Optional delay override, in milliseconds
@@ -108,44 +110,44 @@ class APIEndpoint {
      * @param data Data to be sent with the request
      * @param delay Optional delay override, in milliseconds
      */
-    public async post(data?: APIQuery, delay?: number, noEncode?: boolean): Promise<any> {
+    public async post (data?: APIQuery, delay?: number, noEncode?: boolean): Promise<any> {
         return this.queue.createRequest(this.getParsedPath(), {}, "POST", this.formatParam(data, noEncode), this.name, this.node, delay).then(
             (data) => {
                 return Promise.resolve(data);
             },
-            (error) => { return Promise.reject(error); }
+            (error) => { return Promise.reject(error); },
         );
     }
 
-    public async delete(data?: APIQuery, delay?: number): Promise<any> {
+    public async delete (data?: APIQuery, delay?: number): Promise<any> {
         return this.queue.createRequest(this.getParsedPath(), {}, "DELETE", this.formatParam(data), this.name, this.node, delay).then(
             (data) => {
                 return Promise.resolve(data);
             },
-            (error) => { return Promise.reject(error); }
+            (error) => { return Promise.reject(error); },
         );
     }
 
-    public async put(data?: APIQuery, delay?: number): Promise<any> {
+    public async put (data?: APIQuery, delay?: number): Promise<any> {
         return this.queue.createRequest(this.getParsedPath(), {}, "PUT", this.formatParam(data), this.name, this.node, delay).then(
             (data) => {
                 return Promise.resolve(data);
             },
-            (error) => { return Promise.reject(error); }
+            (error) => { return Promise.reject(error); },
         );
     }
 
-    public async patch(data?: APIQuery, delay?: number): Promise<any> {
+    public async patch (data?: APIQuery, delay?: number): Promise<any> {
         return this.queue.createRequest(this.getParsedPath(), {}, "PATCH", this.formatParam(data), this.name, this.node, delay).then(
             (data) => {
                 return Promise.resolve(data);
             },
-            (error) => { return Promise.reject(error); }
+            (error) => { return Promise.reject(error); },
         );
     }
 
     /** Returns the endpoint path, accounting for the possible parameter */
-    private getParsedPath(): string {
+    private getParsedPath (): string {
         if (this.param) {
             const output = this.path.replace(/%ID%/g, this.param);
             this.param = undefined;     // Clear the param to avoid contaminating the next query
@@ -155,12 +157,12 @@ class APIEndpoint {
     }
 
     /**
-     * Ensures that the provided APIQuery is in the correct format.  
+     * Ensures that the provided APIQuery is in the correct format.
      * Flattens objects and arrays in order to return a list of key-value pairs.
      * @param input APIQuery to format
      * @param noEncode If true, the values are not URI encoded
      */
-    private formatParam(input: APIQuery, noEncode = false): FormattedAPIQuery {
+    private formatParam (input: APIQuery, noEncode = false): FormattedAPIQuery {
         // Debug.log("input", input);
         if (input === undefined || input === null) return {};
 
@@ -189,7 +191,7 @@ class APIEndpoint {
         return response;
 
         /** Prevent double-encoding the values */
-        function cleanURIComponent(value: APIQueryEntry, noEncode: boolean): string {
+        function cleanURIComponent (value: APIQueryEntry, noEncode: boolean): string {
             return noEncode ? encodeURIComponent(value + "") : encodeURIComponent(decodeURIComponent(value + ""));
         }
     }
@@ -220,12 +222,14 @@ export class E621 {
     // Needed to authenticate some post requests, for example when you modify user settings
     private authToken: string;
 
-    //used to notify the original request function of the requests completion
+    // used to notify the original request function of the requests completion
     private emitter = $({});
 
     // Request queue variables
     private queue: QueueItem[];
+
     private processing = false;
+
     private requestIndex = 0;
 
     // Endpoint Definitions
@@ -233,41 +237,65 @@ export class E621 {
 
     // Endpoint Aliases
     public static Posts = E621.getEndpoint("posts");
+
     public static Post = E621.getEndpoint("post");
+
     public static PostVotes = E621.getEndpoint("post_votes");
+
     public static Tags = E621.getEndpoint("tags");
+
     public static Tag = E621.getEndpoint("tag");
+
     public static TagAliases = E621.getEndpoint("tag_aliases");
+
     public static TagImplications = E621.getEndpoint("tag_implications");
+
     public static TagPreview = E621.getEndpoint("tag_preview");
 
     public static Notes = E621.getEndpoint("notes");
+
     public static Favorites = E621.getEndpoint("favorites");
+
     public static Favorite = E621.getEndpoint("favorite");
+
     public static Pools = E621.getEndpoint("pools");
+
     public static Pool = E621.getEndpoint("pool");
+
     public static Sets = E621.getEndpoint("sets");
+
     public static Set = E621.getEndpoint("set");
+
     public static SetAddPost = E621.getEndpoint("set_add_post");
+
     public static SetRemovePost = E621.getEndpoint("set_remove_post");
 
     public static Users = E621.getEndpoint("users");
+
     public static User = E621.getEndpoint("user");
+
     public static Blips = E621.getEndpoint("blips");
+
     public static Wiki = E621.getEndpoint("wiki_pages");
 
     public static Comments = E621.getEndpoint("comments");
+
     public static Comment = E621.getEndpoint("comment");
+
     public static ForumPosts = E621.getEndpoint("forum_posts");
+
     public static ForumPost = E621.getEndpoint("forum_post");
+
     public static ForumTopics = E621.getEndpoint("forum_topics");
+
     public static ForumTopic = E621.getEndpoint("forum_topic");
 
     public static DTextPreview = E621.getEndpoint("dtext_preview");
+
     public static IQDBQueries = E621.getEndpoint("iqdb_queries");
 
     /** Constructor - should be kept private */
-    private constructor() {
+    private constructor () {
         this.authToken = $("head meta[name=csrf-token]").attr("content");
         this.queue = [];
         ENDPOINT_DEFS.forEach((definition) => {
@@ -276,26 +304,26 @@ export class E621 {
     }
 
     /**
-     * Returns an endpoint by name.  
+     * Returns an endpoint by name.
      * Names are defined in ENDPOINT_DEFS constant
      * @param name Endpoint name
      */
-    private static getEndpoint(name: string): APIEndpoint {
+    private static getEndpoint (name: string): APIEndpoint {
         if (this.instance === undefined) this.instance = new E621();
         return this.instance.endpoints[name];
     }
 
     /**
-     * Adds a new request to the queue based on provided data.  
+     * Adds a new request to the queue based on provided data.
      * This should only be called from endpoint get() or post() methods.
-     * @param hasParam Whether or not the endpoint had a parameter  
+     * @param hasParam Whether or not the endpoint had a parameter
      * @param path Endpoint path, i.e. posts.json
      * @param query Raw query string, i.e. ?tags=horse,male,solo
      * @param method Request method, either GET or POST
      * @param data Data to POST
      * @param delay How quickly the next request can be sent, in ms
      */
-    public async createRequest(path: string, query: FormattedAPIQuery, method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE", requestBody: FormattedAPIQuery, endpoint: string, node: string, delay: number): Promise<any> {
+    public async createRequest (path: string, query: FormattedAPIQuery, method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE", requestBody: FormattedAPIQuery, endpoint: string, node: string, delay: number): Promise<any> {
         if (delay === undefined) delay = E621.requestRateLimit;
         else if (delay < 500) delay = 500;
 
@@ -337,7 +365,7 @@ export class E621 {
             });
         });
 
-        this.add({ request: entry, index: index, delay: delay, endpoint: endpoint, node: node, });
+        this.add({ request: entry, index: index, delay: delay, endpoint: endpoint, node: node });
 
         return final;
     }
@@ -346,7 +374,7 @@ export class E621 {
      * Adds an item to the queue and starts processing it
      * @param newItem Item to add
      */
-    private async add(newItem: QueueItem): Promise<void> {
+    private async add (newItem: QueueItem): Promise<void> {
         this.queue.push(newItem);
 
         if (this.processing) return;
@@ -370,7 +398,7 @@ export class E621 {
                                     response.status,
                                     item.endpoint,
                                     item.node,
-                                ]
+                                ],
                             );
                         } else {
                             this.emitter.trigger(
@@ -380,7 +408,7 @@ export class E621 {
                                     response.status,
                                     item.endpoint,
                                     item.node,
-                                ]
+                                ],
                             );
                         }
                         resolve();
@@ -393,10 +421,10 @@ export class E621 {
                                 (error && error[0]) ? error[1] : 500,
                                 item.endpoint,
                                 item.node,
-                            ]
+                            ],
                         );
                         resolve();
-                    }
+                    },
                 );
             });
             await Util.sleep(item.delay);
@@ -409,21 +437,21 @@ export class E621 {
 interface EndpointDefinition {
 
     /**
-     * **name** - irrelevant, as long as it's unique  
+     * **name** - irrelevant, as long as it's unique
      * ex. posts, forum_posts, comments, etc
      */
     name: string;
 
     /**
-     * **path** - endpoint path, without origin or extension  
-     * ex. posts.json, forum_posts.json, comments.json, etc.  
+     * **path** - endpoint path, without origin or extension
+     * ex. posts.json, forum_posts.json, comments.json, etc.
      * May include %ID% that is replaced by a user-provided variable.
      * ex. posts/%ID%.json
      */
     path: string;
 
     /**
-     * **node** - defined special cases for endpoint nodes  
+     * **node** - defined special cases for endpoint nodes
      * Mainly used to get rid of the wrapper around posts results
      */
     node?: string;
@@ -436,14 +464,14 @@ interface EndpointDefinition {
  */
 interface APIQuery {
     [prop: string]: APIQueryEntry | APIQueryEntry[] | APIQuerySubentry;
-};
+}
 
 interface FormattedAPIQuery {
     [prop: string]: string;
 }
 
 namespace FormattedAPIQuery {
-    export function stringify(input: FormattedAPIQuery): string {
+    export function stringify (input: FormattedAPIQuery): string {
         const result = [];
         for (const [key, value] of Object.entries(input))
             result.push(key + "=" + value);

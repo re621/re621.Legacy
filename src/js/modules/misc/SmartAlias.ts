@@ -21,10 +21,10 @@ export class SmartAlias extends RE6Module {
         "#re621_qedit_tags",    // re621's version
 
         // Upload page inputs
-        "#post_artist", 
+        "#post_artist",
         "#post_character",
         "#post_species",
-        "#post_themes", 
+        "#post_themes",
         "#post_content",
         "#post_tags",
     ]);
@@ -32,18 +32,20 @@ export class SmartAlias extends RE6Module {
     private inputElements: JQuery<HTMLElement>[] = [];
 
     private static aliasCache: AliasDefinition[];
+
     private static aliasCacheLength: number;
 
     private static tagData: TagData = {};           // stores tag data for the session - count, valid, dnp, etc
+
     private static tagAliases: TagAlias = {};       // stores e621's alias pairs to avoid repeated lookups
 
     private static postPageLockout = false;         // Used to avoid calling the API on every post page
 
-    public constructor() {
+    public constructor () {
         super([PageDefinition.upload, PageDefinition.post, PageDefinition.search, PageDefinition.favorites], true);
     }
 
-    protected getDefaultSettings(): Settings {
+    protected getDefaultSettings (): Settings {
         return {
             enabled: true,
 
@@ -75,7 +77,7 @@ export class SmartAlias extends RE6Module {
         };
     }
 
-    public async prepare(): Promise<void> {
+    public async prepare (): Promise<void> {
         await super.prepare();
 
         if (!Page.matches(PageDefinition.post)) return;
@@ -97,10 +99,10 @@ export class SmartAlias extends RE6Module {
     }
 
     /**
-     * Destroys and re-creates the entire module as a method of reloading it.  
+     * Destroys and re-creates the entire module as a method of reloading it.
      * It's stupid, but it's the easiest and hassle-free method of resetting some things.
      */
-    public async reload(): Promise<void> {
+    public async reload (): Promise<void> {
         this.destroy();
         if (!this.fetchSettings("enabled")) return;
         return new Promise((resolve) => {
@@ -108,10 +110,10 @@ export class SmartAlias extends RE6Module {
                 this.create();
                 resolve();
             }, 100);
-        })
+        });
     }
 
-    public destroy(): void {
+    public destroy (): void {
         if (!this.isInitialized()) return;
         super.destroy();
         for (const inputElement of $("#post_tags, #post_tag_string").get()) {
@@ -130,7 +132,7 @@ export class SmartAlias extends RE6Module {
                 .removeData("re621:smartalias");
     }
 
-    public create(): void {
+    public create (): void {
         super.create();
 
         if (this.fetchSettings("searchForm") && Page.matches([PageDefinition.search, PageDefinition.post, PageDefinition.favorites])) {
@@ -186,7 +188,7 @@ export class SmartAlias extends RE6Module {
                 .insertAfter($textarea);
 
             if (mode) this.manageAutoLoad($textarea, $container);
-            else this.manageManualLoad($textarea, $container)
+            else this.manageManualLoad($textarea, $container);
 
             // On search pages, in the editing mode, reload container when the user clicks on a thumbnail
             // Otherwise, the old tags get left behind. Thanks to tag data caching, this should be pretty quick
@@ -211,7 +213,7 @@ export class SmartAlias extends RE6Module {
      * Parses the textarea input specified in the parameter and returns a list of space-separated tags
      * @param input Textarea to parse
      */
-    private static getInputString(input: JQuery<HTMLElement>): string {
+    private static getInputString (input: JQuery<HTMLElement>): string {
         return input.val().toString().trim()
             .toLowerCase()
             .replace(/\r?\n|\r/g, " ")      // strip newlines
@@ -222,7 +224,7 @@ export class SmartAlias extends RE6Module {
      * Parses the string input specified in the parameter and returns an array of tags
      * @param input Space-separated sting of tags
      */
-    private static parseTagString(input: string): ParsedTag[] {
+    private static parseTagString (input: string): ParsedTag[] {
         const result = [];
         for (const tag of input.split(/ |\n|\r/).filter(el => el != null && el != ""))
             result.push(ParsedTag.fromString(tag));
@@ -233,15 +235,15 @@ export class SmartAlias extends RE6Module {
      * Parses the textarea input specified in the parameter and returns an array of tags
      * @param input Textarea to parse
      */
-    private static parseTagInput(input: JQuery<HTMLElement>): ParsedTag[] {
+    private static parseTagInput (input: JQuery<HTMLElement>): ParsedTag[] {
         return this.parseTagString(SmartAlias.getInputString(input));
     }
 
-    private static countTagInput(input: JQuery<HTMLElement>): number {
+    private static countTagInput (input: JQuery<HTMLElement>): number {
         return SmartAlias.getInputString(input).split(/ |\n|\r/).length;
     }
 
-    private manageAutoLoad($textarea: JQuery<HTMLElement>, $container: JQuery<HTMLElement>): void {
+    private manageAutoLoad ($textarea: JQuery<HTMLElement>, $container: JQuery<HTMLElement>): void {
 
         // Wait for the user to stop typing before processing
         let typingTimeout: number;
@@ -268,7 +270,7 @@ export class SmartAlias extends RE6Module {
             .on("blur.smartalias.spacefix", () => {
                 $textarea.val((index, value) => {
                     return (value.endsWith(" ") || value.length == 0) ? value : (value + " ");
-                })
+                });
             });
 
         // Skip the waiting and go straight to parsing
@@ -281,7 +283,7 @@ export class SmartAlias extends RE6Module {
         this.handleTagInput($textarea, $container, false);
     }
 
-    private manageManualLoad($textarea: JQuery<HTMLElement>, $container: JQuery<HTMLElement>): void {
+    private manageManualLoad ($textarea: JQuery<HTMLElement>, $container: JQuery<HTMLElement>): void {
 
         $("<button>")
             .html("Validate")
@@ -300,7 +302,7 @@ export class SmartAlias extends RE6Module {
      * @param $container Display container
      * @param scrollToBottom If true, the container's viewport will scroll to the very bottom once processed
      */
-    private async handleTagInput($textarea: JQuery<HTMLElement>, $container: JQuery<HTMLElement>, scrollToBottom = true): Promise<void> {
+    private async handleTagInput ($textarea: JQuery<HTMLElement>, $container: JQuery<HTMLElement>, scrollToBottom = true): Promise<void> {
         if ($container.attr("ready") !== "true") return;
         $container.attr("ready", "false");
 
@@ -371,7 +373,7 @@ export class SmartAlias extends RE6Module {
         const invalidTags: Set<string> = new Set(),
             ambiguousTags: Set<string> = new Set();
         for (const batch of Util.chunkArray([...lookup].filter((value) => SmartAlias.tagAliases[value] == undefined), 40)) {
-            for (const result of await E621.TagAliases.get<APITagAlias>({ "search[antecedent_name]": batch, limit: 320 }, 500)) {
+            for (const result of await E621.TagAliases.get<APITagAlias>({ "search[antecedent_name]": batch, "limit": 320 }, 500)) {
 
                 // Don't apply pending or inactive aliases
                 if (result.status !== "active") continue;
@@ -418,7 +420,7 @@ export class SmartAlias extends RE6Module {
                     // console.log("replacing [" + antecedent + "] with [" + consequent + "]", antecedent == lastTag);
                     currentValue = currentValue.replace(
                         this.getTagRegex(antecedent),
-                        "$1" + consequent + "$3"
+                        "$1" + consequent + "$3",
                     );
                 }
 
@@ -437,41 +439,41 @@ export class SmartAlias extends RE6Module {
             const implLookup = RelationsCache.intersect(tags);
             // console.log("looking up implications for " + implLookup.lacks.length + " tags");
 
-            if(implLookup.lacks.length) {
+            if (implLookup.lacks.length) {
 
                 const response: APITagPreview[] = await E621.TagPreview.post({
                     tags: implLookup.lacks.join(" "),
                 }, 500).then((result) => {
-                    if(result[1] !== 200) return [];
+                    if (result[1] !== 200) return [];
                     return result[0];
                 });
-    
+
                 // console.log("response", response);
                 const lackingTags = new Set(implLookup.lacks);
-    
-                for(const tagPreview of response) {
-                    if(tagPreview.type !== "implication") continue;
-                    
+
+                for (const tagPreview of response) {
+                    if (tagPreview.type !== "implication") continue;
+
                     const tagData = implLookup.has[tagPreview.a] || { adds: [] };
                     tagData.adds.push(tagPreview.b);
                     implLookup.has[tagPreview.a] = tagData;
                     lackingTags.delete(tagPreview.a);
-    
+
                     RelationsCache.add(tagPreview.a, tagData);
                 }
 
-                for(const tag of lackingTags) {
+                for (const tag of lackingTags) {
                     const tagData = implLookup.has[tag] || { adds: [] };
                     RelationsCache.add(tag, tagData);
                 }
             }
 
             const tagIndex = new Set();
-            for(const tagData of tags) tagIndex.add(tagData.name);
-    
-            for(const tagData of Object.values(implLookup.has)) {
-                for(const implication of tagData.adds) {
-                    if(tagIndex.has(implication) || impliedTags.has(implication)) continue;
+            for (const tagData of tags) tagIndex.add(tagData.name);
+
+            for (const tagData of Object.values(implLookup.has)) {
+                for (const implication of tagData.adds) {
+                    if (tagIndex.has(implication) || impliedTags.has(implication)) continue;
                     impliedTags.add(implication);
                     tags.push({
                         name: implication,
@@ -487,7 +489,7 @@ export class SmartAlias extends RE6Module {
                     lookup.add(tagData.name);
             }
 
-            $textarea.data("implications", Array.from(impliedTags))
+            $textarea.data("implications", Array.from(impliedTags));
             redrawContainerContents($container, tags, minPostsWarning, asciiWarning, tagOrder);
         }
 
@@ -585,11 +587,11 @@ export class SmartAlias extends RE6Module {
 
 
         /**
-         * Fix for Vue data-attribute binding  
+         * Fix for Vue data-attribute binding
          * This needs to be executed every time the textarea value gets changed
          * @param $textarea Textarea input
          */
-        function triggerUpdateEvent($textarea: JQuery<HTMLElement>): void {
+        function triggerUpdateEvent ($textarea: JQuery<HTMLElement>): void {
             Util.Events.triggerVueEvent($textarea, "input", "vue-event");
         }
 
@@ -599,7 +601,7 @@ export class SmartAlias extends RE6Module {
          * @param tags Tags to display
          * @param loading Tags to mark as loading
          */
-        function redrawContainerContents($container: JQuery<HTMLElement>, tags: ParsedTag[], minPostsWarning: number, asciiWarning: boolean, tagOrder: TagOrder, loading = new Set<string>()): void {
+        function redrawContainerContents ($container: JQuery<HTMLElement>, tags: ParsedTag[], minPostsWarning: number, asciiWarning: boolean, tagOrder: TagOrder, loading = new Set<string>()): void {
             $container
                 .html("")
                 .toggleClass("grouped", tagOrder == TagOrder.Grouped);
@@ -725,7 +727,7 @@ export class SmartAlias extends RE6Module {
                 $(" <span>")
                     .attr("title", title)
                     .text(text)
-                    .appendTo($element)
+                    .appendTo($element);
                 if (asciiWarning && data && data.errors.length > 0 && !data.dnp)
                     $("<span>")
                         .addClass("fas fa-exclamation-triangle tag-warning")
@@ -737,7 +739,7 @@ export class SmartAlias extends RE6Module {
     }
 
     /** Loads the alias cache from the settings */
-    private async loadAliasCache(): Promise<void> {
+    private async loadAliasCache (): Promise<void> {
         const aliasCacheRaw = await this.fetchSettings<string>("data", true);
         if (aliasCacheRaw.length !== SmartAlias.aliasCacheLength) {
             SmartAlias.aliasCache = SmartAlias.getAliasData(aliasCacheRaw);
@@ -746,11 +748,11 @@ export class SmartAlias extends RE6Module {
     }
 
     /**
-     * Processes the raw text value of the custom alias field and converts it into machine-readable format.  
+     * Processes the raw text value of the custom alias field and converts it into machine-readable format.
      * TODO Optimize this as much as possible
      * @param rawData Raw plaintext data
      */
-    public static getAliasData(rawData: string): AliasDefinition[] {
+    public static getAliasData (rawData: string): AliasDefinition[] {
         const data = rawData.split("\n").reverse();
         const result: AliasDefinition[] = [];
 
@@ -767,7 +769,7 @@ export class SmartAlias extends RE6Module {
             const def: AliasDefinition = {
                 lookup: new Set(),
                 output: formatOutput(parts[1]),
-            }
+            };
 
             // This should prevent multiple aliases from being called by the same lookup
             // Only the last one in the file would be counted.
@@ -785,15 +787,15 @@ export class SmartAlias extends RE6Module {
 
         return result;
 
-        function formatLookup(input: string): Set<string> {
+        function formatLookup (input: string): Set<string> {
             return new Set(
                 input
                     .split(" ")
-                    .filter((e) => e != "")
+                    .filter((e) => e != ""),
             );
         }
 
-        function formatOutput(input: string): string {
+        function formatOutput (input: string): string {
             return input
                 .trim()
                 .replace(/\s{2,}/g, " ");
@@ -804,23 +806,23 @@ export class SmartAlias extends RE6Module {
      * Dynamically creates a regex that should find individual in the textarea
      * @param input Input, as a single string, an array, or a set
      */
-    private getTagRegex(input: string | string[] | Set<string>): RegExp {
+    private getTagRegex (input: string | string[] | Set<string>): RegExp {
         if (typeof input == "string") input = [input];
         else input = [...input];
 
         for (let i = 0; i < input.length; i++)
             input[i] = input[i]
-                .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+                .replace(/[.+?^${}()|[\]\\]/g, "\\$&")
                 .replace(/\*/g, "(\\S*)");
         return new RegExp("((?:^|\n| )-?(?:(?:artist|contributor|character|copyright|species):)?)(" + input.join("|") + ")( |\n|$)", "gi");
     }
 
     /**
-     * Replaces the custom aliases with their consequent values.  
+     * Replaces the custom aliases with their consequent values.
      * Note that an alias cache must be built beforehand via `loadAliasCache()`
      * @param text Text to parse
      */
-    private replaceInputAliases(text: string): string {
+    private replaceInputAliases (text: string): string {
 
         // Run the the process as many times as needed until no more changes can be made
         // This should take care of nested aliases while preventing infinite recursion
@@ -851,7 +853,7 @@ export class SmartAlias extends RE6Module {
 
                         if (result.size == 0) return " ";
                         return args[1] + [...result].join(" ") + args[args.length - 3];
-                    }
+                    },
                 );
 
             }
@@ -862,7 +864,7 @@ export class SmartAlias extends RE6Module {
     }
 
     /** Handles alias replacement in the search form */
-    private handleSearchForm(): void {
+    private handleSearchForm (): void {
         let typingTimeout: number;
         const input = $("#tags").on("input.re621.smart-alias", () => {
             clearTimeout(typingTimeout);
@@ -879,7 +881,7 @@ export class SmartAlias extends RE6Module {
      * Toggles the compact form styles
      * @param state True for compact, false for expanded
      */
-    public setCompactOutput(state = false): void {
+    public setCompactOutput (state = false): void {
         $("#page").attr("data-smartalias-compact", state + "");
     }
 
@@ -918,7 +920,7 @@ enum TagOrder {
 
 namespace TagOrder {
 
-    export function fromString(input: string): TagOrder {
+    export function fromString (input: string): TagOrder {
         for (const value of Object.values(TagOrder))
             if (value == input) return value;
         return TagOrder.Default;
@@ -931,22 +933,22 @@ export type ParsedTag = {
     negated: boolean;
     prefix: string;
     malformed?: boolean;
-}
+};
 
 namespace ParsedTag {
-    export function fromString(rawTag: string): ParsedTag {
+    export function fromString (rawTag: string): ParsedTag {
         const result: ParsedTag = {
             name: null,
             negated: false,
             prefix: null,
-        }
+        };
 
         if (rawTag.startsWith("-")) {
             result.negated = true;
             rawTag = rawTag.substr(1);
         }
 
-        const match = rawTag.match(/(artist|contributor|character|copyright|species):/)
+        const match = rawTag.match(/(artist|contributor|character|copyright|species):/);
         if (match) {
             result.prefix = match[1];
             rawTag = rawTag.substr(match[0].length);
@@ -960,7 +962,7 @@ namespace ParsedTag {
         return result;
     }
 
-    export function toString(tag: ParsedTag, skipNegation = false): string {
+    export function toString (tag: ParsedTag, skipNegation = false): string {
         return ((tag.negated && !skipNegation) ? "-" : "")
             + (tag.prefix ? (tag.prefix + ":") : "")
             + tag.name;

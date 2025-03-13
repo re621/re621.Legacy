@@ -14,19 +14,26 @@ export class HoverZoom extends RE6Module {
     private static paused = false;              // If true, stops several actions that may interfere with other modules
 
     private $zoomBlock: JQuery<HTMLElement>;    // Display area for the hover zoom
+
     private $zoomImage: JQuery<HTMLElement>;    // Image tag for hover zoom
+
     private $zoomVideo: JQuery<HTMLElement>;    // Video tag for hover zoom
+
     private $zoomInfo: JQuery<HTMLElement>;     // Post's resolution and file size
+
     private $zoomTags: JQuery<HTMLElement>;     // Post's tags section displayed on hover
 
     private shiftPressed = false;               // Used to block zoom in onshift mode
+
     private pageX = 0;                          // Mouse position
+
     private pageY = 0;
 
     private static curPost: PostData = null;    // Post over which the user currently hovers, or null if there isn't one
+
     private static curRef: JQuery<HTMLElement> = null;
 
-    public constructor() {
+    public constructor () {
         super([], true);
 
         this.registerHotkeys(
@@ -35,7 +42,7 @@ export class HoverZoom extends RE6Module {
         );
     }
 
-    public getDefaultSettings(): Settings {
+    public getDefaultSettings (): Settings {
         return {
             enabled: true,
 
@@ -53,7 +60,7 @@ export class HoverZoom extends RE6Module {
         };
     }
 
-    public create(): void {
+    public create (): void {
         super.create();
 
         this.createStructure();
@@ -61,7 +68,7 @@ export class HoverZoom extends RE6Module {
         this.initFunctionality();
     }
 
-    private createStructure(): void {
+    private createStructure (): void {
         this.$zoomBlock = $("<zoom-container>")
             .attr("status", "waiting")
             .appendTo("body");
@@ -86,7 +93,7 @@ export class HoverZoom extends RE6Module {
     }
 
     /** Restarts the even listeners used by the hover zoom submodule. */
-    public reloadEventListeners(): void {
+    public reloadEventListeners (): void {
 
         const zoomMode = this.fetchSettings("mode");
         const stickyShift = this.fetchSettings("stickyShift");
@@ -115,11 +122,11 @@ export class HoverZoom extends RE6Module {
             // Anything less than 30 feels choppy, but performance is a concern
             if (throttled) return;
             throttled = true;
-            window.setTimeout(() => { throttled = false }, 25);
+            window.setTimeout(() => { throttled = false; }, 25);
 
             this.pageX = event.pageX;
             this.pageY = event.pageY;
-            HoverZoom.trigger("mousemove", { x: event.pageX, y: event.pageY, });
+            HoverZoom.trigger("mousemove", { x: event.pageX, y: event.pageY });
         });
 
         // Listen for mouse hover over thumbnails
@@ -165,7 +172,7 @@ export class HoverZoom extends RE6Module {
                 scrolling = false;
             }, 100);
             scrolling = true;
-        })
+        });
 
         // Listen for the Shift button being held
         if (zoomMode !== ImageZoomMode.OnShift) return;
@@ -176,7 +183,7 @@ export class HoverZoom extends RE6Module {
                 for (const el of $("[hovering=true]")) {
                     const $el = $(el);
                     if ($el.attr("hztrigger"))
-                        $el.find($el.attr("hztrigger")).trigger("mouseenter.re621.zoom")
+                        $el.find($el.attr("hztrigger")).trigger("mouseenter.re621.zoom");
                     else $(el).trigger("mouseenter.re621.zoom");
                 }
             })
@@ -192,9 +199,9 @@ export class HoverZoom extends RE6Module {
         $(window).on("contextmenu.re621.zoom", () => {
             this.shiftPressed = false;
             if (!stickyShift) resetOnUnshift();
-        })
+        });
 
-        function resetOnUnshift(): void {
+        function resetOnUnshift (): void {
             if (!HoverZoom.curPost) return;
             HoverZoom.trigger("zoom.stop", { post: HoverZoom.curPost.id, pageX: null, pageY: null });
             HoverZoom.curPost = null;
@@ -203,7 +210,7 @@ export class HoverZoom extends RE6Module {
     }
 
     /** Initialize the event listeners for the hover zoom functionality */
-    private initFunctionality(): void {
+    private initFunctionality (): void {
 
         let videoTimeout: number;
 
@@ -233,7 +240,7 @@ export class HoverZoom extends RE6Module {
             this.$zoomBlock.attr("status", "loading");
 
             // Calculate preview width and height
-            let width = Math.min(post.img.width, viewport.width() * 0.5 - 50),
+            let width = Math.min(post.img.width, (viewport.width() * 0.5) - 50),
                 height = width * post.img.ratio;
 
             if (height > (viewport.height() * 0.75)) {
@@ -302,7 +309,7 @@ export class HoverZoom extends RE6Module {
             });
             alignWindow(viewport, this.$zoomBlock, this.pageX, this.pageY);
 
-            function alignWindow(viewport: JQuery<Window>, zoomBlock: JQuery<HTMLElement>, x: number, y: number): void {
+            function alignWindow (viewport: JQuery<Window>, zoomBlock: JQuery<HTMLElement>, x: number, y: number): void {
                 const imgHeight = zoomBlock.height(),
                     imgWidth = zoomBlock.width(),
                     cursorX = x,
@@ -356,7 +363,7 @@ export class HoverZoom extends RE6Module {
         });
     }
 
-    private downloadCurPost(): void {
+    private downloadCurPost (): void {
         Debug.log("hovering over", HoverZoom.curPost);
         if (HoverZoom.curPost == null) return;
         XM.Connect.browserDownload({
@@ -366,10 +373,10 @@ export class HoverZoom extends RE6Module {
         });
     }
 
-    private fullscreenCurPost(): void {
+    private fullscreenCurPost (): void {
         Debug.log("hovering over", HoverZoom.curPost);
         if (HoverZoom.curPost == null) return;
-        const win = window.open(HoverZoom.curPost.file.original, '_blank');
+        const win = window.open(HoverZoom.curPost.file.original, "_blank");
         win.focus();
     }
 

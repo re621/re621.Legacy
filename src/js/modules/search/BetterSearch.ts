@@ -17,6 +17,7 @@ import { BlacklistEnhancer } from "./BlacklistEnhancer";
 export class BetterSearch extends RE6Module {
 
     private static readonly PAGES_PRELOAD = 3;  // Number of pages to pre-load when `loadPrevPages` is true
+
     private static readonly CLICK_DELAY = 200;  // Timeout for double-click events
 
     private static paused = false;              // If true, stops several actions that may interfere with other modules
@@ -24,7 +25,9 @@ export class BetterSearch extends RE6Module {
     public static originalTags: string;
 
     private $wrapper: JQuery<HTMLElement>;      // Wrapper object containing the loading and content sections
+
     private $content: JQuery<HTMLElement>;      // Section containing post thumbnails
+
     private $quickEdit: JQuery<HTMLElement>;    // Quick tags form
 
     private $paginator: JQuery<HTMLElement>;    // Pagination element
@@ -32,21 +35,26 @@ export class BetterSearch extends RE6Module {
     private observer: IntersectionObserver;     // Handles dynamic post rendering
 
     private queryTags: string[];                // Array containing the current search query
+
     private queryPage: string;                  // Output page, either as a number of in `a12345` / `b12345` format
+
     private queryLimit: number;                 // Maximum number of posts per request
 
     private pageResult: Promise<APIPost[]>;     // Post data, called in `prepare`, used in `create`
+
     private pageResultCount: number;            // Number of posts loaded in the last fetch
 
     private lastPage: number;                   // Last page number from the vanilla pagination
+
     private hasMorePages: boolean;              // If false, there are no more posts to load
+
     private loadingPosts: boolean;              // True value indicates that infinite scroll is loading posts
 
-    public constructor() {
+    public constructor () {
         super([PageDefinition.search, PageDefinition.favorites], true, true, [BlacklistEnhancer]);
     }
 
-    protected getDefaultSettings(): Settings {
+    protected getDefaultSettings (): Settings {
         return {
             enabled: true,
 
@@ -87,7 +95,7 @@ export class BetterSearch extends RE6Module {
         };
     }
 
-    public async prepare(): Promise<void> {
+    public async prepare (): Promise<void> {
         await super.prepare();
 
         // Clear the old thumbnails during script startup
@@ -113,7 +121,7 @@ export class BetterSearch extends RE6Module {
         $("#content").attr("loading", "true");
     }
 
-    public create(): void {
+    public create (): void {
         super.create();
 
         // Scrape the old paginator for data
@@ -171,7 +179,7 @@ export class BetterSearch extends RE6Module {
             .on("re621:filters", "post", (event) => { Post.get(event.currentTarget).updateFilters(); })
             .on("re621:visibility", "post", (event) => { Post.get(event.currentTarget).updateVisibility(); });
         BetterSearch.on("postcount", () => { this.updatePostCount(); });
-        BetterSearch.on("paginator", () => { this.reloadPaginator(); })
+        BetterSearch.on("paginator", () => { this.reloadPaginator(); });
 
         const intersecting: Set<number> = new Set();
         let selectedPage = this.queryPage;
@@ -205,7 +213,7 @@ export class BetterSearch extends RE6Module {
                         }
                     }, 100);
                 }
-            })
+            });
         }, config);
 
         // Initial post load
@@ -227,7 +235,7 @@ export class BetterSearch extends RE6Module {
                         "id": "search-stats-count",
                     })
                     .on("re621:update", () => {
-                        const results = (this.lastPage - 1) * postsPerPage + this.pageResultCount;
+                        const results = ((this.lastPage - 1) * postsPerPage) + this.pageResultCount;
                         const queryPageNum = parseInt(this.queryPage);
                         const isLastPage = this.lastPage == queryPageNum;
 
@@ -250,7 +258,7 @@ export class BetterSearch extends RE6Module {
                                     .text("~" + Util.formatK(results - Math.ceil(postsPerPage * 0.5)) + " Posts")
                                     .attr(
                                         "title",
-                                        `Between ${results - postsPerPage} and ${results} posts were found.\nGo to the last page of the search to get the exact number.`
+                                        `Between ${results - postsPerPage} and ${results} posts were found.\nGo to the last page of the search to get the exact number.`,
                                     );
                         }
                     })
@@ -315,7 +323,7 @@ export class BetterSearch extends RE6Module {
                             .html(`Page&nbsp;${(i + 1)}`)
                             .appendTo(this.$content);
 
-                        pagesLoaded++
+                        pagesLoaded++;
                     }
                 }
 
@@ -354,26 +362,27 @@ export class BetterSearch extends RE6Module {
 
         BetterSearch.createResizeButtons();
         if (!this.fetchSettings("thumbnailResizeButtons") || !this.fetchSettings("imageSizeChange"))
-            BetterSearch.toggleResizeButtons(false)
+            BetterSearch.toggleResizeButtons(false);
     }
 
     /** If true, InfiniteScroll and HoverZoom are both paused */
-    public static isPaused(): boolean { return BetterSearch.paused; }
-    public static setPaused(state: boolean): void {
+    public static isPaused (): boolean { return BetterSearch.paused; }
+
+    public static setPaused (state: boolean): void {
         BetterSearch.paused = state;
         BetterSearch.trigger("paginator");
     }
 
     /** Updates the document title with the current page number */
-    private updatePageTitle(page: string): void {
-        document.title =
-            (this.queryTags.length == 0 ? "Posts" : this.queryTags.join(" ").replace(/_/g, " ")) +
-            (page != "1" ? (" - Page " + page) : "") +
-            " - " + Page.getSiteName();
+    private updatePageTitle (page: string): void {
+        document.title
+            = (this.queryTags.length == 0 ? "Posts" : this.queryTags.join(" ").replace(/_/g, " "))
+            + (page != "1" ? (" - Page " + page) : "")
+            + " - " + Page.getSiteName();
     }
 
     /** Creates the basic module structure */
-    private createStructure(): void {
+    private createStructure (): void {
 
         // Post Container
         this.$wrapper = $("#content")
@@ -396,36 +405,36 @@ export class BetterSearch extends RE6Module {
             })
             .addClass("simple_form")
             .html(
-                `<input type="hidden" name="_method" value="put">` +
-                `<div class="quick-tags-toolbar">` +
-                `   <input type="submit" name="submit" value="Submit">` +
-                `   <input type="button" name="cancel" value="Cancel">` +
-                `   <input type="text" name="reason" placeholder="Edit Reason" title="Edit Reason" id="re621_qedit_reason">` +
-                `   <input type="text" name="parent" placeholder="Parent ID" title="Parent ID" id="re621_qedit_parent">` +
-                `   <select name="post[rating]" title="Rating" id="re621_qedit_rating">
+                `<input type="hidden" name="_method" value="put">`
+                + `<div class="quick-tags-toolbar">`
+                + `   <input type="submit" name="submit" value="Submit">`
+                + `   <input type="button" name="cancel" value="Cancel">`
+                + `   <input type="text" name="reason" placeholder="Edit Reason" title="Edit Reason" id="re621_qedit_reason">`
+                + `   <input type="text" name="parent" placeholder="Parent ID" title="Parent ID" id="re621_qedit_parent">`
+                + `   <select name="post[rating]" title="Rating" id="re621_qedit_rating">
                         <option value="s">Safe</option>
                         <option value="q">Questionable</option>
                         <option value="e">Explicit</option>
-                    </select>` +
-                `   <select name="quick-edit-mode" id="re621_qedit_mode">
+                    </select>`
+                + `   <select name="quick-edit-mode" id="re621_qedit_mode">
                         <option value="overview">Full Tags</option>
                         <option value="changes">Changes</option>
-                    </select>` +
-                `   <div class="quick-tags-info">` +
-                `       <span id="re621-qedit-dimensions"></span>` +
-                `       <span id="re621-qedit-flags" class="display-none-important"></span>` +
-                `       <a id="re621-qedit-history" href="post_versions">history</a>` +
-                `   </div>` +
-                `</div>` +
-                `<div class="quick-tags-container">` +
-                `   <div class="post-thumbnail" id="quick-tags-thumbnail">` +
-                `       <img id="quick-tags-image" src="" />` +
-                `   </div>` +
-                `   <div>` +
-                `       <textarea name="post[tag_string]" id="re621_qedit_tags" data-autocomplete="tag-edit" class="ui-autocomplete-input" autocomplete="off"></textarea>` +
-                `   </div>` +
-                `</div>` +
-                ``
+                    </select>`
+                + `   <div class="quick-tags-info">`
+                + `       <span id="re621-qedit-dimensions"></span>`
+                + `       <span id="re621-qedit-flags" class="display-none-important"></span>`
+                + `       <a id="re621-qedit-history" href="post_versions">history</a>`
+                + `   </div>`
+                + `</div>`
+                + `<div class="quick-tags-container">`
+                + `   <div class="post-thumbnail" id="quick-tags-thumbnail">`
+                + `       <img id="quick-tags-image" src="" />`
+                + `   </div>`
+                + `   <div>`
+                + `       <textarea name="post[tag_string]" id="re621_qedit_tags" data-autocomplete="tag-edit" class="ui-autocomplete-input" autocomplete="off"></textarea>`
+                + `   </div>`
+                + `</div>`
+                + ``,
             )
             .on("re621:redraw", () => {
                 const post: PostData = this.$quickEdit.data("wfpost");
@@ -440,7 +449,7 @@ export class BetterSearch extends RE6Module {
 
                 this.$quickEdit.data("thumb")
                     .data("wfpost", post)
-                    .attr({ "data-id": post.id, });
+                    .attr({ "data-id": post.id });
                 this.$quickEdit.data("image").attr("src", post.file.sample);
 
                 if (this.$quickEdit.data("mode").val() == "overview")
@@ -449,7 +458,7 @@ export class BetterSearch extends RE6Module {
                         .val(post.tagString + " ");
                 else this.$quickEdit.data("tags")
                     .val("")
-                    .attr({ "placeholder": "Tags listed here will be added to the post.\nPreface a tag with a minus (-) to remove it instead.", });
+                    .attr({ "placeholder": "Tags listed here will be added to the post.\nPreface a tag with a minus (-) to remove it instead." });
                 this.$quickEdit.data("tags")
                     .data("originalTags", post.tags.all)
                     .trigger("re621:input")
@@ -469,15 +478,15 @@ export class BetterSearch extends RE6Module {
             "flags": $("#re621-qedit-flags"),
             "history": $("#re621-qedit-history"),
 
-            thumb: $("#quick-tags-thumbnail"),
-            image: $("#quick-tags-image"),
+            "thumb": $("#quick-tags-thumbnail"),
+            "image": $("#quick-tags-image"),
 
             "tags": $("#re621_qedit_tags"),
             "reason": $("#re621_qedit_reason"),
             "parent": $("#re621_qedit_parent"),
             "rating": $("#re621_qedit_rating"),
 
-            mode: $("#re621_qedit_mode"),
+            "mode": $("#re621_qedit_mode"),
         });
 
         this.$quickEdit.data("mode")
@@ -490,7 +499,7 @@ export class BetterSearch extends RE6Module {
                 Util.LS.setItem("re621.BetterSearch.QuickEditMode", mode);
 
                 this.$quickEdit.data("tags")
-                    .attr({ "placeholder": mode == "overview" ? "" : "Tags listed here will be added to the post.\nPreface a tag with a minus (-) to remove it instead.", })
+                    .attr({ "placeholder": mode == "overview" ? "" : "Tags listed here will be added to the post.\nPreface a tag with a minus (-) to remove it instead." })
                     .val(() => {
                         switch (mode) {
                             case "changes":
@@ -534,7 +543,7 @@ export class BetterSearch extends RE6Module {
                     return;
             }
 
-            E621.Post.id(postID).patch({ post: formData, }).then(
+            E621.Post.id(postID).patch({ post: formData }).then(
                 (response) => {
                     Debug.log(response);
 
@@ -549,7 +558,7 @@ export class BetterSearch extends RE6Module {
                     Danbooru.error(`An error occurred while updating a post`);
                     console.log(error);
                     this.$quickEdit.hide("fast");
-                }
+                },
             );
         });
 
@@ -570,21 +579,24 @@ export class BetterSearch extends RE6Module {
     }
 
     /** Refreshes the visible post count attribute */
-    public updatePostCount(): void {
+    public updatePostCount (): void {
         this.$content.attr("posts", $("post:visible").length);
     }
 
     /** Re-renders the posts that are currently being displayed */
-    public reloadRenderedPosts(): void {
+    public reloadRenderedPosts (): void {
         Post.find("rendered").each(post => post.render());
     }
 
     /** Updates the content wrapper attributes and variables */
-    public updateContentHeader(): void {
+    public updateContentHeader (): void {
         const conf = this.fetchSettings([
-            "imageSizeChange", "imageWidth",
-            "imageRatioChange", "imageRatio",
-            "imageMinWidth", "compactMode",
+            "imageSizeChange",
+"imageWidth",
+            "imageRatioChange",
+"imageRatio",
+            "imageMinWidth",
+"compactMode",
 
             "ribbonsAlt",
 
@@ -592,7 +604,8 @@ export class BetterSearch extends RE6Module {
             "highlightVisited",
             "hideSmartAliasOutput",
 
-            "hideInfoBar", "colorFavCount",
+            "hideInfoBar",
+"colorFavCount",
             "thumbnailResizeButtons",
         ]);
 
@@ -615,7 +628,7 @@ export class BetterSearch extends RE6Module {
         setContentParameter(conf.hideInfoBar, "hide-info-bar");             // Hide the post info bar
         setContentParameter(conf.colorFavCount, "color-fav-count");         // Change the color of the favorites counter
 
-        function setContentParameter(param: boolean, value: string): void {
+        function setContentParameter (param: boolean, value: string): void {
             if (param) searchContent.attr(value, "true");
             else searchContent.removeAttr(value);
         }
@@ -624,19 +637,19 @@ export class BetterSearch extends RE6Module {
     }
 
     /** Restarts various event listeners used by the module */
-    public reloadEventListeners(): void {
+    public reloadEventListeners (): void {
         this.reloadModeSwitchListener();
         this.reloadInfScrollListeners();
     }
 
-    public reloadModeSwitchListener(): void {
+    public reloadModeSwitchListener (): void {
         this.$content
             .on("click", "post a", (event) => { executeListener(event); })
             .on("pseudoclick", "post", (event) => { executeListener(event); });
 
         const $quickEdit = this.$quickEdit;
 
-        function executeListener(event: JQuery.ClickEvent | JQuery.TriggeredEvent): void {
+        function executeListener (event: JQuery.ClickEvent | JQuery.TriggeredEvent): void {
 
             const mode = $("#mode-box-mode").val();
             if (mode == "view" || !mode) return;
@@ -726,7 +739,7 @@ export class BetterSearch extends RE6Module {
                         (error) => {
                             Danbooru.error("An error occurred while recording the vote");
                             console.log(error);
-                        }
+                        },
                     );
                     break;
                 }
@@ -752,7 +765,7 @@ export class BetterSearch extends RE6Module {
                         (error) => {
                             Danbooru.error("An error occurred while recording the vote");
                             console.log(error);
-                        }
+                        },
                     );
                     break;
                 }
@@ -795,7 +808,7 @@ export class BetterSearch extends RE6Module {
     }
 
     /** Restarts the even listeners used by the infinite scroll submodule. */
-    private reloadInfScrollListeners(): void {
+    private reloadInfScrollListeners (): void {
         const fullpage = $(document),
             viewport = $(window);
 
@@ -837,23 +850,24 @@ export class BetterSearch extends RE6Module {
     }
 
     /** Retrieves post data from an appropriate API endpoint */
-    private async fetchPosts(page?: number | string): Promise<APIPost[]> {
+    private async fetchPosts (page?: number | string): Promise<APIPost[]> {
         if (Page.matches(PageDefinition.favorites)) {
             const userID = Page.getQueryParameter("user_id") || User.userID;
-            return E621.Favorites.get<APIPost>({ user_id: userID, page: page ? page : this.queryPage, limit: this.queryLimit }, 500)
+            return E621.Favorites.get<APIPost>({ user_id: userID, page: page ? page : this.queryPage, limit: this.queryLimit }, 500);
         }
 
         const parsedTags = [];
         for (const tag of this.queryTags) {
-            try { parsedTags.push(decodeURIComponent(tag)); }
-            catch (error) { return []; }    // If unable to decode (probably because of a % sign), just give up
+            try {   // If unable to decode (probably because of a % sign), just give up
+                parsedTags.push(decodeURIComponent(tag));
+            } catch (error) { return []; }
         }
 
         return E621.Posts.get<APIPost>({ tags: parsedTags, page: page ? page : this.queryPage, limit: this.queryLimit }, 500);
     }
 
     /** Loads the next page of results */
-    private async loadNextPage(): Promise<boolean> {
+    private async loadNextPage (): Promise<boolean> {
 
         this.queryPage = Util.Math.isNumeric(this.queryPage)
             ? this.queryPage = (parseInt(this.queryPage) + 1) + ""
@@ -896,7 +910,7 @@ export class BetterSearch extends RE6Module {
     }
 
     /** Rebuilds the DOM structure of the paginator */
-    public reloadPaginator(): void {
+    public reloadPaginator (): void {
 
         this.$paginator.html("");
 
@@ -947,7 +961,7 @@ export class BetterSearch extends RE6Module {
                 $("<span>")
                     .html("No More Posts")
                     .attr("id", "infscroll-next")
-                    .appendTo(loadMoreCont)
+                    .appendTo(loadMoreCont);
             }
         } else $("<span>").appendTo(this.$paginator);
 
@@ -977,9 +991,9 @@ export class BetterSearch extends RE6Module {
             let count = 0;
             for (let i = 1; i <= this.lastPage; i++) {
                 if (
-                    Util.Math.between(i, 0, (currentPage < 5 ? 5 : 3)) ||
-                    Util.Math.between(i, currentPage - 2, currentPage + 2) ||
-                    Util.Math.between(i, (currentPage < 5 ? (this.lastPage - 5) : (this.lastPage - 3)), this.lastPage)
+                    Util.Math.between(i, 0, (currentPage < 5 ? 5 : 3))
+                    || Util.Math.between(i, currentPage - 2, currentPage + 2)
+                    || Util.Math.between(i, (currentPage < 5 ? (this.lastPage - 5) : (this.lastPage - 3)), this.lastPage)
                 ) {
                     pageNum.push(i);
                     count++;
@@ -1000,7 +1014,7 @@ export class BetterSearch extends RE6Module {
             }
         }
 
-        function getPrevPageURL(page: string): string {
+        function getPrevPageURL (page: string): string {
 
             // Default pagination
             if (Util.Math.isNumeric(page)) return getPageURL(parseInt(page) - 1);
@@ -1012,7 +1026,7 @@ export class BetterSearch extends RE6Module {
             return getPageURL("a" + Post.get(lookup).id);
         }
 
-        function getNextPageURL(page: string): string {
+        function getNextPageURL (page: string): string {
 
             // Default pagination
             if (Util.Math.isNumeric(page)) {
@@ -1027,8 +1041,8 @@ export class BetterSearch extends RE6Module {
             return getPageURL("b" + Post.get(lookup).id);
         }
 
-        function getPageURL(page: number | string): string {
-            const url = new URL(window.location.toString())
+        function getPageURL (page: number | string): string {
+            const url = new URL(window.location.toString());
             url.searchParams.set("page", page + "");
             url.searchParams.set("nopreload", "true");
             return url.pathname + url.search;
@@ -1036,7 +1050,7 @@ export class BetterSearch extends RE6Module {
 
     }
 
-    private static getPostDiffs(posts: APIPost[], chunks = 10): PostDiff {
+    private static getPostDiffs (posts: APIPost[], chunks = 10): PostDiff {
         const response: PostDiff = {
             refresh: getDiff(posts[0], posts[posts.length - 1]),
             largest: 1,
@@ -1051,7 +1065,7 @@ export class BetterSearch extends RE6Module {
             smallest = 1,
             average = 0;
         for (let i = 0; i < posts.length - period; i += period) {
-            const diff = getDiff(posts[i], posts[i + period])
+            const diff = getDiff(posts[i], posts[i + period]);
             // console.log(`bt ${posts[i].id}, ${posts[i + period].id}:`, diff)
             intervals.push(diff);
             if (diff > largest) largest = diff;
@@ -1063,7 +1077,7 @@ export class BetterSearch extends RE6Module {
 
         const intervalData = [];
         for (const entry of intervals)
-            intervalData.push(Util.Math.round(-1 * ((entry - smallest) / range) + 0.5));
+            intervalData.push(Util.Math.round((-1 * ((entry - smallest) / range)) + 0.5));
 
         response.largest = largest;
         response.average = average;
@@ -1071,14 +1085,14 @@ export class BetterSearch extends RE6Module {
 
         return response;
 
-        function getDiff(one: APIPost, two: APIPost): number {
+        function getDiff (one: APIPost, two: APIPost): number {
             return new Date(one.created_at).getTime() - new Date(two.created_at).getTime();
         }
     }
 
-    private static createResizeButtons(): void {
+    private static createResizeButtons (): void {
 
-        const betterSearch = ModuleController.get(BetterSearch)
+        const betterSearch = ModuleController.get(BetterSearch);
 
         Util.DOM.addSettingsButton({
             id: "subnav-button-increase",
@@ -1086,12 +1100,12 @@ export class BetterSearch extends RE6Module {
             title: "Increase Image Size",
             tabClass: "re6-bs-pmbutton push-right",
             onClick: async () => {
-                const cur = await betterSearch.fetchSettings("imageWidth")
-                await betterSearch.pushSettings("imageWidth", Math.min($("#content").innerWidth(), cur + 100))
-                await disableResizeButton()
+                const cur = await betterSearch.fetchSettings("imageWidth");
+                await betterSearch.pushSettings("imageWidth", Math.min($("#content").innerWidth(), cur + 100));
+                await disableResizeButton();
                 if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
             },
-        }, ".nav-secondary")
+        }, ".nav-secondary");
 
         Util.DOM.addSettingsButton({
             id: "subnav-button-decrease",
@@ -1099,32 +1113,32 @@ export class BetterSearch extends RE6Module {
             title: "Decrease Image Size",
             tabClass: "re6-bs-pmbutton",
             onClick: async () => {
-                const cur = await betterSearch.fetchSettings("imageWidth")
-                await betterSearch.pushSettings("imageWidth", Math.max(150, cur - 100))
-                await disableResizeButton()
+                const cur = await betterSearch.fetchSettings("imageWidth");
+                await betterSearch.pushSettings("imageWidth", Math.max(150, cur - 100));
+                await disableResizeButton();
                 if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
             },
-        }, ".nav-secondary")
+        }, ".nav-secondary");
 
-        async function disableResizeButton(): Promise<void> {
-            const cur = await betterSearch.fetchSettings("imageWidth")
+        async function disableResizeButton (): Promise<void> {
+            const cur = await betterSearch.fetchSettings("imageWidth");
             if (cur <= 150) {
-                $("#subnav-button-decrease").addClass("resize-disabled")
+                $("#subnav-button-decrease").addClass("resize-disabled");
             } else {
-                $("#subnav-button-decrease").removeClass("resize-disabled")
+                $("#subnav-button-decrease").removeClass("resize-disabled");
             }
 
             if (cur >= $("#content").innerWidth()) {
-                $("#subnav-button-increase").addClass("resize-disabled")
+                $("#subnav-button-increase").addClass("resize-disabled");
             } else {
-                $("#subnav-button-increase").removeClass("resize-disabled")
+                $("#subnav-button-increase").removeClass("resize-disabled");
             }
         }
 
-        disableResizeButton()
+        disableResizeButton();
     }
 
-    public static toggleResizeButtons(buttonsEnabled: boolean): void {
+    public static toggleResizeButtons (buttonsEnabled: boolean): void {
         $("menu.nav-secondary li.re6-bs-pmbutton")
             .attr("hide-resize-buttons", !buttonsEnabled + "");
     }

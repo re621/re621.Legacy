@@ -1,6 +1,6 @@
 /**
  * ===== Single-response functions =====
- * Executed upon being called, send a response, then terminate.  
+ * Executed upon being called, send a response, then terminate.
  * Must be called from XM.Chrome.execBackgroundRequest()
  */
 
@@ -18,7 +18,7 @@ const sRespFn = {
                             active: active,
                             index: typeof data[0] === "undefined" ? undefined : data[0].index + 1,
                         }, () => { resolve(true); });
-                    })
+                    });
                 });
             },
             "setClipboard": (data): void => {
@@ -29,16 +29,16 @@ const sRespFn = {
                 document.execCommand("copy");
                 copyFrom.blur();
                 document.body.removeChild(copyFrom);
-            }
+            },
         },
     },
-}
+};
 
-async function handleBackgroundMessage(request, sender, sendResponse): Promise<void> {
+async function handleBackgroundMessage (request, sender, sendResponse): Promise<void> {
 
-    if (sRespFn[request.component] === undefined ||
-        sRespFn[request.component][request.module] === undefined ||
-        sRespFn[request.component][request.module][request.method] === undefined) {
+    if (sRespFn[request.component] === undefined
+        || sRespFn[request.component][request.module] === undefined
+        || sRespFn[request.component][request.module][request.method] === undefined) {
 
         sendResponse({
             eventID: request.eventID,
@@ -69,20 +69,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 /**
  * Process an xmlHttpRequest
- * @param {string} port 
- * @param {object} details 
+ * @param {string} port
+ * @param {object} details
  */
-function xmlHttpNative(port, details: any): void {
+function xmlHttpNative (port, details: any): void {
     const request = new XMLHttpRequest();
 
     /** **onabort** callback to be executed if the request was aborted */
-    request.onabort = (): void => { port.postMessage(createResponse("onabort", request)); }
+    request.onabort = (): void => { port.postMessage(createResponse("onabort", request)); };
 
     /** **onerror** callback to be executed if the request ended up with an error */
-    request.onerror = (): void => { port.postMessage(createResponse("onerror", request)); }
+    request.onerror = (): void => { port.postMessage(createResponse("onerror", request)); };
 
     /** **onloadstart** callback to be executed if the request started to load */
-    request.onloadstart = (): void => { port.postMessage(createResponse("onloadstart", request)); }
+    request.onloadstart = (): void => { port.postMessage(createResponse("onloadstart", request)); };
 
     /** **onprogress** callback to be executed if the request made some progress */
     request.onprogress = (event): void => {
@@ -92,13 +92,13 @@ function xmlHttpNative(port, details: any): void {
             loaded: event.loaded,
             total: event.total,
         }));
-    }
+    };
 
     /** **onreadystatechange** callback to be executed if the request's ready state changed */
     request.onreadystatechange = (): void => { port.postMessage(createResponse("onreadystatechange", request)); };
 
     /** **ontimeout** callback to be executed if the request failed due to a timeout */
-    request.ontimeout = (): void => { port.postMessage(createResponse("ontimeout", request)); }
+    request.ontimeout = (): void => { port.postMessage(createResponse("ontimeout", request)); };
 
     /** **onload** callback to be executed if the request was loaded. */
     request.onload = (): void => {
@@ -113,7 +113,7 @@ function xmlHttpNative(port, details: any): void {
         } else {
             port.postMessage(createResponse("onerror", request));
         }
-    }
+    };
 
     request.open(details.method, details.url, true, details.username, details.password);
     delete details.headers["User-Agent"];
@@ -128,7 +128,7 @@ function xmlHttpNative(port, details: any): void {
 
     request.send(details.data);
 
-    function createResponse(event, request, data?: any): any {
+    function createResponse (event, request, data?: any): any {
         const result = {
             event: event,
             finalURL: request.finalURL,
@@ -147,7 +147,7 @@ function xmlHttpNative(port, details: any): void {
 chrome.runtime.onConnect.addListener((port) => {
 
     if (port.name === "XHR") {
-        port.onMessage.addListener((message) => { xmlHttpNative(port, message) });
+        port.onMessage.addListener((message) => { xmlHttpNative(port, message); });
         return;
     }
 

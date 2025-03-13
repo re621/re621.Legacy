@@ -6,22 +6,27 @@ import { Util } from "../utility/Util";
 export default class AvoidPosting {
 
     private static baseURL = "https://re621.app/cache/dnp/";
-    public static get Version(): number { return LocalStorage.DNP.Version; }
-    public static get CreatedAt(): number { return LocalStorage.DNP.CreatedAt; }
+
+    public static get Version (): number { return LocalStorage.DNP.Version; }
+
+    public static get CreatedAt (): number { return LocalStorage.DNP.CreatedAt; }
 
     private static CachedList: Set<string>;
-    public static get Cache(): Set<string> {
+
+    public static get Cache (): Set<string> {
         if (!this.CachedList) this.CachedList = LocalStorage.DNP.Cache;
         return new Set(this.CachedList);
     }
-    public static get size(): number {
+
+    public static get size (): number {
         return this.Cache.size;
     }
-    public static has(value: string): boolean {
+
+    public static has (value: string): boolean {
         return this.Cache.has(value);
     }
 
-    public static async init(): Promise<void> {
+    public static async init (): Promise<void> {
 
         if (LocalStorage.DNP.Expires > Util.Time.now()) return;
         try {
@@ -32,8 +37,9 @@ export default class AvoidPosting {
             });
 
             let json: any;
-            try { json = JSON.parse(versionData.responseText); }
-            catch (error) { return passTime(); }
+            try {
+                json = JSON.parse(versionData.responseText);
+            } catch (error) { return passTime(); }
 
             if (!json.version || json.version < this.Version)
                 return passTime();
@@ -44,8 +50,9 @@ export default class AvoidPosting {
                 method: "GET",
             });
 
-            try { json = JSON.parse(dnpData.responseText); }
-            catch (error) { return passTime(); }
+            try {
+                json = JSON.parse(dnpData.responseText);
+            } catch (error) { return passTime(); }
 
             if (!json.data || !Array.isArray) return passTime();
 
@@ -59,7 +66,7 @@ export default class AvoidPosting {
             LocalStorage.DNP.Expires = Util.Time.now() + (5 * Util.Time.MINUTE);
         }
 
-        function passTime(): void {
+        function passTime (): void {
             LocalStorage.DNP.Expires = Util.Time.now() + Util.Time.DAY;
         }
     }

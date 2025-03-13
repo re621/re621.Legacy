@@ -8,12 +8,14 @@ export class SubscriptionList {
     private instance: SubscriptionTracker;
 
     private storageTag: string;                 // XM // primary storage for subscriptions
+
     private extraTag: string;                   // LS // subscription extra data
 
     private subscriptions: Set<string>;
+
     private extra: { [id: string]: ExtraData };
 
-    public constructor(instance: SubscriptionTracker) {
+    public constructor (instance: SubscriptionTracker) {
         this.instance = instance;
         this.storageTag = "re621." + instance.getSettingsTag() + ".list";
         this.extraTag = "re621." + instance.getSettingsTag() + ".extra";
@@ -29,11 +31,11 @@ export class SubscriptionList {
     }
 
     /**
-     * Fetches the fresh list of subscriptions from storage.  
+     * Fetches the fresh list of subscriptions from storage.
      * Note that due to its asynchronous nature, this method is not executed
      * in the constructor - it needs to be run separately after initialization
      */
-    public async fetchSubscriptions(): Promise<void> {
+    public async fetchSubscriptions (): Promise<void> {
 
         // This is the dumbest thing ever, but the event listener won't trigger
         // unless the data actually changes. So, an extraneous element is added
@@ -62,11 +64,11 @@ export class SubscriptionList {
     }
 
     /**
-     * Saves the current list of subscriptions to storage.  
+     * Saves the current list of subscriptions to storage.
      * Take care to fetch the current subscriptions list first,
      * to avoid overwriting changes made in other tabs.
      */
-    public async pushSubscriptions(): Promise<void> {
+    public async pushSubscriptions (): Promise<void> {
         Util.LS.setItem(this.extraTag, JSON.stringify(this.extra));
 
         // See `fetchSubscriptions()` for an explanation
@@ -76,10 +78,10 @@ export class SubscriptionList {
     }
 
     /**
-     * Returns the current list of subscriptions.  
+     * Returns the current list of subscriptions.
      * This might not be equivalent to the stored lists
      */
-    public get(): Set<string> {
+    public get (): Set<string> {
         return this.subscriptions;
     }
 
@@ -87,50 +89,50 @@ export class SubscriptionList {
      * Returns the settings tag used for subscription storage
      * @returns Storage tag, as string
      */
-    public getStorageTag(): string {
+    public getStorageTag (): string {
         return this.storageTag;
     }
 
     /** Returns the number of subscribed items */
-    public count(): number {
+    public count (): number {
         return this.subscriptions.size;
     }
 
     /**
-     * Returns true if the user is subscribed to the specified item.  
+     * Returns true if the user is subscribed to the specified item.
      * Note that this might not be correct due to changes in other tabs.
      * @param id Item to check for
      */
-    public isSubscribed(id: string): boolean {
+    public isSubscribed (id: string): boolean {
         return this.subscriptions.has(id);
     }
 
     /** Adds the provided item to the list of subscriptions */
-    public async subscribe(id: string): Promise<void> {
+    public async subscribe (id: string): Promise<void> {
         this.subscriptions.add(id);
         return this.pushSubscriptions();
     }
 
     /** Deletes the provided item from the list of subscriptions */
-    public async unsubscribe(id: string): Promise<void> {
+    public async unsubscribe (id: string): Promise<void> {
         this.subscriptions.delete(id);
         delete this.extra[id];
         return this.pushSubscriptions();
     }
 
-    public getExtraData(name: string): ExtraData {
+    public getExtraData (name: string): ExtraData {
         return this.extra[name];
     }
 
-    public addExtraData(uid: string, data: ExtraData): void {
+    public addExtraData (uid: string, data: ExtraData): void {
         this.extra[uid] = data;
     }
 
-    public deleteExtraData(name: string): void {
+    public deleteExtraData (name: string): void {
         delete this.extra[name];
     }
 
-    public clearExtraData(): void {
+    public clearExtraData (): void {
         this.extra = {};
     }
 
@@ -140,4 +142,4 @@ type ExtraData = {
     name?: string;
     data?: string;
     last?: number;
-}
+};

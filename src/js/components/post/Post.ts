@@ -15,20 +15,31 @@ export class Post implements PostData {
     public $ref: JQuery<HTMLElement>;       // reference to the post's DOM object
 
     public id: number;
+
     public flags: Set<PostFlag>;
+
     public score: {
         up: number;
         down: number;
         total: number;
-    }
+    };
+
     public user_score: number;              // user's current vote. might be undefined if no vote has been registered this session
+
     public favorites: number;               // total number of favorites
+
     public is_favorited: boolean;           // true if the post is in the user's favorites
+
     public comments: number;                // total number of comments
+
     public rating: PostRating;              // rating in the one-letter lowercase format (s, q, e)
+
     public uploader: number;                // uploader ID
+
     public uploaderName: string;            // name of the uploader; probably not available
+
     public approver: number;                // approver ID, or -1 if there isn't one
+
     public page: string;                    // search page. can either be numeric, or in a- / b- format
 
     public date: {
@@ -38,6 +49,7 @@ export class Post implements PostData {
     };
 
     public tagString: string;               // string with space-separated tags. Makes outputting tags easier
+
     public tags: {
         all: Set<string>;
         artist: Set<string>;
@@ -51,9 +63,11 @@ export class Post implements PostData {
         meta: Set<string>;
         lore: Set<string>;
     };
+
     tagCategoriesKnown: boolean;            // false if the data is scraped from the page, and is thus missing tag category data
 
     public sources: string[];
+
     public description: string;
 
     public file: {
@@ -64,6 +78,7 @@ export class Post implements PostData {
         preview: string;                    // thumbnail (150px). for SWF, null or undefined
         size: number;
     };
+
     public loaded: LoadedFileType;          // currently loaded file size. used in hover loading mode
 
     public img: {
@@ -82,21 +97,21 @@ export class Post implements PostData {
     public rel: {
         children: Set<number>;              // IDs of child posts
         parent: number;                     // ID of the parent post
-    }
+    };
 
     public meta: {
         duration: number;                   // in seconds - for webm only, null for everything else
         animated: boolean;                  // file is animated in any way (gif, webm, swf, etc)
         sound: boolean;                     // file has sound effects of any kind
         interactive: boolean;               // file has interactive elements (webm / swf)
-    }
+    };
 
     public warning: {
         sound: boolean;                     // file is marked with a sound warning
         epilepsy: boolean;                  // file is marked with epilepsy warning
-    }
+    };
 
-    private constructor(data: PostData, $ref: JQuery<HTMLElement>) {
+    private constructor (data: PostData, $ref: JQuery<HTMLElement>) {
         for (const [key, value] of Object.entries(data)) this[key] = value;
         this.$ref = $ref;
         this.$ref.data("wfpost", this);
@@ -105,7 +120,7 @@ export class Post implements PostData {
     }
 
     /** Updates the post's data from the API response */
-    public update(data: APIPost): Post {
+    public update (data: APIPost): Post {
         for (const [key, value] of Object.entries(PostData.fromAPI(data)))
             this[key] = value;
 
@@ -115,25 +130,29 @@ export class Post implements PostData {
     }
 
     /** Returns true if the post has been rendered, false otherwise */
-    public isRendered(): boolean {
+    public isRendered (): boolean {
         return this.$ref.attr("rendered") == "true";
     }
 
     /** Returns true if the post is currently filtered out by the blacklist */
-    public isBlacklisted(): boolean {
+    public isBlacklisted (): boolean {
         return this.$ref.attr("blacklisted") == "true";
     }
 
     /** Converts the placeholder DOM into an actual post element */
-    public render(): Post {
+    public render (): Post {
 
         const conf = ModuleController.get(BetterSearch).fetchSettings([
             "imageRatioChange",                                 // renderArticle
             "clickAction",                                      // renderLink
-            "imageLoadMethod", "hoverTags",                     // renderImage
-            "autoPlayGIFs", "maxPlayingGIFs",
-            "ribbonsFlag", "ribbonsRel",                        // renderRibbons
-            "buttonsVote", "buttonsFav",                        // renderButtons
+            "imageLoadMethod",
+"hoverTags",                     // renderImage
+            "autoPlayGIFs",
+"maxPlayingGIFs",
+            "ribbonsFlag",
+"ribbonsRel",                        // renderRibbons
+            "buttonsVote",
+"buttonsFav",                        // renderButtons
             "customFlagsExpanded",
         ]);
 
@@ -159,7 +178,7 @@ export class Post implements PostData {
             .append(PostParts.renderRibbons(this, conf))     // Ribbons
             .append(PostParts.renderButtons(this, conf))     // Voting Buttons
             .append(PostParts.renderFlags(this, conf))             // Custom Flags
-            .append(PostParts.renderInfo(this))              // Post info
+            .append(PostParts.renderInfo(this));              // Post info
 
         if (!conf.imageRatioChange) this.$ref.css("--img-ratio", this.img.ratio);
         if (this.meta.duration) this.$ref.css("--duration", this.meta.duration);
@@ -171,7 +190,7 @@ export class Post implements PostData {
     }
 
     /** Resets the previously rendered post element back to placeholder state */
-    public reset(): Post {
+    public reset (): Post {
 
         // Clean up attached events and data
         PostParts.cleanup(this);
@@ -195,7 +214,7 @@ export class Post implements PostData {
     }
 
     /** Refreshes the blacklist and custom flagger filters */
-    public updateFilters(): Post {
+    public updateFilters (): Post {
         CustomFlagger.addPost(this);
         Blacklist.addPost(this);
 
@@ -203,10 +222,10 @@ export class Post implements PostData {
     }
 
     /**
-     * Refreshes the post's blacklist status.  
+     * Refreshes the post's blacklist status.
      * Should be executed every time a blacklist filter is toggled.
      */
-    public updateVisibility(): Post {
+    public updateVisibility (): Post {
         const state = Blacklist.checkPostAlt(this.id);
         if (state) {
             if (state == 1) {
@@ -219,17 +238,17 @@ export class Post implements PostData {
     }
 
     /**
-     * Returns a Post object that matches the provided ID.  
+     * Returns a Post object that matches the provided ID.
      * Alternatively, fetches the Post object for the provided DOM element.
-     * @param post Post object, if it exists.  
-     * `null` is returned if the DOM element does not exist.  
+     * @param post Post object, if it exists.
+     * `null` is returned if the DOM element does not exist.
      * `undefined` is returned if the DOM element exists, but lacks data
      */
-    public static get(post: number): Post;
-    public static get(post: Element): Post;
-    public static get(post: JQuery<Element>): Post;
-    public static get(type: "first" | "last" | "random"): Post;
-    public static get(post: number | Element | JQuery<Element> | string): Post {
+    public static get (post: number): Post;
+    public static get (post: Element): Post;
+    public static get (post: JQuery<Element>): Post;
+    public static get (type: "first" | "last" | "random"): Post;
+    public static get (post: number | Element | JQuery<Element> | string): Post {
         if (typeof post == "number") {
             post = $("#entry_" + post).first();
             if (post.length == 0) return null;
@@ -259,10 +278,10 @@ export class Post implements PostData {
     }
 
     /**
-     * Returns the currently visible post.  
+     * Returns the currently visible post.
      * Only applicable on the individual post page (i.e. `/posts/12345`).
      */
-    public static getViewingPost(): Post {
+    public static getViewingPost (): Post {
         const container = $("#image-container");
         if (container.data("wfpost") !== undefined) return Post.get(container);
         return new Post(PostData.fromDOM(), container);
@@ -272,7 +291,7 @@ export class Post implements PostData {
      * Returns all Post elements of the specified type
      * @param type Type to look for
      */
-    public static find(type: "rendered" | "blacklisted" | "hovering" | "visible" | "existant" | "all" | number): PostSet {
+    public static find (type: "rendered" | "blacklisted" | "hovering" | "visible" | "existant" | "all" | number): PostSet {
         const result = new PostSet();
 
         // Return posts up to specified ID
@@ -318,7 +337,7 @@ export class Post implements PostData {
      * @param page Page of the search results
      * @param imageRatioChange Image crop, if applicable
      */
-    public static make(data: APIPost, page?: string, imageRatioChange?: boolean): Post {
+    public static make (data: APIPost, page?: string, imageRatioChange?: boolean): Post {
 
         const post = PostData.fromAPI(data, page);
 
@@ -365,7 +384,7 @@ export class Post implements PostData {
 }
 
 /**
- * Generalized post data that is not attached to a specific element.  
+ * Generalized post data that is not attached to a specific element.
  * Generated either from an API result, or from a DOM element.
  */
 export interface PostData {
@@ -462,7 +481,7 @@ export namespace PostData {
      * @param data API result
      * @param page Search page
      */
-    export function fromAPI(data: APIPost, page?: string): PostData {
+    export function fromAPI (data: APIPost, page?: string): PostData {
 
         const tags = APIPost.getTagSet(data),
             flags = PostFlag.get(data);
@@ -473,7 +492,7 @@ export namespace PostData {
             score: {
                 up: data.score.up,
                 down: data.score.down,
-                total: data.score.total
+                total: data.score.total,
             },
             user_score: data["user_score"],
             favorites: data.fav_count,
@@ -555,10 +574,10 @@ export namespace PostData {
     }
 
     /**
-     * Generates PostData from a DOM element  
+     * Generates PostData from a DOM element
      * Only works on an individual post page (ex. `/posts/12345`)
      */
-    export function fromDOM(): PostData {
+    export function fromDOM (): PostData {
 
         const $article = $("#image-container");
         const data: APIPost = JSON.parse($article.attr("data-post"));
@@ -591,7 +610,7 @@ export namespace PostData {
         data["preview"] = {
             "width": -1,
             "height": -1,
-            "url": `https://static1.e621.net/data/preview/${md52}/${md52}/${md5}.jpg`
+            "url": `https://static1.e621.net/data/preview/${md52}/${md52}/${md5}.jpg`,
         };
 
         // Fetch the user's current vote
@@ -604,7 +623,7 @@ export namespace PostData {
 
         return PostData.fromAPI(data);
 
-        function getTags(group: string): string[] {
+        function getTags (group: string): string[] {
             const result: string[] = [];
             for (const element of $(`#tag-list .${group}-tag-list`).children()) {
                 result.push($(element).find(".search-tag").text().replace(/ /g, "_"));
@@ -614,11 +633,11 @@ export namespace PostData {
     }
 
     /**
-     * Generates PostData from a DOM element  
+     * Generates PostData from a DOM element
      * Unlike `fromDOM()`, works on native thumbnails (ex. `<article>`)
      * @param $article Article to parse for data
      */
-    export function fromThumbnail($article: JQuery<HTMLElement>, cached = true): PostData {
+    export function fromThumbnail ($article: JQuery<HTMLElement>, cached = true): PostData {
 
         // Cache the data, since the calculations below cause some lag that is
         // noticeable when this has to be done on the fly, like in HoverZoom.
@@ -740,7 +759,7 @@ export namespace PostData {
      * Creates a thumbnail preview from an MD5 hash
      * @param md5 MD5 hash
      */
-    export function createPreviewUrlFromMd5(md5: string): string {
+    export function createPreviewUrlFromMd5 (md5: string): string {
         // Assume that the post is flash when no md5 is passed
         return md5 == ""
             ? "https://static1.e621.net/images/download-preview.png"
@@ -763,7 +782,7 @@ export enum FileExtension {
 }
 
 export namespace FileExtension {
-    export function fromString(input: string): FileExtension {
+    export function fromString (input: string): FileExtension {
         switch (input) {
             case "jpeg":
             case "jpg": return FileExtension.JPG;

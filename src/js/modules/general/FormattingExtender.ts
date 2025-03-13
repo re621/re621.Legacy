@@ -59,7 +59,7 @@ export class FormattingExtender extends RE6Module {
 
     private observer: IntersectionObserver;
 
-    public constructor() {
+    public constructor () {
         super([], true, false, [], "FormattingHelper");
     }
 
@@ -67,7 +67,7 @@ export class FormattingExtender extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings(): Settings {
+    protected getDefaultSettings (): Settings {
         return {
             enabled: true,
             buttonsActive: [
@@ -99,7 +99,7 @@ export class FormattingExtender extends RE6Module {
     }
 
     /** Creates the Formatting Helpers for appropriate textareas */
-    public create(): void {
+    public create (): void {
         super.create();
 
         Danbooru.DText.override_formatting(this.processFormattingTag);
@@ -111,7 +111,7 @@ export class FormattingExtender extends RE6Module {
                 this.observer.unobserve(value.target);
                 new Formatter(this, wrapper);
                 this.regenerateButtons();
-            })
+            });
         }, {
             root: null,
             rootMargin: "100% 50% 100% 50%",
@@ -122,15 +122,15 @@ export class FormattingExtender extends RE6Module {
             this.observer.observe(wrapper);
     }
 
-    public regenerateButtons(): void {
+    public regenerateButtons (): void {
         const dtextButtons: HTMLElement[] = [];
         for (const button of this.fetchSettings<ButtonDefinition[]>("buttonsActive"))
             dtextButtons.push(ButtonDefinition.toEsixButton(button));
         this.reloadButtonToolbar($(dtextButtons));
     }
 
-    public reloadButtonToolbar(buttons: JQuery<HTMLElement>): void {
-        const e = document.createEvent('HTMLEvents');
+    public reloadButtonToolbar (buttons: JQuery<HTMLElement>): void {
+        const e = document.createEvent("HTMLEvents");
         e.initEvent("re621:reload", true, true);
 
         $(".dtext-formatter").each((index, element) => {
@@ -148,7 +148,7 @@ export class FormattingExtender extends RE6Module {
      * @param content Tag text (i.e. "[b]%selection%[/b]")
      * @param input Textarea
      */
-    private processFormattingTag(content: string, input: JQuery<HTMLInputElement>): void {
+    private processFormattingTag (content: string, input: JQuery<HTMLInputElement>): void {
 
         // Prevent formatting tag insertion when the drawer is open
         if (input.attr("paused") == "true") return;
@@ -178,8 +178,8 @@ export class FormattingExtender extends RE6Module {
             // Handle the %selection% tag
             const currentText = input.val() + "";
             const position = {
-                start: input.prop('selectionStart'),
-                end: input.prop('selectionEnd')
+                start: input.prop("selectionStart"),
+                end: input.prop("selectionEnd"),
             };
 
             const offset = {
@@ -212,13 +212,16 @@ class Formatter {
     private id: string;
 
     private wrapper: JQuery<HTMLElement>;       // element that contains the formatter UI
+
     private bdrawer: JQuery<HTMLElement>;       // button drawer with inactive buttons
+
     private toolbar: JQuery<HTMLElement>;       // toolbar with active buttons
 
     private editForm: Modal;
+
     private makeForm: Modal;
 
-    constructor(module: FormattingExtender, element: JQuery<HTMLElement>) {
+    constructor (module: FormattingExtender, element: JQuery<HTMLElement>) {
 
         this.module = module;
         this.wrapper = element;
@@ -243,7 +246,7 @@ class Formatter {
         this.setupSorting();
     }
 
-    private extendButtonToolbar(): void {
+    private extendButtonToolbar (): void {
         this.toolbar = this.wrapper.find("div.dtext-formatter-buttons").first();
 
         this.wrapper.on("re621:reload", () => {
@@ -262,7 +265,7 @@ class Formatter {
     }
 
     /** Creates the button drawer structure */
-    private createButtonDrawer(): void {
+    private createButtonDrawer (): void {
         // - Drawer Header
         const header = $("<div>")
             .addClass("dtext-formatter-customizer color-text")
@@ -350,7 +353,7 @@ class Formatter {
         });
     }
 
-    private bootstrapEditForm(): any {
+    private bootstrapEditForm (): any {
 
         this.editForm = null;
 
@@ -367,7 +370,7 @@ class Formatter {
                     async () => {
                         this.deleteButton(this.editForm.getActiveTrigger());
                         this.editForm.close();
-                    }
+                    },
                 ),
                 Form.button({ name: "update", value: "Update", type: "submit" }),
 
@@ -385,7 +388,7 @@ class Formatter {
                         name: values["name"],
                         icon: values["icon"],
                         text: values["text"],
-                    }
+                    },
                 );
                 this.editForm.close();
             });
@@ -411,7 +414,7 @@ class Formatter {
         });
     }
 
-    private bootstrapCreateForm(): void {
+    private bootstrapCreateForm (): void {
 
         // - New Button Process
         const newFormatForm = new Form(
@@ -440,7 +443,7 @@ class Formatter {
 
                 newFormatForm.reset();
                 this.makeForm.close();
-            }
+            },
         );
 
         this.makeForm = new Modal({
@@ -452,7 +455,7 @@ class Formatter {
         });
     }
 
-    private setupSorting(): void {
+    private setupSorting (): void {
         this.toolbar.sortable({
             helper: "clone",
             forceHelperSize: true,
@@ -478,7 +481,7 @@ class Formatter {
         });
     }
 
-    private async saveButtons(): Promise<void> {
+    private async saveButtons (): Promise<void> {
         const active = this.toolbar.children().get(),
             inactive = this.bdrawer.children().get();
 
@@ -516,7 +519,7 @@ class Formatter {
      * Creates a new element based on provided definition
      * @param config Button definition
      */
-    private async createButton(config: ButtonDefinition): Promise<void> {
+    private async createButton (config: ButtonDefinition): Promise<void> {
         config = ButtonDefinition.validate(config);
         const inactiveButtons = this.module.fetchSettings<ButtonDefinition[]>("buttonInactive");
         inactiveButtons.push(config);
@@ -524,7 +527,7 @@ class Formatter {
         this.module.regenerateButtons();
     }
 
-    private deleteButton($element: JQuery<HTMLElement>): void {
+    private deleteButton ($element: JQuery<HTMLElement>): void {
         $element.remove();
         this.saveButtons();
     }
@@ -534,7 +537,7 @@ class Formatter {
      * @param $element element of the button to update
      * @param config new configuration
      */
-    private updateButton($element: JQuery<HTMLElement>, config: ButtonDefinition): void {
+    private updateButton ($element: JQuery<HTMLElement>, config: ButtonDefinition): void {
         config = ButtonDefinition.validate(config);
         $element.data("button", config);
         console.log($element, config);
@@ -547,10 +550,10 @@ type ButtonDefinition = {
     name: string;
     icon: string;
     text: string;
-}
+};
 
 namespace ButtonDefinition {
-    export function toEsixButton(value: ButtonDefinition): HTMLElement {
+    export function toEsixButton (value: ButtonDefinition): HTMLElement {
         const iconUnicode = ButtonDefinition.getIcon(value.icon);
         if (!iconUnicode) return $("<span>").addClass("spacer")[0];
         return $("<a>")
@@ -566,11 +569,11 @@ namespace ButtonDefinition {
      * Provided with a valid icon name, returns its character value
      * @param name Icon name
      */
-    export function getIcon(name: string): string {
+    export function getIcon (name: string): string {
         return iconDefinitions[name] || null;
     }
 
-    export function validate(value: ButtonDefinition): ButtonDefinition {
+    export function validate (value: ButtonDefinition): ButtonDefinition {
         if (value.name === undefined) value.name = "New Button";
         if (value.icon === undefined) value.icon = "crow";
         if (value.text === undefined) value.text = "";

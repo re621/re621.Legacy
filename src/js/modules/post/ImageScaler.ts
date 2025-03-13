@@ -9,7 +9,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
  */
 export class ImageScaler extends RE6Module {
 
-    public constructor() {
+    public constructor () {
         super(PageDefinition.post, true);
         this.registerHotkeys(
             { keys: "hotkeyScale", fnct: this.cycleScaling },
@@ -21,7 +21,7 @@ export class ImageScaler extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings(): Settings {
+    protected getDefaultSettings (): Settings {
         return {
             enabled: true,
 
@@ -39,10 +39,10 @@ export class ImageScaler extends RE6Module {
     }
 
     /**
-     * Creates the module's structure.  
+     * Creates the module's structure.
      * Should be run immediately after the constructor finishes.
      */
-    public create(): void {
+    public create (): void {
         super.create();
 
         const $container = $("#image-container"),
@@ -81,9 +81,9 @@ export class ImageScaler extends RE6Module {
 
                 return;
             }
-            
+
             // Does not work with those types of files anyways
-            if(post.file.ext == "webm" || post.file.ext == "swf")
+            if (post.file.ext == "webm" || post.file.ext == "swf")
                 return;
 
             // Disable this when notes are being edited
@@ -97,26 +97,26 @@ export class ImageScaler extends RE6Module {
     }
 
     /** Opens the post in fullscreen mode */
-    private openFullscreen(): void {
+    private openFullscreen (): void {
         $("#image-download-link a")[0].click();
     }
 
     /** Cycles through scaling modes */
-    private cycleScaling(): void {
+    private cycleScaling (): void {
         Danbooru.Post.resize_cycle_mode();
     }
 
-    private calcDynamicSize(post: Post, mode: DynSizeMode): ImageScalingMode {
+    private calcDynamicSize (post: Post, mode: DynSizeMode): ImageScalingMode {
         if (mode == DynSizeMode.AspectScale) {
             if (post.img.ratio < (1 - this.fetchSettings<number>("dynSizeDeadzone"))) return ImageScalingMode.FitHeight;
             return ImageScalingMode.FitWidth;
         } else if (mode == DynSizeMode.TagScale) {
-            if (setHasAny(post.tags.all, this.fetchSettings<string>("dynSizeTags").split(" "))) return ImageScalingMode.FitWidth
+            if (setHasAny(post.tags.all, this.fetchSettings<string>("dynSizeTags").split(" "))) return ImageScalingMode.FitWidth;
             return ImageScalingMode.FitHeight;
         }
         return User.defaultImageSize;
 
-        function setHasAny(list: Set<string>, entries: string[]): boolean {
+        function setHasAny (list: Set<string>, entries: string[]): boolean {
             for (const entry of entries)
                 if (list.has(entry)) return true;
             return false;

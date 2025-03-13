@@ -7,17 +7,22 @@ import { Util } from "./Util";
 export class VersionChecker {
 
     public static scriptBuild = "0.0.1";        // actual, hard-coded version of the script
+
     public static latestBuild = "0.0.1";        // version of the latest release on github
+
     public static cachedBuild = "0.0.1";        // cached version of the script
 
     public static wasUpdated = false;           // the script has been updated - `currentBuild` and `scriptBuild` do not match
+
     public static hasUpdate = false;            // new version is available - `currentBuild` and `latestBuild` do not match
 
     public static lastUpdated = 0;               // last time the script pinged github to check for a new version
+
     public static changesText = "_~ Changelog not available ~_";
+
     public static changesHTML = "";
 
-    public static async init(): Promise<any> {
+    public static async init (): Promise<any> {
 
         // Load the hard-coded script version
         // For debugging purposes it can be emulated via a localStorage value
@@ -91,7 +96,7 @@ export class VersionChecker {
      * Fetches the release data from Github's API
      * @param node Version number, or "latest"
      */
-    private static async getGithubData(node: string): Promise<any> {
+    private static async getGithubData (node: string): Promise<any> {
         return XM.Connect.xmlHttpPromise({ url: "https://api.github.com/repos/re621/re621.Legacy/releases/" + node, method: "GET" }).then(
             (response: GMxmlHttpRequestResponse) => { return Promise.resolve(JSON.parse(response.responseText)); },
             () => {
@@ -100,7 +105,7 @@ export class VersionChecker {
                     name: "0.0.0",
                     body: "Error: Unable to fetch the changelog",
                 };
-            }
+            },
         );
     }
 

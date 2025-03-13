@@ -9,23 +9,26 @@ export class SubscriptionCache {
     // Instance of the tracker this cache belongs to
     // Needs to be here because fetching data is different between trackers
     private tracker: SubscriptionTracker;
+
     private storageTag: string;
+
     private extraTag: string;
 
     // Data cache, and an index of timestamps for quicker sorting
     private data: UpdateData;
+
     private index: number[];
 
-    public constructor(tracker: SubscriptionTracker) {
+    public constructor (tracker: SubscriptionTracker) {
         this.tracker = tracker;
         this.storageTag = "re621." + tracker.getSettingsTag() + ".cache";
         this.extraTag = "re621." + tracker.getSettingsTag() + ".extra";
 
-        this.data = {}
+        this.data = {};
         this.index = [];
     }
 
-    public async init(): Promise<void> {
+    public async init (): Promise<void> {
         // Cache isn't expected to be backwards compatible. Just delete it if the version differs.
         if (!await SubscriptionManager.isCacheValid()) {
             Util.LS.setItem(this.storageTag, "{}");
@@ -36,24 +39,23 @@ export class SubscriptionCache {
     }
 
     /** Loads the cache from local storage */
-    public async load(): Promise<boolean> {
-        try { this.data = JSON.parse(Util.LS.getItem(this.storageTag) || "{}"); }
-        catch (error) {
+    public async load (): Promise<boolean> {
+        try { this.data = JSON.parse(Util.LS.getItem(this.storageTag) || "{}"); } catch (error) {
             await this.clear();
             return Promise.resolve(false);
         }
         this.updateIndex();
-        return Promise.resolve(true)
+        return Promise.resolve(true);
     }
 
     /** Saves update cache to storage */
-    public async save(): Promise<boolean> {
+    public async save (): Promise<boolean> {
         Util.LS.setItem(this.storageTag, JSON.stringify(this.data));
         return XM.Storage.setValue(this.storageTag, Util.Time.now());
     }
 
     /** Irreversibly clears the update cache */
-    public async clear(): Promise<boolean> {
+    public async clear (): Promise<boolean> {
         this.data = {};
         this.index = [];
         return this.save();
@@ -66,7 +68,7 @@ export class SubscriptionCache {
      * @param status JQuery element to which status updates are to be appended
      * @returns True if changes have been made, false otherwise
      */
-    public async fetch(): Promise<boolean> {
+    public async fetch (): Promise<boolean> {
         const updates = await this.tracker.fetchUpdatedEntries();
         // console.log(`Sub${this.tracker.getTrackerID()}: ${Object.keys(updates).length} new, ${this.index.length} total`);
         if (Object.keys(updates).length == 0) Promise.resolve(false);
@@ -83,7 +85,7 @@ export class SubscriptionCache {
      * Returns an item corresponding to the provided timestamp
      * @param timestamp Timestamp to look for
      */
-    public getItem(timestamp: number): UpdateContent {
+    public getItem (timestamp: number): UpdateContent {
         return this.data[timestamp];
     }
 
@@ -91,7 +93,7 @@ export class SubscriptionCache {
      * Removes an item with the provided timestamp from cache
      * @param timestamp Timestamp to look for
      */
-    public async deleteItem(timestamp: number): Promise<boolean> {
+    public async deleteItem (timestamp: number): Promise<boolean> {
         const el = this.index.indexOf(timestamp);
         console.log("locating", timestamp, el);
         if (el == -1) return false;
@@ -102,29 +104,29 @@ export class SubscriptionCache {
     }
 
     /** Returns the number of items in cache */
-    public count(): number {
+    public count (): number {
         return this.index.length;
     }
 
     /** Strips all `new` entries of that status */
-    public async purgeNew(): Promise<boolean> {
+    public async purgeNew (): Promise<boolean> {
         for (const timestamp of this.index)
             delete this.data[timestamp].new;
         return this.save();
     }
 
     /** Re-creates the timestamp index from the stored data */
-    private updateIndex(): void {
+    private updateIndex (): void {
         this.index = Object.keys(this.data)
             .map(x => parseInt(x))
             .sort((a, b) => b - a); // newest to oldest
     }
 
     /**
-     * Processes the cache, removing duplicate entries and trimming to match the maximum size.  
-     * Note that this method presumes that the cache index is already up to date.  
+     * Processes the cache, removing duplicate entries and trimming to match the maximum size.
+     * Note that this method presumes that the cache index is already up to date.
      */
-    private trim(): void {
+    private trim (): void {
         const params = this.tracker.fetchSettings(["cacheMaxAge", "cacheSize"]);
 
         // If cacheMaxAge is set to never, its value is 0
@@ -163,15 +165,15 @@ export class SubscriptionCache {
         // Trims the index to cacheSize, then removes the unwanted items from the data
         const chunks = Util.chunkArray(this.index, params.cacheSize, "split");
         this.index = chunks[0];
-        chunks[1].forEach((entry: number) => { delete this.data[entry]; })
+        chunks[1].forEach((entry: number) => { delete this.data[entry]; });
     }
 
     /**
-     * Executes the provided function on every element in the cache.  
+     * Executes the provided function on every element in the cache.
      * If the function returns a value, said value will be assigned to the corresponding element.
      * @param fn Function to execute
      */
-    public forEach(fn: (data: UpdateContent, timestamp: number) => void | UpdateContent): void {
+    public forEach (fn: (data: UpdateContent, timestamp: number) => void | UpdateContent): void {
         this.index.forEach((timestamp) => {
             const result = fn(this.data[timestamp], timestamp);
             if (typeof result !== "undefined") this.data[timestamp] = result;

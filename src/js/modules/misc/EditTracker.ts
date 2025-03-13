@@ -4,17 +4,17 @@ import { Util } from "../../components/utility/Util";
 
 export class EditTracker extends RE6Module {
 
-    public constructor() {
+    public constructor () {
         super(PageDefinition.post);
     }
 
-    public create(): void {
+    public create (): void {
 
         if ($("#post_tag_string").is(":visible")) this.listen();
         else { $("body").one("click.re621", "#post-edit-link, #side-edit-link", () => { this.listen(); }); }
     }
 
-    private async listen(): Promise<void> {
+    private async listen (): Promise<void> {
 
         const input = $("#post_tag_string"),
             original = Util.getTags(input);
@@ -42,7 +42,7 @@ export class EditTracker extends RE6Module {
             changes.html(`<label>Tag Changes</label>\n` + output.join(" "));
         });
 
-        function escapeHTML(input: string): string {
+        function escapeHTML (input: string): string {
             return $("<span>").text(input).html();
         }
     }

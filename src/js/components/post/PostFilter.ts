@@ -9,11 +9,14 @@ export class PostFilter {
     private input: string;
 
     private entries: Filter[];          // individual filters
+
     private enabled: boolean;           // if false, the filters are ignored
+
     private matchIDs: Set<number>;      // post IDs matched by the filter
+
     private optionals: number;          // number of optional filters
 
-    constructor(input: string, enabled = true, options?: FilterOptions) {
+    constructor (input: string, enabled = true, options?: FilterOptions) {
         this.input = input.toLowerCase().trim();
         this.entries = [];
         this.enabled = enabled;
@@ -58,11 +61,11 @@ export class PostFilter {
                     break;
                 case FilterType.IsParent:
                 case FilterType.IsChild:
-                    if(!["true", "false", "yes", "no"].includes(filter))
+                    if (!["true", "false", "yes", "no"].includes(filter))
                         continue;
 
-                    if(filter == "yes") filter = "true";
-                    else if(filter == "no") filter = "false";
+                    if (filter == "yes") filter = "true";
+                    else if (filter == "no") filter = "false";
 
                     break;
             }
@@ -73,19 +76,19 @@ export class PostFilter {
     }
 
     /** Returns the original string from which this filter was created */
-    public getName(): string {
+    public getName (): string {
         return this.input;
     }
 
     /**
-     * Tests the provided post against the filter, and adds it to the cache if it passes.  
+     * Tests the provided post against the filter, and adds it to the cache if it passes.
      * Should be triggered every time a post is added or updated.
      * @param post Post to test against
      * @param shouldDecrement If false, does not remove the post from the filter if the tests fail
-     * @returns Whether or not the filter matches the post. 
+     * @returns Whether or not the filter matches the post.
      * If multiple posts are provided, returns true if all of them match.
      */
-    public update(post: PostData | PostData[], shouldDecrement = true): boolean {
+    public update (post: PostData | PostData[], shouldDecrement = true): boolean {
 
         // Take care of the multiple posts separately
         if (Array.isArray(post)) {
@@ -153,46 +156,46 @@ export class PostFilter {
                     break;
 
                 case FilterType.TagCount:
-                    result = PostFilterUtils.compareNumbers(post.tags.all.size, value, filter.comparison)
+                    result = PostFilterUtils.compareNumbers(post.tags.all.size, value, filter.comparison);
                     break;
                 case FilterType.GenTags:
-                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.general.size, value, filter.comparison)
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.general.size, value, filter.comparison);
                     break;
                 case FilterType.ArtTags:
-                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.artist.size, value, filter.comparison)
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.artist.size, value, filter.comparison);
                     break;
                 case FilterType.ContTags:
-                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.contributor.size, value, filter.comparison)
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.contributor.size, value, filter.comparison);
                     break;
                 case FilterType.CharTags:
-                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.character.size, value, filter.comparison)
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.character.size, value, filter.comparison);
                     break;
                 case FilterType.CopyTags:
-                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.copyright.size, value, filter.comparison)
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.copyright.size, value, filter.comparison);
                     break;
                 case FilterType.SpecTags:
-                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.species.size, value, filter.comparison)
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.species.size, value, filter.comparison);
                     break;
                 case FilterType.InvTags:
-                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.invalid.size, value, filter.comparison)
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.invalid.size, value, filter.comparison);
                     break;
                 case FilterType.MetaTags:
-                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.meta.size, value, filter.comparison)
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.meta.size, value, filter.comparison);
                     break;
                 case FilterType.LoreTags:
-                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.lore.size, value, filter.comparison)
+                    result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.lore.size, value, filter.comparison);
                     break;
 
                 case FilterType.IsParent:
                     result = post.has.children;
-                    if(value == "false") result = !result;
+                    if (value == "false") result = !result;
                     break;
                 case FilterType.IsChild:
                     result = post.has.parent;
-                    if(value == "false") result = !result;
+                    if (value == "false") result = !result;
                     break;
 
-                
+
                 default:
                     result = false;
             }
@@ -205,7 +208,7 @@ export class PostFilter {
         }
 
         // The post must match all normal filters, and at least one optional one
-        if(this.optionals > 0)
+        if (this.optionals > 0)
             result = ((this.entries.length - this.optionals > 0) || result) && optionalHits > 0;
 
         if (result === true) this.matchIDs.add(post.id);
@@ -218,7 +221,7 @@ export class PostFilter {
      * @param post Post to test against the filter
      * @param ignoreDisabled Return the result regardless of the filter's state
      */
-    public matches(post: Post, ignoreDisabled = false): boolean {
+    public matches (post: Post, ignoreDisabled = false): boolean {
         return this.matchesID(post.id, ignoreDisabled);
     }
 
@@ -227,36 +230,39 @@ export class PostFilter {
      * @param id ID of the post to test against the filter
      * @param ignoreDisabled Return the result regardless of the filter's state
      */
-    public matchesID(id: number, ignoreDisabled = false): boolean {
+    public matchesID (id: number, ignoreDisabled = false): boolean {
         return (this.enabled || ignoreDisabled) && this.matchIDs.has(id);
     }
 
     /**
-     * Alternative approach to `matchesID` method.  
+     * Alternative approach to `matchesID` method.
      * Returns:
      * - 0 if the filter does not match
      * - 1 if the filter matches, and is enabled
      * - 2 if the filter matches, but is disabled
      * @param id ID of the post to test against the filter
      */
-    public matchesIDAlt(id: number): number {
+    public matchesIDAlt (id: number): number {
         if (this.matchIDs.has(id)) return this.enabled ? 1 : 2;
         return 0;
     }
 
-    public getMatches(): Set<number> { return this.matchIDs; }
-    public getMatchesCount(): number { return this.matchIDs.size; }
+    public getMatches (): Set<number> { return this.matchIDs; }
 
-    public toggleEnabled(): void { this.enabled = !this.enabled; }
-    public setEnabled(enabled: boolean): void { this.enabled = enabled; }
-    public isEnabled(): boolean { return this.enabled; }
+    public getMatchesCount (): number { return this.matchIDs.size; }
+
+    public toggleEnabled (): void { this.enabled = !this.enabled; }
+
+    public setEnabled (enabled: boolean): void { this.enabled = enabled; }
+
+    public isEnabled (): boolean { return this.enabled; }
 
 }
 
 class PostFilterUtils {
 
     /** Returns true if the two provided numbers pass the specified comparison type */
-    public static compareNumbers(a: number, b: string, mode: ComparisonType): boolean {
+    public static compareNumbers (a: number, b: string, mode: ComparisonType): boolean {
         switch (mode) {
             case ComparisonType.Equals: return a === parseFloat(b);
             case ComparisonType.Smaller: return a < parseFloat(b);
@@ -280,7 +286,7 @@ class PostFilterUtils {
     }
 
     /** Returns true if the specified post has the provided tag */
-    public static tagsMatchesFilter(post: PostData, filter: string): boolean {
+    public static tagsMatchesFilter (post: PostData, filter: string): boolean {
         if (filter.includes("*")) {
             const regex = Tag.escapeSearchToRegex(filter);
             return regex.test(post.tagString);
@@ -337,7 +343,7 @@ enum FilterType {
 }
 
 namespace FilterType {
-    export function test(input: string): FilterType {
+    export function test (input: string): FilterType {
         input = input.toLowerCase();
         for (const key of Object.keys(FilterType))
             if (input.startsWith(FilterType[key] + ":")) return FilterType[key];
@@ -366,10 +372,10 @@ const ComparisonTypeAliases = {
     "==": ComparisonType.Equals,
     "<": ComparisonType.Smaller,
     ">": ComparisonType.Larger,
-}
+};
 
 namespace ComparisonType {
-    export function test(input: string): ComparisonType {
+    export function test (input: string): ComparisonType {
         input = input.toLowerCase();
         if (/.+\.\.\..+/.test(input)) return ComparisonType.Range;
         for (const [key, comparison] of Object.entries(ComparisonTypeAliases))

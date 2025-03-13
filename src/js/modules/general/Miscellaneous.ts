@@ -16,7 +16,7 @@ import { BetterSearch, ImageClickAction } from "../search/BetterSearch";
  */
 export class Miscellaneous extends RE6Module {
 
-    public constructor() {
+    public constructor () {
         super();
         this.registerHotkeys(
             { keys: "hotkeyNewComment", fnct: this.openNewComment },
@@ -33,7 +33,7 @@ export class Miscellaneous extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    protected getDefaultSettings(): Settings {
+    protected getDefaultSettings (): Settings {
         return {
             enabled: true,
 
@@ -63,10 +63,10 @@ export class Miscellaneous extends RE6Module {
     }
 
     /**
-     * Creates the module's structure.  
+     * Creates the module's structure.
      * Should be run immediately after the constructor finishes.
      */
-    public create(): void {
+    public create (): void {
         super.create();
 
         // Enhanced quoting button and copy ID button
@@ -189,7 +189,7 @@ export class Miscellaneous extends RE6Module {
             this.addRemoveFromSetButton();
         }
 
-        function uriEncodeArray(array: string[], delimiter = ","): string {
+        function uriEncodeArray (array: string[], delimiter = ","): string {
             const result = [];
             for (const el of array) result.push(encodeURIComponent(el));
             return result.join(delimiter);
@@ -197,7 +197,7 @@ export class Miscellaneous extends RE6Module {
     }
 
     /** Reset the content headers */
-    public resetContentHeaders(): void {
+    public resetContentHeaders (): void {
         const config = this.fetchSettings(["profileEnhancements"]);
 
         if (Page.matches(PageDefinition.profile) && config.profileEnhancements) $("#page").attr("enhancements", "true");
@@ -205,7 +205,7 @@ export class Miscellaneous extends RE6Module {
     }
 
     /** Emulates the clicking on "New Comment" link */
-    private openNewComment(): void {
+    private openNewComment (): void {
         if (Page.matches(PageDefinition.post)) {
             $("menu#post-sections > li > a[href$=comments]")[0].click();
             $("a.expand-comment-response")[0].click();
@@ -213,7 +213,7 @@ export class Miscellaneous extends RE6Module {
     }
 
     /** Emulated clicking on "Edit" tab */
-    private openEditTab(): void {
+    private openEditTab (): void {
         if (Page.matches(PageDefinition.post)) {
             window.setTimeout(() => { $("#post-edit-link")[0].click(); }, 100);
         }
@@ -223,7 +223,7 @@ export class Miscellaneous extends RE6Module {
      * Makes the searchbox stick to the page when scrolling down
      * @param state True to stick, false to unstick
      */
-    public createStickySearchbox(state = true): void {
+    public createStickySearchbox (state = true): void {
         $("body").attr("data-sticky", state + "");
     }
 
@@ -231,7 +231,7 @@ export class Miscellaneous extends RE6Module {
      * Makes the header navbar stick to the page when scrolling down
      * @param state True to stick, false to unstick
      */
-    public createStickyHeader(state = true): void {
+    public createStickyHeader (state = true): void {
         $("body").attr("data-sticky-header", state + "");
     }
 
@@ -239,19 +239,19 @@ export class Miscellaneous extends RE6Module {
      * Makes the quick tags form stick to the page when scrolling down
      * @param state True to stick, false to unstick
      */
-    public createStickyEditBox(state = true): void {
+    public createStickyEditBox (state = true): void {
         $("body").attr("data-sticky-editbox", state + "");
     }
 
     /** If true, completely removes the blacklisted section */
-    public hideBlacklist(state = true): void {
+    public hideBlacklist (state = true): void {
         $("body").attr("data-hide-blacklist", state + "");
     }
 
     /**
      * Handles the "Reply" button functionality
      */
-    private handleQuoteButton(): void {
+    private handleQuoteButton (): void {
         if (Page.matches(PageDefinition.forum)) {
             $(".forum-post-reply-link").each(function (index, element) {
                 const $newLink = $("<a>")
@@ -261,7 +261,7 @@ export class Miscellaneous extends RE6Module {
                 $(element).after($newLink).remove();
             });
 
-            $(".re621-forum-post-reply").on('click', (event) => {
+            $(".re621-forum-post-reply").on("click", (event) => {
                 event.preventDefault();
                 const $parent = $(event.target).parents("article.forum-post");
                 this.quote($parent, "forum", $parent.data("forum-post-id"), $("#forum_post_body_for_"), $("a#new-response-link"));
@@ -275,7 +275,7 @@ export class Miscellaneous extends RE6Module {
                 $(element).after($newLink).remove();
             });
 
-            $(".re621-comment-reply").on('click', (event) => {
+            $(".re621-comment-reply").on("click", (event) => {
                 event.preventDefault();
                 const $parent = $(event.target).parents("article.comment");
                 this.quote($parent, "comment", $parent.data("comment-id"), $("#comment_body_for_"), $("a.expand-comment-response"));
@@ -284,9 +284,9 @@ export class Miscellaneous extends RE6Module {
     }
 
     /**
-     * Generates the "Copy ID" button on comments and forum posts 
+     * Generates the "Copy ID" button on comments and forum posts
      */
-    private handleIDButton(): void {
+    private handleIDButton (): void {
         if (Page.matches(PageDefinition.forum)) {
             // Using li:last-of-type to put the button before the vote menu
             $(".content-menu > menu > li:last-of-type").each(function (index, element) {
@@ -297,7 +297,7 @@ export class Miscellaneous extends RE6Module {
                 $($copyElement).wrap("<li>");
             });
 
-            $(".re621-forum-post-copy-id").on('click', (event) => {
+            $(".re621-forum-post-copy-id").on("click", (event) => {
                 event.preventDefault();
                 const $post = $(event.target).parents("article.forum-post");
                 XM.Util.setClipboard($post.data("forum-post-id"));
@@ -319,7 +319,7 @@ export class Miscellaneous extends RE6Module {
                     .append($copyElement);
             });
 
-            $(".re621-comment-copy-id").on('click', (event) => {
+            $(".re621-comment-copy-id").on("click", (event) => {
                 event.preventDefault();
                 const $comment = $(event.target).parents("article.comment");
                 XM.Util.setClipboard($comment.data("comment-id"));
@@ -328,20 +328,20 @@ export class Miscellaneous extends RE6Module {
             $(".show-all-comments-for-post-link").on("click", async () => {
                 await Util.sleep(500);
                 this.handleIDButton();
-            })
+            });
         }
     }
 
-    private async quote($parent: JQuery<HTMLElement>, endpoint: "forum" | "comment", id: number, $textarea: JQuery<HTMLElement>, $responseButton: JQuery<HTMLElement>): Promise<void> {
+    private async quote ($parent: JQuery<HTMLElement>, endpoint: "forum" | "comment", id: number, $textarea: JQuery<HTMLElement>, $responseButton: JQuery<HTMLElement>): Promise<void> {
         let strippedBody = "";
         const selection = window.getSelection().toString();
 
         if (selection === "") {
             const jsonData: APIForumPost = endpoint === "forum" ? await E621.ForumPost.id(id).first() : await E621.Comment.id(id).first();
             strippedBody = jsonData.body.replace(/\[quote\](?:.|\n|\r)+?\[\/quote\][\n\r]*/gm, "");
-            strippedBody = `[quote]"` + $parent.data('creator') + `":/users/` + $parent.data('creator-id') + ` said:\n` + strippedBody + `\n[/quote]`;
+            strippedBody = `[quote]"` + $parent.data("creator") + `":/users/` + $parent.data("creator-id") + ` said:\n` + strippedBody + `\n[/quote]`;
         } else {
-            strippedBody = `[quote]"` + $parent.data('creator') + `":/users/` + $parent.data('creator-id') + ` said:\n` + selection + `\n[/quote]`;
+            strippedBody = `[quote]"` + $parent.data("creator") + `":/users/` + $parent.data("creator-id") + ` said:\n` + selection + `\n[/quote]`;
         }
 
         if (($textarea.val() + "").length > 0) { strippedBody = "\n\n" + strippedBody; }
@@ -357,7 +357,7 @@ export class Miscellaneous extends RE6Module {
      * Handles the double-clicking actions on the avatars
      * @param state True to enable, false to disable
      */
-    private handleAvatarClick(state = true): void {
+    private handleAvatarClick (state = true): void {
 
         PostParts.unstrapDoubleClick("div.avatar > div.active > a");
 
@@ -367,7 +367,7 @@ export class Miscellaneous extends RE6Module {
         PostParts.bootstrapDoubleClick(
             "div.avatar > div > a",
             ($link) => { XM.Util.openInTab(window.location.origin + $link.attr("href"), false); },
-            () => ModuleController.get(BetterSearch).fetchSettings<ImageClickAction>("clickAction") !== ImageClickAction.NewTab
+            () => ModuleController.get(BetterSearch).fetchSettings<ImageClickAction>("clickAction") !== ImageClickAction.NewTab,
         );
     }
 
@@ -375,14 +375,14 @@ export class Miscellaneous extends RE6Module {
      * Submits the form on hotkey press
      * @param event Keydown event
      */
-    private handleSubmitForm(event: Event): void {
+    private handleSubmitForm (event: Event): void {
         $(event.target).parents("form").trigger("submit");
     }
 
     /**
      * Adds a character counter to the blacklist input in the settings
      */
-    private modifyBlacklistForm(): void {
+    private modifyBlacklistForm (): void {
         const $textarea = $("textarea#user_blacklisted_tags"),
             $container = $("div.user_blacklisted_tags");
         const charCounter = $("<span>")
@@ -398,12 +398,12 @@ export class Miscellaneous extends RE6Module {
         });
     }
 
-    private toggleBlacklist(): void {
+    private toggleBlacklist (): void {
         $("a#disable-all-blacklists:visible, a#re-enable-all-blacklists:visible").first()[0].click();
     }
 
     /** Add a "random post" button to set cover page */
-    private tweakSetPage(): void {
+    private tweakSetPage (): void {
         const wrapper = $("span.set-viewposts").first();
         wrapper.find("a").addClass("button btn-success");
 
@@ -422,25 +422,25 @@ export class Miscellaneous extends RE6Module {
             .appendTo(wrapper);
     }
 
-    private randomSetPost(): void {
+    private randomSetPost (): void {
         if (!Page.matches(PageDefinition.set)) return;
         $("#set-random-post")[0].click();
     }
 
     /** Disables the "read the how to comment guide" warning */
-    public handleCommentRules(disable = true): void {
+    public handleCommentRules (disable = true): void {
         $("div.new-comment > h2 > a[href='/wiki_pages?search%5Btitle%5D=howto%3Acomment']").parent("h2").toggleClass("display-none", disable);
     }
 
-    private scrollUp(): void {
+    private scrollUp (): void {
         window.scrollBy(0, $(window).height() * -0.15);
     }
 
-    private scrollDown(): void {
+    private scrollDown (): void {
         window.scrollBy(0, $(window).height() * 0.15);
     }
 
-    private addRemoveFromSetButton(): void {
+    private addRemoveFromSetButton (): void {
         const post = Post.getViewingPost();
         for (const link of $("div.set-nav span.set-name a").get()) {
             const $link = $(link),

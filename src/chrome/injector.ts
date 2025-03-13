@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /**
  * ===== Injected Functions =====
- * Functions that cannot be called from the content script.  
+ * Functions that cannot be called from the content script.
  * Must be called from XM.Chrome.execInjectorRequest()
  */
 
@@ -10,7 +9,7 @@ declare const Danbooru;
 /** Function index */
 const fnDanbooru = {
     "Autocomplete": {
-        "initialize_all": (): void => { Danbooru.Autocomplete.initialize_all(); }
+        "initialize_all": (): void => { Danbooru.Autocomplete.initialize_all(); },
     },
     "Blacklist": {
         "apply": (): void => { Danbooru.Blacklist.apply(); },
@@ -74,11 +73,11 @@ const fnDanbooru = {
     "Shortcuts": {
         "setDisabled": (state: boolean): void => {
             Danbooru.Shortcuts.disabled = state;
-        }
+        },
     },
     "E621": {
         "addDeferredPosts": (posts): void => {
-            window["___deferred_posts"] = window["___deferred_posts"] || {}
+            window["___deferred_posts"] = window["___deferred_posts"] || {};
             window["___deferred_posts"] = $.extend(window["___deferred_posts"], posts);
         },
     },
@@ -90,19 +89,19 @@ const fnDanbooru = {
 
 const fn = { "Danbooru": fnDanbooru };
 
-async function handleInjectorMessage(data): Promise<void> {
+async function handleInjectorMessage (data): Promise<void> {
     const request = data.detail;
 
-    if (fn[request.component] === undefined ||
-        fn[request.component][request.module] === undefined ||
-        fn[request.component][request.module][request.method] === undefined) {
+    if (fn[request.component] === undefined
+        || fn[request.component][request.module] === undefined
+        || fn[request.component][request.module][request.method] === undefined) {
         document.dispatchEvent(new CustomEvent(
             "re621.chrome.message.response-" + request.eventID, {
             detail: {
                 eventID: request.eventID,
                 data: "RE6 Injector - Invalid Request",
-            }
-        }
+            },
+        },
         ));
         return;
     }
@@ -112,8 +111,8 @@ async function handleInjectorMessage(data): Promise<void> {
         detail: {
             eventID: request.eventID,
             data: await fn[request.component][request.module][request.method](...request.args),
-        }
-    }
+        },
+    },
     ));
 }
 

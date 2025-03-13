@@ -20,24 +20,31 @@ export class FavDownloader extends RE6Module {
     private processing = false;
 
     private downloadOverSize = false;
+
     private batchOverSize = true;
 
     // Keeping track of downloaded images
     private posts: PostData[] = [];
+
     private userID: number;
 
     // Value used to make downloaded file names unique
     private fileTimestamp: string = Util.Time.getDatetimeShort();
+
     private downloadIndex = 1;
 
     // Interface elements
     private section: JQuery<HTMLElement>;
+
     private actButton: JQuery<HTMLElement>;
+
     private visButton: JQuery<HTMLElement>;
+
     private infoText: JQuery<HTMLElement>;
+
     private infoFile: JQuery<HTMLElement>;
 
-    public constructor() {
+    public constructor () {
         super(PageDefinition.favorites);
     }
 
@@ -45,7 +52,7 @@ export class FavDownloader extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    public getDefaultSettings(): Settings {
+    public getDefaultSettings (): Settings {
         return {
             enabled: true,
             template: "%artist%/%postid%-%copyright%-%character%-%species%",
@@ -55,7 +62,7 @@ export class FavDownloader extends RE6Module {
     }
 
     /** Creates the module's structure. */
-    public create(): void {
+    public create (): void {
         super.create();
 
         this.userID = parseInt(Page.getQueryParameter("user_id") || $("meta[name=current-user-id]").attr("content"));
@@ -104,20 +111,20 @@ export class FavDownloader extends RE6Module {
             .appendTo(this.section);
     }
 
-    public destroy(): void {
+    public destroy (): void {
         super.destroy();
     }
 
     /**
      * Toggles the fixed state of the interface section
      */
-    public toggleFixedSection(): void {
+    public toggleFixedSection (): void {
         if (this.section.attr("data-fixed") === "true") this.section.attr("data-fixed", "false");
-        else this.section.attr("data-fixed", "true")
+        else this.section.attr("data-fixed", "true");
     }
 
     /** Processes and downloads the selected files. */
-    private async processFiles(visible = false): Promise<void> {
+    private async processFiles (visible = false): Promise<void> {
         if (this.processing) return;
         this.processing = true;
         this.actButton.attr("disabled", "disabled");
@@ -139,7 +146,7 @@ export class FavDownloader extends RE6Module {
             else this.posts = (await recursiveLookup([], this.infoFile, this.userID)).reverse();
         }
 
-        async function recursiveLookup(output: PostData[], info: JQuery<HTMLElement>, userID: number, index = 1): Promise<PostData[]> {
+        async function recursiveLookup (output: PostData[], info: JQuery<HTMLElement>, userID: number, index = 1): Promise<PostData[]> {
             info.html(" &nbsp; &nbsp;request " + index + " [" + output.length + "]");
             return E621.Favorites.get<APIPost>({ user_id: userID, page: index, limit: 320 })
                 .then((data) => {
@@ -180,7 +187,7 @@ export class FavDownloader extends RE6Module {
 
             // Determine queue size
             totalFileSize += post.file.size;
-            Debug.log(`adding #${post.id} (${Util.Size.format(post.file.size)}) to the queue: ${Util.Size.format(totalFileSize)} total`)
+            Debug.log(`adding #${post.id} (${Util.Size.format(post.file.size)}) to the queue: ${Util.Size.format(totalFileSize)} total`);
             if (totalFileSize > FavDownloader.maxBlobSize) {
                 this.batchOverSize = true;
                 this.downloadOverSize = true;
@@ -221,7 +228,7 @@ export class FavDownloader extends RE6Module {
                     onWorkerFinish: (item, thread) => {
                         threadInfo[thread].remove();
                     },
-                }
+                },
             );
         }
 
@@ -232,8 +239,9 @@ export class FavDownloader extends RE6Module {
 
         const zipData = await downloadQueue.run((metadata) => {
             this.infoText.html(`Compressing . . . ` + metadata.percent.toFixed(2) + `%`);
-            if (metadata.currentFile) { this.infoFile.html(metadata.currentFile); }
-            else { this.infoFile.html(""); }
+            if (metadata.currentFile) {
+                this.infoFile.html(metadata.currentFile);
+            } else { this.infoFile.html(""); }
         });
 
         let filename = this.fetchSettings("archive")
@@ -290,7 +298,7 @@ export class FavDownloader extends RE6Module {
      * Creates a filename from the post data based on the current template
      * @param data Post data
      */
-    private createFilename(post: PostData, downloadSamples = false): string {
+    private createFilename (post: PostData, downloadSamples = false): string {
         return MassDownloader.createFilenameBase(this.fetchSettings<string>("template"), post)
             .slice(0, 128)
             .replace(/-{2,}/g, "-")

@@ -13,24 +13,26 @@ export class SubscriptionManager extends RE6Module {
 
     // Hard-coded cache version. If the stored value is different from this, the cache gets cleared
     private static cacheVersion = 3;
+
     private static cacheValid: boolean;
 
     // List of trackers - needs to be registered from the main file
     private static trackers: SubscriptionTracker[] = [];
 
     private static windowOpen = false;      // Whether or not the notifications window is open
+
     private static activeTab: string;       // ID of the tracker tab that is open
 
     private tabbed: JQuery<HTMLElement>;    // Tabs of the notifications window, used to pass settings to CSS
 
-    public constructor() {
+    public constructor () {
         super();
         this.registerHotkeys(
             { keys: "hotkeyOpenNotifications", fnct: this.openNotifications },
         );
     }
 
-    public getDefaultSettings(): Settings {
+    public getDefaultSettings (): Settings {
         return {
             enabled: true,
 
@@ -43,10 +45,10 @@ export class SubscriptionManager extends RE6Module {
             thumbCols: "4",                 // number of thumbnail columns
 
             hotkeyOpenNotifications: "",    // hotkey that opens the notifications window
-        }
+        };
     }
 
-    public create(): void {
+    public create (): void {
         super.create();
 
         // Create a notifications button
@@ -95,8 +97,8 @@ export class SubscriptionManager extends RE6Module {
                 {
                     name: "Settings",
                     content: this.createSettingsPage().render(),
-                }
-            ]
+                },
+            ],
         }).render();
         this.rebuildTabbedSettings();
 
@@ -182,11 +184,11 @@ export class SubscriptionManager extends RE6Module {
     }
 
     /**
-     * Stores tracker instances for later use.  
+     * Stores tracker instances for later use.
      * This does not initialize the modules - they still have to be registered in the ModuleController
      * @param moduleList List of tracker modules to register
      */
-    public static async register(moduleList: any | any[]): Promise<number> {
+    public static async register (moduleList: any | any[]): Promise<number> {
         if (!Array.isArray(moduleList)) moduleList = [moduleList];
         for (const moduleClass of moduleList) {
             const instance = moduleClass.getInstance();
@@ -197,7 +199,7 @@ export class SubscriptionManager extends RE6Module {
     }
 
     /** Returns a complete list of all active trackers */
-    public static getAllTrackers(): SubscriptionTracker[] {
+    public static getAllTrackers (): SubscriptionTracker[] {
         return this.trackers;
     }
 
@@ -205,7 +207,7 @@ export class SubscriptionManager extends RE6Module {
      * Generates a settings page for the subscriptions trackers
      * @returns Settings form
      */
-    private createSettingsPage(): Form {
+    private createSettingsPage (): Form {
         const subSections: FormElement[] = [],
             trackerConfig: FormElement[] = [];
 
@@ -222,7 +224,7 @@ export class SubscriptionManager extends RE6Module {
             Form.hr(2),
 
             Form.header("Settings", 2),
-            Form.section({ wrapper: "subscription-settings", columns: 2, width: 2, }, trackerConfig),
+            Form.section({ wrapper: "subscription-settings", columns: 2, width: 2 }, trackerConfig),
             Form.spacer(2, true),
 
             Form.text(`Interval: How often should the subscriptions be checked for updates`, 2, "subscription-tutorial"),
@@ -233,7 +235,7 @@ export class SubscriptionManager extends RE6Module {
             Form.subheader(
                 "Notifications Window Width",
                 "At least 37, no more than 99",
-                1
+                1,
             ),
             Form.input(
                 {
@@ -245,13 +247,13 @@ export class SubscriptionManager extends RE6Module {
                     if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
                     await this.pushSettings("windowWidth", data);
                     this.rebuildTabbedSettings();
-                }
+                },
             ),
 
             Form.subheader(
                 "Thumbnail Columns",
                 "Number of columns in the grid",
-                1
+                1,
             ),
             Form.input(
                 {
@@ -263,13 +265,13 @@ export class SubscriptionManager extends RE6Module {
                     if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
                     await this.pushSettings("thumbCols", data);
                     this.rebuildTabbedSettings();
-                }
+                },
             ),
 
             Form.subheader(
                 "Thumbnail Height",
                 "Vertical dimension of the thumbnails",
-                1
+                1,
             ),
             Form.input(
                 {
@@ -281,7 +283,7 @@ export class SubscriptionManager extends RE6Module {
                     if (input.val() == "" || !(input.get()[0] as HTMLInputElement).checkValidity()) return;
                     await this.pushSettings("thumbWidth", data);
                     this.rebuildTabbedSettings();
-                }
+                },
             ),
 
             Form.checkbox(
@@ -292,7 +294,7 @@ export class SubscriptionManager extends RE6Module {
                 },
                 async (data) => {
                     await this.pushSettings("loadLargeThumbs", data);
-                }
+                },
             ),
             Form.spacer(2, true),
 
@@ -304,18 +306,16 @@ export class SubscriptionManager extends RE6Module {
                 },
                 async (data) => {
                     await tagTracker.pushSettings("hideMinorButton", data);
-                }
+                },
             ),
             Form.requiresReload(),
             Form.spacer(2, true),
 
         ]);
 
-        function makeSubscriptionSection(instance: SubscriptionTracker): FormElement {
+        function makeSubscriptionSection (instance: SubscriptionTracker): FormElement {
             let toggleLock = false;
-            return Form.collapse({ title: instance.getTrackerID(), columns: 2, width: 2, badge: instance.getSubscriptionBadge(), }, [
-                Form.div({ value: instance.getSubscriptionList(), width: 2, }),
-            ], (id) => {
+            return Form.collapse({ title: instance.getTrackerID(), columns: 2, width: 2, badge: instance.getSubscriptionBadge() }, [Form.div({ value: instance.getSubscriptionList(), width: 2 })], (id) => {
                 if (toggleLock) return;
                 toggleLock = true;
 
@@ -331,7 +331,7 @@ export class SubscriptionManager extends RE6Module {
             });
         }
 
-        function makeTrackerConfig(instance: SubscriptionTracker): FormElement {
+        function makeTrackerConfig (instance: SubscriptionTracker): FormElement {
             let updateInterval = instance.fetchSettings<number>("updateInterval");
 
             // Fix for the update timer heading into the eternity
@@ -344,7 +344,7 @@ export class SubscriptionManager extends RE6Module {
             if (updateInterval !== -1) updateInterval /= Util.Time.HOUR;
 
             let working = false;
-            return Form.section({ columns: 1, width: 1, }, [
+            return Form.section({ columns: 1, width: 1 }, [
                 Form.header(instance.getTrackerID(), 1),
 
                 Form.select(
@@ -365,7 +365,7 @@ export class SubscriptionManager extends RE6Module {
                         if (data < Util.Time.HOUR && data != -1) data = Util.Time.HOUR;
                         await instance.pushSettings("updateInterval", data);
                         SubscriptionManager.trigger("timer." + instance.getTrackerID());
-                    }
+                    },
                 ),
 
                 Form.input(
@@ -378,7 +378,7 @@ export class SubscriptionManager extends RE6Module {
                     async (data, input) => {
                         if (!(input.get()[0] as HTMLInputElement).checkValidity()) return;
                         await instance.pushSettings("cacheSize", parseInt(data));
-                    }
+                    },
                 ),
 
                 Form.select(
@@ -396,7 +396,7 @@ export class SubscriptionManager extends RE6Module {
                     },
                     async (data) => {
                         await instance.pushSettings("cacheMaxAge", parseInt(data) * Util.Time.WEEK);
-                    }
+                    },
                 ),
 
                 Form.input({
@@ -453,8 +453,8 @@ export class SubscriptionManager extends RE6Module {
                                 (lastAttempt ? `Previous update attempt failed.\n` : ``)
                                 + (lastAttempt ? `Last attempt: ${Util.Time.format(lastAttempt)}\n` : ``)
                                 + (lastUpdate ? `Last update: ${Util.Time.format(lastUpdate)}\n` : ``)
-                                + `Next update: ${Util.Time.format(date)}`
-                            )
+                                + `Next update: ${Util.Time.format(date)}`,
+                            );
 
                             timer = parseInt($el.data("timer") || "0");
                             if (timer) {
@@ -492,7 +492,7 @@ export class SubscriptionManager extends RE6Module {
                         });
                         SubscriptionManager.trigger("timer." + instance.getTrackerID());
 
-                        function leftpad(value: number): string {
+                        function leftpad (value: number): string {
                             return (value < 10 ? "0" : "") + value;
                         }
                     },
@@ -500,8 +500,8 @@ export class SubscriptionManager extends RE6Module {
                     wrapper: "update-timer",
                 }),
 
-                Form.section({ wrapper: "subscription-control-btn", width: 1, columns: 1, }, [
-                    Form.button({ value: "Manual Update", }, async (value, button) => {
+                Form.section({ wrapper: "subscription-control-btn", width: 1, columns: 1 }, [
+                    Form.button({ value: "Manual Update" }, async (value, button) => {
                         if (working) return;
                         working = true;
 
@@ -514,7 +514,7 @@ export class SubscriptionManager extends RE6Module {
                         working = false;
                     }),
 
-                    Form.button({ value: "Clear Cache", }, async (value, button) => {
+                    Form.button({ value: "Clear Cache" }, async (value, button) => {
                         if (working) return;
                         working = true;
 
@@ -532,7 +532,7 @@ export class SubscriptionManager extends RE6Module {
     }
 
     /** Fills in the CSS variables for the window width */
-    private rebuildTabbedSettings(): void {
+    private rebuildTabbedSettings (): void {
         const conf = this.fetchSettings(["windowWidth", "thumbWidth", "thumbCols"]);
         this.tabbed.removeAttr("style").css({
             "--window-width": conf.windowWidth + "rem",
@@ -545,7 +545,7 @@ export class SubscriptionManager extends RE6Module {
      * Checks if the stored cache version is the same as the hardcoded one.
      * @returns True if the cache is valid, false otherwise
      */
-    public static async isCacheValid(): Promise<boolean> {
+    public static async isCacheValid (): Promise<boolean> {
         if (typeof SubscriptionManager.cacheValid !== "undefined")
             return SubscriptionManager.cacheValid;
 
@@ -562,7 +562,7 @@ export class SubscriptionManager extends RE6Module {
     /**
      * Toggles the notifications window
      */
-    private openNotifications(): void {
+    private openNotifications (): void {
         $("a#header-button-notifications")[0].click();
     }
 

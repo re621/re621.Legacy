@@ -4,7 +4,7 @@ export class Page {
 
     private url: URL;
 
-    private constructor() {
+    private constructor () {
         this.url = new URL(window.location.toString());
     }
 
@@ -15,7 +15,7 @@ export class Page {
      *               you can prepend =
      * @returns true if at least on filter is fulfilled
      */
-    public static matches(filter: RegExp | RegExp[]): boolean {
+    public static matches (filter: RegExp | RegExp[]): boolean {
         if (filter instanceof RegExp) filter = [filter];
         const pathname = this.getInstance().url.pathname.replace(/[\/?]$/g, "");
         let result = false;
@@ -26,7 +26,7 @@ export class Page {
     }
 
     /** Returns a URL object */
-    public static getURL(): URL {
+    public static getURL (): URL {
         return this.getInstance().url;
     }
 
@@ -34,25 +34,25 @@ export class Page {
      * Returns the query parameter, or null if the key does not exist
      * @return string Query parameter
      */
-    public static getQueryParameter(key: string): string {
+    public static getQueryParameter (key: string): string {
         return this.getInstance().url.searchParams.get(key);
     }
 
     /**
      * Returns true if the search parameters has the provided key, false otherwise
-     * @param key 
+     * @param key
      */
-    public static hasQueryParameter(key: string): boolean {
+    public static hasQueryParameter (key: string): boolean {
         return this.getInstance().url.searchParams.has(key);
     }
 
     /**
-     * Sets a query parameter in the current url  
+     * Sets a query parameter in the current url
      * If there is already one with the same key, it will get overridden
-     * @param key 
-     * @param value 
+     * @param key
+     * @param value
      */
-    public static setQueryParameter(key: string, value: string): void {
+    public static setQueryParameter (key: string, value: string): void {
         this.getInstance().url.searchParams.set(key, value);
         this.refreshCurrentUrl();
     }
@@ -60,7 +60,7 @@ export class Page {
     /**
      * Removes a querystring from the url
      */
-    public static removeQueryParameter(keys: string | string[]): void {
+    public static removeQueryParameter (keys: string | string[]): void {
         if (!Array.isArray(keys)) keys = [keys];
         for (const key of keys)
             this.getInstance().url.searchParams.delete(key);
@@ -70,7 +70,7 @@ export class Page {
     /**
      * Replaces the current url without reloading or pushing the old one to the history
      */
-    private static refreshCurrentUrl(): void {
+    private static refreshCurrentUrl (): void {
         const url = this.getInstance().url;
         const searchPrefix = url.searchParams.toString().length === 0 ? "" : "?";
         history.replaceState({}, "", url.origin + url.pathname + searchPrefix + url.searchParams.toString() + url.hash);
@@ -80,14 +80,14 @@ export class Page {
      * Returns the name of the current site
      * @returns e621 or e926
      */
-    public static getSiteName(): string {
-        return this.getInstance().url.hostname.replace(/\.net/g, "");;
+    public static getSiteName (): string {
+        return this.getInstance().url.hostname.replace(/\.net/g, "");
     }
 
     /**
      * Returns the ID from the second part of the pathname
      */
-    public static getPageID(): string {
+    public static getPageID (): string {
         return this.getInstance().url.pathname.split("/")[2];
     }
 
@@ -95,7 +95,7 @@ export class Page {
      * Returns a singleton instance of the class
      * @returns Url instance
      */
-    public static getInstance(): Page {
+    public static getInstance (): Page {
         if (this.instance === undefined) this.instance = new Page();
         return this.instance;
     }
@@ -104,7 +104,7 @@ export class Page {
      * Returns the type of the page, according to the definitions below
      * @returns Page type, as a string
      */
-    public static getPageType(): string {
+    public static getPageType (): string {
         for (const [name, regex] of Object.entries(PageDefinition))
             if (Page.matches(regex)) return name;
         return null;

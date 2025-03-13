@@ -21,6 +21,7 @@ export class PoolDownloader extends RE6Module {
     private processing = false;
 
     private downloadOverSize = false;
+
     private batchOverSize = true;
 
     // Download queue instance
@@ -34,18 +35,23 @@ export class PoolDownloader extends RE6Module {
 
     // Pool-specific variables used in the template system
     private poolName = "";
+
     private poolFiles: number[] = [];
+
     private poolDownloaded: number[] = [];
 
     // Interface elements
     private overview: JQuery<HTMLElement>;
+
     private section: JQuery<HTMLElement>;
 
     private actButton: JQuery<HTMLElement>;
+
     private infoText: JQuery<HTMLElement>;
+
     private infoFile: JQuery<HTMLElement>;
 
-    public constructor() {
+    public constructor () {
         super([PageDefinition.pool, PageDefinition.set]);
     }
 
@@ -53,7 +59,7 @@ export class PoolDownloader extends RE6Module {
      * Returns a set of default settings values
      * @returns Default settings
      */
-    public getDefaultSettings(): Settings {
+    public getDefaultSettings (): Settings {
         return {
             enabled: true,
             template: "%pool%/%index%-%postid%-%artist%-%copyright%-%character%-%species%",
@@ -63,7 +69,7 @@ export class PoolDownloader extends RE6Module {
     }
 
     /** Creates the module's structure. */
-    public create(): void {
+    public create (): void {
         super.create();
 
         const base = Page.matches(PageDefinition.pool) ? "div#c-pools" : "div#c-sets";
@@ -129,7 +135,7 @@ export class PoolDownloader extends RE6Module {
     }
 
     /** Processes and downloads the selected files. */
-    private processFiles(): void {
+    private processFiles (): void {
         if (this.processing) return;
         this.processing = true;
         this.overview.attr("processing", "loading");
@@ -147,7 +153,7 @@ export class PoolDownloader extends RE6Module {
         else source = E621.Set.id(Page.getPageID()).get<APIPool>();
 
         source.then((poolData) => {
-            if (poolData.length < 1) { return Promise.reject("Pool not found"); };
+            if (poolData.length < 1) { return Promise.reject("Pool not found"); }
             const pool = poolData[0],
                 imageList = pool.post_ids.filter(n => !this.poolDownloaded.includes(n));
             this.poolFiles = pool.post_ids;
@@ -218,7 +224,7 @@ export class PoolDownloader extends RE6Module {
 
                     // Determine queue size
                     totalFileSize += post.file.size;
-                    Debug.log(`adding #${post.id} (${Util.Size.format(post.file.size)}) to the queue: ${Util.Size.format(totalFileSize)} total`)
+                    Debug.log(`adding #${post.id} (${Util.Size.format(post.file.size)}) to the queue: ${Util.Size.format(totalFileSize)} total`);
                     if (totalFileSize > PoolDownloader.maxBlobSize) {
                         this.batchOverSize = true;
                         this.downloadOverSize = true;
@@ -259,7 +265,7 @@ export class PoolDownloader extends RE6Module {
                             onWorkerFinish: (item, thread) => {
                                 threadInfo[thread].remove();
                             },
-                        }
+                        },
                     );
 
                     this.poolDownloaded.push(post.id);
@@ -273,8 +279,9 @@ export class PoolDownloader extends RE6Module {
 
             return this.downloadQueue.run((metadata) => {
                 this.infoText.html(`Compressing . . . ` + metadata.percent.toFixed(2) + `%`);
-                if (metadata.currentFile) { this.infoFile.html(metadata.currentFile); }
-                else { this.infoFile.html(""); }
+                if (metadata.currentFile) {
+                    this.infoFile.html(metadata.currentFile);
+                } else { this.infoFile.html(""); }
             });
         }).then((zipData) => {
 
@@ -313,8 +320,7 @@ export class PoolDownloader extends RE6Module {
 
             if (this.batchOverSize) {
                 // Start the next download immediately
-                if (this.fetchSettings("autoDownloadArchive")) { this.actButton.get(0).click(); }
-                else {
+                if (this.fetchSettings("autoDownloadArchive")) { this.actButton.get(0).click(); } else {
                     $("<div>")
                         .addClass("download-notice")
                         .html(`Download has exceeded the maximum file size.<br /><br />Click the download button again for the next part.`)
@@ -332,7 +338,7 @@ export class PoolDownloader extends RE6Module {
      * Creates a filename from the post data based on the current template
      * @param data Post data
      */
-    private createFilename(post: PostData, downloadSamples = false): string {
+    private createFilename (post: PostData, downloadSamples = false): string {
         return MassDownloader.createFilenameBase(this.fetchSettings<string>("template"), post)
             .replace(/%pool%/g, this.poolName)
             .replace(/%index%/g, this.padIndex(this.poolFiles.indexOf(post.id) + 1, this.poolFiles.length.toString().length))
@@ -348,7 +354,7 @@ export class PoolDownloader extends RE6Module {
      * @param index The index to be padded
      * @param length The padding amount, the amount of digits in pool length. Defaults to 2
      */
-    private padIndex(index: number, length = 2): string {
+    private padIndex (index: number, length = 2): string {
         let str = index.toString();
         while (str.length < length) {
             str = "0" + str;
@@ -361,7 +367,7 @@ export class PoolDownloader extends RE6Module {
      * Turns a pool name returned by the API into a proper filename
      * @param name Pool name
      */
-    private createPoolFilename(name: string): string {
+    private createPoolFilename (name: string): string {
         return name
             .slice(0, 64)
             .replace(/\s/g, "_")

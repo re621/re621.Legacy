@@ -11,13 +11,19 @@ import { UtilTime } from "./UtilTime";
 export class Util {
 
     public static DOM = UtilDOM;
+
     public static Events = UtilEvents;
+
     public static ID = UtilID;
+
     public static Math = UtilMath;
+
     public static Time = UtilTime;
+
     public static Size = UtilSize;
 
     public static LS = window.localStorage;
+
     public static SS = window.sessionStorage;
 
     /**
@@ -25,7 +31,7 @@ export class Util {
      * @param data Object to download
      * @param file File name
      */
-    public static downloadAsJSON(data: any, file: string): void {
+    public static downloadAsJSON (data: any, file: string): void {
         const tempLink = $("<a>")
             .attr({
                 "download": file + ".json",
@@ -40,13 +46,15 @@ export class Util {
      * Returns a promise that is fulfilled after the specified time period elapses
      * @param time Time period, in milliseconds
      */
-    public static async sleep(time: number): Promise<void> {
-        return new Promise((resolve) => { setTimeout(() => { resolve(); }, time) });
+    public static async sleep (time: number): Promise<void> {
+        return new Promise((resolve) => {
+            setTimeout(() => { resolve(); }, time);
+        });
     }
 
     /**
-     * Split the array into chunks of specified size.  
-     * The `method` parameter defines how the array is split.  
+     * Split the array into chunks of specified size.
+     * The `method` parameter defines how the array is split.
      * - "balance": the chunks are at most `size` big, but otherwise of equal size
      * - "chunk": all chunks except for the last one of equal size
      * - "split": first chunk is `size` big, the second contains the remainder
@@ -95,12 +103,12 @@ export class Util {
     }
 
     /**
-     * Convert markdown input into html.  
+     * Convert markdown input into html.
      * Very limited in scope, don't rely on this for anything important.
      * @param input Markdown input
      * @returns HTML output
      */
-    public static quickParseMarkdown(input: string): string {
+    public static quickParseMarkdown (input: string): string {
         if (input === undefined) return "";
         return input
             .replace(/\*\*(.*?)\*\*/gm, "<strong>$1</strong>")
@@ -116,7 +124,7 @@ export class Util {
      * @param input Input to process
      * @param removeSections If true, removes `quote`, `code`, and `sections` blocks altogether
      */
-    public static stripDText(input: string, removeSections = true): string {
+    public static stripDText (input: string, removeSections = true): string {
         if (removeSections) {
             input = input.replace(/\[quote\][\s\S]*\[\/quote\]/g, "")
                 .replace(/\[code\][\s\S]*\[\/code\]/g, "")
@@ -132,27 +140,27 @@ export class Util {
             .replace(/\[sup\]([\s\S]*)\[\/sup\]/g, "<sup>$1</sup>")             // Superscript
             .replace(/\[sub\]([\s\S]*)\[\/sub\]/g, "<sub>$1</sub>")             // Subscript
             .replace(/\[spoiler\]([\s\S]*)\[\/spoiler\]/g, "<span>$1</span>")   // Spoiler
-            .replace(/\[color\]([\s\S]*)\[\/color\]/g, "<span>$1</span>")       // Color
+            .replace(/\[color\]([\s\S]*)\[\/color\]/g, "<span>$1</span>");       // Color
 
         return input;
     }
 
     /**
-     * Trims the thousands off a number and replaced them with a K.  
+     * Trims the thousands off a number and replaced them with a K.
      * ex. 54321 -> 54.3k
      * @param num Number to trim
      */
-    public static formatK(num: number): string {
-        return Math.abs(num) > 999 ? (Math.sign(num) * (Math.abs(num) / 1000)).toFixed(1) + "k" : Math.sign(num) * Math.abs(num) + "";
+    public static formatK (num: number): string {
+        return Math.abs(num) > 999 ? (Math.sign(num) * (Math.abs(num) / 1000)).toFixed(1) + "k" : (Math.sign(num) * Math.abs(num)) + "";
     }
 
 
     /* returns an array with the ratio */
-    public static formatRatio(width: number, height: number): [number, number] {
+    public static formatRatio (width: number, height: number): [number, number] {
         const d = gcd(width, height);
         return [width / d, height / d];
 
-        function gcd(u: number, v: number): number {
+        function gcd (u: number, v: number): number {
             if (u === v) return u;
             if (u === 0) return v;
             if (v === 0) return u;
@@ -175,7 +183,7 @@ export class Util {
      * Parses the textarea input specified in the parameter and returns a list of space-separated tags
      * @param input Textarea to parse
      */
-    public static getTagString(input: JQuery<HTMLElement>): string {
+    public static getTagString (input: JQuery<HTMLElement>): string {
         const implications = input.data("implications") || [];
         return input.val().toString().trim()
             .toLowerCase()
@@ -184,10 +192,10 @@ export class Util {
             + (implications.length > 0 ? (" " + implications.join(" ")) : "");
     }
 
-    public static getTags(input: string): string[];
-    public static getTags(input: JQuery<HTMLElement>): string[];
-    public static getTags(input: JQuery<HTMLElement>[]): string[];
-    public static getTags(input: string | JQuery<HTMLElement> | JQuery<HTMLElement>[]): string[] {
+    public static getTags (input: string): string[];
+    public static getTags (input: JQuery<HTMLElement>): string[];
+    public static getTags (input: JQuery<HTMLElement>[]): string[];
+    public static getTags (input: string | JQuery<HTMLElement> | JQuery<HTMLElement>[]): string[] {
         if (Array.isArray(input)) {
             const result = [];
             for (const element of input)
@@ -201,10 +209,10 @@ export class Util {
     }
 
     /** Takes in an object, and returns a regular expression with its keys */
-    public static getKeyRegex(object: any): RegExp {
+    public static getKeyRegex (object: any): RegExp {
         const result: string[] = [];
         for (const key of Object.keys(object))
-            result.push(key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+            result.push(key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
         return new RegExp(result.join("|"), "gi");
     }
 
@@ -217,25 +225,25 @@ export class Util {
      * @param v2 The second version to be compared.
      * @param [options] Optional flags that affect comparison behavior:
      *      `lexicographical` _boolean_ compares each part of the version strings lexicographically instead of
-     *      naturally; this allows suffixes such as "b" or "dev" but will cause "1.10" to be considered smaller than "1.2".  
+     *      naturally; this allows suffixes such as "b" or "dev" but will cause "1.10" to be considered smaller than "1.2".
      *      `zeroExtend` _boolean_ changes the result if one version string has less parts than the other. In
-     *         this case the shorter string will be padded with "zero" parts instead of being considered smaller.  
+     *         this case the shorter string will be padded with "zero" parts instead of being considered smaller.
      * @returns {number|NaN}
-     *      - 0 if the versions are equal  
-     *      - a negative integer iff v1 < v2  
-     *      - a positive integer iff v1 > v2  
-     *      - NaN if either version string is in the wrong format  
+     *      - 0 if the versions are equal
+     *      - a negative integer iff v1 < v2
+     *      - a positive integer iff v1 > v2
+     *      - NaN if either version string is in the wrong format
      * @copyright by Jon Papaioannou (`john.papaioannou@gmail.com`)
      * @license This function is in the public domain. Do what you want with it, no strings attached.
      */
-    public static versionCompare(v1: string, v2: string, options?: { lexicographical?: boolean; zeroExtend?: boolean }): number {
+    public static versionCompare (v1: string, v2: string, options?: { lexicographical?: boolean; zeroExtend?: boolean }): number {
         const lexicographical = options && options.lexicographical,
             zeroExtend = options && options.zeroExtend;
         if (typeof v1 !== "string" || typeof v2 !== "string") return NaN;
-        let v1parts: string[] | number[] = v1.split('.'),
-            v2parts: string[] | number[] = v2.split('.');
+        let v1parts: string[] | number[] = v1.split("."),
+            v2parts: string[] | number[] = v2.split(".");
 
-        function isValidPart(x: string): boolean {
+        function isValidPart (x: string): boolean {
             return (lexicographical ? /^\d+[A-Za-z]*$/ : /^\d+$/).test(x);
         }
 
@@ -265,14 +273,14 @@ export class Util {
     }
 
     /**
-     * Formats an array into a string via a non-standard join method.  
+     * Formats an array into a string via a non-standard join method.
      * Ex. ["one"] => "one"
      *     ["one", "two"] => "one and two"
      *     ["one", "two", "three"] => "one, two, and three"
      * @param array Array to format
      * @param delimiter Delimiter for the last element
      */
-    public static prettyPrintArray(array: string[], delimiter = "and"): string {
+    public static prettyPrintArray (array: string[], delimiter = "and"): string {
         if (array.length == 1) return array[0];
         else if (array.length == 2) return array[0] + " " + delimiter + " " + array[1];
         return array.slice(0, -1).join(", ") + ", " + delimiter + " " + array.slice(-1);

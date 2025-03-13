@@ -9,8 +9,11 @@ declare const unsafeWindow: Window;
 export class XM {
 
     public static Storage = XMStorage;
+
     public static Connect = XMConnect;
+
     public static Util = XMUtil;
+
     public static Chrome = XMChrome;
 
     public static Window = typeof unsafeWindow === "undefined" ? window : unsafeWindow;
@@ -18,19 +21,19 @@ export class XM {
     /**
      * Returns the information provided by the script manager
      */
-    public static info(): GMInfo {
+    public static info (): GMInfo {
         if (typeof GM === "undefined") {
             return {
                 script: null,
                 scriptMetaStr: null,
                 scriptHandler: window["re621"].type,
                 version: "1.0",
-            }
+            };
         } else return GM.info;
     }
 
     /** Returns true if the current script instance is a userscript, false for extension */
-    public static isUserscript(): boolean {
+    public static isUserscript (): boolean {
         return window["re621"].type == "script";
     }
 
