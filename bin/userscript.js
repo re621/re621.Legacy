@@ -56,7 +56,7 @@ switch (mode) {
             = util.parseTemplate("// ==UserScript==\n" + header + "// ==/UserScript==\n", packageJSON) + "\n\n"
             + (fs.readFileSync("./build/script.js") + "")
               .replace(/%BUILDTYPE%/g, "script")
-              .replace(/\/\/%STYLESHEET%/g, "const attachedStylesheet = `" + JSON.stringify(fs.readFileSync("./build/style.css").toString(), null, 2) + "`;");
+              .replace(/\/\/ %STYLESHEET%/g, "const attachedStylesheet = `" + JSON.stringify(fs.readFileSync("./build/style.css").toString(), null, 2) + "`;");
     fs.writeFileSync("./build/userscript/script.user.js", scriptBody.replace(/"%PRIVACY%"/g, false));
     fs.writeFileSync(
       "./build/userscript/altver.user.js",
