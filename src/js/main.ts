@@ -53,50 +53,50 @@ import AvoidPosting from "./components/cache/AvoidPosting";
 
 
 const loadOrder = [
-    FormattingExtender,
-    HeaderCustomizer,
-    ThemeCustomizer,
+  FormattingExtender,
+  HeaderCustomizer,
+  ThemeCustomizer,
 
-    DownloadCustomizer,
-    ImageScaler,
-    PostViewer,
-    PoolNavigator,
-    TitleCustomizer,
+  DownloadCustomizer,
+  ImageScaler,
+  PostViewer,
+  PoolNavigator,
+  TitleCustomizer,
 
-    BlacklistEnhancer,
-    CustomFlagger,
-    ThumbnailTweaks,
-    BetterSearch,
-    InstantFilters,
-    HoverZoom,
-    ProgressTracker,
+  BlacklistEnhancer,
+  CustomFlagger,
+  ThumbnailTweaks,
+  BetterSearch,
+  InstantFilters,
+  HoverZoom,
+  ProgressTracker,
 
-    PostSuggester,
-    SearchUtilities,
-    Miscellaneous,
+  PostSuggester,
+  SearchUtilities,
+  Miscellaneous,
 
-    SmartAlias,
-    TagSuggester,
-    EditTracker,
-    WikiEnhancer,
-    UploadUtilities,
-    CommentBlacklist,
-    JanitorEnhancements,
+  SmartAlias,
+  TagSuggester,
+  EditTracker,
+  WikiEnhancer,
+  UploadUtilities,
+  CommentBlacklist,
+  JanitorEnhancements,
 
-    FavDownloader,
-    PoolDownloader,
-    MassDownloader,
+  FavDownloader,
+  PoolDownloader,
+  MassDownloader,
 
-    SubscriptionManager,
-    CompatibilityPatcher,
-    SettingsController,
+  SubscriptionManager,
+  CompatibilityPatcher,
+  SettingsController,
 ];
 
 const subscriptions = [
-    TagTracker,
-    PoolTracker,
-    ForumTracker,
-    CommentTracker,
+  TagTracker,
+  PoolTracker,
+  ForumTracker,
+  CommentTracker,
 ];
 
 // Show the script version in the console
@@ -104,8 +104,8 @@ console.log(`${window["re621"]["name"]} v.${window["re621"]["version"]} build ${
 
 // Reroute the title page before everything else loads
 if (Page.matches(PageDefinition.title)) {
-    const page = Util.LS.getItem("re621.mainpage");
-    if (page && page !== "default") window.location.replace("/" + page);
+  const page = Util.LS.getItem("re621.mainpage");
+  if (page && page !== "default") window.location.replace("/" + page);
 }
 
 // Disable existing keyboard shortcuts
@@ -114,33 +114,33 @@ Danbooru.Shortcuts.disabled = true;
 // Create the basic DOM structure
 CleanSlate.createDOM().then(async () => {
 
-    // Abort loading the script
-    // This is a workaround for the fact that the title page
-    // is missing the blacklist data, causing issues with
-    // subscriptions
-    if (Page.matches(PageDefinition.title)) return;
+  // Abort loading the script
+  // This is a workaround for the fact that the title page
+  // is missing the blacklist data, causing issues with
+  // subscriptions
+  if (Page.matches(PageDefinition.title)) return;
 
-    // Disable existing keyboard shortcuts, again.
-    // Workaround made specificially for one user who presses
-    // the Edit hotkey immediately after the post page loads.
-    // You know who you are.
-    Danbooru.Shortcuts.disabled = true;
+  // Disable existing keyboard shortcuts, again.
+  // Workaround made specificially for one user who presses
+  // the Edit hotkey immediately after the post page loads.
+  // You know who you are.
+  Danbooru.Shortcuts.disabled = true;
 
-    // StartupTasks.createSearchbox();
-    StartupTasks.createTagList();
+  // StartupTasks.createSearchbox();
+  StartupTasks.createTagList();
 
-    await Debug.init();
-    await Patcher.patchConfig();
-    await VersionChecker.init();
-    await AvoidPosting.init();
+  await Debug.init();
+  await Patcher.patchConfig();
+  await VersionChecker.init();
+  await AvoidPosting.init();
 
-    User.init();
+  User.init();
 
-    // Subscriptions have to be registered before the SubscriptionManager
-    await ModuleController.register(subscriptions);
-    await SubscriptionManager.register(subscriptions);
+  // Subscriptions have to be registered before the SubscriptionManager
+  await ModuleController.register(subscriptions);
+  await SubscriptionManager.register(subscriptions);
 
-    // Register the rest of the modules
-    await ModuleController.register(loadOrder);
+  // Register the rest of the modules
+  await ModuleController.register(loadOrder);
 
 });

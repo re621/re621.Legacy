@@ -3,6 +3,6 @@
  * Other responses should extend this for proper typecasting.
  */
 export interface APIResponse {
-    id: number;
-    error: string;
+  id: number;
+  error: string;
 }

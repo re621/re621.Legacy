@@ -4,7 +4,7 @@ import parser from "@typescript-eslint/parser";
 
 export default [
   {
-    files: ["**/*.ts"],
+    files: ["**/*.ts", "bin/*.js"],
     plugins: {
       "@stylistic": stylistic,
     },
@@ -40,11 +40,11 @@ export default [
       "@stylistic/function-call-argument-newline": ["warn", "consistent"],
       "@stylistic/func-call-spacing": "warn",  // function-call-spacing does not work ???
       "@stylistic/implicit-arrow-linebreak": "warn",
-      "@stylistic/indent": "off", // TODO Refactor ["warn", 2, { SwitchCase: 1, }],
+      "@stylistic/indent": ["warn", 2, { SwitchCase: 1, }],
       "@stylistic/key-spacing": ["warn", { mode: "minimum" }],
       "@stylistic/keyword-spacing": "warn",
       "@stylistic/line-comment-position": "off",
-      "@stylistic/linebreak-style": "off", // TODO Refactor
+      "@stylistic/linebreak-style": "off",
       "@stylistic/lines-around-comment": "off",
       "@stylistic/lines-between-class-members": "warn",
       // "max-len": ["warn", { code: 100, tabWidth: 2, ignoreComments: true }], // Might get annoying, see https://eslint.style/rules/js/max-len

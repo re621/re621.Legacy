@@ -1,59 +1,59 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "build",
-            "type": "npm",
-            "script": "build:dev",
-            "problemMatcher": ["$eslint-stylish"],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "clear": true,
-                "reveal": "silent",
-                "panel": "shared"
-            },
-            "options": {
-                "statusbar": { "hide": false }
-            }
-        },
-        {
-            "label": "injector:chrome",
-            "type": "npm",
-            "script": "injector:chrome",
-            "problemMatcher": ["$eslint-stylish"],
-            "group": "none",
-            "presentation": {
-                "clear": true,
-                "reveal": "silent",
-                "panel": "shared"
-            },
-            "options": {
-                "statusbar": {
-                    "hide": false,
-                    "label": "inj:chrome"
-                }
-            }
-        },
-        {
-            "label": "injector:firefox",
-            "type": "npm",
-            "script": "injector:firefox",
-            "problemMatcher": ["$eslint-stylish"],
-            "group": "none",
-            "presentation": {
-                "clear": true,
-                "reveal": "silent",
-                "panel": "shared"
-            },
-            "options": {
-                "statusbar": {
-                    "hide": false,
-                    "label": "inj:firefox"
-                }
-            }
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "type": "npm",
+      "script": "build:dev",
+      "problemMatcher": ["$eslint-stylish"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "clear": true,
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "options": {
+        "statusbar": { "hide": false }
+      }
+    },
+    {
+      "label": "injector:chrome",
+      "type": "npm",
+      "script": "injector:chrome",
+      "problemMatcher": ["$eslint-stylish"],
+      "group": "none",
+      "presentation": {
+        "clear": true,
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "options": {
+        "statusbar": {
+          "hide": false,
+          "label": "inj:chrome"
         }
-    ]
+      }
+    },
+    {
+      "label": "injector:firefox",
+      "type": "npm",
+      "script": "injector:firefox",
+      "problemMatcher": ["$eslint-stylish"],
+      "group": "none",
+      "presentation": {
+        "clear": true,
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "options": {
+        "statusbar": {
+          "hide": false,
+          "label": "inj:firefox"
+        }
+      }
+    }
+  ]
 }
