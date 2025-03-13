@@ -1,3 +1,5 @@
+@use "../utilities/fontawesome";
+
 /* Pool Downloader Styles */
 
 div.pool-container {
@@ -48,7 +50,7 @@ div.pool-container {
                     display: block;
                     line-height: 1;
 
-                    @include FontAwesomeFamily;
+                    @include fontawesome.family;
                     font-weight: 400;
 
                     position: absolute;

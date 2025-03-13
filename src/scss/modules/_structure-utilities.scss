@@ -1,4 +1,8 @@
+@use "../utilities/fontawesome";
+@use "../utilities/mixins";
+
 /* Vanilla Overrides */
+
 // Compatibility fix for modals
 body {
     display: flex;
@@ -258,7 +262,7 @@ textarea.error-feedback {
     overflow-x: hidden;
     white-space: pre;
 
-    @include scrollbars;
+    @include mixins.scrollbars;
 }
 
 /* Increase the size of blacklist form */
@@ -300,7 +304,7 @@ body[data-hide-blacklist=true] section#blacklist-box {
     position: relative;
     &::after {
         content: unicode('f111');
-        @include FontAwesomeFamily;
+        @include fontawesome.family;
         font-weight: 900;
         font-size: 0.5em;
         color: red;
@@ -323,7 +327,7 @@ body[data-hide-blacklist=true] section#blacklist-box {
 
     &::after {
         content: unicode('f110');
-        @include FontAwesomeFamily;
+        @include fontawesome.family;
         font-weight: 900;
         font-size: 0.75em;
         line-height: 0.75em;

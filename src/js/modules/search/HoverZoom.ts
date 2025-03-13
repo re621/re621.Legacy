@@ -208,7 +208,7 @@ export class HoverZoom extends RE6Module {
         let videoTimeout: number;
 
         const viewport = $(window);
-        HoverZoom.on("zoom.start", (event, data) => {
+        HoverZoom.on("zoom.start", () => {
             const mode = this.fetchSettings("mode");
             if (HoverZoom.paused || (mode == ImageZoomMode.OnShift && !this.shiftPressed))
                 return;

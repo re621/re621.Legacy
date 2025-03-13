@@ -1,3 +1,4 @@
+@use "../utilities/mixins";
 
 /* Moves the report button to the far right, to avoid accidental clicks */
 #subnav-reportcommend {
@@ -22,7 +23,7 @@
     max-width: 60vw;
     max-height: 5rem;
     overflow-y: auto;
-    @include scrollbars;
+    @include mixins.scrollbars;
     
     &:before {
         content: "Added Tags";
@@ -38,7 +39,7 @@
         
         &:before {
             content: "+";
-            @include nonselectable;
+            @include mixins.nonselectable;
         }
     }
 }

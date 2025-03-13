@@ -1,3 +1,5 @@
+@use "../utilities/fontawesome";
+
 /* Pool Navigator Styles */
 
 div#nav-links,      // Old version,
@@ -16,7 +18,7 @@ div#nav-links-bottom {
 
             input[type=radio]+label:before {
                 content: unicode("f0c8");
-                @include FontAwesomeFamily;
+                @include fontawesome.family;
                 display: inline-block;
                 letter-spacing: 10px;
                 cursor: pointer;

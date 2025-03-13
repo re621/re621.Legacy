@@ -1,3 +1,5 @@
+@use "../utilities/fontawesome";
+
 /* Styles for the revamped search page */
 
 #content {
@@ -231,7 +233,7 @@ search-content > post {
 
         &::before {
             content: unicode("f1ce");
-            @include FontAwesomeFamily;
+            @include fontawesome.family;
             font-weight: 900;
             width: 2rem;
             height: 2rem;
@@ -272,7 +274,7 @@ search-content > post {
 
         span::before {
             content: " ";
-            @include FontAwesomeFamily;
+            @include fontawesome.family;
             font-weight: 900;
         }
 
@@ -448,7 +450,7 @@ search-content > post[sound=true] {
 
         &::before {
             content: unicode("f027");
-            @include FontAwesomeFamily;
+            @include fontawesome.family;
             font-weight: 900;
         }
     }
@@ -573,7 +575,7 @@ search-content  {
             padding: 0.125rem 1rem;
 
             &::before {
-                @include FontAwesomeFamily;
+                @include fontawesome.family;
                 font-weight: 500;
                 position: relative;
             }
@@ -608,7 +610,7 @@ search-content  {
 
             &::before {
                 content: unicode("f005");
-                @include FontAwesomeFamily;
+                @include fontawesome.family;
                 font-weight: 500;
                 position: relative;
                 top: 1px;
@@ -694,7 +696,7 @@ zoom-container {
     &[status=loading] {
         &::after {
             content: unicode("f1ce");
-            @include FontAwesomeFamily;
+            @include fontawesome.family;
             font-weight: 900;
             font-size: 3rem;
             line-height: 3rem;

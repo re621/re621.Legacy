@@ -1,3 +1,5 @@
+@use "../utilities/fontawesome";
+
 /* Mass Downloader Styles */
 
 section#downloader-box {
@@ -33,7 +35,7 @@ section#downloader-box {
                 display: block;
                 line-height: 1;
 
-                @include FontAwesomeFamily;
+                @include fontawesome.family;
                 font-weight: 400;
 
                 position: absolute;
@@ -115,7 +117,7 @@ search-content[data-downloading=true] {
             right: 0.5rem;
             z-index: 50;
 
-            @include FontAwesomeFamily;
+            @include fontawesome.family;
             font-weight: 500;
             font-size: 3rem;
             text-shadow: 0 0 3px black;

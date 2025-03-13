@@ -1,3 +1,5 @@
+@use "../utilities/fontawesome";
+
 /* Mass Downloader Styles */
 
 section#fav-downloader-box {
@@ -27,7 +29,7 @@ section#fav-downloader-box {
                 display: block;
                 line-height: 1;
 
-                @include FontAwesomeFamily;
+                @include fontawesome.family;
                 font-weight: 400;
 
                 position: absolute;

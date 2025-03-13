@@ -1,5 +1,8 @@
+@use "../utilities/fontawesome";
+@use "../utilities/mixins";
+
 .dtext-formatter-buttons a {
-    @include fontawesome;
+    @include fontawesome.icon;
 }
 
 div.dtext-formatter[data-drawer] {
@@ -19,8 +22,8 @@ div.dtext-formatter[data-drawer] {
             margin-right: 0.25rem;
             cursor: pointer;
             
-            @include fontawesome;
-            @include nonselectable;
+            @include fontawesome.icon;
+            @include mixins.nonselectable;
             
             &:hover { background: #ffffff15; }
         }
@@ -47,8 +50,8 @@ div.dtext-formatter[data-drawer] {
             margin: 0.25rem;
             cursor: pointer;
             
-            @include fontawesome;
-            @include nonselectable;
+            @include fontawesome.icon;
+            @include mixins.nonselectable;
             
             &:hover { background: #ffffff15; }
         }

@@ -1,4 +1,7 @@
+@use "../utilities/fontawesome";
+
 /* Header Customizer Styles */
+
 nav.navigation {
 
     menu.nav-primary.custom {
@@ -39,7 +42,7 @@ nav.navigation {
 
             li > a.tab-has-updates::after {
                 content: unicode('f111');
-                @include FontAwesomeFamily;
+                @include fontawesome.family;
                 font-weight: 900;
                 font-size: 0.5em;
                 color: red;
