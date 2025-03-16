@@ -1,5 +1,6 @@
 @use "../utilities/fontawesome";
 @use "../utilities/mixins";
+@use "../utilities/functions";
 
 /* Vanilla Overrides */
 
@@ -303,7 +304,7 @@ body[data-hide-blacklist=true] section#blacklist-box {
 .update-notification:not([data-updates="0"]) {
     position: relative;
     &::after {
-        content: unicode('f111');
+        content: functions.unicode("f111");
         @include fontawesome.family;
         font-weight: 900;
         font-size: 0.5em;
@@ -326,7 +327,7 @@ body[data-hide-blacklist=true] section#blacklist-box {
     }
 
     &::after {
-        content: unicode('f110');
+        content: functions.unicode("f110");
         @include fontawesome.family;
         font-weight: 900;
         font-size: 0.75em;

@@ -1,4 +1,5 @@
 @use "../utilities/fontawesome";
+@use "../utilities/functions";
 
 /* Header Customizer Styles */
 
@@ -41,7 +42,7 @@ nav.navigation {
         &[data-forumdot=true] {
 
             li > a.tab-has-updates::after {
-                content: unicode('f111');
+                content: functions.unicode("f111");
                 @include fontawesome.family;
                 font-weight: 900;
                 font-size: 0.5em;
