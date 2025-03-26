@@ -31,32 +31,29 @@ export class StartupTasks {
     $("#tag-box > ul > li, #tag-list > ul > li").each((index, element) => {
       const $container = $(element);
 
-      const $tagLink = $container.find("a.search-tag").first();
-      $("<span>").addClass("tag-wrap").insertAfter($tagLink).append($tagLink);
-
       // Container for various actions - subscribe, add to blacklist, etc.
-      const $actionsBox = $("<div>")
-        .addClass("tag-actions")
-        .attr("data-tag", $container.find("a.search-tag").text().replace(/ /g, "_"))
-        .appendTo($container);
+      const $actions = $container.find(".tag-list-actions");
 
       //   ELEMENT   - METHOD  - STATE
       // - blacklist - display - hover
       // - tag count - display - normal
       // - subscribe - visibility - always
 
-      // Blacklist button container
-      $("<span>").addClass("tag-action-blacklist").appendTo($actionsBox);
-
-      // Tag counter container
-      const $countBox = $container.find(".post-count").first();
-      $countBox
-        .addClass("re621-post-count")
-        .attr("data-count-short", $countBox.text())
-        .insertAfter($tagLink);
+      // Fix the counter data
+      const counter = $container.find(".tag-list-count");
+      counter
+        .attr({
+          "data-count": element.dataset.count,
+          "data-count-short": counter.text(),
+        });
 
       // Subscribe button container
-      $("<span>").addClass("tag-action-subscribe").appendTo($actionsBox);
+      $("<span>")
+        .addClass("tag-list-subscribe")
+        .attr({
+          "data-tag": element.dataset.name,
+        })
+        .appendTo($actions);
     });
   }
 

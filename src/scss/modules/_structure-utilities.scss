@@ -145,78 +145,28 @@ div#page aside#sidebar {
 #tag-box,
 #tag-list {
 
-    &>ul {
-
-        // margin-right: -1rem;
-
-        li {
-            display: flex;
-            line-height: 1rem;
-            margin-bottom: 1px;
-
-            position: relative;
-
-            a.search-inc-tag,
-            a.search-exl-tag {
-                padding-right: 0.125rem;
-            }
-
-            span.tag-wrap {
-                margin-right: 0.25rem;
-            }
-
-            div.tag-actions {
-                min-width: fit-content;
-                margin-left: auto;
-                line-height: 1rem;
-
-                position: absolute;
-                right: -0.85rem;
-
-                span {
-                    margin: 0 0.125rem;
-                    min-width: fit-content;
-
-                    &.tag-action-blacklist {
-                        display: none;
-                    }
-
-                    &.tag-action-subscribe a[subscribed=false] {
-                        visibility: hidden;
-                    }
-                }
-            }
-
-            span.post-count {
-                margin-left: 0.5rem;
-                white-space: nowrap;
-                font-size: 90%;
-            }
-
-            &:hover {
-
-                a.search-tag {
-                    white-space: normal;
-                    max-width: unset;
-                }
-
-                div.tag-actions {
-
-                    span {
-
-                        &.tag-action-blacklist {
-                            display: inline-block;
-                        }
-
-                        &.tag-action-subscribe a {
-                            visibility: visible;
-                        }
-                    }
-                }
-            }
-
+    & > ul {
+      li {
+        padding-right: 0;
+        span.tag-list-actions {
+          gap: 0.125rem;
+          padding-left: 0.125rem;
+          .tag-list-quick-blacklist {
+            display: unset;
+            visibility: hidden;
+          }
+          span.tag-list-subscribe a[subscribed=false] {
+            visibility: hidden;
+          }
         }
 
+        &:hover {
+          span.tag-list-actions {
+            button.tag-list-quick-blacklist { visibility: visible; }
+            span.tag-list-subscribe a { visibility: visible; }
+          }
+        }
+      }
     }
 
     &[data-shorten-tagnames=true]>ul {
@@ -246,8 +196,8 @@ div#page aside#sidebar {
     }
 
     &[data-hide-plusminus=true] {
-        a.search-inc-tag,
-        a.search-exl-tag { display: none; }
+        a.tag-list-inc,
+        a.tag-list-exl { display: none; }
     }
 }
 

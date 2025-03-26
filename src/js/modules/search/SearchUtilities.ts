@@ -136,9 +136,6 @@ export class SearchUtilities extends RE6Module {
       });
     }
 
-    // Initialize the quick-blacklist buttons
-    this.initQuickBlacklist(this.fetchSettings("quickBlacklist"));
-
     // Handle sidebar collapse
     if (Page.matches([PageDefinition.search, PageDefinition.favorites]))
       this.handleSidebarCollapse();
@@ -154,7 +151,7 @@ export class SearchUtilities extends RE6Module {
    */
   public async improveTagCount (state = true): Promise<void> {
     const source = state ? "data-count" : "data-count-short";
-    $("span.re621-post-count").each(function (index, element) {
+    $(".tag-list-count").each(function (index, element) {
       const tag = $(element);
       tag.text(tag.attr(source));
     });
@@ -239,30 +236,6 @@ export class SearchUtilities extends RE6Module {
   /** Switches the tag script to the specified one */
   private static switchScript (script: number): void {
     Danbooru.PostModeMenu.change_tag_script(script);
-  }
-
-  /** Reset quick blacklist buttons */
-  public initQuickBlacklist (state = true): void {
-
-    if (!state) $("div.tag-actions span.tag-action-blacklist").html("");
-    else {
-      for (const element of $("div.tag-actions span.tag-action-blacklist").get()) {
-        const $container = $(element);
-
-        $("<a>")
-          .attr({
-            "href": "#",
-            "title": "Blacklist Tag",
-          })
-          .addClass("blacklist-tag-toggle")
-          .html(`<i class="fas fa-times"></i>`)
-          .prependTo($container)
-          .on("click", (event) => {
-            event.preventDefault();
-            Blacklist.toggleBlacklistTag($container.parent().attr("data-tag"));
-          });
-      }
-    }
   }
 
   /** Handle sidebar expansion and collapse */

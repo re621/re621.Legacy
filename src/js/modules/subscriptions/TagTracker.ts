@@ -25,7 +25,7 @@ export class TagTracker extends SubscriptionTracker {
   protected buttonSelect = {
     minor: {
       regex: [PageDefinition.search, PageDefinition.post],
-      selector: "#tag-box li span.tag-action-subscribe, #tag-list li span.tag-action-subscribe",
+      selector: "#tag-box li span.tag-list-subscribe, #tag-list li span.tag-list-subscribe",
     },
     major: {
       regex: [PageDefinition.wiki, PageDefinition.wikiNA, PageDefinition.artist],
@@ -42,7 +42,7 @@ export class TagTracker extends SubscriptionTracker {
   }
 
   protected fetchMinorSubscriptionName (element: JQuery<HTMLElement>): string {
-    return element.parent().attr("data-tag");
+    return element.attr("data-tag");
   }
 
   protected fetchMajorSubscriptionName (element: JQuery<HTMLElement>): string {

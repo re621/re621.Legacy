@@ -1111,19 +1111,6 @@ export class SettingsController extends RE6Module {
 
       Form.checkbox(
         {
-          value: searchUtilities.fetchSettings("quickBlacklist"),
-          label: "<b>Quick Blacklist</b><br />Click X next to the tag in the sidebar to add it to the blacklist",
-          width: 3,
-        },
-        async (data) => {
-          await searchUtilities.pushSettings("quickBlacklist", data);
-          searchUtilities.initQuickBlacklist(data);
-        },
-      ),
-      Form.spacer(3),
-
-      Form.checkbox(
-        {
           value: imageScaler.fetchSettings("clickShowFiltered"),
           label: "<b>Click to Show Blacklisted</b><br />Click on the blacklisted image on the post page to show it",
           width: 2,
