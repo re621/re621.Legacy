@@ -626,7 +626,9 @@ export namespace PostData {
     function getTags (group: string): string[] {
       const result: string[] = [];
       for (const element of $(`#tag-list .${group}-tag-list`).children()) {
-        result.push($(element).find(".search-tag").text().replace(/ /g, "_"));
+        const tag = element.dataset.name;
+        if (!tag) continue;
+        result.push(decodeURIComponent(tag));
       }
       return result;
     }
