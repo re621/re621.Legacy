@@ -117,7 +117,7 @@ export class PostViewer extends RE6Module {
       upvoteOnFavorite: true,     // add an upvote when adding the post to favorites
       hideNotes: false,           // should the notes be hidden by default
 
-      moveChildThumbs: true,      // Moves the parent/child post thumbnails to under the searchbar
+      moveChildThumbs: false,     // Moves the parent/child post thumbnails to under the searchbar
       boldenTags: true,           // Restores the classic bold look on non-general tags
       betterImageSearch: true,    // Uses larger version of the image for reverse image searches
     };
@@ -184,7 +184,7 @@ export class PostViewer extends RE6Module {
     if (this.fetchSettings("moveChildThumbs"))
       $(".parent-children")
         .addClass("children-moved")
-        .insertAfter($("#search-box"));
+        .insertAfter($(".post-search"));
 
     // Add a "left" option for navbars
     if (Page.matches(PageDefinition.post)) {
