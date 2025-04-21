@@ -241,7 +241,7 @@ export class UploadUtilities extends RE6Module {
       .children("div").eq(1)
       .attr("id", "source-container");
 
-    const urlMatch = /(http(?:s)?\:\/\/)(www\.)?/;
+    const urlMatch = /(http(?:s)?:\/\/)(www\.)?/;
     const timers = {};
     $(sourceContainer).on("input re621:input", "input.upload-source-input", (event) => {
       const $input = $(event.currentTarget),
@@ -303,7 +303,7 @@ export class UploadUtilities extends RE6Module {
     $("input.upload-source-input").trigger("input");
 
     function getLinkEval (link: string): string {
-      if (!/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/.test(link)) return "invalid";
+      if (!/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(link)) return "invalid";
       if (!link.startsWith("https")) return "http";
       return "";
     }
@@ -317,7 +317,7 @@ export class UploadUtilities extends RE6Module {
         output.html([
           output.attr("data-width") == "-1" ? "0×0" : `${output.attr("data-width")}×${output.attr("data-height")}`,
           output.attr("data-type") !== "UNK" ? `${output.attr("data-type").toUpperCase()}` : undefined,
-          output.attr("data-size") !== "-1" ? `${Util.Size.format(output.attr("data-size"))}` : undefined
+          output.attr("data-size") !== "-1" ? `${Util.Size.format(output.attr("data-size"))}` : undefined,
         ].filter(n => n).join("&emsp;"));
       });
     const image = $("#preview-sidebar img.upload_preview_img").first();
@@ -402,7 +402,7 @@ export class UploadUtilities extends RE6Module {
         try {
           requestURLValidated = new URL(requestURL);
           if (!requestURLValidated) requestURLValidated = null;
-        } catch (e) { requestURLValidated = null; }
+        } catch { requestURLValidated = null; }
 
         if (!requestURLValidated) {
           output.attr({
@@ -449,11 +449,11 @@ export class UploadUtilities extends RE6Module {
               "data-type": output.attr("data-type"),
               "data-year": output.attr("data-year"),
               "data-file": false,
-            }
+            };
 
             output.trigger("re621:update");
             TagSuggester.trigger("update");
-          }
+          },
         });
 
       }
@@ -479,7 +479,7 @@ export class UploadUtilities extends RE6Module {
 
     const image = $("<img>")
       .attr({
-        src: "/images/deleted-preview.png"
+        src: "/images/deleted-preview.png",
       })
       .appendTo(preview);
 
@@ -507,7 +507,7 @@ export class UploadUtilities extends RE6Module {
         image.attr("src", post.flags.has(PostFlag.Deleted) ? "/images/deleted-preview.png" : post.file.preview);
 
       }, 500);
-    })
+    });
   }
 
   /** Fixes an issue with Pixiv previews not loading properly */
@@ -538,7 +538,7 @@ export class UploadUtilities extends RE6Module {
       try {
         imageURL = new URL(value);
         if (imageURL.hostname !== "i.pximg.net") return;
-      } catch (e) { return; }
+      } catch { return; }
       if (!imageURL) return;
 
       // Start the loading process
@@ -567,10 +567,10 @@ export class UploadUtilities extends RE6Module {
                   .attr("data-height", height)
                   .trigger("re621:update");
               });
-          }
+          };
 
           TagSuggester.trigger("update");
-        }
+        },
       });
     }
   }
