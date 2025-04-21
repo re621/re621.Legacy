@@ -11,11 +11,11 @@ import { TagSuggester } from "./TagSuggester";
 export class UploadUtilities extends RE6Module {
 
 
-  public constructor() {
+  public constructor () {
     super([PageDefinition.upload], true);
   }
 
-  protected getDefaultSettings(): Settings {
+  protected getDefaultSettings (): Settings {
     return {
       enabled: true,
 
@@ -29,7 +29,7 @@ export class UploadUtilities extends RE6Module {
     };
   }
 
-  public create(): void {
+  public create (): void {
     super.create();
 
     // This form's structure is the absolute worst
@@ -71,14 +71,14 @@ export class UploadUtilities extends RE6Module {
    * @param label Label to look for
    * @param id ID to add to the section
    */
-  private static findSection(label: string, id: string): JQuery<HTMLElement> {
+  private static findSection (label: string, id: string): JQuery<HTMLElement> {
     return $("label[for=" + label + "]")
       .parent().parent()
       .attr("id", id);
   }
 
   /** Handles checking for duplicates, and appends reverse image search links */
-  private handleDuplicateCheck(): void {
+  private handleDuplicateCheck (): void {
 
     const fileContainer = UploadUtilities.findSection("post_file", "section-file")
       .find("div.col2").first()
@@ -107,7 +107,7 @@ export class UploadUtilities extends RE6Module {
     fileContainer.find("input[type='text']").trigger("focus");
 
     /** Handles the image URL input changes */
-    function handleInput(event: JQuery.TriggeredEvent): void {
+    function handleInput (event: JQuery.TriggeredEvent): void {
       const $input = $(event.target),
         isFile = $input.attr("type") === "file",
         value = isFile ? $input.prop("files")[0] : $input.val() + "";
@@ -157,7 +157,7 @@ export class UploadUtilities extends RE6Module {
     }
 
     /** Handles valid responses from IQDB endpoint*/
-    function handleResponse(request, response, isFile: boolean): void {
+    function handleResponse (request, response, isFile: boolean): void {
       // console.log(response);
       dupesContainer.html("");
 
@@ -175,7 +175,7 @@ export class UploadUtilities extends RE6Module {
     }
 
     /** Handles errors from IQDB endpoint */
-    function handleError(error): void {
+    function handleError (error): void {
       console.log(error);
       dupesContainer.html("");
       const errorMessage = $("<span>")
@@ -199,7 +199,7 @@ export class UploadUtilities extends RE6Module {
      * Makes a simplistic thumbnail to display in the duplicates section
      * @param entry Post data
      */
-    function makePostThumbnail(entry: APIIQDBResponse): JQuery<HTMLElement> {
+    function makePostThumbnail (entry: APIIQDBResponse): JQuery<HTMLElement> {
       const postData = entry.post.posts;
       const article = $("<div>");
 
@@ -234,7 +234,7 @@ export class UploadUtilities extends RE6Module {
   }
 
   /** Improves source field functionality */
-  private handleSourceEnhancements(): void {
+  private handleSourceEnhancements (): void {
 
     const sourceContainer = UploadUtilities.findSection("post_sources", "section-sources")
       .find("div.col2")
@@ -302,7 +302,7 @@ export class UploadUtilities extends RE6Module {
 
     $("input.upload-source-input").trigger("input");
 
-    function getLinkEval(link: string): string {
+    function getLinkEval (link: string): string {
       if (!/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/.test(link)) return "invalid";
       if (!link.startsWith("https")) return "http";
       return "";
@@ -310,7 +310,7 @@ export class UploadUtilities extends RE6Module {
   }
 
   /** Load image file size and type */
-  private handleImageData(): void {
+  private handleImageData (): void {
 
     const output = $("#preview-sidebar div.upload_preview_dims").first()
       .on("re621:update", () => {
@@ -464,7 +464,7 @@ export class UploadUtilities extends RE6Module {
   }
 
   /** Add a preview image to the parent ID field */
-  private handleParentIDPreview(): void {
+  private handleParentIDPreview (): void {
     const input = $(`input[placeholder="Ex. 12345"]`);
     if (input.length == 0) return;
 
@@ -511,7 +511,7 @@ export class UploadUtilities extends RE6Module {
   }
 
   /** Fixes an issue with Pixiv previews not loading properly */
-  private handlePixivPreviews(): void {
+  private handlePixivPreviews (): void {
     const fileContainer = UploadUtilities.findSection("post_file", "section-file")
       .find("div.col2").first()
       .attr("id", "file-container");
@@ -527,7 +527,7 @@ export class UploadUtilities extends RE6Module {
 
     // Process the input URL
     // Should only be executed once the user pastes/stops typing
-    function processInput(event: JQuery.TriggeredEvent): void {
+    function processInput (event: JQuery.TriggeredEvent): void {
 
       // Get input value
       const $input = $(event.target),
