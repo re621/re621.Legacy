@@ -1,4 +1,7 @@
+@use "../utilities/mixins";
+
 /* Modal Helper Styles */
+
 div#modal-container {
     position: absolute;
     height: 100%;
@@ -105,7 +108,7 @@ div#modal-container {
                 margin-top: -1em;
             }
 
-            @include scrollbars;
+            @include mixins.scrollbars;
         }
     }
 

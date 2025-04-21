@@ -1,3 +1,6 @@
+@use "../utilities/fontawesome";
+@use "../utilities/functions";
+
 /* Generated Form Styles */
 
 @mixin form-element {
@@ -109,8 +112,8 @@ form-section > form-input {
             right: calc(20% + 1.25rem);
 
             &:before {
-                content: unicode("f12a");
-                @include FontAwesomeFamily;
+                content: functions.unicode("f12a");
+                @include fontawesome.family;
                 font-weight: 900;
                 color: coral;
             }
@@ -148,7 +151,7 @@ form-section > form-input {
             padding: 0.125rem 0.25rem;
             outline: 0;
 
-            @include FontAwesomeFamily;
+            @include fontawesome.family;
             font-weight: 900;
 
             border: 1px dashed #666666;
@@ -161,19 +164,19 @@ form-section > form-input {
     &.checkbox-switch {
         justify-content: unset;
 
-        input[type=checkbox] {  display: none; }
+        input[type="checkbox"] {  display: none; }
 
         /* to hide the checkbox itself */
-        input[type=checkbox]+label:before {
-            content: unicode("f0c8");
-            @include FontAwesomeFamily;
+        input[type="checkbox"] + label:before {
+            content: functions.unicode("f0c8");
+            @include fontawesome.family;
             display: inline-block;
             letter-spacing: 10px;
             cursor: pointer;
         }
 
-        input[type=checkbox]:checked+label:before {
-            content: unicode("f14a");
+        input[type="checkbox"]:checked + label:before {
+            content: functions.unicode("f14a");
         }
 
         label {

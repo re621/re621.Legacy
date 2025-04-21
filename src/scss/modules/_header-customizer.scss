@@ -1,10 +1,11 @@
-/* Header Customizer Styles */
-header#top nav#nav {
+@use "../utilities/fontawesome";
+@use "../utilities/functions";
 
-    menu.main.custom {
-        padding: 0;
-        align-self: center;
-        display: inline-flex;
+/* Header Customizer Styles */
+
+nav.navigation {
+
+    menu.nav-primary.custom {
 
         li {
             position: relative;
@@ -16,6 +17,7 @@ header#top nav#nav {
             &>a {
                 padding: 0 0.5rem;
                 outline: 0;
+                white-space: nowrap;
             }
         }
 
@@ -40,14 +42,15 @@ header#top nav#nav {
         &[data-forumdot=true] {
 
             li > a.tab-has-updates::after {
-                content: unicode('f111');
-                @include FontAwesomeFamily;
+                content: functions.unicode("f111");
+                @include fontawesome.family;
                 font-weight: 900;
                 font-size: 0.5em;
                 color: red;
 
                 position: absolute;
                 top: -3px;
+                right: 0;
             }
 
         }
@@ -58,28 +61,29 @@ header#top nav#nav {
         }
     }
 
-    menu.main.custom[data-editing=true] li {
+    menu.nav-primary.custom[data-editing=true] li {
         background-color: #ffffff40;
     }
 
-    menu.main.custom:not([data-editing=true]) li[data-right=true] {
+    menu.nav-primary.custom:not([data-editing=true]) li[data-right=true] {
         float: right;
     }
 
-    menu:last-child li.float-right {
-        #subnav-button-increase {
-            padding-right: 0.24rem;
-        }
+    menu.nav-secondary li.re6-bs-pmbutton {
 
-        .resize-disabled {
+        &.push-right { margin-left: auto; }
+
+        a.resize-disabled {
             pointer-events: none;
             cursor: default;
 
-            i {
-                color: #666666;
-            }
+            i { color: #666666; }
         }
 
         &[hide-resize-buttons=true] { display: none; }
     }
+}
+
+nav.navigation menu.nav-help, html.nav-toggled nav.navigation menu.nav-help {
+    display: none;
 }

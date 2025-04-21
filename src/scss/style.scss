@@ -1,40 +1,40 @@
 /* Styling for the re621 Project */
 
-@import 'utilities/fontawesome';
-@import 'utilities/functions';
-@import 'utilities/mixins';
-@import 'utilities/common';
+@use 'utilities/fontawesome';
+@use 'utilities/functions';
+@use 'utilities/mixins';
+@use 'utilities/common';
 
-@import 'components/form';
-@import 'components/modal';
-@import 'components/prompt';
-@import 'components/tabbed';
+@use 'components/form';
+@use 'components/modal';
+@use 'components/prompt';
+@use 'components/tabbed';
 
-@import 'modules/miscellaneous';
-@import 'modules/better-search';
-@import 'modules/blacklist-enhancer';
-@import 'modules/comment-blacklist';
-@import 'modules/custom-flagger';
-@import 'modules/formatting-extender';
-@import 'modules/header-customizer';
-@import 'modules/image-scaler';
-@import 'modules/janitor-enhancements';
-@import 'modules/progress-tracker';
-@import 'modules/script-assistant';
+@use 'modules/miscellaneous';
+@use 'modules/better-search';
+@use 'modules/blacklist-enhancer';
+@use 'modules/comment-blacklist';
+@use 'modules/custom-flagger';
+@use 'modules/formatting-extender';
+@use 'modules/header-customizer';
+@use 'modules/image-scaler';
+@use 'modules/janitor-enhancements';
+@use 'modules/progress-tracker';
+@use 'modules/script-assistant';
 
-@import 'modules/mass-downloader';
-@import 'modules/pool-downloader';
-@import 'modules/fav-downloader';
+@use 'modules/mass-downloader';
+@use 'modules/pool-downloader';
+@use 'modules/fav-downloader';
 
-@import 'modules/pool-navigator';
-@import 'modules/post-suggester';
-@import 'modules/post-viewer';
-@import 'modules/profile_enhancer';
-@import 'modules/search-utilities';
-@import 'modules/settings-controller';
-@import 'modules/structure-utilities';
-@import 'modules/subscription-manager';
-@import 'modules/smart-alias';
-@import 'modules/tag-suggester';
-@import 'modules/edit-tracker';
-@import 'modules/upload-utilities';
+@use 'modules/pool-navigator';
+@use 'modules/post-suggester';
+@use 'modules/post-viewer';
+@use 'modules/profile_enhancer';
+@use 'modules/search-utilities';
+@use 'modules/settings-controller';
+@use 'modules/structure-utilities';
+@use 'modules/subscription-manager';
+@use 'modules/smart-alias';
+@use 'modules/tag-suggester';
+@use 'modules/edit-tracker';
+@use 'modules/upload-utilities';

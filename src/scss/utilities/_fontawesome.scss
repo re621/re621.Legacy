@@ -1,4 +1,4 @@
-@mixin fontawesome() {
+@mixin icon() {
     -moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
     display: inline-block;
@@ -7,9 +7,9 @@
     text-rendering: auto;
     line-height: 1;
     font-weight: 900;
-    @include FontAwesomeFamily;
+    @include family;
 }
 
-@mixin FontAwesomeFamily() {
+@mixin family() {
     font-family: "Font Awesome 6 Free";
 }

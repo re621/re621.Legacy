@@ -1,3 +1,6 @@
+@use "../utilities/fontawesome";
+@use "../utilities/functions";
+
 /* Mass Downloader Styles */
 
 section#downloader-box {
@@ -7,7 +10,7 @@ section#downloader-box {
     grid-row-gap: 0.5rem;
     top: 10rem;
 
-    h1 {
+    h3 {
         grid-column: span 2;
     }
 
@@ -33,7 +36,7 @@ section#downloader-box {
                 display: block;
                 line-height: 1;
 
-                @include FontAwesomeFamily;
+                @include fontawesome.family;
                 font-weight: 400;
 
                 position: absolute;
@@ -42,15 +45,15 @@ section#downloader-box {
             }
 
             &[data-state=done]::before {
-                content: unicode("f058"); // fa-check-circle
+                content: functions.unicode("f058"); // fa-check-circle
             }
 
             &[data-state=error]::before {
-                content: unicode("f057"); // fa-times-circle
+                content: functions.unicode("f057"); // fa-times-circle
             }
 
             &[data-state=loading]::before {
-                content: unicode("f1ce"); // fa-circle-notch
+                content: functions.unicode("f1ce"); // fa-circle-notch
                 font-weight: 700;
                 animation: fa-spin 2s infinite linear;
             }
@@ -115,7 +118,7 @@ search-content[data-downloading=true] {
             right: 0.5rem;
             z-index: 50;
 
-            @include FontAwesomeFamily;
+            @include fontawesome.family;
             font-weight: 500;
             font-size: 3rem;
             text-shadow: 0 0 3px black;
@@ -124,29 +127,29 @@ search-content[data-downloading=true] {
         }
 
         &[data-state=ready]::before {
-            content: unicode("f358"); // fa-arrow-alt-circle-down
+            content: functions.unicode("f358"); // fa-arrow-alt-circle-down
             color: goldenrod;
         }
 
         &[data-state=preparing]::before {
-            content: unicode("f111"); // fa-circle
+            content: functions.unicode("f111"); // fa-circle
             color: goldenrod;
         }
 
         &[data-state=loading]::before {
-            content: unicode("f1ce"); // fa-circle-notch
+            content: functions.unicode("f1ce"); // fa-circle-notch
             font-weight: 700;
             animation: fa-spin 2s infinite linear;
             color: goldenrod;
         }
 
         &[data-state=error]::before {
-            content: unicode("f057"); // fa-times-circle
+            content: functions.unicode("f057"); // fa-times-circle
             color: orangered;
         }
 
         &[data-state=done]::before {
-            content: unicode("f058"); // fa-circle-check
+            content: functions.unicode("f058"); // fa-circle-check
             color: limegreen;
         }
     }

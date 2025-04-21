@@ -1,6 +1,9 @@
+@use "../utilities/fontawesome";
+@use "../utilities/functions";
+
 /* Styles for the revamped search page */
 
-section#content {
+#content {
 
     search-loading {
         display: flex;
@@ -230,8 +233,8 @@ search-content > post {
         text-shadow: 0 0 10px black;
 
         &::before {
-            content: unicode("f1ce");
-            @include FontAwesomeFamily;
+            content: functions.unicode("f1ce");
+            @include fontawesome.family;
             font-weight: 900;
             width: 2rem;
             height: 2rem;
@@ -272,18 +275,18 @@ search-content > post {
 
         span::before {
             content: " ";
-            @include FontAwesomeFamily;
+            @include fontawesome.family;
             font-weight: 900;
         }
 
         span.post-info-score {
-            &.score-positive::before { content: unicode("f30c"); }  // long-arrow-alt-up
-            &.score-negative::before { content: unicode("f309"); }  // long-arrow-alt-down
-            &.score-neutral::before { content: unicode("f338"); }   // arrows-alt-v
+            &.score-positive::before { content: functions.unicode("f30c"); }  // long-arrow-alt-up
+            &.score-negative::before { content: functions.unicode("f309"); }  // long-arrow-alt-down
+            &.score-neutral::before { content: functions.unicode("f338"); }   // arrows-alt-v
         }
 
         span.post-info-favorites {
-            &::before { content: unicode("f004");  }                // heart
+            &::before { content: functions.unicode("f004");  }                // heart
         }
 
         span.post-info-comments {
@@ -321,7 +324,7 @@ search-content > post[rendered=false] {
 search-content > post[rendered=false],
 search-content > post[filetype=swf],
 search-content > post[deleted=true] {
-    background-image: url(placeholderBG("ffffff06"));
+    background-image: url(functions.placeholderBG("ffffff06"));
 }
 
 
@@ -447,8 +450,8 @@ search-content > post[sound=true] {
         &[warning=true] { color: goldenrod; }
 
         &::before {
-            content: unicode("f027");
-            @include FontAwesomeFamily;
+            content: functions.unicode("f027");
+            @include fontawesome.family;
             font-weight: 900;
         }
     }
@@ -573,7 +576,7 @@ search-content  {
             padding: 0.125rem 1rem;
 
             &::before {
-                @include FontAwesomeFamily;
+                @include fontawesome.family;
                 font-weight: 500;
                 position: relative;
             }
@@ -584,7 +587,7 @@ search-content  {
                 padding-right: 0.7rem;
                 box-shadow: -1px -3px 5px #00000060;
 
-                &::before { content: unicode("f164"); bottom: -1px; }
+                &::before { content: functions.unicode("f164"); bottom: -1px; }
             }
             &[action=down] {
                 border-left: 1px solid #666;
@@ -593,7 +596,7 @@ search-content  {
                 padding-left: 0.7rem;
                 box-shadow: 1px -3px 5px #00000060;
 
-                &::before { content: unicode("f165"); top: 2px; left: 2px; }
+                &::before { content: functions.unicode("f165"); top: 2px; left: 2px; }
             }
         }
 
@@ -607,8 +610,8 @@ search-content  {
             box-shadow: 1px -3px 5px #00000060;
 
             &::before {
-                content: unicode("f005");
-                @include FontAwesomeFamily;
+                content: functions.unicode("f005");
+                @include fontawesome.family;
                 font-weight: 500;
                 position: relative;
                 top: 1px;
@@ -652,7 +655,7 @@ zoom-container {
         &::before {
             content: var(--image-info, "??? x ???, ???MB");
         }
-        */
+      */
     }
 
     & > video {
@@ -693,8 +696,8 @@ zoom-container {
     &[status=waiting] { display: none; }
     &[status=loading] {
         &::after {
-            content: unicode("f1ce");
-            @include FontAwesomeFamily;
+            content: functions.unicode("f1ce");
+            @include fontawesome.family;
             font-weight: 900;
             font-size: 3rem;
             line-height: 3rem;
@@ -717,7 +720,7 @@ zoom-container {
 
 
 /* Quick Tags Form */
-section#content > form#re621-quick-tags {
+#content > form#re621-quick-tags {
     display: none;
     box-sizing: border-box;
     top: 0;
@@ -768,15 +771,15 @@ section#content > form#re621-quick-tags {
         }
     }
 }
-section#content[hide-smart-alias-output=true] > form#re621-quick-tags smart-alias {
+#content[hide-smart-alias-output=true] > form#re621-quick-tags smart-alias {
     display: none;
 }
 
-body[data-sticky-editbox=true] section#content > form#re621-quick-tags {
+body[data-sticky-editbox=true] #content > form#re621-quick-tags {
     position: sticky;
 }
 
-div#page.mode-edit section#content > form#re621-quick-tags {
+div#page.mode-edit #content > form#re621-quick-tags {
     display: block;
 }
 

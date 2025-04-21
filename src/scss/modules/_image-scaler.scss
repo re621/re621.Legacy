@@ -1,3 +1,6 @@
+@use "../utilities/fontawesome";
+@use "../utilities/functions";
+
 /* Image Scaler Styles */
 
 // Image States
@@ -7,8 +10,8 @@ section#image-container {
         position: relative;
 
         &::after {
-            content: unicode("f1ce");
-            @include FontAwesomeFamily;
+            content: functions.unicode("f1ce");
+            @include fontawesome.family;
             font-weight: 900;
             font-size: 3rem;
 

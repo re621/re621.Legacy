@@ -6,109 +6,114 @@ import { Util } from "./Util";
 
 export class VersionChecker {
 
-    public static scriptBuild = "0.0.1";        // actual, hard-coded version of the script
-    public static latestBuild = "0.0.1";        // version of the latest release on github
-    public static cachedBuild = "0.0.1";        // cached version of the script
+  public static scriptBuild = "0.0.1";        // actual, hard-coded version of the script
 
-    public static wasUpdated = false;           // the script has been updated - `currentBuild` and `scriptBuild` do not match
-    public static hasUpdate = false;            // new version is available - `currentBuild` and `latestBuild` do not match
+  public static latestBuild = "0.0.1";        // version of the latest release on github
 
-    public static lastUpdated = 0;               // last time the script pinged github to check for a new version
-    public static changesText = "_~ Changelog not available ~_";
-    public static changesHTML = "";
+  public static cachedBuild = "0.0.1";        // cached version of the script
 
-    public static async init(): Promise<any> {
+  public static wasUpdated = false;           // the script has been updated - `currentBuild` and `scriptBuild` do not match
 
-        // Load the hard-coded script version
-        // For debugging purposes it can be emulated via a localStorage value
-        const emVersion = Util.LS.getItem("re621.version");
-        VersionChecker.scriptBuild = emVersion ? emVersion : window["re621"]["version"];
+  public static hasUpdate = false;            // new version is available - `currentBuild` and `latestBuild` do not match
 
-        // Load settings
-        const settings: VersionSettings = await XM.Storage.getValue("re621.VersionChecker", {});
-        if (settings.latestBuild !== undefined) VersionChecker.latestBuild = settings.latestBuild;
-        if (settings.cachedBuild !== undefined) VersionChecker.cachedBuild = settings.cachedBuild;
+  public static lastUpdated = 0;               // last time the script pinged github to check for a new version
 
-        if (VersionChecker.cachedBuild !== VersionChecker.scriptBuild) VersionChecker.wasUpdated = true;
-        if (Util.versionCompare(VersionChecker.cachedBuild, VersionChecker.latestBuild) < 0) VersionChecker.hasUpdate = true;
+  public static changesText = "_~ Changelog not available ~_";
 
-        if (settings.lastUpdated !== undefined) VersionChecker.lastUpdated = settings.lastUpdated;
-        if (settings.changesText !== undefined) VersionChecker.changesText = settings.changesText;
+  public static changesHTML = "";
 
-        // If this is a dev build, version checking is skipped
-        // Otherwise, either the script version mismatch has been detected, or an hour has passed since last check
-        if (VersionChecker.scriptBuild.includes("dev")) {
-            VersionChecker.wasUpdated = false;
-            VersionChecker.hasUpdate = false;
-        } else if (VersionChecker.wasUpdated || VersionChecker.lastUpdated + Util.Time.HOUR < Util.Time.now()) {
-            try {
-                const latestRelease = await VersionChecker.getGithubData("latest");
+  public static async init (): Promise<any> {
 
-                if (!latestRelease || !latestRelease.name) throw "Malformed GitHub response";
+    // Load the hard-coded script version
+    // For debugging purposes it can be emulated via a localStorage value
+    const emVersion = Util.LS.getItem("re621.version");
+    VersionChecker.scriptBuild = emVersion ? emVersion : window["re621"]["version"];
 
-                VersionChecker.latestBuild = latestRelease.name;
-                VersionChecker.cachedBuild = VersionChecker.scriptBuild;
+    // Load settings
+    const settings: VersionSettings = await XM.Storage.getValue("re621.VersionChecker", {});
+    if (settings.latestBuild !== undefined) VersionChecker.latestBuild = settings.latestBuild;
+    if (settings.cachedBuild !== undefined) VersionChecker.cachedBuild = settings.cachedBuild;
 
-                VersionChecker.hasUpdate = Util.versionCompare(VersionChecker.scriptBuild, VersionChecker.latestBuild) < 0;
+    if (VersionChecker.cachedBuild !== VersionChecker.scriptBuild) VersionChecker.wasUpdated = true;
+    if (Util.versionCompare(VersionChecker.cachedBuild, VersionChecker.latestBuild) < 0) VersionChecker.hasUpdate = true;
 
-                VersionChecker.lastUpdated = Util.Time.now();
-                VersionChecker.changesText = latestRelease.body;
-            } catch (error) {
-                VersionChecker.latestBuild = "0.0.1";
-                VersionChecker.cachedBuild = VersionChecker.scriptBuild;
+    if (settings.lastUpdated !== undefined) VersionChecker.lastUpdated = settings.lastUpdated;
+    if (settings.changesText !== undefined) VersionChecker.changesText = settings.changesText;
 
-                VersionChecker.hasUpdate = false;
+    // If this is a dev build, version checking is skipped
+    // Otherwise, either the script version mismatch has been detected, or an hour has passed since last check
+    if (VersionChecker.scriptBuild.includes("dev")) {
+      VersionChecker.wasUpdated = false;
+      VersionChecker.hasUpdate = false;
+    } else if (VersionChecker.wasUpdated || VersionChecker.lastUpdated + Util.Time.HOUR < Util.Time.now()) {
+      try {
+        const latestRelease = await VersionChecker.getGithubData("latest");
 
-                VersionChecker.lastUpdated = Util.Time.now();
-                VersionChecker.changesText = "Unable to fetch changelog";
+        if (!latestRelease || !latestRelease.name) throw "Malformed GitHub response";
 
-                ErrorHandler.error("VersionChecker", "Failed to fetch update data from GitHub.\n" + error);
-            }
-        }
+        VersionChecker.latestBuild = latestRelease.name;
+        VersionChecker.cachedBuild = VersionChecker.scriptBuild;
 
-        VersionChecker.changesHTML = Util.quickParseMarkdown(VersionChecker.changesText);
+        VersionChecker.hasUpdate = Util.versionCompare(VersionChecker.scriptBuild, VersionChecker.latestBuild) < 0;
 
-        Debug.table({
-            scriptBuild: VersionChecker.scriptBuild,
-            latestBuild: VersionChecker.latestBuild,
-            cachedBuild: VersionChecker.cachedBuild,
+        VersionChecker.lastUpdated = Util.Time.now();
+        VersionChecker.changesText = latestRelease.body;
+      } catch (error) {
+        VersionChecker.latestBuild = "0.0.1";
+        VersionChecker.cachedBuild = VersionChecker.scriptBuild;
 
-            wasUpdated: VersionChecker.wasUpdated,
-            hasUpdate: VersionChecker.hasUpdate,
+        VersionChecker.hasUpdate = false;
 
-            lastUpdated: VersionChecker.lastUpdated,
-        });
+        VersionChecker.lastUpdated = Util.Time.now();
+        VersionChecker.changesText = "Unable to fetch changelog";
 
-        await XM.Storage.setValue("re621.VersionChecker", {
-            latestBuild: VersionChecker.latestBuild,
-            cachedBuild: VersionChecker.cachedBuild,
-            lastUpdated: VersionChecker.lastUpdated,
-            changesText: VersionChecker.changesText,
-        });
+        ErrorHandler.error("VersionChecker", "Failed to fetch update data from GitHub.\n" + error);
+      }
     }
 
-    /**
-     * Fetches the release data from Github's API
-     * @param node Version number, or "latest"
-     */
-    private static async getGithubData(node: string): Promise<any> {
-        return XM.Connect.xmlHttpPromise({ url: "https://api.github.com/repos/re621/re621.Legacy/releases/" + node, method: "GET" }).then(
-            (response: GMxmlHttpRequestResponse) => { return Promise.resolve(JSON.parse(response.responseText)); },
-            () => {
-                console.error("Failed to fetch Github release data");
-                return {
-                    name: "0.0.0",
-                    body: "Error: Unable to fetch the changelog",
-                };
-            }
-        );
-    }
+    VersionChecker.changesHTML = Util.quickParseMarkdown(VersionChecker.changesText);
+
+    Debug.table({
+      scriptBuild: VersionChecker.scriptBuild,
+      latestBuild: VersionChecker.latestBuild,
+      cachedBuild: VersionChecker.cachedBuild,
+
+      wasUpdated: VersionChecker.wasUpdated,
+      hasUpdate: VersionChecker.hasUpdate,
+
+      lastUpdated: VersionChecker.lastUpdated,
+    });
+
+    await XM.Storage.setValue("re621.VersionChecker", {
+      latestBuild: VersionChecker.latestBuild,
+      cachedBuild: VersionChecker.cachedBuild,
+      lastUpdated: VersionChecker.lastUpdated,
+      changesText: VersionChecker.changesText,
+    });
+  }
+
+  /**
+   * Fetches the release data from Github's API
+   * @param node Version number, or "latest"
+   */
+  private static async getGithubData (node: string): Promise<any> {
+    return XM.Connect.xmlHttpPromise({ url: "https://api.github.com/repos/re621/re621.Legacy/releases/" + node, method: "GET" }).then(
+      (response: GMxmlHttpRequestResponse) => { return Promise.resolve(JSON.parse(response.responseText)); },
+      () => {
+        console.error("Failed to fetch Github release data");
+        return {
+          name: "0.0.0",
+          body: "Error: Unable to fetch the changelog",
+        };
+      },
+    );
+  }
 
 }
 
 interface VersionSettings {
-    latestBuild: string;
-    cachedBuild: string;
-    lastUpdated: number;
-    changesText: string;
+  latestBuild: string;
+  cachedBuild: string;
+  lastUpdated: number;
+  changesText: string;
 }

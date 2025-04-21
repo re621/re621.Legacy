@@ -1,3 +1,6 @@
+@use "../utilities/fontawesome";
+@use "../utilities/mixins";
+@use "../utilities/functions";
 
 // Notifications window custom tabs
 tabbed.config-tabs {
@@ -42,8 +45,8 @@ tabbed.config-tabs {
                 }
 
                 &:not([updates="0"])::after {
-                    content: unicode("f111");
-                    @include FontAwesomeFamily;
+                    content: functions.unicode("f111");
+                    @include fontawesome.family;
                     font-weight: 900;
                     font-size: 0.5em;
                     color: red;
@@ -54,8 +57,8 @@ tabbed.config-tabs {
                 }
 
                 &[loading=true]::after {
-                    content: unicode("f110");
-                    @include FontAwesomeFamily;
+                    content: functions.unicode("f110");
+                    @include fontawesome.family;
                     font-weight: 900;
                     font-size: 0.5em;
                     color: inherit;
@@ -97,8 +100,8 @@ div#modal-container div.re621-ui-dialog div.ui-dialog-content.subscription-wrapp
 a.subscribe-button-minor {
 
     &::after {
-        content: unicode("f004");
-        @include FontAwesomeFamily;
+        content: functions.unicode("f004");
+        @include fontawesome.family;
         font-weight: 500;
     }
 
@@ -123,7 +126,7 @@ a.subscribe-button-major {
     float: right;
     box-shadow: 0px 0px 1px 0px black;
     
-    @include nonselectable;
+    @include mixins.nonselectable;
 
     &:hover {
         background: #004b00;
@@ -209,7 +212,7 @@ sb-enwrap {
         max-height: 40vh;
         overflow: hidden auto;
 
-        @include scrollbars;
+        @include mixins.scrollbars;
 
         sb-enitem {
             display: block;

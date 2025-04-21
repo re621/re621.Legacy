@@ -1,3 +1,6 @@
+@use "../utilities/fontawesome";
+@use "../utilities/functions";
+
 /* Mass Downloader Styles */
 
 section#fav-downloader-box {
@@ -7,7 +10,7 @@ section#fav-downloader-box {
     grid-row-gap: 0.5rem;
     top: 10rem;
 
-    h1 {
+    h3 {
         grid-column: span 2;
     }
 
@@ -27,7 +30,7 @@ section#fav-downloader-box {
                 display: block;
                 line-height: 1;
 
-                @include FontAwesomeFamily;
+                @include fontawesome.family;
                 font-weight: 400;
 
                 position: absolute;
@@ -36,15 +39,15 @@ section#fav-downloader-box {
             }
 
             &[data-state=done]::before {
-                content: unicode("f058"); // fa-check-circle
+                content: functions.unicode("f058"); // fa-check-circle
             }
 
             &[data-state=error]::before {
-                content: unicode("f057"); // fa-times-circle
+                content: functions.unicode("f057"); // fa-times-circle
             }
 
             &[data-state=loading]::before {
-                content: unicode("f1ce"); // fa-circle-notch
+                content: functions.unicode("f1ce"); // fa-circle-notch
                 font-weight: 700;
                 animation: fa-spin 2s infinite linear;
             }

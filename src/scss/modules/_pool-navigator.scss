@@ -1,3 +1,6 @@
+@use "../utilities/fontawesome";
+@use "../utilities/functions";
+
 /* Pool Navigator Styles */
 
 div#nav-links,      // Old version,
@@ -15,15 +18,15 @@ div#nav-links-bottom {
             }
 
             input[type=radio]+label:before {
-                content: unicode("f0c8");
-                @include FontAwesomeFamily;
+                content: functions.unicode("f0c8");
+                @include fontawesome.family;
                 display: inline-block;
                 letter-spacing: 10px;
                 cursor: pointer;
             }
 
             input[type=radio]:checked+label:before {
-                content: unicode("f14a");
+                content: functions.unicode("f14a");
             }
         }
 

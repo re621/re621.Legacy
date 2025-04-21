@@ -1,3 +1,6 @@
+@use "../utilities/fontawesome";
+@use "../utilities/mixins";
+
 /* Post Viewer Styles */
 
 // Post Navbar Tweak
@@ -20,7 +23,7 @@ section#image-extra-controls {
         &:last-child { margin-right: 0; }
         & > a, & > button, & > select {
             outline: 0;
-            @include nonselectable;
+            @include mixins.nonselectable;
         }
     }
 
@@ -59,7 +62,7 @@ section#image-extra-controls {
 
             &:before {
                 content: "\f1ce";
-                @include FontAwesomeFamily;
+                @include fontawesome.family;
                 font-weight: 900;
                 animation: fa-spin 2s infinite linear;
                 color: #aaa;
@@ -80,7 +83,7 @@ div#c-posts div.parent-children.children-moved {
         display: grid;
         justify-items: center;
         max-height: 50vh;
-        @include scrollbars;
+        @include mixins.scrollbars;
     }
 }
 

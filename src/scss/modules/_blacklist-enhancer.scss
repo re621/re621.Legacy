@@ -1,3 +1,7 @@
+@use "../utilities/fontawesome";
+@use "../utilities/mixins";
+@use "../utilities/functions";
+
 /** Replacement Blacklist Filtering Styles */
 section#blacklist-box {
     display: block;
@@ -18,10 +22,10 @@ blacklist-header {
 }
 
 section#blacklist-box > blacklist-header::before {
-    content: unicode("f0d7");
+    content: functions.unicode("f0d7");
     display: inline-block;
     margin-right: 0.5rem;
-    @include FontAwesomeFamily;
+    @include fontawesome.family;
     font-weight: 700;
     transition: transform 0.25s ease;
 }
@@ -44,12 +48,12 @@ blacklist-content {
         color: #bbb;
 
         &::before {
-            content: unicode("f14a");
+            content: functions.unicode("f14a");
             display: inline-block;
             margin-right: 0.435rem;
             margin-left: -1rem;
             margin-top: 0.125rem;
-            @include FontAwesomeFamily;
+            @include fontawesome.family;
             font-weight: 500;
             cursor: pointer;
         }
@@ -63,7 +67,7 @@ blacklist-content {
         }
 
         &[enabled=false] {
-            &::before { content: unicode("f0c8"); }
+            &::before { content: functions.unicode("f0c8"); }
             & > a { color: #ccc !important; }
         }
     }
@@ -74,7 +78,7 @@ section#blacklist-box[collapsed=true] > blacklist-content {
 }
 
 section#blacklist-box:not([collapsed=true]) > blacklist-content {
-    @include scrollbars;
+    @include mixins.scrollbars;
 }
 
 // Toggle

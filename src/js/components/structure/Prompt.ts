@@ -5,48 +5,49 @@ import { Modal } from "./Modal";
  */
 export class Prompt extends Modal {
 
-    private promise: Promise<string | number | string[]>;
+  private promise: Promise<string | number | string[]>;
 
-    private $form: JQuery<HTMLElement>;
-    private $input: JQuery<HTMLElement>;
+  private $form: JQuery<HTMLElement>;
 
-    constructor(title = "Prompt") {
-        super({
-            title: title,
-            fixed: true,
-            minHeight: 50,
-        });
+  private $input: JQuery<HTMLElement>;
 
-        this.createForm();
-        this.addContent(this.$form);
-        this.open();
-        this.$input.trigger("focus");
+  constructor (title = "Prompt") {
+    super({
+      title: title,
+      fixed: true,
+      minHeight: 50,
+    });
 
-        this.promise = new Promise((resolve, reject) => {
-            this.$form.on("submit", (event) => {
-                event.preventDefault();
-                this.destroy();
-                resolve(this.$input.val());
-                reject();
-            });
-        });
-    }
+    this.createForm();
+    this.addContent(this.$form);
+    this.open();
+    this.$input.trigger("focus");
 
-    private createForm(): void {
-        this.$form = $("<form>")
-            .addClass("prompt-input");
+    this.promise = new Promise((resolve, reject) => {
+      this.$form.on("submit", (event) => {
+        event.preventDefault();
+        this.destroy();
+        resolve(this.$input.val());
+        reject();
+      });
+    });
+  }
 
-        this.$input = $("<input>")
-            .attr("id", "text")
-            .appendTo(this.$form);
+  private createForm (): void {
+    this.$form = $("<form>")
+      .addClass("prompt-input");
 
-        $("<button>")
-            .attr("type", "submit")
-            .html("Submit")
-            .appendTo(this.$form);
-    }
+    this.$input = $("<input>")
+      .attr("id", "text")
+      .appendTo(this.$form);
 
-    public getPromise(): Promise<string | number | string[]> {
-        return this.promise;
-    }
+    $("<button>")
+      .attr("type", "submit")
+      .html("Submit")
+      .appendTo(this.$form);
+  }
+
+  public getPromise (): Promise<string | number | string[]> {
+    return this.promise;
+  }
 }

@@ -67,7 +67,7 @@ export class UploadUtilities extends RE6Module {
   }
 
   /**
-   * Finds and returns a form section with the specified label.  
+   * Finds and returns a form section with the specified label.
    * @param label Label to look for
    * @param id ID to add to the section
    */
@@ -455,7 +455,6 @@ export class UploadUtilities extends RE6Module {
             TagSuggester.trigger("update");
           },
         });
-
       }
     });
 
@@ -492,7 +491,6 @@ export class UploadUtilities extends RE6Module {
           preview.addClass("display-none-important");
           return;
         }
-
         const lookup = await E621.Posts.first<APIPost>({ tags: "id:" + search }, 500);
         console.log(lookup);
         if (!lookup) {
