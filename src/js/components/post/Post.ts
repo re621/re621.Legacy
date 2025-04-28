@@ -560,9 +560,9 @@ export namespace PostData {
 
       meta: {
         duration: data.duration,
-        animated: tags.has("animated") || data.file.ext == "webm" || data.file.ext == "gif" || data.file.ext == "swf",
+        animated: tags.has("animated") || data.file.ext == "webm" || data.file.ext == "mp4" || data.file.ext == "gif" || data.file.ext == "swf",
         sound: tags.has("sound"),
-        interactive: data.file.ext == "webm" || data.file.ext == "swf",
+        interactive: data.file.ext == "webm" || data.file.ext == "mp4" || data.file.ext == "swf",
       },
 
       warning: {
@@ -742,9 +742,9 @@ export namespace PostData {
 
       meta: {
         duration: null,
-        animated: tagSet.has("animated") || extension == "webm" || extension == "gif" || extension == "swf",
+        animated: tagSet.has("animated") || extension == "webm" || extension == "mp4" || extension == "gif" || extension == "swf",
         sound: tagSet.has("sound"),
-        interactive: extension == "webm" || extension == "swf",
+        interactive: extension == "webm" || extension == "mp4" || extension == "swf",
       },
 
       warning: {
@@ -781,6 +781,7 @@ export enum FileExtension {
   GIF = "gif",
   SWF = "swf",
   WEBM = "webm",
+  MP4 = "mp4",
 }
 
 export namespace FileExtension {
@@ -792,6 +793,7 @@ export namespace FileExtension {
       case "gif": return FileExtension.GIF;
       case "swf": return FileExtension.SWF;
       case "webm": return FileExtension.WEBM;
+      case "mp4": return FileExtension.MP4;
     }
     return null;
   }

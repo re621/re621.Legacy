@@ -83,7 +83,7 @@ export class ImageScaler extends RE6Module {
       }
 
       // Does not work with those types of files anyways
-      if (post.file.ext == "webm" || post.file.ext == "swf")
+      if (post.file.ext == "webm" || post.file.ext == "mp4" || post.file.ext == "swf")
         return;
 
       // Disable this when notes are being edited

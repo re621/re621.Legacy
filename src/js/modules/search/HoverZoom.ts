@@ -254,7 +254,7 @@ export class HoverZoom extends RE6Module {
       });
 
       // Display the image
-      if (post.file.ext == "webm") {
+      if (post.file.ext == "webm" || post.file.ext == "mp4") {
         this.$zoomVideo
           .removeClass("display-none")
           .css("background-image", `url("${post.file.sample}")`)

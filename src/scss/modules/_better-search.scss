@@ -411,6 +411,7 @@ search-content > post[animated=true] {
     }
 
     &[filetype=webm] > a::before { content: "WEBM"; }
+    &[filetype=mp4] > a::before { content: "MP4"; }
     &[filetype=gif] > a::before { content: "GIF"; }
     &[filetype=swf] > a::before { content: "SWF"; }
 
@@ -418,6 +419,7 @@ search-content > post[animated=true] {
 
 /* Duration Badges */
 search-content > post[filetype=webm],
+search-content > post[filetype=mp4],
 search-content > post[filetype=swf] {
 
     span.video-duration {
