@@ -46,38 +46,3 @@ export namespace UtilSize {
     return 0;
   }
 }
-
-export class RISSizeLimit {
-
-  static readonly Google = new RISSizeLimit(20 * UtilSize.Megabyte, 8000, 6000);
-
-  static readonly SauceNAO = new RISSizeLimit(15 * UtilSize.Megabyte);
-
-  static readonly Derpibooru = new RISSizeLimit(20 * UtilSize.Megabyte);
-
-  static readonly Kheina = new RISSizeLimit(8 * UtilSize.Megabyte, 7500, 7500);
-
-  static readonly Yandex = new RISSizeLimit(100 * UtilSize.Megabyte, 150000, 150000);
-
-  public readonly size: number;
-
-  public readonly width: number;
-
-  public readonly height: number;
-
-  private constructor (size: number, width = 0, height = 0) {
-    this.size = size;
-    this.width = width;
-    this.height = height;
-  }
-
-  public test (post: Post): boolean {
-    return post.file.size <= this.size
-            && (this.width == 0 || post.img.width <= this.width)
-            && (this.height == 0 || post.img.height <= this.height);
-  }
-
-  public toString (): string {
-    return `${this.width}x${this.height} (${this.size})`;
-  }
-}

@@ -164,10 +164,10 @@ export class UploadUtilities extends RE6Module {
 
       risContainer.html(`
                 <a href="/iqdb_queries?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">e621</a>
-                <a href="https://www.google.com/searchbyimage?image_url=${encodeURI(value)}&client=e621" target="_blank" rel="noopener noreferrer">Google</a>
+                <a href="https://lens.google.com/uploadbyurl?url=${encodeURI(value)}&client=e621" target="_blank" rel="noopener noreferrer">Google</a>
                 <a href="https://saucenao.com/search.php?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">SauceNAO</a>
                 <a href="https://derpibooru.org/search/reverse?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">Derpibooru</a>
-                <a href="https://kheina.com/?url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">Kheina</a>
+                <a href="https://fuzzysearch.net/#url=${encodeURI(value)}" target="_blank" rel="noopener noreferrer">FuzzySearch</a>
             `);
     }
 

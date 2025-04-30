@@ -1049,19 +1049,6 @@ export class SettingsController extends RE6Module {
 
           Form.checkbox(
             {
-              value: postViewer.fetchSettings("betterImageSearch"),
-              label: "<b>Better Reverse Image Search</b><br />Dynamically select appropriate image resolutions",
-              width: 2,
-            },
-            async (data) => {
-              await postViewer.pushSettings("betterImageSearch", data);
-            },
-          ),
-          Form.requiresReload(),
-          Form.spacer(3),
-
-          Form.checkbox(
-            {
               value: miscellaneous.fetchSettings("disableCommentRules"),
               label: "<b>Hide the Comment Rules Warning</b><br />Removes the \"read the how to comment guide\" warning",
               width: 3,
@@ -2068,11 +2055,11 @@ export class SettingsController extends RE6Module {
           ...createInputs(postViewer, "Open IQDB", "hotkeyOpenIQDB"),
           ...createInputs(postViewer, "Open API Page", "hotkeyOpenAPI"),
           Form.spacer(3),
+          ...createInputs(postViewer, "Search Google", "hotkeyOpenGoogle"),
           ...createInputs(postViewer, "Search SauceNAO", "hotkeyOpenSauceNAO"),
-          ...createInputs(postViewer, "Search Kheina", "hotkeyOpenKheina"),
-          ...createInputs(postViewer, "Search Google Search", "hotkeyOpenGoogle"),
-          ...createInputs(postViewer, "Search Yandex Search", "hotkeyOpenYandex"),
           ...createInputs(postViewer, "Search Derpibooru", "hotkeyOpenDerpibooru"),
+          ...createInputs(postViewer, "Search Yandex", "hotkeyOpenYandex"),
+          ...createInputs(postViewer, "Search FuzzySearch", "hotkeyOpenFuzzySearch"),
           ...createInputs(postViewer, "Search Inkbunny", "hotkeyOpenInkbunny"),
           Form.hr(3),
         ],
