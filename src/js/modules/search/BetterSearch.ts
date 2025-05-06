@@ -363,6 +363,9 @@ export class BetterSearch extends RE6Module {
     BetterSearch.createResizeButtons();
     if (!this.fetchSettings("thumbnailResizeButtons") || !this.fetchSettings("imageSizeChange"))
       BetterSearch.toggleResizeButtons(false);
+
+    // Patch vanilla functions
+    this.patchTagScriptApplyAll();
   }
 
   /** If true, InfiniteScroll and HoverZoom are both paused */
@@ -1048,6 +1051,19 @@ export class BetterSearch extends RE6Module {
       return url.pathname + url.search;
     }
 
+  }
+
+  private patchTagScriptApplyAll () {
+    const button = $("<button>")
+      .text("all")
+      .attr("id", "re621-tag-script-all")
+      .on("click", (event) => {
+        event.preventDefault();
+        const posts = $("search-content post");
+        if (!confirm(`Apply the tag script to ${posts.length} posts?`)) return;
+        posts.trigger("pseudoclick");
+      });
+    $("#tag-script-all").replaceWith(button);
   }
 
   private static getPostDiffs (posts: APIPost[], chunks = 10): PostDiff {
