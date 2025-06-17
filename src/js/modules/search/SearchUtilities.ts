@@ -122,15 +122,15 @@ export class SearchUtilities extends RE6Module {
     // Append custom string to searches
     const persistentTags = this.fetchSettings<string>("persistentTags").trim().toLowerCase();
     if (persistentTags !== "" && Page.matches([PageDefinition.search, PageDefinition.post, PageDefinition.favorites])) {
-      const $tagInput = $("input#tags");
+      const $tagInput = $("textarea#tags");
       $tagInput.val(($tagInput.val() + "").replace(persistentTags, ""));
 
-      $("section#search-box form").on("submit", () => {
+      $("form.post-search-form").on("submit", () => {
         $tagInput.val($tagInput.val() + " " + persistentTags);
         return true;
       });
 
-      $("a.search-tag").each((index, el) => {
+      $("a.tag-list-search").each((index, el) => {
         const $el = $(el);
         $el.attr("href", $el.attr("href") + "+" + persistentTags.split(" ").join("+"));
       });
