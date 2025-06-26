@@ -74,9 +74,9 @@ export interface APIIQDBResponse extends APIResponse {
       locked_tags: string;
 
       file_url: string;
-      large_file_url: string;
+      sample_url: string;
       preview_file_url: string;
-      has_large: boolean;
+      has_sample: boolean;
 
       md5: string;
       file_ext: string;

@@ -152,7 +152,7 @@ export class PoolTracker extends SubscriptionTracker {
         "data-id": data.uid,
         "data-md5": imageData[0],
         "data-preview-url": getPreviewLink(imageData[0]),
-        "data-large-url": getSampleLink(imageData[0], imageData[1] == "true", imageData[2]),
+        "data-sample-url": getSampleLink(imageData[0], imageData[1] == "true", imageData[2]),
         "data-file-ext": imageData[2],
         "data-rating": imageData[3] || "e",
         "data-created-at": new Date(timestamp).toString(),

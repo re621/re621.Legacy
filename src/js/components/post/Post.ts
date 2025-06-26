@@ -364,7 +364,7 @@ export class Post implements PostData {
       .data({
         // Backwards compatibility for HoverZoom
         "id": post.id,
-        "large-file-url": post.file.sample,
+        "sample-url": post.file.sample,
         "file-ext": post.file.ext,
       })
       .html(post.id + "");
@@ -663,7 +663,7 @@ export namespace PostData {
 
     const urls = {
       original: data.fileUrl || "/images/deleted-preview.png",
-      sample: data.largeUrl || "/images/deleted-preview.png",
+      sample: data.sampleUrl || "/images/deleted-preview.png",
       preview: data.previewUrl || "/images/deleted-preview.png",
     };
     const extension = FileExtension.fromString(data.fileExt);
