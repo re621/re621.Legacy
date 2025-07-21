@@ -99,117 +99,125 @@ export class PostFilter {
     }
 
     // Check if the post matches the filter
-    let result = false;
+    let iteration = false,
+      result = false;
     let optionalHits = 0;
     for (const filter of this.entries) {
 
       const value = filter.value;
       switch (filter.type) {
         case FilterType.Tag:
-          result = PostFilterUtils.tagsMatchesFilter(post, value);
+          iteration = PostFilterUtils.tagsMatchesFilter(post, value);
           break;
         case FilterType.Id:
-          result = PostFilterUtils.compareNumbers(post.id, value, filter.comparison);
+          iteration = PostFilterUtils.compareNumbers(post.id, value, filter.comparison);
           break;
         case FilterType.Score:
-          result = PostFilterUtils.compareNumbers(post.score.total, value, filter.comparison);
+          iteration = PostFilterUtils.compareNumbers(post.score.total, value, filter.comparison);
           break;
         case FilterType.Fav:
-          result = post.is_favorited;
+          iteration = post.is_favorited;
           break;
         case FilterType.FavCount:
-          result = PostFilterUtils.compareNumbers(post.favorites, value, filter.comparison);
+          iteration = PostFilterUtils.compareNumbers(post.favorites, value, filter.comparison);
           break;
         case FilterType.Rating:
-          result = post.rating === PostRating.fromValue(value);
+          iteration = post.rating === PostRating.fromValue(value);
           break;
         case FilterType.Flag:
-          result = post.flags.has(PostFlag.fromSingle(value));
+          iteration = post.flags.has(PostFlag.fromSingle(value));
           break;
 
         case FilterType.Uploader:
         case FilterType.User:
         case FilterType.UserID:
-          result = post.uploader === parseInt(value);
+          iteration = post.uploader === parseInt(value);
           break;
         case FilterType.Approver:
-          result = post.approver === parseInt(value);
+          iteration = post.approver === parseInt(value);
           break;
 
         case FilterType.Height:
-          result = PostFilterUtils.compareNumbers(post.img.height, value, filter.comparison);
+          iteration = PostFilterUtils.compareNumbers(post.img.height, value, filter.comparison);
           break;
         case FilterType.Width:
-          result = PostFilterUtils.compareNumbers(post.img.width, value, filter.comparison);
+          iteration = PostFilterUtils.compareNumbers(post.img.width, value, filter.comparison);
           break;
         case FilterType.Size:
-          result = PostFilterUtils.compareNumbers(post.file.size, value, filter.comparison);
+          iteration = PostFilterUtils.compareNumbers(post.file.size, value, filter.comparison);
           break;
         case FilterType.Type:
-          result = post.file.ext === value;
+          iteration = post.file.ext === value;
           break;
         case FilterType.Duration:
-          result = post.meta.duration == null || PostFilterUtils.compareNumbers(post.meta.duration, value, filter.comparison);
+          iteration = post.meta.duration == null || PostFilterUtils.compareNumbers(post.meta.duration, value, filter.comparison);
           break;
         case FilterType.Ratio:
-          result = PostFilterUtils.compareNumbers(post.img.ratio, value, filter.comparison);
+          iteration = PostFilterUtils.compareNumbers(post.img.ratio, value, filter.comparison);
           break;
 
         case FilterType.TagCount:
-          result = PostFilterUtils.compareNumbers(post.tags.all.size, value, filter.comparison);
+          iteration = PostFilterUtils.compareNumbers(post.tags.all.size, value, filter.comparison);
           break;
         case FilterType.GenTags:
-          result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.general.size, value, filter.comparison);
+          iteration = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.general.size, value, filter.comparison);
           break;
         case FilterType.ArtTags:
-          result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.artist.size, value, filter.comparison);
+          iteration = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.artist.size, value, filter.comparison);
           break;
         case FilterType.ContTags:
-          result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.contributor.size, value, filter.comparison);
+          iteration = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.contributor.size, value, filter.comparison);
           break;
         case FilterType.CharTags:
-          result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.character.size, value, filter.comparison);
+          iteration = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.character.size, value, filter.comparison);
           break;
         case FilterType.CopyTags:
-          result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.copyright.size, value, filter.comparison);
+          iteration = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.copyright.size, value, filter.comparison);
           break;
         case FilterType.SpecTags:
-          result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.species.size, value, filter.comparison);
+          iteration = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.species.size, value, filter.comparison);
           break;
         case FilterType.InvTags:
-          result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.invalid.size, value, filter.comparison);
+          iteration = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.invalid.size, value, filter.comparison);
           break;
         case FilterType.MetaTags:
-          result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.meta.size, value, filter.comparison);
+          iteration = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.meta.size, value, filter.comparison);
           break;
         case FilterType.LoreTags:
-          result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.lore.size, value, filter.comparison);
+          iteration = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.lore.size, value, filter.comparison);
           break;
 
         case FilterType.IsParent:
-          result = post.has.children;
-          if (value == "false") result = !result;
+          iteration = post.has.children;
+          if (value == "false") iteration = !iteration;
           break;
         case FilterType.IsChild:
-          result = post.has.parent;
-          if (value == "false") result = !result;
+          iteration = post.has.parent;
+          if (value == "false") iteration = !iteration;
           break;
 
 
         default:
-          result = false;
+          iteration = false;
       }
 
       // Invert the result if necessary
-      if (filter.inverted) result = !result;
+      if (filter.inverted) iteration = !iteration;
 
-      if (filter.optional) optionalHits += result ? 1 : 0;
-      else if (!result) break;
+      if (filter.optional) optionalHits += iteration ? 1 : 0;
+      else {
+        // Prevent contaminating the optional filters.
+        // Break if any of the normal filters fail.
+        result = iteration;
+        if (!iteration) break;
+      }
     }
 
     // The post must match all normal filters, and at least one optional one
-    if (this.optionals > 0)
-      result = ((this.entries.length - this.optionals > 0) || result) && optionalHits > 0;
+    if (this.optionals > 0) {
+      if (this.entries.length - this.optionals == 0) result = true;
+      result = result && optionalHits > 0;
+    }
 
     if (result === true) this.matchIDs.add(post.id);
     else if (result === false && shouldDecrement) this.matchIDs.delete(post.id);
