@@ -55,6 +55,7 @@
   "homepage": "https://e621.net/forum_topics/25872",
   "github": "https://github.com/re621/re621.Legacy",
   "dependencies": {
+    "caniuse-lite": "^1.0.30001734",
     "jquery": "^3.6.0",
     "jquery-ui": "^1.13.2"
   },
