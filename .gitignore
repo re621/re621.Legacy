@@ -113,5 +113,8 @@ dav/
 # Jetbrains IDE
 .idea
 
+# Lockfiles
+bun.lock
+
 # Other
 .gitconfig
