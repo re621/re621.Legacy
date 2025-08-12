@@ -17,7 +17,7 @@
     "compile:dev": "concurrently \"bun run compile-typescript:dev\" \"bun run compile-sass:dev\"",
     "compile-typescript:prod": "bun run eslint && bun run typescript && bun run browserify && bun run minify && bun run template",
     "compile-typescript:dev": "bun run eslint && bun run typescript && bun run browserify && bun run template",
-    "eslint": "eslint ./**/*.ts",
+    "eslint": "eslint \"**/*.ts\"",
     "typescript": "tsc",
     "browserify": "browserify ./build/tsc-temp/js/main.js -o ./build/script.js",
     "minify": "terser ./build/script.js --compress -o ./build/script.js",
