@@ -28,7 +28,7 @@ export class PostViewer extends RE6Module {
       { keys: "hotkeyAddFavorite", fnct: this.addFavorite, page: reqPage },
       { keys: "hotkeyRemoveFavorite", fnct: this.removeFavorite, page: reqPage },
 
-      { keys: "hotkeyHideNotes", fnct: () => { this.toggleNotes(); }, page: reqPage },
+      { keys: "hotkeyHideNotes", fnct: () => this.toggleNotes(), page: reqPage },
       { keys: "hotkeyNewNote", fnct: this.switchNewNote, page: reqPage },
 
       { keys: "hotkeyAddSet", fnct: this.openSetDialogue, page: reqPage },
@@ -206,115 +206,57 @@ export class PostViewer extends RE6Module {
 
   /** Emulates a click on the upvote button */
   private triggerUpvote (): void {
-    Danbooru.Post.vote(Post.getViewingPost().id, 1);
+    $(".ptbr-vote-button[data-action=1]")[0].click();
   }
 
   /** Same as above, but does not unvote */
   private triggerUpvoteNU (): void {
-    const id = Post.getViewingPost().id;
-    PostActions.vote(id, 1, true).then((response) => {
-      if (!response.success) {
-        Danbooru.error("An error occurred while processing votes");
-        return;
-      }
-
-      $("span.post-vote-up-" + id)
-        .removeClass("score-neutral")
-        .addClass("score-positive");
-      $("span.post-vote-down-" + id)
-        .removeClass("score-negative")
-        .addClass("score-neutral");
-
-      $("span.post-score-" + id)
-        .removeClass("score-positive score-negative score-neutral")
-        .addClass(PostViewer.getScoreClass(response.score))
-        .attr("title", response.up + " up / " + response.down + " down")
-        .html(response.score + "");
-      if (response.score > 0) Danbooru.notice("Post Score Updated");
-    });
+    const voteWrap = $(".ptbr-vote");
+    if (voteWrap.attr("data-vote") !== "0") return;
+    $(".ptbr-vote-button[data-action=1]")[0].click();
   }
 
   /** Emulates a click on the downvote button */
   private triggerDownvote (): void {
-    Danbooru.Post.vote(Post.getViewingPost().id, -1);
+    $(".ptbr-vote-button[data-action=-1]")[0].click();
   }
 
   /** Same as above, but does not unvote */
   private triggerDownvoteNU (): void {
-    const id = Post.getViewingPost().id;
-    PostActions.vote(id, -1, true).then((response) => {
-      if (!response.success) {
-        Danbooru.error("An error occurred while processing votes");
-        return;
-      }
-
-      $("span.post-vote-down-" + id)
-        .addClass("score-negative")
-        .removeClass("score-neutral");
-      $("span.post-vote-up-" + id)
-        .removeClass("score-positive")
-        .addClass("score-neutral");
-
-      $("span.post-score-" + id)
-        .removeClass("score-positive score-negative score-neutral")
-        .addClass(PostViewer.getScoreClass(response.score))
-        .attr("title", response.up + " up / " + response.down + " down")
-        .html(response.score + "");
-      if (response.score < 0) Danbooru.notice("Post Score Updated");
-    });
-  }
-
-  private static getScoreClass (score: number): string {
-    if (score > 0) return "score-positive";
-    if (score < 0) return "score-negative";
-    return "score-neutral";
+    const voteWrap = $(".ptbr-vote");
+    if (voteWrap.attr("data-vote") !== "0") return;
+    $(".ptbr-vote-button[data-action=-1]")[0].click();
   }
 
   /** Toggles the favorite state */
   private toggleFavorite (): void {
-    if ($("div.fav-buttons").hasClass("fav-buttons-false")) {
-      $("#add-fav-button")[0].click();
-    } else { $("#remove-fav-button")[0].click(); }
+    $(".ptbr-favorite-button")[0].click();
   }
 
   /** Adds the post to favorites, does not remove it */
   private addFavorite (): void {
-    if ($("div.fav-buttons").hasClass("fav-buttons-false")) {
-      $("#add-fav-button")[0].click();
-    }
+    const btn = $(".ptbr-favorite-button");
+    if (btn.attr("favorited") == "true") return;
+    btn[0].click();
   }
 
   /** Removes the post from favorites, does not add it */
   private removeFavorite (): void {
-    if (!$("div.fav-buttons").hasClass("fav-buttons-false")) {
-      $("#remove-fav-button")[0].click();
-    }
+    const btn = $(".ptbr-favorite-button");
+    if (btn.attr("favorited") == "false") return;
+    btn[0].click();
   }
 
   /** Switches the notes container to its opposite state */
-  private async toggleNotes (updateSettings = true): Promise<void> {
-    const module = ModuleController.get(PostViewer),
-      hideNotes = module.fetchSettings("hideNotes");
-
-    if (hideNotes) {
-      $("#note-container").attr("data-hidden", "false");
-      $("a#image-note-button").html("Notes: ON");
-    } else {
-      $("#note-container").attr("data-hidden", "true");
-      $("a#image-note-button").html("Notes: OFF");
-    }
-
-    if (updateSettings)
-      await module.pushSettings("hideNotes", !hideNotes);
+  private async toggleNotes (): Promise<void> {
+    const btn = $(".ptbr-notes-button");
+    if (!btn.length) return;
+    btn[0].click();
   }
 
   /** Toggles the note editing interface */
   private async switchNewNote (): Promise<void> {
-    $("#note-container").attr("data-hidden", "false");
-    $("a#image-note-button").html("Notes: ON");
-    await ModuleController.get(PostViewer).pushSettings("hideNotes", false);
-
-    Danbooru.Note.TranslationMode.toggle();
+    $("#translate")[0].click();
   }
 
   /** Opens the dialog to add the post to the set */

@@ -98,7 +98,7 @@ export class ImageScaler extends RE6Module {
 
   /** Opens the post in fullscreen mode */
   private openFullscreen (): void {
-    $("#image-download-link a")[0].click();
+    $(".ptbr-fullscreen-button")[0].click();
   }
 
   /** Cycles through scaling modes */
