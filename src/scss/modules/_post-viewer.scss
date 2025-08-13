@@ -13,66 +13,11 @@ div#image-and-nav {
 }
 
 // Image Toolbar
-section#image-extra-controls {
+section#ptbr-wrapper {
+  .ptbr-download, .ptbr-add-links {
     display: flex;
-    flex-wrap: wrap;
-    margin: 0.25rem 0;
-
-    & > div {
-        margin: 0.25rem 0.5rem 0.25rem 0;
-        &:last-child { margin-right: 0; }
-        & > a, & > button, & > select {
-            outline: 0;
-            @include mixins.nonselectable;
-        }
-    }
-
-    div.image-vote-buttons > a > span {
-        font-size: 1rem;
-        padding: 0.25rem 0.5rem;
-    }
-
-    div#image-download-link > a {
-        width: 6rem;
-        text-align: center;
-        position: relative;
-    }
-
-    div#image-add-links > a,
-    div#image-toggle-notes > a,
-    div#image-custom-download-links > a {
-        margin-right: 0.5rem;
-        &:last-child { margin-right: 0; }
-    }
-
-    div#image-resize-cycle {
-        select {
-            height: 1.75rem;
-            vertical-align: unset;
-            cursor: pointer;
-        }
-    }
-
-    div#image-custom-download-links > a {
-        text-align: center;
-        position: relative;
-
-        &[loading=true] {
-            color: transparent;
-
-            &:before {
-                content: "\f1ce";
-                @include fontawesome.family;
-                font-weight: 900;
-                animation: fa-spin 2s infinite linear;
-                color: #aaa;
-                line-height: 1.3rem;
-                position: absolute;
-                left: 0;
-                right: 0;
-            }
-        }
-    }
+    gap: 0.5rem;
+  }
 }
 
 div#c-posts div.parent-children.children-moved {

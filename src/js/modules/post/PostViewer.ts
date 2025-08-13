@@ -133,48 +133,32 @@ export class PostViewer extends RE6Module {
     this.post = Post.getViewingPost();
 
     // Move the add to set / pool buttons
-    const $addToContainer = $("<div>").attr("id", "image-add-links").insertAfter("div#image-download-link");
+    const $addToContainer = $("<div>")
+      .addClass("ptbr-add-links")
+      .insertAfter($(".ptbr-fullscreen").first());
     $("li#add-to-set-list > a")
       .addClass("image-add-set")
-      .addClass("button btn-neutral")
+      .addClass("st-button kinetic")
       .html("+ Set")
       .appendTo($addToContainer);
     $("li#add-to-pool-list > a")
       .addClass("image-add-pool")
-      .addClass("button btn-neutral")
+      .addClass("st-button kinetic")
       .html("+ Pool")
       .appendTo($addToContainer);
+    if ($addToContainer.children().length == 0) {
+      $addToContainer.css("display", "none");
+    }
 
-
-    // Create the Note Toggle button
-    const $noteToggleContainer = $("<div>").attr("id", "image-toggle-notes").insertAfter("div#image-add-links");
-    $("<a>")
-      .attr({
-        "id": "image-note-button",
-        "href": "#",
-      })
-      .addClass("button btn-neutral")
-      .html(this.fetchSettings("hideNotes") ? "Notes: OFF" : "Notes: ON")
-      .appendTo($noteToggleContainer)
-      .on("click", (event) => {
-        event.preventDefault();
-        this.toggleNotes();
-      });
-    const $noteContainer = $("#note-container")
-      .css("display", "")
-      .attr("data-hidden", this.fetchSettings("hideNotes"));
-
-    // Move the note preview to root
-    $("#note-preview").insertBefore("#page");
-
+    // Add a new note button
     $("#translate")
-      .appendTo("#image-toggle-notes")
-      .addClass("button btn-neutral")
+      .insertAfter($(".ptbr-resize").first())
+      .addClass("st-button kinetic")
       .html("+ Note")
       .on("click", async () => {
         if (!await Danbooru.Note.TranslationMode.active()) return;
-        if ($noteContainer.attr("data-hidden") == "true")
-          this.toggleNotes(false);
+        $("#note-container").removeClass("hidden");
+        $(".ptbr-notes-button").attr("enabled", "true");
       });
 
 
