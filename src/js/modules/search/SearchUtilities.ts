@@ -11,8 +11,8 @@ export class SearchUtilities extends RE6Module {
   public constructor () {
     super([PageDefinition.search, PageDefinition.post, PageDefinition.favorites]);
     this.registerHotkeys(
-      { keys: "hotkeyFocusSearch", fnct: this.focusSearchbar },
-      { keys: "hotkeyRandomPost", fnct: this.randomPost },
+      // { keys: "hotkeyFocusSearch", fnct: this.focusSearchbar },
+      // { keys: "hotkeyRandomPost", fnct: this.randomPost },
 
       { keys: "hotkeySwitchModeView", fnct: this.switchModeView },
       { keys: "hotkeySwitchModeEdit", fnct: this.switchModeEdit },
@@ -24,16 +24,16 @@ export class SearchUtilities extends RE6Module {
       { keys: "hotkeySwitchModeRemSet", fnct: this.switchModeRemSet },
       { keys: "hotkeySwitchModeScript", fnct: this.switchModeScript },
 
-      { keys: "hotkeyScriptOne", fnct: () => { SearchUtilities.switchScript(1); } },
-      { keys: "hotkeyScriptTwo", fnct: () => { SearchUtilities.switchScript(2); } },
-      { keys: "hotkeyScriptThree", fnct: () => { SearchUtilities.switchScript(3); } },
-      { keys: "hotkeyScriptFour", fnct: () => { SearchUtilities.switchScript(4); } },
-      { keys: "hotkeyScriptFive", fnct: () => { SearchUtilities.switchScript(5); } },
-      { keys: "hotkeyScriptSix", fnct: () => { SearchUtilities.switchScript(6); } },
-      { keys: "hotkeyScriptSeven", fnct: () => { SearchUtilities.switchScript(7); } },
-      { keys: "hotkeyScriptEight", fnct: () => { SearchUtilities.switchScript(8); } },
-      { keys: "hotkeyScriptNine", fnct: () => { SearchUtilities.switchScript(9); } },
-      { keys: "hotkeyScriptTen", fnct: () => { SearchUtilities.switchScript(0); } },
+      // { keys: "hotkeyScriptTwo", fnct: () => { SearchUtilities.switchScript(2); } },
+      // { keys: "hotkeyScriptOne", fnct: () => { SearchUtilities.switchScript(1); } },
+      // { keys: "hotkeyScriptThree", fnct: () => { SearchUtilities.switchScript(3); } },
+      // { keys: "hotkeyScriptFour", fnct: () => { SearchUtilities.switchScript(4); } },
+      // { keys: "hotkeyScriptFive", fnct: () => { SearchUtilities.switchScript(5); } },
+      // { keys: "hotkeyScriptSix", fnct: () => { SearchUtilities.switchScript(6); } },
+      // { keys: "hotkeyScriptSeven", fnct: () => { SearchUtilities.switchScript(7); } },
+      // { keys: "hotkeyScriptEight", fnct: () => { SearchUtilities.switchScript(8); } },
+      // { keys: "hotkeyScriptNine", fnct: () => { SearchUtilities.switchScript(9); } },
+      // { keys: "hotkeyScriptTen", fnct: () => { SearchUtilities.switchScript(0); } },
     );
   }
 
