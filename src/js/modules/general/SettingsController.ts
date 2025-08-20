@@ -1993,32 +1993,23 @@ export class SettingsController extends RE6Module {
 
     return new Form({ name: "conf-hotkeys", columns: 3, width: 3 }, [
       // Listing
+      Form.div({
+        value: "<center><b>Note:</b> Vanilla e621 hotkeys can be rebound <a href='/static/keyboard_shortcuts/'>here</a>.</center>",
+        width: 3,
+      }),
+
       Form.header("Listing", 3),
-      ...createInputs(searchUtilities, "Search", "hotkeyFocusSearch"),
-      ...createInputs(searchUtilities, "Random Post", "hotkeyRandomPost"),
       ...createInputs(miscellaneous, "Toggle Blacklist", "hotkeyToggleBlacklist"),
       Form.hr(3),
 
       // Posts
       Form.header("Posts", 3),
-      ...createInputs(postViewer, "Upvote Post", "hotkeyUpvoteNU"),
-      ...createInputs(postViewer, "Toggle Upvote", "hotkeyUpvote"),
-      ...createInputs(postViewer, "Downvote Post", "hotkeyDownvoteNU"),
-      ...createInputs(postViewer, "Toggle Downvote", "hotkeyDownvote"),
-
-      ...createInputs(postViewer, "Toggle Favorite", "hotkeyFavorite"),
-      ...createInputs(postViewer, "Add to Favorites", "hotkeyAddFavorite"),
-      ...createInputs(postViewer, "Remove From Favorites", "hotkeyRemoveFavorite"),
       ...createInputs(imageScaler, "Fullscreen Mode", "hotkeyFullscreen"),
       Form.spacer(3, true),
 
       ...createInputs(poolNavigator, "Cycle Navigation", "hotkeyCycle"),
-      ...createInputs(imageScaler, "Change Scale", "hotkeyScale"),
       ...createInputs(downloadCustomizer, "Download", "hotkeyDownload"),
-      Form.spacer(3, true),
 
-      ...createInputs(poolNavigator, "Previous Post", "hotkeyPrev"),
-      ...createInputs(poolNavigator, "Next Post", "hotkeyNext"),
       Form.spacer(3, true),
 
       ...createInputs(postViewer, "Open `Add to Set` Dialog", "hotkeyAddSet"),
@@ -2044,7 +2035,6 @@ export class SettingsController extends RE6Module {
         [
           Form.header("Actions", 3),
           ...createInputs(miscellaneous, "New Comment", "hotkeyNewComment"),
-          ...createInputs(miscellaneous, "Edit Post", "hotkeyEditPost"),
           ...createInputs(postViewer, "Toggle Notes", "hotkeyHideNotes"),
           ...createInputs(postViewer, "Edit Notes", "hotkeyNewNote"),
           ...createInputs(postViewer, "Post History", "hotkeyOpenHistory"),
@@ -2083,50 +2073,6 @@ export class SettingsController extends RE6Module {
       ...createInputs(hoverZoom, "Open Fullscreen Image", "hotkeyFullscreen"),
       Form.hr(3),
 
-      // Tag Scripts
-      Form.section(
-        {
-          columns: 3,
-          width: 3,
-          wrapper: undefined, // TODO Hide from member-level users
-        },
-        [
-          Form.header("Tag Scripts", 3),
-
-          ...createInputs(searchUtilities, "Tag Script", "hotkeySwitchModeScript"),
-          Form.spacer(3),
-
-          ...createInputs(searchUtilities, "Script #1", "hotkeyScriptOne"),
-          ...createInputs(searchUtilities, "Script #2", "hotkeyScriptTwo"),
-          ...createInputs(searchUtilities, "Script #3", "hotkeyScriptThree"),
-          ...createInputs(searchUtilities, "Script #4", "hotkeyScriptFour"),
-          ...createInputs(searchUtilities, "Script #5", "hotkeyScriptFive"),
-          ...createInputs(searchUtilities, "Script #6", "hotkeyScriptSix"),
-          ...createInputs(searchUtilities, "Script #7", "hotkeyScriptSeven"),
-          ...createInputs(searchUtilities, "Script #8", "hotkeyScriptEight"),
-          ...createInputs(searchUtilities, "Script #9", "hotkeyScriptNine"),
-          ...createInputs(searchUtilities, "Script #0", "hotkeyScriptTen"),
-          Form.hr(3),
-        ],
-      ),
-
-      // Janitor stuff
-      Form.section(
-        {
-          columns: 3,
-          width: 3,
-          wrapper: undefined, // TODO Hide from non-staff
-        },
-        [
-          Form.header("Extra", 3),
-
-          ...createInputs(janitorEnhancements, "Approve post", "hotkeyApprovePost"),
-          ...createInputs(janitorEnhancements, "Approve + Prev", "hotkeyApprovePostPrev"),
-          ...createInputs(janitorEnhancements, "Approve + Next", "hotkeyApprovePostNext"),
-          Form.hr(3),
-        ],
-      ),
-
 
       // Tabs
       Form.header("Header Tabs", 3),
@@ -2148,8 +2094,6 @@ export class SettingsController extends RE6Module {
       Form.header("Miscellaneous", 3),
       ...createInputs(miscellaneous, "Random Set Post", "hotkeyRandomSetPost"),
       ...createInputs(miscellaneous, "Submit Form", "hotkeySubmit"),
-      ...createInputs(miscellaneous, "Scroll Up", "hotkeyScrollUp"),
-      ...createInputs(miscellaneous, "Scroll Down", "hotkeyScrollDown"),
     ]);
   }
 

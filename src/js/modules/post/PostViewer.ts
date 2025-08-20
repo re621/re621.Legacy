@@ -19,14 +19,14 @@ export class PostViewer extends RE6Module {
 
     const reqPage = PageDefinition.post;
     this.registerHotkeys(
-      { keys: "hotkeyUpvote", fnct: this.triggerUpvote, page: reqPage },
-      { keys: "hotkeyUpvoteNU", fnct: this.triggerUpvoteNU, page: reqPage },
-      { keys: "hotkeyDownvote", fnct: this.triggerDownvote, page: reqPage },
-      { keys: "hotkeyDownvoteNU", fnct: this.triggerDownvoteNU, page: reqPage },
+      // { keys: "hotkeyUpvote", fnct: this.triggerUpvote, page: reqPage },
+      // { keys: "hotkeyUpvoteNU", fnct: this.triggerUpvoteNU, page: reqPage },
+      // { keys: "hotkeyDownvote", fnct: this.triggerDownvote, page: reqPage },
+      // { keys: "hotkeyDownvoteNU", fnct: this.triggerDownvoteNU, page: reqPage },
 
-      { keys: "hotkeyFavorite", fnct: this.toggleFavorite, page: reqPage },
-      { keys: "hotkeyAddFavorite", fnct: this.addFavorite, page: reqPage },
-      { keys: "hotkeyRemoveFavorite", fnct: this.removeFavorite, page: reqPage },
+      // { keys: "hotkeyFavorite", fnct: this.toggleFavorite, page: reqPage },
+      // { keys: "hotkeyAddFavorite", fnct: this.addFavorite, page: reqPage },
+      // { keys: "hotkeyRemoveFavorite", fnct: this.removeFavorite, page: reqPage },
 
       { keys: "hotkeyHideNotes", fnct: () => this.toggleNotes(), page: reqPage },
       { keys: "hotkeyNewNote", fnct: this.switchNewNote, page: reqPage },

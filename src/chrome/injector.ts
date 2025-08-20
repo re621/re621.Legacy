@@ -64,15 +64,9 @@ const fnDanbooru = {
   "Thumbnails": {
     "initialize": (): void => { Danbooru.Thumbnails.initialize(); },
   },
-  "Utility": {
-    "disableShortcuts": (state): void => {
-      if (state !== undefined) Danbooru.Utility.disableShortcuts = state;
-      return Danbooru.Utility.disableShortcuts;
-    },
-  },
-  "Shortcuts": {
-    "setDisabled": (state: boolean): void => {
-      Danbooru.Shortcuts.disabled = state;
+  "Hotkeys": {
+    "setEnabled": (state: boolean): void => {
+      Danbooru.Hotkeys.enabled = state;
     },
   },
   "E621": {

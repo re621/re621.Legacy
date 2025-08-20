@@ -108,9 +108,6 @@ if (Page.matches(PageDefinition.title)) {
   if (page && page !== "default") window.location.replace("/" + page);
 }
 
-// Disable existing keyboard shortcuts
-Danbooru.Shortcuts.disabled = true;
-
 // Create the basic DOM structure
 CleanSlate.createDOM().then(async () => {
 
@@ -119,12 +116,6 @@ CleanSlate.createDOM().then(async () => {
   // is missing the blacklist data, causing issues with
   // subscriptions
   if (Page.matches(PageDefinition.title)) return;
-
-  // Disable existing keyboard shortcuts, again.
-  // Workaround made specificially for one user who presses
-  // the Edit hotkey immediately after the post page loads.
-  // You know who you are.
-  Danbooru.Shortcuts.disabled = true;
 
   // StartupTasks.createSearchbox();
   StartupTasks.createTagList();
