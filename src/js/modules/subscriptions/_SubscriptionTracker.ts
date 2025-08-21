@@ -50,13 +50,14 @@ export class SubscriptionTracker extends RE6Module {
 
   private observer: IntersectionObserver; // renders the updates when they come into view
 
-  public constructor () {
+  public constructor (trackerID?: string) {
     super();
 
     this.cache = new SubscriptionCache(this);
     this.slist = new SubscriptionList(this);
 
-    this.trackerID = this.getSettingsTag().replace("Tracker", "") + "s";
+    if (trackerID) this.trackerID = trackerID;
+    else this.trackerID = this.getSettingsTag().replace("Tracker", "") + "s";
   }
 
   /** Performs the initialization and setup of the tracker */
