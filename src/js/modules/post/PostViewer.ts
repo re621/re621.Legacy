@@ -192,10 +192,17 @@ export class PostViewer extends RE6Module {
     // Bolden the tags
     this.toggleBoldenedTags(this.fetchSettings<boolean>("boldenTags"));
 
-    // Listen to favorites button click
-    $(".ptbr-favorite-button").on("click", () => {
-      if (!this.fetchSettings("upvoteOnFavorite") || $(".ptbr-vote[data-vote=1]")[0] || $(".ptbr-favorite-button").attr("favorited") == "true") return;
+    // Listen to favorites button attribute change
+    const favoriteButton = document.querySelector(".ptbr-favorite-button");
+
+    const mutationObserver = new MutationObserver((mutations) => {
+      if (!this.fetchSettings("upvoteOnFavorite") || $(".ptbr-vote[data-vote=1]")[0] || favoriteButton.getAttribute("favorited") != "true") return;
       $(".ptbr-vote-button[data-action=1]")[0].click();
+    });
+
+    mutationObserver.observe(favoriteButton, {
+      attributes: true,
+      attributeFilter: ["favorited"],
     });
   }
 
