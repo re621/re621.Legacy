@@ -50,6 +50,7 @@ import { PoolTracker } from "./modules/subscriptions/PoolTracker";
 import { TagTracker } from "./modules/subscriptions/TagTracker";
 import { SubscriptionManager } from "./modules/subscriptions/_SubscriptionManager";
 import AvoidPosting from "./components/cache/AvoidPosting";
+import {QueryTracker} from "./modules/subscriptions/QueryTracker";
 
 
 const loadOrder = [
@@ -94,6 +95,7 @@ const loadOrder = [
 
 const subscriptions = [
   TagTracker,
+  QueryTracker,
   PoolTracker,
   ForumTracker,
   CommentTracker,
