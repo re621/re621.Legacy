@@ -2,49 +2,48 @@ name: build-dev
 on:
   push:
     tags:
-    - '*.dev*'
+      - "*.dev*"
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out the Repository
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: '0'
-        ref: dev
-  
-    - name: Fetch the latest Git tag
-      uses: little-core-labs/get-git-tag@v3.0.2
-      
-    - name: Set up Node
-      uses: actions/setup-node@v2
-      with:
-        node-version: '22'
-  
-    - name: Install Project Dependencies
-      run: npm ci
+      - name: Check out the Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: "0"
+          ref: dev
 
-    - name: Compile Typescript
-      run: npm run compile-typescript:prod
+      - name: Fetch the latest Git tag
+        uses: little-core-labs/get-git-tag@v3.0.2
 
-    - name: Compile SASS
-      run: npm run compile-sass:prod
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
 
-    - name: Build Userscript Files
-      run: npm run compose-userscript:prod
+      - name: Install Project Dependencies
+        run: bun install --frozen-lockfile
 
-    - name: Build Extension Files
-      run: npm run compose-extension:prod
-      
-    - name: Create a Release
-      uses: ncipollo/release-action@v1
-      with:
-        allowUpdates: true
-        artifacts: "./build/userscript/script.user.js,./build/userscript/script.meta.js,./build/userscript/altver.user.js,./build/userscript/altver.meta.js,./build/extension/re621.zip"
-        replacesArtifacts: true
-        omitBody: true
-        prerelease: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Compile Typescript & SASS (parallel)
+        run: |
+          bun run compile-typescript:prod &
+          bun run compile-sass:prod &
+          wait
+
+      - name: Build Userscript Files
+        run: bun run compose-userscript:prod
+
+      - name: Build Extension Files
+        run: bun run compose-extension:prod
+
+      - name: Create a Release
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          artifacts: "./build/userscript/script.user.js,./build/userscript/script.meta.js,./build/userscript/altver.user.js,./build/userscript/altver.meta.js,./build/extension/re621.zip"
+          replacesArtifacts: true
+          omitBody: true
+          prerelease: true
+          token: ${{ secrets.GITHUB_TOKEN }}
