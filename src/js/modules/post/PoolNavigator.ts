@@ -12,9 +12,9 @@ export class PoolNavigator extends RE6Module {
   public constructor () {
     super(PageDefinition.post);
     this.registerHotkeys(
-      { keys: "hotkeyCycle", fnct: this.cycleNavbars },
-      { keys: "hotkeyNext", fnct: this.triggerNextPost },
-      { keys: "hotkeyPrev", fnct: this.triggerPrevPost },
+      // { keys: "hotkeyCycle", fnct: this.cycleNavbars },
+      // { keys: "hotkeyNext", fnct: this.triggerNextPost },
+      // { keys: "hotkeyPrev", fnct: this.triggerPrevPost },
     );
   }
 
@@ -24,7 +24,7 @@ export class PoolNavigator extends RE6Module {
    */
   protected getDefaultSettings (): Settings {
     return {
-      enabled: true,
+      enabled: false,
       hotkeyCycle: "x|.",
       hotkeyPrev: "a|left",
       hotkeyNext: "d|right",

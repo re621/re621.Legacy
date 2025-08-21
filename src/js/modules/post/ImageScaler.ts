@@ -12,7 +12,7 @@ export class ImageScaler extends RE6Module {
   public constructor () {
     super(PageDefinition.post, true);
     this.registerHotkeys(
-      { keys: "hotkeyScale", fnct: this.cycleScaling },
+      // { keys: "hotkeyScale", fnct: this.cycleScaling },
       { keys: "hotkeyFullscreen", fnct: this.openFullscreen },
     );
   }

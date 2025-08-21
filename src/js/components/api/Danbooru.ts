@@ -164,11 +164,11 @@ export class Danbooru {
 
   };
 
-  public static Shortcuts = {
+  public static Hotkeys = {
 
-    set disabled (value: boolean) {
-      if (Danbooru.hasModules()) Danbooru.getModules()["Shortcuts"].disabled = (value == true);
-      else XM.Chrome.execInjectorRequest("Danbooru", "Shortcuts", "setDisabled", [(value == true)]);
+    set enabled (value: boolean) {
+      if (Danbooru.hasModules()) Danbooru.getModules()["Hotkeys"].enabled = (value == true);
+      else XM.Chrome.execInjectorRequest("Danbooru", "Hotkeys", "setEnabled", [(value == true)]);
     },
 
   };
