@@ -3,8 +3,8 @@
   "tasks": [
     {
       "label": "build",
-      "type": "npm",
-      "script": "build:dev",
+      "type": "shell",
+      "command": "bun run build:dev",
       "problemMatcher": ["$eslint-stylish"],
       "group": {
         "kind": "build",
@@ -21,8 +21,8 @@
     },
     {
       "label": "injector:chrome",
-      "type": "npm",
-      "script": "injector:chrome",
+      "type": "shell",
+      "command": "bun run injector:chrome",
       "problemMatcher": ["$eslint-stylish"],
       "group": "none",
       "presentation": {
@@ -39,8 +39,8 @@
     },
     {
       "label": "injector:firefox",
-      "type": "npm",
-      "script": "injector:firefox",
+      "type": "shell",
+      "command": "bun run injector:firefox",
       "problemMatcher": ["$eslint-stylish"],
       "group": "none",
       "presentation": {
