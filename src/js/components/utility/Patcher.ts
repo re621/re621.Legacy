@@ -31,6 +31,7 @@ export class Patcher {
         case 8: counter += await this.patch9();
         case 9: counter += await this.patch10();
         case 10: counter += await this.patch11();
+        case 11: counter += await this.patch12();
       }
     } catch (error) { ErrorHandler.error("Patcher", error.stack, "patch " + Patcher.version); }
 
@@ -323,6 +324,32 @@ export class Patcher {
 
     Patcher.version = 11;
 
+    return counter;
+  }
+
+  // Patch 12: 1.5.98
+  // TagTracker was saving tags in a URI encoded format
+  private static async patch12 (): Promise<number> {
+    let counter = 0;
+
+    const tagTracker = await XM.Storage.getValue("re621.TagTracker.list", []);
+    if (!tagTracker || !Array.isArray(tagTracker) || tagTracker.length === 0) {
+      Patcher.version = 12;
+      return 0;
+    }
+
+    const decoded = [];
+    for (const tag of tagTracker) {
+      if (/%.{2}/.test(tag)) {
+        decoded.push(decodeURIComponent(tag));
+        counter++;
+      } else decoded.push(tag);
+    }
+
+    if (counter > 0)
+      await XM.Storage.setValue("re621.TagTracker.list", [...new Set(decoded)]);
+
+    Patcher.version = 12;
     return counter;
   }
 
