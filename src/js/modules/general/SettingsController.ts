@@ -1023,19 +1023,6 @@ export class SettingsController extends RE6Module {
 
           Form.checkbox(
             {
-              value: miscellaneous.fetchSettings("profileEnhancements"),
-              label: "<b>Redesigned Profile Page</b><br />Restyle the profile page to be more compact",
-              width: 3,
-            },
-            async (data) => {
-              await miscellaneous.pushSettings("profileEnhancements", data);
-              miscellaneous.resetContentHeaders();
-            },
-          ),
-          Form.spacer(3),
-
-          Form.checkbox(
-            {
               value: miscellaneous.fetchSettings("commitWikiLinks"),
               label: "<b>Wiki Links in Post History</b><br />Redirect the tag links in the post history to the wiki pages",
               width: 2,
