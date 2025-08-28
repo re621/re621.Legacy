@@ -3,7 +3,7 @@
 
 //UTF-8 fuckery: https://github.com/sass/sass/issues/1395
 @function unicode($str) {
-  @return "#{string.unquote(" \"")}#{string.unquote(string.insert($str, " \\", 1))}#{string.unquote(" \"")}";
+  @return unquote("\"")+unquote(str-insert($str, "\\", 1))+unquote("\"");
 }
 
 @function placeholderBG($color) {
