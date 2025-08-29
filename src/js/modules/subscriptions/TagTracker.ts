@@ -88,7 +88,7 @@ export class TagTracker extends SubscriptionTracker {
             }
             // Joins the parts of the query back together with pluses between them, as that is how the API expects it.
             if (acc.query) {
-              acc.query += "+";
+              acc.query += " ";
             }
             acc.query += tag;
             // Returns the updated accumulator.
@@ -104,7 +104,7 @@ export class TagTracker extends SubscriptionTracker {
       // Prepare the query to be added.
       let preparedQuery = query;
       if (tagCount > 1) {
-        preparedQuery = `(+${query}+)`;
+        preparedQuery = `( ${query} )`;
       }
 
       // Using a binary search to find the chunk that the query should go into.
@@ -342,10 +342,19 @@ export class TagTracker extends SubscriptionTracker {
         unsub(id);
       });
 
-    $("<a>")
-      .html(id)
-      .attr({ "href": "/wiki_pages/show_or_new?title=" + id })
-      .appendTo(result);
+    if (id.includes(" ")) {
+      // This is a complex query, it won't have a wiki page, so link to the search page instead.
+      $("<a>")
+        .html(id)
+        .attr({ "href": "/posts?tags=" + id.replace(/ /g, "+") })
+        .appendTo(result);
+    } else {
+      // Preserve the original behavior of linking to the wiki page for solo tags.
+      $("<a>")
+        .html(id)
+        .attr({"href": "/wiki_pages/show_or_new?title=" + id})
+        .appendTo(result);
+    }
 
     return result;
   }
