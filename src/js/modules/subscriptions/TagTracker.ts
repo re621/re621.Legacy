@@ -52,7 +52,7 @@ export class TagTracker extends SubscriptionTracker {
   }
 
   protected fetchMinorSubscriptionName (element: JQuery<HTMLElement>): string {
-    return element.attr("data-tag");
+    return decodeURIComponent(element.attr("data-tag"));
   }
 
   protected fetchMajorSubscriptionName (element: JQuery<HTMLElement>): string {
