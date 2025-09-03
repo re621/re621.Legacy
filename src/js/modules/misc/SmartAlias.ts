@@ -352,9 +352,10 @@ export class SmartAlias extends RE6Module {
 
       // Regenerate the tags to account for replacements
       triggerUpdateEvent($textarea);
-      tags = SmartAlias.parseTagInput($textarea);
+      // tags = SmartAlias.parseTagInput($textarea);
     }
 
+    $container.attr("ready", "true");
     // The following section had been ported to vanilla e621
     /*
 

@@ -1692,6 +1692,7 @@ export class SettingsController extends RE6Module {
 
         ]),
 
+        /*
         Form.accordionTab({ name: "aliasref", label: "Validated Inputs", columns: 3, width: 3 }, [
 
           Form.checkbox(
@@ -1800,6 +1801,7 @@ export class SettingsController extends RE6Module {
           Form.spacer(3),
 
         ]),
+        */
 
         // Alias Definitions
         Form.accordionTab({ name: "aliasdef", label: "Alias Definitions", columns: 3, width: 3 }, [
