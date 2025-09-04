@@ -25,10 +25,17 @@ type SizedChunk = {
   tagCount: number;
 };
 
+const invalidMetatags = new Set([
+  "order",
+  "limit",
+  "random",
+  "date",
+]);
+
 export class TagTracker extends SubscriptionTracker {
 
   // Needs to be overridden due to lower lookup batch sizes
-  protected batchSize = 40;
+  protected batchSize = 39;
 
   protected quickSubEnabled = true;
 
@@ -78,9 +85,15 @@ export class TagTracker extends SubscriptionTracker {
         return tags
           // Counts the number of tags in the query.
           .reduce((acc, tag) => {
-            // If the tag is empty or a solo metatag, it will break the API request.
-            if (tag.length === 0 || TagValidator.isSoloMetatag(tag)) {
+            // If the tag is empty, it will break the API request.
+            if (tag.length === 0) {
               return acc;
+            } else {
+              // Stripping out invalid metatags, which could also break the API request.
+              const metatag = TagValidator.getMetatag(tag);
+              if (metatag && invalidMetatags.has(metatag)) {
+                return acc;
+              }
             }
             // If the tag isn't a group boundary, count it.
             if (!TagValidator.isGroupBoundary(tag)) {
@@ -156,7 +169,8 @@ export class TagTracker extends SubscriptionTracker {
     for (const [index, chunk] of subscriptionsChunks.entries()) {
 
       // Processing batch #index
-      const processedChunk = chunk.map(el => "~" + el);
+      const lastUpdateSeconds = Math.ceil((Date.now() - lastUpdate) / 1000);
+      const processedChunk = [...chunk.map(el => "~" + el), `date:${lastUpdateSeconds}seconds`];
       if (index == 10) this.writeStatus(`&nbsp; &nbsp; &nbsp; <span style="color:gold">connection throttled</span>`);
       if (subscriptionsChunks.length > 1)
         this.writeStatus(`&nbsp; &nbsp; - processing batch #${index} [<a href="/posts?tags=${processedChunk.join("+")}" target="_blank">${chunk.length}</a>]`);
