@@ -1558,6 +1558,7 @@ export class SettingsController extends RE6Module {
         // Validator Configuration
         Form.accordionTab({ name: "validatior", label: "Tag Validation", columns: 3, width: 3 }, [
 
+          /*
           Form.checkbox(
             {
               value: smartAlias.fetchSettings("autoLoad"),
@@ -1660,6 +1661,7 @@ export class SettingsController extends RE6Module {
             (data) => { smartAlias.pushSettings("asciiWarning", data); },
           ),
           Form.hr(3),
+          */
 
           Form.checkbox(
             {
@@ -1674,6 +1676,7 @@ export class SettingsController extends RE6Module {
           ),
           Form.spacer(3),
 
+          /*
           Form.checkbox(
             {
               value: smartAlias.fetchSettings("compactOutput"),
@@ -1685,9 +1688,11 @@ export class SettingsController extends RE6Module {
               smartAlias.setCompactOutput(data);
             },
           ),
+          */
 
         ]),
 
+        /*
         Form.accordionTab({ name: "aliasref", label: "Validated Inputs", columns: 3, width: 3 }, [
 
           Form.checkbox(
@@ -1796,6 +1801,7 @@ export class SettingsController extends RE6Module {
           Form.spacer(3),
 
         ]),
+        */
 
         // Alias Definitions
         Form.accordionTab({ name: "aliasdef", label: "Alias Definitions", columns: 3, width: 3 }, [

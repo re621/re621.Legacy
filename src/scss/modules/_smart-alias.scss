@@ -30,6 +30,8 @@ smart-alias {
     border: 1px solid #666;
     border-radius: 0.25rem;
 
+    &.disabled { display: none; }
+
     smart-tag {
         position: relative;
         padding: 0.075rem 0 0.075rem 1.35rem;

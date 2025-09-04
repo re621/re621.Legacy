@@ -183,6 +183,7 @@ export class SmartAlias extends RE6Module {
       this.inputElements.push($textarea);
       const $container = $("<smart-alias>")
         .attr("ready", "true")
+        .addClass("disabled")
         .insertAfter($textarea);
       const $counter = $("<smart-tag-counter>")
         .insertAfter($textarea);
@@ -351,8 +352,12 @@ export class SmartAlias extends RE6Module {
 
       // Regenerate the tags to account for replacements
       triggerUpdateEvent($textarea);
-      tags = SmartAlias.parseTagInput($textarea);
+      // tags = SmartAlias.parseTagInput($textarea);
     }
+
+    $container.attr("ready", "true");
+    // The following section had been ported to vanilla e621
+    /*
 
 
     // Step 2
@@ -584,6 +589,8 @@ export class SmartAlias extends RE6Module {
     if (scrollToBottom)
       $container.scrollTop($container[0].scrollHeight - $container[0].clientHeight);
     $container.attr("ready", "true");
+
+    */
 
 
     /**
