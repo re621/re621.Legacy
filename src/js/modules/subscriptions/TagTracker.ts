@@ -32,6 +32,8 @@ const invalidMetatags = new Set([
   "date",
 ]);
 
+const lastUpdateOverlapMinutes = 5;
+
 export class TagTracker extends SubscriptionTracker {
 
   // Needs to be overridden due to lower lookup batch sizes
@@ -169,8 +171,8 @@ export class TagTracker extends SubscriptionTracker {
     for (const [index, chunk] of subscriptionsChunks.entries()) {
 
       // Processing batch #index
-      const lastUpdateSeconds = Math.ceil((Date.now() - lastUpdate) / 1000);
-      const processedChunk = [...chunk.map(el => "~" + el), `date:${lastUpdateSeconds}seconds`];
+      const lastUpdateMinutes = Math.ceil(((Date.now() - lastUpdate) / 1000) / 60) + lastUpdateOverlapMinutes;
+      const processedChunk = [...chunk.map(el => "~" + el), `date:${lastUpdateMinutes}minutes`];
       if (index == 10) this.writeStatus(`&nbsp; &nbsp; &nbsp; <span style="color:gold">connection throttled</span>`);
       if (subscriptionsChunks.length > 1)
         this.writeStatus(`&nbsp; &nbsp; - processing batch #${index} [<a href="/posts?tags=${processedChunk.join("+")}" target="_blank">${chunk.length}</a>]`);
