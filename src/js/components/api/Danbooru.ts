@@ -129,31 +129,10 @@ export class Danbooru {
     },
   };
 
-  public static Note = {
-    Box: {
-      scale_all (): void {
-        if (Danbooru.hasModules()) Danbooru.getModules()["Note"]["Box"].scale_all();
-        else XM.Chrome.execInjectorRequest("Danbooru", "Note.Box", "scale_all");
-
-      },
-    },
-
-    TranslationMode: {
-      active (state?: boolean): Promise<boolean> {
-        if (Danbooru.hasModules()) {
-          if (state !== undefined) Danbooru.getModules()["Note"]["TranslationMode"].active = state;
-          return Promise.resolve(Danbooru.getModules()["Note"]["TranslationMode"].active);
-        } else return XM.Chrome.execInjectorRequest("Danbooru", "Note.TranslationMode", "active", [state]);
-
-      },
-
-      toggle (): void {
-        if (Danbooru.hasModules()) Danbooru.getModules()["Note"]["TranslationMode"].toggle(new CustomEvent("re621.dummy-event"));
-        else XM.Chrome.execInjectorRequest("Danbooru", "Note.TranslationMode", "toggle");
-
-      },
-    },
-  };
+  public static get Note () {
+    if (!Danbooru.hasModules()) throw new Error("Danbooru.Note module is not available.");
+    return Danbooru.getModules()["Note"];
+  }
 
   public static Thumbnails = {
 
