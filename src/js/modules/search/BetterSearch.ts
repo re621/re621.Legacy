@@ -686,7 +686,7 @@ export class BetterSearch extends RE6Module {
           // used to trigger Danbooru's native functionality.
 
           const $tempArticle = $("<article>")
-            .addClass("post-preview display-none-important")
+            .addClass("thumbnail display-none-important")
             .attr({
               "id": "post_" + post.id,
               "data-id": post.id,
