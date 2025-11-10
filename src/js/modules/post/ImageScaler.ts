@@ -89,7 +89,7 @@ export class ImageScaler extends RE6Module {
       // Disable this when notes are being edited
       if (!this.fetchSettings("clickScale")
                 || isInteractive
-                || await Danbooru.Note.TranslationMode.active()) return;
+                || await Danbooru.Note.editing) return;
 
       this.cycleScaling();
     });

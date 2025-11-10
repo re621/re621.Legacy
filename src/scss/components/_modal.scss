@@ -62,10 +62,11 @@ div#modal-container {
                 right: 0;
                 top: 0;
                 padding: 0;
-                width: 3em;
+                width: 3rem;
                 outline: 0;
                 border: 0;
                 border-left: 1px solid #66666666;
+                font-size: 0; // Hide the "close" text
 
                 border-width: 0 0 0 1px !important;
                 background: unset;
@@ -79,6 +80,12 @@ div#modal-container {
                         background-image: url(/packs/media/images/ui-icons_ffffff_256x240-bf27228a.png);
                         background-position: -96px -128px;
                     }
+                }
+
+                span.ui-button-icon.ui-icon.ui-icon-closethick::before {
+                    content: "X";
+                    color: var(--color-text);
+                    font-size: 1rem;
                 }
             }
         }

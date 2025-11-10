@@ -69,7 +69,7 @@ export class FormattingExtender extends RE6Module {
    */
   protected getDefaultSettings (): Settings {
     return {
-      enabled: true,
+      enabled: false,
       buttonsActive: [
         { name: "Bold", icon: "bold", text: "[b]%selection%[/b]" },
         { name: "Italic", icon: "italic", text: "[i]%selection%[/i]" },

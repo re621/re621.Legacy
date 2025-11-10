@@ -132,34 +132,13 @@ export class PostViewer extends RE6Module {
 
     this.post = Post.getViewingPost();
 
-    // Move the add to set / pool buttons
-    const $addToContainer = $("<div>")
-      .addClass("ptbr-add-links")
-      .insertAfter($(".ptbr-fullscreen").first());
-    $("li#add-to-set-list > a")
-      .addClass("image-add-set")
-      .addClass("st-button kinetic")
-      .html("+ Set")
-      .appendTo($addToContainer);
-    $("li#add-to-pool-list > a")
-      .addClass("image-add-pool")
-      .addClass("st-button kinetic")
-      .html("+ Pool")
-      .appendTo($addToContainer);
-    if ($addToContainer.children().length == 0) {
-      $addToContainer.css("display", "none");
-    }
-
     // Add a new note button
-    $("#translate")
-      .insertAfter($(".ptbr-resize").first())
+    const translateButton = $("#translate");
+    translateButton.parents("#add-notes-list").hide();
+
+    translateButton.insertBefore($(".ptbr-resize").first())
       .addClass("st-button kinetic")
-      .html("+ Note")
-      .on("click", async () => {
-        if (!await Danbooru.Note.TranslationMode.active()) return;
-        $("#note-container").removeClass("hidden");
-        $(".ptbr-notes-button").attr("enabled", "true");
-      });
+      .html("+ Note");
 
 
     // Move child/parent indicator, leave others as is, like marked for deletion

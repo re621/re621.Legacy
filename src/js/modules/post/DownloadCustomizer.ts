@@ -43,9 +43,9 @@ export class DownloadCustomizer extends RE6Module {
 
     this.post = Post.getViewingPost();
 
-    const downloadContainer = $("<div>")
-      .addClass("ptbr-download")
-      .appendTo("#ptbr-wrapper");
+    const downloadContainer = $(".ptbr-etc-menu");
+
+    downloadContainer.find(".ptbr-etc-download").hide();
 
     const link = $("<a>")
       .attr({
