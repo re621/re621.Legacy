@@ -58,9 +58,6 @@ export class UploadUtilities extends RE6Module {
       XM.Window.onbeforeunload = null;
     }
 
-    // Add a preview image to the parent ID input
-    this.handleParentIDPreview();
-
     // Make sure the pixiv previews load in properly
     if (this.fetchSettings("fixPixivPreviews"))
       this.handlePixivPreviews();
@@ -436,53 +433,6 @@ export class UploadUtilities extends RE6Module {
 
     image.trigger("load.resix");
 
-  }
-
-  /** Add a preview image to the parent ID field */
-  private handleParentIDPreview (): void {
-    const input = $(`input[placeholder="Ex. 12345"]`);
-    if (input.length == 0) return;
-
-    const preview = $("<a>")
-      .attr({
-        target: "_blank",
-        rel: "noopener noreferrer",
-        id: "upload-parent-preview",
-      })
-      .addClass("display-none-important")
-      .insertAfter(input);
-
-    const image = $("<img>")
-      .attr({
-        src: "/images/deleted-preview.png",
-      })
-      .appendTo(preview);
-
-    let timer: number;
-    input.on("input paste", () => {
-      if (timer) window.clearTimeout(timer);
-      timer = window.setTimeout(async () => {
-        const search = parseInt(input.val() + "");
-        if (!search) {
-          preview.addClass("display-none-important");
-          return;
-        }
-
-        const lookup = await E621.Posts.first<APIPost>({ tags: "id:" + search }, 500);
-        console.log(lookup);
-        if (!lookup) {
-          preview.addClass("display-none-important");
-          return;
-        }
-
-        const post = PostData.fromAPI(lookup);
-        preview
-          .attr("href", "/posts/" + post.id)
-          .removeClass("display-none-important");
-        image.attr("src", post.flags.has(PostFlag.Deleted) ? "/images/deleted-preview.png" : post.file.preview);
-
-      }, 500);
-    });
   }
 
   /** Fixes an issue with Pixiv previews not loading properly */
