@@ -8,17 +8,34 @@ import { PostData } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
 import { PostParts } from "../../components/post/PostParts";
 import { Settings } from "../../components/RE6Module";
-import { Util } from "../../components/utility/Util";
 import { WikiEnhancer } from "../misc/WikiEnhancer";
 import { BetterSearch, ImageClickAction } from "../search/BetterSearch";
 import { UpdateContent, UpdateData } from "./_SubscriptionCache";
 import { SubscriptionManager } from "./_SubscriptionManager";
 import { SubscriptionTracker } from "./_SubscriptionTracker";
+import {TagValidator} from "../../components/utility/TagValidator";
+
+type SizedQuery = {
+  query: string;
+  tagCount: number;
+};
+
+type SizedChunk = {
+  queries: string[];
+  tagCount: number;
+};
+
+const invalidMetatags = new Set([
+  "order",
+  "limit",
+  "random",
+  "date",
+]);
 
 export class TagTracker extends SubscriptionTracker {
 
   // Needs to be overridden due to lower lookup batch sizes
-  protected batchSize = 40;
+  protected batchSize = 39;
 
   protected quickSubEnabled = true;
 
@@ -49,6 +66,89 @@ export class TagTracker extends SubscriptionTracker {
     return WikiEnhancer.sanitizeWikiTagName(element.find("a:first").text());
   }
 
+  // This uses a greedy algorithm optimized to produce the fewest number of chunks, and thus API requests, possible.
+  private chunkSubscriptionsByQuerySize (subscriptions: Set<string>): string[][] {
+    // Calculates the size of each query and sorts them by tag count in descending order, while stripping out metatags
+    // which would break the API request.
+    const queriesWithTagSize = Array.from(subscriptions)
+      // Gets the tag count for each query, filtering out any grouping indicators.
+      .map((query): SizedQuery => {
+        const tags = query.split(" ");
+        // If the query is empty or starts with a negated grouping boundary, it's not a valid query.
+        if (tags.length === 0 || (TagValidator.isGroupBoundary(tags[0]) && TagValidator.isNegated(tags[0]))) {
+          return { query: "", tagCount: 0 };
+        }
+        // Keeping the or operator will break the API request due to applying it later, so stripping it out.
+        if (TagValidator.isGroupBoundary(tags[0]) && TagValidator.isEithered(tags[0])) {
+          tags[0] = "(";
+        }
+        return tags
+          // Counts the number of tags in the query.
+          .reduce((acc, tag) => {
+            // If the tag is empty, it will break the API request.
+            if (tag.length === 0) {
+              return acc;
+            } else {
+              // Stripping out invalid metatags, which could also break the API request.
+              const metatag = TagValidator.getMetatag(tag);
+              if (metatag && invalidMetatags.has(metatag)) {
+                return acc;
+              }
+            }
+            // If the tag isn't a group boundary, count it.
+            if (!TagValidator.isGroupBoundary(tag)) {
+              acc.tagCount++;
+            }
+            // Joins the parts of the query back together with pluses between them, as that is how the API expects it.
+            if (acc.query) {
+              acc.query += " ";
+            }
+            acc.query += tag;
+            // Returns the updated accumulator.
+            return acc;
+          }, { query: "", tagCount: 0});
+      })
+      .filter(query => query.query.length > 0)
+      .sort((a, b) => b.tagCount - a.tagCount);
+
+    // The following binary search guarantees that the chunks are sorted by tag count in descending order.
+    const chunks: SizedChunk[] = [];
+    for (const { query, tagCount } of queriesWithTagSize) {
+      // Prepare the query to be added.
+      let preparedQuery = query;
+      if (tagCount > 1) {
+        preparedQuery = `( ${query} )`;
+      }
+
+      // Using a binary search to find the chunk that the query should go into.
+      let low = 0;
+      let high = chunks.length - 1;
+      let foundChunkIndex: number | null = null;
+      while (low <= high) {
+        const pivot = Math.floor((low + high) / 2);
+        if (chunks[pivot].tagCount + tagCount <= this.batchSize) {
+          // The pivot fits, so we try to find an earlier chunk that fits.
+          foundChunkIndex = pivot;
+          high = pivot - 1;
+        } else {
+          // The pivot is too full, so we try to find a later chunk that fits.
+          low = pivot + 1;
+        }
+      }
+      // No chunks fit, so we create a new one.
+      if (foundChunkIndex === null) {
+        foundChunkIndex = chunks.length;
+        chunks.push({queries: [preparedQuery], tagCount: tagCount});
+      } else {
+        // The query found the earliest chunk that fits, so we add it to that chunk.
+        chunks[foundChunkIndex].queries.push(preparedQuery);
+        chunks[foundChunkIndex].tagCount += tagCount;
+      }
+    }
+
+    return chunks.map(chunk => chunk.queries);
+  }
+
   public async fetchUpdatedEntries (): Promise<UpdateData> {
 
     const result: UpdateData = {};
@@ -63,13 +163,14 @@ export class TagTracker extends SubscriptionTracker {
 
     // Splitting subscriptions into batches and sending API requests
     this.writeStatus(`. . . sending an API request`);
-    const subscriptionsChunks = Util.chunkArray(subscriptions, this.batchSize);
+    const subscriptionsChunks = this.chunkSubscriptionsByQuerySize(subscriptions);
     const apiResponse: { [timestamp: number]: APIPost } = {};
 
     for (const [index, chunk] of subscriptionsChunks.entries()) {
 
       // Processing batch #index
-      const processedChunk = chunk.map(el => "~" + el);
+      const lastUpdateSeconds = Math.ceil((Date.now() - lastUpdate) / 1000);
+      const processedChunk = [...chunk.map(el => "~" + el), `date:${lastUpdateSeconds}seconds`];
       if (index == 10) this.writeStatus(`&nbsp; &nbsp; &nbsp; <span style="color:gold">connection throttled</span>`);
       if (subscriptionsChunks.length > 1)
         this.writeStatus(`&nbsp; &nbsp; - processing batch #${index} [<a href="/posts?tags=${processedChunk.join("+")}" target="_blank">${chunk.length}</a>]`);
@@ -255,10 +356,19 @@ export class TagTracker extends SubscriptionTracker {
         unsub(id);
       });
 
-    $("<a>")
-      .html(id)
-      .attr({ "href": "/wiki_pages/show_or_new?title=" + id })
-      .appendTo(result);
+    if (id.includes(" ")) {
+      // This is a complex query, it won't have a wiki page, so link to the search page instead.
+      $("<a>")
+        .html(id)
+        .attr({ "href": "/posts?tags=" + id.replace(/ /g, "+") })
+        .appendTo(result);
+    } else {
+      // Preserve the original behavior of linking to the wiki page for solo tags.
+      $("<a>")
+        .html(id)
+        .attr({"href": "/wiki_pages/show_or_new?title=" + id})
+        .appendTo(result);
+    }
 
     return result;
   }
