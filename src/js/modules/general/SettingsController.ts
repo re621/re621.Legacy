@@ -624,14 +624,29 @@ export class SettingsController extends RE6Module {
           Form.checkbox(
             {
               value: betterSearch.fetchSettings("highlightVisited"),
-              label: "<b>Underline Visited Posts</b><br />Adds an orange bottom border to visited posts",
-              width: 3,
+              label: "<b>Underline Visited Posts</b><br />Adds an colored bottom border to visited posts",
+              width: 2,
             },
             async (data) => {
               await betterSearch.pushSettings("highlightVisited", data);
               if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
             },
           ),
+          Form.div({
+            value: $("<input>")
+              .attr({
+                "type": "color",
+                "placeholder": "color",
+              })
+              .val(betterSearch.fetchSettings("highlightVisitedColor"))
+              .on("input", async (event) => {
+                const $target = $(event.target);
+                if (($target.val() + "").match(/^#(?:[0-9a-f]{3}){1,2}$/i)) {
+                  await betterSearch.pushSettings("highlightVisitedColor", $target.val());
+                  if (betterSearch.isInitialized()) betterSearch.updateContentHeader();
+                }
+              }),
+          }),
           Form.spacer(3, true),
 
           Form.checkbox(
