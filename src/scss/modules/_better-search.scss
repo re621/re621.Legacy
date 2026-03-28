@@ -420,7 +420,9 @@ search-content > post[animated=true] {
 /* Duration Badges */
 search-content > post[filetype=webm],
 search-content > post[filetype=mp4],
-search-content > post[filetype=swf] {
+search-content > post[filetype=swf],
+search-content > post[filetype=gif],
+search-content > post[filetype=webp] {
 
     span.video-duration {
         position: absolute;
