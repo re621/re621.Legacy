@@ -58,6 +58,7 @@ export class PostViewer extends RE6Module {
       { keys: "hotkeyOpenDerpibooru", fnct: this.openDerpibooru },
       { keys: "hotkeyOpenFuzzySearch", fnct: this.openFuzzySearch },
       { keys: "hotkeyOpenInkbunny", fnct: this.openInkbunny },
+      { keys: "hotkeyOpenFluffle", fnct: this.openFluffle },
     );
   }
 
@@ -112,6 +113,7 @@ export class PostViewer extends RE6Module {
       hotkeyOpenYandex: "",       // Open Yandex search
       hotkeyOpenFuzzySearch: "",  // Open FuzzySearch
       hotkeyOpenInkbunny: "",     // Open Inkbunny md5 search
+      hotkeyOpenFluffle: "",      // Open Fluffle search
 
       upvoteOnFavorite: true,     // add an upvote when adding the post to favorites
       hideNotes: false,           // should the notes be hidden by default
@@ -341,7 +343,7 @@ export class PostViewer extends RE6Module {
     }
   }
 
-  private static openSourceLookup (source: "Google" | "SauceNAO" | "Derpibooru" | "Yandex" | "FuzzySearch" | "Inkbunny"): void {
+  private static openSourceLookup (source: "Google" | "SauceNAO" | "Derpibooru" | "Yandex" | "FuzzySearch" | "Inkbunny" | "Fluffle"): void {
     if (!Page.matches(PageDefinition.post)) return;
     const link = $(`#post-related-images a:contains("${source}")`).first();
     if (!link.length) return;
@@ -359,6 +361,8 @@ export class PostViewer extends RE6Module {
   private openFuzzySearch (): void { PostViewer.openSourceLookup("FuzzySearch"); }
 
   private openInkbunny (): void { PostViewer.openSourceLookup("Inkbunny"); }
+
+  private openFluffle (): void { PostViewer.openSourceLookup("Fluffle"); }
 
   /** Opens the raw API data for the current post */
   private openAPI (): void { location.href = location.origin + location.pathname + ".json" + location.search; }

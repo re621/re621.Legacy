@@ -2044,6 +2044,7 @@ export class SettingsController extends RE6Module {
           ...createInputs(postViewer, "Search Yandex", "hotkeyOpenYandex"),
           ...createInputs(postViewer, "Search FuzzySearch", "hotkeyOpenFuzzySearch"),
           ...createInputs(postViewer, "Search Inkbunny", "hotkeyOpenInkbunny"),
+          ...createInputs(postViewer, "Search Fluffle", "hotkeyOpenFluffle"),
           Form.hr(3),
         ],
       ),
