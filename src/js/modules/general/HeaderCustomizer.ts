@@ -88,7 +88,7 @@ export class HeaderCustomizer extends RE6Module {
     super.create();
 
     // Check for forum updates before the structure changes
-    this.hasForumUpdates = $("li#nav-forum").hasClass("forum-updated");
+    this.hasForumUpdates = $("li#nav-forum").hasClass("notification");
 
     // Create the structure and store the old navbar for later
     this.$menu = $("menu.nav-primary");
