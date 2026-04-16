@@ -415,7 +415,14 @@ export class PostParts {
 
   }
 
-  public static renderInfo (post: Post): JQuery<HTMLElement> {
+  public static renderInfo (post: Post, conf: any): JQuery<HTMLElement> {
+
+    const shouldUserKNumbers = conf.imageWidth && conf.imageWidth < 200;
+    const getKNumber = (num: number): string => {
+      if (!shouldUserKNumbers) return num.toString();
+      if (num >= 1000) return (num / 1000).toFixed(1) + "k";
+      return num.toString();
+    };
 
     const $infoBlock = $("<post-info>");
     post.$ref.on("re621:update", () => {
@@ -428,9 +435,9 @@ export class PostParts {
     function getPostInfo (post: Post): string {
       const scoreClass = post.score.total > 0 ? "positive" : (post.score.total < 0 ? "negative" : "neutral");
       return `
-                <span class="post-info-score score-${scoreClass}" title="${post.score.up} up / ${Math.abs(post.score.down)} down">${post.score.total}</span>
-                <span class="post-info-favorites">${post.favorites}</span>
-                <span class="post-info-comments">${post.comments}</span>
+                <span class="post-info-score score-${scoreClass}" title="${post.score.up} up / ${Math.abs(post.score.down)} down">${getKNumber(post.score.total)}</span>
+                <span class="post-info-favorites">${getKNumber(post.favorites)}</span>
+                <span class="post-info-comments">${getKNumber(post.comments)}</span>
                 <span class="post-info-rating rating-${post.rating}">${post.rating}</span>
             `;
     }
