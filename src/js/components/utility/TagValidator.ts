@@ -3,11 +3,13 @@ export class TagValidator {
 
   private static metatags = ["user", "approver", "commenter", "comm", "noter", "noteupdater", "artcomm?", "pool", "ordpool", "fav", "favoritedby", "md5", "rating", "note", "locked", "width", "height", "mpixels", "ratio", "score", "favcount", "filesize", "source", "id", "date", "age", "order", "limit", "status", "tagcount", "parent", "child", "pixiv_id", "pixiv", "search", "upvote", "downvote", "voted", "filetype", "flagger", "type", "appealer", "disapproval", "set", "randseed", "description", "change", "user_id", "delreason", "deletedby", "votedup", "voteddown", "duration"];
 
-  private static metatagsRegex = new RegExp(`^(${TagValidator.metatags.join("|")}):(.+)$`, "i");
+  private static metatagsRegex = new RegExp(`^(${this.metatags.join("|")}):(.+)$`, "i");
 
   private static categories = ["general", "species", "character", "copyright", "artist", "contributor", "invalid", "lore", "meta"];
 
   private static categoriesRegex = new RegExp(`^(${TagValidator.categories.join("|")}):(.+)$`, "i");
+
+  private static groupBoundariesRegex = /^([~-]?\(|\))$/;
 
   private static validation = [
     { regex: /\*/, text: "Tags cannot contain asterisks ('*')" },
@@ -74,4 +76,21 @@ export class TagValidator {
     return errors;
   }
 
+  public static isGroupBoundary (tag: string): boolean {
+    return TagValidator.groupBoundariesRegex.test(tag);
+  }
+
+  public static isNegated (tag: string): boolean {
+    return tag.startsWith("-");
+  }
+
+  public static isEithered (tag: string): boolean {
+    return tag.startsWith("~");
+  }
+
+  public static getMetatag (tag: string): string | null {
+    const match = TagValidator.metatagsRegex.exec(tag);
+    if (!match) return null;
+    return match[1];
+  }
 }
