@@ -59,6 +59,10 @@
 .nav-re6-dmail,
 .nav-re6-notifications,
 .nav-re6-settings {
+    svg {
+        height: 1rem !important;
+        width: 1rem !important;
+    }
     @media (min-width: 800px) {
         span { display: none; }
     }

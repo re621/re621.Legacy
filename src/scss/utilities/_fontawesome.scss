@@ -1,15 +1,18 @@
-@mixin icon() {
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-font-smoothing: antialiased;
-    display: inline-block;
-    font-style: normal;
-    font-variant: normal;
-    text-rendering: auto;
-    line-height: 1;
-    font-weight: 900;
-    @include family;
+// Spin animation for loading indicators (was previously provided by the FA library)
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
-@mixin family() {
-    font-family: "Font Awesome 6 Free";
+// Base styles for inline SVG icons injected via TypeScript
+:root .svg-icon {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
+    overflow: visible;
+}
+
+// Applied to SVG icons that should rotate continuously
+:root .spin {
+    animation: spin 2s linear infinite;
 }

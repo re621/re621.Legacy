@@ -1,5 +1,3 @@
-@use "../utilities/fontawesome";
-@use "../utilities/functions";
 
 /* Image Scaler Styles */
 
@@ -10,16 +8,21 @@ section#image-container {
         position: relative;
 
         &::after {
-            content: functions.unicode("f1ce");
-            @include fontawesome.family;
-            font-weight: 900;
-            font-size: 3rem;
+            content: "";
+            display: block;
+            width: 3rem;
+            height: 3rem;
+            background-color: currentColor;
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M222.7 32.1c5 16.9-4.6 34.8-21.5 39.8C121.8 95.6 64 169.1 64 256c0 106 86 192 192 192s192-86 192-192c0-86.9-57.8-160.4-137.1-184.1c-16.9-5-26.6-22.9-21.5-39.8s22.9-26.6 39.8-21.5C434.9 42.1 512 140 512 256c0 141.4-114.6 256-256 256S0 397.4 0 256C0 140 77.1 42.1 182.9 10.6c16.9-5 34.8 4.6 39.8 21.5z'/%3E%3C/svg%3E");
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
 
             position: absolute;
-            left: 50%;
-            top: 50%;
+            top: calc(50% - 1.5rem);
+            left: calc(50% - 1.5rem);
 
-            animation: loading-rotation 2s infinite linear;
+            animation: spin 2s infinite linear;
         }
     }
 
@@ -44,15 +47,6 @@ div#image-resize-notice {
     display: none;
 }
 
-@keyframes loading-rotation {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(359deg);
-    }
-}
 
 // Layer note preview properly
 div#note-preview {

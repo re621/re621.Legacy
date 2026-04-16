@@ -3,6 +3,7 @@ import { Page } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { ErrorHandler } from "../../components/utility/ErrorHandler";
+import { Icons } from "../../components/utility/Icons";
 import { Util } from "../../components/utility/Util";
 import { SubscriptionCache, UpdateContent, UpdateData } from "./_SubscriptionCache";
 import { SubscriptionList } from "./_SubscriptionList";
@@ -638,7 +639,7 @@ export class SubscriptionTracker extends RE6Module {
 
     $("<a>")
       .addClass("sb-unsub")
-      .html(`<i class="fas fa-times"></i>`)
+      .html(Icons.get("times"))
       .attr({ "title": "Unsubscribe" })
       .prependTo(result)
       .on("click", (event) => {

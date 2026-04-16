@@ -10,6 +10,7 @@ import { Post, PostData } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Debug } from "../../components/utility/Debug";
+import { Icons } from "../../components/utility/Icons";
 import { Util } from "../../components/utility/Util";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
@@ -920,13 +921,13 @@ export class BetterSearch extends RE6Module {
     // PREV
     if (this.queryPage == "1") {
       $("<span>")
-        .html(`<i class="fas fa-angle-double-left"></i> Previous`)
+        .html(`${Icons.get("angle-double-left")} Previous`)
         .addClass("paginator-prev")
         .appendTo(this.$paginator);
     } else {
       $("<a>")
         .attr("href", getPrevPageURL(this.queryPage))
-        .html(`<i class="fas fa-angle-double-left"></i> Previous`)
+        .html(`${Icons.get("angle-double-left")} Previous`)
         .addClass("paginator-prev")
         .appendTo(this.$paginator);
     }
@@ -972,12 +973,12 @@ export class BetterSearch extends RE6Module {
     if (this.hasMorePages) {
       $("<a>")
         .attr("href", getNextPageURL(this.queryPage))
-        .html(`Next <i class="fas fa-angle-double-right"></i>`)
+        .html(`Next ${Icons.get("angle-double-right")}`)
         .addClass("paginator-next")
         .appendTo(this.$paginator);
     } else {
       $("<span>")
-        .html(`Next <i class="fas fa-angle-double-right"></i>`)
+        .html(`Next ${Icons.get("angle-double-right")}`)
         .addClass("paginator-next")
         .appendTo(this.$paginator);
     }
@@ -1112,7 +1113,7 @@ export class BetterSearch extends RE6Module {
 
     Util.DOM.addSettingsButton({
       id: "subnav-button-increase",
-      name: `<i class="fas fa-plus"></i>`,
+      name: Icons.get("plus"),
       title: "Increase Image Size",
       tabClass: "re6-bs-pmbutton push-right",
       onClick: async () => {
@@ -1125,7 +1126,7 @@ export class BetterSearch extends RE6Module {
 
     Util.DOM.addSettingsButton({
       id: "subnav-button-decrease",
-      name: `<i class="fas fa-minus"></i>`,
+      name: Icons.get("minus"),
       title: "Decrease Image Size",
       tabClass: "re6-bs-pmbutton",
       onClick: async () => {

@@ -1,5 +1,6 @@
 import { XM } from "../api/XM";
 import { KeybindManager } from "../data/Keybinds";
+import { Icons } from "../utility/Icons";
 import { Util } from "../utility/Util";
 import { PreparedStructure } from "./PreparedStructure";
 
@@ -449,7 +450,7 @@ export class Form implements PreparedStructure {
         "id": options.name + "-copy",
       })
       .addClass("button btn-neutral border-highlight border-left")
-      .html(`<i class="far fa-copy"></i>`)
+      .html(Icons.get("copy"))
       .appendTo($element);
 
     if (options.title) {
@@ -529,7 +530,7 @@ export class Form implements PreparedStructure {
         "id": options.name + "-key",
       })
       .addClass("button btn-neutral border-highlight border-left")
-      .html(`<i class="far fa-keyboard"></i>`)
+      .html(Icons.get("keyboard"))
       .appendTo($element);
 
     if (options.title) {

@@ -10,6 +10,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed } from "../../components/structure/Tabbed";
+import { Icons } from "../../components/utility/Icons";
 import { Debug } from "../../components/utility/Debug";
 import { Patcher } from "../../components/utility/Patcher";
 import { Util } from "../../components/utility/Util";
@@ -71,7 +72,7 @@ export class SettingsController extends RE6Module {
     // Create a button in the header
     this.openSettingsButton = Util.DOM.addSettingsButton({
       id: "header-button-settings",
-      name: `<i class="fas fa-wrench"></i> <span>RE621</span>`,
+      name: `${Icons.get("wrench")} <span>RE621</span>`,
       title: "RE621 Settings",
       tabClass: "nav-re6-settings",
       attr: {
@@ -1898,7 +1899,7 @@ export class SettingsController extends RE6Module {
         .appendTo(flagContainer);
 
       $("<button>")
-        .html(`<i class="far fa-trash-alt"></i>`)
+        .html(Icons.get("trash-alt"))
         .appendTo(flagContainer)
         .on("click", () => {
           flagContainer.remove();

@@ -1,3 +1,4 @@
+import { Icons } from "./Icons";
 import { UtilDOM } from "./UtilDOM";
 import { UtilEvents } from "./UtilEvents";
 import { UtilID } from "./UtilID";
@@ -13,6 +14,8 @@ export class Util {
   public static DOM = UtilDOM;
 
   public static Events = UtilEvents;
+
+  public static Icons = Icons;
 
   public static ID = UtilID;
 
