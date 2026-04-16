@@ -779,6 +779,7 @@ export enum FileExtension {
   JPG = "jpg",
   PNG = "png",
   GIF = "gif",
+  WEBP = "webp",
   SWF = "swf",
   WEBM = "webm",
   MP4 = "mp4",
@@ -791,6 +792,7 @@ export namespace FileExtension {
       case "jpg": return FileExtension.JPG;
       case "png": return FileExtension.PNG;
       case "gif": return FileExtension.GIF;
+      case "webp": return FileExtension.WEBP;
       case "swf": return FileExtension.SWF;
       case "webm": return FileExtension.WEBM;
       case "mp4": return FileExtension.MP4;
