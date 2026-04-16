@@ -1,6 +1,4 @@
-@use "../utilities/fontawesome";
 @use "../utilities/mixins";
-@use "../utilities/functions";
 
 /** Replacement Blacklist Filtering Styles */
 section#blacklist-box {
@@ -22,11 +20,17 @@ blacklist-header {
 }
 
 section#blacklist-box > blacklist-header::before {
-    content: functions.unicode("f0d7");
+    content: "";
     display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.1em;
     margin-right: 0.5rem;
-    @include fontawesome.family;
-    font-weight: 700;
+    background-color: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'%3E%3Cpath d='M137.4 374.6c12.5 12.5 32.8 12.5 45.3 0l128-128c9.2-9.2 11.9-22.9 6.9-34.9s-16.6-19.8-29.6-19.8L32 192c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l128 128z'/%3E%3C/svg%3E");
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
     transition: transform 0.25s ease;
 }
 section#blacklist-box[collapsed=true] > blacklist-header::before {
@@ -48,13 +52,19 @@ blacklist-content {
         color: #bbb;
 
         &::before {
-            content: functions.unicode("f14a");
+            content: "";
             display: inline-block;
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.1em;
             margin-right: 0.435rem;
             margin-left: -1rem;
             margin-top: 0.125rem;
-            @include fontawesome.family;
-            font-weight: 500;
+            background-color: currentColor;
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath d='M64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zM337 209L209 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L303 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z'/%3E%3C/svg%3E");
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
             cursor: pointer;
         }
 
@@ -67,7 +77,9 @@ blacklist-content {
         }
 
         &[enabled=false] {
-            &::before { content: functions.unicode("f0c8"); }
+            &::before {
+                mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath d='M0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96z'/%3E%3C/svg%3E");
+            }
             & > a { color: #ccc !important; }
         }
     }

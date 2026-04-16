@@ -1,6 +1,7 @@
 import { XM } from "../../components/api/XM";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Icons } from "../../components/utility/Icons";
 
 /**
  * Adds the wiki page name into the url and adds a button to copy the wiki page name to clipboard
@@ -25,7 +26,7 @@ export class WikiEnhancer extends RE6Module {
     $("<button>")
       .attr("id", "wiki-page-copy-tag")
       .addClass("button btn-neutral border-highlight border-left")
-      .html(`<i class="far fa-copy"></i>`)
+      .html(Icons.get("copy"))
       .insertAfter($title)
       .on("click", () => {
         XM.Util.setClipboard(tagName);

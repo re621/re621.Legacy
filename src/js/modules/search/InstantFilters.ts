@@ -2,6 +2,7 @@ import { Page, PageDefinition } from "../../components/data/Page";
 import { Post, PostData } from "../../components/post/Post";
 import { PostFilter } from "../../components/post/PostFilter";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Icons } from "../../components/utility/Icons";
 import { Util } from "../../components/utility/Util";
 import { BetterSearch } from "./BetterSearch";
 
@@ -70,7 +71,7 @@ export class InstantFilters extends RE6Module {
 
     $("<button>")
       .attr("type", "submit")
-      .html(`<i class="fas fa-search"></i>`)
+      .html(Icons.get("search"))
       .appendTo($searchForm);
 
     $("#sidebar").trigger("re621:reflow");

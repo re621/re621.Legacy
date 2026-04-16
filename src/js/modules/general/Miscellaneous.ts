@@ -8,6 +8,7 @@ import { Post } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
 import { PostParts } from "../../components/post/PostParts";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Icons } from "../../components/utility/Icons";
 import { Util } from "../../components/utility/Util";
 import { BetterSearch, ImageClickAction } from "../search/BetterSearch";
 
@@ -173,7 +174,7 @@ export class Miscellaneous extends RE6Module {
     // Add a mail button
     Util.DOM.addSettingsButton({
       id: "header-button-dmail",
-      name: `<i class="fas fa-envelope"></i> <span>DMail</span>`,
+      name: `${Icons.get("envelope")} <span>DMail</span>`,
       href: "/dmails",
       title: "DMail",
       tabClass: "nav-re6-dmail",
@@ -437,7 +438,7 @@ export class Miscellaneous extends RE6Module {
 
       $("<a>")
         .addClass("remove-from-set-button")
-        .html(`<i class="fas fa-times"></i>`)
+        .html(Icons.get("times"))
         .insertAfter($link)
         .on("click", (event) => {
           event.preventDefault();

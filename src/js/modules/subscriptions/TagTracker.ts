@@ -8,6 +8,7 @@ import { PostData } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
 import { PostParts } from "../../components/post/PostParts";
 import { Settings } from "../../components/RE6Module";
+import { Icons } from "../../components/utility/Icons";
 import { Util } from "../../components/utility/Util";
 import { WikiEnhancer } from "../misc/WikiEnhancer";
 import { BetterSearch, ImageClickAction } from "../search/BetterSearch";
@@ -210,7 +211,7 @@ export class TagTracker extends SubscriptionTracker {
 
         $("<a>")
           .addClass("delete-link")
-          .html(`<span><i class="fas fa-times"></i></span>`)
+          .html(`<span>${Icons.get("times")}</span>`)
           .appendTo(result)
           .on("click", (event) => {
             event.preventDefault;
@@ -247,7 +248,7 @@ export class TagTracker extends SubscriptionTracker {
 
     $("<a>")
       .addClass("sb-unsub")
-      .html(`<i class="fas fa-times"></i>`)
+      .html(Icons.get("times"))
       .attr({ "title": "Unsubscribe" })
       .appendTo(result)
       .on("click", (event) => {

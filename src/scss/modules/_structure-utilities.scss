@@ -1,6 +1,4 @@
-@use "../utilities/fontawesome";
 @use "../utilities/mixins";
-@use "../utilities/functions";
 
 /* Vanilla Overrides */
 
@@ -254,11 +252,15 @@ body[data-hide-blacklist=true] section#blacklist-box {
 .update-notification:not([data-updates="0"]) {
     position: relative;
     &::after {
-        content: functions.unicode("f111");
-        @include fontawesome.family;
-        font-weight: 900;
-        font-size: 0.5em;
-        color: red;
+        content: "";
+        display: block;
+        width: 0.5em;
+        height: 0.5em;
+        background-color: red;
+        mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z'/%3E%3C/svg%3E");
+        mask-size: contain;
+        mask-repeat: no-repeat;
+        mask-position: center;
 
         position: absolute;
         top: -3px;
@@ -270,23 +272,19 @@ body[data-hide-blacklist=true] section#blacklist-box {
 
     position: relative;
 
-    @keyframes spinner {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-
     &::after {
-        content: functions.unicode("f110");
-        @include fontawesome.family;
-        font-weight: 900;
-        font-size: 0.75em;
-        line-height: 0.75em;
-        text-align: center;
-        color: inherit;
+        content: "";
+        display: block;
+        width: 0.75em;
+        height: 0.75em;
+        background-color: currentColor;
+        mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M222.7 32.1c5 16.9-4.6 34.8-21.5 39.8C121.8 95.6 64 169.1 64 256c0 106 86 192 192 192s192-86 192-192c0-86.9-57.8-160.4-137.1-184.1c-16.9-5-26.6-22.9-21.5-39.8s22.9-26.6 39.8-21.5C434.9 42.1 512 140 512 256c0 141.4-114.6 256-256 256S0 397.4 0 256C0 140 77.1 42.1 182.9 10.6c16.9-5 34.8 4.6 39.8 21.5z'/%3E%3C/svg%3E");
+        mask-size: contain;
+        mask-repeat: no-repeat;
+        mask-position: center;
 
         position: absolute;
 
-        animation: spinner 1.0s linear infinite;
+        animation: spin 1.0s linear infinite;
     }
 }

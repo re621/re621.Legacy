@@ -3,6 +3,7 @@ import { APIForumTopic } from "../../components/api/responses/APIForumTopic";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { User } from "../../components/data/User";
 import { Settings } from "../../components/RE6Module";
+import { Icons } from "../../components/utility/Icons";
 import { Util } from "../../components/utility/Util";
 import { UpdateContent, UpdateData } from "./_SubscriptionCache";
 import { SubscriptionManager } from "./_SubscriptionManager";
@@ -113,7 +114,7 @@ export class ForumTracker extends SubscriptionTracker {
 
         $("<a>")
           .addClass("delete-link")
-          .html(`<span><i class="fas fa-times"></i></span>`)
+          .html(`<span>${Icons.get("times")}</span>`)
           .appendTo(result)
           .on("click", (event) => {
             event.preventDefault;
@@ -140,7 +141,7 @@ export class ForumTracker extends SubscriptionTracker {
 
     $("<a>")
       .addClass("sb-unsub")
-      .html(`<i class="fas fa-times"></i>`)
+      .html(Icons.get("times"))
       .attr({ "title": "Unsubscribe" })
       .appendTo(result)
       .on("click", (event) => {

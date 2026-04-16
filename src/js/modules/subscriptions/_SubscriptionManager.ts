@@ -4,6 +4,7 @@ import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form, FormElement } from "../../components/structure/Form";
 import { Modal } from "../../components/structure/Modal";
 import { Tabbed, TabContent } from "../../components/structure/Tabbed";
+import { Icons } from "../../components/utility/Icons";
 import { Util } from "../../components/utility/Util";
 import { TagTracker } from "./TagTracker";
 import { SubscriptionTracker } from "./_SubscriptionTracker";
@@ -54,7 +55,7 @@ export class SubscriptionManager extends RE6Module {
     // Create a notifications button
     const openSubscriptionsButton = Util.DOM.addSettingsButton({
       id: "header-button-notifications",
-      name: `<i class="fas fa-bell"></i> <span>Updates</span>`,
+      name: `${Icons.get("bell")} <span>Updates</span>`,
       title: "Notifications",
       attr: {
         "data-loading": "false",
@@ -505,7 +506,7 @@ export class SubscriptionManager extends RE6Module {
             if (working) return;
             working = true;
 
-            button.html(`<i class="fas fa-spinner fa-spin"></i>`);
+            button.html(`<span class="spin">${Icons.get("spinner")}</span>`);
             await instance.update();
             button.html(`Done!`);
             await Util.sleep(1000);
@@ -518,7 +519,7 @@ export class SubscriptionManager extends RE6Module {
             if (working) return;
             working = true;
 
-            button.html(`<i class="fas fa-spinner fa-spin"></i>`);
+            button.html(`<span class="spin">${Icons.get("spinner")}</span>`);
             await instance.clear();
             button.html(`Done!`);
             await Util.sleep(1000);

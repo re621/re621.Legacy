@@ -7,6 +7,7 @@ import RelationsCache from "../../components/cache/RelationsCache";
 import { TagCache } from "../../components/cache/TagCache";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
+import { Icons } from "../../components/utility/Icons";
 import { TagValidator } from "../../components/utility/TagValidator";
 import { Util } from "../../components/utility/Util";
 
@@ -736,8 +737,8 @@ export class SmartAlias extends RE6Module {
           .text(text)
           .appendTo($element);
         if (asciiWarning && data && data.errors.length > 0 && !data.dnp)
-          $("<span>")
-            .addClass("fas fa-exclamation-triangle tag-warning")
+          $(Icons.get("exclamation-triangle"))
+            .addClass("tag-warning")
             .attr("title", data.errors.join("\n"))
             .appendTo($element);
       }

@@ -3,6 +3,7 @@ import { User } from "../../components/data/User";
 import { ModuleController } from "../../components/ModuleController";
 import { RE6Module, Settings } from "../../components/RE6Module";
 import { Form } from "../../components/structure/Form";
+import { Icons } from "../../components/utility/Icons";
 import { Modal } from "../../components/structure/Modal";
 import { Util } from "../../components/utility/Util";
 
@@ -147,7 +148,7 @@ export class HeaderCustomizer extends RE6Module {
     // === Tab Configuration Interface
     this.addTabButton = Util.DOM.addSettingsButton({
       id: "header-button-customizer",
-      name: `<i class="fas fa-tasks"></i> <span>Customize</span>`,
+      name: `${Icons.get("tasks")} <span>Customize</span>`,
       title: "Edit Header Tabs",
       tabClass: "nav-re6-headercus",
     });
