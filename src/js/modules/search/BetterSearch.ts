@@ -86,6 +86,7 @@ export class BetterSearch extends RE6Module {
       hidePageBreaks: true,                           // Show a visual separator between different pages
 
       highlightVisited: true,                         // Adds a colored border to visited posts
+      highlightVisitedColor: "#d2a109",               // The border color for visited posts
       hideSmartAliasOutput: false,                    // Run SmartAlias, but don't show its output, in the quick edit mode
 
       hideInfoBar: false,                             // Remove the post info (votes, favorites, etc) from view
@@ -606,6 +607,7 @@ export class BetterSearch extends RE6Module {
 
       "hidePageBreaks",
       "highlightVisited",
+      "highlightVisitedColor",
       "hideSmartAliasOutput",
 
       "hideInfoBar",
@@ -619,6 +621,7 @@ export class BetterSearch extends RE6Module {
     if (conf.imageRatioChange) this.$content.css("--img-ratio", conf.imageRatio);
     else this.$content.css("--img-fit", Util.Math.clamp(conf.imageMinWidth, 10, 100) + "%");
     if (conf.compactMode) this.$content.css("--img-maxheight", (conf.imageSizeChange ? conf.imageWidth : 150) + "px");
+    if (conf.highlightVisited) this.$content.css("--highlight-visited-color", conf.highlightVisitedColor);
 
     // Hide the SmartAlias output in the quick edit form
     if (conf.hideSmartAliasOutput) $("#content").attr("hide-smart-alias-output", "true");
