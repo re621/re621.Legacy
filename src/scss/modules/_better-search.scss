@@ -269,6 +269,8 @@ search-content > post {
         color: #bbb;
 
         border-radius: 0 0 6px 6px;
+        white-space: nowrap;
+        overflow: hidden;
 
         & > span:not(:last-child) {
             margin-right: 0.5rem;
