@@ -60,7 +60,6 @@
     "jquery-ui": "^1.13.2"
   },
   "devDependencies": {
-    "@actions/core": "^1.9.1",
     "@stylistic/eslint-plugin": "^4.2.0",
     "@types/jquery": "^3.5.14",
     "@types/jqueryui": "^1.12.16",

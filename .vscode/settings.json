@@ -6,4 +6,8 @@
   "editor.insertSpaces": true,
   "editor.rulers": [100],
   "editor.formatOnSave": false,
+
+  // Use the TypeScript from node_modules rather than the one bundled with VSCode,
+  // so editor diagnostics match what `bun run typescript` actually reports.
+  "typescript.tsdk": "node_modules/typescript/lib",
 }

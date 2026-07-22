@@ -1,14 +1,21 @@
 {
     "compilerOptions": {
         "module": "CommonJS",
-        "moduleResolution": "node",
-        "target": "ES2019",
+        // "node10" is the explicit name for the old "node" strategy. It is deprecated,
+        // but it is the only resolution mode TS allows alongside "module": "CommonJS",
+        // and browserify needs CommonJS output. Revisit when the bundler is replaced.
+        "moduleResolution": "node10",
+        // ES2021 is the ceiling: at ES2022 tsc emits native class-field syntax, which
+        // browserify 17's acorn-node parser cannot parse. See ModuleController.ts.
+        "target": "ES2021",
+        // Pinned to preserve current class-field semantics (set, not define) so a future
+        // target bump past ES2022 cannot silently change behaviour of ~160 fields.
+        "useDefineForClassFields": false,
         "outDir": "./build/tsc-temp/",
         "rootDir": "./src/",
         "removeComments": true,
         "typeRoots": [
-            "node_modules/@types",
-            "node_modules/@shopify"
+            "node_modules/@types"
         ]
     }
 }
