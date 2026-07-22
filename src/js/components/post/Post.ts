@@ -458,11 +458,11 @@ export interface PostData {
 
   rel: {
     children: Set<number>;
-    parent: number;
+    parent: number | null;
   };
 
   meta: {
-    duration: number;
+    duration: number | null;
     animated: boolean;
     sound: boolean;
     interactive: boolean;
@@ -580,59 +580,115 @@ export namespace PostData {
    */
   export function fromDOM (): PostData {
 
-    const $article = $("#image-container");
-    const data: APIPost = JSON.parse($article.attr("data-post"));
+    const rawPostData = document.getElementById("post-data");
+    if (!rawPostData) throw new Error("Post data not found in DOM");
 
-    // Fetch tags - the existant ones are insufficient
-    data["tags"] = {
-      artist: getTags("artist"),
-      contributor: getTags("contributor"),
-      character: getTags("character"),
-      copyright: getTags("copyright"),
-      general: getTags("general"),
-      invalid: getTags("invalid"),
-      lore: getTags("lore"),
-      meta: getTags("meta"),
-      species: getTags("species"),
+    const decodedData = atob(rawPostData.textContent || "");
+    if (!decodedData) throw new Error("Post data is empty");
+
+    const currentPostData = JSON.parse(decodedData) as RawPostObject;
+    console.log("CurrentPostData:", currentPostData);
+
+    const flags = new Set<PostFlag>();
+    if (currentPostData.flags.pending) flags.add(PostFlag.Pending);
+    if (currentPostData.flags.flagged) flags.add(PostFlag.Flagged);
+    if (currentPostData.flags.deleted) flags.add(PostFlag.Deleted);
+
+    const allTags = new Set<string>([
+      ...currentPostData.tags.artist,
+      ...currentPostData.tags.contributor,
+      ...currentPostData.tags.copyright,
+      ...currentPostData.tags.species,
+      ...currentPostData.tags.character,
+      ...currentPostData.tags.general,
+      ...currentPostData.tags.invalid,
+      ...currentPostData.tags.meta,
+      ...currentPostData.tags.lore,
+    ]);
+
+    const result = {
+      id: currentPostData.id,
+      flags: flags,
+      score: currentPostData.stats.score,
+      user_score: currentPostData.stats.vote,
+      favorites: currentPostData.stats.fav_count,
+      is_favorited: currentPostData.stats.is_favorited,
+      comments: currentPostData.stats.comment_count,
+      rating: PostRating.fromValue(currentPostData.rating),
+      uploader: currentPostData.uploader_id,
+      uploaderName: currentPostData["uploader_name"] || "",
+      approver: currentPostData.approver_id ? currentPostData.approver_id : -1,
+
+      page: "0",
+
+      date: {
+        iso: currentPostData.created_at == null ? currentPostData.updated_at : currentPostData.created_at,
+        ago: Util.Time.ago(currentPostData.created_at == null ? currentPostData.updated_at : currentPostData.created_at),
+        obj: new Date(currentPostData.created_at == null ? currentPostData.updated_at : currentPostData.created_at),
+      },
+
+      tagString: [...allTags].sort().join(" "),
+      tags: {
+        all: allTags,
+        artist: new Set(currentPostData.tags.artist),
+        real_artist: new Set(currentPostData.tags.artist.filter(tag => Tag.isArtist(tag))),
+        contributor: new Set(currentPostData.tags.contributor),
+        copyright: new Set(currentPostData.tags.copyright),
+        species: new Set(currentPostData.tags.species),
+        character: new Set(currentPostData.tags.character),
+        general: new Set(currentPostData.tags.general),
+        invalid: new Set(currentPostData.tags.invalid),
+        meta: new Set(currentPostData.tags.meta),
+        lore: new Set(currentPostData.tags.lore),
+      },
+      tagCategoriesKnown: true,
+
+      sources: currentPostData.sources,
+      description: currentPostData.description,
+
+      file: {
+        ext: FileExtension.fromString(currentPostData.files.meta.ext),
+        md5: currentPostData.files.meta.md5,
+        original: currentPostData.files.original.url || "/images/deleted-preview.png",
+        sample: currentPostData.files.sample.jpg || currentPostData.files.original.url || "/images/deleted-preview.png",
+        preview: currentPostData.files.preview.jpg || "/images/deleted-preview.png",
+        size: currentPostData.files.meta.size,
+      },
+
+      img: {
+        width: currentPostData.files.original.width,
+        height: currentPostData.files.original.height,
+        ratio: Util.Math.round(currentPostData.files.original.height / currentPostData.files.original.width, 2),
+      },
+
+      has: {
+        file: currentPostData.files.original.url !== null,
+        children: currentPostData.has.active_children,
+        parent: currentPostData.relationships.parent_id !== undefined && currentPostData.relationships.parent_id !== null,
+        sample: currentPostData.files.meta.has_sample,
+      },
+
+      rel: {
+        children: new Set(currentPostData.relationships.children),
+        parent: currentPostData.relationships.parent_id,
+      },
+
+      meta: {
+        duration: currentPostData.files.meta.duration,
+        animated: allTags.has("animated"),
+        sound: allTags.has("sound"),
+        interactive: currentPostData.files.meta.ext == "swf",
+      },
+
+      warning: {
+        sound: allTags.has("sound_warning"),
+        epilepsy: allTags.has("epilepsy_warning"),
+      },
+
+      loaded: undefined,
     };
-    data["uploader_name"] = $article.attr("data-uploader");
 
-    // Sources formatting is incorrect
-    // All sources are dumped into the first element, separated by newlines
-    if (data.sources.length > 0)
-      data.sources = data.sources[0].split("\n");
-
-    // Rating is missing from the data
-    data.rating = PostRating.fromValue($article.attr("data-rating"));
-
-    // Restore the preview image. Not used anywhere, but avoids an error.
-    const md5 = data["file"]["md5"],
-      md52 = md5.substr(0, 2);
-    data["preview"] = {
-      "width": -1,
-      "height": -1,
-      "url": `https://static1.e621.net/data/preview/${md52}/${md52}/${md5}.jpg`,
-    };
-
-    // Fetch the user's current vote
-    const positiveVote = $("a.post-vote-up-link span").first(),
-      negativeVote = $("a.post-vote-down-link span").first();
-
-    data["user_score"] = positiveVote.hasClass("score-positive")
-      ? 1
-      : (negativeVote.hasClass("score-negative") ? -1 : 0);
-
-    return PostData.fromAPI(data);
-
-    function getTags (group: string): string[] {
-      const result: string[] = [];
-      for (const element of $(`#tag-list .${group}-tag-list`).children()) {
-        const tag = element.dataset.name;
-        if (!tag) continue;
-        result.push(decodeURIComponent(tag));
-      }
-      return result;
-    }
+    return result;
   }
 
   /**
@@ -800,4 +856,108 @@ export namespace FileExtension {
     }
     return null;
   }
+}
+
+interface RawPostObject {
+  "id": number;
+  "created_at": string;
+  "updated_at": string;
+  "change_seq": number;
+  "files": {
+    "meta": {
+      "md5": string;
+      "ext": string;
+      "size": number;
+      "duration": number;
+      "has_sample": boolean;
+    };
+    "original": {
+      "width": number;
+      "height": number;
+      "url": string;
+    };
+    "preview": {
+      "width": number;
+      "height": number;
+      "jpg": string;
+      "webp": string;
+    };
+    "sample": {
+      "width": number;
+      "height": number;
+      "jpg": string;
+      "webp": string;
+    };
+    "video": {
+      "has": boolean;
+      "original": {
+        "fps": number;
+        "codec": string;
+        "size": number;
+        "width": number;
+        "height": number;
+        "url": string;
+      };
+      "variants": Record<string, unknown>;
+      "samples": Record<string, {
+        "fps": number;
+        "size": number;
+        "codec": string;
+        "width": number;
+        "height": number;
+        "url": string;
+      }>;
+    };
+  };
+  "uploader_id": number;
+  "uploader_name": string;
+  "approver_id": number | null;
+  "stats": {
+    "score": {
+      "up": number;
+      "down": number;
+      "total": number;
+    };
+    "fav_count": number;
+    "is_favorited": boolean;
+    "vote": number;
+    "comment_count": number;
+    "hotness": number;
+  };
+  "flags": {
+    "pending": boolean;
+    "flagged": boolean;
+    "note_locked": boolean;
+    "status_locked": boolean;
+    "rating_locked": boolean;
+    "deleted": boolean;
+  };
+  "has": {
+    "parent": boolean;
+    "children": boolean;
+    "active_children": boolean;
+    "notes": boolean;
+    "sample": boolean;
+  };
+  "relationships": {
+    "parent_id": number | null;
+    "children": number[];
+  };
+  "pools": number[];
+  "rating": string;
+  "locked_tags": string[];
+  "sources": string[];
+  "description": string;
+  "tags": {
+    "general": string[];
+    "artist": string[];
+    "contributor": string[];
+    "copyright": string[];
+    "character": string[];
+    "species": string[];
+    "invalid": string[];
+    "meta": string[];
+    "lore": string[];
+  };
+  "initial_size": string;
 }
