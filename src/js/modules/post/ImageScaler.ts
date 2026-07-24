@@ -55,7 +55,7 @@ export class ImageScaler extends RE6Module {
     // Set up dynamic scaling options
     const dynSizeMode = this.fetchSettings("dynSizeMode");
     if (dynSizeMode !== DynSizeMode.Disabled)
-      Danbooru.Post.resize_to(this.calcDynamicSize(post, dynSizeMode));
+      Danbooru.PostResizer.resizeTo(this.calcDynamicSize(post, dynSizeMode));
 
     // Rename the "download" button - actual downloading is provided by DownloadCustomizer
     $("#image-download-link a").html("Fullscreen");
@@ -76,7 +76,7 @@ export class ImageScaler extends RE6Module {
 
         $container.removeClass("blacklisted");
         const size = ($selector.val() + "") || "large";
-        Danbooru.Post.resize_to(size);
+        Danbooru.PostResizer.resizeTo(size);
         Danbooru.Post.resize_notes();
 
         return;
@@ -103,7 +103,7 @@ export class ImageScaler extends RE6Module {
 
   /** Cycles through scaling modes */
   private cycleScaling (): void {
-    Danbooru.Post.resize_cycle_mode();
+    Danbooru.PostResizer.resizeTo("next");
   }
 
   private calcDynamicSize (post: Post, mode: DynSizeMode): ImageScalingMode {

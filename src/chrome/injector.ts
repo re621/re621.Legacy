@@ -37,10 +37,10 @@ const fnDanbooru = {
     "approve": (post_id, should_reload): void => { Danbooru.Post.approve(post_id, should_reload); },
     "disapprove": (post_id, reason, should_reload): void => { Danbooru.Post.disapprove(post_id, reason, should_reload); },
     "unapprove": (post_id): void => { Danbooru.Post.unapprove(post_id); },
-    "resize_cycle_mode": (): void => { Danbooru.Post.resize_cycle_mode(); },
-    "resize_to": (size: string): void => { Danbooru.Post.resize_to(size); },
-    "resize_to_internal": (size: string): void => { Danbooru.Post.resize_to_internal(size); },
     "resize_notes": (): void => { Danbooru.Post.resize_notes(); },
+  },
+  "PostResizer": {
+    "resizeTo": (size: "next" | string): void => { Danbooru.PostResizer.resizeTo(size); },
   },
   "PostModeMenu": {
     "change": (): void => { Danbooru.PostModeMenu.change(); },

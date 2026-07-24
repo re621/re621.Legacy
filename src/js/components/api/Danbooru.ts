@@ -93,21 +93,16 @@ export class Danbooru {
       if (Danbooru.hasModules()) Danbooru.getModules()["Post"].unapprove(post_id);
       else XM.Chrome.execInjectorRequest("Danbooru", "Post", "unapprove", [post_id]);
     },
-    resize_cycle_mode (): void {
-      if (Danbooru.hasModules()) Danbooru.getModules()["Post"].resize_cycle_mode();
-      else XM.Chrome.execInjectorRequest("Danbooru", "Post", "resize_cycle_mode");
-    },
-    resize_to (size: string): void {
-      if (Danbooru.hasModules()) Danbooru.getModules()["Post"].resize_to(size);
-      else XM.Chrome.execInjectorRequest("Danbooru", "Post", "resize_to", [size]);
-    },
-    resize_to_internal (size: string): void {
-      if (Danbooru.hasModules()) Danbooru.getModules()["Post"].resize_to_internal(size);
-      else XM.Chrome.execInjectorRequest("Danbooru", "Post", "resize_to_internal", [size]);
-    },
     resize_notes (): void {
       if (Danbooru.hasModules()) Danbooru.getModules()["Post"].resize_notes();
       else XM.Chrome.execInjectorRequest("Danbooru", "Post", "resize_notes");
+    },
+  };
+
+  public static PostResizer = {
+    resizeTo (size: "next" | string): void {
+      if (Danbooru.hasModules()) Danbooru.getModules()["PostResizer"].resizeTo(size);
+      else XM.Chrome.execInjectorRequest("Danbooru", "PostResizer", "resizeTo", [size]);
     },
   };
 
