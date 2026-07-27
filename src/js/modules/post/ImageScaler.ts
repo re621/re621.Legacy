@@ -54,7 +54,7 @@ export class ImageScaler extends RE6Module {
 
     // Set up dynamic scaling options
     const dynSizeMode = this.fetchSettings("dynSizeMode");
-    if (dynSizeMode !== DynSizeMode.Disabled)
+    if (dynSizeMode != DynSizeMode.Disabled)
       Danbooru.PostResizer.resizeTo(this.calcDynamicSize(post, dynSizeMode));
 
     // Rename the "download" button - actual downloading is provided by DownloadCustomizer
