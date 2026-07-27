@@ -19,7 +19,6 @@ import { MassDownloader } from "./modules/downloader/MassDownloader";
 import { PoolDownloader } from "./modules/downloader/PoolDownloader";
 import { CommentBlacklist } from "./modules/general/CommentBlacklist";
 import { CompatibilityPatcher } from "./modules/general/CompatibilityPatcher";
-import { FormattingExtender } from "./modules/general/FormattingExtender";
 import { HeaderCustomizer } from "./modules/general/HeaderCustomizer";
 import { JanitorEnhancements } from "./modules/general/JanitorEnhancements";
 import { Miscellaneous } from "./modules/general/Miscellaneous";
@@ -53,7 +52,6 @@ import AvoidPosting from "./components/cache/AvoidPosting";
 
 
 const loadOrder = [
-  FormattingExtender,
   HeaderCustomizer,
   ThemeCustomizer,
 
