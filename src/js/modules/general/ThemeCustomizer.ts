@@ -47,6 +47,7 @@ export class ThemeCustomizer extends RE6Module {
           "pony": "Pony",
           "bloodlust": "Bloodlust",
           "serpent": "Serpent",
+          "forest": "Forest",
           "hotdog": "Hotdog",
         },
         (data) => {
