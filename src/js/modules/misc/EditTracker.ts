@@ -10,20 +10,20 @@ export class EditTracker extends RE6Module {
 
   public create (): void {
 
-    if ($("#post_tag_string").is(":visible")) this.listen();
+    if ($("#post_tag_string, #re621_qedit_tags").is(":visible")) this.listen();
     else { $("body").one("click.re621", "#post-edit-link, #side-edit-link", () => { this.listen(); }); }
   }
 
   private async listen (): Promise<void> {
 
-    const input = $("#post_tag_string"),
+    const input = $("#post_tag_string, #re621_qedit_tags").filter(":visible").first(),
       original = Util.getTags(input);
 
     const changes = $("<div>")
       .addClass("diff-list post-changes")
       .insertAfter("#tags-container");
 
-    $("#post_tag_string").on("input", () => {
+    input.on("input", () => {
       const changed = Util.getTags(input);
 
       const output = [];

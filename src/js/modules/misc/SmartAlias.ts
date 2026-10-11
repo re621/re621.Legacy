@@ -40,8 +40,6 @@ export class SmartAlias extends RE6Module {
 
   private static tagAliases: TagAlias = {};       // stores e621's alias pairs to avoid repeated lookups
 
-  private static postPageLockout = false;         // Used to avoid calling the API on every post page
-
   public constructor () {
     super([PageDefinition.upload, PageDefinition.post, PageDefinition.search, PageDefinition.favorites], true);
   }
@@ -78,27 +76,6 @@ export class SmartAlias extends RE6Module {
     };
   }
 
-  public async prepare (): Promise<void> {
-    await super.prepare();
-
-    if (!Page.matches(PageDefinition.post)) return;
-
-    // Only create an instance once the editing form is enabled
-    // This will avoid unnecessary API calls, as well as solve issues with dynamic DOM
-    if (!$("#post_tag_string").is(":visible")) {
-
-      // This is dumb, but it works
-      // If the editing form is visible when the script loads, skip this whole thing
-      // This fixes an issue with SmartAlias not loading if the editing form is opened before page loads
-
-      SmartAlias.postPageLockout = true;
-      $("body").one("click.re621", "#post-edit-link, #side-edit-link", () => {
-        SmartAlias.postPageLockout = false;
-        this.reload();
-      });
-    }
-  }
-
   /**
    * Destroys and re-creates the entire module as a method of reloading it.
    * It's stupid, but it's the easiest and hassle-free method of resetting some things.
@@ -125,12 +102,15 @@ export class SmartAlias extends RE6Module {
     $("smart-alias").remove();
     $("smart-tag-counter").remove();
     $("button.smart-alias-validate").remove();
-    $("#tags").off("input.re621.smart-alias");
+    $(document).off("input.re621.smart-alias", "#tags");
 
     for (const element of this.inputElements)
       element
         .off("input.smartalias blur.smartalias blur.smartalias.spacefix")
         .removeData("re621:smartalias");
+    $(document)
+      .off("re621:input.smartalias", "#post_tag_string, #re621_qedit_tags")
+      .off("input.smartalias", "#post_tag_string, #re621_qedit_tags");
   }
 
   public create (): void {
@@ -151,9 +131,6 @@ export class SmartAlias extends RE6Module {
     // Toggle the data-attribute necessary for the compact form
     this.setCompactOutput(this.fetchSettings("compactOutput"));
 
-    // Only create the structure once the editing form is enabled
-    if (SmartAlias.postPageLockout) return;
-
     // Establish the data caches
     if (typeof SmartAlias.aliasCache == "undefined") {
       const cacheData = this.fetchSettings<string>("data");
@@ -171,44 +148,48 @@ export class SmartAlias extends RE6Module {
     if (!enabledInputs.uploadTagsForm) inputs.delete("#post_tags");
 
     this.inputElements = [];
-
-    // Initializes SmartAlias for all appropriate inputs
     const mode = this.fetchSettings<boolean>("autoLoad");
     for (const inputElement of $([...inputs].join(", ")).get()) {
-      const $textarea = $(inputElement);
+      this.initializeInput($(inputElement), mode);
+    }
 
-      // Ignore already initialized inputs
-      if ($textarea.data("re621:smartalias")) continue;
-      $textarea.data("re621:smartalias", true);
+    // Edit textareas can be created dynamically by e621 or BetterSearch.
+    $(document).on("re621:input.smartalias", "#post_tag_string, #re621_qedit_tags", (event) => {
+      this.initializeInput($(event.currentTarget), mode);
+    });
+    $(document).on("input.smartalias", "#post_tag_string, #re621_qedit_tags", (event) => {
+      this.initializeInput($(event.currentTarget), mode);
+    });
+  }
 
-      this.inputElements.push($textarea);
-      const $container = $("<smart-alias>")
-        .attr("ready", "true")
-        .addClass("disabled")
-        .insertAfter($textarea);
-      const $counter = $("<smart-tag-counter>")
-        .insertAfter($textarea);
+  private initializeInput ($textarea: JQuery<HTMLElement>, mode: boolean): void {
+    if ($textarea.data("re621:smartalias")) return;
+    $textarea.data("re621:smartalias", true);
 
-      if (mode) this.manageAutoLoad($textarea, $container);
-      else this.manageManualLoad($textarea, $container);
+    this.inputElements.push($textarea);
+    const $container = $("<smart-alias>")
+      .attr("ready", "true")
+      .addClass("disabled")
+      .insertAfter($textarea);
+    const $counter = $("<smart-tag-counter>")
+      .insertAfter($textarea);
 
-      // On search pages, in the editing mode, reload container when the user clicks on a thumbnail
-      // Otherwise, the old tags get left behind. Thanks to tag data caching, this should be pretty quick
-      if (Page.matches([PageDefinition.search, PageDefinition.favorites])) {
-        $("article.post-preview").on("click.danbooru", () => {
-          if (mode) this.handleTagInput($textarea, $container, false);
-          else $container.html("");
-        });
-      }
+    if (mode) this.manageAutoLoad($textarea, $container);
+    else this.manageManualLoad($textarea, $container);
 
-      // Update the tag counter
-      let updateTimeout: number;
-      $textarea.on("input re621:input", () => {
-        if (updateTimeout) return;
-        updateTimeout = window.setTimeout(() => { updateTimeout = 0; }, 500);
-        $counter.html(SmartAlias.countTagInput($textarea) + "");
+    if (Page.matches([PageDefinition.search, PageDefinition.favorites])) {
+      $("article.post-preview").on("click.danbooru", () => {
+        if (mode) this.handleTagInput($textarea, $container, false);
+        else $container.html("");
       });
     }
+
+    let updateTimeout: number;
+    $textarea.on("input re621:input", () => {
+      if (updateTimeout) return;
+      updateTimeout = window.setTimeout(() => { updateTimeout = 0; }, 500);
+      $counter.html(SmartAlias.countTagInput($textarea) + "");
+    });
   }
 
   /**
@@ -216,7 +197,7 @@ export class SmartAlias extends RE6Module {
    * @param input Textarea to parse
    */
   private static getInputString (input: JQuery<HTMLElement>): string {
-    return input.val().toString().trim()
+    return (input.val() ?? "").toString().trim()
       .toLowerCase()
       .replace(/\r?\n|\r/g, " ")      // strip newlines
       .replace(/(?:\s){2,}/g, " ");    // strip multiple spaces
@@ -874,10 +855,12 @@ export class SmartAlias extends RE6Module {
   /** Handles alias replacement in the search form */
   private handleSearchForm (): void {
     let typingTimeout: number;
-    const input = $("#tags").on("input.re621.smart-alias", () => {
+    $(document).on("input.re621.smart-alias", "#tags", (event) => {
       clearTimeout(typingTimeout);
       typingTimeout = window.setTimeout(async () => {
         await this.loadAliasCache();
+        const input = $("#tags");
+        if (input.length == 0) return;
         input.val((index, text) => {
           return this.replaceInputAliases(text);
         });

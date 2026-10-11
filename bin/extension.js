@@ -18,7 +18,7 @@ const manifest = JSON.parse(util.parseTemplate(
 ));
 
 // Copy the icons
-fs.mkdirSync("./build/extension/src/icons");
+fs.mkdirSync("./build/extension/src/icons", { recursive: true });
 const downloadQueue = [];
 manifest["icons-lib"].forEach((entry, index) => {
   downloadQueue.push(new Promise(async (resolve) => {
