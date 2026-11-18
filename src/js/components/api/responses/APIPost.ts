@@ -1,34 +1,99 @@
 import { APIResponse } from "./APIResponse";
 
-export interface APIPost extends APIResponse {
+/** Fields shared by all output modes of the posts API */
+export interface APIPostBase extends APIResponse {
   id: number;
   created_at: string;
   updated_at: string;
-  file: File;
-  preview: Preview;
-  sample: Sample;
-  score: Score;
-  tags: Tags;
-  locked_tags: string[];
   change_seq: number;
-  flags: Flags;
-  rating: PostRating;
-  fav_count: number;
-  sources: string[];
-  pools: number[];
-  relationships: Relationships;
-  approver_id?: number;
+  files: Files;
   uploader_id: number;
+  uploader_name: string;
+  approver_id: number | null;
+  stats: Stats;
+  flags: Flags;
+  has: Has;
+  relationships: Relationships;
+  pools: number[];
+  rating: PostRating;
+  locked_tags: string[];
+  sources: string[];
   description: string;
+}
+
+/** Post in the `extended` output mode: tags are sorted by category */
+export interface APIPost extends APIPostBase {
+  tags: Tags;
+}
+
+/** Post in the `basic` (default) output mode: tags are a flat list */
+export interface APIPostBasic extends APIPostBase {
+  tags: string[];
+}
+
+interface Files {
+  meta: {
+    md5: string;
+    ext: string;
+    size: number;
+    duration: number | null;
+    has_sample: boolean;
+  };
+  /** `url` is null if the user cannot see the post */
+  original: {
+    width: number;
+    height: number;
+    url: string | null;
+  };
+  preview: ImageVariant;
+  /** Falls back to the original file if the post has no sample */
+  sample: ImageVariant;
+  /** Only present on video posts */
+  video?: {
+    has: boolean;
+    original: VideoVariant;
+    variants: Record<string, VideoVariant>;
+    samples: Record<string, VideoVariant>;
+  };
+}
+
+/** URLs are null if the user cannot see the post */
+interface ImageVariant {
+  width: number;
+  height: number;
+  jpg: string | null;
+  webp: string | null;
+}
+
+interface VideoVariant {
+  fps: number;
+  codec: string;
+  size: number;
+  width: number;
+  height: number;
+  url: string;
+}
+
+interface Stats {
+  score: Score;
+  fav_count: number;
+  is_favorited: boolean;
+  /** Current user's vote: 1, 0, or -1 */
+  vote: number;
   comment_count: number;
-  is_favorited?: boolean;
-  duration: number;
+  hotness: number;
+}
+
+interface Has {
+  parent: boolean;
+  children: boolean;
+  active_children: boolean;
+  notes: boolean;
+  sample: boolean;
 }
 
 interface Relationships {
-  parent_id?: number;
-  has_children: boolean;
-  has_active_children: boolean;
+  parent_id: number | null;
   children: number[];
 }
 
@@ -57,28 +122,6 @@ interface Score {
   up: number;
   down: number;
   total: number;
-}
-
-interface Sample {
-  has: boolean;
-  height: number;
-  width: number;
-  url: string;
-}
-
-interface Preview {
-  width: number;
-  height: number;
-  url: string;
-}
-
-interface File {
-  width: number;
-  height: number;
-  ext: string;
-  size: number;
-  md5: string;
-  url: string;
 }
 
 export enum PostRating {

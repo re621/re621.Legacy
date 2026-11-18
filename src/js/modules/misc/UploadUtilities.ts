@@ -173,8 +173,10 @@ export class UploadUtilities extends RE6Module {
        * @param entry Post data
        */
     function makePostThumbnail (entry: APIIQDBResponse): JQuery<HTMLElement> {
-      const postData = entry.post.posts;
+      const postData = entry.post;
       const article = $("<div>");
+
+      const dimensions = `${postData.files.original.width}x${postData.files.original.height} ${Util.Size.format(postData.files.meta.size)}`;
 
       const link = $("<a>")
         .attr({
@@ -186,10 +188,8 @@ export class UploadUtilities extends RE6Module {
 
       $("<img>")
         .attr({
-          src: postData.is_deleted ? "/images/deleted-preview.png" : postData["preview_file_url"],
-          title:
-                        `${postData.image_width}x${postData.image_height} ${Util.Size.format(postData.file_size)} ${Math.round(entry.score)}% match\n`
-                        + `${postData.tag_string_artist}\n${postData.tag_string_copyright}\n${postData.tag_string_character}\n${postData.tag_string_species}`,
+          src: postData.files.preview.jpg || "/images/deleted-preview.png",
+          title: `${dimensions} ${Math.round(entry.score)}% match`,
         })
         .appendTo(link);
 
@@ -198,7 +198,7 @@ export class UploadUtilities extends RE6Module {
         .appendTo(link);
 
       $("<span>")
-        .html(`${postData["image_width"]}x${postData["image_height"]} ${Util.Size.format(postData["file_size"])}`)
+        .html(dimensions)
         .appendTo(article);
 
       return article;

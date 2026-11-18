@@ -547,12 +547,12 @@ export class BetterSearch extends RE6Module {
           return;
       }
 
-      E621.Post.id(postID).patch({ post: formData }).then(
+      E621.Post.id(postID).patch({ post: formData, mode: "extended" }).then(
         (response) => {
           Debug.log(response);
 
           Post.get(postID)
-            .update(response[0]["post"])
+            .update(response[0])
             .render();
 
           Danbooru.notice(`Post <a href="/posts/${postID}" target="_blank" rel="noopener noreferrer">#${postID}</a> updated (<a href="/post_versions?search[post_id]=${postID}">history</a>)`);
