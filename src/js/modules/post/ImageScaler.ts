@@ -77,7 +77,6 @@ export class ImageScaler extends RE6Module {
         $container.removeClass("blacklisted");
         const size = ($selector.val() + "") || "large";
         Danbooru.PostResizer.resizeTo(size);
-        Danbooru.Post.resize_notes();
 
         return;
       }

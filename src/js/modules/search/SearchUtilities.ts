@@ -23,17 +23,6 @@ export class SearchUtilities extends RE6Module {
       { keys: "hotkeySwitchModeAddSet", fnct: this.switchModeAddSet },
       { keys: "hotkeySwitchModeRemSet", fnct: this.switchModeRemSet },
       { keys: "hotkeySwitchModeScript", fnct: this.switchModeScript },
-
-      // { keys: "hotkeyScriptTwo", fnct: () => { SearchUtilities.switchScript(2); } },
-      // { keys: "hotkeyScriptOne", fnct: () => { SearchUtilities.switchScript(1); } },
-      // { keys: "hotkeyScriptThree", fnct: () => { SearchUtilities.switchScript(3); } },
-      // { keys: "hotkeyScriptFour", fnct: () => { SearchUtilities.switchScript(4); } },
-      // { keys: "hotkeyScriptFive", fnct: () => { SearchUtilities.switchScript(5); } },
-      // { keys: "hotkeyScriptSix", fnct: () => { SearchUtilities.switchScript(6); } },
-      // { keys: "hotkeyScriptSeven", fnct: () => { SearchUtilities.switchScript(7); } },
-      // { keys: "hotkeyScriptEight", fnct: () => { SearchUtilities.switchScript(8); } },
-      // { keys: "hotkeyScriptNine", fnct: () => { SearchUtilities.switchScript(9); } },
-      // { keys: "hotkeyScriptTen", fnct: () => { SearchUtilities.switchScript(0); } },
     );
   }
 
@@ -231,11 +220,6 @@ export class SearchUtilities extends RE6Module {
   private static switchMode (mode: string): void {
     $("select#mode-box-mode").val(mode);
     Danbooru.PostModeMenu.change();
-  }
-
-  /** Switches the tag script to the specified one */
-  private static switchScript (script: number): void {
-    Danbooru.PostModeMenu.change_tag_script(script);
   }
 
   /** Handle sidebar expansion and collapse */

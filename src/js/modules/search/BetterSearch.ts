@@ -674,6 +674,9 @@ export class BetterSearch extends RE6Module {
         case "approve": {
           post.flags.delete(PostFlag.Pending);
         }
+        case "unflag": {
+          if (mode == "unflag") post.flags.delete(PostFlag.Flagged);
+        }
         case "remove-parent":
         case "tag-script":
 
@@ -684,25 +687,31 @@ export class BetterSearch extends RE6Module {
 
           // To avoid having to duplicate the functionality of every single mode,
           // a fake article is created with all appropriate data, which is then
-          // used to trigger Danbooru's native functionality.
+          // used to trigger the site's native functionality.
+          // The site handles clicks on thumbnails inside of `#posts`, and looks
+          // the post up in its own cache - which ignores thumbnails without a rating.
 
           const $tempArticle = $("<article>")
             .addClass("thumbnail display-none-important")
             .attr({
-              "id": "post_" + post.id,
+              "data-re621-proxy": "true",
               "data-id": post.id,
               "data-tags": post.tagString,
               "data-flags": Array.from(post.flags).join(" "),
+              "data-rating": post.rating,
             })
-            .appendTo("body")
-            .on("click", (event) => {
-              Danbooru.PostModeMenu.click(event);
+            .appendTo("#posts");
+
+          // The cache must be refreshed first, or the tag script may run against outdated tags
+          Danbooru.PostCache.register($tempArticle[0])
+            .catch((error) => { console.log(error); })
+            .then(() => {
+              $tempArticle[0].click();
               window.setTimeout(() => {
                 $tempArticle.remove();
               }, 500);
+              post.$ref.trigger("re621:sync");
             });
-          $tempArticle[0].click();
-          post.$ref.trigger("re621:sync");
           break;
         }
         case "open": {

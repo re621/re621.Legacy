@@ -1,4 +1,5 @@
 import { BlacklistEnhancer } from "../../modules/search/BlacklistEnhancer";
+import { Danbooru } from "../api/Danbooru";
 import LocalStorage from "../api/LocalStorage";
 import { ModuleController } from "../ModuleController";
 import { Post, PostData } from "../post/Post";
