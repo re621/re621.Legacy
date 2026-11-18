@@ -485,23 +485,24 @@ export namespace PostData {
   export function fromAPI (data: APIPost, page?: string): PostData {
 
     const tags = APIPost.getTagSet(data),
-      flags = PostFlag.get(data);
+      flags = PostFlag.get(data),
+      ext = data.files.meta.ext;
 
     return {
       id: data.id,
       flags: flags,
       score: {
-        up: data.score.up,
-        down: data.score.down,
-        total: data.score.total,
+        up: data.stats.score.up,
+        down: data.stats.score.down,
+        total: data.stats.score.total,
       },
-      user_score: data["user_score"],
-      favorites: data.fav_count,
-      is_favorited: data.is_favorited == true,
-      comments: data.comment_count,
+      user_score: data.stats.vote,
+      favorites: data.stats.fav_count,
+      is_favorited: data.stats.is_favorited == true,
+      comments: data.stats.comment_count,
       rating: PostRating.fromValue(data.rating),
       uploader: data.uploader_id,
-      uploaderName: data["uploader_name"] || "",
+      uploaderName: data.uploader_name || "",
       approver: data.approver_id ? data.approver_id : -1,
 
       page: page,
@@ -532,26 +533,26 @@ export namespace PostData {
       description: data.description,
 
       file: {
-        ext: FileExtension.fromString(data.file.ext),
-        md5: data.file.md5,
-        original: data.file.url,
-        sample: data.sample.has ? data.sample.url : data.file.url,
-        preview: data.preview.url,
-        size: data.file.size,
+        ext: FileExtension.fromString(ext),
+        md5: data.files.meta.md5,
+        original: data.files.original.url,
+        sample: data.files.meta.has_sample ? data.files.sample.jpg : data.files.original.url,
+        preview: data.files.preview.jpg,
+        size: data.files.meta.size,
       },
       loaded: undefined,
 
       img: {
-        width: data.file.width,
-        height: data.file.height,
-        ratio: Util.Math.round(data.file.height / data.file.width, 2),
+        width: data.files.original.width,
+        height: data.files.original.height,
+        ratio: Util.Math.round(data.files.original.height / data.files.original.width, 2),
       },
 
       has: {
-        file: data.file.url !== null,
-        children: data.relationships.has_active_children,
+        file: data.files.original.url !== null,
+        children: data.has.active_children,
         parent: data.relationships.parent_id !== undefined && data.relationships.parent_id !== null,
-        sample: data.sample.has,
+        sample: data.files.meta.has_sample,
       },
 
       rel: {
@@ -560,10 +561,10 @@ export namespace PostData {
       },
 
       meta: {
-        duration: data.duration,
-        animated: tags.has("animated") || data.file.ext == "webm" || data.file.ext == "mp4" || data.file.ext == "gif" || data.file.ext == "swf",
+        duration: data.files.meta.duration,
+        animated: tags.has("animated") || ext == "webm" || ext == "mp4" || ext == "gif" || ext == "swf",
         sound: tags.has("sound"),
-        interactive: data.file.ext == "webm" || data.file.ext == "mp4" || data.file.ext == "swf",
+        interactive: ext == "webm" || ext == "mp4" || ext == "swf",
       },
 
       warning: {
@@ -586,7 +587,8 @@ export namespace PostData {
     const decodedData = atob(rawPostData.textContent || "");
     if (!decodedData) throw new Error("Post data is empty");
 
-    const currentPostData = JSON.parse(decodedData) as RawPostObject;
+    // Same format as the API in the `extended` output mode
+    const currentPostData = JSON.parse(decodedData) as APIPost;
     console.log("CurrentPostData:", currentPostData);
 
     const flags = new Set<PostFlag>();
@@ -616,7 +618,7 @@ export namespace PostData {
       comments: currentPostData.stats.comment_count,
       rating: PostRating.fromValue(currentPostData.rating),
       uploader: currentPostData.uploader_id,
-      uploaderName: currentPostData["uploader_name"] || "",
+      uploaderName: currentPostData.uploader_name || "",
       approver: currentPostData.approver_id ? currentPostData.approver_id : -1,
 
       page: "0",
@@ -856,108 +858,4 @@ export namespace FileExtension {
     }
     return null;
   }
-}
-
-interface RawPostObject {
-  "id": number;
-  "created_at": string;
-  "updated_at": string;
-  "change_seq": number;
-  "files": {
-    "meta": {
-      "md5": string;
-      "ext": string;
-      "size": number;
-      "duration": number;
-      "has_sample": boolean;
-    };
-    "original": {
-      "width": number;
-      "height": number;
-      "url": string;
-    };
-    "preview": {
-      "width": number;
-      "height": number;
-      "jpg": string;
-      "webp": string;
-    };
-    "sample": {
-      "width": number;
-      "height": number;
-      "jpg": string;
-      "webp": string;
-    };
-    "video": {
-      "has": boolean;
-      "original": {
-        "fps": number;
-        "codec": string;
-        "size": number;
-        "width": number;
-        "height": number;
-        "url": string;
-      };
-      "variants": Record<string, unknown>;
-      "samples": Record<string, {
-        "fps": number;
-        "size": number;
-        "codec": string;
-        "width": number;
-        "height": number;
-        "url": string;
-      }>;
-    };
-  };
-  "uploader_id": number;
-  "uploader_name": string;
-  "approver_id": number | null;
-  "stats": {
-    "score": {
-      "up": number;
-      "down": number;
-      "total": number;
-    };
-    "fav_count": number;
-    "is_favorited": boolean;
-    "vote": number;
-    "comment_count": number;
-    "hotness": number;
-  };
-  "flags": {
-    "pending": boolean;
-    "flagged": boolean;
-    "note_locked": boolean;
-    "status_locked": boolean;
-    "rating_locked": boolean;
-    "deleted": boolean;
-  };
-  "has": {
-    "parent": boolean;
-    "children": boolean;
-    "active_children": boolean;
-    "notes": boolean;
-    "sample": boolean;
-  };
-  "relationships": {
-    "parent_id": number | null;
-    "children": number[];
-  };
-  "pools": number[];
-  "rating": string;
-  "locked_tags": string[];
-  "sources": string[];
-  "description": string;
-  "tags": {
-    "general": string[];
-    "artist": string[];
-    "contributor": string[];
-    "copyright": string[];
-    "character": string[];
-    "species": string[];
-    "invalid": string[];
-    "meta": string[];
-    "lore": string[];
-  };
-  "initial_size": string;
 }

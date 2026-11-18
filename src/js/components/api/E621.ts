@@ -10,8 +10,8 @@ import { APIResponse } from "./responses/APIResponse";
 // Path is the endpoint address, without https://e621.net/
 // Don't forget to update the name in the E621 aliases below
 const ENDPOINT_DEFS: EndpointDefinition[] = [
-  { name: "posts", path: "posts.json", node: "posts" },
-  { name: "post", path: "posts/%ID%.json", node: "post" },
+  { name: "posts", path: "posts.json", query: { mode: "extended" } },
+  { name: "post", path: "posts/%ID%.json", query: { mode: "extended" } },
   { name: "post_votes", path: "posts/%ID%/votes.json" },
   { name: "tags", path: "tags.json" },
   { name: "tag", path: "tags/%ID%.json" },
@@ -20,7 +20,7 @@ const ENDPOINT_DEFS: EndpointDefinition[] = [
   { name: "tag_preview", path: "tags/preview.json" },
 
   { name: "notes", path: "notes.json" },
-  { name: "favorites", path: "favorites.json", node: "posts" },
+  { name: "favorites", path: "favorites.json", query: { mode: "extended" } },
   { name: "favorite", path: "favorites/%ID%.json" },
   { name: "pools", path: "pools.json" },
   { name: "pool", path: "pools/%ID%.json" },
@@ -55,6 +55,8 @@ class APIEndpoint {
 
   private node: string;
 
+  private query: FormattedAPIQuery;
+
   private param: string;
 
   public constructor (queue: E621, endpoint: EndpointDefinition) {
@@ -63,6 +65,7 @@ class APIEndpoint {
 
     this.name = endpoint.name;
     this.node = endpoint.node;
+    this.query = endpoint.query || {};
   }
 
   /**
@@ -81,7 +84,7 @@ class APIEndpoint {
    * @param delay Optional delay override, in milliseconds
    */
   public async get<T extends APIResponse>(query?: APIQuery, delay?: number): Promise<T[]> {
-    return this.queue.createRequest(this.getParsedPath(), this.formatParam(query), "GET", {}, this.name, this.node, delay).then(
+    return this.queue.createRequest(this.getParsedPath(), { ...this.query, ...this.formatParam(query) }, "GET", {}, this.name, this.node, delay).then(
       (response) => {
         const result = this.formatData<T>(response[0], response[2]);
         return Promise.resolve(result);
@@ -452,9 +455,16 @@ interface EndpointDefinition {
 
   /**
    * **node** - defined special cases for endpoint nodes
-   * Mainly used to get rid of the wrapper around posts results
+   * Used to get rid of a wrapper object around the results
    */
   node?: string;
+
+  /**
+   * **query** - default parameters added to every GET request
+   * Parameters passed to `get()` take precedence over these.
+   * ex. `mode=extended` on posts, to have the tags sorted by category
+   */
+  query?: FormattedAPIQuery;
 
 }
 

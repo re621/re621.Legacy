@@ -1,4 +1,3 @@
-import { Danbooru } from "../../components/api/Danbooru";
 import LocalStorage from "../../components/api/LocalStorage";
 import { Blacklist } from "../../components/data/Blacklist";
 import { PageDefinition } from "../../components/data/Page";
@@ -37,9 +36,6 @@ export class BlacklistEnhancer extends RE6Module {
   public create (): void {
     super.create();
 
-    // Override default blacklist function
-    Danbooru.Blacklist.stub_vanilla_functions();
-    Danbooru.Blacklist.initialize_disable_all_blacklists();
     $("#blacklisted-hider").remove();
 
     // Content wrapper
