@@ -32,6 +32,12 @@ export class SmartAlias extends RE6Module {
 
   private inputElements: JQuery<HTMLElement>[] = [];
 
+  private previewHandlers: Array<{ $textarea: JQuery<HTMLElement>; $container: JQuery<HTMLElement>; mode: boolean }> = [];
+
+  private postFormObserver: MutationObserver | null = null;
+
+  private searchTypingTimeout: number | null = null;
+
   private static aliasCache: AliasDefinition[];
 
   private static aliasCacheLength: number;
@@ -39,8 +45,6 @@ export class SmartAlias extends RE6Module {
   private static tagData: TagData = {};           // stores tag data for the session - count, valid, dnp, etc
 
   private static tagAliases: TagAlias = {};       // stores e621's alias pairs to avoid repeated lookups
-
-  private static postPageLockout = false;         // Used to avoid calling the API on every post page
 
   public constructor () {
     super([PageDefinition.upload, PageDefinition.post, PageDefinition.search, PageDefinition.favorites], true);
@@ -78,27 +82,6 @@ export class SmartAlias extends RE6Module {
     };
   }
 
-  public async prepare (): Promise<void> {
-    await super.prepare();
-
-    if (!Page.matches(PageDefinition.post)) return;
-
-    // Only create an instance once the editing form is enabled
-    // This will avoid unnecessary API calls, as well as solve issues with dynamic DOM
-    if (!$("#post_tag_string").is(":visible")) {
-
-      // This is dumb, but it works
-      // If the editing form is visible when the script loads, skip this whole thing
-      // This fixes an issue with SmartAlias not loading if the editing form is opened before page loads
-
-      SmartAlias.postPageLockout = true;
-      $("body").one("click.re621", "#post-edit-link, #side-edit-link", () => {
-        SmartAlias.postPageLockout = false;
-        this.reload();
-      });
-    }
-  }
-
   /**
    * Destroys and re-creates the entire module as a method of reloading it.
    * It's stupid, but it's the easiest and hassle-free method of resetting some things.
@@ -117,6 +100,17 @@ export class SmartAlias extends RE6Module {
   public destroy (): void {
     if (!this.isInitialized()) return;
     super.destroy();
+
+    if (this.postFormObserver) {
+      this.postFormObserver.disconnect();
+      this.postFormObserver = null;
+    }
+
+    if (this.searchTypingTimeout !== null) {
+      clearTimeout(this.searchTypingTimeout);
+      this.searchTypingTimeout = null;
+    }
+
     for (const inputElement of $("#post_tags, #post_tag_string").get()) {
       $(inputElement)
         .off("focus.re621.smart-alias")
@@ -125,12 +119,22 @@ export class SmartAlias extends RE6Module {
     $("smart-alias").remove();
     $("smart-tag-counter").remove();
     $("button.smart-alias-validate").remove();
-    $("#tags").off("input.re621.smart-alias");
+    $(document)
+      .off("input.re621.smart-alias", "#tags")
+      .off("click.smartalias", "article.post-preview")
+      .off("click.smartalias", "#post-edit-link, #side-edit-link");
+
+    this.previewHandlers = [];
 
     for (const element of this.inputElements)
       element
-        .off("input.smartalias blur.smartalias blur.smartalias.spacefix")
+        .off("input.smartalias re621:input.smartalias blur.smartalias blur.smartalias.spacefix")
         .removeData("re621:smartalias");
+    this.inputElements = [];
+
+    $(document)
+      .off("re621:input.smartalias", "#post_tag_string, #re621_qedit_tags")
+      .off("input.smartalias", "#post_tag_string, #re621_qedit_tags");
   }
 
   public create (): void {
@@ -151,9 +155,6 @@ export class SmartAlias extends RE6Module {
     // Toggle the data-attribute necessary for the compact form
     this.setCompactOutput(this.fetchSettings("compactOutput"));
 
-    // Only create the structure once the editing form is enabled
-    if (SmartAlias.postPageLockout) return;
-
     // Establish the data caches
     if (typeof SmartAlias.aliasCache == "undefined") {
       const cacheData = this.fetchSettings<string>("data");
@@ -171,44 +172,108 @@ export class SmartAlias extends RE6Module {
     if (!enabledInputs.uploadTagsForm) inputs.delete("#post_tags");
 
     this.inputElements = [];
-
-    // Initializes SmartAlias for all appropriate inputs
+    this.previewHandlers = [];
     const mode = this.fetchSettings<boolean>("autoLoad");
+    const isPostPage = Page.matches(PageDefinition.post);
+
     for (const inputElement of $([...inputs].join(", ")).get()) {
-      const $textarea = $(inputElement);
-
-      // Ignore already initialized inputs
-      if ($textarea.data("re621:smartalias")) continue;
-      $textarea.data("re621:smartalias", true);
-
-      this.inputElements.push($textarea);
-      const $container = $("<smart-alias>")
-        .attr("ready", "true")
-        .addClass("disabled")
-        .insertAfter($textarea);
-      const $counter = $("<smart-tag-counter>")
-        .insertAfter($textarea);
-
-      if (mode) this.manageAutoLoad($textarea, $container);
-      else this.manageManualLoad($textarea, $container);
-
-      // On search pages, in the editing mode, reload container when the user clicks on a thumbnail
-      // Otherwise, the old tags get left behind. Thanks to tag data caching, this should be pretty quick
-      if (Page.matches([PageDefinition.search, PageDefinition.favorites])) {
-        $("article.post-preview").on("click.danbooru", () => {
-          if (mode) this.handleTagInput($textarea, $container, false);
-          else $container.html("");
-        });
+      const $el = $(inputElement);
+      // Defer hidden #post_tag_string on post pages until the edit UI opens
+      if (isPostPage && $el.is("#post_tag_string") && !$el.is(":visible")) {
+        continue;
       }
+      this.initializeInput($el, mode);
+    }
 
-      // Update the tag counter
-      let updateTimeout: number;
-      $textarea.on("input re621:input", () => {
-        if (updateTimeout) return;
-        updateTimeout = window.setTimeout(() => { updateTimeout = 0; }, 500);
-        $counter.html(SmartAlias.countTagInput($textarea) + "");
+    if (isPostPage && inputs.has("#post_tag_string")) {
+      this.deferPostEditInput(mode);
+    }
+
+    // Edit textareas can be created dynamically by e621 or BetterSearch.
+    const onDynamicInput = (event: JQuery.TriggeredEvent): void => {
+      const $target = $(event.currentTarget);
+      const alreadyInitialized = Boolean($target.data("re621:smartalias"));
+      this.initializeInput($target, mode);
+      if (!alreadyInitialized) {
+        $target.trigger(event.type);
+      }
+    };
+
+    $(document).on("re621:input.smartalias", "#post_tag_string, #re621_qedit_tags", onDynamicInput);
+    $(document).on("input.smartalias", "#post_tag_string, #re621_qedit_tags", onDynamicInput);
+  }
+
+  private deferPostEditInput (mode: boolean): void {
+    const tryInit = (): boolean => {
+      const $postTags = $("#post_tag_string").first();
+      if ($postTags.length && ($postTags.is(":visible") || $postTags.closest("#edit_post, .edit_post, form[action*='/posts/']").is(":visible"))) {
+        this.initializeInput($postTags, mode);
+        return true;
+      }
+      return false;
+    };
+
+    if (tryInit()) return;
+
+    $(document).on("click.smartalias", "#post-edit-link, #side-edit-link", () => {
+      window.setTimeout(() => {
+        if (tryInit() && this.postFormObserver) {
+          this.postFormObserver.disconnect();
+          this.postFormObserver = null;
+        }
+      }, 0);
+    });
+
+    if (typeof MutationObserver !== "undefined" && document.body) {
+      this.postFormObserver = new MutationObserver(() => {
+        if (tryInit() && this.postFormObserver) {
+          this.postFormObserver.disconnect();
+          this.postFormObserver = null;
+        }
+      });
+      this.postFormObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["style", "class", "hidden"],
       });
     }
+  }
+
+  private initializeInput ($textarea: JQuery<HTMLElement>, mode: boolean): void {
+    if ($textarea.data("re621:smartalias")) return;
+    $textarea.data("re621:smartalias", true);
+
+    this.inputElements.push($textarea);
+    const $container = $("<smart-alias>")
+      .attr("ready", "true")
+      .addClass("disabled")
+      .insertAfter($textarea);
+    const $counter = $("<smart-tag-counter>")
+      .text(SmartAlias.countTagInput($textarea) + "")
+      .insertAfter($textarea);
+
+    if (mode) this.manageAutoLoad($textarea, $container);
+    else this.manageManualLoad($textarea, $container);
+
+    if (Page.matches([PageDefinition.search, PageDefinition.favorites])) {
+      this.previewHandlers.push({ $textarea, $container, mode });
+      if (this.previewHandlers.length === 1) {
+        $(document).on("click.smartalias", "article.post-preview", () => {
+          for (const entry of this.previewHandlers) {
+            if (entry.mode) this.handleTagInput(entry.$textarea, entry.$container, false);
+            else entry.$container.html("");
+          }
+        });
+      }
+    }
+
+    let updateTimeout: number;
+    $textarea.on("input.smartalias re621:input.smartalias", () => {
+      if (updateTimeout) return;
+      updateTimeout = window.setTimeout(() => { updateTimeout = 0; }, 500);
+      $counter.html(SmartAlias.countTagInput($textarea) + "");
+    });
   }
 
   /**
@@ -216,7 +281,7 @@ export class SmartAlias extends RE6Module {
    * @param input Textarea to parse
    */
   private static getInputString (input: JQuery<HTMLElement>): string {
-    return input.val().toString().trim()
+    return (input.val() ?? "").toString().trim()
       .toLowerCase()
       .replace(/\r?\n|\r/g, " ")      // strip newlines
       .replace(/(?:\s){2,}/g, " ");    // strip multiple spaces
@@ -276,7 +341,7 @@ export class SmartAlias extends RE6Module {
       });
 
     // Skip the waiting and go straight to parsing
-    $textarea.on("re621:input", () => {
+    $textarea.on("re621:input.smartalias", () => {
       this.handleTagInput($textarea, $container);
     });
 
@@ -325,7 +390,7 @@ export class SmartAlias extends RE6Module {
 
     // Get the tags from the textarea
     const inputString = SmartAlias.getInputString($textarea);
-    let tags: ParsedTag[] = SmartAlias.parseTagString(inputString);
+    const tags: ParsedTag[] = SmartAlias.parseTagString(inputString);
     const impliedTags: Set<string> = new Set();
 
     // Skip the rest if the textarea is empty
@@ -334,12 +399,6 @@ export class SmartAlias extends RE6Module {
       $container.attr("ready", "true");
       return;
     }
-
-    // Get the settings
-    const minPostsWarning = this.fetchSettings<number>("minPostsWarning"),
-      asciiWarning = this.fetchSettings<boolean>("asciiWarning"),
-      tagOrder = this.fetchSettings<TagOrder>("tagOrder");
-
 
     // Step 1
     // Replace custom aliases with their contents
@@ -353,397 +412,18 @@ export class SmartAlias extends RE6Module {
 
       // Regenerate the tags to account for replacements
       triggerUpdateEvent($textarea);
-      // tags = SmartAlias.parseTagInput($textarea);
     }
 
     $container.attr("ready", "true");
-    // The following section had been ported to vanilla e621
-    /*
-
-
-    // Step 2
-    // Create a list of tags that need to be looked up in the API
-    // Ignore tags considered malformed from the very start
-    const lookup: Set<string> = new Set();
-    for (const tagData of tags.filter(tag => !tag.malformed)) {
-      if (typeof SmartAlias.tagData[tagData.name] == "undefined")
-        lookup.add(tagData.name);
-    }
-
-    // Redraw the container to indicate loading
-    redrawContainerContents($container, tags, minPostsWarning, asciiWarning, tagOrder, lookup);
-
-
-    // Step 3
-    // Check the lookup tags for aliases
-    const invalidTags: Set<string> = new Set(),
-      ambiguousTags: Set<string> = new Set();
-    for (const batch of Util.chunkArray([...lookup].filter((value) => SmartAlias.tagAliases[value] == undefined), 40)) {
-      for (const result of await E621.TagAliases.get<APITagAlias>({ "search[antecedent_name]": batch, "limit": 320 }, 500)) {
-
-        // Don't apply pending or inactive aliases
-        if (result.status !== "active") continue;
-
-        const currentName = result.antecedent_name,
-          trueName = result.consequent_name;
-
-        // Don't replace tags aliased to `invalid_tag`
-        if (trueName == "invalid_tag" || trueName == "invalid_color") {
-          invalidTags.add(currentName);
-          continue;
-        }
-
-        // Account for ambiguous tags
-        if (trueName.endsWith("_(disambiguation)")) {
-          ambiguousTags.add(currentName);
-          // TODO make record of tags that implicate an ambiguous tag, and display them
-          continue;
-        }
-
-        // Don't look up tags that have been found already
-        lookup.delete(currentName);
-        if (SmartAlias.tagData[trueName] == undefined)
-          lookup.add(trueName);
-
-        // Mark down the alias name to be replaced
-        SmartAlias.tagAliases[currentName] = trueName;
-
-      }
-    }
-
-
-    // Step 4
-    // Replace all known e6 aliases with their consequent versions to avoid unnecessary API calls
-    if (this.fetchSettings("replaceAliasedTags")) {
-      // console.log(SmartAlias.tagAliases);
-      $textarea.val((index, currentValue) => {
-        const lastTag = (this.fetchSettings("replaceLastTag") || currentValue.endsWith(" ") || !$textarea.is(":focus"))
-          ? null
-          : Util.getTags($textarea).pop();
-        // console.log("[" + lastTag + "]", this.fetchSettings("replaceLastTag"), $textarea.is(":focus"));
-        for (const [antecedent, consequent] of Object.entries(SmartAlias.tagAliases)) {
-          if (antecedent == lastTag) continue;
-          // console.log("replacing [" + antecedent + "] with [" + consequent + "]", antecedent == lastTag);
-          currentValue = currentValue.replace(
-            this.getTagRegex(antecedent),
-            "$1" + consequent + "$3",
-          );
-        }
-
-        return currentValue;
-      });
-
-      // Regenerate the tags to account for replacements
-      triggerUpdateEvent($textarea);
-      tags = SmartAlias.parseTagInput($textarea);
-    }
-
-    // Step 4.1
-    // Resolve Implications
-    if (this.fetchSettings("resolveImplications")) {
-
-      const implLookup = RelationsCache.intersect(tags);
-      // console.log("looking up implications for " + implLookup.lacks.length + " tags");
-
-      if (implLookup.lacks.length) {
-
-        const response: APITagPreview[] = await E621.TagPreview.post({
-          tags: implLookup.lacks.join(" "),
-        }, 500).then((result) => {
-          if (result[1] !== 200) return [];
-          return result[0];
-        });
-
-        // console.log("response", response);
-        const lackingTags = new Set(implLookup.lacks);
-
-        for (const tagPreview of response) {
-          if (tagPreview.type !== "implication") continue;
-
-          const tagData = implLookup.has[tagPreview.a] || { adds: [] };
-          tagData.adds.push(tagPreview.b);
-          implLookup.has[tagPreview.a] = tagData;
-          lackingTags.delete(tagPreview.a);
-
-          RelationsCache.add(tagPreview.a, tagData);
-        }
-
-        for (const tag of lackingTags) {
-          const tagData = implLookup.has[tag] || { adds: [] };
-          RelationsCache.add(tag, tagData);
-        }
-      }
-
-      const tagIndex = new Set();
-      for (const tagData of tags) tagIndex.add(tagData.name);
-
-      for (const tagData of Object.values(implLookup.has)) {
-        for (const implication of tagData.adds) {
-          if (tagIndex.has(implication) || impliedTags.has(implication)) continue;
-          impliedTags.add(implication);
-          tags.push({
-            name: implication,
-            negated: false,
-            prefix: null,
-          });
-        }
-      }
-
-      // Add implied tags to the lookup list, since they are probably missing from it?
-      for (const tagData of tags.filter(tag => !tag.malformed)) {
-        if (typeof SmartAlias.tagData[tagData.name] == "undefined")
-          lookup.add(tagData.name);
-      }
-
-      $textarea.data("implications", Array.from(impliedTags));
-      redrawContainerContents($container, tags, minPostsWarning, asciiWarning, tagOrder);
-    }
-
-
-    // Step 4.5
-    // Check the tags against the cache
-    TagCache.load();
-    for (const tag of lookup) {
-      const data = TagCache.get(tag);
-      if (data == null) continue;
-
-      SmartAlias.tagData[tag] = {
-        count: data.count,
-        category: data.category,
-
-        ambiguous: false,
-        invalid: false,
-        dnp: AvoidPosting.has(tag),
-        errors: TagValidator.runVerbose(tag),
-
-        cached: true,
-      };
-      lookup.delete(tag);
-    }
-
-
-    // Step 5
-    // Look up the tags through the API to make sure they exist
-    // Those that do not get removed from the list must be invalid
-    if (lookup.size > 0) {
-
-      for (const batch of Util.chunkArray(lookup, 100)) {
-        for (const result of await E621.Tags.get<APITag>({
-          search: {
-            name: batch.join(","),
-            hide_empty: false,
-          },
-          limit: 100,
-        }, 500)) {
-          SmartAlias.tagData[result.name] = {
-            count: result.post_count,
-            category: result.category,
-
-            ambiguous: ambiguousTags.has(result.name),
-            invalid: invalidTags.has(result.name),
-            dnp: AvoidPosting.has(result.name),
-            errors: TagValidator.runVerbose(result.name),
-
-            cached: false,
-          };
-          lookup.delete(result.name);
-        }
-      }
-
-      for (const tagName of lookup) {
-        SmartAlias.tagData[tagName] = {
-          count: -1,
-          category: TagCategory.Unknown,
-
-          ambiguous: false,
-          invalid: true,
-          dnp: AvoidPosting.has(tagName),
-          errors: TagValidator.runVerbose(tagName),
-
-          cached: false,
-        };
-      }
-
-    }
-
-
-    // Step 5.5
-    // Add data to cache
-    const minCachedTags = this.fetchSettings<number>("minCachedTags");
-    if (minCachedTags > 0) {
-      for (const [name, data] of Object.entries(SmartAlias.tagData)) {
-        if (TagCache.has(name) || data.count < minCachedTags) continue;
-        TagCache.add(name, data.count, data.category);
-      }
-      TagCache.save();
-    }
-
-
-    // Step 6
-    // Redraw the tag data output container
-    // console.log("data", SmartAlias.tagData);
-    redrawContainerContents($container, tags, minPostsWarning, asciiWarning, tagOrder);
-
-
-    // Step 7
-    // Finish and clean up
-    if (scrollToBottom)
-      $container.scrollTop($container[0].scrollHeight - $container[0].clientHeight);
-    $container.attr("ready", "true");
-
-    */
-
 
     /**
-       * Fix for Vue data-attribute binding
-       * This needs to be executed every time the textarea value gets changed
-       * @param $textarea Textarea input
-       */
+     * Fix for Vue data-attribute binding
+     * This needs to be executed every time the textarea value gets changed
+     * @param $textarea Textarea input
+     */
     function triggerUpdateEvent ($textarea: JQuery<HTMLElement>): void {
       Util.Events.triggerVueEvent($textarea, "input", "vue-event");
     }
-
-    /**
-       * Clears and redraws the information display container
-       * @param $container Container to refresh
-       * @param tags Tags to display
-       * @param loading Tags to mark as loading
-       */
-    function redrawContainerContents ($container: JQuery<HTMLElement>, tags: ParsedTag[], minPostsWarning: number, asciiWarning: boolean, tagOrder: TagOrder, loading = new Set<string>()): void {
-      $container
-        .html("")
-        .toggleClass("grouped", tagOrder == TagOrder.Grouped);
-
-      const originalTags: Set<string> = $container.data("originalTags")
-        ? $container.data("originalTags")
-        : new Set();
-
-      if (tagOrder !== TagOrder.Default)
-        tags = tags.sort((a, b) => a.name.localeCompare(b.name));
-
-      // console.log(SmartAlias.tagData);
-
-      // Index of tag names, for quicker duplicated checking
-      const tagNames = [];
-      for (const tagData of tags)
-        tagNames.push(tagData.name);
-
-      for (const tagData of tags) {
-
-        let displayName = tagData.name;  // text to be displayed in the link
-        if (SmartAlias.tagAliases[tagData.name] != undefined)
-          tagData.name = SmartAlias.tagAliases[tagData.name];
-
-        const data = tagData.malformed
-          ? {
-            count: 0,
-            category: TagCategory.Invalid,
-
-            invalid: true,
-            ambiguous: false,
-            dnp: false,
-            errors: [],
-
-            cached: false,
-          }
-          : SmartAlias.tagData[tagData.name];
-        const isLoading = loading.has(tagData.name);
-
-        // console.log("drawing " + tagName, data);
-
-        // Tags that are currently loading will not have the necessary data.
-        // For all other tags, lacking data means that an error has occurred
-        if (data == undefined && !isLoading) continue;
-
-        let symbol: string,         // font-awesome icon in front of the line
-          color: string,          // color of the non-link text
-          text: string,           // text after the link
-          title: string;
-
-        if (isLoading) {
-          symbol = "loading";
-          color = "success";
-          text = "";
-        } else if (tagData.malformed) {
-          symbol = "error";
-          color = "error";
-          text = "invalid";
-          tagData.name = (tagData.negated ? "-" : "") + (tagData.prefix ? (tagData.prefix + ":") : "") + tagData.name;
-          displayName = tagData.name;
-        } else if (data.dnp) {
-          symbol = "error";
-          color = "error";
-          text = "avoid posting";
-        } else if (Util.getArrayIndexes(tagNames, tagData.name).length > 1) {
-          symbol = "info";
-          color = "info";
-          text = "duplicate";
-        } else if (data.invalid || data.category == TagCategory.Invalid) {
-          symbol = "error";
-          color = "error";
-          text = "invalid";
-        } else if (data.ambiguous || tagData.name.endsWith("_(disambiguation)")) {
-          symbol = "info";
-          color = "warning";
-          text = "ambiguous";
-          displayName = displayName.replace("_(disambiguation)", "");
-        } else if (impliedTags.has(tagData.name)) {
-          symbol = "info";
-          color = "implied";
-          text = "implied";
-        } else if (data.count == 0) {
-          symbol = "error";
-          color = "error";
-          text = "empty";
-        } else if (data.count < minPostsWarning) {
-          symbol = "error";
-          color = "error";
-          text = data.count + "";
-        } else {
-          symbol = "success";
-          color = "success";
-          text = data.cached ? "~" + Util.formatK(data.count) : data.count + "";
-          title = data.cached ? "cached value" : undefined;
-        }
-
-        // Insert zero-width spaces for better line-breaking
-        displayName = displayName.replace(/_/g, "_\u200B");
-
-        let action = "default";
-        if (originalTags.has(tagData.name) && tagData.negated) action = "removed";
-        if (!originalTags.has(tagData.name) && !tagData.negated) action = "added";
-
-        const $element = $("<smart-tag>")
-          .addClass(isLoading ? "" : "category-" + data.category)
-          .attr({
-            "name": tagData.name,
-            "symbol": symbol,
-            "color": color,
-            // "title": title,
-            "action": action == "default" ? undefined : action,
-          })
-          .appendTo($container);
-        $("<a>")
-          .attr({
-            href: "/wiki_pages/show_or_new?title=" + encodeURIComponent(tagData.name),
-            target: "_blank",
-            rel: "noopener noreferrer",
-            tabindex: -1,
-          })
-          .text(displayName)
-          .appendTo($element);
-        $(" <span>")
-          .attr("title", title)
-          .text(text)
-          .appendTo($element);
-        if (asciiWarning && data && data.errors.length > 0 && !data.dnp)
-          $(Icons.get("exclamation-triangle"))
-            .addClass("tag-warning")
-            .attr("title", data.errors.join("\n"))
-            .appendTo($element);
-      }
-    }
-
   }
 
   /** Loads the alias cache from the settings */
@@ -873,11 +553,15 @@ export class SmartAlias extends RE6Module {
 
   /** Handles alias replacement in the search form */
   private handleSearchForm (): void {
-    let typingTimeout: number;
-    const input = $("#tags").on("input.re621.smart-alias", () => {
-      clearTimeout(typingTimeout);
-      typingTimeout = window.setTimeout(async () => {
+    $(document).on("input.re621.smart-alias", "#tags", () => {
+      if (this.searchTypingTimeout !== null) {
+        clearTimeout(this.searchTypingTimeout);
+      }
+      this.searchTypingTimeout = window.setTimeout(async () => {
+        this.searchTypingTimeout = null;
         await this.loadAliasCache();
+        const input = $("#tags");
+        if (input.length == 0) return;
         input.val((index, text) => {
           return this.replaceInputAliases(text);
         });
