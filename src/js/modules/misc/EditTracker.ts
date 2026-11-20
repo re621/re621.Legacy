@@ -4,27 +4,58 @@ import { Util } from "../../components/utility/Util";
 
 export class EditTracker extends RE6Module {
 
+  private trackingBound = false;
+
   public constructor () {
     super(PageDefinition.post);
   }
 
   public create (): void {
-
-    if ($("#post_tag_string, #re621_qedit_tags").is(":visible")) this.listen();
-    else { $("body").one("click.re621", "#post-edit-link, #side-edit-link", () => { this.listen(); }); }
+    this.trackingBound = false;
+    const $input = $("#post_tag_string").first();
+    if ($input.length && $input.is(":visible")) {
+      this.listen($input);
+    } else {
+      $("body").one("click.re621.edit-tracker", "#post-edit-link, #side-edit-link", () => {
+        this.attachWhenReady();
+      });
+    }
   }
 
-  private async listen (): Promise<void> {
+  public destroy (): void {
+    if (!this.isInitialized()) return;
+    super.destroy();
+    $("body").off("click.re621.edit-tracker");
+    $(document).off("input.re621.edit-tracker", "#post_tag_string");
+    $(".diff-list.post-changes").remove();
+    this.trackingBound = false;
+  }
 
-    const input = $("#post_tag_string, #re621_qedit_tags").filter(":visible").first(),
-      original = Util.getTags(input);
+  private attachWhenReady (attempts = 0): void {
+    if (this.trackingBound) return;
+    const $input = $("#post_tag_string").first();
+    if ($input.length) {
+      this.listen($input);
+      return;
+    }
+    if (attempts < 20) {
+      window.setTimeout(() => this.attachWhenReady(attempts + 1), 50);
+    }
+  }
 
+  private listen ($input: JQuery<HTMLElement>): void {
+    if (this.trackingBound) return;
+    this.trackingBound = true;
+
+    const original = Util.getTags($input);
+
+    $(".diff-list.post-changes").remove();
     const changes = $("<div>")
       .addClass("diff-list post-changes")
       .insertAfter("#tags-container");
 
-    input.on("input", () => {
-      const changed = Util.getTags(input);
+    $input.off("input.re621.edit-tracker").on("input.re621.edit-tracker", () => {
+      const changed = Util.getTags($input);
 
       const output = [];
       // Added tags (in changed, but not in original)
